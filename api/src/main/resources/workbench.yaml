@@ -2053,15 +2053,15 @@ paths:
         - dataSet
       description: >
         Preview data set
-      operationId: "previewQuery"
+      operationId: "generateDataSetPreview"
       parameters:
         - $ref: '#/parameters/workspaceNamespace'
         - $ref: '#/parameters/workspaceId'
         - in: body
-          name: dataSet
+          name: dataSetPreviewRequest
           required: true
           schema:
-            $ref: "#/definitions/DataSetRequest"
+            $ref: "#/definitions/DataSetPreviewRequest"
       responses:
         200:
           description: >
@@ -2981,19 +2981,45 @@ definitions:
         type: object
         description: Can be any value
 
+  DataSetPreviewRequest:
+    type: object
+    required:
+      - domain
+    properties:
+      domain:
+        $ref: "#/definitions/Domain"
+      includesAllParticipants:
+        type: boolean
+        default: false
+        description: >
+          Whether to include all participants or filter by cohorts
+      prePackagedConceptSet:
+        $ref: "#/definitions/PrePackagedConceptSetEnum"
+      conceptSetIds:
+        type: array
+        description: >
+          The ids of all concept sets in the data set
+        items:
+          type: integer
+          format: int64
+      cohortIds:
+        type: array
+        description: >
+          The ids of all cohorts in the data set
+        items:
+          type: integer
+          format: int64
+      values:
+        type: array
+        description: >
+          All the selected values in the data set
+        items:
+          type: string
+
+
   DataSetPreviewResponse:
     type: object
     properties:
-      domainValue:
-        type: "array"
-        items:
-          $ref: "#/definitions/DataSetPreviewList"
-
-  DataSetPreviewList:
-    type: object
-    properties:
-      domain:
-        type: string
       values:
         type: "array"
         items:

@@ -50,6 +50,7 @@ import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewList;
+import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -263,18 +264,36 @@ public class DataSetController implements DataSetApiDelegate {
         new DataSetCodeResponse().code(generatedCode).kernelType(kernelTypeEnum));
   }
 
+  // TODO (srubenst): Delete this method and make generate query take the composite parts.
+  private DataSetRequest generateDataSetRequestFromPreviewRequest(DataSetPreviewRequest dataSetPreviewRequest) {
+    return new DataSetRequest()
+        .name("Does not matter")
+        .conceptSetIds(dataSetPreviewRequest.getConceptSetIds())
+        .cohortIds(dataSetPreviewRequest.getCohortIds())
+        .prePackagedConceptSet(dataSetPreviewRequest.getPrePackagedConceptSet())
+        .includesAllParticipants(dataSetPreviewRequest.getIncludesAllParticipants())
+        .values(dataSetPreviewRequest.getValues().stream()
+            .map(value -> new DomainValuePair().domain(dataSetPreviewRequest.getDomain()).value(value))
+            .collect(Collectors.toList()));
+  }
+
   @Override
-  public ResponseEntity<DataSetPreviewResponse> previewQuery(
-      String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
+  public ResponseEntity<DataSetPreviewResponse> generateDataSetPreview(
+      String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
-    Map<String, QueryJobConfiguration> bigQueryJobConfig =
-        dataSetService.generateQueryJobConfigurationsByDomainName(dataSet);
+    DataSetRequest dataSetRequest = generateDataSetRequestFromPreviewRequest(dataSetPreviewRequest);
+    Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSetRequest);
+
+    if (bigQueryJobConfig.size() > 1) {
+      throw new BadRequestException("There should never be a preview request with more than one domain");
+    }
+    List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
+
     bigQueryJobConfig.forEach(
         (domain, queryJobConfiguration) -> {
           int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS;
-          List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
           String originalQuery = queryJobConfiguration.getQuery();
           do {
             try {
@@ -379,11 +398,10 @@ public class DataSetController implements DataSetApiDelegate {
 
           Collections.sort(
               valuePreviewList,
-              Comparator.comparing(item -> requestValues.indexOf(item.getValue())));
-
-          previewQueryResponse.addDomainValueItem(
-              new DataSetPreviewList().domain(domain).values(valuePreviewList));
+              Comparator.comparing(item -> dataSetPreviewRequest.getValues().indexOf(item.getValue())));
         });
+
+    previewQueryResponse.setValues(valuePreviewList);
     return ResponseEntity.ok(previewQueryResponse);
   }
 

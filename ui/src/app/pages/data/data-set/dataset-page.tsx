@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {FlexRow} from 'app/components/flex';
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
@@ -35,8 +36,7 @@ import {
   Cohort,
   ConceptSet,
   DataSet,
-  DataSetPreviewList,
-  DataSetRequest,
+  DataSetPreviewValueList,
   Domain,
   DomainValue,
   DomainValuePair,
@@ -135,7 +135,11 @@ export const styles = reactStyles({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    height: '10rem'
+    height: '10rem',
+    marginTop: '2rem',
+    fontSize: 18,
+    fontWeight: 600,
+    color: colorWithWhiteness(colors.dark, 0.6)
   },
 
   selectAllContainer: {
@@ -225,6 +229,12 @@ const BoxHeader = ({text= '', header =  '', subHeader = '', style= {}, ...props}
   </div>;
 };
 
+interface DataSetPreviewList {
+  domain: Domain;
+  isLoading: boolean
+  values?: Array<DataSetPreviewValueList>;
+}
+
 interface Props {
   workspace: WorkspaceData;
   urlParams: any;
@@ -247,8 +257,8 @@ interface State {
   previewDataLoading: boolean;
   selectedCohortIds: number[];
   selectedConceptSetIds: number[];
-  selectedPreviewDomain: string;
   selectedDomainValuePairs: DomainValuePair[];
+  selectedPreviewDomain: Domain;
   valueSets: ValueSet[];
   valuesLoading: boolean;
 }
@@ -275,7 +285,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         previewDataLoading: false,
         selectedCohortIds: [],
         selectedConceptSetIds: [],
-        selectedPreviewDomain: '',
+        selectedPreviewDomain: Domain.CONDITION,
         selectedDomainValuePairs: [],
         valueSets: [],
         valuesLoading: false,
@@ -520,60 +530,73 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     }
 
     async getPreviewList() {
-      this.setState({previewList: [], previewDataLoading: true});
       const {namespace, id} = this.props.workspace;
-      const request: DataSetRequest = {
-        name: '',
-        description: '',
-        conceptSetIds: this.state.selectedConceptSetIds,
-        includesAllParticipants: this.state.includesAllParticipants,
-        cohortIds: this.state.selectedCohortIds,
-        prePackagedConceptSet: this.getPrePackagedConceptSet(),
-        domainValuePairs: this.state.selectedDomainValuePairs
-      };
-      try {
-        const dataSetPreviewResp = await dataSetApi().previewQuery(namespace, id, request);
-        this.setState({
-          previewList: dataSetPreviewResp.domainValue,
-          selectedPreviewDomain: dataSetPreviewResp.domainValue[0].domain
-        });
-      } catch (ex) {
-        const exceptionResponse = await ex.json() as unknown as ErrorResponse;
-        let errorText: string;
-        switch (exceptionResponse.statusCode) {
-          case 400:
-            if (exceptionResponse.message ===
-              'Data Sets must include at least one cohort and concept.') {
-              errorText = exceptionResponse.message;
-            } else if (exceptionResponse.message ===
-              'Concept Sets must contain at least one concept') {
-              errorText = 'One or more of your concept sets has no concepts. ' +
-                'Please check your concept sets to ensure all concept sets have concepts.';
-            }
-            break;
-          case 404:
-            if (exceptionResponse.message.startsWith(
-              'Not Found: No Cohort definition matching cohortId')) {
-              errorText = 'Error with one or more cohorts in the data set. ' +
-                'Please submit a bug using the contact support button';
-            }
-            break;
-          case 504:
-            if (exceptionResponse.message ===
-              'Timeout while querying the CDR to pull preview information.') {
-              errorText = 'Query to load data from the All of Us Database timed out. ' +
-                'Please either try again or export data set to a notebook to try there';
-            }
-            break;
-          default:
-            errorText = 'An unexpected error has occurred. ' +
-              'Please submit a bug using the contact support button';
+      const domains = fp.uniq(this.state.selectedValues.map(domainValue => domainValue.domain));
+      this.setState({
+        previewList: domains.map(domain => {
+          return {
+            domain: domain,
+            isLoading: true,
+            values: []
+          }
+        }),
+        previewDataLoading: true,
+        selectedPreviewDomain: domains[0]
+      });
+      domains.forEach(async domain => {
+        const request = {
+          domain: domain,
+          conceptSetIds: this.state.selectedConceptSetIds,
+          includesAllParticipants: this.state.includesAllParticipants,
+          cohortIds: this.state.selectedCohortIds,
+          prePackagedConceptSet: this.getPrePackagedConceptSet(),
+          values: this.state.selectedValues.map(domainValue => domainValue.value)
+        };
+        try {
+          const dataSetPreviewResp = await dataSetApi().generateDataSetPreview(namespace, id, request);
+          const domainPreviewIndex = '[' + fp.findIndex(['domain', domain], this.state.previewList) + ']';
+          this.setState({previewList: fp.set(domainPreviewIndex + '.isLoading', false,
+            fp.set(domainPreviewIndex + '.values', dataSetPreviewResp.values, this.state.previewList))});
+        } catch (ex) {
+          const exceptionResponse = await ex.json() as unknown as ErrorResponse;
+          let errorText: string;
+          switch (exceptionResponse.statusCode) {
+            case 400:
+              if (exceptionResponse.message ===
+                'Data Sets must include at least one cohort and concept.') {
+                errorText = exceptionResponse.message;
+              } else if (exceptionResponse.message ===
+                'Concept Sets must contain at least one concept') {
+                errorText = `One or more of your concept sets in domain ${domain}
+                  has no concepts. Please check your concept sets to ensure all
+                  concept sets have concepts.`;
+              }
+              break;
+            case 404:
+              if (exceptionResponse.message.startsWith(
+                  'Not Found: No Cohort definition matching cohortId')) {
+                errorText = 'Error with one or more cohorts in the data set. ' +
+                  'Please submit a bug using the contact support button';
+              }
+              break;
+            case 504:
+              if (exceptionResponse.message ===
+                'Timeout while querying the CDR to pull preview information.') {
+                errorText = `Query to load data from the All of Us Database timed out for domain:
+                  ${domain}. Please either try again or export data set to a notebook to try
+                  there`;
+              }
+              break;
+            default:
+              errorText = `An unexpected error has occurred loading domain: ${domain}.
+              Please submit a bug using the contact support button`;
+          }
+          this.setState({previewError: true, previewErrorText: errorText});
+          console.error(ex);
+        } finally {
+          this.setState({previewDataLoading: false});
         }
-        this.setState({previewError: true, previewErrorText: errorText});
-        console.error(ex);
-      } finally {
-        this.setState({previewDataLoading: false});
-      }
+      });
     }
 
     isEllipsisActive(text) {
@@ -605,16 +628,24 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     renderPreviewDataTable() {
       const filteredPreviewData =
           this.state.previewList.filter(
-            preview => fp.contains(preview.domain, this.state.selectedPreviewDomain))[0];
-      return <DataTable ref={el => this.dt = el} key={this.state.selectedPreviewDomain}
-                        scrollable={true} style={{width: '100%'}}
-                        value={this.getDataTableValue(filteredPreviewData.values)}>
-        {filteredPreviewData.values.map(value =>
-          <Column key={value.value} header={this.getHeaderValue(value)}
-                  headerStyle={{textAlign: 'left', width: '5rem'}} style={{width: '5rem'}}
-                  field={value.value}/>
-        )}
-      </DataTable>;
+            preview => preview.domain === this.state.selectedPreviewDomain)[0];
+      const domainDisplayed = this.state.selectedPreviewDomain.toString().toLowerCase()
+      return filteredPreviewData.values.length > 0 ?
+        <DataTable ref={el => this.dt = el} key={this.state.selectedPreviewDomain}
+                          scrollable={true} style={{width: '100%'}}
+                          value={this.getDataTableValue(filteredPreviewData.values)}>
+          {filteredPreviewData.values.map(value =>
+            <Column key={value.value} header={this.getHeaderValue(value)}
+                    headerStyle={{textAlign: 'left', width: '5rem'}} style={{width: '5rem'}}
+                    field={value.value}/>
+          )}
+        </DataTable> :
+        <div style={styles.warningMessage}>
+          {filteredPreviewData.isLoading ?
+            <div>Generating preview for {domainDisplayed}</div> :
+            <div>No values found for {domainDisplayed}</div>
+          }
+        </div>;
     }
 
     render() {
@@ -782,35 +813,38 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                   View Preview Table
               </Clickable>
             </div>
-            {previewDataLoading && <div style={styles.warningMessage}>
-              <Spinner style={{position: 'relative', top: '2rem'}} />
-              <div style={{top: '3rem', position: 'relative'}}>
-                It may take up to few minutes to load the data
-              </div>
-            </div>}
             {previewList.length > 0 &&
               <div style={{display: 'flex', flexDirection: 'column'}}>
                 <div style={{display: 'flex', flexDirection: 'row', paddingTop: '0.5rem'}}>
                   {previewList.map(previewRow =>
-                     <Clickable key={previewRow.domain}
-                          onClick={() =>
-                            this.setState({selectedPreviewDomain: previewRow.domain})}
-                            style={{
-                              marginLeft: '0.2rem', color: colors.accent,
-                              marginRight: '0.25rem', paddingBottom: '0.25rem',
-                              width: '7rem',
-                              borderBottom:
-                               (selectedPreviewDomain === previewRow.domain) ?
-                                 '4px solid ' + colors.accent : '',
-                              fontWeight: (selectedPreviewDomain === previewRow.domain)
-                               ? 600 : 400,
-                              fontSize: '18px',
-                              display: 'flex',
-                              justifyContent: 'center',
-                              lineHeight: '32px',
-                            }}>
-                       {previewRow.domain === 'OBSERVATION' ? 'SURVEY' : previewRow.domain}
-                     </Clickable>
+                     <TooltipTrigger content={'Preview for domain ' + previewRow.domain.toString()
+                     + ' is still loading. It may take up to one minute'}
+                                     disabled={!previewRow.isLoading}
+                                     side='top'>
+                       <Clickable key={previewRow.domain.toString()}
+                            disabled={previewRow.isLoading}
+                            onClick={() =>
+                              this.setState({selectedPreviewDomain: previewRow.domain})}
+                              style={{
+                                marginLeft: '0.2rem', color: colors.accent,
+                                marginRight: '0.25rem', paddingBottom: '0.25rem',
+                                width: '7rem',
+                                borderBottom:
+                                 (selectedPreviewDomain === previewRow.domain) ?
+                                   '4px solid ' + colors.accent : '',
+                                fontWeight: (selectedPreviewDomain === previewRow.domain)
+                                 ? 600 : 400,
+                                fontSize: '18px',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                lineHeight: '19px',
+                              }}>
+                         <FlexRow style={{alignItems: 'center'}}>
+                           {previewRow.domain === Domain.OBSERVATION ? 'SURVEY' : previewRow.domain.toString()}
+                           {previewRow.isLoading && <Spinner style={{marginLeft: '4px', height: '18px', width: '18px'}}/>}
+                         </FlexRow>
+                       </Clickable>
+                     </TooltipTrigger>
                   )}
                 </div>
                 {this.renderPreviewDataTable()}

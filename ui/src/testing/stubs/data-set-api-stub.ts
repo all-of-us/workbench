@@ -4,6 +4,7 @@ import {
   DataSetCodeResponse,
   DataSetExportRequest,
   DataSetListResponse,
+  DataSetPreviewRequest,
   DataSetPreviewResponse,
   DataSetRequest,
   EmptyResponse,
@@ -56,11 +57,12 @@ export class DataSetApiStub extends DataSetApi {
     });
   }
 
-  previewQuery(workspaceNamespace: string,
-    workspaceId: string, dataSet: DataSetRequest): Promise<DataSetPreviewResponse> {
+  generateDataSetPreview(workspaceNamespace: string,
+    workspaceId: string, dataSetPreviewRequest: DataSetPreviewRequest): Promise<DataSetPreviewResponse> {
     return Promise.resolve({
-      domainValue: [
-        {domain: 'CONDITION', values: [{value: 'Value1'}, {value: 'Value2'}]}
+      values: [
+        {value: 'Value1', queryValue: ['blah']},
+        {value: 'Value2', queryValue: ['blah2']}
       ]
     });
   }
