@@ -33,7 +33,6 @@ import {AppComponent, overriddenUrlKey} from './pages/app/component';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {CreateReviewModalComponent} from './pages/data/cohort-review/create-review-modal';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
-import {PageLayout} from './pages/data/cohort-review/page-layout/page-layout';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
 import {TablePage} from './pages/data/cohort-review/table-page';
 import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
@@ -149,7 +148,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     InteractiveNotebookComponent,
     NotebookListComponent,
     NotebookRedirectComponent,
-    PageLayout,
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
     QueryReportComponent,
