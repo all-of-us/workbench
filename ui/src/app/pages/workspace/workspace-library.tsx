@@ -133,7 +133,7 @@ export const WorkspaceLibrary = withUserProfile()
     this.filterPublishedWorkspaces();
   }
 
-  // Gets all published recentWorkspaces, including those configured as 'featured'
+  // Gets all published workspaces, including those configured as 'featured'
   async getAllPublishedWorkspaces() {
     try {
       const workspacesReceived = await workspacesApi().getPublishedWorkspaces();
@@ -150,7 +150,7 @@ export const WorkspaceLibrary = withUserProfile()
     }
   }
 
-  // Gets the 'featured recentWorkspaces' config and filters the list of published recentWorkspaces to
+  // Gets the 'featured workspaces' config and filters the list of published workspaces to
   // find the 'featured' ones
   async getFeaturedWorkspaces() {
     try {
@@ -169,7 +169,7 @@ export const WorkspaceLibrary = withUserProfile()
     }
   }
 
-  // Filter the list of published recentWorkspaces to find the ones that are not configured as 'featured'
+  // Filter the list of published workspaces to find the ones that are not configured as 'featured'
   filterPublishedWorkspaces() {
     const publishedWorkspaces = this.state.workspaceList.filter(ws =>
       !fp.contains(ws, this.state.featuredWorkspaces)

@@ -138,7 +138,7 @@ public class DataSetController implements DataSetApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    long dbWorkspaceId = workspaceService.get(workspaceNamespace, workspaceId).getWorkspaceId();
+    long wId = workspaceService.get(workspaceNamespace, workspaceId).getWorkspaceId();
     List<DataSetValues> dataSetValuesList =
         dataSetRequest.getValues().stream()
             .map(
@@ -156,14 +156,13 @@ public class DataSetController implements DataSetApiDelegate {
               dataSetRequest.getName(),
               dataSetRequest.getIncludesAllParticipants(),
               dataSetRequest.getDescription(),
-              dbWorkspaceId,
+              wId,
               dataSetRequest.getCohortIds(),
               dataSetRequest.getConceptSetIds(),
               dataSetValuesList,
               dataSetRequest.getPrePackagedConceptSet(),
               userProvider.get().getUserId(),
               now);
-      workspaceService.updateRecentWorkspaces(dbWorkspaceId, userProvider.get().getUserId());
       return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(savedDataSet));
     } catch (DataIntegrityViolationException ex) {
       throw new ConflictException("Data set with the same name already exists");
@@ -498,10 +497,8 @@ public class DataSetController implements DataSetApiDelegate {
                   return dataSet;
                 })
             .collect(Collectors.toList());
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     try {
       dataSetDao.save(dbDataSetList);
-      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent data set modification");
     }
@@ -515,8 +512,6 @@ public class DataSetController implements DataSetApiDelegate {
     org.pmiops.workbench.db.model.DataSet dataSet =
         getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
     dataSetDao.delete(dataSet.getDataSetId());
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -525,7 +520,6 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, Long dataSetId, DataSetRequest request) {
     org.pmiops.workbench.db.model.DataSet dbDataSet =
         getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
-
     if (Strings.isNullOrEmpty(request.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }
@@ -552,10 +546,8 @@ public class DataSetController implements DataSetApiDelegate {
                   return dataSetValues;
                 })
             .collect(Collectors.toList()));
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     try {
       dbDataSet = dataSetDao.save(dbDataSet);
-      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
       // TODO: add recent resource entry for data sets
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");

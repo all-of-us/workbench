@@ -354,7 +354,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
             {/* The elements inside this fadeBox will be changed as part of ongoing
             homepage redesign work*/}
             <div style={{display: 'flex', justifyContent: 'flex-start', flexDirection: 'column'}}>
-              {/*<FlexColumn style={styles.singleCard}>*/}
                 {accessTasksLoaded ?
                   (accessTasksRemaining ?
                       (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
@@ -365,27 +364,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                               twoFactorAuthCompleted={twoFactorAuthCompleted}
                                             dataUseAgreementCompleted={dataUseAgreementCompleted}/>
                       ) : (
-                        /*<FlexRow style={{paddingTop: '2rem'}}>
-                          <FlexColumn style={styles.contentWrapperLeft}>
-                            <FlexRow style={styles.mainHeader}>Researcher Workbench</FlexRow>
-                            <CardButton onClick={() => navigate(['workspaces/build'])}
-                                        style={{margin: '1.9rem 106px 0 3%'}}>
-                              Create a <br/> New Workspace
-                              <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
-                            </CardButton>
-                          </FlexColumn>
-                          <FlexColumn style={styles.contentWrapperRight}>
-                            <a onClick={() => navigate(['workspaces'])}
-                               style={{fontSize: '14px', color: colors.primary}}>
-                              See All Workspaces</a>
-                            <FlexColumn style={{marginRight: '3%'}}>
-                              <div style={{color: colors.primary, height: '1.9rem'}}>
-                                <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
-                              </div>
-                              <RecentWork dark={true}/>
-                            </FlexColumn>
-                          </FlexColumn>
-                        </FlexRow>*/
                           <React.Fragment>
                             <FlexColumn>
                               <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
@@ -416,7 +394,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
                         )
                   ) :
                   <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
-              {/*</FlexColumn>*/}
             </div>
           </FadeBox>
           <div>

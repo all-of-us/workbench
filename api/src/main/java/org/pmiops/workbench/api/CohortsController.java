@@ -152,7 +152,6 @@ public class CohortsController implements CohortsApiDelegate {
           userProvider.get().getUserId(),
           newCohort.getCohortId(),
           newCohort.getLastModifiedTime());
-      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
     } catch (DataIntegrityViolationException e) {
       // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
       // client by Spring (the client gets a default reason string).

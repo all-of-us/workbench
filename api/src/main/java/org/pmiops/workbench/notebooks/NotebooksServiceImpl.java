@@ -15,7 +15,6 @@ import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.GoogleCloudLocators;
@@ -126,13 +125,11 @@ public class NotebooksServiceImpl implements NotebooksService {
     fileDetail.setPath(newNotebookLocators.fullPath);
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     fileDetail.setLastModifiedTime(now.getTime());
-    Workspace toWorkspace = workspaceService.getRequired(toWorkspaceNamespace, toWorkspaceName);
     userRecentResourceService.updateNotebookEntry(
-        toWorkspace.getWorkspaceId(),
+        workspaceService.getRequired(toWorkspaceNamespace, toWorkspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
         newNotebookLocators.fullPath,
         now);
-    workspaceService.updateRecentWorkspaces(toWorkspace.getWorkspaceId(), userProvider.get().getUserId());
 
     return fileDetail;
   }
