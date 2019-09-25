@@ -115,7 +115,7 @@ describe('DataSet', () => {
     });
 
   it('should display preview data table once preview button is clicked', async() => {
-    const spy = jest.spyOn(dataSetApi(), 'previewQuery');
+    const spy = jest.spyOn(dataSetApi(), 'generateDataSetPreview');
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
