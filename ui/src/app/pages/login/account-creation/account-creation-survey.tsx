@@ -106,8 +106,9 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   }
 
   updateList(attribute, value) {
-    const genderList = toggleIncludes(value, this.state.profile.demographicSurvey[attribute]);
-    this.setState(fp.set(['profile', 'demographicSurvey', attribute], genderList));
+    // Toggle Includes removes the element if it already exist and adds if not
+    const attributeList = toggleIncludes(value, this.state.profile.demographicSurvey[attribute]);
+    this.setState(fp.set(['profile', 'demographicSurvey', attribute], attributeList));
   }
 
   toggleDisability(value) {
