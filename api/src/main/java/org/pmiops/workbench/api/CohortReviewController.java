@@ -32,7 +32,11 @@ import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.model.*;
+import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -87,7 +91,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
   private UserRecentResourceService userRecentResourceService;
   private Provider<User> userProvider;
-  private WorkspaceService workspaceService;
   private final Clock clock;
   private static final Logger log = Logger.getLogger(CohortReviewController.class.getName());
 
@@ -217,7 +220,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
-    this.workspaceService = workspaceService;
     this.clock = clock;
   }
 
@@ -288,9 +290,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     // when saving ParticipantCohortStatuses to the database the long value of birthdate is mutated.
     cohortReviewService.saveFullCohortReview(cohortReview, participantCohortStatuses);
 
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
-
     PageRequest pageRequest =
         new PageRequest()
             .page(PAGE)
@@ -333,9 +332,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         cohortReviewService.saveParticipantCohortAnnotation(
             request.getCohortReviewId(), participantCohortAnnotation);
 
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
-
     return ResponseEntity.ok(
         TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(participantCohortAnnotation));
   }
@@ -349,9 +345,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     CohortReview dbCohortReview =
         cohortReviewService.findCohortReview(workspaceNamespace, workspaceId, cohortReviewId);
     cohortReviewService.deleteCohortReview(dbCohortReview);
-
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -369,9 +362,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     // will throw a NotFoundException if participant cohort annotation does not exist
     cohortReviewService.deleteParticipantCohortAnnotation(
         annotationId, cohortReviewId, participantId);
-
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
 
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -651,10 +641,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       dbCohortReview.setDescription(cohortReview.getDescription());
     }
     dbCohortReview.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     try {
       cohortReviewService.saveCohortReview(dbCohortReview);
-      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
     } catch (OptimisticLockException e) {
       log.log(Level.WARNING, "version conflict for cohort review update", e);
       throw new ConflictException("Failed due to concurrent cohort review modification");
@@ -676,9 +664,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantCohortAnnotation =
         cohortReviewService.updateParticipantCohortAnnotation(
             annotationId, cohortReviewId, participantId, request);
-
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
 
     return ResponseEntity.ok(
         TO_CLIENT_PARTICIPANT_COHORT_ANNOTATION.apply(participantCohortAnnotation));
@@ -707,9 +692,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     cohortReview.lastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
     cohortReview.incrementReviewedCount();
     cohortReviewService.saveCohortReview(cohortReview);
-
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), userProvider.get().getUserId());
 
     return ResponseEntity.ok(TO_CLIENT_PARTICIPANT.apply(participantCohortStatus));
   }

@@ -38,7 +38,7 @@ export const RecentWorkspaces = withUserProfile()
   }
 
   render() {
-    return <div>
+    return <div style={{display: 'flex', marginTop: '1rem'}}>
       {
         this.state.recentWorkspaces.map(recentWorkspace => {
           return <WorkspaceCard

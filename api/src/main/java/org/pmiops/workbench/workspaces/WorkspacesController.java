@@ -268,7 +268,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-    workspaceService.updateRecentWorkspaces(dbWorkspace.getWorkspaceId(), userProvider.get().getUserId());
 
     return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
@@ -343,7 +342,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-    workspaceService.updateRecentWorkspaces(dbWorkspace.getWorkspaceId(), userProvider.get().getUserId());
     return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
@@ -462,7 +460,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     org.pmiops.workbench.db.model.Workspace savedWorkspace =
         workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
-    workspaceService.updateRecentWorkspaces(savedWorkspace.getWorkspaceId(), userProvider.get().getUserId());
 
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, WorkspaceAccessEntry> fromAclsMap =

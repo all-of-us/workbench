@@ -14,7 +14,6 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
-import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -30,8 +29,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.inject.Provider;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -50,7 +47,6 @@ public class CohortAnnotationDefinitionControllerTest {
   private CohortAnnotationDefinition dbCohortAnnotationDefinition;
   @Autowired CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
   @Autowired CohortDao cohortDao;
-  @Mock Provider<User> userProvider;
   @Autowired WorkspaceDao workspaceDao;
   @Mock WorkspaceService workspaceService;
   CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
@@ -59,7 +55,7 @@ public class CohortAnnotationDefinitionControllerTest {
   public void setUp() {
     cohortAnnotationDefinitionController =
         new CohortAnnotationDefinitionController(
-            cohortAnnotationDefinitionDao, cohortDao, userProvider, workspaceService);
+            cohortAnnotationDefinitionDao, cohortDao, workspaceService);
 
     workspace = new Workspace();
     workspace.setWorkspaceNamespace(NAMESPACE);
