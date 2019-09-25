@@ -885,7 +885,7 @@ public class DataSetControllerTest {
 
   @Test
   public void testGetQueryPersonDomainNoConceptSets() {
-    DataSetRequest dataSetRequest = buildEmptyDataSet();
+    DataSetRequest dataSetRequest = buildEmptyDataSetRequest();
     dataSetRequest = dataSetRequest.addCohortIdsItem(COHORT_ONE_ID);
     List<DomainValuePair> domainValues = mockDomainValuePairWithPerson();
     dataSetRequest.setValues(domainValues);

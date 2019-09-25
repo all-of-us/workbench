@@ -141,14 +141,6 @@ public class DataSetServiceTest {
   }
 
   @Test
-  public void itHandlesPersonDomain() throws Exception {
-    final DataSetRequest dataSetRequest = buildTrivialRequest();
-    dataSetRequest.setValues(DOMAIN_VALUE_PAIR_PERSON_LIST);
-    ImmutableMap<String, QueryJobConfiguration> configurationsByDomain =
-        ImmutableMap.copyOf(dataSetServiceImpl.generateQueryJobConfigurationsByDomainName(dataSetRequest));
-  }
-
-  @Test
   public void itGetsCohortQueryStringAndCollectNamedParameters() throws Exception {
     final Cohort cohortDbModel = buildSimpleCohort();
     final QueryAndParameters queryAndParameters = dataSetServiceImpl.getCohortQueryStringAndCollectNamedParameters(cohortDbModel);
@@ -161,7 +153,7 @@ public class DataSetServiceTest {
     final ConceptSet conceptSet1 = new ConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet1.setConceptIds(Collections.emptySet());
-    final boolean isValid = dataSetServiceImpl.eachDomainHasAtLeastOneConcept(ImmutableList.of(conceptSet1));
+    final boolean isValid = dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(ImmutableList.of(conceptSet1));
     assertThat(isValid).isFalse();
   }
 
@@ -175,7 +167,7 @@ public class DataSetServiceTest {
     conceptSet2.setDomain((short) Domain.PERSON.ordinal());
     conceptSet2.setConceptIds(ImmutableSet.of(4L, 5L, 6L));
 
-    final boolean isValid = dataSetServiceImpl.eachDomainHasAtLeastOneConcept(ImmutableList.of(conceptSet1, conceptSet2));
+    final boolean isValid = dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(isValid).isTrue();
   }
 
@@ -194,7 +186,7 @@ public class DataSetServiceTest {
     conceptSet3.setDomain((short) Domain.DRUG.ordinal());
     conceptSet3.setConceptIds(Collections.emptySet());
 
-    final boolean isValid = dataSetServiceImpl.eachDomainHasAtLeastOneConcept(
+    final boolean isValid = dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
         ImmutableList.of(conceptSet1, conceptSet2, conceptSet3));
     assertThat(isValid).isFalse();
   }
@@ -213,14 +205,14 @@ public class DataSetServiceTest {
     conceptSet3.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet3.setConceptIds(Collections.emptySet());
 
-    final boolean isValid = dataSetServiceImpl.eachDomainHasAtLeastOneConcept(
+    final boolean isValid = dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
         ImmutableList.of(conceptSet1, conceptSet2, conceptSet3));
     assertThat(isValid).isTrue();
   }
 
   @Test
-  public void itAcceptsEmptyConceptSetList() {
-    final boolean isValid = dataSetServiceImpl.eachDomainHasAtLeastOneConcept(Collections.emptyList());
-    assertThat(isValid).isTrue();
+  public void itRejectsEmptyConceptSetList() {
+    final boolean isValid = dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(Collections.emptyList());
+    assertThat(isValid).isFalse();
   }
 }
