@@ -1,21 +1,25 @@
 import {Component} from '@angular/core';
 import * as React from 'react';
 
+import {Button} from 'app/components/buttons';
+import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-modal';
-import {
-  cohortReviewStore,
-  filterStateStore,
-  initialFilterState,
-  multiOptions,
-  visitsFilterOptions,
-  vocabOptions
-} from 'app/services/review-state.service';
+import {cohortReviewStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase} from 'app/utils';
+import colors from 'app/styles/colors';
+import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import {PageFilterType, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
+
+const styles = reactStyles({
+  title: {
+    color: colors.primary,
+    fontSize: '0.9rem',
+    fontWeight: 200,
+  },
+});
 
 interface State {
   reviewPresent: boolean;
@@ -88,7 +92,12 @@ export class CohortReview extends React.Component<{}, State> {
       {loading ? <SpinnerOverlay/>
         : <React.Fragment>
         {ableToReview && <CreateReviewModal canceled={() => this.goBack()} created={() => this.reviewCreated()}/>}
-        {unableToReview && <div>Cannot review</div>}
+        {unableToReview && <Modal onRequestClose={() => this.goBack()}>
+          <ModalTitle style={styles.title}>Users with read-only access cannot create cohort reviews</ModalTitle>
+          <ModalFooter>
+            <Button style={{}} type='primary' onClick={() => this.goBack()}>Return to cohorts</Button>
+          </ModalFooter>
+        </Modal>}
       </React.Fragment>}
     </React.Fragment>;
   }
@@ -102,17 +111,4 @@ export class CohortReviewComponent extends ReactWrapperBase {
   constructor() {
     super(CohortReview, []);
   }
-
-  // constructor(private location: Location, private router: Router) {
-  //   this.subscription = router.events.subscribe(event => {
-  //     if (event instanceof NavigationStart) {
-  //       const oldRoute = router.url.split('/').pop();
-  //       const newRoute = event.url.split('/').pop();
-  //       if (oldRoute === 'participants' && newRoute === 'review') {
-  //         // back button was pressed on 'participants' route, go back again to avoid blank page
-  //         location.back();
-  //       }
-  //     }
-  //   });
-  // }
 }
