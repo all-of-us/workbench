@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.persistence.OptimisticLockException;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
@@ -137,7 +136,6 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
               "Conflict: Cohort Annotation Definition name exists for: %s",
               request.getColumnName()));
     }
-
     try {
       cohortAnnotationDefinition = cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
     } catch (DataIntegrityViolationException e) {

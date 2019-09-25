@@ -66,7 +66,6 @@ import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.VocabularyListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -211,7 +210,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
       UserRecentResourceService userRecentResourceService,
       Provider<User> userProvider,
-      WorkspaceService workspaceService,
       Clock clock) {
     this.cohortReviewService = cohortReviewService;
     this.bigQueryService = bigQueryService;
