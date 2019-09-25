@@ -12,7 +12,7 @@ import {cdrVersionStore, currentWorkspaceStore, serverConfigStore, userProfileSt
 import {userRolesStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
-import {CdrVersionsStubVariables, cdrVersionListResponse} from '../../../testing/stubs/cdr-versions-api-stub';
+import {CdrVersionsStubVariables, cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
