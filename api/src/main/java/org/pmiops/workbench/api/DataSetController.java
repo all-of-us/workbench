@@ -49,7 +49,6 @@ import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetListResponse;
-import org.pmiops.workbench.model.DataSetPreviewList;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
