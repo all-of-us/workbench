@@ -234,8 +234,12 @@ public class ElasticFiltersTest {
   private static final QueryBuilder nonNestedQuery(QueryBuilder... inners) {
     BoolQueryBuilder innerBuilder = QueryBuilders.boolQuery();
     for (QueryBuilder in : inners) {
-      BoolQueryBuilder b = QueryBuilders.boolQuery().filter(in);
-      innerBuilder.should(b);
+      if (in.toString().contains("is_deceased") && in.toString().contains("birth_datetime")) {
+        innerBuilder.should(in);
+      } else {
+        BoolQueryBuilder b = QueryBuilders.boolQuery().filter(in);
+        innerBuilder.should(b);
+      }
     }
     return QueryBuilders.boolQuery().filter(innerBuilder);
   }
@@ -782,6 +786,26 @@ public class ElasticFiltersTest {
   }
 
   @Test
+  public void testDeceasedQuery() {
+    SearchParameter deceasedParam =
+        new SearchParameter()
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.DECEASED.toString())
+            .standard(true)
+            .ancestorData(false)
+            .group(false);
+    QueryBuilder resp =
+        ElasticFilters.fromCohortSearch(
+            cbCriteriaDao,
+            new SearchRequest()
+                .addIncludesItem(
+                    new SearchGroup()
+                        .addItemsItem(
+                            new SearchGroupItem().addSearchParametersItem(deceasedParam))));
+    assertThat(resp).isEqualTo(nonNestedQuery(QueryBuilders.termQuery("is_deceased", true)));
+  }
+
+  @Test
   public void testPregnancyQuery() {
     String conceptId = "903120";
     String operand = "12345";
@@ -892,13 +916,15 @@ public class ElasticFiltersTest {
                 .addIncludesItem(
                     new SearchGroup()
                         .addItemsItem(new SearchGroupItem().addSearchParametersItem(ethParam))));
-    assertThat(resp)
-        .isEqualTo(
-            nonNestedQuery(
+    BoolQueryBuilder ageBuilder =
+        QueryBuilders.boolQuery()
+            .filter(QueryBuilders.termQuery("is_deceased", false))
+            .filter(
                 QueryBuilders.rangeQuery("birth_datetime")
                     .gt(left)
                     .lte(right)
-                    .format("yyyy-MM-dd")));
+                    .format("yyyy-MM-dd"));
+    assertThat(resp).isEqualTo(nonNestedQuery(ageBuilder));
   }
 
   @Test
@@ -937,10 +963,19 @@ public class ElasticFiltersTest {
                         .addItemsItem(
                             new SearchGroupItem()
                                 .searchParameters(Arrays.asList(ageParam, ethParam)))));
+
+    BoolQueryBuilder ageBuilder =
+        QueryBuilders.boolQuery()
+            .filter(QueryBuilders.termQuery("is_deceased", false))
+            .filter(
+                QueryBuilders.rangeQuery("birth_datetime")
+                    .gt(left)
+                    .lte(right)
+                    .format("yyyy-MM-dd"));
     assertThat(resp)
         .isEqualTo(
             nonNestedQuery(
-                QueryBuilders.rangeQuery("birth_datetime").gt(left).lte(right).format("yyyy-MM-dd"),
+                ageBuilder,
                 QueryBuilders.termsQuery("ethnicity_concept_id", ImmutableList.of(conceptId))));
   }
 
