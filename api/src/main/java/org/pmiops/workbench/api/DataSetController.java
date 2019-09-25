@@ -264,16 +264,22 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   // TODO (srubenst): Delete this method and make generate query take the composite parts.
-  private DataSetRequest generateDataSetRequestFromPreviewRequest(DataSetPreviewRequest dataSetPreviewRequest) {
+  private DataSetRequest generateDataSetRequestFromPreviewRequest(
+      DataSetPreviewRequest dataSetPreviewRequest) {
     return new DataSetRequest()
         .name("Does not matter")
         .conceptSetIds(dataSetPreviewRequest.getConceptSetIds())
         .cohortIds(dataSetPreviewRequest.getCohortIds())
         .prePackagedConceptSet(dataSetPreviewRequest.getPrePackagedConceptSet())
         .includesAllParticipants(dataSetPreviewRequest.getIncludesAllParticipants())
-        .values(dataSetPreviewRequest.getValues().stream()
-            .map(value -> new DomainValuePair().domain(dataSetPreviewRequest.getDomain()).value(value))
-            .collect(Collectors.toList()));
+        .values(
+            dataSetPreviewRequest.getValues().stream()
+                .map(
+                    value ->
+                        new DomainValuePair()
+                            .domain(dataSetPreviewRequest.getDomain())
+                            .value(value))
+                .collect(Collectors.toList()));
   }
 
   @Override
@@ -283,10 +289,12 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     DataSetRequest dataSetRequest = generateDataSetRequestFromPreviewRequest(dataSetPreviewRequest);
-    Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSetRequest);
+    Map<String, QueryJobConfiguration> bigQueryJobConfig =
+        dataSetService.generateQuery(dataSetRequest);
 
     if (bigQueryJobConfig.size() > 1) {
-      throw new BadRequestException("There should never be a preview request with more than one domain");
+      throw new BadRequestException(
+          "There should never be a preview request with more than one domain");
     }
     List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
 
@@ -397,7 +405,8 @@ public class DataSetController implements DataSetApiDelegate {
 
           Collections.sort(
               valuePreviewList,
-              Comparator.comparing(item -> dataSetPreviewRequest.getValues().indexOf(item.getValue())));
+              Comparator.comparing(
+                  item -> dataSetPreviewRequest.getValues().indexOf(item.getValue())));
         });
 
     previewQueryResponse.setValues(valuePreviewList);

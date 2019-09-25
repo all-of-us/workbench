@@ -231,7 +231,7 @@ const BoxHeader = ({text= '', header =  '', subHeader = '', style= {}, ...props}
 
 interface DataSetPreviewList {
   domain: Domain;
-  isLoading: boolean
+  isLoading: boolean;
   values?: Array<DataSetPreviewValueList>;
 }
 
@@ -538,7 +538,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             domain: domain,
             isLoading: true,
             values: []
-          }
+          };
         }),
         previewDataLoading: true,
         selectedPreviewDomain: domains[0]
@@ -574,7 +574,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               break;
             case 404:
               if (exceptionResponse.message.startsWith(
-                  'Not Found: No Cohort definition matching cohortId')) {
+                'Not Found: No Cohort definition matching cohortId')) {
                 errorText = 'Error with one or more cohorts in the data set. ' +
                   'Please submit a bug using the contact support button';
               }
@@ -629,7 +629,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       const filteredPreviewData =
           this.state.previewList.filter(
             preview => preview.domain === this.state.selectedPreviewDomain)[0];
-      const domainDisplayed = this.state.selectedPreviewDomain.toString().toLowerCase()
+      const domainDisplayed = this.state.selectedPreviewDomain.toString().toLowerCase();
       return filteredPreviewData.values.length > 0 ?
         <DataTable ref={el => this.dt = el} key={this.state.selectedPreviewDomain}
                           scrollable={true} style={{width: '100%'}}
