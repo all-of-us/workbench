@@ -21,7 +21,7 @@ class IncrementalHotSwapTask extends DefaultTask {
                 String fqClassName = relativePath[0..-(".class".length() + 1)].replaceAll("/", ".")
                 printf "Hot swapping $fqClassName from $change.file.path..."
                 def proc = "echo redefine $fqClassName $change.file.path".execute() \
-            | "/usr/lib/jvm/default-jvm/bin/jdb -attach 8001".execute()
+            | "${System.getenv('JAVA_HOME')}/bin/jdb -attach 8001".execute()
                 proc.waitFor()
                 println "done."
             }
