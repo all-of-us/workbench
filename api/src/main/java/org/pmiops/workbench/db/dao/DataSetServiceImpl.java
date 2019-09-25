@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.BigQueryService;
@@ -337,79 +338,88 @@ public class DataSetServiceImpl implements DataSetService {
       boolean includesAllParticipants,
       List<ConceptSet> conceptSetsSelected,
       String cohortQueries) {
-
-    final ImmutableMap.Builder<String, QueryJobConfiguration> resultBuilder = new ImmutableMap.Builder<>();
     final CdrBigQuerySchemaConfig  bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
 
-    for (Domain domain : domainList) {
+    return domainList.stream()
+        .collect(ImmutableMap.toImmutableMap(
+            Domain::toString,
+            domain -> buildQueryJobConfigForDomain(
+                (Domain) domain,
+                domainValuePairs,
+                cohortParameters,
+                includesAllParticipants,
+                conceptSetsSelected,
+                cohortQueries,
+                bigQuerySchemaConfig)));
+  }
 
-      validateConceptSetSelection(domain, conceptSetsSelected);
+  private QueryJobConfiguration buildQueryJobConfigForDomain(Domain domain, List<DomainValuePair> domainValuePairs,
+      Map<String, QueryParameterValue> cohortParameters, boolean includesAllParticipants,
+      List<ConceptSet> conceptSetsSelected, String cohortQueries,
+      CdrBigQuerySchemaConfig bigQuerySchemaConfig) {
+    validateConceptSetSelection(domain, conceptSetsSelected);
 
-      final StringBuilder queryBuilder = new StringBuilder("SELECT ");
-      final String personIdQualified = getQualifiedColumnName(domain, PERSON_ID_COLUMN_NAME);
+    final StringBuilder queryBuilder = new StringBuilder("SELECT ");
+    final String personIdQualified = getQualifiedColumnName(domain, PERSON_ID_COLUMN_NAME);
 
-      final List<DomainValuePair> domainValuePairsForCurrentDomain = domainValuePairs.stream()
-          .filter(dvp -> dvp.getDomain() == domain)
-          .collect(Collectors.toList());
+    final List<DomainValuePair> domainValuePairsForCurrentDomain = domainValuePairs.stream()
+        .filter(dvp -> dvp.getDomain() == domain)
+        .collect(Collectors.toList());
 
-      final ValuesLinkingPair valuesLinkingPair = getValueSelectsAndJoins(domainValuePairsForCurrentDomain);
+    final ValuesLinkingPair valuesLinkingPair = getValueSelectsAndJoins(domainValuePairsForCurrentDomain);
 
-      queryBuilder.append(String.join(", ", valuesLinkingPair.getSelects()))
-          .append(" ")
-          .append(valuesLinkingPair.formatJoins());
+    queryBuilder.append(String.join(", ", valuesLinkingPair.getSelects()))
+        .append(" ")
+        .append(valuesLinkingPair.formatJoins());
 
+    final Optional<String> conceptSetSqlInClauseMaybe = buildConceptIdListClause(domain, conceptSetsSelected);
 
-      final Optional<String> conceptSetSqlInClauseMaybe = buildConceptIdListClause(domain, conceptSetsSelected);
+    if (supportsConceptSets(domain)) {
+      final Optional<DomainConceptIdInfo> domainConceptIdInfoMaybe =
+          bigQuerySchemaConfig.cohortTables.values().stream()
+              .filter(config -> domain.toString().equals(config.domain))
+              .map(
+                  tableConfig ->
+                      new DomainConceptIdInfo(
+                          getColumnName(tableConfig, "source"),
+                          getColumnName(tableConfig, "standard")))
+              .findFirst();
 
-      if (supportsConceptSets(domain)) {
-        final Optional<DomainConceptIdInfo> domainConceptIdInfoMaybe =
-            bigQuerySchemaConfig.cohortTables.values().stream()
-                .filter(config -> domain.toString().equals(config.domain))
-                .map(
-                    tableConfig ->
-                        new DomainConceptIdInfo(
-                            getColumnName(tableConfig, "source"),
-                            getColumnName(tableConfig, "standard")))
-                .findFirst();
+      final DomainConceptIdInfo domainConceptIdInfo = domainConceptIdInfoMaybe.orElseThrow(
+          () -> new ServerErrorException(String.format(
+              "Couldn't find source and standard columns for domain: %s",
+              domain.toString())));
 
-        final DomainConceptIdInfo domainConceptIdInfo = domainConceptIdInfoMaybe.orElseThrow(
-            () -> new ServerErrorException(String.format(
-                "Couldn't find source and standard columns for domain: %s",
-                domain.toString())));
+      // This adds the where clauses for cohorts and concept sets.
+      conceptSetSqlInClauseMaybe.ifPresent(
+          clause -> queryBuilder.append(" WHERE \n(")
+              .append(domainConceptIdInfo.getStandardConceptIdColumn())
+              .append(clause)
+              .append(" OR \n")
+              .append(domainConceptIdInfo.getSourceConceptIdColumn())
+              .append(clause)
+              .append(")"));
 
-        // This adds the where clauses for cohorts and concept sets.
-        queryBuilder.append(
-            " WHERE \n("
-                + domainConceptIdInfo.getStandardConceptIdColumn()
-                + conceptSetSqlInClauseMaybe
-                + " OR \n"
-                + domainConceptIdInfo.getSourceConceptIdColumn()
-                + conceptSetSqlInClauseMaybe
-                + ")");
-        if (!includesAllParticipants) {
-          queryBuilder
-              .append(" \nAND (")
-              .append(personIdQualified)
-              .append(" IN (")
-              .append(cohortQueries)
-              .append("))");
-        }
-      } else if (!includesAllParticipants) {
-          queryBuilder
-              .append(" \nWHERE ")
-              .append(personIdQualified)
-              .append(" IN (")
-              .append(cohortQueries)
-              .append(")");
-        }
+      if (!includesAllParticipants) {
+        queryBuilder
+            .append(" \nAND (")
+            .append(personIdQualified)
+            .append(" IN (")
+            .append(cohortQueries)
+            .append("))");
+      }
+    } else if (!includesAllParticipants) {
+        queryBuilder
+            .append(" \nWHERE ")
+            .append(personIdQualified)
+            .append(" IN (")
+            .append(cohortQueries)
+            .append(")");
+      }
 
-        final String completeQuery = queryBuilder.toString();
+    final String completeQuery = queryBuilder.toString();
 
-        final QueryJobConfiguration queryJobConfiguration =
-            buildQueryJobConfiguration(cohortParameters, completeQuery);
-        resultBuilder.put(domain.toString(), queryJobConfiguration);
-    }
-    return resultBuilder.build();
+    return buildQueryJobConfiguration(cohortParameters, completeQuery);
   }
 
   private void validateConceptSetSelection(Domain domain, List<ConceptSet> conceptSetsSelected) {

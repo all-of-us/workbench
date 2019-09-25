@@ -48,7 +48,6 @@ public class DataSetServiceTest {
       .domain(Domain.PERSON)
       .value("PERSON_ID");
   private static final Long CONCEPT_SET_ID_1 = 200L;
-  private static final ImmutableList<DomainValuePair> DOMAIN_VALUE_PAIR_PERSON_LIST = ImmutableList.of(DOMAIN_VALUE_PAIR_PERSON_PERSON_ID);
   private static final QueryJobConfiguration QUERY_JOB_CONFIGURATION_1 =
       QueryJobConfiguration.newBuilder("SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
       .addNamedParameter("foo",
