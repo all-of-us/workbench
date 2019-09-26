@@ -150,9 +150,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspacesControllerTest {
 
-  private static final Instant NOW = Instant.now();
-  private static final long NOW_TIME = Timestamp.from(NOW).getTime();
-  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+  private static final Timestamp NOW = Timestamp.from(Instant.now());
+  private static final long NOW_TIME = NOW.getTime();
+  private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
   private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
@@ -312,7 +312,7 @@ public class WorkspacesControllerTest {
     conceptDao.save(CONCEPT_2);
     conceptDao.save(CONCEPT_3);
 
-    CLOCK.setInstant(NOW);
+    CLOCK.setInstant(NOW.toInstant());
 
     WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
@@ -2017,7 +2017,7 @@ public class WorkspacesControllerTest {
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
     verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
+        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
@@ -2042,7 +2042,7 @@ public class WorkspacesControllerTest {
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
     verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
+        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
@@ -2080,7 +2080,7 @@ public class WorkspacesControllerTest {
 
     verify(userRecentResourceService)
         .updateNotebookEntry(
-            2l, 1l, "gs://workspace-bucket/notebooks/" + expectedNotebookName, Timestamp.from(NOW));
+            2l, 1l, "gs://workspace-bucket/notebooks/" + expectedNotebookName, NOW);
   }
 
   @Test
@@ -2229,7 +2229,7 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService)
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
+        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
   }
 
   @Test
@@ -2552,7 +2552,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
-    workspaceService.updateRecentWorkspaces(dbWorkspace.getWorkspaceId(), currentUser.getUserId());
+    workspaceService.updateRecentWorkspaces(dbWorkspace.getWorkspaceId(), currentUser.getUserId(), NOW);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity = workspacesController.getUserRecentWorkspaces();
     RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
     assertThat(recentWorkspace.getWorkspace().getNamespace()).isEqualTo(dbWorkspace.getWorkspaceNamespace());
