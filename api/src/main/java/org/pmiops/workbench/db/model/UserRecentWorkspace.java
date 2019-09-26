@@ -7,17 +7,17 @@ import java.sql.Timestamp;
 @Table(name = "user_recent_workspace")
 public class UserRecentWorkspace {
     private Timestamp lastAccessDate;
-    private int id;
+    private long id;
     private Long userId;
     private Long workspaceId;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
