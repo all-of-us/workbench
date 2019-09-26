@@ -129,29 +129,29 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return readToString(getCredentialsBucketName(), objectPath);
   }
 
-  private GoogleCredential getBucketCredential(final String objectPath) throws IOException {
-    String json = readCredentialsBucketString(objectPath);
+  private GoogleCredential getCredential(final String objectPath) throws IOException {
+    final String json = readCredentialsBucketString(objectPath);
     return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
   }
 
   @Override
   public GoogleCredential getGSuiteAdminCredentials() throws IOException {
-    return getBucketCredential("gsuite-admin-sa.json");
+    return getCredential("gsuite-admin-sa.json");
   }
 
   @Override
   public GoogleCredential getFireCloudAdminCredentials() throws IOException {
-    return getBucketCredential("firecloud-admin-sa.json");
+    return getCredential("firecloud-admin-sa.json");
   }
 
   @Override
   public GoogleCredential getCloudResourceManagerAdminCredentials() throws IOException {
-    return getBucketCredential("cloud-resource-manager-admin-sa.json");
+    return getCredential("cloud-resource-manager-admin-sa.json");
   }
 
   @Override
   public GoogleCredential getDefaultServiceAccountCredentials() throws IOException {
-    return getBucketCredential("app-engine-default-sa.json");
+    return getCredential("app-engine-default-sa.json");
   }
 
   @Override
