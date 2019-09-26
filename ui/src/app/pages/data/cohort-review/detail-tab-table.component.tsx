@@ -169,7 +169,7 @@ const filterIcons = {
   }
 };
 
-const rows = 25;
+const rowsPerPage = 25;
 const domains = [
   DomainType.CONDITION,
   DomainType.PROCEDURE,
@@ -244,6 +244,8 @@ interface State {
   expandedRows: Array<any>;
   codeResults: any;
   error: boolean;
+  inMemory: boolean;
+  totalCount: number;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
@@ -261,6 +263,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         expandedRows: [],
         codeResults: null,
         error: false,
+        inMemory: true,
+        totalCount: null
       };
       this.codeInputChange = fp.debounce(300, (e) => this.filterCodes(e));
     }
@@ -288,32 +292,30 @@ export const DetailTabTable = withCurrentWorkspace()(
       try {
         const {columns, domain, participantId,
           workspace: {id, namespace}} = this.props;
+        let {inMemory} = this.state;
         const pageFilterRequest = {
           page: 0,
-          pageSize: 10000,
+          pageSize: 125,
           sortOrder: SortOrder.Asc,
           sortColumn: columns[0].name,
           domain: domain,
+          filters: {items: []}
         } as PageFilterRequest;
 
-        cohortReviewApi().getParticipantData(
-          namespace,
-          id,
-          cohortReviewStore.getValue().cohortReviewId,
-          participantId,
-          pageFilterRequest
-        ).then(response => {
+        this.callApi(pageFilterRequest).then(response => {
+          inMemory = response.count <= 1000;
           response.items.forEach(item => {
             if (domain === DomainType.VITAL || domain === DomainType.LAB) {
               item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
             }
             item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
           });
-          this.setState({
-            data: response.items,
-            loading: false,
-          });
-          this.filterData();
+          if (inMemory) {
+            this.setState({data: response.items, loading: false, inMemory});
+            this.filterData();
+          } else {
+            this.setState({data: response.items, filteredData: response.items, loading: false, inMemory, totalCount: response.count});
+          }
         });
       } catch (error) {
         console.log(error);
@@ -322,6 +324,12 @@ export const DetailTabTable = withCurrentWorkspace()(
           error: true
         });
       }
+    }
+
+    callApi(request: PageFilterRequest) {
+      const {participantId, workspace: {id, namespace}} = this.props;
+      const {cohortReviewId} = cohortReviewStore.getValue();
+      return cohortReviewApi().getParticipantData(namespace, id, cohortReviewId, participantId, request);
     }
 
     onSort = (event: any) => {
@@ -435,8 +443,8 @@ export const DetailTabTable = withCurrentWorkspace()(
       ];
       const columnFilters = filterState.tabs[domain];
       if (!columnFilters) {
-        if (data.length < start + rows) {
-          start = Math.floor(data.length / rows) * rows;
+        if (data.length < start + rowsPerPage) {
+          start = Math.floor(data.length / rowsPerPage) * rowsPerPage;
         }
         this.setState({filteredData: data, start: start});
       } else {
@@ -461,8 +469,8 @@ export const DetailTabTable = withCurrentWorkspace()(
             }
           }
         }
-        if (data && data.length < start + rows) {
-          start = Math.floor(data.length / rows) * rows;
+        if (data && data.length < start + rowsPerPage) {
+          start = Math.floor(data.length / rowsPerPage) * rowsPerPage;
         }
         this.setState({filteredData: data, start: start});
       }
@@ -675,18 +683,27 @@ export const DetailTabTable = withCurrentWorkspace()(
       return {'graphExpander' : noConcept};
     }
 
+    get totalCount() {
+      const {filteredData, inMemory, totalCount} = this.state;
+      if (inMemory) {
+        return !!filteredData ? filteredData.length : null;
+      } else {
+        return totalCount;
+      }
+    }
+
     render() {
       const {loading, start, sortField, sortOrder} = this.state;
       const {columns, filterState: {vocab}, tabName} = this.props;
       const filteredData = loading ? null : this.state.filteredData;
       let pageReportTemplate;
       if (filteredData !== null) {
-        const lastRowOfPage = (start + rows) > filteredData.length
-          ? start + rows - (start + rows - filteredData.length) : start + rows;
-        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${filteredData.length} records `;
+        const lastRowOfPage = (start + rowsPerPage) > filteredData.length
+          ? start + rowsPerPage - (start + rowsPerPage - filteredData.length) : start + rowsPerPage;
+        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${this.totalCount} records `;
       }
       let paginatorTemplate = 'CurrentPageReport';
-      if (filteredData && filteredData.length > rows) {
+      if (filteredData && filteredData.length > rowsPerPage) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
       const cols = columns.map((col) => {
@@ -751,14 +768,15 @@ export const DetailTabTable = withCurrentWorkspace()(
           sortField={sortField}
           sortOrder={sortOrder}
           onSort={this.onSort}
+          lazy
           paginator
           alwaysShowPaginator={false}
           paginatorTemplate={filteredData && filteredData.length ? paginatorTemplate : ''}
           currentPageReportTemplate={filteredData && filteredData.length ? pageReportTemplate : ''}
           onPage={this.onPage}
           first={start}
-          rows={rows}
-          totalRecords={filteredData && filteredData.length}
+          rows={rowsPerPage}
+          totalRecords={this.totalCount}
           scrollable
           scrollHeight='calc(100vh - 350px)'
           autoLayout
