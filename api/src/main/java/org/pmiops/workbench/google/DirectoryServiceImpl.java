@@ -9,11 +9,11 @@ import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.services.admin.directory.Directory;
-import com.google.api.services.admin.directory.DirectoryScopes;
-import com.google.api.services.admin.directory.model.User;
-import com.google.api.services.admin.directory.model.UserEmail;
-import com.google.api.services.admin.directory.model.UserName;
+import com.google.api.services.directory.Directory;
+import com.google.api.services.directory.DirectoryScopes;
+import com.google.api.services.directory.model.User;
+import com.google.api.services.directory.model.UserEmail;
+import com.google.api.services.directory.model.UserName;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -158,7 +158,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     // GSuite custom fields for Workbench user accounts.
     // See the Moodle integration doc (broad.io/aou-moodle) for more details, as this
     // was primarily set up for Moodle SSO integration.
-    Map<String, Object> aouCustomFields = new HashMap<String, Object>();
+    Map<String, Object> aouCustomFields = new HashMap<>();
     // The value of this field must match one of the allowed values in the Moodle installation.
     // Since this value is unlikely to ever change, we use a hard-coded constant rather than an env
     // variable.
@@ -180,6 +180,7 @@ public class DirectoryServiceImpl implements DirectoryService {
       emails.add(new UserEmail().setType("home").setAddress(contactEmail));
     }
     user.setEmails(emails)
+        .setRecoveryEmail(contactEmail)
         .setCustomSchemas(Collections.singletonMap(GSUITE_AOU_SCHEMA_NAME, aouCustomFields));
   }
 
@@ -199,14 +200,6 @@ public class DirectoryServiceImpl implements DirectoryService {
     addCustomSchemaAndEmails(user, primaryEmail, contactEmail);
 
     retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
-    return user;
-  }
-
-  @Override
-  public User updateUser(User user) {
-    retryHandler.run(
-        (context) ->
-            getGoogleDirectoryService().users().update(user.getPrimaryEmail(), user).execute());
     return user;
   }
 
