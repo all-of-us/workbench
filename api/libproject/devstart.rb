@@ -27,7 +27,7 @@ DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
 def make_gae_vars(min, max)
   {
-    "GAE_MIN_INSTANCES" => min.to_s,
+    "GAE_MIN_IDLE_INSTANCES" => min.to_s,
     "GAE_MAX_INSTANCES" => max.to_s
   }
 end
