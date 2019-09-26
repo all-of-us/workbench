@@ -417,7 +417,7 @@ public class ProfileController implements ProfileApiDelegate {
     if (request.getProfile().getInstitutionalAffiliations() == null) {
       request.getProfile().setInstitutionalAffiliations(new ArrayList<InstitutionalAffiliation>());
     }
-    com.google.api.services.admin.directory.model.User googleUser =
+    com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
             request.getProfile().getGivenName(),
             request.getProfile().getFamilyName(),
@@ -555,8 +555,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> updateContactEmail(
       UpdateContactEmailRequest updateContactEmailRequest) {
     String username = updateContactEmailRequest.getUsername().toLowerCase();
-    com.google.api.services.admin.directory.model.User googleUser =
-        directoryService.getUser(username);
+    com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
     checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
     if (!userNeverLoggedIn(googleUser, user)) {
@@ -576,8 +575,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
     String username = resendRequest.getUsername().toLowerCase();
-    com.google.api.services.admin.directory.model.User googleUser =
-        directoryService.getUser(username);
+    com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
     checkUserCreationNonce(user, resendRequest.getCreationNonce());
     if (!userNeverLoggedIn(googleUser, user)) {
@@ -587,12 +585,12 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private boolean userNeverLoggedIn(
-      com.google.api.services.admin.directory.model.User googleUser, User user) {
+      com.google.api.services.directory.model.User googleUser, User user) {
     return user.getFirstSignInTime() == null && googleUser.getChangePasswordAtNextLogin();
   }
 
   private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, User user) {
-    com.google.api.services.admin.directory.model.User googleUser =
+    com.google.api.services.directory.model.User googleUser =
         directoryService.resetUserPassword(username);
     try {
       mailServiceProvider

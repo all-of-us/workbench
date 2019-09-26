@@ -371,6 +371,21 @@ paths:
       parameters:
         - $ref: '#/parameters/workspaceNamespaceParam'
         - $ref: '#/parameters/workspaceNameParam'
+        - name: fields
+          description: >
+            When specified, include only these keys in the response payload and exclude other keys.
+            Accepts a comma-delimited list of values. To include a nested key, specify the key's path
+            using a dot delimiter; for example, to include {"workspace": {"attributes": {}}}, specify
+            "workspace.attributes". Legal values are any first-level key in the response, any first-level key
+            inside the {"workspace": {}} object, and any first-level key inside the {"workspace": {"attributes": {}}}
+            object.
+            If omitted, will return the full response payload.
+          required: false
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+          in: query
       responses:
         200:
           description: Successful Request

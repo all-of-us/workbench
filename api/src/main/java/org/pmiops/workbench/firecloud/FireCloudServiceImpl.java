@@ -4,7 +4,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,11 +69,22 @@ public class FireCloudServiceImpl implements FireCloudService {
   // The set of Google OAuth scopes required for access to FireCloud APIs. If FireCloud ever changes
   // its API scopes (see https://api.firecloud.org/api-docs.yaml), we'll need to update this list.
   public static final List<String> FIRECLOUD_API_OAUTH_SCOPES =
-      Arrays.asList(
+      ImmutableList.of(
           "openid",
           "https://www.googleapis.com/auth/userinfo.profile",
           "https://www.googleapis.com/auth/userinfo.email",
           "https://www.googleapis.com/auth/cloud-billing");
+
+  // All options are defined in this document:
+  // https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#
+  public static final List<String> FIRECLOUD_GET_WORKSPACE_REQUIRED_FIELDS =
+      ImmutableList.of(
+          "accessLevel",
+          "workspace.workspaceId",
+          "workspace.name",
+          "workspace.namespace",
+          "workspace.bucketName",
+          "workspace.createdBy");
 
   @Autowired
   public FireCloudServiceImpl(
@@ -302,7 +312,10 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public WorkspaceResponse getWorkspace(String projectName, String workspaceName) {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
-    return retryHandler.run((context) -> workspacesApi.getWorkspace(projectName, workspaceName));
+    return retryHandler.run(
+        (context) ->
+            workspacesApi.getWorkspace(
+                projectName, workspaceName, FIRECLOUD_GET_WORKSPACE_REQUIRED_FIELDS));
   }
 
   @Override

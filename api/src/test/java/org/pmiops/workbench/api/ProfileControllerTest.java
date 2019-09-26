@@ -107,7 +107,7 @@ public class ProfileControllerTest {
   private ProfileController cloudProfileController;
   private CreateAccountRequest createAccountRequest;
   private InvitationVerificationRequest invitationVerificationRequest;
-  private com.google.api.services.admin.directory.model.User googleUser;
+  private com.google.api.services.directory.model.User googleUser;
   private FakeClock clock;
   private User user;
 
@@ -132,7 +132,7 @@ public class ProfileControllerTest {
     createAccountRequest.setProfile(profile);
     createAccountRequest.setInvitationKey(INVITATION_KEY);
     invitationVerificationRequest.setInvitationKey(INVITATION_KEY);
-    googleUser = new com.google.api.services.admin.directory.model.User();
+    googleUser = new com.google.api.services.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
     googleUser.setChangePasswordAtNextLogin(true);
     googleUser.setPassword("testPassword");

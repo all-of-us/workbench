@@ -89,7 +89,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
         this.hasDataAccess = hasRegisteredAccess(profile.dataAccessLevel);
         if (this.hasDataAccess) {
           cdrVersionsApi().getCdrVersions().then(resp => {
-            cdrVersionStore.next(resp.items);
+            cdrVersionStore.next(resp);
           });
         }
 

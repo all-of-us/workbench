@@ -104,9 +104,10 @@
     <include file="changelog/db.changelog-94-dataset-add-prepackaged-conceptsets-addDefaultValue.xml"/>
     <include file="changelog/db.changelog-95-free-credits.xml"/>
     <include file="changelog/db.changelog-96-drop-free-tier-billing.xml"/>
-    <include file="changelog/db.changelog-97-add-demographic-survey.xml"/> 
-    <include file="changelog/db.changelog-98-add-address.xml"/>
-    <include file="changelog/db.changelog-99-update-institution-affiliations.xml"/> 
+    <include file="changelog/db.changelog-97-cdr-archival-status.xml"/>
+    <include file="changelog/db.changelog-98-add-demographic-survey.xml"/> 
+    <include file="changelog/db.changelog-99-add-address.xml"/>
+    <include file="changelog/db.changelog-100-update-institution-affiliations.xml"/> 
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`

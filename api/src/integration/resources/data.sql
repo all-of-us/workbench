@@ -5,5 +5,5 @@ insert into config (config_id, configuration) values
 insert into config (config_id, configuration) values
   ('cdrBigQuerySchema', '{"description":"Configuration specifying the schema for tables in the CDR, including foreign key relationships. Adapted from BigQuery schema files"}');
 
-insert into cdr_version(cdr_version_id, is_default, name, data_access_level, release_number, bigquery_project, bigquery_dataset, creation_time, num_participants, cdr_db_name, elastic_index_base_name, public_db_name) VALUES
-  (1, 1, 'Test Registered CDR', 1, 1, 'all-of-us-ehr-dev', 'synthetic_cdr20180606', SYSDATE(), 942637, 'cdr20180223', 'cdr20180223', 'public20180223');
+insert into cdr_version(cdr_version_id, is_default, name, data_access_level, archival_status, release_number, bigquery_project, bigquery_dataset, creation_time, num_participants, cdr_db_name, elastic_index_base_name, public_db_name) VALUES
+  (1, 1, 'Test Registered CDR', 1, 0, 1, 'all-of-us-ehr-dev', 'synthetic_cdr20180606', SYSDATE(), 942637, 'cdr20180223', 'cdr20180223', 'public20180223');

@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
@@ -21,6 +22,7 @@ public class CdrVersion {
   private String name;
   private Short dataAccessLevel;
   private short releaseNumber;
+  private short archivalStatus;
   private String bigqueryProject;
   private String bigqueryDataset;
   private Timestamp creationTime;
@@ -73,6 +75,24 @@ public class CdrVersion {
 
   public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
     setDataAccessLevel(CommonStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
+  }
+
+  @Column(name = "archival_status")
+  public Short getArchivalStatus() {
+    return archivalStatus;
+  }
+
+  public void setArchivalStatus(Short archivalStatus) {
+    this.archivalStatus = archivalStatus;
+  }
+
+  @Transient
+  public ArchivalStatus getArchivalStatusEnum() {
+    return CommonStorageEnums.archivalStatusFromStorage(getArchivalStatus());
+  }
+
+  public void setArchivalStatusEnum(ArchivalStatus archivalStatus) {
+    setArchivalStatus(CommonStorageEnums.archivalStatusToStorage(archivalStatus));
   }
 
   @Column(name = "release_number")
@@ -145,6 +165,7 @@ public class CdrVersion {
         isDefault,
         name,
         dataAccessLevel,
+        archivalStatus,
         releaseNumber,
         bigqueryProject,
         bigqueryDataset,
@@ -165,6 +186,7 @@ public class CdrVersion {
         .append(this.isDefault, that.isDefault)
         .append(this.name, that.name)
         .append(this.dataAccessLevel, that.dataAccessLevel)
+        .append(this.archivalStatus, that.archivalStatus)
         .append(this.releaseNumber, that.releaseNumber)
         .append(this.bigqueryProject, that.bigqueryProject)
         .append(this.creationTime, that.creationTime)
