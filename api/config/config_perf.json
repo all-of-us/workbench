@@ -8,7 +8,7 @@
     "registeredDomainName": "all-of-us-registered-perf",
     "registeredDomainGroup": "all-of-us-registered-perf@perf.test.firecloud.org",
     "xAppIdValue": "perf-AoU-RW",
-    "vpcServicePerimeterName": "",
+    "vpcServicePerimeterName": "terra_perf_aou_perf",
     "timeoutInSeconds": 40
   },
   "billing": {
@@ -70,6 +70,6 @@
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
-    "enableVpcServicePerimeter": false
+    "enableVpcServicePerimeter": true
   }
 }
