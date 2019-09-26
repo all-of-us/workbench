@@ -145,18 +145,31 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     }, (environment.inactivityTimeoutSeconds - environment.inactivityWarningBeforeSeconds) * 1000);
     this.getInactivityModalTimer = resetInactivityModalTimeout.getTimer;
 
+    const hideModal = () => this.showInactivityModal = false;
+
+    function resetTimers() {
+      hideModal();
+      resetLogoutTimeout.reset();
+      resetInactivityModalTimeout.reset();
+    }
+
     localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
-    resetLogoutTimeout.reset();
-    resetInactivityModalTimeout.reset();
+    resetTimers();
+
     window.addEventListener('message', (e) => {
       if (e.data !== INACTIVITY_CONFIG.MESSAGE_KEY) {
         return;
       }
 
       window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
-      resetLogoutTimeout.reset();
-      resetInactivityModalTimeout.reset();
+      resetTimers();
     }, false);
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE && e.newValue !== null) {
+        resetTimers();
+      }
+    })
   }
 
   ngAfterViewInit() {
