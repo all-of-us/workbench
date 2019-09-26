@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
@@ -67,6 +68,20 @@ public class CommonStorageEnums {
 
   public static Short dataAccessLevelToStorage(DataAccessLevel level) {
     return CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL.get(level);
+  }
+
+  private static final BiMap<ArchivalStatus, Short> CLIENT_TO_STORAGE_ARCHIVAL_STATUS =
+      ImmutableBiMap.<ArchivalStatus, Short>builder()
+          .put(ArchivalStatus.LIVE, (short) 0)
+          .put(ArchivalStatus.ARCHIVED, (short) 1)
+          .build();
+
+  public static ArchivalStatus archivalStatusFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_ARCHIVAL_STATUS.inverse().get(s);
+  }
+
+  public static Short archivalStatusToStorage(ArchivalStatus s) {
+    return CLIENT_TO_STORAGE_ARCHIVAL_STATUS.get(s);
   }
 
   private static final BiMap<Surveys, Short> CLIENT_TO_STORAGE_SURVEY =

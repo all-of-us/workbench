@@ -727,6 +727,62 @@ paths:
           schema:
             $ref: '#/definitions/EmptyResponse'
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      consumes:
+        - application/json
+      description: >
+        Shares a workspace with the given users and permissions. Note that the entire ACL must
+        be provided to this method (including all existing users and roles), not just the additional
+        roles desired. Clients should first fetch existing ACLs via the getFirecloudWorkspaceUserRoles
+        method, make any changes desired, then pass the final list to this method.
+
+      operationId: shareWorkspace
+      parameters:
+        - in: body
+          name: body
+          description: users to share the workspace with
+          schema:
+            $ref: "#/definitions/ShareWorkspaceRequest"
+      responses:
+        200:
+          description: Successful share response
+          schema:
+            $ref: "#/definitions/WorkspaceUserRolesResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/duplicate:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      consumes:
+        - application/json
+      description: >
+        Duplicate an existing workspace, with given modifications to workspace metadata. Caller will own
+        the newly duplicated workspace, and must have read access to the source workspace. In
+        addition to workspace metadata, the following will also be duplicated:
+          - the associated Firecloud workspace
+          - cohorts, along with reviews and annotations
+          - notebooks located in the default notebook directory for this workspace
+      operationId: cloneWorkspace
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/CloneWorkspaceRequest"
+      responses:
+        200:
+          description: Successful duplicate response
+          schema:
+            $ref: "#/definitions/CloneWorkspaceResponse"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/userRoles:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -1079,62 +1135,6 @@ paths:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorResponse'
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
-    parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-    post:
-      tags:
-        - workspaces
-      consumes:
-        - application/json
-      description: >
-        Shares a workspace with the given users and permissions. Note that the entire ACL must
-        be provided to this method (including all existing users and roles), not just the additional
-        roles desired. Clients should first fetch existing ACLs via the getFirecloudWorkspaceUserRoles
-        method, make any changes desired, then pass the final list to this method.
-
-      operationId: shareWorkspace
-      parameters:
-        - in: body
-          name: body
-          description: users to share the workspace with
-          schema:
-            $ref: "#/definitions/ShareWorkspaceRequest"
-      responses:
-        200:
-          description: Successful share response
-          schema:
-            $ref: "#/definitions/WorkspaceUserRolesResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/duplicate:
-    parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-    post:
-      tags:
-        - workspaces
-      consumes:
-        - application/json
-      description: >
-        Duplicate an existing workspace, with given modifications to workspace metadata. Caller will own
-        the newly duplicated workspace, and must have read access to the source workspace. In
-        addition to workspace metadata, the following will also be duplicated:
-          - the associated Firecloud workspace
-          - cohorts, along with reviews and annotations
-          - notebooks located in the default notebook directory for this workspace
-      operationId: cloneWorkspace
-      parameters:
-        - in: body
-          name: body
-          schema:
-            $ref: "#/definitions/CloneWorkspaceRequest"
-      responses:
-        200:
-          description: Successful duplicate response
-          schema:
-            $ref: "#/definitions/CloneWorkspaceResponse"
 
   # Billing ##############################################################################
 

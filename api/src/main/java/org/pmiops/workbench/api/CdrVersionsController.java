@@ -22,16 +22,13 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
 
   @VisibleForTesting
   static final Function<CdrVersion, org.pmiops.workbench.model.CdrVersion> TO_CLIENT_CDR_VERSION =
-      new Function<CdrVersion, org.pmiops.workbench.model.CdrVersion>() {
-        @Override
-        public org.pmiops.workbench.model.CdrVersion apply(CdrVersion cdrVersion) {
-          return new org.pmiops.workbench.model.CdrVersion()
+      (CdrVersion cdrVersion) ->
+          new org.pmiops.workbench.model.CdrVersion()
               .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
               .creationTime(cdrVersion.getCreationTime().getTime())
               .dataAccessLevel(cdrVersion.getDataAccessLevelEnum())
+              .archivalStatus(cdrVersion.getArchivalStatusEnum())
               .name(cdrVersion.getName());
-        }
-      };
 
   private final CdrVersionService cdrVersionService;
   private Provider<User> userProvider;
