@@ -85,6 +85,7 @@ import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
 import org.pmiops.workbench.model.ParticipantCohortStatus;
 import org.pmiops.workbench.model.ParticipantData;
+import org.pmiops.workbench.model.ParticipantDataCountResponse;
 import org.pmiops.workbench.model.ParticipantDataListResponse;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SearchRequest;
@@ -556,6 +557,26 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   @Override
+  public ResponseEntity<ParticipantDataCountResponse> getParticipantCount(
+      String workspaceNamespace,
+      String workspaceId,
+      Long cohortReviewId,
+      Long participantId,
+      PageFilterRequest request) {
+    // get the total records count for this participant per specified domain
+    TableResult result =
+        bigQueryService.executeQuery(
+            bigQueryService.filterBigQueryConfig(
+                reviewQueryBuilder.buildCountQuery(
+                    participantId, request.getDomain(), createPageRequest(request))));
+    Map<String, Integer> rm = bigQueryService.getResultMapper(result);
+    ParticipantDataCountResponse response =
+        new ParticipantDataCountResponse()
+            .count(bigQueryService.getLong(result.iterateAll().iterator().next(), rm.get("count")));
+    return ResponseEntity.ok(response);
+  }
+
+  @Override
   public ResponseEntity<ParticipantDataListResponse> getParticipantData(
       String workspaceNamespace,
       String workspaceId,
@@ -570,31 +591,18 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     // this validates that the participant is in the requested review.
     cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId);
 
-    DomainType domain = request.getDomain();
-    PageRequest pageRequest = createPageRequest(request);
-
     TableResult result =
         bigQueryService.executeQuery(
             bigQueryService.filterBigQueryConfig(
-                reviewQueryBuilder.buildQuery(participantId, domain, pageRequest)));
+                reviewQueryBuilder.buildQuery(
+                    participantId, request.getDomain(), createPageRequest(request))));
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
     ParticipantDataListResponse response = new ParticipantDataListResponse();
     for (List<FieldValue> row : result.iterateAll()) {
-      response.addItemsItem(convertRowToParticipantData(rm, row, domain));
+      response.addItemsItem(convertRowToParticipantData(rm, row, request.getDomain()));
     }
 
-    if (result.getTotalRows() == pageRequest.getPageSize()) {
-      result =
-          bigQueryService.executeQuery(
-              bigQueryService.filterBigQueryConfig(
-                  reviewQueryBuilder.buildCountQuery(participantId, domain, pageRequest)));
-      rm = bigQueryService.getResultMapper(result);
-      response.count(
-          bigQueryService.getLong(result.iterateAll().iterator().next(), rm.get("count")));
-    } else {
-      response.count(result.getTotalRows());
-    }
     return ResponseEntity.ok(response);
   }
 
