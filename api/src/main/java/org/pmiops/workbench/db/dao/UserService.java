@@ -261,8 +261,8 @@ public class UserService {
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     user.setAddress(address);
     user.setDemographicSurvey(demographicSurvey);
-
-    user.setInstitutionalAffiliations(institutionalAffiliation);
+    user.getInstitutionalAffiliations().clear();
+    user.getInstitutionalAffiliations().addAll(institutionalAffiliation);
     // For existing user that do not have address
     if (address != null) {
       address.setUser(user);

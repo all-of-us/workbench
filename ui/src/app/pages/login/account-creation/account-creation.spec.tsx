@@ -39,7 +39,7 @@ beforeEach(() => {
       institutionalAffiliations: [
         {
           institution: undefined,
-          affiliation: undefined,
+          nonAcademicAffiliation: undefined,
           role: undefined
         }
       ]},

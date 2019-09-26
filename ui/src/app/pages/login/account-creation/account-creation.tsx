@@ -35,10 +35,10 @@ import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils/index';
 import {environment} from 'environments/environment';
 import {
-  AffiliationRole,
   EducationalRole,
   IndustryRole,
-  InstitutionalAffiliation
+  InstitutionalAffiliation,
+  NonAcademicAffiliation
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
@@ -65,15 +65,15 @@ export interface AccountCreationState {
   profile: Profile;
   showAllFieldsRequiredError: boolean;
   showInstitution: boolean;
-  showAffiliationRole: boolean;
-  showAffiliationOther: boolean;
+  showNonAcademicAffiliationRole: boolean;
+  showNonAcademicAffiliationOther: boolean;
   usernameCheckInProgress: boolean;
   usernameConflictError: boolean;
   institutionName: string;
   institutionRole: string;
-  affiliation: string;
-  affiliationRole: string;
-  affiliationOther: string;
+  nonAcademicAffiliation: string;
+  nonAcademicAffiliationRole: string;
+  nonAcademicAffiliationOther: string;
 }
 
 const styles = {
@@ -132,7 +132,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         institutionalAffiliations: [
           {
             institution: undefined,
-            affiliation: undefined,
+            nonAcademicAffiliation: undefined,
             role: undefined
           }
         ]
@@ -142,21 +142,31 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       creatingAccount: false,
       showAllFieldsRequiredError: false,
       showInstitution: true,
-      showAffiliationRole: false,
-      showAffiliationOther: false,
+      showNonAcademicAffiliationRole: false,
+      showNonAcademicAffiliationOther: false,
       invalidEmail: false,
       rolesOptions: [],
       institutionName: '',
       institutionRole: '',
-      affiliation: '',
-      affiliationRole: '',
-      affiliationOther: ''
+      nonAcademicAffiliation: '',
+      nonAcademicAffiliationRole: '',
+      nonAcademicAffiliationOther: ''
     };
   }
 
   componentDidMount() {
     if (this.props.profile.address) {
+      const {institutionalAffiliations} = this.props.profile;
+      if (institutionalAffiliations[0].institution) {
+        this.setState({showInstitution: true});
+      } else {
+        this.setState({showInstitution: false});
+        this.updateNonAcademicAffiliationRoles(institutionalAffiliations[0].nonAcademicAffiliation);
+        this.selectNonAcademicAffiliationRoles(institutionalAffiliations[0].role);
+      }
       this.setState({profile: this.props.profile});
+
+
     }
   }
 
@@ -273,29 +283,37 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   showFreeTextField(option) {
-    return option === AffiliationRole.FREETEXT || option === IndustryRole.FREETEXT ||
+    return option === NonAcademicAffiliation.FREETEXT || option === IndustryRole.FREETEXT ||
         option === EducationalRole.FREETEXT;
   }
 
-  updateAffiliationRoles(affiliation) {
-    this.updateInstitutionAffiliation('affiliation', affiliation);
-    this.setState({showAffiliationRole: false, showAffiliationOther: false});
-    if (affiliation === AffiliationRole.INDUSTRY) {
-      this.setState({rolesOptions: AccountCreationOptions.industryRole, showAffiliationRole: true});
-    } else if (affiliation === AffiliationRole.EDUCATIONALINSTITUTION) {
-      this.setState({rolesOptions: AccountCreationOptions.educationRole, showAffiliationRole: true});
-    } else if (this.showFreeTextField(affiliation)) {
-      this.setState({showAffiliationOther: true});
-      return;
-    }
-    this.selectAffiliationRoles(this.state.affiliationRole);
+  clearInstitutionAffiliation() {
+    this.updateInstitutionAffiliation('nonAcademicAffiliation', '');
+    this.updateInstitutionAffiliation('role', '');
+    this.updateInstitutionAffiliation('institution', '');
+    this.updateInstitutionAffiliation('other', '');
   }
 
-  selectAffiliationRoles(role) {
+  updateNonAcademicAffiliationRoles(nonAcademicAffiliation) {
+    this.updateInstitutionAffiliation('nonAcademicAffiliation', nonAcademicAffiliation);
+    this.setState({showNonAcademicAffiliationRole: false, showNonAcademicAffiliationOther: false});
+    if (nonAcademicAffiliation === NonAcademicAffiliation.INDUSTRY) {
+      this.setState({rolesOptions: AccountCreationOptions.industryRole,
+        showNonAcademicAffiliationRole: true});
+    } else if (nonAcademicAffiliation === NonAcademicAffiliation.EDUCATIONALINSTITUTION) {
+      this.setState({rolesOptions: AccountCreationOptions.educationRole, showNonAcademicAffiliationRole: true});
+    } else if (this.showFreeTextField(nonAcademicAffiliation)) {
+      this.setState({showNonAcademicAffiliationOther: true});
+      return;
+    }
+    this.selectNonAcademicAffiliationRoles(this.state.nonAcademicAffiliationRole);
+  }
+
+  selectNonAcademicAffiliationRoles(role) {
     if (this.showFreeTextField(role)) {
-      this.setState({affiliationRole: role, showAffiliationOther: true});
+      this.setState({nonAcademicAffiliationRole: role, showNonAcademicAffiliationOther: true});
     } else {
-      this.setState({affiliationRole: role, showAffiliationOther: false});
+      this.setState({nonAcademicAffiliationRole: role, showNonAcademicAffiliationOther: false});
     }
     this.updateInstitutionAffiliation('role', role);
 
@@ -318,7 +336,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       showInstitution,
       profile: { givenName, familyName, contactEmail,
         address: {streetAddress1, city, country, state},
-        institutionalAffiliations: [{institution, affiliation, role}]
+        institutionalAffiliations: [{institution, nonAcademicAffiliation, role}]
       }
     } = this.state;
 
@@ -345,15 +363,15 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     };
 
     showInstitution ? validationCheck['institution'] = presenceCheck :
-      validationCheck['affiliation'] = presenceCheck;
+      validationCheck['nonAcademicAffiliation'] = presenceCheck;
 
-    if (showInstitution || affiliation !== AffiliationRole.COMMUNITYSCIENTIST) {
+    if (showInstitution || nonAcademicAffiliation !== NonAcademicAffiliation.COMMUNITYSCIENTIST) {
       validationCheck['role'] = presenceCheck;
     }
 
 
     const errors = validate({givenName, familyName, contactEmail, streetAddress1, city, state, country,
-      institution, affiliation, role}, validationCheck);
+      institution, nonAcademicAffiliation, role}, validationCheck);
     this.setState({errors: errors}, () => {
       if (!this.state.errors) {
         this.props.setProfile(this.state.profile, 'accountCreationSurvey');
@@ -477,16 +495,15 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </label>
           <div style={{paddingTop: '0.5rem'}}>
             <RadioButton data-test-id='show-institution-yes'
-                         onChange={() => {this.updateInstitutionAffiliation('affiliation', '');
-                           this.updateInstitutionAffiliation('role', '');
+                         onChange={() => {this.clearInstitutionAffiliation();
                            this.setState({showInstitution: true}); }}
                          checked={this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
             <label style={{paddingRight: '3rem', color: colors.primary}}>
               Yes
             </label>
             <RadioButton data-test-id='show-institution-no'
-                         onChange={() => {this.updateInstitutionAffiliation('institution', '');
-                           this.updateInstitutionAffiliation('role', ''); this.setState({showInstitution: false}); }}
+                         onChange={() => {this.clearInstitutionAffiliation();
+                           this.setState({showInstitution: false}); }}
                          checked={!this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
             <label style={{color: colors.primary}}>No</label>
           </div>
@@ -500,7 +517,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             placeholder='Institution Name'
             onChange={value => this.updateInstitutionAffiliation('institution', value)}
                      ></TextInput>
-          <Dropdown data-test-id='institutionRole' value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
+          <Dropdown data-test-id='institutionRole' value={institutionalAffiliations &&
+          institutionalAffiliations.length > 0 ?
               institutionalAffiliations[0].role : ''}
                     onChange={e => this.updateInstitutionAffiliation('role', e.value)}
                     placeholder='Which of the following describes your role'
@@ -511,17 +529,18 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <Dropdown data-test-id='affiliation'
                     style={{width: '18rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
                     value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
-                        institutionalAffiliations[0].affiliation : ''}
-                    options={AccountCreationOptions.affiliations}
-                    onChange={e => this.updateAffiliationRoles(e.value)}
+                        institutionalAffiliations[0].nonAcademicAffiliation : ''}
+                    options={AccountCreationOptions.nonAcademicAffiliations}
+                    onChange={e => this.updateNonAcademicAffiliationRoles(e.value)}
                     placeholder='Which of the following better describes your affiliation?'/>
-          {this.state.showAffiliationRole &&
+          {this.state.showNonAcademicAffiliationRole &&
           <Dropdown data-test-id='affiliationrole' placeholder='Which of the following describes your role'
-                    options={this.state.rolesOptions} value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
+                    options={this.state.rolesOptions} value={institutionalAffiliations
+          && institutionalAffiliations.length > 0 ?
               institutionalAffiliations[0].role : ''}
-                    onChange={e => this.selectAffiliationRoles(e.value)}
+                    onChange={e => this.selectNonAcademicAffiliationRoles(e.value)}
                     style={{width: '18rem'}}/>}
-          {this.state.showAffiliationOther &&
+          {this.state.showNonAcademicAffiliationOther &&
           <TextInput value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
               institutionalAffiliations[0].other : ''}
                      onChange={value => this.updateInstitutionAffiliation('other', value)}

@@ -3297,8 +3297,8 @@ definitions:
         type: string
       role:
         type: string
-      affiliation:
-        $ref: '#/definitions/AffiliationRole'
+      nonAcademicAffiliation:
+        $ref: '#/definitions/NonAcademicAffiliation'
         type: string
       other:
         type: string

@@ -1,35 +1,35 @@
 import {
-  AffiliationRole,
+  AcademicRole,
   Education,
   EducationalRole,
   Ethnicity,
   Gender,
   IndustryRole,
-  Race,
-  Role
+  NonAcademicAffiliation,
+  Race
 } from 'generated/fetch';
 
 export const AccountCreationOptions = {
   roles: [
-    {label: `Undergraduate (Bachelor level) student`, value: Role.UNDERGRADUATE},
+    {label: `Undergraduate (Bachelor level) student`, value: AcademicRole.UNDERGRADUATE},
     {label: `Graduate trainee (Current student in a Masters, PhD, or Medical school training
-        program)`, value: Role.TRAINEE},
+        program)`, value: AcademicRole.TRAINEE},
     {label: `Research fellow (a post-doctoral fellow or medical resident in training)`,
-      value: Role.FELLOW},
-    {label: `Early career tenure-track researcher`, value: Role.EARLYCAREER},
-    {label: `Non tenure-track researcher`, value: Role.NONTENURE},
-    {label: `Mid-career tenured researcher`, value: Role.MIDCAREER},
-    {label: `Late career tenured researcher`, value: Role.LATECAREER},
+      value: AcademicRole.FELLOW},
+    {label: `Early career tenure-track researcher`, value: AcademicRole.EARLYCAREER},
+    {label: `Non tenure-track researcher`, value: AcademicRole.NONTENURE},
+    {label: `Mid-career tenured researcher`, value: AcademicRole.MIDCAREER},
+    {label: `Late career tenured researcher`, value: AcademicRole.LATECAREER},
     {label: `Project Personnel (eg: Research Assistant, Data Analyst, Project Manager, Research
-        Coordinator or other roles)`, value: Role.PROJECTPERSONNEL}
+        Coordinator or other roles)`, value: AcademicRole.PROJECTPERSONNEL}
   ],
-  affiliations: [
-    {label: 'Industry', value: AffiliationRole.INDUSTRY },
+  nonAcademicAffiliations: [
+    {label: 'Industry', value: NonAcademicAffiliation.INDUSTRY },
     {label: `Educational institution (High school, Community college, 4-year college, trade
-        school)`, value: AffiliationRole.EDUCATIONALINSTITUTION},
+        school)`, value: NonAcademicAffiliation.EDUCATIONALINSTITUTION},
     {label: `Community Scientist (i.e. I am accessing AoU for independent research, unrelated to my
-        professional affiliation)`, value: AffiliationRole.COMMUNITYSCIENTIST},
-    {label: `Other (free text)`, value: AffiliationRole.FREETEXT}
+        professional affiliation)`, value: NonAcademicAffiliation.COMMUNITYSCIENTIST},
+    {label: `Other (free text)`, value: NonAcademicAffiliation.FREETEXT}
   ],
   industryRole: [
     {label: 'Research Assistant (pre-doctoral)', value: IndustryRole.PREDOCTORAL},

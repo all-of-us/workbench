@@ -7,11 +7,11 @@
   <changeSet author="nsaxena" id="changelog-99-update-institution-affiliations">
      
      <addColumn tableName="institutional_affiliation">
-       <column name="affiliation" type="tinyint"/>
+       <column name="non_academic_affiliation" type="tinyint"/>
        <column name="other" type="varchar(255)"/>
      </addColumn>
      
-     <addDefaultValue tableName="institutional_affiliation" columnName="affiliation" defaultValue="0"/>
+     <addDefaultValue tableName="institutional_affiliation" columnName="non_academic_affiliation" defaultValue="0"/>
      <addDefaultValue tableName="institutional_affiliation" columnName="role" defaultValue=""/>
   </changeSet>
 </databaseChangeLog>

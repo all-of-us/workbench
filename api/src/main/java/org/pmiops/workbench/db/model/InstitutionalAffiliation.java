@@ -9,7 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import org.pmiops.workbench.model.AffiliationRole;
+import org.pmiops.workbench.model.NonAcademicAffiliation;
 
 @Entity
 @Table(name = "institutional_affiliation")
@@ -20,7 +20,7 @@ public class InstitutionalAffiliation {
   private int orderIndex;
   private String institution;
   private String role;
-  private Short affiliation;
+  private Short nonAcademicAffiliation;
   private String other;
 
   @Id
@@ -71,22 +71,23 @@ public class InstitutionalAffiliation {
     this.role = role;
   }
 
-  @Column(name = "affiliation")
-  public Short getAffiliation() {
-    return affiliation;
+  @Column(name = "non_academic_affiliation")
+  public Short getNonAcademicAffiliation() {
+    return nonAcademicAffiliation;
   }
 
-  public void setAffiliation(Short affiliation) {
-    this.affiliation = affiliation;
+  public void setNonAcademicAffiliation(Short nonAcademicAffiliation) {
+    this.nonAcademicAffiliation = nonAcademicAffiliation;
   }
 
   @Transient
-  public AffiliationRole getAffiliationEnum() {
-    return DemographicSurveyEnum.affiliationRoleFromStorage(this.affiliation);
+  public NonAcademicAffiliation getNonAcademicAffiliationEnum() {
+    return DemographicSurveyEnum.nonAcademicAffiliationFromStorage(this.nonAcademicAffiliation);
   }
 
-  public void setAffiliationEnum(AffiliationRole affiliation) {
-    this.affiliation = DemographicSurveyEnum.affiliatioRoleToStorage(affiliation);
+  public void setNonAcademicAffiliationnEnum(NonAcademicAffiliation affiliation) {
+    this.nonAcademicAffiliation =
+        DemographicSurveyEnum.nonAcademicAffiliationToStorage(affiliation);
   }
 
   @Column(name = "other")
