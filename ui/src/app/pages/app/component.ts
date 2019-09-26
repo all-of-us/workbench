@@ -12,7 +12,6 @@ import {
 import {ServerConfigService} from 'app/services/server-config.service';
 import {cookiesEnabled} from 'app/utils';
 import {
-  navigateSignOut,
   queryParamsStore,
   routeConfigDataStore,
   serverConfigStore,
