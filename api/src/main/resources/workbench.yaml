@@ -2053,7 +2053,7 @@ paths:
         - dataSet
       description: >
         Preview data set
-      operationId: "generateDataSetPreview"
+      operationId: "previewDataSetByDomain"
       parameters:
         - $ref: '#/parameters/workspaceNamespace'
         - $ref: '#/parameters/workspaceId'
@@ -3020,6 +3020,8 @@ definitions:
   DataSetPreviewResponse:
     type: object
     properties:
+      domain:
+        $ref: "#/definitions/Domain"
       values:
         type: "array"
         items:
