@@ -17,7 +17,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -798,29 +797,30 @@ public class DataSetControllerTest {
             .generateCode(
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
-       /* this should produces the following query
-        import pandas
+    /* this should produces the following query
+       import pandas
 
-        blah_person_sql = """SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.person` person
-        WHERE person.PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person`
-        person UNION DISTINCT SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person)"""
+       blah_person_sql = """SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.person` person
+       WHERE person.PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person`
+       person UNION DISTINCT SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person)"""
 
-        blah_person_query_config = {
-          'query': {
-          'parameterMode': 'NAMED',
-          'queryParameters': [
+       blah_person_query_config = {
+         'query': {
+         'parameterMode': 'NAMED',
+         'queryParameters': [
 
-            ]
-          }
-        }
-     */
-    assertThat(response.getCode()).contains("blah_person_sql = \"\"\"SELECT PERSON_ID FROM `" +
-        TEST_CDR_TABLE + ".person` person");
+           ]
+         }
+       }
+    */
+    assertThat(response.getCode())
+        .contains(
+            "blah_person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person");
     // For demographic unlike other domains WHERE should be followed by person.person_id rather than
     // concept_id
     assertThat(response.getCode().contains("WHERE person.PERSON_ID"));
-
   }
+
   @Rule public ExpectedException expectedException = ExpectedException.none();
 
   @Test
