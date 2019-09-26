@@ -176,7 +176,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       if (e.key === INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE && e.newValue !== null) {
         resetTimers();
       }
-    })
+    });
   }
 
   ngAfterViewInit() {
