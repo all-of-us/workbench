@@ -431,7 +431,7 @@ export function resettableTimeout(f, timeoutInSeconds) {
 }
 
 export function highlightSearchTerm(searchTerm: string, stringToHighlight: string, highlightColor: string) {
-  if (searchTerm === '' || searchTerm.length < 3) {
+  if (searchTerm.length < 3) {
     return stringToHighlight;
   }
   const words: string[] = [];
