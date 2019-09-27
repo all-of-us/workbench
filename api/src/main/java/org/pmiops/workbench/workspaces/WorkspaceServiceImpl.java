@@ -525,23 +525,23 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     // Unfortunately it doesn't look like there's a way to batch call this currently. At least we
     // can make it parallel.
-    dbWorkspacesById
-            .forEach((dbWorkspaceId, dbWorkspace) -> {
-              // Grab the ACLs.
-              Map<String, WorkspaceAccessEntry> aclsByEmail =
-                      getFirecloudWorkspaceAcls(
-                              dbWorkspace.getWorkspaceNamespace(),
-                              dbWorkspace.getFirecloudName());
+    dbWorkspacesById.forEach(
+        (dbWorkspaceId, dbWorkspace) -> {
+          // Grab the ACLs.
+          Map<String, WorkspaceAccessEntry> aclsByEmail =
+              getFirecloudWorkspaceAcls(
+                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
-              // If this user's email isn't something that has access, remove the corresponding
-              // entry from userRecentResources.
-              if (
-                !aclsByEmail.containsKey(userProvider.get().getEmail())
-                || aclsByEmail.get(userProvider.get().getEmail()).getAccessLevel().equals(WorkspaceAccessLevel.NO_ACCESS.toString())
-              ) {
-                userRecentWorkspaceDao.delete(recentWorkspacesById.get(dbWorkspaceId));
-              }
-            });
+          // If this user's email isn't something that has access, remove the corresponding
+          // entry from userRecentResources.
+          if (!aclsByEmail.containsKey(userProvider.get().getEmail())
+              || aclsByEmail
+                  .get(userProvider.get().getEmail())
+                  .getAccessLevel()
+                  .equals(WorkspaceAccessLevel.NO_ACCESS.toString())) {
+            userRecentWorkspaceDao.delete(recentWorkspacesById.get(dbWorkspaceId));
+          }
+        });
   }
 
   @Override
