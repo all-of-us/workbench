@@ -395,51 +395,65 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     async componentDidMount() {
-      if (!this.isMode(WorkspaceEditMode.Create)) {
-        this.setState({workspace : {
-          ...this.props.workspace,
-            // Replace potential nulls with empty string or empty array
-          researchPurpose: {
-            ...this.props.workspace.researchPurpose,
-            populationDetails: !this.props.workspace.researchPurpose.populationDetails ?
-              [] : this.props.workspace.researchPurpose.populationDetails,
-            diseaseOfFocus: !this.props.workspace.researchPurpose.diseaseOfFocus ?
-              '' : this.props.workspace.researchPurpose.diseaseOfFocus}
-        }});
-        if (this.isMode(WorkspaceEditMode.Duplicate)) {
-          this.setState({workspace: {
+      workspacesApi().updateRecentWorkspaces(this.props.workspace.namespace, this.props.workspace.id).then(_ => {
+        if (!this.isMode(WorkspaceEditMode.Create)) {
+          this.setState({workspace : {
             ...this.props.workspace,
-            // This is the only field which is not automatically handled/differentiated
-            // on the API level.
-            name: 'Duplicate of ' + this.props.workspace.name
+              // Replace potential nulls with empty string or empty array
+            researchPurpose: {
+              ...this.props.workspace.researchPurpose,
+              populationDetails: !this.props.workspace.researchPurpose.populationDetails ?
+                [] : this.props.workspace.researchPurpose.populationDetails,
+              diseaseOfFocus: !this.props.workspace.researchPurpose.diseaseOfFocus ?
+                '' : this.props.workspace.researchPurpose.diseaseOfFocus}
           }});
+          if (this.isMode(WorkspaceEditMode.Duplicate)) {
+            this.setState({workspace: {
+              ...this.props.workspace,
+                // Replace potential nulls with empty string or empty array
+              researchPurpose: {
+                ...this.props.workspace.researchPurpose,
+                populationDetails: !this.props.workspace.researchPurpose.populationDetails ?
+                  [] : this.props.workspace.researchPurpose.populationDetails,
+                diseaseOfFocus: !this.props.workspace.researchPurpose.diseaseOfFocus ?
+                  '' : this.props.workspace.researchPurpose.diseaseOfFocus}
+            }});
+            if (this.isMode(WorkspaceEditMode.Duplicate)) {
+              this.setState({workspace: {
+                ...this.props.workspace,
+                // This is the only field which is not automatically handled/differentiated
+                // on the API level.
+                name: 'Duplicate of ' + this.props.workspace.name
+              }});
+            }
+          }
         }
-      }
 
-      const cdrResp = this.props.cdrVersionListResponse;
-      const liveCdrVersions = cdrResp.items.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
-      if (liveCdrVersions.length === 0) {
-        throw Error('no live CDR versions were found');
-      }
-      if (this.isMode(WorkspaceEditMode.Edit)) {
-        // In edit mode, you cannot modify the CDR version, therefore it's fine
-        // to show archived CDRs in the drop-down so that it accurately displays
-        // the current value.
-        this.setState({cdrVersionItems: cdrResp.items.slice()});
-      } else {
-        // In create/clone, disallow selection of archived versions by omitting
-        // them. The server will also reject archived CDRs.
-        this.setState({cdrVersionItems: liveCdrVersions});
-      }
+        const cdrResp = this.props.cdrVersionListResponse;
+        const liveCdrVersions = cdrResp.items.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
+        if (liveCdrVersions.length === 0) {
+          throw Error('no live CDR versions were found');
+        }
+        if (this.isMode(WorkspaceEditMode.Edit)) {
+          // In edit mode, you cannot modify the CDR version, therefore it's fine
+          // to show archived CDRs in the drop-down so that it accurately displays
+          // the current value.
+          this.setState({cdrVersionItems: cdrResp.items.slice()});
+        } else {
+          // In create/clone, disallow selection of archived versions by omitting
+          // them. The server will also reject archived CDRs.
+          this.setState({cdrVersionItems: liveCdrVersions});
+        }
 
-      const selectedCdrIsLive = liveCdrVersions.some(cdr => cdr.cdrVersionId === this.state.workspace.cdrVersionId);
-      if (this.isMode(WorkspaceEditMode.Create) || (
-        this.isMode(WorkspaceEditMode.Duplicate) && !selectedCdrIsLive)) {
-        // We preselect the default CDR version when a new workspace is being
-        // created (via create or duplicate) with one exception: cloning a
-        // workspace which references a non-default, non-archived CDR version.
-        this.setState(fp.set(['workspace', 'cdrVersionId'], cdrResp.defaultCdrVersionId));
-      }
+        const selectedCdrIsLive = liveCdrVersions.some(cdr => cdr.cdrVersionId === this.state.workspace.cdrVersionId);
+        if (this.isMode(WorkspaceEditMode.Create) || (
+          this.isMode(WorkspaceEditMode.Duplicate) && !selectedCdrIsLive)) {
+          // We preselect the default CDR version when a new workspace is being
+          // created (via create or duplicate) with one exception: cloning a
+          // workspace which references a non-default, non-archived CDR version.
+          this.setState(fp.set(['workspace', 'cdrVersionId'], cdrResp.defaultCdrVersionId));
+        }
+      });
     }
 
     makeDiseaseInput() {

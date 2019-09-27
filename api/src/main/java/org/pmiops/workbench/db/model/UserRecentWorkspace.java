@@ -48,6 +48,11 @@ public class UserRecentWorkspace {
         this.lastAccessDate = lastAccessDate;
     }
 
+    @Override
+    public String toString() {
+        return String.format("{id: %d, userId: %d, lastAccessDate: %s", this.id, this.userId, this.lastAccessDate.toString());
+    }
+
     public UserRecentWorkspace() {}
 
     public UserRecentWorkspace(

@@ -202,14 +202,18 @@ public class WorkspaceServiceTest {
   public void updateRecentWorkspaces() {
     workspaces.forEach(workspace -> {
       // Need a new 'now' each time or else we won't have lastAccessDates that are different from each other
-      workspaceService.updateRecentWorkspaces(workspace.getWorkspaceId(), USER_ID, Timestamp.from(NOW.minusSeconds(workspace.getWorkspaceId())));
+      workspaceService.updateRecentWorkspaces(
+              workspace.getWorkspaceId(),
+              USER_ID,
+              Timestamp.from(NOW.minusSeconds(workspaces.size() - workspace.getWorkspaceId()))
+      );
     });
     List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspacesByUser(USER_ID);
     assertThat(recentWorkspaces.size()).isEqualTo(WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT);
     assertThat(
             recentWorkspaces.stream().map(UserRecentWorkspace::getWorkspaceId).collect(Collectors.toList())
     ).containsAll(
-            workspaces.subList(workspaces.size() - WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT, WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT)
+            workspaces.subList(workspaces.size() - WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT, workspaces.size())
                     .stream()
                     .map(org.pmiops.workbench.db.model.Workspace::getWorkspaceId).collect(Collectors.toList())
     );

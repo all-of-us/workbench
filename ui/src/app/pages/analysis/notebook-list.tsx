@@ -58,8 +58,13 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
     try {
       const {workspace: {namespace, id}} = this.props;
       this.setState({loading: true});
-      const notebooks = await workspacesApi().getNoteBookList(namespace, id);
-      this.setState({notebooks});
+      Promise.all([
+        workspacesApi().updateRecentWorkspaces(namespace, id),
+        workspacesApi().getNoteBookList(namespace, id)
+      ]).then(values => {
+        const notebooks = values[1];
+        this.setState({notebooks});
+      });
     } catch (error) {
       console.error(error);
     } finally {
