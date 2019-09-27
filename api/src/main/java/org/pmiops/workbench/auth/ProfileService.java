@@ -1,10 +1,14 @@
 package org.pmiops.workbench.auth;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.model.Address;
+import org.pmiops.workbench.model.DemographicSurvey;
+import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
@@ -37,6 +41,44 @@ public class ProfileService {
               PageVisit result = new PageVisit();
               result.setPage(pageVisit.getPageId());
               result.setFirstVisit(pageVisit.getFirstVisit().getTime());
+              return result;
+            }
+          };
+
+  private static final Function<org.pmiops.workbench.db.model.DemographicSurvey, DemographicSurvey>
+      TO_CLIENT_DEMOGRAPHIC_SURVEY =
+          new Function<org.pmiops.workbench.db.model.DemographicSurvey, DemographicSurvey>() {
+            @Override
+            public DemographicSurvey apply(
+                org.pmiops.workbench.db.model.DemographicSurvey demographicSurvey) {
+              DemographicSurvey result = new DemographicSurvey();
+              if (result.getDisability() != null)
+                result.setDisability(demographicSurvey.getDisabilityEnum().equals(Disability.TRUE));
+              result.setEducation(demographicSurvey.getEducationEnum());
+              result.setEthnicity(demographicSurvey.getEthnicityEnum());
+              result.setGender(demographicSurvey.getGenderEnum());
+              result.setRace(demographicSurvey.getRaceEnum());
+              result.setYearOfBirth(BigDecimal.valueOf(demographicSurvey.getYear_of_birth()));
+
+              return result;
+            }
+          };
+
+  private static final Function<org.pmiops.workbench.db.model.Address, Address>
+      TO_CLIENT_ADDRESS_SURVEY =
+          new Function<org.pmiops.workbench.db.model.Address, Address>() {
+            @Override
+            public Address apply(org.pmiops.workbench.db.model.Address address) {
+              Address result = new Address();
+              if (address != null) {
+                result.setStreetAddress1(address.getStreetAddress1());
+                result.setStreetAddress2(address.getStreetAddress2());
+                result.setCity(address.getCity());
+                result.setState(address.getState());
+                result.setCountry(address.getCountry());
+                result.setZipCode(address.getZipCode());
+                return result;
+              }
               return result;
             }
           };
@@ -141,6 +183,12 @@ public class ProfileService {
     if (user.getPageVisits() != null && !user.getPageVisits().isEmpty()) {
       profile.setPageVisits(
           user.getPageVisits().stream().map(TO_CLIENT_PAGE_VISIT).collect(Collectors.toList()));
+    }
+    if (user.getDemographicSurvey() != null) {
+      profile.setDemographicSurvey(TO_CLIENT_DEMOGRAPHIC_SURVEY.apply(user.getDemographicSurvey()));
+    }
+    if (user.getAddress() != null) {
+      profile.setAddress(TO_CLIENT_ADDRESS_SURVEY.apply(user.getAddress()));
     }
     profile.setInstitutionalAffiliations(
         user.getInstitutionalAffiliations().stream()

@@ -54,8 +54,44 @@ definitions:
     enum: &SURVEYS [THE BASICS, LIFESTYLE, OVERALL HEALTH]
 
   PrePackagedConceptSetEnum:
-      type: string
-      enum: &PrePackagedConceptSetEnum [NONE, DEMOGRAPHICS, SURVEY, BOTH]
+    type: string
+    enum: &PrePackagedConceptSetEnum [NONE, DEMOGRAPHICS, SURVEY, BOTH]
+
+  Race:
+    type: string
+    enum: &Race [AIAN, ASIAN, AA, NHOPI, WHITE, NONE, PREFER_NO_ANSWER]
+
+  Ethnicity:
+    type: string
+    enum: &Ethnicity [HISPANIC, NOT_HISPANIC, PREFER_NO_ANSWER]
+
+  Gender:
+    type: string
+    enum: &Gender [MALE, FEMALE, NON_BINARY, TRANSGENDER, INTERSEX, NONE, PREFER_NO_ANSWER]
+
+  Education:
+    type: string
+    enum: &Education [NO_EDUCATION, GRADES_1_12, UNDERGRADUATE, COLLEGE_GRADUATE, MASTER, DOCTORATE]
+
+  Disability:
+    type: string
+    enum: &Disability [YES, NO]
+
+  NonAcademicAffiliation:
+    type: string
+    enum: &Affiliation_Role [INDUSTRY, EDUCATIONAL_INSTITUTION, COMMUNITY_SCIENTIST, FREE_TEXT]
+
+  IndustryRole:
+    type: string
+    enum: &Industry_Role [PRE_DOCTORAL, POST_DOCTORAL, EARLY, PI, FREE_TEXT]
+
+  EducationalRole:
+    type: string
+    enum: &Educational_Role [TEACHER, STUDENT, ADMIN, FREE_TEXT]
+
+  AcademicRole:
+    type: string
+    enum: &Role [UNDERGRADUATE, TRAINEE, FELLOW, EARLY_CAREER, NON_TENURE, MID_CAREER, LATE_CAREER, PROJECT_PERSONNEL]
 
   CdrVersionListResponse:
     type: object

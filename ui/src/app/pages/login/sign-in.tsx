@@ -12,6 +12,7 @@ import {AccountCreation} from './account-creation/account-creation';
 import {Profile} from 'generated/fetch';
 
 import * as React from 'react';
+import {AccountCreationSurvey} from './account-creation/account-creation-survey';
 
 export interface SignInProps {
   onInit: () => void;
@@ -79,6 +80,10 @@ export const pageImages = {
     backgroundImgSrc: '/assets/images/create-account-male.png',
     smallerBackgroundImgSrc: '/assets/images/create-account-male-standing.png'
   },
+  'accountCreationSurvey': {
+    backgroundImgSrc: '/assets/images/create-account-male.png',
+    smallerBackgroundImgSrc: '/assets/images/create-account-male-standing.png'
+  },
   'accountCreationSuccess': {
     backgroundImgSrc: '/assets/images/congrats-female.png',
     smallerBackgroundImgSrc: 'assets/images/congrats-female-standing.png'
@@ -113,8 +118,11 @@ export const SignInReact = withWindowSize()(
         case 'invitationKey':
           return <InvitationKey onInvitationKeyVerify={(key) => this.onKeyVerified(key)}/>;
         case 'accountCreation':
-          return <AccountCreation invitationKey={this.state.invitationKey}
+          return <AccountCreation invitationKey={this.state.invitationKey} profile={this.state.profile}
                                   setProfile={this.setProfile}/>;
+        case 'accountCreationSurvey':
+          return <AccountCreationSurvey profile={this.state.profile}
+            invitationKey={this.state.invitationKey} setProfile={this.setProfile}/>;
         case 'accountCreationSuccess':
           return <AccountCreationSuccess profile={this.state.profile}/>;
         default:
@@ -135,12 +143,14 @@ export const SignInReact = withWindowSize()(
       });
     }
 
-    setProfile(profile) {
+    setProfile(profile, currentStep) {
       this.setState({
         profile: profile,
-        currentStep: 'accountCreationSuccess'
+        currentStep: currentStep
       });
     }
+
+
 
     render() {
       return <div style={styles.signedInContainer}>
