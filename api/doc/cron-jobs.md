@@ -7,7 +7,8 @@ Typical examples of cron-style tasks include:
  * Cluster maintenance / auto-restart
  * Synchronizing user state from external data sources
  * Periodic security / compliance audit calculations  
-
+ * Periodic resource cleanup
+ 
 All cron jobs are configured as App Engine scheduled tasks; see the
 [App Engine docs](https://cloud.google.com/appengine/docs/standard/java/config/cron) for more info.
 

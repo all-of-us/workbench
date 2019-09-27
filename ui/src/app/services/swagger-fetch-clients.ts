@@ -21,9 +21,8 @@
  */
 
 import {
-  AuditApi,
   AuthDomainApi,
-  BaseAPI,
+  BaseAPI,  // internal
   CdrVersionsApi,
   ClusterApi,
   CohortAnnotationDefinitionApi,
@@ -32,14 +31,13 @@ import {
   CohortsApi,
   ConceptsApi,
   ConceptSetsApi,
-  ConfigApi,
+  ConfigApi,  // not currently used
   Configuration as FetchConfiguration,
-  CronApi,
-  DataSetApi, FeaturedWorkspacesConfigApi,
-  FetchAPI,
-  OfflineClusterApi,
+  DataSetApi,
+  FeaturedWorkspacesConfigApi,
+  FetchAPI, // internal
   ProfileApi,
-  StatusApi,
+  StatusApi,  // not currently used
   UserApi,
   UserMetricsApi,
   WorkspacesApi,
@@ -81,7 +79,6 @@ function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
 
 // To add a new service, add a new entry below. Note that these properties are
 // getters for the API clients, e.g.: clusterApi().listClusters();
-export const auditApi = bindCtor(AuditApi);
 export const authDomainApi = bindCtor(AuthDomainApi);
 export const cdrVersionsApi = bindCtor(CdrVersionsApi);
 export const clusterApi = bindCtor(ClusterApi);
@@ -92,10 +89,8 @@ export const cohortsApi = bindCtor(CohortsApi);
 export const conceptsApi = bindCtor(ConceptsApi);
 export const conceptSetsApi = bindCtor(ConceptSetsApi);
 export const configApi = bindCtor(ConfigApi);
-export const cronApi = bindCtor(CronApi);
 export const dataSetApi = bindCtor(DataSetApi);
 export const featuredWorkspacesConfigApi = bindCtor(FeaturedWorkspacesConfigApi);
-export const offlineClusterApi = bindCtor(OfflineClusterApi);
 export const profileApi = bindCtor(ProfileApi);
 export const statusApi = bindCtor(StatusApi);
 export const userApi = bindCtor(UserApi);
