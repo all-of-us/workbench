@@ -10,10 +10,10 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CohortReview,
   Filter,
+  FilterColumns as Columns,
   Operator,
   PageFilterRequest,
   ParticipantCohortStatus,
-  FilterColumns as Columns,
   SortOrder
 } from 'generated/fetch';
 import * as moment from 'moment';
