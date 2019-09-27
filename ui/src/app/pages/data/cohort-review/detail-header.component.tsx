@@ -10,11 +10,10 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CohortReview,
   Filter,
+  FilterColumns as Columns,
   Operator,
   PageFilterRequest,
-  PageFilterType,
   ParticipantCohortStatus,
-  ParticipantCohortStatusColumns as Columns,
   SortOrder
 } from 'generated/fetch';
 import * as moment from 'moment';
@@ -298,8 +297,7 @@ export const DetailHeader = withCurrentWorkspace()(
         page: page,
         pageSize: size,
         sortOrder: SortOrder.Asc,
-        filters: {items: this.getRequestFilters()},
-        pageFilterType: PageFilterType.ParticipantCohortStatuses
+        filters: {items: this.getRequestFilters()}
       } as PageFilterRequest;
       return from(cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrid, request));
     }

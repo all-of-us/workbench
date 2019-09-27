@@ -11,7 +11,7 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType, PageFilterType} from 'generated/fetch';
+import {DomainType} from 'generated/fetch';
 import {TabPanel, TabView} from 'primereact/tabview';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
@@ -168,7 +168,6 @@ const tabs = [
   {
     name: 'All Events',
     domain: DomainType.ALLEVENTS,
-    filterType: PageFilterType.ReviewFilter,
     columns: {
       standard: [
         itemDate, visitType, standardCode, standardVocabulary, standardName, value,
@@ -181,7 +180,6 @@ const tabs = [
   }, {
     name: 'Conditions',
     domain: DomainType.CONDITION,
-    filterType: PageFilterType.ReviewFilter,
     columns: {
       standard: [
         itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
@@ -193,7 +191,6 @@ const tabs = [
   }, {
     name: 'Procedures',
     domain: DomainType.PROCEDURE,
-    filterType: PageFilterType.ReviewFilter,
     columns: {
       standard: [
         itemDate, standardCode, standardVocabulary, standardName, ageAtEvent, visitType
@@ -205,7 +202,6 @@ const tabs = [
   }, {
     name: 'Drugs',
     domain: DomainType.DRUG,
-    filterType: PageFilterType.ReviewFilter,
     columns: {
       standard: [
         itemDate, standardName, ageAtEvent, numMentions, firstMention, lastMention, visitType
@@ -217,7 +213,6 @@ const tabs = [
   }, {
     name: 'Observations',
     domain: DomainType.OBSERVATION,
-    filterType: PageFilterType.ReviewFilter,
     columns: {
       standard: [
         itemDate, standardName, standardCode, standardVocabulary, ageAtEvent, visitType
@@ -229,7 +224,6 @@ const tabs = [
   }, {
     name: 'Physical Measurements',
     domain: DomainType.PHYSICALMEASUREMENT,
-    filterType: PageFilterType.ReviewFilter,
     columns: {
       standard: [
         itemDate, standardCode, standardVocabulary, standardName, value, ageAtEvent
@@ -241,7 +235,6 @@ const tabs = [
   }, {
     name: 'Labs',
     domain: DomainType.LAB,
-    filterType: PageFilterType.ReviewFilter,
     columns: {
       standard: [
         itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
@@ -253,7 +246,6 @@ const tabs = [
   }, {
     name: 'Vitals',
     domain: DomainType.VITAL,
-    filterType: PageFilterType.ReviewFilter,
     columns: {
       standard: [
         itemDate, itemTime, standardName, graph, value, ageAtEvent, visitType
@@ -265,7 +257,6 @@ const tabs = [
   }, {
     name: 'Surveys',
     domain: DomainType.SURVEY,
-    filterType: PageFilterType.ReviewFilter,
     columns: {
       standard: [
         itemDate, survey, question, answer
@@ -402,7 +393,6 @@ export const DetailTabs = withCurrentWorkspace()(
                 updateState={updateState}
                 tabName={tab.name}
                 columns={tab.columns[filterState.vocab]}
-                filterType={tab.filterType}
                 domain={tab.domain}
                 participantId={participantId}
               />}

@@ -61,13 +61,12 @@ import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
-import org.pmiops.workbench.model.ParticipantCohortStatuses;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -185,21 +184,21 @@ public class CohortReviewControllerTest {
     public GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
       Map<String, Map<Long, String>> concepts = new HashMap<>();
       concepts.put(
-          ParticipantCohortStatusColumns.RACE.name(),
+          FilterColumns.RACE.name(),
           ImmutableMap.of(
               TestDemo.ASIAN.getConceptId(),
               TestDemo.ASIAN.getName(),
               TestDemo.WHITE.getConceptId(),
               TestDemo.WHITE.getName()));
       concepts.put(
-          ParticipantCohortStatusColumns.GENDER.name(),
+          FilterColumns.GENDER.name(),
           ImmutableMap.of(
               TestDemo.MALE.getConceptId(),
               TestDemo.MALE.getName(),
               TestDemo.FEMALE.getConceptId(),
               TestDemo.FEMALE.getName()));
       concepts.put(
-          ParticipantCohortStatusColumns.ETHNICITY.name(),
+          FilterColumns.ETHNICITY.name(),
           ImmutableMap.of(TestDemo.NOT_HISPANIC.getConceptId(), TestDemo.NOT_HISPANIC.getName()));
       return new GenderRaceEthnicityConcept(concepts);
     }
@@ -737,7 +736,7 @@ public class CohortReviewControllerTest {
             page,
             pageSize,
             SortOrder.DESC,
-            ParticipantCohortStatusColumns.STATUS);
+            FilterColumns.STATUS);
     org.pmiops.workbench.model.CohortReview expectedReview2 =
         createCohortReview(
             cohortReview,
@@ -745,7 +744,7 @@ public class CohortReviewControllerTest {
             page,
             pageSize,
             SortOrder.DESC,
-            ParticipantCohortStatusColumns.PARTICIPANTID);
+            FilterColumns.PARTICIPANTID);
     org.pmiops.workbench.model.CohortReview expectedReview3 =
         createCohortReview(
             cohortReview,
@@ -753,7 +752,7 @@ public class CohortReviewControllerTest {
             page,
             pageSize,
             SortOrder.ASC,
-            ParticipantCohortStatusColumns.STATUS);
+            FilterColumns.STATUS);
     org.pmiops.workbench.model.CohortReview expectedReview4 =
         createCohortReview(
             cohortReview,
@@ -761,24 +760,19 @@ public class CohortReviewControllerTest {
             page,
             pageSize,
             SortOrder.ASC,
-            ParticipantCohortStatusColumns.PARTICIPANTID);
+            FilterColumns.PARTICIPANTID);
 
     when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.READER))
         .thenReturn(workspace);
 
     assertParticipantCohortStatuses(
-        expectedReview1, page, pageSize, SortOrder.DESC, ParticipantCohortStatusColumns.STATUS);
+        expectedReview1, page, pageSize, SortOrder.DESC, FilterColumns.STATUS);
     verify(userRecentResourceService)
         .updateCohortEntry(anyLong(), anyLong(), anyLong(), any(Timestamp.class));
     assertParticipantCohortStatuses(
-        expectedReview2,
-        page,
-        pageSize,
-        SortOrder.DESC,
-        ParticipantCohortStatusColumns.PARTICIPANTID);
-    assertParticipantCohortStatuses(
-        expectedReview3, null, null, null, ParticipantCohortStatusColumns.STATUS);
+        expectedReview2, page, pageSize, SortOrder.DESC, FilterColumns.PARTICIPANTID);
+    assertParticipantCohortStatuses(expectedReview3, null, null, null, FilterColumns.STATUS);
     assertParticipantCohortStatuses(expectedReview4, null, null, SortOrder.ASC, null);
     assertParticipantCohortStatuses(expectedReview4, null, pageSize, null, null);
     assertParticipantCohortStatuses(expectedReview4, page, null, null, null);
@@ -940,7 +934,7 @@ public class CohortReviewControllerTest {
       Integer page,
       Integer pageSize,
       SortOrder sortOrder,
-      ParticipantCohortStatusColumns sortColumn) {
+      FilterColumns sortColumn) {
     org.pmiops.workbench.model.CohortReview actualReview =
         cohortReviewController
             .getParticipantCohortStatuses(
@@ -948,7 +942,7 @@ public class CohortReviewControllerTest {
                 WORKSPACE_NAME,
                 cohort.getCohortId(),
                 cdrVersion.getCdrVersionId(),
-                new ParticipantCohortStatuses()
+                new PageFilterRequest()
                     .sortColumn(sortColumn)
                     .page(page)
                     .pageSize(pageSize)
@@ -999,7 +993,7 @@ public class CohortReviewControllerTest {
       Integer page,
       Integer pageSize,
       SortOrder sortOrder,
-      ParticipantCohortStatusColumns sortColumn) {
+      FilterColumns sortColumn) {
     List<org.pmiops.workbench.model.ParticipantCohortStatus> newParticipantCohortStatusList =
         new ArrayList<>();
     for (ParticipantCohortStatus participantCohortStatus : participantCohortStatusList) {

@@ -39,7 +39,7 @@ import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.DomainType;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
+import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
@@ -356,15 +356,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     Map<String, Map<Long, String>> concepts =
         genderRaceEthnicityConceptProvider.get().getConcepts();
     List<ConceptIdName> genderList =
-        concepts.get(ParticipantCohortStatusColumns.GENDER.name()).entrySet().stream()
+        concepts.get(FilterColumns.GENDER.name()).entrySet().stream()
             .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
             .collect(Collectors.toList());
     List<ConceptIdName> raceList =
-        concepts.get(ParticipantCohortStatusColumns.RACE.name()).entrySet().stream()
+        concepts.get(FilterColumns.RACE.name()).entrySet().stream()
             .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
             .collect(Collectors.toList());
     List<ConceptIdName> ethnicityList =
-        concepts.get(ParticipantCohortStatusColumns.ETHNICITY.name()).entrySet().stream()
+        concepts.get(FilterColumns.ETHNICITY.name()).entrySet().stream()
             .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
             .collect(Collectors.toList());
 

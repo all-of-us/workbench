@@ -12,7 +12,7 @@ import {
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType} from 'generated/fetch';
-import {PageFilterType, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
+import {ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
 @Component({
@@ -46,7 +46,6 @@ export class PageLayout implements OnInit, OnDestroy {
       page: 0,
       pageSize: 25,
       sortOrder: SortOrder.Asc,
-      pageFilterType: PageFilterType.ParticipantCohortStatuses,
       filters: {items: []}
     }).then(review => {
       cohortReviewStore.next(review);

@@ -13,8 +13,8 @@ import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.model.Filter;
+import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.PageRequest;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,9 +26,9 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
   public static final List<String> NON_GENDER_RACE_ETHNICITY_TYPES =
       ImmutableList.of(
-          ParticipantCohortStatusColumns.STATUS.name(),
-          ParticipantCohortStatusColumns.PARTICIPANTID.name(),
-          ParticipantCohortStatusColumns.BIRTHDATE.name());
+          FilterColumns.STATUS.name(),
+          FilterColumns.PARTICIPANTID.name(),
+          FilterColumns.BIRTHDATE.name());
 
   public static final String SELECT_SQL_TEMPLATE =
       "select cohort_review_id as cohortReviewId,\n"

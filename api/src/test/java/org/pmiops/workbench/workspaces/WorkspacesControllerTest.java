@@ -105,13 +105,12 @@ import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
-import org.pmiops.workbench.model.PageFilterType;
+import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
-import org.pmiops.workbench.model.ParticipantCohortStatuses;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -246,9 +245,9 @@ public class WorkspacesControllerTest {
     @Bean
     GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
       Map<String, Map<Long, String>> concepts = new HashMap<>();
-      concepts.put(ParticipantCohortStatusColumns.RACE.name(), new HashMap<>());
-      concepts.put(ParticipantCohortStatusColumns.GENDER.name(), new HashMap<>());
-      concepts.put(ParticipantCohortStatusColumns.ETHNICITY.name(), new HashMap<>());
+      concepts.put(FilterColumns.RACE.name(), new HashMap<>());
+      concepts.put(FilterColumns.GENDER.name(), new HashMap<>());
+      concepts.put(FilterColumns.ETHNICITY.name(), new HashMap<>());
       return new GenderRaceEthnicityConcept(concepts);
     }
 
@@ -1082,8 +1081,7 @@ public class WorkspacesControllerTest {
                 cloned.getId(),
                 cohortsByName.get("c1").getId(),
                 cdrVersion.getCdrVersionId(),
-                new ParticipantCohortStatuses()
-                    .pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES))
+                new PageFilterRequest())
             .getBody();
     assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
     assertThat(gotCr1.getParticipantCohortStatuses()).isEqualTo(cr1.getParticipantCohortStatuses());
@@ -1117,8 +1115,7 @@ public class WorkspacesControllerTest {
                 cloned.getId(),
                 cohortsByName.get("c2").getId(),
                 cdrVersion.getCdrVersionId(),
-                new ParticipantCohortStatuses()
-                    .pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES))
+                new PageFilterRequest())
             .getBody();
     assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
     assertThat(gotCr2.getParticipantCohortStatuses()).isEqualTo(cr2.getParticipantCohortStatuses());
