@@ -20,7 +20,10 @@
     "defaultFreeCreditsLimit": 300.0,
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
-      "TODO - will update PR once generated"
+      "aou-rw-gc-perf-1@all-of-us-rw-perf.iam.gserviceaccount.com",
+      "aou-rw-gc-perf-2@all-of-us-rw-perf.iam.gserviceaccount.com",
+      "aou-rw-gc-perf-3@all-of-us-rw-perf.iam.gserviceaccount.com",
+      "aou-rw-gc-perf-4@all-of-us-rw-perf.iam.gserviceaccount.com"
     ]
   },
   "auth": {

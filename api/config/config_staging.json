@@ -20,7 +20,7 @@
     "defaultFreeCreditsLimit": 300.0,
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
-      "TODO - will update PR once generated"
+      "aou-rw-gc-staging-1@all-of-us-rw-staging.iam.gserviceaccount.com"
     ]
   },
   "auth": {
