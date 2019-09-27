@@ -10,7 +10,7 @@ import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewStore, filterStateStore, getVocabOptions, multiOptions, vocabOptions} from 'app/services/review-state.service';
-import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -38,6 +38,12 @@ const fields = [
 ];
 const rows = 25;
 const styles = reactStyles({
+  review: {
+    minHeight: 'calc(100vh - calc(4rem + 60px))',
+    padding: '1rem',
+    position: 'relative',
+    marginRight: '45px'
+  },
   backBtn: {
     padding: 0,
     border: 0,
@@ -247,9 +253,31 @@ export const ParticipantsTable = withCurrentWorkspace()(
     async componentDidMount() {
       const {filters} = this.state;
       const {cdrVersionId} = this.props.workspace;
+      const promises = [];
+      const {ns, wsid, cid} = urlParamsStore.getValue();
+      const review = cohortReviewStore.getValue();
+      if (!currentCohortStore.getValue()) {
+        promises.push(cohortsApi().getCohort(ns, wsid, cid).then(cohort => currentCohortStore.next(cohort)));
+      }
+      if (!review) {
+        promises.push(
+          this.getParticipantStatuses().then(rev => {
+            cohortReviewStore.next(rev);
+            if (!vocabOptions.getValue()) {
+              getVocabOptions(ns, wsid, rev.cohortReviewId);
+            }
+            this.setState({data: rev.participantCohortStatuses.map(this.mapData), total: rev.queryResultSize});
+          }, (error) => {
+            console.error(error);
+            this.setState({loading: false, error: true});
+          })
+        );
+      } else {
+        this.setState({data: review.participantCohortStatuses.map(this.mapData), page: review.page, total: review.queryResultSize});
+      }
       if (!multiOptions.getValue()) {
-        try {
-          await cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
+        promises.push(
+          cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
             const extract = (arr, _type?) => fp.uniq([
               ...arr.map(i => {
                 filters[_type].push(i.conceptName);
@@ -269,26 +297,23 @@ export const ParticipantsTable = withCurrentWorkspace()(
             };
             multiOptions.next(multiFilters);
             this.setState({filters});
-          });
-        } catch (error) {
-          console.error(error);
-          multiFilters = {
-            ...multiFilters,
-            RACE: [{name: 'Select All', value: 'Select All'}],
-            GENDER: [{name: 'Select All', value: 'Select All'}],
-            ETHNICITY: [{name: 'Select All', value: 'Select All'}]
-          };
-        } finally {
-          this.getTableData();
-        }
+          }, error => {
+            console.error(error);
+            multiFilters = {
+              ...multiFilters,
+              RACE: [{name: 'Select All', value: 'Select All'}],
+              GENDER: [{name: 'Select All', value: 'Select All'}],
+              ETHNICITY: [{name: 'Select All', value: 'Select All'}]
+            };
+          })
+        );
       } else {
         multiFilters = multiOptions.getValue();
-        const review = cohortReviewStore.getValue();
-        if (review) {
-          this.setState({page: review.page});
-        }
-        setTimeout(() => this.getTableData());
       }
+      if (promises.length) {
+        await Promise.all(promises);
+      }
+      this.setState({loading: false});
     }
 
     componentWillUnmount(): void {
@@ -299,43 +324,31 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     getTableData(): void {
-      try {
-        const {page, sortField, sortOrder} = this.state;
-        const {cdrVersionId, id, namespace} = this.props.workspace;
-        const {cid} = urlParamsStore.getValue();
-        const filters = this.mapFilters();
-        if (filters === null) {
-          this.setState({
-            data: [],
-            loading: false,
-          });
-        } else {
-          const query = {
-            page: page,
-            pageSize: rows,
-            sortColumn: reverseColumnEnum[sortField],
-            sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
-            filters: {items: filters},
-          } as Request;
-          cohortReviewApi().getParticipantCohortStatuses(namespace, id, cid, +cdrVersionId, query)
-            .then(review => {
-              cohortReviewStore.next(review);
-              if (!vocabOptions.getValue()) {
-                getVocabOptions(namespace, id, review.cohortReviewId);
-              }
-              this.setState({
-                data: review.participantCohortStatuses.map(this.mapData),
-                loading: false,
-                total: review.queryResultSize
-              });
-            });
-        }
-      } catch (error) {
-        console.log(error);
-        this.setState({
-          loading: false,
-          error: true
-        });
+      this.getParticipantStatuses().then(review => {
+        cohortReviewStore.next(review);
+        this.setState({data: review.participantCohortStatuses.map(this.mapData), loading: false, total: review.queryResultSize});
+      }, (error) => {
+        console.error(error);
+        this.setState({loading: false, error: true});
+      });
+    }
+
+    getParticipantStatuses() {
+      const {page, sortField, sortOrder} = this.state;
+      const {cdrVersionId, id, namespace} = this.props.workspace;
+      const {cid} = urlParamsStore.getValue();
+      const filters = this.mapFilters();
+      if (filters === null) {
+        this.setState({data: [], loading: false});
+      } else {
+        const query = {
+          page: page,
+          pageSize: rows,
+          sortColumn: reverseColumnEnum[sortField],
+          sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+          filters: {items: filters},
+        } as Request;
+        return cohortReviewApi().getParticipantCohortStatuses(namespace, id, cid, +cdrVersionId, query);
       }
     }
 
@@ -497,7 +510,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
               onChange={(e) => this.onInputChange(e.target.value)}
               placeholder={'Search'} />
           </div>}
-          {column !== 'participantId' && options.map((opt, i) => (
+          {!!options && options.map((opt, i) => (
             <div key={i} style={{
               borderTop: opt.name === 'Select All' && options.length > 1 ? '1px solid #ccc' : 0,
               padding: opt.name === 'Select All' ? '0.5rem 0.5rem' : '0.3rem 0.4rem'
@@ -603,9 +616,9 @@ export const ParticipantsTable = withCurrentWorkspace()(
           header={header}
           sortable/>;
       });
-      return <div>
+      return <div style={styles.review}>
         <style>{datatableStyles}</style>
-        <React.Fragment>
+        {!!cohort && <React.Fragment>
           <button
             style={styles.backBtn}
             type='button'
@@ -624,7 +637,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           <div style={styles.description}>
             {cohort.description}
           </div>
-          <DataTable
+          {!loading && <DataTable
             style={styles.table}
             value={data}
             first={start}
@@ -644,8 +657,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
             scrollHeight='calc(100vh - 350px)'
             footer={this.errorMessage()}>
             {columns}
-          </DataTable>
-        </React.Fragment>
+          </DataTable>}
+        </React.Fragment>}
         {loading && <SpinnerOverlay />}
         <HelpSidebar location='reviewParticipants' />
       </div>;
