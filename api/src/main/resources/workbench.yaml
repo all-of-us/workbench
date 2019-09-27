@@ -1041,7 +1041,7 @@ paths:
     get:
       security: []
       tags:
-        - audit
+        - offlineAudit
         - cron
       description: >
         Endpoint meant to be called offline to trigger BigQuery auditing; may be
@@ -1142,7 +1142,7 @@ paths:
     get:
       security: []
       tags:
-        - billing
+        - offlineBilling
         - cron
       description: If the AoU Billing Project buffer is not full, create a firecloud billing project and add one
       operationId: bufferBillingProject
@@ -1158,7 +1158,7 @@ paths:
     get:
       security: []
       tags:
-        - billing
+        - offlineBilling
         - cron
       description: Fetch a BillingProjectBufferEntry that is in the CREATING state and check its status on Firecloud
       operationId: syncBillingProjectStatus
@@ -1174,7 +1174,7 @@ paths:
     get:
       security: []
       tags:
-        - billing
+        - offlineBilling
         - cron
       description: Find BillingProjectBufferEntries that have failed during the creation or assignment step and set their statuses to ERROR
       operationId: cleanBillingBuffer
@@ -1190,7 +1190,7 @@ paths:
     get:
       security: []
       tags:
-        - billing
+        - offlineBilling
         - cron
       description: Find and alert users that have exceeded their free tier billing usage
       operationId: checkFreeTierBillingUsage

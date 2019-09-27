@@ -33,9 +33,9 @@ import org.springframework.web.bind.annotation.RestController;
  * https://docs.google.com/document/d/14HT1GWXHPMaCc9rhCM0y5CglAIY-GgRBwebdZpqwEDs
  */
 @RestController
-public class AuditController implements AuditApiDelegate {
+public class OfflineAuditController implements OfflineAuditApiDelegate {
 
-  private static final Logger log = Logger.getLogger(AuditController.class.getName());
+  private static final Logger log = Logger.getLogger(OfflineAuditController.class.getName());
   private static final String AUDIT_SINK_NAME = "cdr_audit_logs";
   // How many days into the past (including today) logs should be checked. This could become a
   // request parameter if the need arises.
@@ -55,7 +55,7 @@ public class AuditController implements AuditApiDelegate {
   private final WorkspaceDao workspaceDao;
 
   @Autowired
-  AuditController(
+  OfflineAuditController(
       Clock clock,
       BigQueryService bigQueryService,
       CdrVersionDao cdrVersionDao,
