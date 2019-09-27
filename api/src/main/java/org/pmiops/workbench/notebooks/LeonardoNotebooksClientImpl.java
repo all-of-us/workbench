@@ -81,6 +81,10 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                 .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
                 .combinedExtensions(ImmutableMap.<String, String>of())
                 .labExtensions(ImmutableMap.<String, String>of()))
+        // Matches Terra UI's scopes, see RW-3531 for rationale.
+        .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
+        .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
+        .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
         .enableWelder(true)
         .machineConfig(
             new MachineConfig()
