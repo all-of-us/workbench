@@ -4,7 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="nsaxena" id="changelog-97-add-demographic-survey">
+  <changeSet author="nsaxena" id="changelog-98-add-demographic-survey">
   	 
      <createTable tableName="demographic_survey">
   	 	<column name="demographic_survey_id" type="bigint" autoIncrement="true">
