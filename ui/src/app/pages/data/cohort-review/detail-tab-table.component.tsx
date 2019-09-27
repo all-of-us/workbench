@@ -238,6 +238,8 @@ interface State {
   data: Array<any>;
   filteredData: Array<any>;
   loading: boolean;
+  updating: boolean;
+  page: number;
   start: number;
   sortField: string;
   sortOrder: number;
@@ -246,6 +248,8 @@ interface State {
   error: boolean;
   inMemory: boolean;
   totalCount: number;
+  requestPage: number;
+  range: Array<number>;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
@@ -257,6 +261,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         data: null,
         filteredData: null,
         loading: true,
+        updating: false,
+        page: 0,
         start: 0,
         sortField: null,
         sortOrder: 1,
@@ -264,7 +270,9 @@ export const DetailTabTable = withCurrentWorkspace()(
         codeResults: null,
         error: false,
         inMemory: true,
-        totalCount: null
+        totalCount: null,
+        requestPage: 0,
+        range: [0, 124]
       };
       this.codeInputChange = fp.debounce(300, (e) => this.filterCodes(e));
     }
@@ -290,8 +298,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     getParticipantData() {
       try {
-        const {columns, domain, participantId,
-          workspace: {id, namespace}} = this.props;
+        const {columns, domain} = this.props;
         let {inMemory} = this.state;
         const pageFilterRequest = {
           page: 0,
@@ -326,6 +333,31 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
+    updateDataRange(previous: boolean) {
+      this.setState({updating: true});
+      const {columns, domain, filterType} = this.props;
+      const {requestPage, sortField, sortOrder} = this.state;
+      // let {filteredData} = this.state;
+      const pageFilterRequest = {
+        page: previous ? requestPage - 1 : requestPage + 1,
+        pageSize: 125,
+        sortOrder: sortOrder === 1 ? SortOrder.Asc :  SortOrder.Desc,
+        sortColumn: columns[0].name,
+        pageFilterType: filterType,
+        domain: domain,
+        filters: {items: []}
+      } as PageFilterRequest;
+      this.callApi(pageFilterRequest).then(response => {
+        response.items.forEach(item => {
+          if (domain === DomainType[DomainType.VITAL] || domain === DomainType[DomainType.LAB]) {
+            item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
+          }
+          item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
+        });
+        // this.setState({data: response.items, filteredData: response.items, updating: false});
+      });
+    }
+
     callApi(request: PageFilterRequest) {
       const {participantId, workspace: {id, namespace}} = this.props;
       const {cohortReviewId} = cohortReviewStore.getValue();
@@ -346,7 +378,16 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     onPage = (event: any) => {
-      this.setState({start: event.first});
+      console.log(event);
+      const {inMemory, page, range} = this.state;
+      if (!inMemory) {
+        if (event.page < page && range[0] >= (event.first - rowsPerPage)) {
+          this.updateDataRange(true);
+        } else if (event.page > page && range[1] <= (event.first + (rowsPerPage * 2))) {
+          this.updateDataRange(false);
+        }
+      }
+      this.setState({page: event.page, start: event.first});
     }
 
     overlayTemplate = (rowData: any, column: any) => {
@@ -697,10 +738,12 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {columns, filterState: {vocab}, tabName} = this.props;
       const filteredData = loading ? null : this.state.filteredData;
       let pageReportTemplate;
+      let value = null;
       if (filteredData !== null) {
         const lastRowOfPage = (start + rowsPerPage) > filteredData.length
           ? start + rowsPerPage - (start + rowsPerPage - filteredData.length) : start + rowsPerPage;
         pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${this.totalCount} records `;
+        value = filteredData.slice(start, start + rowsPerPage);
       }
       let paginatorTemplate = 'CurrentPageReport';
       if (filteredData && filteredData.length > rowsPerPage) {
@@ -764,7 +807,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           rowExpansionTemplate={this.rowExpansionTemplate}
           rowClassName = {this.hideGraphIcon}
           style={styles.table}
-          value={filteredData}
+          value={value}
           sortField={sortField}
           sortOrder={sortOrder}
           onSort={this.onSort}
