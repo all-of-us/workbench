@@ -8,12 +8,12 @@ import {cohortReviewStore} from 'app/cohort-review/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortBuilderService} from 'generated';
-import {CohortBuilderApi, CohortReviewApi, CohortsApi, CriteriaListResponse} from 'generated/fetch';
+import {CohortBuilderApi, CohortReviewApi, CohortsApi, CriteriaListResponse, WorkspacesApi} from 'generated/fetch';
 import {Observable} from 'rxjs/Observable';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub, WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {PageLayout} from './page-layout';
 class BuilderApiStub {
   getCriteriaBy(): Observable<CriteriaListResponse> {
@@ -51,6 +51,7 @@ describe('PageLayout', () => {
     registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     fixture = TestBed.createComponent(PageLayout);
     component = fixture.componentInstance;
     fixture.detectChanges();
