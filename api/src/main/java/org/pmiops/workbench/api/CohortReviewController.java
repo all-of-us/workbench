@@ -104,6 +104,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   public static final Integer PAGE = 0;
   public static final Integer PAGE_SIZE = 25;
+  public static final Integer MAX_PAGE_SIZE = 1000;
   public static final Integer MAX_REVIEW_SIZE = 10000;
   public static final Integer MIN_LIMIT = 1;
   public static final Integer MAX_LIMIT = 20;
