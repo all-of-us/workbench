@@ -88,7 +88,11 @@ export const CreateReviewModal = withCurrentWorkspace()(
       const request = {size: parseInt(numberOfParticipants, 10)};
 
       cohortReviewApi().createCohortReview(namespace, id, cohort.id, +cdrVersionId, request)
-        .then(_ => {
+        .then(response => {
+          if (!response.queryResultSize) {
+            response.queryResultSize = parseInt(numberOfParticipants, 10);
+          }
+          cohortReviewStore.next(response);
           this.setState({creating: false});
           this.props.created(true);
           navigate(
