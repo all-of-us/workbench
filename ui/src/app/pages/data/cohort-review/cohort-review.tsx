@@ -10,7 +10,7 @@ import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagge
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
-import {CriteriaType, DomainType, PageFilterType, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
+import {CriteriaType, DomainType, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = reactStyles({
   title: {
@@ -44,7 +44,6 @@ export class CohortReview extends React.Component<{}, State> {
       page: 0,
       pageSize: 25,
       sortOrder: SortOrder.Asc,
-      pageFilterType: PageFilterType.ParticipantCohortStatuses,
       filters: {items: []}
     }).then(review => {
       cohortReviewStore.next(review);

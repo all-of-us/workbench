@@ -12,7 +12,7 @@ import {cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {PageFilterType, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
+import {ParticipantCohortStatus, SortOrder} from 'generated/fetch';
 
 interface Props {
   workspace: WorkspaceData;
@@ -40,7 +40,6 @@ export const DetailPage = withCurrentWorkspace()(
             page: 0,
             pageSize: 25,
             sortOrder: SortOrder.Asc,
-            pageFilterType: PageFilterType.ParticipantCohortStatuses,
             filters: {items: []}
           }).then(review => cohortReviewStore.next(review))
         );
