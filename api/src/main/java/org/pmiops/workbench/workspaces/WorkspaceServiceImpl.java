@@ -499,7 +499,49 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<UserRecentWorkspace> getRecentWorkspacesByUser(long userId) {
+    List<UserRecentWorkspace> userRecentWorkspaces =
+        userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
+    enforceFirecloudAclsInRecentWorkspaces(userRecentWorkspaces);
     return userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
+  }
+
+  private void enforceFirecloudAclsInRecentWorkspaces(List<UserRecentWorkspace> recentWorkspaces) {
+    // Map recentWorkspaces by id because we'll want to access them like that later when we delete
+    Map<Long, UserRecentWorkspace> recentWorkspacesById =
+        recentWorkspaces.stream()
+            .collect(Collectors.toMap(UserRecentWorkspace::getWorkspaceId, rw -> rw));
+
+    // Grab the dbWorkspaces.
+    List<Workspace> dbWorkspaces =
+        workspaceDao.findAllByWorkspaceIdIn(
+            recentWorkspaces.stream()
+                .map(UserRecentWorkspace::getWorkspaceId)
+                .collect(Collectors.toList()));
+
+    // Map by primary key id bc it's illegal to string streams along in Java. not pretty enough.
+    Map<Long, Workspace> dbWorkspacesById =
+        dbWorkspaces.stream()
+            .collect(Collectors.toMap(Workspace::getWorkspaceId, dbWorkspace -> dbWorkspace));
+
+    // Unfortunately it doesn't look like there's a way to batch call this currently. At least we
+    // can make it parallel.
+    dbWorkspacesById
+            .forEach((dbWorkspaceId, dbWorkspace) -> {
+              // Grab the ACLs.
+              Map<String, WorkspaceAccessEntry> aclsByEmail =
+                      getFirecloudWorkspaceAcls(
+                              dbWorkspace.getWorkspaceNamespace(),
+                              dbWorkspace.getFirecloudName());
+
+              // If this user's email isn't something that has access, remove the corresponding
+              // entry from userRecentResources.
+              if (
+                !aclsByEmail.containsKey(userProvider.get().getEmail())
+                || aclsByEmail.get(userProvider.get().getEmail()).getAccessLevel().equals(WorkspaceAccessLevel.NO_ACCESS.toString())
+              ) {
+                userRecentWorkspaceDao.delete(recentWorkspacesById.get(dbWorkspaceId));
+              }
+            });
   }
 
   @Override

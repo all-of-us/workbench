@@ -394,7 +394,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     componentDidMount() {
-      workspacesApi().updateRecentWorkspaces(this.props.workspace.namespace, this.props.workspace.id).then(_ => {
+      this.maybeUpdateRecentWorkspaces().then(_ => {
         if (!this.isMode(WorkspaceEditMode.Create)) {
           this.setState({workspace : {
             ...this.props.workspace,
@@ -417,6 +417,15 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         }
         this.setCdrVersions();
       });
+    }
+
+    async maybeUpdateRecentWorkspaces() {
+      if (!!this.props.workspace) {
+        await workspacesApi().updateRecentWorkspaces(this.props.workspace.namespace, this.props.workspace.id);
+      }
+      else {
+        return;
+      }
     }
 
     makeDiseaseInput() {
