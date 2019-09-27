@@ -1,7 +1,5 @@
 package org.pmiops.workbench.db.dao;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
@@ -16,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -44,9 +41,6 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-// TODO(jaycarlton): In theory, a service shoudl handle high-level business rules, not low-level
-// details...
-// TODO
 @Service
 public class DataSetServiceImpl implements DataSetService {
 
@@ -116,6 +110,7 @@ public class DataSetServiceImpl implements DataSetService {
     }
   }
 
+  @VisibleForTesting
   public static class QueryAndParameters {
     private final String query;
     private final Map<String, QueryParameterValue> namedParameterValues;
@@ -231,9 +226,9 @@ public class DataSetServiceImpl implements DataSetService {
 
     // Below constructs the union of all cohort queries
     final ImmutableList<QueryAndParameters> queryMapEntries =
-        Objects.requireNonNull(cohortsSelected).stream()
+        cohortsSelected.stream()
             .map(this::getCohortQueryStringAndCollectNamedParameters)
-            .collect(toImmutableList());
+            .collect(ImmutableList.toImmutableList());
 
     final String unionedCohortQueries =
         queryMapEntries.stream()
@@ -241,7 +236,9 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(Collectors.joining(" UNION DISTINCT "));
 
     final ImmutableList<Domain> domainList =
-        domainValuePairs.stream().map(DomainValuePair::getDomain).collect(toImmutableList());
+        domainValuePairs.stream()
+            .map(DomainValuePair::getDomain)
+            .collect(ImmutableList.toImmutableList());
 
     // now merge all the individual maps from each configuration
     final ImmutableMap<String, QueryParameterValue> mergedQueryParameterValues =
@@ -343,11 +340,11 @@ public class DataSetServiceImpl implements DataSetService {
 
   // TODO(jaycarlton) Convert to its own class or owherwise consolidate argument list
   private Map<String, QueryJobConfiguration> buildQueriesByDomain(
-      List<Domain> domainList,
-      List<DomainValuePair> domainValuePairs,
-      Map<String, QueryParameterValue> cohortParameters,
+      ImmutableList<Domain> domainList,
+      ImmutableList<DomainValuePair> domainValuePairs,
+      ImmutableMap<String, QueryParameterValue> cohortParameters,
       boolean includesAllParticipants,
-      List<ConceptSet> conceptSetsSelected,
+      ImmutableList<ConceptSet> conceptSetsSelected,
       String cohortQueries) {
     final CdrBigQuerySchemaConfig bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
 
@@ -357,7 +354,7 @@ public class DataSetServiceImpl implements DataSetService {
                 Domain::toString,
                 domain ->
                     buildQueryJobConfigForDomain(
-                        (Domain) domain,
+                        domain,
                         domainValuePairs,
                         cohortParameters,
                         includesAllParticipants,
@@ -548,7 +545,7 @@ public class DataSetServiceImpl implements DataSetService {
                     + "\n\n"
                     + generateNotebookUserCode(
                         entry.getValue(),
-                        Objects.requireNonNull(Domain.fromValue(entry.getKey())),
+                        Domain.fromValue(entry.getKey()),
                         dataSetName,
                         kernelTypeEnum))
         .collect(Collectors.toList());
