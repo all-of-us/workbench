@@ -2489,11 +2489,15 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubFcGetWorkspaceACL();
-    org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
-    workspaceService.updateRecentWorkspaces(dbWorkspace.getWorkspaceId(), currentUser.getUserId(), NOW);
-    ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity = workspacesController.getUserRecentWorkspaces();
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.get(workspace.getNamespace(), workspace.getId());
+    workspaceService.updateRecentWorkspaces(
+        dbWorkspace.getWorkspaceId(), currentUser.getUserId(), NOW);
+    ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
+        workspacesController.getUserRecentWorkspaces();
     RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
-    assertThat(recentWorkspace.getWorkspace().getNamespace()).isEqualTo(dbWorkspace.getWorkspaceNamespace());
+    assertThat(recentWorkspace.getWorkspace().getNamespace())
+        .isEqualTo(dbWorkspace.getWorkspaceNamespace());
     assertThat(recentWorkspace.getWorkspace().getName()).isEqualTo(dbWorkspace.getName());
   }
 }

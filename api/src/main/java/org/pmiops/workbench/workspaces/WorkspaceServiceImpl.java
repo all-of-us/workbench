@@ -503,17 +503,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public UserRecentWorkspace updateRecentWorkspaces(long workspaceId, long userId, Timestamp lastAccessDate) {
-    Optional<UserRecentWorkspace> matchingRecentWorkspace = userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
+  public UserRecentWorkspace updateRecentWorkspaces(
+      long workspaceId, long userId, Timestamp lastAccessDate) {
+    Optional<UserRecentWorkspace> matchingRecentWorkspace =
+        userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
 
     if (matchingRecentWorkspace.isPresent()) {
       matchingRecentWorkspace.get().setLastAccessDate(lastAccessDate);
       userRecentWorkspaceDao.save(matchingRecentWorkspace.get());
       handleWorkspaceLimit(userId);
       return matchingRecentWorkspace.get();
-    }
-    else {
-      UserRecentWorkspace recentWorkspace = new UserRecentWorkspace(workspaceId, userId, lastAccessDate);
+    } else {
+      UserRecentWorkspace recentWorkspace =
+          new UserRecentWorkspace(workspaceId, userId, lastAccessDate);
       userRecentWorkspaceDao.save(recentWorkspace);
       handleWorkspaceLimit(userId);
       return recentWorkspace;
@@ -521,9 +523,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   private void handleWorkspaceLimit(long userId) {
-    List<UserRecentWorkspace> userRecentWorkspaces = userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
+    List<UserRecentWorkspace> userRecentWorkspaces =
+        userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
 
-    while(userRecentWorkspaces.size() > RECENT_WORKSPACE_COUNT) {
+    while (userRecentWorkspaces.size() > RECENT_WORKSPACE_COUNT) {
       userRecentWorkspaceDao.delete(userRecentWorkspaces.get(userRecentWorkspaces.size() - 1));
       userRecentWorkspaces.remove(userRecentWorkspaces.size() - 1);
     }
@@ -531,7 +534,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public void maybeDeleteRecentWorkspace(long workspaceId, long userId) {
-    Optional<UserRecentWorkspace> maybeRecentWorkspaces = userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
-    maybeRecentWorkspaces.ifPresent(userRecentWorkspace -> userRecentWorkspaceDao.delete(userRecentWorkspace));
+    Optional<UserRecentWorkspace> maybeRecentWorkspaces =
+        userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
+    maybeRecentWorkspaces.ifPresent(
+        userRecentWorkspace -> userRecentWorkspaceDao.delete(userRecentWorkspace));
   }
 }
