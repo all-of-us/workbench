@@ -44,21 +44,9 @@ public class StatusController implements StatusApiDelegate {
     Logging logging = LoggingOptions.getDefaultInstance().getService();
 
     // The name of the log to write to
-    String logName = "action-audit-test";
+    final String logName = "action-audit-test";
 
-    // The data to write to the log
-    String text = "Hello, world!";
-
-    LogEntry stringEntry = LogEntry.newBuilder(StringPayload.of(text))
-        .setSeverity(Severity.INFO)
-        .setLogName(logName)
-        .setResource(MonitoredResource.newBuilder("global").build())
-        .build();
-
-    // Writes the log entry asynchronously
-    logging.write(Collections.singleton(stringEntry));
-
-    Map<String, ?> data = ImmutableMap.of(
+    final Map<String, ?> data = ImmutableMap.of(
         "name", "Bond, James Bond",
         "occupation", "007",
         "shaken", true,
@@ -71,7 +59,5 @@ public class StatusController implements StatusApiDelegate {
         .setResource(MonitoredResource.newBuilder("global").build())
         .build();
     logging.write(Collections.singleton(jsonEntry));
-
-    System.out.printf("Logged: %s%n", text);
   }
 }
