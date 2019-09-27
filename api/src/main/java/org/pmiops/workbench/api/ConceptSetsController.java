@@ -60,7 +60,6 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   @VisibleForTesting int maxConceptsPerSet;
 
-  // TODO(jaycarlton): move into helper methods in one or both of these classes
   static final Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>
       TO_CLIENT_CONCEPT_SET =
           new Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>() {
@@ -84,7 +83,6 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
             }
           };
 
-  // TODO(jaycarlton): move into helper methods in one or both of these classes
   private static final Function<ConceptSet, org.pmiops.workbench.db.model.ConceptSet>
       FROM_CLIENT_CONCEPT_SET =
           new Function<ConceptSet, org.pmiops.workbench.db.model.ConceptSet>() {
