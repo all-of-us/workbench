@@ -20,11 +20,10 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CohortStatus,
   Filter,
+  FilterColumns as Columns,
   Operator,
-  PageFilterType,
+  PageFilterRequest as Request,
   ParticipantCohortStatus,
-  ParticipantCohortStatusColumns as Columns,
-  ParticipantCohortStatuses as Request,
   SortOrder,
 } from 'generated/fetch';
 
@@ -317,7 +316,6 @@ export const ParticipantsTable = withCurrentWorkspace()(
             sortColumn: reverseColumnEnum[sortField],
             sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
             filters: {items: filters},
-            pageFilterType: PageFilterType.ParticipantCohortStatuses,
           } as Request;
           cohortReviewApi().getParticipantCohortStatuses(namespace, id, cid, +cdrVersionId, query)
             .then(review => {

@@ -10,7 +10,7 @@ import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType, PageFilterRequest, PageFilterType, SortOrder} from 'generated/fetch';
+import {DomainType, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
@@ -198,8 +198,7 @@ const domains = [
 interface Props {
   tabName: string;
   columns: Array<any>;
-  domain: string;
-  filterType: PageFilterType;
+  domain: DomainType;
   participantId: number;
   workspace: WorkspaceData;
   filterState: any;
@@ -259,14 +258,13 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     getParticipantData() {
       try {
-        const {columns, domain, filterType, participantId,
+        const {columns, domain, participantId,
           workspace: {id, namespace}} = this.props;
         const pageFilterRequest = {
           page: 0,
           pageSize: 10000,
           sortOrder: SortOrder.Asc,
           sortColumn: columns[0].name,
-          pageFilterType: filterType,
           domain: domain,
         } as PageFilterRequest;
 
@@ -278,7 +276,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           pageFilterRequest
         ).then(response => {
           response.items.forEach(item => {
-            if (domain === DomainType[DomainType.VITAL] || domain === DomainType[DomainType.LAB]) {
+            if (domain === DomainType.VITAL || domain === DomainType.LAB) {
               item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
             }
             item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
@@ -394,13 +392,13 @@ export const DetailTabTable = withCurrentWorkspace()(
           return itemDate >= min && itemDate <= max;
         });
       }
-      if (domain !== DomainType[DomainType.SURVEY] && (ageMin || ageMax)) {
+      if (domain !== DomainType.SURVEY && (ageMin || ageMax)) {
         const min = ageMin || 0;
         const max = ageMax || 120;
         data = data.filter(item => item.ageAtEvent >= min && item.ageAtEvent <= max);
       }
-      if (domain !== DomainType[DomainType.SURVEY]
-        && domain !== DomainType[DomainType.PHYSICALMEASUREMENT]
+      if (domain !== DomainType.SURVEY
+        && domain !== DomainType.PHYSICALMEASUREMENT
         && visits) {
         data = data.filter(item => visits === item.visitType);
       }
@@ -433,7 +431,7 @@ export const DetailTabTable = withCurrentWorkspace()(
                 data = [];
                 break;
               } else if (!columnFilters[col].includes('Select All')
-                && !(vocab === 'source' && domain === DomainType[DomainType.OBSERVATION])) {
+                && !(vocab === 'source' && domain === DomainType.OBSERVATION)) {
                 data = data.filter(row => columnFilters[col].includes(row[col]));
               }
             } else {
