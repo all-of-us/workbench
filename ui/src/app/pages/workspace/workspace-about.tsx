@@ -101,7 +101,11 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
 
   async componentDidMount() {
     this.setVisits();
-    await this.reloadWorkspace(currentWorkspaceStore.getValue());
+    const workspace = currentWorkspaceStore.getValue();
+    await Promise.all([
+      workspacesApi().updateRecentWorkspaces(workspace.namespace, workspace.id),
+      this.reloadWorkspace(workspace)
+    ]);
     this.loadUserRoles();
     this.setCdrVersion();
   }

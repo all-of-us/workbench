@@ -38,7 +38,8 @@ export const RecentWorkspaces = withUserProfile()
   }
 
   render() {
-    return <div style={{display: 'flex', marginTop: '1rem'}}>
+    // Needs a min-height so the spinner will render when loading and position: relative so said spinner will center.
+    return <div style={{display: 'flex', marginTop: '1rem', minHeight: 247, position: 'relative'}}>
       {
         this.state.recentWorkspaces.map(recentWorkspace => {
           return <WorkspaceCard

@@ -6,7 +6,6 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -500,7 +499,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<UserRecentWorkspace> getRecentWorkspacesByUser(long userId) {
-    return userRecentWorkspaceDao.findByUserIdOrderByLastAccessDate(userId);
+    return userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
   }
 
   @Override
@@ -510,20 +509,23 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     if (matchingRecentWorkspace.isPresent()) {
       matchingRecentWorkspace.get().setLastAccessDate(lastAccessDate);
       userRecentWorkspaceDao.save(matchingRecentWorkspace.get());
+      handleWorkspaceLimit(userId);
       return matchingRecentWorkspace.get();
     }
     else {
       UserRecentWorkspace recentWorkspace = new UserRecentWorkspace(workspaceId, userId, lastAccessDate);
       userRecentWorkspaceDao.save(recentWorkspace);
-
-      List<UserRecentWorkspace> userRecentWorkspaces = userRecentWorkspaceDao.findByUserIdOrderByLastAccessDate(userId);
-
-      while(userRecentWorkspaces.size() > RECENT_WORKSPACE_COUNT) {
-        userRecentWorkspaceDao.delete(userRecentWorkspaces.get(userRecentWorkspaces.size() - 1));
-        userRecentWorkspaces.remove(userRecentWorkspaces.size() - 1);
-      }
-
+      handleWorkspaceLimit(userId);
       return recentWorkspace;
+    }
+  }
+
+  private void handleWorkspaceLimit(long userId) {
+    List<UserRecentWorkspace> userRecentWorkspaces = userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
+
+    while(userRecentWorkspaces.size() > RECENT_WORKSPACE_COUNT) {
+      userRecentWorkspaceDao.delete(userRecentWorkspaces.get(userRecentWorkspaces.size() - 1));
+      userRecentWorkspaces.remove(userRecentWorkspaces.size() - 1);
     }
   }
 

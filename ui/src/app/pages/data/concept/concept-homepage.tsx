@@ -14,7 +14,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
 import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
 import {ConceptTable} from 'app/pages/data/concept/concept-table';
-import {conceptsApi} from 'app/services/swagger-fetch-clients';
+import {conceptsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {NavStore, queryParamsStore} from 'app/utils/navigation';
@@ -216,7 +216,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      this.loadDomainsAndSurveys();
+      workspacesApi().updateRecentWorkspaces(this.props.workspace.namespace, this.props.workspace.id)
+        .then(_ => this.loadDomainsAndSurveys());
     }
 
     async loadDomainsAndSurveys() {

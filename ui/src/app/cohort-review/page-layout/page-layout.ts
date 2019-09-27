@@ -9,7 +9,7 @@ import {
   visitsFilterOptions,
   vocabOptions
 } from 'app/cohort-review/review-state.service';
-import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortReviewApi, cohortsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import {PageFilterType, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
@@ -42,13 +42,17 @@ export class PageLayout implements OnInit, OnDestroy {
     const {ns, wsid, cid} = urlParamsStore.getValue();
     const {accessLevel, cdrVersionId} = currentWorkspaceStore.getValue();
     this.readonly = accessLevel === WorkspaceAccessLevel.READER;
-    cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
-      page: 0,
-      pageSize: 25,
-      sortOrder: SortOrder.Asc,
-      pageFilterType: PageFilterType.ParticipantCohortStatuses,
-      filters: {items: []}
-    }).then(review => {
+    Promise.all([
+      workspacesApi().updateRecentWorkspaces(ns, wsid),
+      cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
+        page: 0,
+        pageSize: 25,
+        sortOrder: SortOrder.Asc,
+        pageFilterType: PageFilterType.ParticipantCohortStatuses,
+        filters: {items: []}
+      })
+    ]).then(values => {
+      const review = values[1];
       cohortReviewStore.next(review);
       this.reviewPresent = review.reviewStatus !== ReviewStatus.NONE;
       if (this.reviewPresent && this.router.url.split('/').pop() === 'review') {
