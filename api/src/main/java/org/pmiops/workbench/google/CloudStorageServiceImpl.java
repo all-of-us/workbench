@@ -155,6 +155,13 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
+  public GoogleCredential getGarbageCollectionServiceAccountCredentials(
+      String garbageCollectionEmail) throws IOException {
+    final String objectPath = String.format("garbage-collection/%s.json", garbageCollectionEmail);
+    return getCredential(objectPath);
+  }
+
+  @Override
   public JSONObject getFileAsJson(String bucketName, String fileName) {
     return new JSONObject(readToString(bucketName, fileName));
   }

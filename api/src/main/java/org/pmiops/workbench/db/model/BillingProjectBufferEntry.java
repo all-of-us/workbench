@@ -31,7 +31,12 @@ public class BillingProjectBufferEntry {
     ERROR, // Failed to create BillingProject
     AVAILABLE, // BillingProject is ready to be assigned to a user
     ASSIGNING, //  BillingProject is being assigned to a user
-    ASSIGNED // BillingProject has been assigned to a user
+    ASSIGNED, // BillingProject has been assigned to a user
+
+    // The ownership of this project has been transferred from the AoU App Engine SA
+    // to an alternate SA, to help ensure that the AoU App Engine SA is not a member of too many
+    // groups. See https://precisionmedicineinitiative.atlassian.net/browse/RW-3435
+    GARBAGE_COLLECTED,
   }
 
   @Id

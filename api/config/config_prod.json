@@ -17,7 +17,11 @@
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.gcp_billing_export_v1_015EAA_E95687_1F8614",
     "retryCount": 4,
     "bufferCapacity": 20,
-    "defaultFreeCreditsLimit": 300.0
+    "defaultFreeCreditsLimit": 300.0,
+    "garbageCollectionUserCapacity": 1000,
+    "garbageCollectionUsers": [
+      "TODO - will update PR once generated"
+    ]
   },
   "auth": {
     "serviceAccountApiUsers": [

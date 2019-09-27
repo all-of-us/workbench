@@ -1031,6 +1031,7 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
+  # Cron ############################################################################
 
   # Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
   # true, which app engine itself only sets when invoking as a cronjob.
@@ -1197,6 +1198,27 @@ paths:
       responses:
         200:
           description: No Error
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /v1/cron/billingProjectGarbageCollection:
+    get:
+      security: []
+      tags:
+        - offlineBilling
+        - cron
+      description: >
+        Endpoint meant to be called offline to trigger a bulk transfer of ownership of billing
+        projects associated with deleted workspaces; may be
+        slow to execute. Only executable via App Engine cronjob.
+      operationId: billingProjectGarbageCollection
+      responses:
+        200:
+          description: Billing Project Garbage Collection was successful.
+          schema:
+            $ref: "#/definitions/BillingProjectGarbageCollectionResponse"
         500:
           description: Internal Error
           schema:
@@ -3530,6 +3552,22 @@ definitions:
         format: int32
         description: >
           Number of clusters deleted during the check.
+
+  BillingProjectGarbageCollectionResponse:
+    type: array
+    items:
+      $ref: "#/definitions/GarbageCollectedProject"
+
+  GarbageCollectedProject:
+    type: object
+    properties:
+      project:
+        type: string
+      newOwner:
+        type: string
+    required:
+      - project
+      - newOwner
 
   User:
     type: object
