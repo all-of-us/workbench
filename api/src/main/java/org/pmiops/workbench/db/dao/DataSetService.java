@@ -1,12 +1,9 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import org.pmiops.workbench.db.dao.DataSetServiceImpl.QueryAndParameters;
-import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.DataSetValues;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -28,7 +25,8 @@ public interface DataSetService {
       long creatorId,
       Timestamp creationTime);
 
-  Map<String, QueryJobConfiguration> generateQueryJobConfigurationsByDomainName(DataSetRequest dataSet);
+  Map<String, QueryJobConfiguration> generateQueryJobConfigurationsByDomainName(
+      DataSetRequest dataSet);
 
   List<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,

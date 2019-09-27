@@ -86,7 +86,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   private final CohortDao cohortDao;
   private final ConceptDao conceptDao;
-  private final  ConceptSetDao conceptSetDao;
+  private final ConceptSetDao conceptSetDao;
   private final DataSetDao dataSetDao;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
@@ -124,7 +124,8 @@ public class DataSetController implements DataSetApiDelegate {
     final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER);
-    final long workspaceId = workspaceService.get(workspaceNamespace, workspaceFirecloudName).getWorkspaceId();
+    final long workspaceId =
+        workspaceService.get(workspaceNamespace, workspaceFirecloudName).getWorkspaceId();
     final ImmutableList<DataSetValues> dataSetValuesList =
         dataSetRequest.getValues().stream()
             .map(this::getDataSetValuesFromDomainValueSet)
@@ -149,16 +150,15 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   private DataSetValues getDataSetValuesFromDomainValueSet(DomainValuePair domainValueSet) {
-      final DataSetValues dataSetValues =
-          new DataSetValues(
-              domainValueSet.getDomain().name(), domainValueSet.getValue());
-      dataSetValues.setDomainEnum(domainValueSet.getDomain());
-      return dataSetValues;
+    final DataSetValues dataSetValues =
+        new DataSetValues(domainValueSet.getDomain().name(), domainValueSet.getValue());
+    dataSetValues.setDomainEnum(domainValueSet.getDomain());
+    return dataSetValues;
   }
 
   private void validateDataSetCreateRequest(DataSetRequest dataSetRequest) {
-    boolean includesAllParticipants = Optional.ofNullable(
-        dataSetRequest.getIncludesAllParticipants()).orElse(false);
+    boolean includesAllParticipants =
+        Optional.ofNullable(dataSetRequest.getIncludesAllParticipants()).orElse(false);
     if (Strings.isNullOrEmpty(dataSetRequest.getName())) {
       throw new BadRequestException("Missing name");
     } else if (dataSetRequest.getConceptSetIds() == null
@@ -225,7 +225,7 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   // TODO(jaycarlton): move into helper methods in one or both of these classes
-  static final private Function<DataSetValues, DomainValuePair> TO_CLIENT_DOMAIN_VALUE =
+  private static final Function<DataSetValues, DomainValuePair> TO_CLIENT_DOMAIN_VALUE =
       dataSetValue -> {
         DomainValuePair domainValuePair = new DomainValuePair();
         domainValuePair.setValue(dataSetValue.getValue());
@@ -243,20 +243,23 @@ public class DataSetController implements DataSetApiDelegate {
     final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
 
     // Generate query per domain for the selected concept set, cohort and values
-    // TODO(jaycarlton): return better error information form this function for common validation scenarios
-    final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain = dataSetService.generateQueryJobConfigurationsByDomainName(dataSet);
+    // TODO(jaycarlton): return better error information form this function for common validation
+    // scenarios
+    final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain =
+        dataSetService.generateQueryJobConfigurationsByDomainName(dataSet);
 
     if (bigQueryJobConfigsByDomain.isEmpty()) {
       log.warning("Empty query map generated for this DataSetRequest");
     }
 
-    final ImmutableList<String> codeCells = ImmutableList.copyOf(dataSetService.generateCodeCells(kernelTypeEnum, dataSet.getName(), bigQueryJobConfigsByDomain));
+    final ImmutableList<String> codeCells =
+        ImmutableList.copyOf(
+            dataSetService.generateCodeCells(
+                kernelTypeEnum, dataSet.getName(), bigQueryJobConfigsByDomain));
     final String generatedCode = String.join("\n\n", codeCells);
 
     return ResponseEntity.ok(
-        new DataSetCodeResponse()
-            .code(generatedCode)
-            .kernelType(kernelTypeEnum));
+        new DataSetCodeResponse().code(generatedCode).kernelType(kernelTypeEnum));
   }
 
   @Override
@@ -265,7 +268,8 @@ public class DataSetController implements DataSetApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
-    Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQueryJobConfigurationsByDomainName(dataSet);
+    Map<String, QueryJobConfiguration> bigQueryJobConfig =
+        dataSetService.generateQueryJobConfigurationsByDomainName(dataSet);
     bigQueryJobConfig.forEach(
         (domain, queryJobConfiguration) -> {
           int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS;
@@ -433,7 +437,8 @@ public class DataSetController implements DataSetApiDelegate {
     }
 
     Map<String, QueryJobConfiguration> queriesByDomain =
-        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetExportRequest.getDataSetRequest());
+        dataSetService.generateQueryJobConfigurationsByDomainName(
+            dataSetExportRequest.getDataSetRequest());
     List<String> queriesAsStrings =
         dataSetService.generateCodeCells(
             dataSetExportRequest.getKernelType(),
@@ -579,10 +584,7 @@ public class DataSetController implements DataSetApiDelegate {
     }
     DataSetListResponse dataSetResponse =
         new DataSetListResponse()
-            .items(
-                dbDataSets.stream()
-                    .map(TO_CLIENT_DATA_SET)
-                    .collect(Collectors.toList()));
+            .items(dbDataSets.stream().map(TO_CLIENT_DATA_SET).collect(Collectors.toList()));
     return ResponseEntity.ok(dataSetResponse);
   }
 

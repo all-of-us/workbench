@@ -44,17 +44,18 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class DataSetServiceTest {
 
   private static final Long COHORT_ID_1 = 100L;
-  private static final DomainValuePair DOMAIN_VALUE_PAIR_PERSON_PERSON_ID = new DomainValuePair()
-      .domain(Domain.PERSON)
-      .value("PERSON_ID");
+  private static final DomainValuePair DOMAIN_VALUE_PAIR_PERSON_PERSON_ID =
+      new DomainValuePair().domain(Domain.PERSON).value("PERSON_ID");
   private static final Long CONCEPT_SET_ID_1 = 200L;
   private static final QueryJobConfiguration QUERY_JOB_CONFIGURATION_1 =
-      QueryJobConfiguration.newBuilder("SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
-      .addNamedParameter("foo",
-          QueryParameterValue.newBuilder()
-              .setType(StandardSQLTypeName.INT64)
-              .setValue(Long.toString(101L))
-              .build())
+      QueryJobConfiguration.newBuilder(
+              "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
+          .addNamedParameter(
+              "foo",
+              QueryParameterValue.newBuilder()
+                  .setType(StandardSQLTypeName.INT64)
+                  .setValue(Long.toString(101L))
+                  .build())
           .build();
 
   @Autowired private BigQueryService bigQueryService;
@@ -69,17 +70,15 @@ public class DataSetServiceTest {
 
   @TestConfiguration
   @MockBean({
-      BigQueryService.class,
-      CdrBigQuerySchemaConfigService.class,
-      CohortDao.class,
-      ConceptBigQueryService.class,
-      ConceptSetDao.class,
-      CohortQueryBuilder.class,
-      DataSetDao.class
+    BigQueryService.class,
+    CdrBigQuerySchemaConfigService.class,
+    CohortDao.class,
+    ConceptBigQueryService.class,
+    ConceptSetDao.class,
+    CohortQueryBuilder.class,
+    DataSetDao.class
   })
-  static class Configuration {
-
-  }
+  static class Configuration {}
 
   @Before
   public void setUp() {
@@ -94,12 +93,11 @@ public class DataSetServiceTest {
             dataSetDao);
 
     final Cohort cohort = buildSimpleCohort();
-    when(cohortDao.findCohortByNameAndWorkspaceId(anyString(), anyLong()))
-        .thenReturn(cohort);
+    when(cohortDao.findCohortByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(cohort);
     when(cohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(
             QueryJobConfiguration.newBuilder(
-                "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
+                    "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
                 .build());
     when(bigQueryService.filterBigQueryConfig(any(QueryJobConfiguration.class)))
         .thenReturn(QUERY_JOB_CONFIGURATION_1);
@@ -136,13 +134,15 @@ public class DataSetServiceTest {
   public void itThrowsForNoCohortOrConcept() throws Exception {
     final DataSetRequest invalidRequest = buildEmptyRequest();
     ImmutableMap<String, QueryJobConfiguration> configurationsByDomain =
-        ImmutableMap.copyOf(dataSetServiceImpl.generateQueryJobConfigurationsByDomainName(invalidRequest));
+        ImmutableMap.copyOf(
+            dataSetServiceImpl.generateQueryJobConfigurationsByDomainName(invalidRequest));
   }
 
   @Test
   public void itGetsCohortQueryStringAndCollectNamedParameters() throws Exception {
     final Cohort cohortDbModel = buildSimpleCohort();
-    final QueryAndParameters queryAndParameters = dataSetServiceImpl.getCohortQueryStringAndCollectNamedParameters(cohortDbModel);
+    final QueryAndParameters queryAndParameters =
+        dataSetServiceImpl.getCohortQueryStringAndCollectNamedParameters(cohortDbModel);
     assertThat(queryAndParameters.getQuery()).isNotEmpty();
     assertThat(queryAndParameters.getNamedParameterValues()).isNotEmpty();
   }
@@ -152,7 +152,9 @@ public class DataSetServiceTest {
     final ConceptSet conceptSet1 = new ConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet1.setConceptIds(Collections.emptySet());
-    final boolean isValid = dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(ImmutableList.of(conceptSet1));
+    final boolean isValid =
+        dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
+            ImmutableList.of(conceptSet1));
     assertThat(isValid).isFalse();
   }
 
@@ -166,10 +168,11 @@ public class DataSetServiceTest {
     conceptSet2.setDomain((short) Domain.PERSON.ordinal());
     conceptSet2.setConceptIds(ImmutableSet.of(4L, 5L, 6L));
 
-    final boolean isValid = dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(ImmutableList.of(conceptSet1, conceptSet2));
+    final boolean isValid =
+        dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
+            ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(isValid).isTrue();
   }
-
 
   @Test
   public void itRejectsSomeDomainsWithConceptsSomeWithout() {
@@ -185,8 +188,9 @@ public class DataSetServiceTest {
     conceptSet3.setDomain((short) Domain.DRUG.ordinal());
     conceptSet3.setConceptIds(Collections.emptySet());
 
-    final boolean isValid = dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
-        ImmutableList.of(conceptSet1, conceptSet2, conceptSet3));
+    final boolean isValid =
+        dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
+            ImmutableList.of(conceptSet1, conceptSet2, conceptSet3));
     assertThat(isValid).isFalse();
   }
 
@@ -204,14 +208,17 @@ public class DataSetServiceTest {
     conceptSet3.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet3.setConceptIds(Collections.emptySet());
 
-    final boolean isValid = dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
-        ImmutableList.of(conceptSet1, conceptSet2, conceptSet3));
+    final boolean isValid =
+        dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
+            ImmutableList.of(conceptSet1, conceptSet2, conceptSet3));
     assertThat(isValid).isTrue();
   }
 
   @Test
   public void itRejectsEmptyConceptSetList() {
-    final boolean isValid = dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(Collections.emptyList());
+    final boolean isValid =
+        dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
+            Collections.emptyList());
     assertThat(isValid).isFalse();
   }
 }

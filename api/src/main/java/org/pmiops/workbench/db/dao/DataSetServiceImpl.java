@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.api.BigQueryService;
@@ -45,17 +44,18 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
-// TODO(jaycarlton): In theory, a service shoudl handle high-level business rules, not low-level details...
+// TODO(jaycarlton): In theory, a service shoudl handle high-level business rules, not low-level
+// details...
 // TODO
 @Service
 public class DataSetServiceImpl implements DataSetService {
 
   private static final String SELCECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
-      + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
-  private static final ImmutableSet<PrePackagedConceptSetEnum> CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY =
-      ImmutableSet.of(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.BOTH);
+          + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
+  private static final ImmutableSet<PrePackagedConceptSetEnum>
+      CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY =
+          ImmutableSet.of(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.BOTH);
 
   /*
    * A subclass to store the associated set of selects and joins for values for the data set builder.
@@ -91,11 +91,8 @@ public class DataSetServiceImpl implements DataSetService {
     static final String JOIN_VALUE_KEY = "JOIN_VALUE";
 
     public String formatJoins() {
-      return getJoins().stream()
-          .distinct()
-          .collect(Collectors.joining(" "));
+      return getJoins().stream().distinct().collect(Collectors.joining(" "));
     }
-
   }
 
   /*
@@ -213,40 +210,48 @@ public class DataSetServiceImpl implements DataSetService {
           .build();
 
   @Override
-  public Map<String, QueryJobConfiguration> generateQueryJobConfigurationsByDomainName(DataSetRequest dataSetRequest) {
-    // TODO - migrate non-null constraint the DB column & API so that we don't have to use Boolean for IncludesAllPrticipants
-    final boolean includesAllParticipants = getBuiltinBooleanFromNullable(dataSetRequest.getIncludesAllParticipants());
-    final ImmutableList<Cohort> cohortsSelected = ImmutableList.copyOf(this.cohortDao.findAllByCohortIdIn(dataSetRequest.getCohortIds()));
-    final ImmutableList<DomainValuePair> domainValuePairs = ImmutableList.copyOf(dataSetRequest.getValues());
+  public Map<String, QueryJobConfiguration> generateQueryJobConfigurationsByDomainName(
+      DataSetRequest dataSetRequest) {
+    // TODO - migrate non-null constraint the DB column & API so that we don't have to use Boolean
+    // for IncludesAllPrticipants
+    final boolean includesAllParticipants =
+        getBuiltinBooleanFromNullable(dataSetRequest.getIncludesAllParticipants());
+    final ImmutableList<Cohort> cohortsSelected =
+        ImmutableList.copyOf(this.cohortDao.findAllByCohortIdIn(dataSetRequest.getCohortIds()));
+    final ImmutableList<DomainValuePair> domainValuePairs =
+        ImmutableList.copyOf(dataSetRequest.getValues());
 
     final ImmutableList<org.pmiops.workbench.db.model.ConceptSet> expandedSelectedConceptSets =
         getExpandedConceptSetSelections(
-            dataSetRequest.getPrePackagedConceptSet(), dataSetRequest.getConceptSetIds(),
+            dataSetRequest.getPrePackagedConceptSet(),
+            dataSetRequest.getConceptSetIds(),
             cohortsSelected,
-            includesAllParticipants, domainValuePairs
-        );
+            includesAllParticipants,
+            domainValuePairs);
 
     // Below constructs the union of all cohort queries
-    final ImmutableList<QueryAndParameters> queryMapEntries = Objects.requireNonNull(cohortsSelected).stream()
-        .map(this::getCohortQueryStringAndCollectNamedParameters)
-        .collect(toImmutableList());
-
-    final String unionedCohortQueries = queryMapEntries.stream()
-        .map(QueryAndParameters::getQuery)
-        .collect(Collectors.joining(" UNION DISTINCT "));
-
-    final ImmutableList<Domain> domainList = domainValuePairs.stream()
-            .map(DomainValuePair::getDomain)
+    final ImmutableList<QueryAndParameters> queryMapEntries =
+        Objects.requireNonNull(cohortsSelected).stream()
+            .map(this::getCohortQueryStringAndCollectNamedParameters)
             .collect(toImmutableList());
 
+    final String unionedCohortQueries =
+        queryMapEntries.stream()
+            .map(QueryAndParameters::getQuery)
+            .collect(Collectors.joining(" UNION DISTINCT "));
+
+    final ImmutableList<Domain> domainList =
+        domainValuePairs.stream().map(DomainValuePair::getDomain).collect(toImmutableList());
+
     // now merge all the individual maps from each configuration
-    final ImmutableMap<String, QueryParameterValue> mergedQueryParameterValues = queryMapEntries.stream()
-        .map(QueryAndParameters::getNamedParameterValues)
-        .flatMap(m -> m.entrySet().stream())
-        .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
+    final ImmutableMap<String, QueryParameterValue> mergedQueryParameterValues =
+        queryMapEntries.stream()
+            .map(QueryAndParameters::getNamedParameterValues)
+            .flatMap(m -> m.entrySet().stream())
+            .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
 
-
-    return buildQueriesByDomain(domainList,
+    return buildQueriesByDomain(
+        domainList,
         domainValuePairs,
         mergedQueryParameterValues,
         includesAllParticipants,
@@ -254,28 +259,32 @@ public class DataSetServiceImpl implements DataSetService {
         unionedCohortQueries);
   }
 
-  // note: ImmutableList is OK return type on private methods, but should be avoided in public signatures.
-    private ImmutableList<ConceptSet> getExpandedConceptSetSelections(
-        PrePackagedConceptSetEnum prePackagedConceptSet,
-        List<Long> conceptSetIds,
-        List<Cohort> selectedCohorts,
-        boolean includesAllParticipants,
-        List<DomainValuePair> domainValuePairs) {
+  // note: ImmutableList is OK return type on private methods, but should be avoided in public
+  // signatures.
+  private ImmutableList<ConceptSet> getExpandedConceptSetSelections(
+      PrePackagedConceptSetEnum prePackagedConceptSet,
+      List<Long> conceptSetIds,
+      List<Cohort> selectedCohorts,
+      boolean includesAllParticipants,
+      List<DomainValuePair> domainValuePairs) {
     final ImmutableList<org.pmiops.workbench.db.model.ConceptSet> initialSelectedConceptSets =
         ImmutableList.copyOf(this.conceptSetDao.findAllByConceptSetIdIn(conceptSetIds));
     // TODO: can we not check this earlier?
     final boolean noCohortsIncluded = selectedCohorts.isEmpty() && !includesAllParticipants;
     if (noCohortsIncluded
         || hasNoConcepts(prePackagedConceptSet, domainValuePairs, initialSelectedConceptSets)) {
-      // TODO: According to the unit tests, we should throw if there's no cohort or concept, but return an empty
-      // query if there's no value. This seems odd. Regardless, we should do this validation elsewhere,
+      // TODO: According to the unit tests, we should throw if there's no cohort or concept, but
+      // return an empty
+      // query if there's no value. This seems odd. Regardless, we should do this validation
+      // elsewhere,
       // and maybe build a helper class with all these derived properties. Scout says we likely want
       // to consider the request invalid if there are not values selected, except possibly in rare
       // cases where some domains have none but others do.
       throw new BadRequestException("Data Sets must include at least one cohort and concept.");
     }
 
-    final ImmutableList.Builder<org.pmiops.workbench.db.model.ConceptSet> selectedConceptSetsBuilder = ImmutableList.builder();
+    final ImmutableList.Builder<org.pmiops.workbench.db.model.ConceptSet>
+        selectedConceptSetsBuilder = ImmutableList.builder();
     selectedConceptSetsBuilder.addAll(initialSelectedConceptSets);
 
     // If pre packaged all survey concept set is selected create a temp concept set with concept ids
@@ -287,8 +296,10 @@ public class DataSetServiceImpl implements DataSetService {
     return selectedConceptSetsBuilder.build();
   }
 
-  private static boolean hasNoConcepts(PrePackagedConceptSetEnum prePackagedConceptSet,
-      List<DomainValuePair> domainValuePairs, ImmutableList<ConceptSet> initialSelectedConceptSets) {
+  private static boolean hasNoConcepts(
+      PrePackagedConceptSetEnum prePackagedConceptSet,
+      List<DomainValuePair> domainValuePairs,
+      ImmutableList<ConceptSet> initialSelectedConceptSets) {
     return initialSelectedConceptSets.isEmpty()
         && domainValuePairs.isEmpty()
         && prePackagedConceptSet.equals(PrePackagedConceptSetEnum.NONE);
@@ -298,31 +309,31 @@ public class DataSetServiceImpl implements DataSetService {
   public QueryAndParameters getCohortQueryStringAndCollectNamedParameters(Cohort cohortDbModel) {
     String cohortDefinition = cohortDbModel.getCriteria();
     if (cohortDefinition == null) {
-      throw new NotFoundException(String.format(
-          "Not Found: No Cohort definition matching cohortId: %s", cohortDbModel.getCohortId()));
+      throw new NotFoundException(
+          String.format(
+              "Not Found: No Cohort definition matching cohortId: %s",
+              cohortDbModel.getCohortId()));
     }
-    final SearchRequest searchRequest =
-        new Gson().fromJson(cohortDefinition, SearchRequest.class);
+    final SearchRequest searchRequest = new Gson().fromJson(cohortDefinition, SearchRequest.class);
     final QueryJobConfiguration participantIdQuery =
         cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
     final QueryJobConfiguration participantQueryConfig =
         bigQueryService.filterBigQueryConfig(participantIdQuery);
     final AtomicReference<String> participantQuery =
         new AtomicReference<>(participantQueryConfig.getQuery());
-    final ImmutableMap.Builder<String, QueryParameterValue> cohortNamedParametersBuilder = new ImmutableMap.Builder<>();
-      participantQueryConfig
-          .getNamedParameters()
-          .forEach(
-              (npKey, npValue) -> {
-                final String newKey = biuldNewKey(cohortDbModel, npKey);
-                // replace the original key (when found as a word)
-                participantQuery.getAndSet(
-                    participantQuery
-                        .get()
-                        .replaceAll("\\b".concat(npKey).concat("\\b"), newKey));
-                cohortNamedParametersBuilder.put(newKey, npValue);
-              });
-      return new QueryAndParameters(participantQuery.get(), cohortNamedParametersBuilder.build());
+    final ImmutableMap.Builder<String, QueryParameterValue> cohortNamedParametersBuilder =
+        new ImmutableMap.Builder<>();
+    participantQueryConfig
+        .getNamedParameters()
+        .forEach(
+            (npKey, npValue) -> {
+              final String newKey = biuldNewKey(cohortDbModel, npKey);
+              // replace the original key (when found as a word)
+              participantQuery.getAndSet(
+                  participantQuery.get().replaceAll("\\b".concat(npKey).concat("\\b"), newKey));
+              cohortNamedParametersBuilder.put(newKey, npValue);
+            });
+    return new QueryAndParameters(participantQuery.get(), cohortNamedParametersBuilder.build());
   }
 
   // Construct key the new cohort parameter format
@@ -338,41 +349,51 @@ public class DataSetServiceImpl implements DataSetService {
       boolean includesAllParticipants,
       List<ConceptSet> conceptSetsSelected,
       String cohortQueries) {
-    final CdrBigQuerySchemaConfig  bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
+    final CdrBigQuerySchemaConfig bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
 
     return domainList.stream()
-        .collect(ImmutableMap.toImmutableMap(
-            Domain::toString,
-            domain -> buildQueryJobConfigForDomain(
-                (Domain) domain,
-                domainValuePairs,
-                cohortParameters,
-                includesAllParticipants,
-                conceptSetsSelected,
-                cohortQueries,
-                bigQuerySchemaConfig)));
+        .collect(
+            ImmutableMap.toImmutableMap(
+                Domain::toString,
+                domain ->
+                    buildQueryJobConfigForDomain(
+                        (Domain) domain,
+                        domainValuePairs,
+                        cohortParameters,
+                        includesAllParticipants,
+                        conceptSetsSelected,
+                        cohortQueries,
+                        bigQuerySchemaConfig)));
   }
 
-  private QueryJobConfiguration buildQueryJobConfigForDomain(Domain domain, List<DomainValuePair> domainValuePairs,
-      Map<String, QueryParameterValue> cohortParameters, boolean includesAllParticipants,
-      List<ConceptSet> conceptSetsSelected, String cohortQueries,
+  private QueryJobConfiguration buildQueryJobConfigForDomain(
+      Domain domain,
+      List<DomainValuePair> domainValuePairs,
+      Map<String, QueryParameterValue> cohortParameters,
+      boolean includesAllParticipants,
+      List<ConceptSet> conceptSetsSelected,
+      String cohortQueries,
       CdrBigQuerySchemaConfig bigQuerySchemaConfig) {
     validateConceptSetSelection(domain, conceptSetsSelected);
 
     final StringBuilder queryBuilder = new StringBuilder("SELECT ");
     final String personIdQualified = getQualifiedColumnName(domain, PERSON_ID_COLUMN_NAME);
 
-    final List<DomainValuePair> domainValuePairsForCurrentDomain = domainValuePairs.stream()
-        .filter(dvp -> dvp.getDomain() == domain)
-        .collect(Collectors.toList());
+    final List<DomainValuePair> domainValuePairsForCurrentDomain =
+        domainValuePairs.stream()
+            .filter(dvp -> dvp.getDomain() == domain)
+            .collect(Collectors.toList());
 
-    final ValuesLinkingPair valuesLinkingPair = getValueSelectsAndJoins(domainValuePairsForCurrentDomain);
+    final ValuesLinkingPair valuesLinkingPair =
+        getValueSelectsAndJoins(domainValuePairsForCurrentDomain);
 
-    queryBuilder.append(String.join(", ", valuesLinkingPair.getSelects()))
+    queryBuilder
+        .append(String.join(", ", valuesLinkingPair.getSelects()))
         .append(" ")
         .append(valuesLinkingPair.formatJoins());
 
-    final Optional<String> conceptSetSqlInClauseMaybe = buildConceptIdListClause(domain, conceptSetsSelected);
+    final Optional<String> conceptSetSqlInClauseMaybe =
+        buildConceptIdListClause(domain, conceptSetsSelected);
 
     if (supportsConceptSets(domain)) {
       final Optional<DomainConceptIdInfo> domainConceptIdInfoMaybe =
@@ -385,20 +406,25 @@ public class DataSetServiceImpl implements DataSetService {
                           getColumnName(tableConfig, "standard")))
               .findFirst();
 
-      final DomainConceptIdInfo domainConceptIdInfo = domainConceptIdInfoMaybe.orElseThrow(
-          () -> new ServerErrorException(String.format(
-              "Couldn't find source and standard columns for domain: %s",
-              domain.toString())));
+      final DomainConceptIdInfo domainConceptIdInfo =
+          domainConceptIdInfoMaybe.orElseThrow(
+              () ->
+                  new ServerErrorException(
+                      String.format(
+                          "Couldn't find source and standard columns for domain: %s",
+                          domain.toString())));
 
       // This adds the where clauses for cohorts and concept sets.
       conceptSetSqlInClauseMaybe.ifPresent(
-          clause -> queryBuilder.append(" WHERE \n(")
-              .append(domainConceptIdInfo.getStandardConceptIdColumn())
-              .append(clause)
-              .append(" OR \n")
-              .append(domainConceptIdInfo.getSourceConceptIdColumn())
-              .append(clause)
-              .append(")"));
+          clause ->
+              queryBuilder
+                  .append(" WHERE \n(")
+                  .append(domainConceptIdInfo.getStandardConceptIdColumn())
+                  .append(clause)
+                  .append(" OR \n")
+                  .append(domainConceptIdInfo.getSourceConceptIdColumn())
+                  .append(clause)
+                  .append(")"));
 
       if (!includesAllParticipants) {
         queryBuilder
@@ -409,13 +435,13 @@ public class DataSetServiceImpl implements DataSetService {
             .append("))");
       }
     } else if (!includesAllParticipants) {
-        queryBuilder
-            .append(" \nWHERE ")
-            .append(personIdQualified)
-            .append(" IN (")
-            .append(cohortQueries)
-            .append(")");
-      }
+      queryBuilder
+          .append(" \nWHERE ")
+          .append(personIdQualified)
+          .append(" IN (")
+          .append(cohortQueries)
+          .append(")");
+    }
 
     final String completeQuery = queryBuilder.toString();
 
@@ -423,17 +449,18 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   private void validateConceptSetSelection(Domain domain, List<ConceptSet> conceptSetsSelected) {
-    if (supportsConceptSets(domain) &&
-        !conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(conceptSetsSelected)) {
+    if (supportsConceptSets(domain)
+        && !conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(conceptSetsSelected)) {
       throw new BadRequestException("Concept Sets must contain at least one concept");
     }
   }
 
-  private Optional<String> buildConceptIdListClause(Domain domain,
-      List<ConceptSet> conceptSetsSelected) {
+  private Optional<String> buildConceptIdListClause(
+      Domain domain, List<ConceptSet> conceptSetsSelected) {
     final Optional<String> conceptSetSqlInClauseMaybe;
     if (supportsConceptSets(domain)) {
-      conceptSetSqlInClauseMaybe = Optional.of(buildConceptIdSqlInClause(domain, conceptSetsSelected));
+      conceptSetSqlInClauseMaybe =
+          Optional.of(buildConceptIdSqlInClause(domain, conceptSetsSelected));
     } else {
       conceptSetSqlInClauseMaybe = Optional.empty();
     }
@@ -445,10 +472,11 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   private String buildConceptIdSqlInClause(Domain domain, List<ConceptSet> conceptSetsSelected) {
-    final String conceptSetIDs = conceptSetsSelected.stream()
-        .filter(cs -> domain == cs.getDomainEnum())
-        .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
-        .collect(Collectors.joining(", "));
+    final String conceptSetIDs =
+        conceptSetsSelected.stream()
+            .filter(cs -> domain == cs.getDomainEnum())
+            .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
+            .collect(Collectors.joining(", "));
     return buildSqlInConstraintList(conceptSetIDs);
   }
 
@@ -472,16 +500,16 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @VisibleForTesting
-  public boolean conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(List<ConceptSet> conceptSetsSelected) {
+  public boolean conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
+      List<ConceptSet> conceptSetsSelected) {
     if (conceptSetsSelected.isEmpty()) {
       return false;
     }
     return conceptSetsSelected.stream()
         .collect(Collectors.groupingBy(ConceptSet::getDomain, Collectors.toList()))
-        .values().stream()
-        .map(csl -> csl.stream()
-            .mapToLong(cs -> cs.getConceptIds().size())
-            .sum())
+        .values()
+        .stream()
+        .map(csl -> csl.stream().mapToLong(cs -> cs.getConceptIds().size()).sum())
         .allMatch(count -> count > 0);
   }
 
@@ -520,7 +548,7 @@ public class DataSetServiceImpl implements DataSetService {
                     + "\n\n"
                     + generateNotebookUserCode(
                         entry.getValue(),
-                    Objects.requireNonNull(Domain.fromValue(entry.getKey())),
+                        Objects.requireNonNull(Domain.fromValue(entry.getKey())),
                         dataSetName,
                         kernelTypeEnum))
         .collect(Collectors.toList());
@@ -538,9 +566,8 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   private ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> valueSetList) {
-    final Optional<Domain> domainMaybe = valueSetList.stream()
-        .map(DomainValuePair::getDomain)
-        .findFirst();
+    final Optional<Domain> domainMaybe =
+        valueSetList.stream().map(DomainValuePair::getDomain).findFirst();
     if (!domainMaybe.isPresent()) {
       return ValuesLinkingPair.emptyPair();
     }
@@ -555,23 +582,31 @@ public class DataSetServiceImpl implements DataSetService {
     final String domainName = domainMaybe.get().toString();
     final String domainTitleCase = toTitleCase(domainName);
 
-    final ImmutableMap<String, QueryParameterValue> queryParameterValuesByDomain = ImmutableMap.of(
-        "pDomain", QueryParameterValue.string(domainTitleCase),
-        "pValuesList", QueryParameterValue.array(valuesUppercaseBuilder.build().toArray(new String[0]), String.class));
+    final ImmutableMap<String, QueryParameterValue> queryParameterValuesByDomain =
+        ImmutableMap.of(
+            "pDomain", QueryParameterValue.string(domainTitleCase),
+            "pValuesList",
+                QueryParameterValue.array(
+                    valuesUppercaseBuilder.build().toArray(new String[0]), String.class));
 
     final TableResult valuesLinkingTableResult =
         bigQueryService.executeQuery(
-            buildQueryJobConfiguration(queryParameterValuesByDomain,
+            buildQueryJobConfiguration(
+                queryParameterValuesByDomain,
                 SELCECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST));
 
-    final ImmutableList<String> valueSelects = StreamSupport.stream(valuesLinkingTableResult.getValues().spliterator(), false)
-        .filter(fieldValue -> !fieldValue.get("OMOP_SQL").getStringValue().equals("CORE_TABLE_FOR_DOMAIN"))
-        .map(fieldValue -> fieldValue.get("OMOP_SQL").getStringValue())
-        .collect(ImmutableList.toImmutableList());
+    final ImmutableList<String> valueSelects =
+        StreamSupport.stream(valuesLinkingTableResult.getValues().spliterator(), false)
+            .filter(
+                fieldValue ->
+                    !fieldValue.get("OMOP_SQL").getStringValue().equals("CORE_TABLE_FOR_DOMAIN"))
+            .map(fieldValue -> fieldValue.get("OMOP_SQL").getStringValue())
+            .collect(ImmutableList.toImmutableList());
 
-    final ImmutableList<String> valueJoins = StreamSupport.stream(valuesLinkingTableResult.getValues().spliterator(), false)
-        .map(fieldValue -> fieldValue.get(ValuesLinkingPair.JOIN_VALUE_KEY).getStringValue())
-        .collect(ImmutableList.toImmutableList());
+    final ImmutableList<String> valueJoins =
+        StreamSupport.stream(valuesLinkingTableResult.getValues().spliterator(), false)
+            .map(fieldValue -> fieldValue.get(ValuesLinkingPair.JOIN_VALUE_KEY).getStringValue())
+            .collect(ImmutableList.toImmutableList());
 
     return new ValuesLinkingPair(valueSelects, valueJoins);
   }
@@ -583,9 +618,7 @@ public class DataSetServiceImpl implements DataSetService {
     } else if (name.length() == 1) {
       return name;
     } else {
-      return String.format("%s%s",
-          name.charAt(0),
-          name.substring(1).toLowerCase());
+      return String.format("%s%s", name.charAt(0), name.substring(1).toLowerCase());
     }
   }
 
@@ -682,11 +715,13 @@ public class DataSetServiceImpl implements DataSetService {
     }
     final boolean isArrayParameter = namedParameterValue.getArrayType() != null;
 
-    final List<QueryParameterValue> arrayValues = nullableListToEmpty(namedParameterValue.getArrayValues());
+    final List<QueryParameterValue> arrayValues =
+        nullableListToEmpty(namedParameterValue.getArrayValues());
 
     switch (kernelTypeEnum) {
       case PYTHON:
-        return buildPythonNamedParameterQuery(key, namedParameterValue, isArrayParameter, arrayValues);
+        return buildPythonNamedParameterQuery(
+            key, namedParameterValue, isArrayParameter, arrayValues);
       case R:
         return "      list(\n"
             + "        name = \""
@@ -715,8 +750,10 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   // TODO(jaycarlton) use external query builder or build high-level tooling for constructing this.
-  private static String buildPythonNamedParameterQuery(String key,
-      QueryParameterValue namedParameterValue, boolean isArrayParameter,
+  private static String buildPythonNamedParameterQuery(
+      String key,
+      QueryParameterValue namedParameterValue,
+      boolean isArrayParameter,
       List<QueryParameterValue> arrayValues) {
     return "      {\n"
         + "        'name': \""
@@ -741,10 +778,8 @@ public class DataSetServiceImpl implements DataSetService {
         + "      }";
   }
 
-  private static <T> List<T> nullableListToEmpty(
-      List<T> nullableList) {
-    return Optional.ofNullable(nullableList)
-        .orElse(new ArrayList<>());
+  private static <T> List<T> nullableListToEmpty(List<T> nullableList) {
+    return Optional.ofNullable(nullableList).orElse(new ArrayList<>());
   }
 
   private static boolean getBuiltinBooleanFromNullable(Boolean boo) {
@@ -752,7 +787,8 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   private ConceptSet buildPrePackagedSurveyConceptSet() {
-    final ImmutableList<Long> conceptIds = ImmutableList.copyOf(conceptBigQueryService.getSurveyQuestionConceptIds());
+    final ImmutableList<Long> conceptIds =
+        ImmutableList.copyOf(conceptBigQueryService.getSurveyQuestionConceptIds());
     final ConceptSet surveyConceptSet = new ConceptSet();
     surveyConceptSet.setName("All Surveys");
     surveyConceptSet.setDomain(CommonStorageEnums.domainToStorage(Domain.SURVEY));

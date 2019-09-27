@@ -399,10 +399,7 @@ public class DataSetControllerTest {
     CreateConceptSetRequest conceptSetRequest =
         new CreateConceptSetRequest()
             .conceptSet(conceptSet)
-            .addedIds(
-                conceptList.stream()
-                    .map(Concept::getConceptId)
-                    .collect(Collectors.toList()));
+            .addedIds(conceptList.stream().map(Concept::getConceptId).collect(Collectors.toList()));
 
     conceptSet =
         conceptSetsController
@@ -585,13 +582,15 @@ public class DataSetControllerTest {
 
   @Test
   public void testGetQueryDropsQueriesWithNoValue() {
-    final DataSetRequest dataSet = buildEmptyDataSetRequest()
-        .addCohortIdsItem(COHORT_ONE_ID)
-        .addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+    final DataSetRequest dataSet =
+        buildEmptyDataSetRequest()
+            .addCohortIdsItem(COHORT_ONE_ID)
+            .addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
     DataSetCodeResponse response =
         dataSetController
-            .generateCode(workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+            .generateCode(
+                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
     assertThat(response.getCode()).isEmpty();
   }
@@ -784,24 +783,25 @@ public class DataSetControllerTest {
             .generateCode(
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
-       /* this should produces the following query
-        import pandas
+    /* this should produces the following query
+       import pandas
 
-        blah_person_sql = """SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.person` person
-        WHERE person.PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person`
-        person UNION DISTINCT SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person)"""
+       blah_person_sql = """SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.person` person
+       WHERE person.PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person`
+       person UNION DISTINCT SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person)"""
 
-        blah_person_query_config = {
-          'query': {
-          'parameterMode': 'NAMED',
-          'queryParameters': [
+       blah_person_query_config = {
+         'query': {
+         'parameterMode': 'NAMED',
+         'queryParameters': [
 
-            ]
-          }
-        }
-     */
-    assertThat(response.getCode()).contains("blah_person_sql = \"\"\"SELECT PERSON_ID FROM `" +
-        TEST_CDR_TABLE + ".person` person");
+           ]
+         }
+       }
+    */
+    assertThat(response.getCode())
+        .contains(
+            "blah_person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person");
     // For demographic unlike other domains WHERE should be followed by person.person_id rather than
     // concept_id
     assertThat(response.getCode().contains("WHERE person.PERSON_ID"));
@@ -938,7 +938,8 @@ public class DataSetControllerTest {
 
     mockLinkingTableQuery(tables);
 
-    final Map<String, QueryJobConfiguration> result = dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
+    final Map<String, QueryJobConfiguration> result =
+        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
     assertThat(result).isNotEmpty();
   }
 }
