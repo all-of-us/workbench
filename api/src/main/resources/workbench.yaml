@@ -1,55 +1,27 @@
-# This file is for endpoints we do NOT intend to generate client libraries for
-# and advertise to notebook developers. Endpoints we DO want notebook developers to use should
-# go in client_api.yaml.
-
-# This file references parameters, paths, and definitions specified in
-# client_api.yaml; the two files get merged together into a merged.yaml file at build time.
-
-# If validation fails, gradle:generateApi fails claiming this file does not exist.
-# For separate validation (with some false positives), do:
-#     ./project.rb validate-swagger
-swagger: '2.0'
+﻿swagger: '2.0'
 info:
-  version: "0.1.0"
-  title: "AllOfUs Workbench API"
-  description: "The API for the AllOfUs workbench."
-  termsOfService: "http://www.pmi-ops.org/terms_of_service.html"
+  version: 0.1.0
+  title: 'AllOfUs Workbench API'
+  description: 'The API for the AllOfUs workbench.'
+  termsOfService: 'http://www.pmi-ops.org/terms_of_service.html'
   contact:
-    name: "developer_help@pmi-ops.org"
+    name: developer_help@pmi-ops.org
   license:
-    name: "BSD"
-host: "api.pmi-ops.org"
+    name: BSD
+host: api.pmi-ops.org
 securityDefinitions:
-  # Establish the fact that *some endpoints* are OAuth protected
-  # by defining an `aou_oauth` security mode, which we'll assing
-  # to any protected endpoints below.
   aou_oauth:
-    # TODO: Vet/fix this token and/or authorization URL to work in practice.
-    # These are currently included simply to satisfy the Swagger specification,
-    # as this is not directly used to dictate oauth details (just used to
-    # annotate which methods require oauth).
     authorizationUrl: ""
     tokenUrl: ""
     type: oauth2
     flow: accessCode
 schemes:
-  - "https"
+  - https
 produces:
-  - "application/json"
-# Establish the fact that all endpoints are protected: this annotation
-# ensures that client libraries know to send bearer tokens when calling
+  - application/json
 security:
-  - aou_oauth: []
-
-# Throughout, we use integer/int64 in preference to string/date-time because Swagger's
-# date formatting is inconsistent between server and client. Time values are stored as
-# milliseconds since the UNIX epoch.
-
-##########################################################################################
-## PATHS
-##########################################################################################
-
-## Common Path Parameters
+  -
+    aou_oauth: []
 parameters:
   userId:
     in: path
@@ -63,398 +35,377 @@ parameters:
     type: integer
     format: int64
     required: true
-    description: Concept set ID
+    description: 'Concept set ID'
   dataSetId:
     in: path
     name: dataSetId
     type: integer
     format: int64
     required: true
-    description: Data set ID
-
+    description: 'Data set ID'
 paths:
   /v1/status:
     get:
       tags:
         - status
-      description: Returns the status of the various services and integrations
+      description: 'Returns the status of the various services and integrations'
       operationId: getStatus
       security: []
       responses:
-        200:
-          description: A map of system name to status.
+        '200':
+          description: 'A map of system name to status.'
           schema:
-            $ref: "#/definitions/StatusResponse"
-
-
+            $ref: '#/definitions/StatusResponse'
   /v1/config:
     get:
       tags:
         - config
-      description: Returns some server configuration data.
+      description: 'Returns some server configuration data.'
       operationId: getConfig
       security: []
       responses:
-        200:
-          description: Configuration data
+        '200':
+          description: 'Configuration data'
           schema:
-            $ref: "#/definitions/ConfigResponse"
-
+            $ref: '#/definitions/ConfigResponse'
   /v1/featured-workspace-config:
     get:
       tags:
         - featured-workspaces-config
-      description: Returns the featured workspaces config
+      description: 'Returns the featured workspaces config'
       operationId: getFeaturedWorkspacesConfig
       security: []
       responses:
-        200:
-          description: List of featured workspaces
+        '200':
+          description: 'List of featured workspaces'
           schema:
-            $ref: "#/definitions/FeaturedWorkspacesConfigResponse"
-
-
-    # User methods ########################################################################
-
+            $ref: '#/definitions/FeaturedWorkspacesConfigResponse'
   /v1/profile:
     get:
       tags:
         - profile
-      description: Returns the user's profile information
+      description: 'Returns the user''s profile information'
       operationId: getMe
       responses:
-        200:
-          description: The user's profile.
+        '200':
+          description: 'The user''s profile.'
           schema:
-            $ref: "#/definitions/Profile"
+            $ref: '#/definitions/Profile'
     patch:
       tags:
         - profile
       consumes:
         - application/json
-      description: Updates a users profile
+      description: 'Updates a users profile'
       operationId: updateProfile
       parameters:
-        - in: body
+        -
+          in: body
           name: updatedProfile
-          description: the new profile to use
+          description: 'the new profile to use'
           schema:
-            $ref: "#/definitions/Profile"
+            $ref: '#/definitions/Profile'
       responses:
-        204:
-          description: Request received.
-        400:
-          description: Bad request
+        '204':
+          description: 'Request received.'
+        '400':
+          description: 'Bad request'
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: '#/definitions/ErrorResponse'
     delete:
       tags:
         - profile
-      description: Deletes the user's profile and gsuite account, does not clean up in firecloud.
+      description: 'Deletes the user''s profile and gsuite account, does not clean up in firecloud.'
       operationId: deleteProfile
       responses:
-        204:
-          description: Request Received.
-
-
-  # TODO(dmohs): If the username is not present in the query string, this responds with 500 Server
-  # Error. It should respond with 400 Bad Request.
+        '204':
+          description: 'Request Received.'
   /v1/is-username-taken:
     get:
       tags:
         - profile
-      description: Checks to see if the given username is not available.
+      description: 'Checks to see if the given username is not available.'
       operationId: isUsernameTaken
       security: []
       parameters:
-        - in: query
+        -
+          in: query
           name: username
           type: string
           required: true
       responses:
-        200:
-          description: The answer.
+        '200':
+          description: 'The answer.'
           schema:
-            $ref: "#/definitions/UsernameTakenResponse"
-
+            $ref: '#/definitions/UsernameTakenResponse'
   /v1/is-contact-email-taken:
     get:
       tags:
         - profile
-      description: Checks to see if the given contact email is not available.
+      description: 'Checks to see if the given contact email is not available.'
       operationId: isContactEmailTaken
       security: []
       parameters:
-        - in: query
+        -
+          in: query
           name: contactEmail
           type: string
           required: true
       responses:
-        200:
-          description: The answer.
+        '200':
+          description: 'The answer.'
           schema:
-            $ref: "#/definitions/ContactEmailTakenResponse"
-
+            $ref: '#/definitions/ContactEmailTakenResponse'
   /v1/update-contact-email:
     post:
       tags:
         - profile
       consumes:
         - application/json
-      description: Only for accounts that have not logged in yet, update contact email.
+      description: 'Only for accounts that have not logged in yet, update contact email.'
       operationId: updateContactEmail
       security: []
       parameters:
-        - in: body
+        -
+          in: body
           name: updateContactEmailRequest
           schema:
-            $ref: "#/definitions/UpdateContactEmailRequest"
+            $ref: '#/definitions/UpdateContactEmailRequest'
       responses:
-        200:
-          description: Contact Email Updated
-        400:
-          description: Invalid contact email address
-        403:
-          description: Unable to process this request
-        500:
-          description: Internal Server Error
-
+        '200':
+          description: 'Contact Email Updated'
+        '400':
+          description: 'Invalid contact email address'
+        '403':
+          description: 'Unable to process this request'
+        '500':
+          description: 'Internal Server Error'
   /v1/resend-welcome-email:
     post:
       tags:
         - profile
       consumes:
         - application/json
-      description: Resend welcome email
+      description: 'Resend welcome email'
       operationId: resendWelcomeEmail
       security: []
       parameters:
-        - in: body
+        -
+          in: body
           name: resendWelcomeEmail
           schema:
-            $ref: "#/definitions/ResendWelcomeEmailRequest"
+            $ref: '#/definitions/ResendWelcomeEmailRequest'
       responses:
-        200:
-          description: Welcome Email sent.
-        500:
-          description: Internal Server Error
-
+        '200':
+          description: 'Welcome Email sent.'
+        '500':
+          description: 'Internal Server Error'
   /v1/invitation-key-verification:
     post:
       tags:
         - profile
       consumes:
         - application/json
-      description: Verifies invitation key.
+      description: 'Verifies invitation key.'
       operationId: invitationKeyVerification
       security: []
       parameters:
-        - in: body
+        -
+          in: body
           name: invitationVerificationRequest
           schema:
-            $ref: "#/definitions/InvitationVerificationRequest"
+            $ref: '#/definitions/InvitationVerificationRequest'
       responses:
-        200:
-          description: Invitation Key verified.
-        400:
-          description: Error occurred while verifying Invitation Key.
+        '200':
+          description: 'Invitation Key verified.'
+        '400':
+          description: 'Error occurred while verifying Invitation Key.'
           schema:
-            $ref: "#/definitions/ErrorResponse"
-
+            $ref: '#/definitions/ErrorResponse'
   /v1/google-account:
     post:
       tags:
         - profile
       consumes:
         - application/json
-      description: Creates an account in the researchallofus.org domain.
+      description: 'Creates an account in the researchallofus.org domain.'
       operationId: createAccount
       security: []
       parameters:
-        - in: body
+        -
+          in: body
           name: createAccountRequest
           schema:
-            $ref: "#/definitions/CreateAccountRequest"
+            $ref: '#/definitions/CreateAccountRequest'
       responses:
-        200:
-          description: Account created successfully.
+        '200':
+          description: 'Account created successfully.'
           schema:
-            $ref: "#/definitions/Profile"
-        400:
-          description: Error occurred while creating account.
+            $ref: '#/definitions/Profile'
+        '400':
+          description: 'Error occurred while creating account.'
           schema:
-            $ref: "#/definitions/ErrorResponse"
-
+            $ref: '#/definitions/ErrorResponse'
   /v1/beta-access:
     post:
       tags:
         - profile
-      description: Request betaAccess.
+      description: 'Request betaAccess.'
       operationId: requestBetaAccess
       responses:
-        200:
-          description: The user's profile.
+        '200':
+          description: 'The user''s profile.'
           schema:
-            $ref: "#/definitions/Profile"
-
-
-
+            $ref: '#/definitions/Profile'
   /v1/update-nih-token:
     post:
       tags:
         - profile
       consumes:
         - application/json
-      description: Updates a users NIH token
+      description: 'Updates a users NIH token'
       operationId: updateNihToken
       parameters:
-        - in: body
+        -
+          in: body
           name: token
-          description: the token retrieved from NIH
+          description: 'the token retrieved from NIH'
           schema:
-            $ref: "#/definitions/NihToken"
+            $ref: '#/definitions/NihToken'
       responses:
-        200:
-          description: The user's updated profile.
+        '200':
+          description: 'The user''s updated profile.'
           schema:
-            $ref: "#/definitions/Profile"
-        400:
-          description: Bad request
+            $ref: '#/definitions/Profile'
+        '400':
+          description: 'Bad request'
           schema:
-            $ref: "#/definitions/ErrorResponse"
-
+            $ref: '#/definitions/ErrorResponse'
   /v1/page-visits:
     post:
       tags:
         - profile
       consumes:
         - application/json
-      description: Updates a users page visits
+      description: 'Updates a users page visits'
       operationId: updatePageVisits
       parameters:
-        - in: body
+        -
+          in: body
           name: pageVisit
-          description: the users pageVisits
+          description: 'the users pageVisits'
           schema:
-            $ref: "#/definitions/PageVisit"
+            $ref: '#/definitions/PageVisit'
       responses:
-        200:
-          description: The user's profile.
+        '200':
+          description: 'The user''s profile.'
           schema:
-            $ref: "#/definitions/Profile"
-        400:
-          description: Bad request
+            $ref: '#/definitions/Profile'
+        '400':
+          description: 'Bad request'
           schema:
-            $ref: "#/definitions/ErrorResponse"
-
+            $ref: '#/definitions/ErrorResponse'
   /v1/account/submit-data-use-agreement:
     post:
       tags:
         - profile
-      description: Submits consent to the data use agreement for researchers.
+      description: 'Submits consent to the data use agreement for researchers.'
       operationId: submitDataUseAgreement
       parameters:
-        - in: query
+        -
+          in: query
           name: dataUseAgreementSignedVersion
-          description: Version \# of the Data Use Agreement that was signed.
+          description: 'Version \# of the Data Use Agreement that was signed.'
           type: integer
           required: true
       responses:
-        200:
-          description: The user's profile.
+        '200':
+          description: 'The user''s profile.'
           schema:
-            $ref: "#/definitions/Profile"
-
+            $ref: '#/definitions/Profile'
   /v1/account/sync-training-status:
     post:
       tags:
         - profile
-      summary: Sync compliance training status
-      description: Retrieves moodleId(either from DB or call from Moodle API)
-        and gets Training status on the basis of that
+      summary: 'Sync compliance training status'
+      description: "Retrieves moodleId(either from DB or call from Moodle API)\nand gets Training status on the basis of that"
       operationId: syncComplianceTrainingStatus
       responses:
-        200:
-          description: The user's profile.
+        '200':
+          description: 'The user''s profile.'
           schema:
-            $ref: "#/definitions/Profile"
-        404:
-          description: User not found
-        500:
-          description: Internal Error
+            $ref: '#/definitions/Profile'
+        '404':
+          description: 'User not found'
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
   /v1/account/sync-era-commons-status:
     post:
       tags:
         - profile
-      summary: Sync eRA Commons status
-      description: Retrieves and stores the current user's NIH / eRA Commons
-        linkage status, fetched via the FireCloud API.
+      summary: 'Sync eRA Commons status'
+      description: "Retrieves and stores the current user's NIH / eRA Commons\nlinkage status, fetched via the FireCloud API."
       operationId: syncEraCommonsStatus
       responses:
-        200:
-          description: The user's profile.
+        '200':
+          description: 'The user''s profile.'
           schema:
-            $ref: "#/definitions/Profile"
-        404:
-          description: User not found
-        500:
-          description: Internal Error
+            $ref: '#/definitions/Profile'
+        '404':
+          description: 'User not found'
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
   /v1/account/sync-two-factor-auth-status:
     post:
       tags:
         - profile
-      summary: Sync two factor auth status
-      description: Syncs a user's 2FA status from google
+      summary: 'Sync two factor auth status'
+      description: 'Syncs a user''s 2FA status from google'
       operationId: syncTwoFactorAuthStatus
       responses:
-        200:
-          description: The user's profile.
+        '200':
+          description: 'The user''s profile.'
           schema:
-            $ref: "#/definitions/Profile"
-        404:
-          description: User not found
-        500:
-          description: Internal Error
+            $ref: '#/definitions/Profile'
+        '404':
+          description: 'User not found'
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
-  # TODO: add demographic survey response data
   /v1/account/submit-demographic-survey:
     post:
       tags:
         - profile
-      description: Submits demographic survey responses.
+      description: 'Submits demographic survey responses.'
       operationId: submitDemographicsSurvey
       responses:
-        200:
-          description: The user's profile.
+        '200':
+          description: 'The user''s profile.'
           schema:
-            $ref: "#/definitions/Profile"
-
-  /v1/auth-domain/{groupName}:
+            $ref: '#/definitions/Profile'
+  '/v1/auth-domain/{groupName}':
     post:
       tags:
         - authDomain
-      description: This endpoint will create the registered auth domain.
-      operationId: "createAuthDomain"
+      description: 'This endpoint will create the registered auth domain.'
+      operationId: createAuthDomain
       parameters:
-        - in: path
+        -
+          in: path
           name: groupName
           description: groupName
           required: true
           type: string
       responses:
-        200:
-          description: Successfully created group
+        '200':
+          description: 'Successfully created group'
           schema:
-            $ref: "#/definitions/EmptyResponse"
-
+            $ref: '#/definitions/EmptyResponse'
   /v1/auth-domain/users:
     post:
       tags:
@@ -462,763 +413,704 @@ paths:
       consumes:
         - application/json
       responses:
-        204:
-          description: Successfully Updated User In Group
-        403:
-          description: You must be an admin of this group in order to enable/disable members
+        '204':
+          description: 'Successfully Updated User In Group'
+        '403':
+          description: 'You must be an admin of this group in order to enable/disable members'
           schema:
             $ref: '#/definitions/ErrorResponse'
-        404:
-          description: User not found
+        '404':
+          description: 'User not found'
           schema:
             $ref: '#/definitions/ErrorResponse'
-        500:
-          description: FireCloud Internal Error
+        '500':
+          description: 'FireCloud Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
       parameters:
-        - in: body
+        -
+          in: body
           name: request
-          description: Request containing user email to update and a disabled status to update the user to.
+          description: 'Request containing user email to update and a disabled status to update the user to.'
           schema:
-            $ref: "#/definitions/UpdateUserDisabledRequest"
-      summary: enable/disable a user to an auth domain if you have ID verification authority
+            $ref: '#/definitions/UpdateUserDisabledRequest'
+      summary: 'enable/disable a user to an auth domain if you have ID verification authority'
       operationId: updateUserDisabledStatus
-
-  /v1/user/{term}:
+  '/v1/user/{term}':
     get:
       tags:
         - user
-      description: Returns user information matching search terms
+      description: 'Returns user information matching search terms'
       operationId: user
       responses:
-        200:
-          description: The user information matching supplied search terms
+        '200':
+          description: 'The user information matching supplied search terms'
           schema:
-            $ref: "#/definitions/UserResponse"
+            $ref: '#/definitions/UserResponse'
       parameters:
-        - in: path
+        -
+          in: path
           name: term
-          description: String to find in user's name or email address. Search is a case-insensitive substring match.
+          description: 'String to find in user''s name or email address. Search is a case-insensitive substring match.'
           required: true
           type: string
-        - in: query
+        -
+          in: query
           name: pageToken
-          description: >
-            Pagination token retrieved from a previous call to user; used for retrieving additional pages of results.
+          description: "Pagination token retrieved from a previous call to user; used for retrieving additional pages of results.\n"
           type: string
           required: false
-        - in: query
+        -
+          in: query
           name: pageSize
-          description: >
-            Maximum number of results to return in a response. Defaults to 10.
+          description: "Maximum number of results to return in a response. Defaults to 10.\n"
           type: integer
           required: false
-        - in: query
+        -
+          in: query
           name: sortOrder
-          description: Sort order, either 'asc' or 'desc'. Defaults to 'asc' on the user's email.
+          description: 'Sort order, either ''asc'' or ''desc''. Defaults to ''asc'' on the user''s email.'
           type: string
           required: false
-
-  # Notebook clusters ####################################################################
-
-  /v1/clusters/{billingProjectId}:
+  '/v1/clusters/{billingProjectId}':
     get:
-      summary: List available notebook clusters
-      description: >
-        Returns the clusters available to the current user in the given billing project.
-        Currently there is a single default cluster supported per billing project
-        and this cluster should always either exist or be in the process of being
-        initialized. In a future where researchers have more control over cluster
-        creation, this endpoint would be extended to return all clusters.
+      summary: 'List available notebook clusters'
+      description: "Returns the clusters available to the current user in the given billing project. Currently there is a single default cluster supported per billing project and this cluster should always either exist or be in the process of being initialized. In a future where researchers have more control over cluster creation, this endpoint would be extended to return all clusters.\n"
       operationId: listClusters
       tags:
         - cluster
       parameters:
-        - in: path
+        -
+          in: path
           name: billingProjectId
-          description: The unique identifier of the Google Billing Project containing the clusters
+          description: 'The unique identifier of the Google Billing Project containing the clusters'
           required: true
           type: string
       responses:
-        200:
-          description: Available clusters
+        '200':
+          description: 'Available clusters'
           schema:
             $ref: '#/definitions/ClusterListResponse'
-        500:
-          description: Internal Error
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
-  /v1/clusters/{clusterNamespace}/{clusterName}:
+  '/v1/clusters/{clusterNamespace}/{clusterName}':
     delete:
-      summary: Delete a cluster by name.
+      summary: 'Delete a cluster by name.'
       operationId: deleteCluster
       tags:
         - cluster
       parameters:
-        - in: path
+        -
+          in: path
           name: clusterNamespace
           description: clusterNamespace
           required: true
           type: string
-        - in: path
+        -
+          in: path
           name: clusterName
           description: clusterName
           required: true
           type: string
       responses:
-        202:
-          description: Deletion success
+        '202':
+          description: 'Deletion success'
           schema:
             $ref: '#/definitions/EmptyResponse'
-        500:
-          description: Internal Error
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
-  /v1/clusters/{clusterNamespace}/{clusterName}/localize:
+  '/v1/clusters/{clusterNamespace}/{clusterName}/localize':
     post:
-      summary: >
-        Localize files from a workspace to notebook cluster. As a side-effect,
-        JSON workspace environment files will also be localized to the cluster.
-      description: Localize notebook files to the corresponding notebook cluster.
+      summary: "Localize files from a workspace to notebook cluster. As a side-effect, JSON workspace environment files will also be localized to the cluster.\n"
+      description: 'Localize notebook files to the corresponding notebook cluster.'
       operationId: localize
       tags:
         - cluster
       consumes:
         - application/json
       parameters:
-        - in: path
+        -
+          in: path
           name: clusterNamespace
           description: clusterNamespace
           required: true
           type: string
-        - in: path
+        -
+          in: path
           name: clusterName
           description: clusterName
           required: true
           type: string
-        - in: body
+        -
+          in: body
           name: body
-          description: Localization request.
+          description: 'Localization request.'
           schema:
             $ref: '#/definitions/ClusterLocalizeRequest'
       responses:
-        200:
+        '200':
           description: Success
           schema:
             $ref: '#/definitions/ClusterLocalizeResponse'
-        404:
-          description: Cluster or Workspace not found
+        '404':
+          description: 'Cluster or Workspace not found'
           schema:
             $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Internal Error
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
-  # Billing projects #####################################################################
-
   /v1/billingProjects:
     get:
       tags:
         - Profile
       operationId: getBillingProjects
-      summary: List billing projects for a user
+      summary: 'List billing projects for a user'
       responses:
-        200:
+        '200':
           description: OK
           schema:
             type: array
             items:
               $ref: '#/definitions/BillingProjectMembership'
-        404:
-          description: User Not Found
-        500:
-          description: Internal Server Error
-
-  # Workspaces ###########################################################################
-
+        '404':
+          description: 'User Not Found'
+        '500':
+          description: 'Internal Server Error'
   /v1/workspaces:
     get:
       tags:
         - workspaces
-      description: Returns all workspaces that a user has access to
+      description: 'Returns all workspaces that a user has access to'
       operationId: getWorkspaces
       responses:
-        200:
-          description: A list of workspace definitions.
+        '200':
+          description: 'A list of workspace definitions.'
           schema:
-            $ref: "#/definitions/WorkspaceResponseListResponse"
+            $ref: '#/definitions/WorkspaceResponseListResponse'
     post:
       tags:
         - workspaces
       consumes:
         - application/json
-      description: Creates a workspace
+      description: 'Creates a workspace'
       operationId: createWorkspace
       parameters:
-        - in: body
+        -
+          in: body
           name: workspace
-          description: workspace definition
+          description: 'workspace definition'
           schema:
-            $ref: "#/definitions/Workspace"
+            $ref: '#/definitions/Workspace'
       responses:
-        200:
-          description: The workspace that was created.
+        '200':
+          description: 'The workspace that was created.'
           schema:
-            $ref: "#/definitions/Workspace"
-
+            $ref: '#/definitions/Workspace'
   /v1/workspaces/published:
     get:
       tags:
         - workspaces
-      description: Returns a list of published workspaces
+      description: 'Returns a list of published workspaces'
       operationId: getPublishedWorkspaces
       responses:
-        200:
-          description: A list of workspace definitions.
+        '200':
+          description: 'A list of workspace definitions.'
           schema:
-            $ref: "#/definitions/WorkspaceResponseListResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}:
+            $ref: '#/definitions/WorkspaceResponseListResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     get:
       tags:
         - workspaces
-      description: Returns the workspace definition with the specified ID and namespace
+      description: 'Returns the workspace definition with the specified ID and namespace'
       operationId: getWorkspace
       responses:
-        200:
-          description: A workspace response containing workspace and access level
+        '200':
+          description: 'A workspace response containing workspace and access level'
           schema:
-            $ref: "#/definitions/WorkspaceResponse"
+            $ref: '#/definitions/WorkspaceResponse'
     patch:
       tags:
         - workspaces
       consumes:
         - application/json
-      description: >
-        Modifies the workspace definition with the specified ID and namespace;
-        fields that are omitted will not be modified
+      description: "Modifies the workspace definition with the specified ID and namespace; fields that are omitted will not be modified\n"
       operationId: updateWorkspace
       parameters:
-        - in: body
+        -
+          in: body
           name: workspace
-          description: workspace definition
+          description: 'workspace definition'
           schema:
-            $ref: "#/definitions/UpdateWorkspaceRequest"
+            $ref: '#/definitions/UpdateWorkspaceRequest'
       responses:
-        200:
-          description: The updated workspace definition
+        '200':
+          description: 'The updated workspace definition'
           schema:
-            $ref: "#/definitions/Workspace"
+            $ref: '#/definitions/Workspace'
     delete:
       tags:
         - workspaces
-      description: Deletes the workspace definition with the specified ID and namespace
+      description: 'Deletes the workspace definition with the specified ID and namespace'
       operationId: deleteWorkspace
       responses:
-        202:
-          description: Workspace deletion request accepted
+        '202':
+          description: 'Workspace deletion request accepted'
           schema:
             $ref: '#/definitions/EmptyResponse'
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/userRoles:
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/userRoles':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     get:
       tags:
         - workspaces
-      description: Returns the user roles for all collaborators on a workspace
+      description: 'Returns the user roles for all collaborators on a workspace'
       operationId: getFirecloudWorkspaceUserRoles
       responses:
-        200:
-          description: A list of workspace collaborators
+        '200':
+          description: 'A list of workspace collaborators'
           schema:
             $ref: '#/definitions/WorkspaceUserRolesResponse'
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/publish:
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/publish':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     post:
       tags:
         - workspaces
-      description: >
-        Makes a workspace public to all AoU registered users.
-        Requires FEATURED_WORKSPACE_ADMIN authority.
+      description: "Makes a workspace public to all AoU registered users. Requires FEATURED_WORKSPACE_ADMIN authority.\n"
       operationId: publishWorkspace
       responses:
-        200:
+        '200':
           description: success
           schema:
-            $ref: "#/definitions/EmptyResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/unpublish:
+            $ref: '#/definitions/EmptyResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/unpublish':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     post:
       tags:
         - workspaces
-      description: >
-        Makes a workspace public to all AoU registered users.
-        Requires FEATURED_WORKSPACE_ADMIN authority.
+      description: "Makes a workspace public to all AoU registered users. Requires FEATURED_WORKSPACE_ADMIN authority.\n"
       operationId: unpublishWorkspace
       responses:
-        200:
+        '200':
           description: success
           schema:
-            $ref: "#/definitions/EmptyResponse"
-
+            $ref: '#/definitions/EmptyResponse'
   /v1/admin/workspaces/review:
     get:
       tags:
         - workspaces
-      description: >
-        Returns workspaces that need research purpose review. Requires
-        REVIEW_RESEARCH_PURPOSE authority.
+      description: "Returns workspaces that need research purpose review. Requires REVIEW_RESEARCH_PURPOSE authority.\n"
       operationId: getWorkspacesForReview
       responses:
-        200:
-          description: A list of workspaces
+        '200':
+          description: 'A list of workspaces'
           schema:
-            $ref: "#/definitions/WorkspaceListResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list:
+            $ref: '#/definitions/WorkspaceListResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebook-list':
     get:
-      summary: Get details of Python files from google Bucket directory notebook
-      description: >
-        Returns list of name and path of python files from google bucket,
-        directory notebook.
+      summary: 'Get details of Python files from google Bucket directory notebook'
+      description: "Returns list of name and path of python files from google bucket, directory notebook.\n"
       operationId: getNoteBookList
       tags:
         - workspaces
       parameters:
-        - in: path
+        -
+          in: path
           name: workspaceNamespace
           description: workspaceNamespace
           required: true
           type: string
-        - in: path
+        -
+          in: path
           name: workspaceId
           description: workspaceId
           required: true
           type: string
       responses:
-        200:
-          description: List of files
+        '200':
+          description: 'List of files'
           schema:
             type: array
             items:
               $ref: '#/definitions/FileDetail'
-        404:
-          description: Workspace not found
+        '404':
+          description: 'Workspace not found'
           schema:
             $ref: '#/definitions/ErrorResponse'
-        500:
-          description: Internal Error
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
   /v1/admin/unsafe-self-bypass-access-requirement:
     post:
       tags:
         - profile
       consumes:
         - application/json
-      description: >
-        Updates the given user to bypass the request access requirement
+      description: "Updates the given user to bypass the request access requirement\n"
       parameters:
-        - in: body
+        -
+          in: body
           name: bypassed
           schema:
             $ref: '#/definitions/AccessBypassRequest'
-          description: >
-            Whether the requirement should be bypassed or not. Defaults to
-            true, so an empty body  will cause the requirement to be bypassed.
+          description: "Whether the requirement should be bypassed or not. Defaults to true, so an empty body  will cause the requirement to be bypassed.\n"
       operationId: unsafeSelfBypassAccessRequirement
       responses:
-        200:
+        '200':
           description: success
           schema:
-            $ref: "#/definitions/EmptyResponse"
-        403:
-          description: Self bypass is disallowed in this environment
+            $ref: '#/definitions/EmptyResponse'
+        '400':
+          description: 'No module exists with name submitted'
           schema:
-            $ref: "#/definitions/ErrorResponse"
-        400:
-          description: No module exists with name submitted
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: 'Self bypass is disallowed in this environment'
           schema:
-            $ref: "#/definitions/ErrorResponse"
-
-  /v1/admin/users/{userId}/bypass-access-requirement:
+            $ref: '#/definitions/ErrorResponse'
+  '/v1/admin/users/{userId}/bypass-access-requirement':
     post:
       tags:
         - profile
       consumes:
         - application/json
-      description: >
-        Updates the given user to bypass the request access requirement,
-        e.g. "eraCommons", or "twoFactorAuth"
+      description: "Updates the given user to bypass the request access requirement, e.g. \"eraCommons\", or \"twoFactorAuth\"\n"
       parameters:
-        - $ref: '#/parameters/userId'
-        - in: body
+        -
+          $ref: '#/parameters/userId'
+        -
+          in: body
           name: bypassed
           schema:
             $ref: '#/definitions/AccessBypassRequest'
-          description: >
-            Whether the requirement should be bypassed or not. Defaults to
-            true, so an empty body  will cause the requirement to be bypassed.
+          description: "Whether the requirement should be bypassed or not. Defaults to true, so an empty body  will cause the requirement to be bypassed.\n"
       operationId: bypassAccessRequirement
       responses:
-        200:
+        '200':
           description: success
           schema:
-            $ref: "#/definitions/EmptyResponse"
-        403:
-          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
+            $ref: '#/definitions/EmptyResponse'
+        '400':
+          description: 'No module exists with name submitted'
           schema:
-            $ref: "#/definitions/ErrorResponse"
-        400:
-          description: No module exists with name submitted
+            $ref: '#/definitions/ErrorResponse'
+        '403':
+          description: 'User doesn''t have the ACCESS_CONTROL_ADMIN authority'
           schema:
-            $ref: "#/definitions/ErrorResponse"
-
-  /v1/admin/users/{userId}:
+            $ref: '#/definitions/ErrorResponse'
+  '/v1/admin/users/{userId}':
     get:
       tags:
         - profile
-      description: >
-        Returns a user's profile for review.  Requires ACCESS_CONTROL_ADMIN authority.
+      description: "Returns a user's profile for review.  Requires ACCESS_CONTROL_ADMIN authority.\n"
       parameters:
-        - $ref: '#/parameters/userId'
+        -
+          $ref: '#/parameters/userId'
       operationId: getUser
       responses:
-        200:
-          description: A user's profile
+        '200':
+          description: 'A user''s profile'
           schema:
-            $ref: "#/definitions/Profile"
-        403:
-          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
+            $ref: '#/definitions/Profile'
+        '403':
+          description: 'User doesn''t have the ACCESS_CONTROL_ADMIN authority'
           schema:
-            $ref: "#/definitions/ErrorResponse"
-
-
+            $ref: '#/definitions/ErrorResponse'
   /v1/admin/users/list:
     get:
       tags:
         - profile
-      description: >
-        Returns a list of profiles for users to be reviewed. Requires
-        ACCESS_CONTROL_ADMIN authority.
+      description: "Returns a list of profiles for users to be reviewed. Requires ACCESS_CONTROL_ADMIN authority.\n"
       operationId: getAllUsers
       responses:
-        200:
-          description: A list of users
+        '200':
+          description: 'A list of users'
           schema:
-            $ref: "#/definitions/UserListResponse"
-        403:
-          description: User doesn't have the ACCESS_CONTROL_ADMIN authority
+            $ref: '#/definitions/UserListResponse'
+        '403':
+          description: 'User doesn''t have the ACCESS_CONTROL_ADMIN authority'
           schema:
-            $ref: "#/definitions/ErrorResponse"
-
-  /v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/review:
+            $ref: '#/definitions/ErrorResponse'
+  '/v1/admin/workspaces/{workspaceNamespace}/{workspaceId}/review':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     post:
       tags:
         - workspaces
       consumes:
         - application/json
-      description: Sets a research purpose review result.
+      description: 'Sets a research purpose review result.'
       operationId: reviewWorkspace
       parameters:
-        - in: body
+        -
+          in: body
           name: review
-          description: result of the research purpose review
+          description: 'result of the research purpose review'
           schema:
-            $ref: "#/definitions/ResearchPurposeReviewRequest"
+            $ref: '#/definitions/ResearchPurposeReviewRequest'
       responses:
-        200:
+        '200':
           description: success
           schema:
-            $ref: "#/definitions/EmptyResponse"
-
+            $ref: '#/definitions/EmptyResponse'
   /v1/admin/clusters/updateConfig:
     post:
-      summary: Sets default cluster creation request parameters for a user.
-      description: >
-        Clusters are created with a default machine configuration. Setting this
-        override changes that configuration for subsequent cluster creations.
-        This change only takes effect after a new cluster creation, e.g. due to
-        standard cluster expiration (~2w) or via manual reset. Requires
-        DEVELOPER authority.
+      summary: 'Sets default cluster creation request parameters for a user.'
+      description: "Clusters are created with a default machine configuration. Setting this override changes that configuration for subsequent cluster creations. This change only takes effect after a new cluster creation, e.g. due to standard cluster expiration (~2w) or via manual reset. Requires DEVELOPER authority.\n"
       operationId: updateClusterConfig
       tags:
         - cluster
       parameters:
-        - in: body
+        -
+          in: body
           name: body
-          description: Cluster config update request.
+          description: 'Cluster config update request.'
           schema:
-            $ref: "#/definitions/UpdateClusterConfigRequest"
+            $ref: '#/definitions/UpdateClusterConfigRequest'
       responses:
-        200:
+        '200':
           description: success
           schema:
-            $ref: "#/definitions/EmptyResponse"
-
-
-  # Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
-  # true, which app engine itself only sets when invoking as a cronjob.
-  # See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
-  # and o.p.w.interceptors.CronInterceptor which implements the header check.
-
+            $ref: '#/definitions/EmptyResponse'
   /v1/cron/auditBigQuery:
     get:
       security: []
       tags:
         - audit
         - cron
-      description: >
-        Endpoint meant to be called offline to trigger BigQuery auditing; may be
-        slow to execute. Only executable via App Engine cronjob.
+      description: "Endpoint meant to be called offline to trigger BigQuery auditing; may be slow to execute. Only executable via App Engine cronjob.\n"
       operationId: auditBigQuery
       responses:
-        200:
-          description: Audit was successful.
+        '200':
+          description: 'Audit was successful.'
           schema:
-            $ref: "#/definitions/AuditBigQueryResponse"
-
+            $ref: '#/definitions/AuditBigQueryResponse'
   /v1/cron/checkClusters:
     get:
       security: []
       tags:
         - offlineCluster
         - cron
-      description: >
-        Endpoint meant to be called offline to trigger cluster checks and
-        cleanup. Enforces upgrades for older cluster deployments. May be slow to
-        execute. Only executable via App Engine cronjob.
+      description: "Endpoint meant to be called offline to trigger cluster checks and cleanup. Enforces upgrades for older cluster deployments. May be slow to execute. Only executable via App Engine cronjob.\n"
       operationId: checkClusters
       responses:
-        200:
-          description: Clusters were checked and handled successfully.
+        '200':
+          description: 'Clusters were checked and handled successfully.'
           schema:
-            $ref: "#/definitions/CheckClustersResponse"
-
+            $ref: '#/definitions/CheckClustersResponse'
   /v1/cron/bulkSyncComplianceTrainingStatus:
     get:
       security: []
       tags:
         - offlineUser
         - cron
-      description: sync moodle badge/training status for all users.
+      description: 'sync moodle badge/training status for all users.'
       operationId: bulkSyncComplianceTrainingStatus
       responses:
-        200:
-          description: The user table is updated with training status.
-        404:
-          description: User not found while retrieving  badge.
-        500:
-          description: Internal Error
+        '200':
+          description: 'The user table is updated with training status.'
+        '404':
+          description: 'User not found while retrieving  badge.'
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
   /v1/cron/bulkSyncEraCommonsStatus:
     get:
       security: []
       tags:
         - offlineUser
         - cron
-      description: sync eRA Commons linkage status for all users.
+      description: 'sync eRA Commons linkage status for all users.'
       operationId: bulkSyncEraCommonsStatus
       responses:
-        200:
-          description: All users' eRA Commons statuses were updated.
-        500:
-          description: Internal Error
+        '200':
+          description: 'All users'' eRA Commons statuses were updated.'
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
   /v1/cron/bulkSyncTwoFactorAuthStatus:
     get:
       security: []
       tags:
         - offlineUser
         - cron
-      description: sync 2FA status for all users
+      description: 'sync 2FA status for all users'
       operationId: bulkSyncTwoFactorAuthStatus
       responses:
-        200:
-          description: All users' 2FA statuses were updated.
-        500:
-          description: Internal Error
+        '200':
+          description: 'All users'' 2FA statuses were updated.'
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
   /v1/cron/bulkAuditProjectAccess:
     get:
       security: []
       tags:
         - offlineUser
         - cron
-      description: Audits project access for all users
+      description: 'Audits project access for all users'
       operationId: bulkAuditProjectAccess
       responses:
-        200:
-          description: All users' project access were audited.
-        500:
-          description: Internal Error
+        '200':
+          description: 'All users'' project access were audited.'
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/share':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     post:
       tags:
         - workspaces
       consumes:
         - application/json
-      description: >
-        Shares a workspace with the given users and permissions. Note that the entire ACL must
-        be provided to this method (including all existing users and roles), not just the additional
-        roles desired. Clients should first fetch existing ACLs via the getFirecloudWorkspaceUserRoles
-        method, make any changes desired, then pass the final list to this method.
-
+      description: "Shares a workspace with the given users and permissions. Note that the entire ACL must be provided to this method (including all existing users and roles), not just the additional roles desired. Clients should first fetch existing ACLs via the getFirecloudWorkspaceUserRoles method, make any changes desired, then pass the final list to this method.\n"
       operationId: shareWorkspace
       parameters:
-        - in: body
+        -
+          in: body
           name: body
-          description: users to share the workspace with
+          description: 'users to share the workspace with'
           schema:
-            $ref: "#/definitions/ShareWorkspaceRequest"
+            $ref: '#/definitions/ShareWorkspaceRequest'
       responses:
-        200:
-          description: Successful share response
+        '200':
+          description: 'Successful share response'
           schema:
-            $ref: "#/definitions/WorkspaceUserRolesResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/duplicate:
+            $ref: '#/definitions/WorkspaceUserRolesResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/duplicate':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     post:
       tags:
         - workspaces
       consumes:
         - application/json
-      description: >
-        Duplicate an existing workspace, with given modifications to workspace metadata. Caller will own
-        the newly duplicated workspace, and must have read access to the source workspace. In
-        addition to workspace metadata, the following will also be duplicated:
-          - the associated Firecloud workspace
-          - cohorts, along with reviews and annotations
-          - notebooks located in the default notebook directory for this workspace
+      description: "Duplicate an existing workspace, with given modifications to workspace metadata. Caller will own the newly duplicated workspace, and must have read access to the source workspace. In addition to workspace metadata, the following will also be duplicated:  - the associated Firecloud workspace\n  - cohorts, along with reviews and annotations\n  - notebooks located in the default notebook directory for this workspace\n"
       operationId: cloneWorkspace
       parameters:
-        - in: body
+        -
+          in: body
           name: body
           schema:
-            $ref: "#/definitions/CloneWorkspaceRequest"
+            $ref: '#/definitions/CloneWorkspaceRequest'
       responses:
-        200:
-          description: Successful duplicate response
+        '200':
+          description: 'Successful duplicate response'
           schema:
-            $ref: "#/definitions/CloneWorkspaceResponse"
-
-  # Billing ##############################################################################
-
+            $ref: '#/definitions/CloneWorkspaceResponse'
   /v1/cron/bufferBillingProject:
     get:
       security: []
       tags:
         - billing
         - cron
-      description: If the AoU Billing Project buffer is not full, create a firecloud billing project and add one
+      description: 'If the AoU Billing Project buffer is not full, create a firecloud billing project and add one'
       operationId: bufferBillingProject
       responses:
-        200:
-          description: No Error
-        500:
-          description: Internal Error
+        '200':
+          description: 'No Error'
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
   /v1/cron/syncBillingProjectStatus:
     get:
       security: []
       tags:
         - billing
         - cron
-      description: Fetch a BillingProjectBufferEntry that is in the CREATING state and check its status on Firecloud
+      description: 'Fetch a BillingProjectBufferEntry that is in the CREATING state and check its status on Firecloud'
       operationId: syncBillingProjectStatus
       responses:
-        200:
-          description: No Error
-        500:
-          description: Internal Error
+        '200':
+          description: 'No Error'
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
   /v1/cron/cleanBillingBuffer:
     get:
       security: []
       tags:
         - billing
         - cron
-      description: Find BillingProjectBufferEntries that have failed during the creation or assignment step and set their statuses to ERROR
+      description: 'Find BillingProjectBufferEntries that have failed during the creation or assignment step and set their statuses to ERROR'
       operationId: cleanBillingBuffer
       responses:
-        200:
-          description: No Error
-        500:
-          description: Internal Error
+        '200':
+          description: 'No Error'
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
   /v1/cron/checkFreeTierBillingUsage:
     get:
       security: []
       tags:
         - billing
         - cron
-      description: Find and alert users that have exceeded their free tier billing usage
+      description: 'Find and alert users that have exceeded their free tier billing usage'
       operationId: checkFreeTierBillingUsage
       responses:
-        200:
-          description: No Error
-        500:
-          description: Internal Error
+        '200':
+          description: 'No Error'
+        '500':
+          description: 'Internal Error'
           schema:
             $ref: '#/definitions/ErrorResponse'
-
-  # Notebooks ############################################################################
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename:
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     post:
       tags:
         - workspaces
       consumes:
         - application/json
-      description: Renames specified notebook
-      operationId: "renameNotebook"
+      description: 'Renames specified notebook'
+      operationId: renameNotebook
       parameters:
-        - in: body
+        -
+          in: body
           name: NotebookRename
-          description: new name for notebook
+          description: 'new name for notebook'
           required: true
           schema:
             type: object
@@ -1228,835 +1120,856 @@ paths:
               newName:
                 type: string
       responses:
-        200:
-          description: Successful rename
+        '200':
+          description: 'Successful rename'
           schema:
-            $ref: "#/definitions/FileDetail"
-
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/duplicate:
+            $ref: '#/definitions/FileDetail'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/duplicate':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     post:
       tags:
         - workspaces
-      description: Duplicates specified notebook
-      operationId: "cloneNotebook"
+      description: 'Duplicates specified notebook'
+      operationId: cloneNotebook
       parameters:
-        - in: path
+        -
+          in: path
           name: notebookName
           required: true
           type: string
       responses:
-        200:
-          description: Successful duplicate
+        '200':
+          description: 'Successful duplicate'
           schema:
-            $ref: "#/definitions/FileDetail"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/copy:
+            $ref: '#/definitions/FileDetail'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/copy':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-      - in: path
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
+      -
+        in: path
         name: notebookName
         required: true
         type: string
     post:
       tags:
         - workspaces
-      description: Copy specified notebook in path to specified workspace in body
-      operationId: "copyNotebook"
+      description: 'Copy specified notebook in path to specified workspace in body'
+      operationId: copyNotebook
       parameters:
-        - in: body
+        -
+          in: body
           name: copyNotebookRequest
           required: true
           schema:
             $ref: '#/definitions/CopyRequest'
       responses:
-        200:
-          description: Successful copy
+        '200':
+          description: 'Successful copy'
           schema:
-            $ref: "#/definitions/FileDetail"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/delete:
+            $ref: '#/definitions/FileDetail'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/delete':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     delete:
       tags:
         - workspaces
-      description: Deletes specified notebook
-      operationId: "deleteNotebook"
+      description: 'Deletes specified notebook'
+      operationId: deleteNotebook
       parameters:
-        - in: path
+        -
+          in: path
           name: notebookName
           required: true
           type: string
       responses:
-        200:
-          description: Successful delete
+        '200':
+          description: 'Successful delete'
           schema:
-            $ref: "#/definitions/EmptyResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly:
+            $ref: '#/definitions/EmptyResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/readonly':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     post:
       tags:
         - workspaces
-      description: Get the HTML for a read only view of the notebook
-      operationId: "readOnlyNotebook"
+      description: 'Get the HTML for a read only view of the notebook'
+      operationId: readOnlyNotebook
       parameters:
-        - in: path
+        -
+          in: path
           name: notebookName
           required: true
           type: string
       responses:
-        200:
-          description: HTML Read Only version of the notebook
+        '200':
+          description: 'HTML Read Only version of the notebook'
           schema:
             $ref: '#/definitions/ReadOnlyNotebookResponse'
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/lockingMetadata:
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/{notebookName}/lockingMetadata':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     get:
       tags:
         - workspaces
-      summary: Get the locking metadata for a notebook
-      description: |
-        Get the locking metadata for a notebook, if available.  If the notebook is not locked
-        (e.g. at first creation) this may be empty.  Additionally, the caller of this endpoint
-        may not have the appropriate permissions to determine who is locking this notebook.
-        When this is the case, the lastLockedBy field is set to UNKNOWN.
-      operationId: "getNotebookLockingMetadata"
+      summary: 'Get the locking metadata for a notebook'
+      description: "Get the locking metadata for a notebook, if available.  If the notebook is not locked\n(e.g. at first creation) this may be empty.  Additionally, the caller of this endpoint\nmay not have the appropriate permissions to determine who is locking this notebook.\nWhen this is the case, the lastLockedBy field is set to UNKNOWN.\n"
+      operationId: getNotebookLockingMetadata
       parameters:
-        - in: path
+        -
+          in: path
           name: notebookName
           required: true
           type: string
       responses:
-        200:
-          description: The locking metadata fields for the notebook
+        '200':
+          description: 'The locking metadata fields for the notebook'
           schema:
             $ref: '#/definitions/NotebookLockingMetadataResponse'
-
-  # Cohort Reviews #######################################################################
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews:
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     get:
       tags:
         - cohortReview
-      description: Returns all cohort reviews in a workspace
-      operationId: "getCohortReviewsInWorkspace"
+      description: 'Returns all cohort reviews in a workspace'
+      operationId: getCohortReviewsInWorkspace
       responses:
-        200:
-          description: A list of cohort definitions.
+        '200':
+          description: 'A list of cohort definitions.'
           schema:
-            $ref: "#/definitions/CohortReviewListResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews/{cohortReviewId}:
+            $ref: '#/definitions/CohortReviewListResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews/{cohortReviewId}':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-      - in: path
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
+      -
+        in: path
         name: cohortReviewId
         type: integer
         format: int64
         required: true
-        description: specifies which cohort review
+        description: 'specifies which cohort review'
     patch:
       tags:
         - cohortReview
       consumes:
         - application/json
-      description: >
-        Modifies the cohort review with the specified ID; fields that are omitted
-        will not be modified
-      operationId: "updateCohortReview"
+      description: "Modifies the cohort review with the specified ID; fields that are omitted will not be modified\n"
+      operationId: updateCohortReview
       parameters:
-        - in: body
+        -
+          in: body
           name: cohortReview
-          description: cohort review
+          description: 'cohort review'
           schema:
-            $ref: "#/definitions/CohortReview"
+            $ref: '#/definitions/CohortReview'
       responses:
-        200:
-          description: The updated cohort review
+        '200':
+          description: 'The updated cohort review'
           schema:
-            $ref: "#/definitions/CohortReview"
+            $ref: '#/definitions/CohortReview'
     delete:
       tags:
         - cohortReview
-      description: Deletes the cohort review with the specified ID
-      operationId: "deleteCohortReview"
+      description: 'Deletes the cohort review with the specified ID'
+      operationId: deleteCohortReview
       responses:
-        202:
+        '202':
           description: ACCEPTED
           schema:
             $ref: '#/definitions/EmptyResponse'
-
-  # Cohorts ##############################################################################
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     get:
       tags:
         - cohorts
-      description: Returns all cohort definitions in a workspace
-      operationId: "getCohortsInWorkspace"
+      description: 'Returns all cohort definitions in a workspace'
+      operationId: getCohortsInWorkspace
       responses:
-        200:
-          description: A list of cohort definitions.
+        '200':
+          description: 'A list of cohort definitions.'
           schema:
-            $ref: "#/definitions/CohortListResponse"
+            $ref: '#/definitions/CohortListResponse'
     post:
       tags:
         - cohorts
       consumes:
         - application/json
-      description: Creates a cohort definition in a workspace.
-      operationId: "createCohort"
+      description: 'Creates a cohort definition in a workspace.'
+      operationId: createCohort
       parameters:
-        - in: body
+        -
+          in: body
           name: cohort
-          description: cohort definition
+          description: 'cohort definition'
           schema:
-            $ref: "#/definitions/Cohort"
+            $ref: '#/definitions/Cohort'
       responses:
-        200:
-          description: The cohort definition that was created.
+        '200':
+          description: 'The cohort definition that was created.'
           schema:
-            $ref: "#/definitions/Cohort"
-        400:
+            $ref: '#/definitions/Cohort'
+        '400':
           description: 'Bad Request. Cohort name already exists'
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/duplicate:
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/duplicate':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     post:
       tags:
         - cohorts
-      description: Creates a duplicate of the cohort specified by cohortId
-      operationId: "duplicateCohort"
+      description: 'Creates a duplicate of the cohort specified by cohortId'
+      operationId: duplicateCohort
       parameters:
-        - in: body
+        -
+          in: body
           name: DuplicateCohortRequest
-          description: Duplicate Cohort Request
+          description: 'Duplicate Cohort Request'
           schema:
             $ref: '#/definitions/DuplicateCohortRequest'
       responses:
-        200:
-          description: The cohort definition that was created.
+        '200':
+          description: 'The cohort definition that was created.'
           schema:
-            $ref: "#/definitions/Cohort"
-        400:
+            $ref: '#/definitions/Cohort'
+        '400':
           description: 'Bad Request. Cohort name already exists'
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}:
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/cohortId'
     get:
       tags:
         - cohorts
-      description: Returns the cohort definition with the specified ID
-      operationId: "getCohort"
+      description: 'Returns the cohort definition with the specified ID'
+      operationId: getCohort
       responses:
-        200:
-          description: A cohort definition
+        '200':
+          description: 'A cohort definition'
           schema:
-            $ref: "#/definitions/Cohort"
+            $ref: '#/definitions/Cohort'
     patch:
       tags:
         - cohorts
       consumes:
         - application/json
-      description: >
-        Modifies the cohort definition with the specified ID; fields that are omitted
-        will not be modified
-      operationId: "updateCohort"
+      description: "Modifies the cohort definition with the specified ID; fields that are omitted will not be modified\n"
+      operationId: updateCohort
       parameters:
-        - in: body
+        -
+          in: body
           name: cohort
-          description: cohort definition
+          description: 'cohort definition'
           schema:
-            $ref: "#/definitions/Cohort"
+            $ref: '#/definitions/Cohort'
       responses:
-        200:
-          description: The updated cohort definition
+        '200':
+          description: 'The updated cohort definition'
           schema:
-            $ref: "#/definitions/Cohort"
+            $ref: '#/definitions/Cohort'
     delete:
       tags:
         - cohorts
-      description: Deletes the cohort definition with the specified ID
-      operationId: "deleteCohort"
+      description: 'Deletes the cohort definition with the specified ID'
+      operationId: deleteCohort
       responses:
-        202:
+        '202':
           description: ACCEPTED
           schema:
             $ref: '#/definitions/EmptyResponse'
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/materializeCohort:
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/materializeCohort':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     post:
       tags:
         - cohorts
       consumes:
         - application/json
-      description: >
-        Materializes a cohort for a given CDR version to specified output.
-      operationId: "materializeCohort"
+      description: "Materializes a cohort for a given CDR version to specified output.\n"
+      operationId: materializeCohort
       parameters:
-        - in: body
+        -
+          in: body
           name: request
-          description: cohort materialization request
+          description: 'cohort materialization request'
           schema:
-            $ref: "#/definitions/MaterializeCohortRequest"
+            $ref: '#/definitions/MaterializeCohortRequest'
       responses:
-        200:
-          description: The results of materializing the cohort
+        '200':
+          description: 'The results of materializing the cohort'
           schema:
-            $ref: "#/definitions/MaterializeCohortResponse"
-
-  ######### USER RECENT RESOURCES ########################################
+            $ref: '#/definitions/MaterializeCohortResponse'
   /v1/workspaces/user-recent-resources:
     get:
       tags:
         - userMetrics
-      description: Returns the resources accessed by user order by access time desc
+      description: 'Returns the resources accessed by user order by access time desc'
       operationId: getUserRecentResources
       responses:
-        200:
-          description: A list of resources order by last access time desc order
+        '200':
+          description: 'A list of resources order by last access time desc order'
           schema:
-            $ref: "#/definitions/RecentResourceResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resources/update:
+            $ref: '#/definitions/RecentResourceResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resources/update':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     post:
       tags:
         - userMetrics
       consumes:
         - application/json
-      description: Add/update user recent resource
+      description: 'Add/update user recent resource'
       operationId: updateRecentResource
       parameters:
-        - in: body
+        -
+          in: body
           name: RecentResourceRequest
-          description: request object for updating recent resource
+          description: 'request object for updating recent resource'
           required: true
           schema:
-            # this is currently only ever used by Notebooks because other
-            # resources are stored in our db, and therefore cache ops are
-            # done for them in the backend
-            $ref: "#/definitions/RecentResourceRequest"
+            $ref: '#/definitions/RecentResourceRequest'
       responses:
-        200:
-          description: Successfully added/updated
+        '200':
+          description: 'Successfully added/updated'
           schema:
-            $ref: "#/definitions/RecentResource"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resources/delete:
+            $ref: '#/definitions/RecentResource'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-resources/delete':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     delete:
       tags:
         - userMetrics
-      description: Deletes entry from recent resource
+      description: 'Deletes entry from recent resource'
       operationId: deleteRecentResource
       parameters:
-        - in: body
+        -
+          in: body
           name: RecentResourceRequest
-          description: request object for updating recent resource
+          description: 'request object for updating recent resource'
           required: true
           schema:
-            $ref: "#/definitions/RecentResourceRequest"
+            $ref: '#/definitions/RecentResourceRequest'
       responses:
-        200:
-          description: Successfully deleted
+        '200':
+          description: 'Successfully deleted'
           schema:
-            $ref: "#/definitions/EmptyResponse"
-
-
-  # Concept sets ##############################################################################
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets:
+            $ref: '#/definitions/EmptyResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     get:
       tags:
         - conceptSets
-      description: Returns all concept sets in a workspace
-      operationId: "getConceptSetsInWorkspace"
+      description: 'Returns all concept sets in a workspace'
+      operationId: getConceptSetsInWorkspace
       responses:
-        200:
-          description: A list of concept sets.
+        '200':
+          description: 'A list of concept sets.'
           schema:
-            $ref: "#/definitions/ConceptSetListResponse"
+            $ref: '#/definitions/ConceptSetListResponse'
     post:
       tags:
         - conceptSets
       consumes:
         - application/json
-      description: Creates a concept set in a workspace.
-      operationId: "createConceptSet"
+      description: 'Creates a concept set in a workspace.'
+      operationId: createConceptSet
       parameters:
-        - in: body
+        -
+          in: body
           name: request
-          description: create concept set request
+          description: 'create concept set request'
           schema:
-            $ref: "#/definitions/CreateConceptSetRequest"
+            $ref: '#/definitions/CreateConceptSetRequest'
       responses:
-        200:
-          description: The concept set that was created.
+        '200':
+          description: 'The concept set that was created.'
           schema:
-            $ref: "#/definitions/ConceptSet"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/survey-concept-sets/{surveyName}:
+            $ref: '#/definitions/ConceptSet'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/survey-concept-sets/{surveyName}':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-      - in: path
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
+      -
+        in: path
         name: surveyName
         type: string
         required: true
     get:
       tags:
         - conceptSets
-      description: Returns all survey concept sets in a workspace
-      operationId: "getSurveyConceptSetsInWorkspace"
+      description: 'Returns all survey concept sets in a workspace'
+      operationId: getSurveyConceptSetsInWorkspace
       responses:
-        200:
-          description: A list of concept sets of type surveys.
+        '200':
+          description: 'A list of concept sets of type surveys.'
           schema:
-            $ref: "#/definitions/ConceptSetListResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}:
+            $ref: '#/definitions/ConceptSetListResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/conceptSetId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/conceptSetId'
     get:
       tags:
         - conceptSets
-      description: Returns the concept set definition with the specified ID
-      operationId: "getConceptSet"
+      description: 'Returns the concept set definition with the specified ID'
+      operationId: getConceptSet
       responses:
-        200:
-          description: A concept set definition
+        '200':
+          description: 'A concept set definition'
           schema:
-            $ref: "#/definitions/ConceptSet"
+            $ref: '#/definitions/ConceptSet'
     patch:
       tags:
         - conceptSets
       consumes:
         - application/json
-      description: >
-        Modifies the name or description of the concept set with the specified ID;
-        fields that are omitted will not be modified
-      operationId: "updateConceptSet"
+      description: "Modifies the name or description of the concept set with the specified ID; fields that are omitted will not be modified\n"
+      operationId: updateConceptSet
       parameters:
-        - in: body
+        -
+          in: body
           name: conceptSet
-          description: concept set definition
+          description: 'concept set definition'
           schema:
-            $ref: "#/definitions/ConceptSet"
+            $ref: '#/definitions/ConceptSet'
       responses:
-        200:
-          description: The updated concept set.
+        '200':
+          description: 'The updated concept set.'
           schema:
-            $ref: "#/definitions/ConceptSet"
+            $ref: '#/definitions/ConceptSet'
     delete:
       tags:
         - conceptSets
-      description: Deletes the concept set with the specified ID
-      operationId: "deleteConceptSet"
+      description: 'Deletes the concept set with the specified ID'
+      operationId: deleteConceptSet
       responses:
-        202:
+        '202':
           description: ACCEPTED
           schema:
             $ref: '#/definitions/EmptyResponse'
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/concepts:
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/concepts':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/conceptSetId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/conceptSetId'
     post:
       tags:
         - conceptSets
       consumes:
         - application/json
-      description: >
-        Adds or removes concepts from the concept set.
-      operationId: "updateConceptSetConcepts"
+      description: "Adds or removes concepts from the concept set.\n"
+      operationId: updateConceptSetConcepts
       parameters:
-        - in: body
+        -
+          in: body
           name: request
-          description: update concept set request
+          description: 'update concept set request'
           schema:
-            $ref: "#/definitions/UpdateConceptSetRequest"
+            $ref: '#/definitions/UpdateConceptSetRequest'
       responses:
-        200:
-          description: The updated concept set.
+        '200':
+          description: 'The updated concept set.'
           schema:
-            $ref: "#/definitions/ConceptSet"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/copy:
+            $ref: '#/definitions/ConceptSet'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets/{conceptSetId}/copy':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-      - in: path
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
+      -
+        in: path
         name: conceptSetId
         required: true
         type: string
     post:
       tags:
         - conceptSets
-      description: Copy specified concept set in path to specified workspace in body
-      operationId: "copyConceptSet"
+      description: 'Copy specified concept set in path to specified workspace in body'
+      operationId: copyConceptSet
       parameters:
-        - in: body
+        -
+          in: body
           name: copyConceptSetRequest
           required: true
           schema:
             $ref: '#/definitions/CopyRequest'
       responses:
-        200:
-          description: Successful copy
+        '200':
+          description: 'Successful copy'
           schema:
-            $ref: "#/definitions/ConceptSet"
-
-  # Concepts ###############################################################################
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/domainInfo:
+            $ref: '#/definitions/ConceptSet'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/domainInfo':
     get:
       tags:
         - concepts
-      description: >
-        Returns information on the domains of data in the workspace's CDR version along
-        with participant and concept counts
-      operationId: "getDomainInfo"
+      description: "Returns information on the domains of data in the workspace's CDR version along with participant and concept counts\n"
+      operationId: getDomainInfo
       parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
+        -
+          $ref: '#/parameters/workspaceNamespace'
+        -
+          $ref: '#/parameters/workspaceId'
       responses:
-        200:
-          description: information on the domains
+        '200':
+          description: 'information on the domains'
           schema:
-            $ref: "#/definitions/DomainInfoResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/domainValues/{domain}:
+            $ref: '#/definitions/DomainInfoResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/domainValues/{domain}':
     get:
       tags:
         - concepts
-      description: >
-        Returns all column names/values for a given domain.
-      operationId: "getValuesFromDomain"
+      description: "Returns all column names/values for a given domain.\n"
+      operationId: getValuesFromDomain
       parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
-        - in: path
+        -
+          $ref: '#/parameters/workspaceNamespace'
+        -
+          $ref: '#/parameters/workspaceId'
+        -
+          in: path
           name: domain
           required: true
           type: string
       responses:
-        200:
-          description: the values/column names in the domain.
+        '200':
+          description: 'the values/column names in the domain.'
           schema:
-            $ref: "#/definitions/DomainValuesResponse"
-
-  ### Surveys #############################################
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyInfo:
+            $ref: '#/definitions/DomainValuesResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyInfo':
     get:
       tags:
         - concepts
-      description: >
-        Returns survey information in the workspace's CDR version along with participant and
-        question count
-      operationId: "getSurveyInfo"
+      description: "Returns survey information in the workspace's CDR version along with participant and question count\n"
+      operationId: getSurveyInfo
       parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
+        -
+          $ref: '#/parameters/workspaceNamespace'
+        -
+          $ref: '#/parameters/workspaceId'
       responses:
-        200:
-          description: information about the surveys
+        '200':
+          description: 'information about the surveys'
           schema:
-            $ref: "#/definitions/SurveysResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/{surveyName}/surveyQuestions:
+            $ref: '#/definitions/SurveysResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/{surveyName}/surveyQuestions':
     get:
       tags:
         - concepts
-      description: >
-        Returns survey questions and answers in the workspace's CDR version
-      operationId: "getSurveyQuestions"
+      description: "Returns survey questions and answers in the workspace's CDR version\n"
+      operationId: getSurveyQuestions
       parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
-        - in: path
+        -
+          $ref: '#/parameters/workspaceNamespace'
+        -
+          $ref: '#/parameters/workspaceId'
+        -
+          in: path
           name: surveyName
           required: true
           type: string
       responses:
-        200:
-          description: information about the surveys
+        '200':
+          description: 'information about the surveys'
           schema:
-            type: "array"
+            type: array
             items:
-              $ref: "#/definitions/SurveyQuestionsResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyAnswer:
+              $ref: '#/definitions/SurveyQuestionsResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyAnswer':
     get:
       tags:
         - concepts
-      description: >
-        Returns with all the answer for survey Question
-      operationId: "getSurveyAnswers"
+      description: "Returns with all the answer for survey Question\n"
+      operationId: getSurveyAnswers
       parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
-        - in: query
+        -
+          $ref: '#/parameters/workspaceNamespace'
+        -
+          $ref: '#/parameters/workspaceId'
+        -
+          in: query
           name: questionConceptId
           required: true
           type: integer
           format: int64
       responses:
-        200:
-          description: List of Survey Details with Answer
+        '200':
+          description: 'List of Survey Details with Answer'
           schema:
-            type: "array"
+            type: array
             items:
-              $ref: "#/definitions/SurveyAnswerResponse"
-
-  ### Data set ############################################
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
+              $ref: '#/definitions/SurveyAnswerResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}':
     post:
       tags:
         - dataSet
-      description: >
-        Given a Data Set, return the SQL query built from it.
-      operationId: "generateCode"
+      description: "Given a Data Set, return the SQL query built from it.\n"
+      operationId: generateCode
       parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
-        - in: path
+        -
+          $ref: '#/parameters/workspaceNamespace'
+        -
+          $ref: '#/parameters/workspaceId'
+        -
+          in: path
           name: kernelType
           required: true
           type: string
-        - in: body
+        -
+          in: body
           name: dataSet
           required: true
           schema:
-            $ref: "#/definitions/DataSetRequest"
+            $ref: '#/definitions/DataSetRequest'
       responses:
-        200:
-          description: >
-            A SQL query for each domain in the Data Set
+        '200':
+          description: "A SQL query for each domain in the Data Set\n"
           schema:
-            $ref: "#/definitions/DataSetCodeResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets:
+            $ref: '#/definitions/DataSetCodeResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-sets':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     get:
       tags:
         - dataSet
-      description: Returns all data sets in a workspace
-      operationId: "getDataSetsInWorkspace"
+      description: 'Returns all data sets in a workspace'
+      operationId: getDataSetsInWorkspace
       responses:
-        200:
-          description: A list of data sets.
+        '200':
+          description: 'A list of data sets.'
           schema:
-            $ref: "#/definitions/DataSetListResponse"
+            $ref: '#/definitions/DataSetListResponse'
     post:
       tags:
         - dataSet
-      description: >
-        Creates Data Set
-      operationId: "createDataSet"
+      description: "Creates Data Set\n"
+      operationId: createDataSet
       parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
-        - in: body
+        -
+          $ref: '#/parameters/workspaceNamespace'
+        -
+          $ref: '#/parameters/workspaceId'
+        -
+          in: body
           name: dataSetRequest
           required: true
           schema:
-            $ref: "#/definitions/DataSetRequest"
+            $ref: '#/definitions/DataSetRequest'
       responses:
-        200:
-          description: Data set has been created successfully
+        '200':
+          description: 'Data set has been created successfully'
           schema:
-            $ref: "#/definitions/DataSet"
-        400:
-          description: Invalid data set request
+            $ref: '#/definitions/DataSet'
+        '400':
+          description: 'Invalid data set request'
           schema:
-            $ref: "#/definitions/ErrorResponse"
-        409:
-          description: Data Set with the same name already exists
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: 'Data Set with the same name already exists'
           schema:
-            $ref: "#/definitions/ErrorResponse"
-
-  /v1/{workspaceNamespace}/{workspaceId}/data-sets/{dataSetId}:
+            $ref: '#/definitions/ErrorResponse'
+  '/v1/{workspaceNamespace}/{workspaceId}/data-sets/{dataSetId}':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/dataSetId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/dataSetId'
     get:
       tags:
         - dataSet
-      operationId: "getDataSet"
+      operationId: getDataSet
       responses:
-        200:
-          description: The data set with the specified ID
+        '200':
+          description: 'The data set with the specified ID'
           schema:
-            $ref: "#/definitions/DataSet"
+            $ref: '#/definitions/DataSet'
     patch:
       tags:
         - dataSet
       consumes:
         - application/json
-      operationId: "updateDataSet"
+      operationId: updateDataSet
       parameters:
-        - in: body
+        -
+          in: body
           name: dataSet
-          description: data set definition
+          description: 'data set definition'
           schema:
-            $ref: "#/definitions/DataSetRequest"
+            $ref: '#/definitions/DataSetRequest'
       responses:
-        200:
-          description: The updated data set.
+        '200':
+          description: 'The updated data set.'
           schema:
-            $ref: "#/definitions/DataSet"
-        409:
-          description: Data Set with the same name already exists
+            $ref: '#/definitions/DataSet'
+        '409':
+          description: 'Data Set with the same name already exists'
           schema:
-            $ref: "#/definitions/ErrorResponse"
+            $ref: '#/definitions/ErrorResponse'
     delete:
       tags:
         - dataSet
-      description: Deletes the data set with the specified ID
-      operationId: "deleteDataSet"
+      description: 'Deletes the data set with the specified ID'
+      operationId: deleteDataSet
       responses:
-        202:
+        '202':
           description: ACCEPTED
           schema:
             $ref: '#/definitions/EmptyResponse'
-
-  /v1/{workspaceNamespace}/{workspaceId}/data-sets/dataSetByResourceId:
+  '/v1/{workspaceNamespace}/{workspaceId}/data-sets/dataSetByResourceId':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     get:
       parameters:
-        - in: query
+        -
+          in: query
           name: resourceType
           type: string
           required: true
-        - in: query
+        -
+          in: query
           name: id
           type: integer
           format: int64
           required: true
       tags:
         - dataSet
-      operationId: "getDataSetByResourceId"
+      operationId: getDataSetByResourceId
       responses:
-        200:
-          description: A list of data sets containg cohort/concept Id passed.
+        '200':
+          description: 'A list of data sets containg cohort/concept Id passed.'
           schema:
-            $ref: "#/definitions/DataSetListResponse"
-
-  /v1/{workspaceNamespace}/{workspaceId}/data-set/markDirty:
+            $ref: '#/definitions/DataSetListResponse'
+  '/v1/{workspaceNamespace}/{workspaceId}/data-set/markDirty':
     parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
+      -
+        $ref: '#/parameters/workspaceNamespace'
+      -
+        $ref: '#/parameters/workspaceId'
     post:
       parameters:
-        - in: body
+        -
+          in: body
           name: markDataSetRequest
           schema:
-            $ref: "#/definitions/MarkDataSetRequest"
+            $ref: '#/definitions/MarkDataSetRequest'
       tags:
         - dataSet
-      operationId: "markDirty"
+      operationId: markDirty
       responses:
-        200:
-          description: Mark all dataset with cohort/concept id as dirty
+        '200':
+          description: 'Mark all dataset with cohort/concept id as dirty'
           schema:
             type: boolean
-
-  /v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook:
+  '/v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook':
     post:
       tags:
         - dataSet
-      description: >
-        Exports a data set query to a notebook
-      operationId: "exportToNotebook"
+      description: "Exports a data set query to a notebook\n"
+      operationId: exportToNotebook
       parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
-        - in: body
+        -
+          $ref: '#/parameters/workspaceNamespace'
+        -
+          $ref: '#/parameters/workspaceId'
+        -
+          in: body
           name: dataSetExportRequest
           required: true
           schema:
-            $ref: "#/definitions/DataSetExportRequest"
+            $ref: '#/definitions/DataSetExportRequest'
       responses:
-        200:
-          description: Data set has been exported correctly
+        '200':
+          description: 'Data set has been exported correctly'
           schema:
-            $ref: "#/definitions/EmptyResponse"
-        400:
-          description: Invalid data set request
+            $ref: '#/definitions/EmptyResponse'
+        '400':
+          description: 'Invalid data set request'
           schema:
-            $ref: "#/definitions/ErrorResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/preview:
+            $ref: '#/definitions/ErrorResponse'
+  '/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/preview':
     post:
       tags:
         - dataSet
-      description: >
-        Preview data set
-      operationId: "previewQuery"
+      description: "Preview data set\n"
+      operationId: previewQuery
       parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
-        - in: body
+        -
+          $ref: '#/parameters/workspaceNamespace'
+        -
+          $ref: '#/parameters/workspaceId'
+        -
+          in: body
           name: dataSet
           required: true
           schema:
-            $ref: "#/definitions/DataSetRequest"
+            $ref: '#/definitions/DataSetRequest'
       responses:
-        200:
-          description: >
-            A SQL query for each domain in the Data Set
+        '200':
+          description: "A SQL query for each domain in the Data Set\n"
           schema:
-            $ref: "#/definitions/DataSetPreviewResponse"
-
-##########################################################################################
-## DEFINITIONS
-##########################################################################################
+            $ref: '#/definitions/DataSetPreviewResponse'
 definitions:
-
   StatusResponse:
     type: object
     required:
@@ -2067,49 +1980,41 @@ definitions:
         type: boolean
       notebooksStatus:
         type: boolean
-
   ConfigResponse:
     type: object
     required:
       - gsuiteDomain
     properties:
-      # This should be gSuiteDomain, but the Swagger-Codegen-generated server code causes the JSON
-      # response to have the keys "gsuiteDomain" and "gSuiteDomain". This weirdness is a workaround.
       gsuiteDomain:
         type: string
-        description: G-Suite domain containing user accounts.
+        description: 'G-Suite domain containing user accounts.'
       projectId:
         type: string
-        description: The cloud project in which this app is running.
+        description: 'The cloud project in which this app is running.'
       publicApiKeyForErrorReports:
         type: string
-        description: |
-          Stackdriver API key for error reporting, scoped to a particular
-          domain. If unset, Stackdriver error reporting should be disabled.
+        description: "Stackdriver API key for error reporting, scoped to a particular\ndomain. If unset, Stackdriver error reporting should be disabled.\n"
       enableDataUseAgreement:
         type: boolean
-        description: Feature flag for enabling data use agreement
+        description: 'Feature flag for enabling data use agreement'
       unsafeAllowSelfBypass:
         type: boolean
-        description: Enable a user to bypass themself
+        description: 'Enable a user to bypass themself'
       enableEraCommons:
         type: boolean
-        description: Feature flag for enabling eRA commons
+        description: 'Feature flag for enabling eRA commons'
       firecloudURL:
         type: string
-        description: The Firecloud URL to use for REST requests.
-
+        description: 'The Firecloud URL to use for REST requests.'
   FeaturedWorkspacesConfigResponse:
     type: object
     properties:
       featuredWorkspacesList:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/FeaturedWorkspace"
-
-  # Mirrors BillingProjectMembership from fireCloud.yaml
+          $ref: '#/definitions/FeaturedWorkspace'
   BillingProjectMembership:
-    description: ''
+    description: ""
     required:
       - projectName
       - role
@@ -2118,30 +2023,32 @@ definitions:
     properties:
       projectName:
         type: string
-        description: the name of the project
+        description: 'the name of the project'
       role:
         type: string
-        description: the role of the current user in the project
+        description: 'the role of the current user in the project'
       status:
-        $ref: "#/definitions/BillingProjectStatus"
-
+        $ref: '#/definitions/BillingProjectStatus'
   BillingProjectStatus:
     type: string
-    description: >
-      Initialization status of a Firecloud billing project for use with Workbench.
-    enum: &BILLING_PROJECT_STATUS [none, pending, ready, error]
-
+    description: "Initialization status of a Firecloud billing project for use with Workbench.\n"
+    enum:
+      - none
+      - pending
+      - ready
+      - error
   EmailVerificationStatus:
     type: string
-    description: stage of email verification
-    enum: &EMAIL_VERIFICATION_STATUS [unverified, pending, subscribed]
-
+    description: 'stage of email verification'
+    enum:
+      - unverified
+      - pending
+      - subscribed
   EmptyResponse:
     type: object
     properties:
       additionalInfo:
         type: string
-
   VerifyEmailRequest:
     type: object
     properties:
@@ -2149,29 +2056,14 @@ definitions:
         type: string
       username:
         type: string
-
-  # Authorities are a tool used to add discrete permissions to users. We currently
-  # define the following authorities:
-  #   1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
-  #      the user has requested review to approve or reject.
-  #   2) DEVELOPER: *Grants all other authorities* as well as some internal-only
-  #      administrative endpoints, including group management and cluster
-  #      management. Intended to be granted for devops needs, e.g. for oncall.
-  #   3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
-  #      to perform actions on a user's enabled status and manual verification.
-  #   4) FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
   Authority:
     type: string
-    description: actions a user can have authority/permission to perform
-      # Note: Swagger trims any common prefix from enum values' corresponding
-      # Java fields by default; this has no side-effect currently as there is
-    # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
+    description: 'actions a user can have authority/permission to perform'
     enum:
-      - 'REVIEW_RESEARCH_PURPOSE'
-      - 'DEVELOPER'
-      - 'ACCESS_CONTROL_ADMIN'
-      - 'FEATURED_WORKSPACE_ADMIN'
-
+      - REVIEW_RESEARCH_PURPOSE
+      - DEVELOPER
+      - ACCESS_CONTROL_ADMIN
+      - FEATURED_WORKSPACE_ADMIN
   PageVisit:
     type: object
     properties:
@@ -2183,27 +2075,24 @@ definitions:
       firstVisit:
         type: integer
         format: int64
-
   WorkspaceListResponse:
     type: object
     required:
       - items
     properties:
       items:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/Workspace"
-
+          $ref: '#/definitions/Workspace'
   WorkspaceResponseListResponse:
     type: object
     required:
       - items
     properties:
       items:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/WorkspaceResponse"
-
+          $ref: '#/definitions/WorkspaceResponse'
   Workspace:
     type: object
     required:
@@ -2213,10 +2102,7 @@ definitions:
         type: string
       etag:
         type: string
-        description: >
-          Entity tag for optimistic concurrency control. To be set during a
-          read-modify-write to ensure that the client has not attempted to
-          modify a changed resource.
+        description: "Entity tag for optimistic concurrency control. To be set during a read-modify-write to ensure that the client has not attempted to modify a changed resource.\n"
       name:
         type: string
       namespace:
@@ -2228,20 +2114,19 @@ definitions:
       googleBucketName:
         type: string
       dataAccessLevel:
-        $ref: "#/definitions/DataAccessLevel"
+        $ref: '#/definitions/DataAccessLevel'
       researchPurpose:
-        $ref: "#/definitions/ResearchPurpose"
+        $ref: '#/definitions/ResearchPurpose'
       creationTime:
         type: integer
         format: int64
-        description: Milliseconds since the UNIX epoch.
+        description: 'Milliseconds since the UNIX epoch.'
       lastModifiedTime:
         type: integer
         format: int64
-        description: Milliseconds since the UNIX epoch.
+        description: 'Milliseconds since the UNIX epoch.'
       published:
         type: boolean
-
   UserRole:
     type: object
     required:
@@ -2255,8 +2140,7 @@ definitions:
       familyName:
         type: string
       role:
-        $ref: "#/definitions/WorkspaceAccessLevel"
-
+        $ref: '#/definitions/WorkspaceAccessLevel'
   ShareWorkspaceRequest:
     type: object
     required:
@@ -2264,27 +2148,21 @@ definitions:
     properties:
       workspaceEtag:
         type: string
-        description: >
-          Associated workspace etag retrieved via reading the workspaces API. If provided,
-          validates that the workspace (and its user roles) has not been modified since this
-          etag was retrieved.
+        description: "Associated workspace etag retrieved via reading the workspaces API. If provided, validates that the workspace (and its user roles) has not been modified since this etag was retrieved.\n"
       items:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/UserRole"
-
+          $ref: '#/definitions/UserRole'
   WorkspaceUserRolesResponse:
     type: object
     properties:
       workspaceEtag:
         type: string
-        description: >
-          Updated workspace etag after the share request has been applied.
+        description: "Updated workspace etag after the share request has been applied.\n"
       items:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/UserRole"
-
+          $ref: '#/definitions/UserRole'
   CopyRequest:
     type: object
     required:
@@ -2298,7 +2176,6 @@ definitions:
         type: string
       newName:
         type: string
-
   CloneWorkspaceRequest:
     type: object
     required:
@@ -2306,51 +2183,38 @@ definitions:
     properties:
       includeUserRoles:
         type: boolean
-        description: >
-          Whether to duplicate the user roles (sharing settings) on the workspace.
-          By default, duplicate follows the behavior of CreateWorkspace - it is
-          shared solely with the creator as an OWNER. If true, all user roles
-          are also copied onto the new workspace in addition to the caller
-          becoming an OWNER.
+        description: "Whether to duplicate the user roles (sharing settings) on the workspace. By default, duplicate follows the behavior of CreateWorkspace - it is shared solely with the creator as an OWNER. If true, all user roles are also copied onto the new workspace in addition to the caller becoming an OWNER.\n"
       workspace:
-        $ref: "#/definitions/Workspace"
-        description: >
-          Workspace metadata to be applied to the cloned workspace upon creation. The following
-          workspace fields are accepted:
-            - name (required)
-            - namespace (required)
-            - researchPurpose (required)
-            - description: defaults to the cloned workspace description
-            - cdrVersionId defaults to the cloned workspace CDR version
-
-          All other fields will be ignored and are generated server-side or are copied from the
-          cloned workspace.
-
+        $ref: '#/definitions/Workspace'
+        description: "Workspace metadata to be applied to the cloned workspace upon creation. The following workspace fields are accepted:  - name (required)\n  - namespace (required)\n  - researchPurpose (required)\n  - description: defaults to the cloned workspace description\n  - cdrVersionId defaults to the cloned workspace CDR version\n\nAll other fields will be ignored and are generated server-side or are copied from the cloned workspace.\n"
   CloneWorkspaceResponse:
     type: object
     properties:
       workspace:
-        $ref: "#/definitions/Workspace"
-        description: The newly created workspace duplicate.
-
+        $ref: '#/definitions/Workspace'
+        description: 'The newly created workspace duplicate.'
   UpdateWorkspaceRequest:
     type: object
     required:
       - workspace
     properties:
       workspace:
-        $ref: "#/definitions/Workspace"
-
+        $ref: '#/definitions/Workspace'
   WorkspaceAccessLevel:
     type: string
-    description: levels of access to workspace, NO ACCESS is akin to removing a user from a workspace ACL.
-    enum: [NO ACCESS, READER, WRITER, OWNER]
-
+    description: 'levels of access to workspace, NO ACCESS is akin to removing a user from a workspace ACL.'
+    enum:
+      - 'NO ACCESS'
+      - READER
+      - WRITER
+      - OWNER
   WorkspaceActiveStatus:
     type: string
-    description: Status of workspace
-    enum: [ACTIVE, DELETED, PENDING_DELETION_POST_1PPW_MIGRATION]
-
+    description: 'Status of workspace'
+    enum:
+      - ACTIVE
+      - DELETED
+      - PENDING_DELETION_POST_1PPW_MIGRATION
   ResearchPurpose:
     type: object
     required:
@@ -2415,7 +2279,7 @@ definitions:
       populationDetails:
         type: array
         items:
-          $ref: "#/definitions/specificPopulationEnum"
+          $ref: '#/definitions/specificPopulationEnum'
       populationHealth:
         type: boolean
         default: false
@@ -2430,41 +2294,45 @@ definitions:
       timeRequested:
         type: integer
         format: int64
-        description: Milliseconds since the UNIX epoch.
+        description: 'Milliseconds since the UNIX epoch.'
       timeReviewed:
         type: integer
         format: int64
-        description: Milliseconds since the UNIX epoch.
-
+        description: 'Milliseconds since the UNIX epoch.'
   specificPopulationEnum:
     type: string
-    description: Short parsable descriptions of specific population categories
-    enum: [ RACE_ETHNICITY, AGE_GROUPS, SEX, GENDER_IDENTITY, SEXUAL_ORIENTATION, GEOGRAPHY, DISABILITY_STATUS,ACCESS_TO_CARE,EDUCATION_LEVEL,INCOME_LEVEL,OTHER]
-
+    description: 'Short parsable descriptions of specific population categories'
+    enum:
+      - RACE_ETHNICITY
+      - AGE_GROUPS
+      - SEX
+      - GENDER_IDENTITY
+      - SEXUAL_ORIENTATION
+      - GEOGRAPHY
+      - DISABILITY_STATUS
+      - ACCESS_TO_CARE
+      - EDUCATION_LEVEL
+      - INCOME_LEVEL
+      - OTHER
   ResearchPurposeReviewRequest:
-    description: Approve or reject a workspace's research purpose.
+    description: 'Approve or reject a workspace''s research purpose.'
     type: object
     required:
       - approved
     properties:
       approved:
         type: boolean
-
   ClusterConfig:
     properties:
       masterDiskSize:
-        description: Master persistent disk size in GB.
+        description: 'Master persistent disk size in GB.'
         type: integer
         format: int32
       machineType:
-        description: GCE machine type, e.g. n1-standard-2.
+        description: 'GCE machine type, e.g. n1-standard-2.'
         type: string
-
   UpdateClusterConfigRequest:
-    description: >
-      Request to update the default cluster configuration for a given user.
-      Fields of the config may be omitted, in which case a default will be used.
-      Set clusterConfig to null to clear it.
+    description: "Request to update the default cluster configuration for a given user. Fields of the config may be omitted, in which case a default will be used. Set clusterConfig to null to clear it.\n"
     type: object
     required:
       - userEmail
@@ -2472,42 +2340,42 @@ definitions:
       userEmail:
         type: string
       clusterConfig:
-        $ref: "#/definitions/ClusterConfig"
-
+        $ref: '#/definitions/ClusterConfig'
   AccessModule:
     type: string
-    enum: [DATA_USE_AGREEMENT,COMPLIANCE_TRAINING,BETA_ACCESS,ERA_COMMONS,TWO_FACTOR_AUTH]
-
+    enum:
+      - DATA_USE_AGREEMENT
+      - COMPLIANCE_TRAINING
+      - BETA_ACCESS
+      - ERA_COMMONS
+      - TWO_FACTOR_AUTH
   AccessBypassRequest:
     type: object
     required:
       - isBypassed
     properties:
       moduleName:
-        $ref: "#/definitions/AccessModule"
+        $ref: '#/definitions/AccessModule'
       isBypassed:
         type: boolean
-
   CohortReviewListResponse:
     type: object
     required:
       - items
     properties:
       items:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/CohortReview"
-
+          $ref: '#/definitions/CohortReview'
   CohortListResponse:
     type: object
     required:
       - items
     properties:
       items:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/Cohort"
-
+          $ref: '#/definitions/Cohort'
   Cohort:
     type: object
     required:
@@ -2520,16 +2388,11 @@ definitions:
         format: int64
       etag:
         type: string
-        description: >
-          Entity tag for optimistic concurrency control. To be set during a
-          read-modify-write to ensure that the client has not attempted to
-          modify a changed resource.
+        description: "Entity tag for optimistic concurrency control. To be set during a read-modify-write to ensure that the client has not attempted to modify a changed resource.\n"
       name:
         type: string
       criteria:
-        description: >
-          Internal representation of the cohort definition. Clients should not depend directly
-          on this, but instead call client functions to issue a SQL query for the cohort.
+        description: "Internal representation of the cohort definition. Clients should not depend directly on this, but instead call client functions to issue a SQL query for the cohort.\n"
         type: string
       type:
         type: string
@@ -2540,104 +2403,70 @@ definitions:
       creationTime:
         type: integer
         format: int64
-        description: Milliseconds since the UNIX epoch.
+        description: 'Milliseconds since the UNIX epoch.'
       lastModifiedTime:
         type: integer
         format: int64
-        description: Milliseconds since the UNIX epoch.
-
+        description: 'Milliseconds since the UNIX epoch.'
   MaterializeCohortRequest:
     type: object
     properties:
       cohortName:
-        description: >
-          The name of a cohort that is to be evaluated. Either this or cohortSpec should be specified
+        description: "The name of a cohort that is to be evaluated. Either this or cohortSpec should be specified\n"
         type: string
       cohortSpec:
-        description: >
-          JSON representation of a cohort to be evaluated (using the same format used for saved
-          cohorts). Either this or cohortName should be specified
+        description: "JSON representation of a cohort to be evaluated (using the same format used for saved cohorts). Either this or cohortName should be specified\n"
         type: string
       statusFilter:
-        description: >
-          An array of status values; participants with these statuses will be included.
-          Defaults to [NOT_REVIEWED, INCLUDED, NEEDS_FURTHER_REVIEW] -- everything but EXCLUDED.
-          Only valid for use with cohortName (cohorts saved in the database.)
+        description: "An array of status values; participants with these statuses will be included. Defaults to [NOT_REVIEWED, INCLUDED, NEEDS_FURTHER_REVIEW] -- everything but EXCLUDED. Only valid for use with cohortName (cohorts saved in the database.)\n"
         type: array
         items:
-          $ref: "#/definitions/CohortStatus"
+          $ref: '#/definitions/CohortStatus'
       cdrVersionName:
-        description: >
-          The name of a CDR version to use when evaluating the cohort; if none is specified,
-          the CDR version currently associated with the workspace will be used
+        description: "The name of a CDR version to use when evaluating the cohort; if none is specified, the CDR version currently associated with the workspace will be used\n"
         type: string
       pageToken:
-        description: >
-          Pagination token retrieved from a previous call to materializeCohort; used for
-          retrieving additional pages of results. If this is specified, all other fields on
-          MaterializeCohortRequest apart from pageSize must match the values specified
-          on the request that generated this token.
+        description: "Pagination token retrieved from a previous call to materializeCohort; used for retrieving additional pages of results. If this is specified, all other fields on MaterializeCohortRequest apart from pageSize must match the values specified on the request that generated this token.\n"
         type: string
       pageSize:
-        description: >
-          Maximum number of results to return in a response. Defaults to 1000.
+        description: "Maximum number of results to return in a response. Defaults to 1000.\n"
         type: integer
         format: int32
       fieldSet:
-        description: >
-          Specification defining what data to return for participants in the cohort. Defaults to
-          just participant IDs.
-        $ref: "#/definitions/FieldSet"
-
+        description: "Specification defining what data to return for participants in the cohort. Defaults to just participant IDs.\n"
+        $ref: '#/definitions/FieldSet'
   FieldSet:
     type: object
-    description: >
-      A specification for fields to retrieve about participants in a cohort.
-      Exactly one of the properties below should be specified.
+    description: "A specification for fields to retrieve about participants in a cohort. Exactly one of the properties below should be specified.\n"
     properties:
       tableQuery:
-        description: >
-          A query specifying how to pull data out of a single table. Either this or annotationQuery
-          should be set (not both.)
-        $ref: "#/definitions/TableQuery"
+        description: "A query specifying how to pull data out of a single table. Either this or annotationQuery should be set (not both.)\n"
+        $ref: '#/definitions/TableQuery'
       annotationQuery:
-        description: >
-          A query specifying how to retrieve annotation values created about participants in a
-          cohort during cohort review. Either this or tableQuery should be set (not both.)
-        $ref: "#/definitions/AnnotationQuery"
-
+        description: "A query specifying how to retrieve annotation values created about participants in a cohort during cohort review. Either this or tableQuery should be set (not both.)\n"
+        $ref: '#/definitions/AnnotationQuery'
   MaterializeCohortResponse:
     type: object
     required:
       - results
     properties:
       results:
-        description: >
-          An array of JSON dictionaries representing results to the cohort materialization.
-          (In Java, this is represented as Map<String, Object>[]. In Python clients, this is a
-          list[object] where each object is a dictionary. In Typescript clients, this is an
-          Array<any> where each object is a dictionary.) Keys in the dictionaries will be the
-          columns selected in the field set provided in the request, and the values will
-          be the values of those columns.
+        description: "An array of JSON dictionaries representing results to the cohort materialization. (In Java, this is represented as Map<String, Object>[]. In Python clients, this is a list[object] where each object is a dictionary. In Typescript clients, this is an Array<any> where each object is a dictionary.) Keys in the dictionaries will be the columns selected in the field set provided in the request, and the values will be the values of those columns.\n"
         type: array
         items:
           type: object
       nextPageToken:
-        description: >
-          Pagination token that can be used in a subsequent call to MaterializeCohortRequest to
-          retrieve more results. If not set, there are no more results to retrieve.
+        description: "Pagination token that can be used in a subsequent call to MaterializeCohortRequest to retrieve more results. If not set, there are no more results to retrieve.\n"
         type: string
-
   ConceptSetListResponse:
     type: object
     required:
       - items
     properties:
       items:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/ConceptSet"
-
+          $ref: '#/definitions/ConceptSet'
   ConceptSet:
     type: object
     required:
@@ -2649,23 +2478,15 @@ definitions:
         format: int64
       etag:
         type: string
-        description: >
-          Entity tag for optimistic concurrency control. To be set during a
-          read-modify-write to ensure that the client has not attempted to
-          modify a changed resource.
+        description: "Entity tag for optimistic concurrency control. To be set during a read-modify-write to ensure that the client has not attempted to modify a changed resource.\n"
       name:
         type: string
       domain:
-        description: >
-          Domain corresponding to an OMOP table that can contain rows for the concepts in this
-          concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed
-          here; it makes sense to specify concepts in these domains in cohort criteria, but
-          there isn't much value in having concept sets defined for them.
-        $ref: "#/definitions/Domain"
+        description: "Domain corresponding to an OMOP table that can contain rows for the concepts in this concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed here; it makes sense to specify concepts in these domains in cohort criteria, but there isn't much value in having concept sets defined for them.\n"
+        $ref: '#/definitions/Domain'
       survey:
-        description: >
-          Survey
-        $ref: "#/definitions/Surveys"
+        description: "Survey\n"
+        $ref: '#/definitions/Surveys'
       description:
         type: string
       creator:
@@ -2673,38 +2494,34 @@ definitions:
       creationTime:
         type: integer
         format: int64
-        description: Milliseconds since the UNIX epoch.
+        description: 'Milliseconds since the UNIX epoch.'
       lastModifiedTime:
         type: integer
         format: int64
-        description: Milliseconds since the UNIX epoch.
+        description: 'Milliseconds since the UNIX epoch.'
       participantCount:
         type: integer
         format: int32
-        description: >
-          Count of participants in the CDR version for the workspace containing this
-          concept set that match the specified concept set
+        description: "Count of participants in the CDR version for the workspace containing this concept set that match the specified concept set\n"
       concepts:
-        description: "Concepts in the concept set, in conceptName order."
+        description: 'Concepts in the concept set, in conceptName order.'
         type: array
         items:
-          $ref: "#/definitions/Concept"
-
+          $ref: '#/definitions/Concept'
   CreateConceptSetRequest:
     type: object
     required:
       - conceptSet
     properties:
       conceptSet:
-        description: Concept set to be created; concepts is ignored
-        $ref: "#/definitions/ConceptSet"
+        description: 'Concept set to be created; concepts is ignored'
+        $ref: '#/definitions/ConceptSet'
       addedIds:
         type: array
-        description: The IDs of concepts to be added to the concept set.
+        description: 'The IDs of concepts to be added to the concept set.'
         items:
           type: integer
           format: int64
-
   UpdateConceptSetRequest:
     type: object
     required:
@@ -2712,25 +2529,19 @@ definitions:
     properties:
       etag:
         type: string
-        description: >
-          Etag of the concept set being modified.
-          Validates that the concept set has not been modified since this
-          etag was retrieved.
+        description: "Etag of the concept set being modified. Validates that the concept set has not been modified since this etag was retrieved.\n"
       addedIds:
         type: array
-        description: >
-          The IDs of concepts to be added to the concept set.
+        description: "The IDs of concepts to be added to the concept set.\n"
         items:
           type: integer
           format: int64
       removedIds:
         type: array
-        description: >
-          The IDs of concepts to be removed from the concept set.
+        description: "The IDs of concepts to be removed from the concept set.\n"
         items:
           type: integer
           format: int64
-
   DataSetRequest:
     type: object
     required:
@@ -2742,41 +2553,33 @@ definitions:
         type: string
       etag:
         type: string
-        description: >
-          Entity tag for optimistic concurrency control. To be set during a
-          read-modify-write to ensure that the client has not attempted to
-          modify a changed resource.
+        description: "Entity tag for optimistic concurrency control. To be set during a read-modify-write to ensure that the client has not attempted to modify a changed resource.\n"
       workspaceId:
         type: integer
         format: int64
       includesAllParticipants:
         type: boolean
         default: false
-        description: >
-          Whether to include all participants or filter by cohorts
+        description: "Whether to include all participants or filter by cohorts\n"
       prePackagedConceptSet:
-        $ref: "#/definitions/PrePackagedConceptSetEnum"
+        $ref: '#/definitions/PrePackagedConceptSetEnum'
       conceptSetIds:
         type: array
-        description: >
-          The ids of all concept sets in the data set
+        description: "The ids of all concept sets in the data set\n"
         items:
           type: integer
           format: int64
       cohortIds:
         type: array
-        description: >
-          The ids of all cohorts in the data set
+        description: "The ids of all cohorts in the data set\n"
         items:
           type: integer
           format: int64
       values:
         type: array
-        description: >
-          All the selected values in the data set
+        description: "All the selected values in the data set\n"
         items:
-          $ref: "#/definitions/DomainValuePair"
-
+          $ref: '#/definitions/DomainValuePair'
   PrePackagedConceptSetEnum:
     type: string
     enum:
@@ -2784,7 +2587,6 @@ definitions:
       - Demographics
       - Survey
       - Both
-
   DataSetExportRequest:
     type: object
     required:
@@ -2793,14 +2595,13 @@ definitions:
       - newNotebook
     properties:
       dataSetRequest:
-        $ref: "#/definitions/DataSetRequest"
+        $ref: '#/definitions/DataSetRequest'
       notebookName:
         type: string
       newNotebook:
         type: boolean
       kernelType:
-        $ref: "#/definitions/KernelTypeEnum"
-
+        $ref: '#/definitions/KernelTypeEnum'
   MarkDataSetRequest:
     type: object
     properties:
@@ -2809,23 +2610,19 @@ definitions:
         format: int64
       resourceType:
         type: string
-
   KernelTypeEnum:
     type: string
     enum:
       - Python
       - R
-
   DomainValuePair:
     type: object
     properties:
       domain:
-        description: >
-          Domain corresponding to an OMOP table.
-        $ref: "#/definitions/Domain"
+        description: "Domain corresponding to an OMOP table.\n"
+        $ref: '#/definitions/Domain'
       value:
         type: string
-
   DataSet:
     type: object
     properties:
@@ -2836,10 +2633,7 @@ definitions:
         type: string
       etag:
         type: string
-        description: >
-          Entity tag for optimistic concurrency control. To be set during a
-          read-modify-write to ensure that the client has not attempted to
-          modify a changed resource.
+        description: "Entity tag for optimistic concurrency control. To be set during a read-modify-write to ensure that the client has not attempted to modify a changed resource.\n"
       includesAllParticipants:
         type: boolean
       description:
@@ -2850,46 +2644,39 @@ definitions:
       lastModifiedTime:
         type: integer
         format: int64
-        description: Milliseconds since the UNIX epoch.
+        description: 'Milliseconds since the UNIX epoch.'
       conceptSets:
         type: array
-        description: >
-          All concept sets in the data set
+        description: "All concept sets in the data set\n"
         items:
           $ref: '#/definitions/ConceptSet'
       cohorts:
         type: array
-        description: >
-          All cohorts in the data set
+        description: "All cohorts in the data set\n"
         items:
-          $ref: "#/definitions/Cohort"
+          $ref: '#/definitions/Cohort'
       values:
         type: array
-        description: >
-          All the selected values in the data set
+        description: "All the selected values in the data set\n"
         items:
-          $ref: "#/definitions/DomainValuePair"
+          $ref: '#/definitions/DomainValuePair'
       prePackagedConceptSet:
-        $ref: "#/definitions/PrePackagedConceptSetEnum"
-
+        $ref: '#/definitions/PrePackagedConceptSetEnum'
   DataSetListResponse:
     type: object
     properties:
       items:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/DataSet"
-
-
+          $ref: '#/definitions/DataSet'
   DataSetCodeResponse:
     type: object
     properties:
       kernelType:
-        $ref: "#/definitions/KernelTypeEnum"
+        $ref: '#/definitions/KernelTypeEnum'
       code:
         type: string
-        description: The code required to generate the query for the data set.
-
+        description: 'The code required to generate the query for the data set.'
   DataSetQuery:
     type: object
     required:
@@ -2897,23 +2684,16 @@ definitions:
       - query
     properties:
       domain:
-        description: >
-          Domain corresponding to an OMOP table that can contain rows for the concepts in this
-          concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed
-          here; it makes sense to specify concepts in these domains in cohort criteria, but
-          there isn't much value in having concept sets defined for them.
-        $ref: "#/definitions/Domain"
+        description: "Domain corresponding to an OMOP table that can contain rows for the concepts in this concept set. Note that the Domain values RACE, GENDER, and ETHNICITY are not allowed here; it makes sense to specify concepts in these domains in cohort criteria, but there isn't much value in having concept sets defined for them.\n"
+        $ref: '#/definitions/Domain'
       query:
         type: string
-        description: >
-          The parameterized BigQuery SQL string to fetch the domain-specific subset of the data set from the CDR.
+        description: "The parameterized BigQuery SQL string to fetch the domain-specific subset of the data set from the CDR.\n"
       namedParameters:
         type: array
-        description: >
-          The set of named parameters to use for the SQL query.
+        description: "The set of named parameters to use for the SQL query.\n"
         items:
-          $ref: "#/definitions/NamedParameterEntry"
-
+          $ref: '#/definitions/NamedParameterEntry'
   NamedParameterEntry:
     type: object
     required:
@@ -2923,8 +2703,7 @@ definitions:
       key:
         type: string
       value:
-        $ref: "#/definitions/NamedParameterValue"
-
+        $ref: '#/definitions/NamedParameterValue'
   NamedParameterValue:
     type: object
     required:
@@ -2935,106 +2714,91 @@ definitions:
       name:
         type: string
       parameterType:
-        description: >
-          Should be any parameter allowed by bigquery, with the exception of struct. The list of
-          parameter types can be found here: https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types
+        description: "Should be any parameter allowed by bigquery, with the exception of struct. The list of parameter types can be found here: https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types\n"
         type: string
       arrayType:
         type: string
       parameterValue:
         type: object
-        description: Can be any value
-
+        description: 'Can be any value'
   DataSetPreviewResponse:
     type: object
     properties:
       domainValue:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/DataSetPreviewList"
-
+          $ref: '#/definitions/DataSetPreviewList'
   DataSetPreviewList:
     type: object
     properties:
       domain:
         type: string
       values:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/DataSetPreviewValueList"
-
+          $ref: '#/definitions/DataSetPreviewValueList'
   DataSetPreviewValueList:
     type: object
     properties:
       value:
         type: string
-        description: Value selected by user which will act as column header in preview table
+        description: 'Value selected by user which will act as column header in preview table'
       queryValue:
-        type: "array"
+        type: array
         items:
           type: string
-
   DomainInfoResponse:
     type: object
     required:
       - items
     properties:
       items:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/DomainInfo"
-
+          $ref: '#/definitions/DomainInfo'
   ValueSet:
     type: object
     properties:
       domain:
-        description: >
-          Domain corresponding to an OMOP table.
-        $ref: "#/definitions/Domain"
+        description: "Domain corresponding to an OMOP table.\n"
+        $ref: '#/definitions/Domain'
       survey:
-        description: >
-          Survey corresponding to an OMOP table.
-        $ref: "#/definitions/Surveys"
+        description: "Survey corresponding to an OMOP table.\n"
+        $ref: '#/definitions/Surveys'
       values:
-        $ref: "#/definitions/DomainValuesResponse"
-
+        $ref: '#/definitions/DomainValuesResponse'
   DomainValuesResponse:
     type: object
     required:
       - items
     properties:
       items:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/DomainValue"
-
+          $ref: '#/definitions/DomainValue'
   DomainValue:
     type: object
-    description: >
-      Domain values map to various column names in OMOP.
+    description: "Domain values map to various column names in OMOP.\n"
     required:
       - value
     properties:
       value:
-        description: The user facing display name for the value.
+        description: 'The user facing display name for the value.'
         type: string
-
   ReadOnlyNotebookResponse:
     type: object
     properties:
       html:
         type: string
-
   SurveysResponse:
     type: object
     required:
       - items
     properties:
       items:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/SurveyModule"
-
+          $ref: '#/definitions/SurveyModule'
   SurveyQuestionsResponse:
     type: object
     properties:
@@ -3043,7 +2807,6 @@ definitions:
       conceptId:
         type: integer
         format: int64
-
   SurveyAnswerResponse:
     type: object
     properties:
@@ -3058,7 +2821,6 @@ definitions:
       percentAnswered:
         type: number
         format: double
-
   CreateAccountRequest:
     type: object
     properties:
@@ -3066,7 +2828,6 @@ definitions:
         $ref: '#/definitions/Profile'
       invitationKey:
         type: string
-
   DuplicateCohortRequest:
     type: object
     properties:
@@ -3075,7 +2836,6 @@ definitions:
         format: int64
       newName:
         type: string
-
   InvitationVerificationRequest:
     type: object
     required:
@@ -3083,8 +2843,7 @@ definitions:
     properties:
       invitationKey:
         type: string
-        description: Invitation key for verification
-
+        description: 'Invitation key for verification'
   ResendWelcomeEmailRequest:
     type: object
     required:
@@ -3093,11 +2852,10 @@ definitions:
     properties:
       username:
         type: string
-        description: Username of account to resend welcome email to
+        description: 'Username of account to resend welcome email to'
       creationNonce:
         type: string
-        description: The nonce returned from the account creation API.
-
+        description: 'The nonce returned from the account creation API.'
   UpdateContactEmailRequest:
     type: object
     required:
@@ -3107,14 +2865,13 @@ definitions:
     properties:
       contactEmail:
         type: string
-        description: Email to update contact email
+        description: 'Email to update contact email'
       username:
         type: string
-        description: Username for account.
+        description: 'Username for account.'
       creationNonce:
         type: string
-        description: The nonce returned from the account creation API.
-
+        description: 'The nonce returned from the account creation API.'
   NihToken:
     required:
       - jwt
@@ -3122,8 +2879,7 @@ definitions:
     properties:
       jwt:
         type: string
-        description: the encoded/signed JWT
-
+        description: 'the encoded/signed JWT'
   Profile:
     type: object
     required:
@@ -3131,139 +2887,136 @@ definitions:
       - dataAccessLevel
     properties:
       userId:
-        description: researchallofus userId
+        description: 'researchallofus userId'
         type: integer
         format: int64
       username:
-        description: researchallofus username
+        description: 'researchallofus username'
         type: string
       creationNonce:
-        description: >
-          A value which can be used to secure API calls during the account
-          creation flow, prior to account login.
+        description: "A value which can be used to secure API calls during the account creation flow, prior to account login.\n"
         type: string
       contactEmail:
-        description: email address that can be used to contact the user
+        description: 'email address that can be used to contact the user'
         type: string
       contactEmailFailure:
-        description: Whether or not contact email could be added to verification list
+        description: 'Whether or not contact email could be added to verification list'
         type: boolean
       firstSignInTime:
         type: integer
         format: int64
       dataAccessLevel:
-        description: what level of data access the user has
-        $ref: "#/definitions/DataAccessLevel"
+        description: 'what level of data access the user has'
+        $ref: '#/definitions/DataAccessLevel'
       givenName:
-        description: the user's given name (e.g. Alice)
+        description: 'the user''s given name (e.g. Alice)'
         type: string
       familyName:
-        description: the user's family  name (e.g. Jones)
+        description: 'the user''s family  name (e.g. Jones)'
         type: string
       phoneNumber:
-        description: the user's phone number
+        description: 'the user''s phone number'
         type: string
       currentPosition:
-        description: the user's curent position (job title)
+        description: 'the user''s curent position (job title)'
         type: string
       organization:
-        description: the user's current organization
+        description: 'the user''s current organization'
         type: string
       authorities:
-        description: authorities granted to this user
-        type: "array"
+        description: 'authorities granted to this user'
+        type: array
         items:
-          $ref: "#/definitions/Authority"
+          $ref: '#/definitions/Authority'
       pageVisits:
-        description: pages user has visited
-        type: "array"
+        description: 'pages user has visited'
+        type: array
         items:
-          $ref: "#/definitions/PageVisit"
+          $ref: '#/definitions/PageVisit'
       demographicSurveyCompletionTime:
         type: integer
         format: int64
-        description: Timestamp when the user completed a demographic survey in milliseconds since the UNIX epoch.
+        description: 'Timestamp when the user completed a demographic survey in milliseconds since the UNIX epoch.'
       disabled:
         type: boolean
       emailVerificationStatus:
-        $ref: "#/definitions/EmailVerificationStatus"
+        $ref: '#/definitions/EmailVerificationStatus'
       aboutYou:
         type: string
       areaOfResearch:
         type: string
       institutionalAffiliations:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/InstitutionalAffiliation"
+          $ref: '#/definitions/InstitutionalAffiliation'
       idVerificationCompletionTime:
         type: integer
         format: int64
-        description: Timestamp when the user completes identity verification.
+        description: 'Timestamp when the user completes identity verification.'
       idVerificationBypassTime:
         type: integer
         format: int64
-        description: Timestamp when the user is bypassed for completing identity verification
+        description: 'Timestamp when the user is bypassed for completing identity verification'
       twoFactorAuthCompletionTime:
         type: integer
         format: int64
-        description: Timestamp when the user completed two factor authentication in milliseconds since the UNIX epoch.
+        description: 'Timestamp when the user completed two factor authentication in milliseconds since the UNIX epoch.'
       twoFactorAuthBypassTime:
         type: integer
         format: int64
-        description: Timestamp when the user was bypassed for completing two factor authentication in milliseconds since the UNIX epoch.
+        description: 'Timestamp when the user was bypassed for completing two factor authentication in milliseconds since the UNIX epoch.'
       eraCommonsLinkedNihUsername:
         type: string
-        description: The user's NIH username
+        description: 'The user''s NIH username'
       eraCommonsLinkExpireTime:
         type: integer
-        description: The FireCloud-calculated expiration time
+        description: 'The FireCloud-calculated expiration time'
         format: int64
         default: 0
       eraCommonsCompletionTime:
         type: integer
         format: int64
-        description: Timestamp when the user completed era commons linking.
+        description: 'Timestamp when the user completed era commons linking.'
       eraCommonsBypassTime:
         type: integer
         format: int64
-        description: Timestamp when the user was bypassed for completing era commons linking.
+        description: 'Timestamp when the user was bypassed for completing era commons linking.'
       complianceTrainingCompletionTime:
         type: integer
         format: int64
-        description: Timestamp when a user completed compliance training.
+        description: 'Timestamp when a user completed compliance training.'
       complianceTrainingBypassTime:
         type: integer
         format: int64
-        description: Timestamp when a user was bypassed for completing compliance training
+        description: 'Timestamp when a user was bypassed for completing compliance training'
       betaAccessBypassTime:
         type: integer
         format: int64
-        description: Timestamp when a user was bypassed for beta access
+        description: 'Timestamp when a user was bypassed for beta access'
       betaAccessRequestTime:
         type: integer
         format: int64
-        description: Timestamp when the user requests beta access.
+        description: 'Timestamp when the user requests beta access.'
       emailVerificationCompletionTime:
         type: integer
         format: int64
-        description: Timestamp when a user completed email verification
+        description: 'Timestamp when a user completed email verification'
       emailVerificationBypassTime:
         type: integer
         format: int64
-        description: Timestamp when a user was bypassed for completing email verification
+        description: 'Timestamp when a user was bypassed for completing email verification'
       dataUseAgreementCompletionTime:
         type: integer
         format: int64
-        description: Timestamp when a user completed the data use agreement.
+        description: 'Timestamp when a user completed the data use agreement.'
       dataUseAgreementBypassTime:
         type: integer
         format: int64
-        description: Timestamp when a user was bypassed for completing the data use agreement.
+        description: 'Timestamp when a user was bypassed for completing the data use agreement.'
       dataUseAgreementSignedVersion:
         type: integer
         format: int32
-        description: Version of the data use agreement that the user last signed.
-
+        description: 'Version of the data use agreement that the user last signed.'
   InstitutionalAffiliation:
     type: object
     required:
@@ -3274,9 +3027,8 @@ definitions:
         type: string
       role:
         type: string
-
   StackTraceElement:
-    description: ''
+    description: ""
     required:
       - className
       - methodName
@@ -3285,20 +3037,19 @@ definitions:
     properties:
       className:
         type: string
-        description: class name
+        description: 'class name'
       methodName:
         type: string
-        description: method name
+        description: 'method name'
       fileName:
         type: string
-        description: source file name
+        description: 'source file name'
       lineNumber:
         type: integer
-        description: line number
-
+        description: 'line number'
   ClusterStatus:
     type: string
-    enum: &CLUSTERSTATUS
+    enum:
       - Creating
       - Running
       - Updating
@@ -3309,9 +3060,8 @@ definitions:
       - Deleting
       - Deleted
       - Unknown
-
   Cluster:
-    description: A Firecloud notebook cluster.
+    description: 'A Firecloud notebook cluster.'
     required:
       - clusterName
       - clusterNamespace
@@ -3319,16 +3069,15 @@ definitions:
     properties:
       clusterName:
         type: string
-        description: The user-supplied name for the cluster
+        description: 'The user-supplied name for the cluster'
       clusterNamespace:
         type: string
-        description: The Google Project used to create the cluster
+        description: 'The Google Project used to create the cluster'
       status:
-        $ref: "#/definitions/ClusterStatus"
+        $ref: '#/definitions/ClusterStatus'
       createdDate:
         type: string
-        description: The date and time the cluster was created, in ISO-8601 format
-
+        description: 'The date and time the cluster was created, in ISO-8601 format'
   FileDetail:
     type: object
     required:
@@ -3338,23 +3087,21 @@ definitions:
     properties:
       name:
         type: string
-        description: File Name
+        description: 'File Name'
       path:
         type: string
-        description: The path is in format of gs://bucket-name/name
+        description: 'The path is in format of gs://bucket-name/name'
       lastModifiedTime:
         type: integer
         format: int64
-        description: Milliseconds since the UNIX epoch.
-
+        description: 'Milliseconds since the UNIX epoch.'
   ClusterListResponse:
     type: object
     required:
       - defaultCluster
     properties:
       defaultCluster:
-        $ref: "#/definitions/Cluster"
-
+        $ref: '#/definitions/Cluster'
   ClusterLocalizeRequest:
     type: object
     required:
@@ -3365,22 +3112,18 @@ definitions:
     properties:
       workspaceNamespace:
         type: string
-        description: Workspace namespace from which to source notebooks
+        description: 'Workspace namespace from which to source notebooks'
       workspaceId:
         type: string
-        description: Workspace from which to source notebooks
+        description: 'Workspace from which to source notebooks'
       notebookNames:
         type: array
-        description: >
-          Names of notebooks to localize. This is just the basename (no gs://
-          needed). This is interpreted as relative to the /notebooks directory
-          within the provided workspace's Google Cloud Storage bucket.
+        description: "Names of notebooks to localize. This is just the basename (no gs:// needed). This is interpreted as relative to the /notebooks directory within the provided workspace's Google Cloud Storage bucket.\n"
         items:
           type: string
       playgroundMode:
         type: boolean
-        description: Set to true if playgroundMode needed
-
+        description: 'Set to true if playgroundMode needed'
   ClusterLocalizeResponse:
     type: object
     required:
@@ -3388,34 +3131,27 @@ definitions:
     properties:
       clusterLocalDirectory:
         type: string
-        description: >
-          The directory on the notebook cluster file system where the requested
-          files were localized. This is the "API" directory in Jupyter terms,
-          which means it is a relative path in the Jupyter user-facing file
-          system, e.g. "foo/bar.ipynb".
-
+        description: "The directory on the notebook cluster file system where the requested files were localized. This is the \"API\" directory in Jupyter terms, which means it is a relative path in the Jupyter user-facing file system, e.g. \"foo/bar.ipynb\".\n"
   UsernameTakenResponse:
     type: object
     required:
       - isTaken
     properties:
       isTaken:
-        description: Boolean response to whether username is already taken.
+        description: 'Boolean response to whether username is already taken.'
         type: boolean
     example:
       isTaken: false
-
   ContactEmailTakenResponse:
     type: object
     required:
       - isTaken
     properties:
       isTaken:
-        description: Boolean response to whether contact email is already taken.
+        description: 'Boolean response to whether contact email is already taken.'
         type: boolean
     example:
       isTaken: false
-
   WorkspaceResponse:
     type: object
     required:
@@ -3426,17 +3162,15 @@ definitions:
         $ref: '#/definitions/Workspace'
       accessLevel:
         $ref: '#/definitions/WorkspaceAccessLevel'
-
   userListResponse:
     type: object
     required:
       - profileList
     properties:
       profileList:
-        type: "array"
+        type: array
         items:
-          $ref: "#/definitions/Profile"
-
+          $ref: '#/definitions/Profile'
   UpdateUserDisabledRequest:
     type: object
     required:
@@ -3445,60 +3179,49 @@ definitions:
       email:
         type: string
       disabled:
-        description: Set to true to disable user in auth domain, false otherwise
+        description: 'Set to true to disable user in auth domain, false otherwise'
         type: boolean
-
   AuditBigQueryResponse:
     type: object
     properties:
       numQueryIssues:
         type: integer
         format: int32
-        description: >
-          Number of queries issues against the Curated data repository which are
-          flagged as possible audit issues. See logs/alerts for details.
-
+        description: "Number of queries issues against the Curated data repository which are flagged as possible audit issues. See logs/alerts for details.\n"
   CheckClustersResponse:
     type: object
     properties:
       clusterDeletionCount:
         type: integer
         format: int32
-        description: >
-          Number of clusters deleted during the check.
-
+        description: "Number of clusters deleted during the check.\n"
   User:
     type: object
     properties:
       email:
-        description: researchallofus email address
+        description: 'researchallofus email address'
         type: string
       givenName:
-        description: the user's given name (e.g. Alice)
+        description: 'the user''s given name (e.g. Alice)'
         type: string
       familyName:
-        description: the user's family  name (e.g. Jones)
+        description: 'the user''s family  name (e.g. Jones)'
         type: string
-
   UserResponse:
     type: object
     properties:
       users:
-        description: A list of users matching the provided search query.
+        description: 'A list of users matching the provided search query.'
         type: array
         items:
-          $ref: "#/definitions/User"
+          $ref: '#/definitions/User'
       nextPageToken:
-        description: >
-          Pagination token that can be used in a subsequent calls to retrieve more results.
-          If not set, there are no more results to retrieve.
+        description: "Pagination token that can be used in a subsequent calls to retrieve more results. If not set, there are no more results to retrieve.\n"
         type: string
-
   RecentResourceResponse:
     type: array
     items:
-      $ref: "#/definitions/RecentResource"
-
+      $ref: '#/definitions/RecentResource'
   RecentResource:
     type: object
     properties:
@@ -3512,9 +3235,9 @@ definitions:
       permission:
         type: string
       cohort:
-        $ref: "#/definitions/Cohort"
+        $ref: '#/definitions/Cohort'
       cohortReview:
-        $ref: "#/definitions/CohortReview"
+        $ref: '#/definitions/CohortReview'
       notebook:
         $ref: '#/definitions/FileDetail'
       conceptSet:
@@ -3523,19 +3246,17 @@ definitions:
         $ref: '#/definitions/DataSet'
       modifiedTime:
         type: string
-
   RecentResourceRequest:
     type: object
     properties:
       notebookName:
         type: string
-
   NotebookLockingMetadataResponse:
     type: object
     properties:
       lastLockedBy:
         type: string
       lockExpirationTime:
-        description: The time when the lock will expire, in ms from the Unix epoch
+        description: 'The time when the lock will expire, in ms from the Unix epoch'
         type: integer
         format: int64
