@@ -2163,15 +2163,14 @@ definitions:
   Authority:
     type: string
     description: actions a user can have authority/permission to perform
-    enum: [
       # Note: Swagger trims any common prefix from enum values' corresponding
       # Java fields by default; this has no side-effect currently as there is
-      # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
-      REVIEW_RESEARCH_PURPOSE,
-      DEVELOPER,
-      ACCESS_CONTROL_ADMIN,
-      FEATURED_WORKSPACE_ADMIN
-    ]
+    # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
+    enum:
+      - 'REVIEW_RESEARCH_PURPOSE'
+      - 'DEVELOPER'
+      - 'ACCESS_CONTROL_ADMIN'
+      - 'FEATURED_WORKSPACE_ADMIN'
 
   PageVisit:
     type: object
@@ -2440,19 +2439,7 @@ definitions:
   specificPopulationEnum:
     type: string
     description: Short parsable descriptions of specific population categories
-    enum: [
-      RACE_ETHNICITY,
-      AGE_GROUPS,
-      SEX,
-      GENDER_IDENTITY,
-      SEXUAL_ORIENTATION,
-      GEOGRAPHY,
-      DISABILITY_STATUS,
-      ACCESS_TO_CARE,
-      EDUCATION_LEVEL,
-      INCOME_LEVEL,
-      OTHER
-    ]
+    enum: [ RACE_ETHNICITY, AGE_GROUPS, SEX, GENDER_IDENTITY, SEXUAL_ORIENTATION, GEOGRAPHY, DISABILITY_STATUS,ACCESS_TO_CARE,EDUCATION_LEVEL,INCOME_LEVEL,OTHER]
 
   ResearchPurposeReviewRequest:
     description: Approve or reject a workspace's research purpose.
@@ -2489,13 +2476,7 @@ definitions:
 
   AccessModule:
     type: string
-    enum: [
-      DATA_USE_AGREEMENT,
-      COMPLIANCE_TRAINING,
-      BETA_ACCESS,
-      ERA_COMMONS,
-      TWO_FACTOR_AUTH
-    ]
+    enum: [DATA_USE_AGREEMENT,COMPLIANCE_TRAINING,BETA_ACCESS,ERA_COMMONS,TWO_FACTOR_AUTH]
 
   AccessBypassRequest:
     type: object
