@@ -8,11 +8,11 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {DetailHeader} from 'app/pages/data/cohort-review/detail-header.component';
 import {DetailTabs} from 'app/pages/data/cohort-review/detail-tabs.component';
 import {cohortReviewStore, getVocabOptions, vocabOptions} from 'app/services/review-state.service';
-import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
+import {cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {urlParamsStore} from 'app/utils/navigation';
+import {currentCohortStore, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {ParticipantCohortStatus} from 'generated/fetch';
+import {ParticipantCohortStatus, SortOrder} from 'generated/fetch';
 
 interface Props {
   workspace: WorkspaceData;
@@ -30,10 +30,29 @@ export const DetailPage = withCurrentWorkspace()(
       this.state = {participant: null};
     }
 
-    componentDidMount() {
+    async componentDidMount() {
+      const {workspace: {cdrVersionId, id, namespace}} = this.props;
+      const {ns, wsid, cid} = urlParamsStore.getValue();
+      const promises = [];
+      if (!cohortReviewStore.getValue()) {
+        promises.push(
+          cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
+            page: 0,
+            pageSize: 25,
+            sortOrder: SortOrder.Asc,
+            filters: {items: []}
+          }).then(review => cohortReviewStore.next(review))
+        );
+      }
+      if (!currentCohortStore.getValue()) {
+        promises.push(cohortsApi().getCohort(ns, wsid, cid).then(cohort => currentCohortStore.next(cohort)));
+      }
+      if (promises.length) {
+        await Promise.all(promises);
+      }
       this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(params => !!params.pid)
-        .switchMap(({ns, wsid, pid}) => {
+        .switchMap(({pid}) => {
           return from(cohortReviewApi()
             .getParticipantCohortStatus(ns, wsid,
               cohortReviewStore.getValue().cohortReviewId, +pid))
@@ -43,7 +62,6 @@ export const DetailPage = withCurrentWorkspace()(
         })
         .subscribe();
       if (!vocabOptions.getValue()) {
-        const {workspace: {id, namespace}} = this.props;
         const {cohortReviewId} = cohortReviewStore.getValue();
         getVocabOptions(namespace, id, cohortReviewId);
       }
@@ -54,31 +72,33 @@ export const DetailPage = withCurrentWorkspace()(
     }
 
     setParticipant(v) {
-      console.log(v);
       this.setState({participant: v});
     }
 
     render() {
       const {participant} = this.state;
-      return <React.Fragment>
+      return <div style={{
+        minHeight: 'calc(100vh - calc(4rem + 60px))',
+        padding: '1rem',
+        position: 'relative',
+        marginRight: '45px'
+      }}>
         {!!participant
           ? <React.Fragment>
-            <div className='detail-page '>
-              <DetailHeader participant={participant} />
-              <DetailTabs />
-            </div>
+            <DetailHeader participant={participant} />
+            <DetailTabs />
             <HelpSidebar location='reviewParticipantDetail' participant={participant}
               setParticipant={(p) => this.setParticipant(p)} />
           </React.Fragment>
           : <SpinnerOverlay />
         }
-      </React.Fragment>;
+      </div>;
     }
   }
 );
 
 @Component ({
-  template: '<div #root></div>'
+  template: '<div #root></div>',
 })
 export class DetailPageComponent extends ReactWrapperBase {
   constructor() {

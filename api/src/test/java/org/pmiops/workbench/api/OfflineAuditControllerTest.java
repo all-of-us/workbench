@@ -45,7 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class AuditControllerTest {
+public class OfflineAuditControllerTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String CDR_V1_PROJECT_ID = "cdr1-project";
@@ -54,7 +54,7 @@ public class AuditControllerTest {
   private static final String USER_EMAIL = "falco@lombardi.com";
 
   @TestConfiguration
-  @Import({AuditController.class})
+  @Import({OfflineAuditController.class})
   @MockBean({BigQueryService.class, WorkspaceDao.class})
   static class Configuration {
     @Bean
@@ -66,7 +66,7 @@ public class AuditControllerTest {
   @Autowired BigQueryService bigQueryService;
   @Autowired UserDao userDao;
   @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired AuditController auditController;
+  @Autowired OfflineAuditController offlineAuditController;
   @Autowired WorkspaceDao workspaceDao;
 
   @Before
@@ -118,34 +118,34 @@ public class AuditControllerTest {
 
   @Test
   public void testAuditTableSuffix() {
-    assertThat(AuditController.auditTableSuffix(Instant.parse("2007-01-03T00:00:00.00Z"), 0))
+    assertThat(OfflineAuditController.auditTableSuffix(Instant.parse("2007-01-03T00:00:00.00Z"), 0))
         .isEqualTo("20070103");
-    assertThat(AuditController.auditTableSuffix(Instant.parse("2018-01-01T23:59:59.00Z"), 3))
+    assertThat(OfflineAuditController.auditTableSuffix(Instant.parse("2018-01-01T23:59:59.00Z"), 3))
         .isEqualTo("20171229");
   }
 
   @Test
   public void testAuditBigQueryCdrV1Queries() {
     stubBigQueryCalls(CDR_V1_PROJECT_ID, USER_EMAIL, 5);
-    assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(0);
+    assertThat(offlineAuditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(0);
   }
 
   @Test
   public void testAuditBigQueryCdrV2Queries() {
     stubBigQueryCalls(CDR_V2_PROJECT_ID, USER_EMAIL, 5);
-    assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(0);
+    assertThat(offlineAuditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(0);
   }
 
   @Test
   public void testAuditBigQueryFirecloudQueries() {
     stubBigQueryCalls(FC_PROJECT_ID, USER_EMAIL, 5);
-    assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(0);
+    assertThat(offlineAuditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(0);
   }
 
   @Test
   public void testAuditBigQueryUnrecognizedProjectQueries() {
     stubBigQueryCalls("my-personal-gcp-project", USER_EMAIL, 5);
     // These stubs are hit once per CDR project, so the total number of issues is doubled.
-    assertThat(auditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(10);
+    assertThat(offlineAuditController.auditBigQuery().getBody().getNumQueryIssues()).isEqualTo(10);
   }
 }

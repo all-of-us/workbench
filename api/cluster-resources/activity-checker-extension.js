@@ -32,7 +32,7 @@ define([
     }, 1000);
 
     // Events array should be in sync with INACTIVITY_CONFIG.TRACKED_EVENTS from signed-in/component.ts
-    ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'].forEach(eventName => {
+    ['mousedown', 'keypress', 'scroll', 'click'].forEach(eventName => {
       window.addEventListener(eventName, () => signalUserActivity.invoke(), false);
     });
 
