@@ -10,7 +10,6 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {
-  userRolesStub,
   WorkspacesApiStub,
   workspaceStubs,
   WorkspaceStubVariables
@@ -71,25 +70,4 @@ describe('WorkspaceList', () => {
       .find('[data-test-id="workspace-access-level"]').text())
       .toBe(WorkspaceStubVariables.DEFAULT_WORKSPACE_PERMISSION);
   });
-
-  it('fetches user roles before opening the share dialog', async() => {
-    const wrapper = component();
-    await waitOneTickAndUpdate(wrapper);
-    const userRolesSpy = jest.spyOn(workspacesApi(), 'getFirecloudWorkspaceUserRoles');
-
-    // Click the snowman menu
-    wrapper.find('[data-test-id="workspace-card-menu"]').first().simulate('click');
-    // Click the share menu item
-    wrapper.find('[data-test-id="Share-menu-item"]').first()
-      .simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    // We should have called the userRoles API before opening the share modal.
-    expect(userRolesSpy).toHaveBeenCalledTimes(1);
-
-    // The share modal should have been opened w/ the correct props.
-    const shareModal = wrapper.find('[data-test-id="workspace-share-modal"]').first();
-    expect(shareModal.prop('userRoles')).toEqual(userRolesStub);
-  });
-
 });
