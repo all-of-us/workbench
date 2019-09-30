@@ -150,7 +150,7 @@ public class BillingGarbageCollectionService {
 
   BillingProjectGarbageCollectionResponse deletedWorkspaceGarbageCollection() {
     final List<String> billingProjects =
-        billingProjectGarbageCollectionDao.findBillingProjectsForGarbageCollection();
+        billingProjectBufferEntryDao.findBillingProjectsForGarbageCollection();
 
     final List<GarbageCollectedProject> garbageCollectedProjects =
         billingProjects.stream()
