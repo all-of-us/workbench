@@ -173,8 +173,7 @@ buildscript {    // Configuration for building
   ext {
     GAE_VERSION = '1.9.64'
     SPRING_BOOT_VERSION = '1.5.22.RELEASE'
-    JACKSON_VERSION = '2.9.9'
-    JACKSON_DATABIND_VERSION = '2.9.9.3'  // security update on 2.9.9
+    JACKSON_VERSION = '2.9.10'
     ELASTICSEARCH_VERSION = '6.6.1'
   }
 
@@ -342,7 +341,7 @@ dependencies {
 
   compile "com.fasterxml.jackson.core:jackson-annotations:${JACKSON_VERSION}"
   compile "com.fasterxml.jackson.core:jackson-core:${JACKSON_VERSION}"
-  compile "com.fasterxml.jackson.core:jackson-databind:${JACKSON_DATABIND_VERSION}"
+  compile "com.fasterxml.jackson.core:jackson-databind:${JACKSON_VERSION}"
 
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev20190806-1.30.3'
   compile 'com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0'
