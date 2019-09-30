@@ -59,6 +59,7 @@ public final class StorageEnums {
               .put(BillingProjectBufferStatus.AVAILABLE, (short) 2)
               .put(BillingProjectBufferStatus.ASSIGNING, (short) 3)
               .put(BillingProjectBufferStatus.ASSIGNED, (short) 4)
+              .put(BillingProjectBufferStatus.GARBAGE_COLLECTED, (short) 5)
               .build();
 
   public static BillingProjectBufferStatus billingProjectBufferStatusFromStorage(Short s) {

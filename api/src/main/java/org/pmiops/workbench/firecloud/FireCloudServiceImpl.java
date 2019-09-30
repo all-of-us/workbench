@@ -61,6 +61,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
 
   private static final String USER_FC_ROLE = "user";
+  private static final String OWNER_FC_ROLE = "owner";
   private static final String THURLOE_STATUS_NAME = "Thurloe";
   private static final String SAM_STATUS_NAME = "Sam";
   private static final String RAWLS_STATUS_NAME = "Rawls";
@@ -93,8 +94,10 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<BillingApi> billingApiProvider,
       Provider<GroupsApi> groupsApiProvider,
       Provider<NihApi> nihApiProvider,
-      @Qualifier("workspacesApi") Provider<WorkspacesApi> workspacesApiProvider,
-      @Qualifier("workspaceAclsApi") Provider<WorkspacesApi> workspaceAclsApiProvider,
+      @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
+          Provider<WorkspacesApi> workspacesApiProvider,
+      @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_WORKSPACE_API)
+          Provider<WorkspacesApi> workspaceAclsApiProvider,
       Provider<StatusApi> statusApiProvider,
       Provider<StaticNotebooksApi> staticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
@@ -239,14 +242,18 @@ public class FireCloudServiceImpl implements FireCloudService {
         (context) -> billingApiProvider.get().billingProjectStatus(projectName));
   }
 
-  @Override
-  public void addUserToBillingProject(String email, String projectName) {
+  private void addRoleToBillingProject(String email, String projectName, String role) {
     BillingApi billingApi = billingApiProvider.get();
     retryHandler.run(
         (context) -> {
-          billingApi.addUserToBillingProject(projectName, USER_FC_ROLE, email);
+          billingApi.addUserToBillingProject(projectName, role, email);
           return null;
         });
+  }
+
+  @Override
+  public void addUserToBillingProject(String email, String projectName) {
+    addRoleToBillingProject(email, projectName, USER_FC_ROLE);
   }
 
   @Override
@@ -255,6 +262,29 @@ public class FireCloudServiceImpl implements FireCloudService {
     retryHandler.run(
         (context) -> {
           billingApi.removeUserFromBillingProject(projectName, USER_FC_ROLE, email);
+          return null;
+        });
+  }
+
+  @Override
+  public void addOwnerToBillingProject(String ownerEmail, String projectName) {
+    addRoleToBillingProject(ownerEmail, projectName, OWNER_FC_ROLE);
+  }
+
+  @Override
+  public void removeOwnerFromBillingProject(
+      String projectName, String ownerEmailToRemove, String callerAccessToken) {
+
+    final ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
+    apiClient.setAccessToken(callerAccessToken);
+
+    // use a private instance of BillingApi instead of the provider
+    // b/c we don't want to modify its ApiClient globally
+    final BillingApi billingApi = new BillingApi();
+    billingApi.setApiClient(apiClient);
+    retryHandler.run(
+        (context) -> {
+          billingApi.removeUserFromBillingProject(projectName, OWNER_FC_ROLE, ownerEmailToRemove);
           return null;
         });
   }

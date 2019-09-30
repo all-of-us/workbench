@@ -52,6 +52,9 @@ public class WorkbenchConfig {
     public String accountId;
     public String exportBigQueryTable;
     public Double defaultFreeCreditsLimit;
+    public Integer garbageCollectionUserCapacity;
+    // A list of GCP service accounts for billing project garbage collection
+    public ArrayList<String> garbageCollectionUsers;
   }
 
   public static class FireCloudConfig {
