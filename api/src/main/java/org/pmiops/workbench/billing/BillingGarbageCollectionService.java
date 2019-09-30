@@ -19,7 +19,7 @@ import org.pmiops.workbench.db.dao.BillingProjectGarbageCollectionDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
 import org.pmiops.workbench.db.model.BillingProjectGarbageCollection;
-import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
@@ -96,7 +96,7 @@ public class BillingGarbageCollectionService {
             "No available Garbage Collection Service Accounts.  "
                 + "These GCSAs exceed the configured capacity limit of %d: %s",
             config.garbageCollectionUserCapacity, String.join(", ", config.garbageCollectionUsers));
-    throw new BadRequestException(msg);
+    throw new ServerErrorException(msg);
   }
 
   private GarbageCollectedProject recordGarbageCollection(
@@ -132,13 +132,13 @@ public class BillingGarbageCollectionService {
           String.format(
               "Failure retrieving credentials for garbage collection service account %s",
               garbageCollectionSA);
-      throw new BadRequestException(msg, e);
+      throw new ServerErrorException(msg, e);
     } catch (final IOException e) {
       final String msg =
           String.format(
               "Failure removing user %s as owner of project %s. Successfully added new owner %s",
               appEngineSA, projectName, garbageCollectionSA);
-      throw new BadRequestException(msg, e);
+      throw new ServerErrorException(msg, e);
     }
 
     return recordGarbageCollection(projectName, garbageCollectionSA);
