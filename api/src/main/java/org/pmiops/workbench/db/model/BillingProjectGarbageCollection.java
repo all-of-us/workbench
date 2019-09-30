@@ -14,7 +14,7 @@ public class BillingProjectGarbageCollection {
   private String owner;
 
   @Id
-  @JoinColumn(name = "firecloud_project_name")
+  @Column(name = "firecloud_project_name")
   public String getFireCloudProjectName() {
     return fireCloudProjectName;
   }
