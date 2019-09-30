@@ -18,7 +18,7 @@ abstract class AbstractAuditableEvent {
 
   private static final String LOG_NAME = "action-audit-test-2";
 
-  public abstract Timestamp timestamp();
+  public abstract long timestamp();
   public abstract AgentType agentType();
   public abstract long agentId();
   public abstract Optional<String> agentEmail();

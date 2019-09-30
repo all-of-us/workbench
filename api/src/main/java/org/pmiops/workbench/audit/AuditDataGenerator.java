@@ -3,8 +3,7 @@ package org.pmiops.workbench.audit;
 import com.google.cloud.logging.LogEntry;
 import com.google.common.collect.ImmutableList;
 import java.security.SecureRandom;
-import java.sql.Timestamp;
-import java.util.Collections;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -31,7 +30,8 @@ public class AuditDataGenerator {
   }
 
   private static LogEntry generateEntry() {
-    final Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    // todo: spread the timestamps out a bit
+    final long timestamp = randomTimeInTrailingDuration(Duration.ofDays(365 * 2));
     final AgentType agentType = randomEnum(AgentType.class);
     final long agentId = random.nextInt(100); // agents are 0-99
     final Optional<String> agentEmail = buildOptionally(() -> randomFromList(USER_EMAIL_ADDRESSES));
@@ -53,6 +53,17 @@ public class AuditDataGenerator {
         previousValue,
         newValue);
     return event.toLogEntry();
+  }
+
+  private static long randomTimeInTrailingDuration(Duration range) {
+    final long now = System.currentTimeMillis();
+    final long beginning = now - range.toMillis();
+    final long offsetMillis = randomLongInRange(beginning, now);
+    return now - offsetMillis;
+  }
+
+  private static long randomLongInRange(long low, long high) {
+    return low + (long) (random.nextFloat() * (high - low));
   }
 
   public static <T> Optional<T> buildOptionally(Supplier<T> valueSupplier) {

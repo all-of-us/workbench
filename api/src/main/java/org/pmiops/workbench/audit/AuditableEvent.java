@@ -8,7 +8,7 @@ import java.util.Optional;
  */
 public class AuditableEvent extends AbstractAuditableEvent {
 
-  private final Timestamp timestamp;
+  private final long timestamp;
   private final AgentType agentType;
   private final long agentId;
   private Optional<String> agentEmail;
@@ -19,7 +19,7 @@ public class AuditableEvent extends AbstractAuditableEvent {
   private final Optional<String> previousValueMaybe;
   private final Optional<String> newValueMaybe;
 
-  public AuditableEvent(Timestamp timestamp, AgentType agentType, long agentId, Optional<String> agentEmail,
+  public AuditableEvent(long timestamp, AgentType agentType, long agentId, Optional<String> agentEmail,
       ActionType actionType, TargetType targetType, Optional<String> targetPropertyMaybe, Optional<Long> targetIdMaybe,
       Optional<String> previousValueMaybe, Optional<String> newValueMaybe) {
     this.timestamp = timestamp;
@@ -35,7 +35,7 @@ public class AuditableEvent extends AbstractAuditableEvent {
   }
 
   @Override
-  public Timestamp timestamp() {
+  public long timestamp() {
     return timestamp;
   }
 
