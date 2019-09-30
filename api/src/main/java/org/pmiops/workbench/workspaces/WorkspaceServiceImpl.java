@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -34,6 +35,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -498,7 +500,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public List<UserRecentWorkspace> getRecentWorkspacesByUser(long userId) {
+  public List<UserRecentWorkspace> getRecentWorkspaces() {
+    long userId = userProvider.get().getUserId();
     List<UserRecentWorkspace> userRecentWorkspaces =
         userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
     enforceFirecloudAclsInRecentWorkspaces(userRecentWorkspaces);
@@ -509,7 +512,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // Map recentWorkspaces by id because we'll want to access them like that later when we delete
     Map<Long, UserRecentWorkspace> recentWorkspacesById =
         recentWorkspaces.stream()
-            .collect(Collectors.toMap(UserRecentWorkspace::getWorkspaceId, rw -> rw));
+            .collect(Collectors.toMap(UserRecentWorkspace::getWorkspaceId, Function.identity()));
 
     // Grab the dbWorkspaces.
     List<Workspace> dbWorkspaces =
@@ -521,47 +524,53 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // Map by primary key id bc it's illegal to string streams along in Java. not pretty enough.
     Map<Long, Workspace> dbWorkspacesById =
         dbWorkspaces.stream()
-            .collect(Collectors.toMap(Workspace::getWorkspaceId, dbWorkspace -> dbWorkspace));
+            .collect(Collectors.toMap(Workspace::getWorkspaceId, Function.identity()));
 
-    // Unfortunately it doesn't look like there's a way to batch call this currently. At least we
-    // can make it parallel.
-    dbWorkspacesById.forEach(
-        (dbWorkspaceId, dbWorkspace) -> {
+    // Unfortunately it doesn't look like there's a way to batch call this currently.
+    dbWorkspaces.forEach(
+        dbWorkspace -> {
           // Grab the ACLs.
           Map<String, WorkspaceAccessEntry> aclsByEmail =
               getFirecloudWorkspaceAcls(
                   dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
-          // If this user's email isn't something that has access, remove the corresponding
-          // entry from userRecentResources.
-          if (!aclsByEmail.containsKey(userProvider.get().getEmail())
-              || aclsByEmail
-                  .get(userProvider.get().getEmail())
-                  .getAccessLevel()
-                  .equals(WorkspaceAccessLevel.NO_ACCESS.toString())) {
-            userRecentWorkspaceDao.delete(recentWorkspacesById.get(dbWorkspaceId));
+          String email = userProvider.get().getEmail();
+          if (userHasWorkspaceAccess(email, aclsByEmail)) {
+            userRecentWorkspaceDao.delete(recentWorkspacesById.get(dbWorkspace.getWorkspaceId()));
           }
         });
   }
 
-  @Override
-  public UserRecentWorkspace updateRecentWorkspaces(
-      long workspaceId, long userId, Timestamp lastAccessDate) {
-    Optional<UserRecentWorkspace> matchingRecentWorkspace =
-        userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
+  private boolean userHasWorkspaceAccess(
+      String email, Map<String, WorkspaceAccessEntry> aclsByEmail) {
+    return !aclsByEmail.containsKey(email)
+        || aclsByEmail
+            .get(email)
+            .getAccessLevel()
+            .equals(WorkspaceAccessLevel.NO_ACCESS.toString());
+  }
 
-    if (matchingRecentWorkspace.isPresent()) {
-      matchingRecentWorkspace.get().setLastAccessDate(lastAccessDate);
-      userRecentWorkspaceDao.save(matchingRecentWorkspace.get());
-      handleWorkspaceLimit(userId);
-      return matchingRecentWorkspace.get();
-    } else {
-      UserRecentWorkspace recentWorkspace =
-          new UserRecentWorkspace(workspaceId, userId, lastAccessDate);
-      userRecentWorkspaceDao.save(recentWorkspace);
-      handleWorkspaceLimit(userId);
-      return recentWorkspace;
-    }
+  @Override
+  public UserRecentWorkspace updateRecentWorkspaces(long workspaceId, long userId, Timestamp lastAccessDate) {
+    Optional<UserRecentWorkspace> maybeRecentWorkspace =
+            userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
+    final UserRecentWorkspace matchingRecentWorkspace =
+            maybeRecentWorkspace
+                    .map(
+                            recentWorkspace ->
+                                    new UserRecentWorkspace(
+                                            recentWorkspace.getWorkspaceId(), recentWorkspace.getUserId(), lastAccessDate))
+                    .orElseGet(() -> new UserRecentWorkspace(workspaceId, userId, lastAccessDate));
+    userRecentWorkspaceDao.save(matchingRecentWorkspace);
+    handleWorkspaceLimit(userId);
+    return matchingRecentWorkspace;
+  }
+
+  @Override
+  public UserRecentWorkspace updateRecentWorkspaces(long workspaceId) {
+    long userId = userProvider.get().getUserId();
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    return updateRecentWorkspaces(workspaceId, userId, now);
   }
 
   private void handleWorkspaceLimit(long userId) {
@@ -575,10 +584,44 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public void maybeDeleteRecentWorkspace(long workspaceId, long userId) {
-    Optional<UserRecentWorkspace> maybeRecentWorkspaces =
+  /** Returns true if anything was deleted from user_recent_workspaces, false if nothing was */
+  public boolean maybeDeleteRecentWorkspace(long workspaceId) {
+    long userId = userProvider.get().getUserId();
+    Optional<UserRecentWorkspace> maybeRecentWorkspace =
         userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
-    maybeRecentWorkspaces.ifPresent(
-        userRecentWorkspace -> userRecentWorkspaceDao.delete(userRecentWorkspace));
+    if (maybeRecentWorkspace.isPresent()) {
+      userRecentWorkspaceDao.delete(maybeRecentWorkspace.get());
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @Override
+  public List<RecentWorkspace> buildRecentWorkspaceList(
+      List<UserRecentWorkspace> userRecentWorkspaces) {
+    return userRecentWorkspaces.stream()
+        .map(
+            userRecentWorkspace -> {
+              org.pmiops.workbench.db.model.Workspace dbWorkspace =
+                  this.findByWorkspaceId(userRecentWorkspace.getWorkspaceId());
+              WorkspaceAccessLevel accessLevel =
+                  this.getWorkspaceAccessLevel(
+                      dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+              return buildRecentWorkspace(dbWorkspace, userRecentWorkspace, accessLevel);
+            })
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public RecentWorkspace buildRecentWorkspace(
+      org.pmiops.workbench.db.model.Workspace dbWorkspace,
+      UserRecentWorkspace userRecentWorkspace,
+      WorkspaceAccessLevel accessLevel) {
+    RecentWorkspace recentWorkspace = new RecentWorkspace();
+    recentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
+    recentWorkspace.setAccessedTime(userRecentWorkspace.getLastAccessDate().toString());
+    recentWorkspace.setAccessLevel(accessLevel);
+    return recentWorkspace;
   }
 }
