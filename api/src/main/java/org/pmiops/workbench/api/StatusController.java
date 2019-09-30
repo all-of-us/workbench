@@ -10,7 +10,9 @@ import com.google.cloud.logging.Severity;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Struct;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import org.pmiops.workbench.audit.AuditDataGenerator;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.StatusResponse;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
@@ -65,22 +67,7 @@ public class StatusController implements StatusApiDelegate {
 
   private void populateAuditTestData() {
     Logging logging = LoggingOptions.getDefaultInstance().getService();
-
-    // The name of the log to write to
-    final String logName = "action-audit-test";
-
-    final Map<String, ?> data = ImmutableMap.of(
-        "name", "Bond, James Bond",
-        "occupation", "007",
-        "shaken", true,
-        "stirred", false,
-        "numFilms", 25);
-
-    LogEntry jsonEntry = LogEntry.newBuilder(JsonPayload.of(data))
-        .setSeverity(Severity.INFO)
-        .setLogName(logName)
-        .setResource(LOGGING_RESOURCE)
-        .build();
-    logging.write(Collections.singleton(jsonEntry));
+    List<LogEntry> entries = AuditDataGenerator.generateRandomLogEntries(1000);
+    logging.write(entries);
   }
 }
