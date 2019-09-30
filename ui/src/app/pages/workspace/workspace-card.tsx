@@ -15,25 +15,38 @@ import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {BugReportModal} from 'app/components/bug-report';
 import {UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
+import {FlexColumn, FlexRow} from "app/components/flex";
 
 const EVENT_CATEGORY = 'Workspace list';
 
 const styles = reactStyles({
   workspaceCard: {
-    display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%',
+    justifyContent: 'flex-end',
+    height: '100%',
     // Set relative positioning so the spinner overlay is centered in the card.
     position: 'relative'
   },
-  workspaceCardFooter: {
-    display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'
+  workspaceCardContents: {
+    paddingTop: '.5rem',
+    borderRight: '1px solid #b7b7b7',
+    flex: '0 0 1rem',
+    justifyContent: 'center'
   },
   workspaceName: {
-    color: colors.accent, marginBottom: '0.5rem', fontWeight: 600,
-    fontSize: 18, wordBreak: 'break-all', cursor: 'pointer',
+    color: colors.accent,
+    marginBottom: '0.5rem',
+    fontSize: 18,
+    wordBreak: 'break-all',
+    cursor: 'pointer',
   },
   permissionBox: {
-    color: colors.white, height: '1rem', width: '3rem', fontSize: 10, textAlign: 'center',
-    borderRadius: '0.2rem', padding: 0
+    color: colors.white,
+    height: '1rem',
+    width: '3rem',
+    fontSize: 10,
+    textAlign: 'center',
+    borderRadius: '0.2rem',
+    padding: 0
   }
 });
 
@@ -57,35 +70,39 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
   return <PopupTrigger
     side='bottom'
     closeOnClick
-    content={ <React.Fragment>
-      <MenuItem icon='copy'
-                onClick={() => {navigate([wsPathPrefix, 'duplicate']); }}>
-        Duplicate
-      </MenuItem>
-      <TooltipTrigger content={<div>Requires Write Permission</div>}
-                      disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}>
-        <MenuItem icon='pencil'
-                  onClick={() => {navigate([wsPathPrefix, 'edit']); }}
-                  disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}>
-          Edit
+    content={
+      <React.Fragment>
+        <MenuItem icon='copy'
+                  onClick={() => {navigate([wsPathPrefix, 'duplicate']); }}>
+          Duplicate
         </MenuItem>
-      </TooltipTrigger>
-      <TooltipTrigger content={<div>Requires Owner Permission</div>}
-                      disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
-        <MenuItem icon='pencil' onClick={onShare} disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
-          Share
-        </MenuItem>
-      </TooltipTrigger>
-      <TooltipTrigger content={<div>Requires Owner Permission</div>}
-                      disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
-        <MenuItem icon='trash' onClick={onDelete} disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
-          Delete
-        </MenuItem>
-      </TooltipTrigger>
-    </React.Fragment>}
+        <TooltipTrigger content={<div>Requires Write Permission</div>}
+                        disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}>
+          <MenuItem icon='pencil'
+                    onClick={() => {navigate([wsPathPrefix, 'edit']); }}
+                    disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}>
+            Edit
+          </MenuItem>
+        </TooltipTrigger>
+        <TooltipTrigger content={<div>Requires Owner Permission</div>}
+                        disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+          <MenuItem icon='pencil' onClick={onShare} disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+            Share
+          </MenuItem>
+        </TooltipTrigger>
+        <TooltipTrigger content={<div>Requires Owner Permission</div>}
+                        disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+          <MenuItem icon='trash' onClick={onDelete} disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+            Delete
+          </MenuItem>
+        </TooltipTrigger>
+      </React.Fragment>
+    }
   >
     <Clickable disabled={disabled} data-test-id='workspace-card-menu'>
-      <SnowmanIcon disabled={disabled}
+      <SnowmanIcon
+        style={{marginLeft: '0px'}}
+        disabled={disabled}
       />
     </Clickable>
   </PopupTrigger>;
@@ -188,60 +205,81 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
 
     return <React.Fragment>
       <WorkspaceCardBase>
-        <div style={styles.workspaceCard} data-test-id='workspace-card'>
-          {loadingData && <SpinnerOverlay/>}
-          <div style={{display: 'flex', flexDirection: 'column'}}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
-              <WorkspaceCardMenu workspace={workspace}
-                                 accessLevel={accessLevel}
-                                 onDelete={() => {
-                                   triggerEvent(
-                                     EVENT_CATEGORY, 'delete', 'Card menu - click delete');
-                                   this.setState({confirmDeleting: true});
-                                 }}
-                                 onShare={() => {
-                                   triggerEvent(EVENT_CATEGORY, 'share', 'Card menu - click share');
-                                   this.handleShareAction();
-                                 }}
-                                 disabled={false}/>
-              <Clickable>
-                <div style={styles.workspaceName}
-                     data-test-id='workspace-card-name'
-                     onClick={() => {
-                       triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
-                       navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
-                     }}>
-                  {workspace.name}</div>
-              </Clickable>
+        <FlexRow style={{height: '100%'}}>
+          <FlexRow style={styles.workspaceCardContents}>
+            <WorkspaceCardMenu
+              workspace={workspace}
+              accessLevel={accessLevel}
+              onDelete={() => {
+                triggerEvent(
+                  EVENT_CATEGORY, 'delete', 'Card menu - click delete');
+                this.setState({confirmDeleting: true});
+              }}
+              onShare={() => {
+                triggerEvent(EVENT_CATEGORY, 'share', 'Card menu - click share');
+                this.handleShareAction();
+              }}
+              disabled={false}
+            />
+          </FlexRow>
+          <FlexColumn
+            style={{
+              ...styles.workspaceCard,
+              padding: '.5rem',
+            }}
+            data-test-id='workspace-card'
+          >
+            {loadingData && <SpinnerOverlay/>}
+            <FlexColumn style={{marginBottom: 'auto'}}>
+              <FlexRow style={{ alignItems: 'flex-start' }}>
+                <Clickable>
+                  <div style={styles.workspaceName}
+                       data-test-id='workspace-card-name'
+                       onClick={() => {
+                         triggerEvent(EVENT_CATEGORY, 'navigate', 'Click on workspace name');
+                         navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+                       }}>
+                    {workspace.name}</div>
+                </Clickable>
+              </FlexRow>
+              {
+                workspace.researchPurpose.reviewRequested === true &&
+                workspace.researchPurpose.approved === null &&
+                <div style={{color: colors.warning}}>
+                  <ClrIcon shape='exclamation-triangle' className='is-solid'
+                           style={{fill: colors.warning}}/>
+                  Pending Approval
+                </div>
+              }
+              {
+                workspace.researchPurpose.reviewRequested === true &&
+                workspace.researchPurpose.approved === false &&
+                <div style={{color: colors.danger}}>
+                  <ClrIcon shape='exclamation-triangle' className='is-solid'
+                           style={{fill: colors.danger}}/>
+                  Rejected
+                </div>
+              }
+            </FlexColumn>
+            <div
+              style={{
+                ...styles.permissionBox,
+                backgroundColor: colors.workspacePermissionsHighlights[accessLevel]
+              }}
+             data-test-id='workspace-access-level'
+            >
+              {accessLevel}
             </div>
-            {
-              workspace.researchPurpose.reviewRequested === true &&
-              workspace.researchPurpose.approved === null &&
-              <div style={{color: colors.warning}}>
-                <ClrIcon shape='exclamation-triangle' className='is-solid'
-                         style={{fill: colors.warning}}/>
-                Pending Approval
-              </div>
-            }
-            {
-              workspace.researchPurpose.reviewRequested === true &&
-              workspace.researchPurpose.approved === false &&
-              <div style={{color: colors.danger}}>
-                <ClrIcon shape='exclamation-triangle' className='is-solid'
-                         style={{fill: colors.danger}}/>
-                Rejected
-              </div>
-            }
-          </div>
-          <div style={styles.workspaceCardFooter}>
-            <div style={{fontSize: 12, lineHeight: '17px'}}>Last Changed: <br/>
-              {displayDate(workspace.lastModifiedTime)}</div>
-            <div style={{
-              ...styles.permissionBox,
-              backgroundColor: colors.workspacePermissionsHighlights[accessLevel]}}
-                 data-test-id='workspace-access-level'>{accessLevel}</div>
-          </div>
-        </div>
+            <div
+              style={{
+                fontSize: 12,
+                lineHeight: '17px'
+              }}
+            >
+              Last Changed: {displayDate(workspace.lastModifiedTime)}
+            </div>
+          </FlexColumn>
+        </FlexRow>
       </WorkspaceCardBase>
       {workspaceDeletionError && <Modal>
         <ModalTitle>Error: Could not delete workspace '{workspace.name}'</ModalTitle>
