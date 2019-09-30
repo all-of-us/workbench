@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class StatusController implements StatusApiDelegate {
 
+  public static final MonitoredResource LOGGING_RESOURCE = MonitoredResource.newBuilder("global").build();
   private final FireCloudService fireCloudService;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
 
@@ -33,7 +34,8 @@ public class StatusController implements StatusApiDelegate {
 
   @Override
   public ResponseEntity<StatusResponse> getStatus() {
-    testStackDriverLogging();
+    // testStackDriverLogging();
+    populateAuditTestData();
     StatusResponse statusResponse = new StatusResponse();
     statusResponse.setFirecloudStatus(fireCloudService.getFirecloudStatus());
     statusResponse.setNotebooksStatus(leonardoNotebooksClient.getNotebooksStatus());
@@ -57,6 +59,27 @@ public class StatusController implements StatusApiDelegate {
         .setSeverity(Severity.INFO)
         .setLogName(logName)
         .setResource(MonitoredResource.newBuilder("global").build())
+        .build();
+    logging.write(Collections.singleton(jsonEntry));
+  }
+
+  private void populateAuditTestData() {
+    Logging logging = LoggingOptions.getDefaultInstance().getService();
+
+    // The name of the log to write to
+    final String logName = "action-audit-test";
+
+    final Map<String, ?> data = ImmutableMap.of(
+        "name", "Bond, James Bond",
+        "occupation", "007",
+        "shaken", true,
+        "stirred", false,
+        "numFilms", 25);
+
+    LogEntry jsonEntry = LogEntry.newBuilder(JsonPayload.of(data))
+        .setSeverity(Severity.INFO)
+        .setLogName(logName)
+        .setResource(LOGGING_RESOURCE)
         .build();
     logging.write(Collections.singleton(jsonEntry));
   }
