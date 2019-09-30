@@ -1209,10 +1209,7 @@ paths:
       tags:
         - offlineBilling
         - cron
-      description: >
-        Endpoint meant to be called offline to trigger a bulk transfer of ownership of billing
-        projects associated with deleted workspaces; may be
-        slow to execute. Only executable via App Engine cronjob.
+      description: Trigger a bulk transfer of ownership of billing projects associated with deleted workspaces
       operationId: billingProjectGarbageCollection
       responses:
         200:
