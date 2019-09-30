@@ -56,7 +56,7 @@ public interface BillingProjectBufferEntryDao
           + "AND w.activeStatus = :workspaceStatus "
           + "AND w.billingMigrationStatus = :migrationStatus")
   List<String> findByStatusAndActiveStatusAndBillingMigrationStatus(
-      @Param("billingStatus") long billingStatus,
-      @Param("workspaceStatus") long workspaceStatus,
-      @Param("migrationStatus") long migrationStatus);
+      @Param("billingStatus") short billingStatus,
+      @Param("workspaceStatus") short workspaceStatus,
+      @Param("migrationStatus") short migrationStatus);
 }
