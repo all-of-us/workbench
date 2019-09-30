@@ -19,8 +19,8 @@ import org.pmiops.workbench.db.dao.BillingProjectGarbageCollectionDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
 import org.pmiops.workbench.db.model.BillingProjectGarbageCollection;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -126,7 +126,11 @@ public class BillingGarbageCollectionService {
     try {
       final GoogleCredential gcsaCredential =
           garbageCollectionSACredentials.get(garbageCollectionSA);
-      fireCloudService.removeOwnerFromBillingProject(appEngineSA, gcsaCredential, projectName);
+
+      gcsaCredential.refreshToken();
+
+      fireCloudService.removeOwnerFromBillingProject(
+          projectName, appEngineSA, gcsaCredential.getAccessToken());
     } catch (final ExecutionException e) {
       final String msg =
           String.format(

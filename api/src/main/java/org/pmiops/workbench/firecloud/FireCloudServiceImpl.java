@@ -273,13 +273,10 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public void removeOwnerFromBillingProject(
-      String ownerEmailToRemove, GoogleCredential retainingOwnerCredential, String projectName)
-      throws IOException {
-
-    retainingOwnerCredential.refreshToken();
+      String projectName, String ownerEmailToRemove, String callerAccessToken) {
 
     final ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
-    apiClient.setAccessToken(retainingOwnerCredential.getAccessToken());
+    apiClient.setAccessToken(callerAccessToken);
 
     // use a private instance of BillingApi instead of the provider
     // b/c we don't want to modify its ApiClient globally

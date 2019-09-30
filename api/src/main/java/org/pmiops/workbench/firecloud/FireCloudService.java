@@ -1,6 +1,5 @@
 package org.pmiops.workbench.firecloud;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import java.io.IOException;
 import java.util.List;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
@@ -64,8 +63,7 @@ public interface FireCloudService {
    * <p>Only used for billing project garbage collection
    */
   void removeOwnerFromBillingProject(
-      String ownerEmailToRemove, GoogleCredential retainingOwnerCredential, String projectName)
-      throws IOException;
+      String projectName, String ownerEmailToRemove, String callerAccessToken);
 
   /** Creates a new FC workspace. */
   void createWorkspace(String projectName, String workspaceName);
