@@ -586,30 +586,15 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       domain: Domain): string {
       switch (exceptionResponse.statusCode) {
         case 400:
-          if (exceptionResponse.message ===
-            'Data Sets must include at least one cohort and concept.') {
-            return exceptionResponse.message;
-          } else if (exceptionResponse.message ===
-            'Concept Sets must contain at least one concept') {
-            return `One or more of your concept sets in domain ${domain}
-                  has no concepts. Please check your concept sets to ensure all
-                  concept sets have concepts.`;
-          }
+          return exceptionResponse.message;
           break;
         case 404:
-          if (exceptionResponse.message.startsWith(
-            'Not Found: No Cohort definition matching cohortId')) {
-            return 'Error with one or more cohorts in the data set. ' +
-              'Please submit a bug using the contact support button';
-          }
+          return exceptionResponse.message;
           break;
         case 504:
-          if (exceptionResponse.message ===
-            'Timeout while querying the CDR to pull preview information.') {
-            return `Query to load data from the All of Us Database timed out for domain:
-                  ${domain}. Please either try again or export data set to a notebook to try
-                  there`;
-          }
+          return `Query to load data from the All of Us Database timed out for domain:
+                ${domain}. Please either try again or export data set to a notebook to try
+                there`;
           break;
         default:
           return `An unexpected error has occurred loading domain: ${domain}.
