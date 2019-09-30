@@ -3,7 +3,6 @@ package org.pmiops.workbench.db.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import org.pmiops.workbench.model.GarbageCollectedProject;
 
