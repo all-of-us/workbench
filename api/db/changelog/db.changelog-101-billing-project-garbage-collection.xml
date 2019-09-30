@@ -7,7 +7,7 @@
   <changeSet author="thibault" id="changelog-101-billing-project-garbage-collection">
 
     <createTable tableName="billing_project_garbage_collection">
-      <column name="fireCloudProjectName" type="varchar(80)">
+      <column name="firecloud_project_name" type="varchar(80)">
         <constraints nullable="false"/>
       </column>
       <column name="owner" type="varchar(80)">
