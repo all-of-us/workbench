@@ -581,7 +581,9 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       });
     }
 
-    generateErrorTextFromPreviewException(exceptionResponse: ErrorResponse, domain: Domain): string {
+    // TODO: Move to using a response based error handling method, rather than a error based one
+    generateErrorTextFromPreviewException(exceptionResponse: ErrorResponse,
+                                          domain: Domain): string {
       switch (exceptionResponse.statusCode) {
         case 400:
           if (exceptionResponse.message ===
