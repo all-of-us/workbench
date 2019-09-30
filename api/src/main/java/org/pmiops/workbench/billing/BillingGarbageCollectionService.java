@@ -72,7 +72,7 @@ public class BillingGarbageCollectionService {
             });
   }
 
-  // Is the App Engine SA a member of this FireCloud project?
+  // Checks whether the AppEngine service account is a member of this FireCloud project
   private boolean appSAIsMemberOfProject(String billingProject) {
     try {
       fireCloudService.getBillingProjectStatus(billingProject);
