@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.dao.BillingProjectGarbageCollectionDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
@@ -82,14 +83,20 @@ public class BillingGarbageCollectionService {
   }
 
   private String chooseGarbageCollectionSA() {
-    for (final String sa : workbenchConfigProvider.get().billing.garbageCollectionUsers) {
+    final BillingConfig config = workbenchConfigProvider.get().billing;
+    for (final String sa : config.garbageCollectionUsers) {
       final long count = billingProjectGarbageCollectionDao.countAllByOwner(sa);
-      if (count < workbenchConfigProvider.get().billing.garbageCollectionUserCapacity) {
+      if (count < config.garbageCollectionUserCapacity) {
         return sa;
       }
     }
 
-    throw new BadRequestException("No available Garbage Collection Service Accounts");
+    final String msg =
+        String.format(
+            "No available Garbage Collection Service Accounts.  "
+                + "These GCSAs exceed the configured capacity limit of %d: %s",
+            config.garbageCollectionUserCapacity, String.join(", ", config.garbageCollectionUsers));
+    throw new BadRequestException(msg);
   }
 
   private GarbageCollectedProject recordGarbageCollection(
