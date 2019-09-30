@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.model.UserRecentWorkspace;
@@ -9,4 +10,5 @@ public interface UserRecentWorkspaceDao extends CrudRepository<UserRecentWorkspa
   List<UserRecentWorkspace> findByUserIdOrderByLastAccessDateDesc(long userId);
 
   Optional<UserRecentWorkspace> findFirstByWorkspaceIdAndUserId(long workspaceId, long userId);
+  void deleteAllByWorkspaceIdIn(Collection<Long> workspaceIds);
 }

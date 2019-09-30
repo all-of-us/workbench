@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -526,23 +527,20 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         dbWorkspaces.stream()
             .collect(Collectors.toMap(Workspace::getWorkspaceId, Function.identity()));
 
-    // Unfortunately it doesn't look like there's a way to batch call this currently.
-    dbWorkspaces.forEach(
-        dbWorkspace -> {
-          // Grab the ACLs.
-          Map<String, WorkspaceAccessEntry> aclsByEmail =
-              getFirecloudWorkspaceAcls(
-                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    final String email = userProvider.get().getEmail();
 
-          String email = userProvider.get().getEmail();
-          if (userHasWorkspaceAccess(email, aclsByEmail)) {
-            userRecentWorkspaceDao.delete(recentWorkspacesById.get(dbWorkspace.getWorkspaceId()));
-          }
-        });
+    ImmutableList<Long> idsToDelete = dbWorkspaces.stream()
+        .filter(w -> userHasWorkspaceAccess(email, w))
+        .map(Workspace::getWorkspaceId)
+        .collect(ImmutableList.toImmutableList());
+
+    userRecentWorkspaceDao.deleteAllByWorkspaceIdIn(idsToDelete);
   }
 
-  private boolean userHasWorkspaceAccess(
-      String email, Map<String, WorkspaceAccessEntry> aclsByEmail) {
+  private boolean userHasWorkspaceAccess(String email, Workspace workspace) {
+  final Map<String, WorkspaceAccessEntry> aclsByEmail = getFirecloudWorkspaceAcls(
+      workspace.getWorkspaceNamespace(),
+      workspace.getFirecloudName());
     return !aclsByEmail.containsKey(email)
         || aclsByEmail
             .get(email)
