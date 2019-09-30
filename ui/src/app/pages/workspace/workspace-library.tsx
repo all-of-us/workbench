@@ -224,7 +224,8 @@ export const WorkspaceLibrary = withUserProfile()
               (<Spinner style={{width: '100%', marginTop: '0.5rem'}}/>) :
               (<div style={{display: 'flex', marginTop: '0.5rem', flexWrap: 'wrap'}}>
                 {publishedWorkspaces.map(wp => {
-                  return <WorkspaceCard workspace={wp.workspace}
+                  return <WorkspaceCard key={wp.workspace.name}
+                                        workspace={wp.workspace}
                                         accessLevel={wp.accessLevel}
                                         userEmail={username}
                                         reload={() => this.updateWorkspaces()}/>;

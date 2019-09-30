@@ -1,19 +1,19 @@
-import * as React from "react";
-import {WorkspacePermissions, WorkspacePermissionsUtil} from "app/utils/workspace-permissions";
-import {PopupTrigger, TooltipTrigger} from "app/components/popups";
-import {Button, Clickable, Link, MenuItem} from "app/components/buttons";
-import {currentWorkspaceStore, navigate} from "app/utils/navigation";
-import {ClrIcon, SnowmanIcon} from "app/components/icons";
-import {workspacesApi} from "app/services/swagger-fetch-clients";
-import {WorkspaceCardBase} from "app/components/card";
-import {SpinnerOverlay} from "app/components/spinners";
-import {triggerEvent} from "app/utils/analytics";
-import colors from "app/styles/colors";
-import {displayDate, reactStyles} from "app/utils";
-import {Modal, ModalBody, ModalFooter, ModalTitle} from "app/components/modals";
-import {ConfirmDeleteModal} from "app/components/confirm-delete-modal";
-import {WorkspaceShare} from "app/pages/workspace/workspace-share";
-import {BugReportModal} from "app/components/bug-report";
+import * as React from 'react';
+import {WorkspacePermissions, WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
+import {Button, Clickable, Link, MenuItem} from 'app/components/buttons';
+import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
+import {ClrIcon, SnowmanIcon} from 'app/components/icons';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {WorkspaceCardBase} from 'app/components/card';
+import {SpinnerOverlay} from 'app/components/spinners';
+import {triggerEvent} from 'app/utils/analytics';
+import colors from 'app/styles/colors';
+import {displayDate, reactStyles} from 'app/utils';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
+import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
+import {BugReportModal} from 'app/components/bug-report';
 import {UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
 const EVENT_CATEGORY = 'Workspace list';
@@ -63,22 +63,22 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
         Duplicate
       </MenuItem>
       <TooltipTrigger content={<div>Requires Write Permission</div>}
-                      disabled={WorkspacePermissionsUtil.canWrite(accessLevel)}>
+                      disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}>
         <MenuItem icon='pencil'
                   onClick={() => {navigate([wsPathPrefix, 'edit']); }}
-                  disabled={WorkspacePermissionsUtil.canWrite(accessLevel)}>
+                  disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}>
           Edit
         </MenuItem>
       </TooltipTrigger>
       <TooltipTrigger content={<div>Requires Owner Permission</div>}
-                      disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
-        <MenuItem icon='pencil' onClick={onShare} disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
+                      disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+        <MenuItem icon='pencil' onClick={onShare} disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
           Share
         </MenuItem>
       </TooltipTrigger>
       <TooltipTrigger content={<div>Requires Owner Permission</div>}
-                      disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
-        <MenuItem icon='trash' onClick={onDelete} disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
+                      disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+        <MenuItem icon='trash' onClick={onDelete} disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
           Delete
         </MenuItem>
       </TooltipTrigger>
@@ -141,7 +141,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
     }
   }
 
-  // The function called when the "share" action is called on a workspace card
+  // The function called when the 'share' action is called on a workspace card
   // within the recentWorkspaces list.
   async handleShareAction() {
     this.setState({

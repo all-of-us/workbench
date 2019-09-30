@@ -7,7 +7,7 @@ export namespace WorkspacePermissionsUtil {
   }
 
   export function isOwner(accessLevel: WorkspaceAccessLevel) {
-    return accessLevel === WorkspaceAccessLevel.OWNER;
+    return accessLevel == WorkspaceAccessLevel.OWNER;
   }
 }
 
@@ -19,6 +19,7 @@ export class WorkspacePermissions {
     this.workspace = workspaceResponse.workspace;
     this.accessLevel = workspaceResponse.accessLevel;
   }
+
   get canWrite() {
     return WorkspacePermissionsUtil.canWrite(this.accessLevel);
   }
