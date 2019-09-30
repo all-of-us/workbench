@@ -1,3 +1,4 @@
+import colors from 'app/styles/colors';
 import {switchCase} from 'app/utils';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -6,7 +7,7 @@ import onClickOutside from 'react-onclickoutside';
 
 const styles = {
   tooltip: {
-    background: 'black', color: 'white',
+    background: 'black', color: colors.white,
     padding: '0.5rem',
     position: 'fixed', top: 0, left: 0, pointerEvents: 'none', zIndex: 105,
     maxWidth: 400, borderRadius: 4
@@ -20,8 +21,8 @@ const styles = {
   },
   popup: {
     position: 'fixed', top: 0, left: 0, zIndex: 105,
-    backgroundColor: 'white',
-    border: `1px solid #b7b7b7`, borderRadius: 4,
+    backgroundColor: colors.white,
+    border: `1px solid`, borderColor: colors.border, borderRadius: 4,
     boxShadow: '0 3px 2px 0 rgba(0,0,0,0.12)'
   }
 };

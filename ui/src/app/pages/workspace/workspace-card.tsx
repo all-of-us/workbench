@@ -28,7 +28,8 @@ const styles = reactStyles({
   },
   workspaceCardContents: {
     paddingTop: '.5rem',
-    borderRight: '1px solid #b7b7b7',
+    borderRight: '1px solid',
+    borderColor: colors.border,
     flex: '0 0 1rem',
     justifyContent: 'center'
   },
