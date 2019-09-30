@@ -245,7 +245,7 @@ public class UserService {
       String areaOfResearch,
       Address address,
       DemographicSurvey demographicSurvey,
-      List<InstitutionalAffiliation> institutionalAffiliation) {
+      List<InstitutionalAffiliation> institutionalAffiliations) {
     User user = new User();
     user.setCreationNonce(Math.abs(random.nextLong()));
     user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
@@ -261,16 +261,18 @@ public class UserService {
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     user.setAddress(address);
     user.setDemographicSurvey(demographicSurvey);
-    user.getInstitutionalAffiliations().clear();
-    user.getInstitutionalAffiliations().addAll(institutionalAffiliation);
     // For existing user that do not have address
     if (address != null) {
       address.setUser(user);
     }
     if (demographicSurvey != null) demographicSurvey.setUser(user);
-    if (institutionalAffiliation != null) {
+    if (institutionalAffiliations != null) {
       final User u = user;
-      institutionalAffiliation.forEach(affiliation -> affiliation.setUser(u));
+      institutionalAffiliations.forEach(
+          affiliation -> {
+            affiliation.setUser(u);
+            u.addInstitutionalAffiliation(affiliation);
+          });
     }
     try {
       userDao.save(user);
