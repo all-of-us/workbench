@@ -22,12 +22,13 @@ import {
 import colors from 'app/styles/colors';
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
+  formatDomain,
+  formatDomainString,
   ReactWrapperBase,
   toggleIncludes,
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
-import {formatDomain} from 'app/utils/index';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -840,11 +841,15 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                   {fp.toPairs(previewList).map((value) => {
                     const domain: string = value[0];
                     const previewRow: DataSetPreviewInfo = value[1];
-                    return <TooltipTrigger content={'Preview for domain ' + fp.capitalize(domain)
-                    + ' is still loading. It may take up to one minute'}
+                    return <TooltipTrigger key={domain}
+                                           content={
+                                             'Preview for domain '
+                                             + formatDomainString(domain)
+                                             + ' is still loading. It may take up to one minute'
+                                           }
                                            disabled={!previewRow.isLoading}
                                            side='top'>
-                      <Clickable key={domain}
+                      <Clickable
                                  disabled={previewRow.isLoading}
                                  onClick={() =>
                                    this.setState({selectedPreviewDomain: Domain[domain]})}
