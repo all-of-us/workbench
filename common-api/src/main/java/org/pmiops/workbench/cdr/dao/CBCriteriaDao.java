@@ -69,7 +69,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
               + " has_ancestor_data,a.path,synonyms "
               + "  from cb_criteria a "
               + "  where domain_id = :domain "
-              + "   and type = 'ATC' "
+              + "   and type = :type "
               + "   and concept_id in (:parentConceptIds)",
       nativeQuery = true)
   List<CBCriteria> findCriteriaAncestors(
