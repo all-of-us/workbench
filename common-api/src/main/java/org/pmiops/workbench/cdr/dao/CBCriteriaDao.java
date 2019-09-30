@@ -70,7 +70,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
               + "  from cb_criteria a "
               + "  where domain_id = :domain "
               + "   and type = :type "
-              + "   and concept_id in (:parentConceptIds)",
+              + "   and concept_id in (:parentConceptIds) ",
       nativeQuery = true)
   List<CBCriteria> findCriteriaAncestors(
       @Param("domain") String domain,
