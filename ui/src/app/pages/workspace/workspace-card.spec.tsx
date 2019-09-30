@@ -1,13 +1,13 @@
 // Mock the navigate function but not userProfileStore
 import {mount} from 'enzyme';
-import {Profile, ProfileApi, WorkspacesApi} from 'generated/fetch';
 import * as React from 'react';
-import {ProfileApiStub, ProfileStubVariables} from 'src/testing/stubs/profile-api-stub';
-import {WorkspaceAccessLevel} from 'src/generated/fetch';
-import {registerApiClient, workspacesApi} from 'src/app/services/swagger-fetch-clients';
-import {workspaceStubs, WorkspacesApiStub, userRolesStub} from 'src/testing/stubs/workspaces-api-stub';
-import {serverConfigStore, userProfileStore} from 'src/app/utils/navigation';
-import {waitOneTickAndUpdate} from 'src/testing/react-test-helpers';
+
+import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {Profile, ProfileApi, WorkspacesApi, WorkspaceAccessLevel} from 'generated/fetch';
+import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
+import {workspaceStubs, WorkspacesApiStub, userRolesStub} from 'testing/stubs/workspaces-api-stub';
+import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {WorkspaceCard} from './workspace-card';
 
 jest.mock('app/utils/navigation', () => ({
