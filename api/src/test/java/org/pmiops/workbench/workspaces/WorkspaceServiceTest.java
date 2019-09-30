@@ -125,6 +125,7 @@ public class WorkspaceServiceTest {
     User user = mock(User.class);
     doReturn(user).when(userProvider).get();
     doReturn(DEFAULT_USER_EMAIL).when(user).getEmail();
+    doReturn(USER_ID).when(user).getUserId();
   }
 
   private WorkspaceResponse mockFirecloudWorkspaceResponse(
@@ -248,8 +249,7 @@ public class WorkspaceServiceTest {
               USER_ID,
               Timestamp.from(NOW.minusSeconds(workspaces.size() - workspace.getWorkspaceId())));
         });
-    List<UserRecentWorkspace> recentWorkspaces =
-        workspaceService.getRecentWorkspacesByUser(USER_ID);
+    List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT);
     assertThat(
             recentWorkspaces.stream()
@@ -285,8 +285,7 @@ public class WorkspaceServiceTest {
         WorkspaceActiveStatus.ACTIVE);
     workspaceService.updateRecentWorkspaces(sharedId, USER_ID, Timestamp.from(NOW));
 
-    List<UserRecentWorkspace> recentWorkspaces =
-        workspaceService.getRecentWorkspacesByUser(USER_ID);
+    List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(1);
   }
 }

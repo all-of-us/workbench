@@ -41,7 +41,7 @@ public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
 
   List<Workspace> findAllByFirecloudUuidIn(Collection<String> firecloudUuids);
 
-  List<Workspace> findAllByWorkspaceIdIn(Collection<Long> ids);
+  List<Workspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
 
   @Query(
       "SELECT distinct w.workspaceNamespace, u from Workspace w INNER JOIN User u ON w.creator = u.userId")

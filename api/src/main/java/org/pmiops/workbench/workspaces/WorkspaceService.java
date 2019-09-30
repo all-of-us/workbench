@@ -9,6 +9,7 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -70,10 +71,18 @@ public interface WorkspaceService {
 
   Workspace setPublished(Workspace workspace, String publishedWorkspaceGroup, boolean publish);
 
-  List<UserRecentWorkspace> getRecentWorkspacesByUser(long userId);
+  List<UserRecentWorkspace> getRecentWorkspaces();
 
-  UserRecentWorkspace updateRecentWorkspaces(
-      long workspaceId, long userId, Timestamp lastAccessDate);
+  UserRecentWorkspace updateRecentWorkspaces(long workspaceId, long userId, Timestamp lastAccessDate);
 
-  void maybeDeleteRecentWorkspace(long workspaceId, long userId);
+  UserRecentWorkspace updateRecentWorkspaces(long workspaceId);
+
+  boolean maybeDeleteRecentWorkspace(long workspaceId);
+
+  List<RecentWorkspace> buildRecentWorkspaceList(List<UserRecentWorkspace> userRecentWorkspaces);
+
+  RecentWorkspace buildRecentWorkspace(
+      org.pmiops.workbench.db.model.Workspace dbWorkspace,
+      UserRecentWorkspace userRecentWorkspace,
+      WorkspaceAccessLevel accessLevel);
 }
