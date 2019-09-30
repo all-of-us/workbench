@@ -4,7 +4,7 @@ import * as React from 'react';
 import {AlertClose, AlertDanger} from 'app/components/alert';
 import {Clickable} from 'app/components/buttons';
 import {SlidingFabReact} from 'app/components/buttons';
-import {WorkspaceCardBase} from 'app/components/card';
+import {DomainCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {Header} from 'app/components/headers';
 import {HelpSidebar} from 'app/components/help-sidebar';
@@ -99,7 +99,7 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
     ({conceptDomainInfo, standardConceptsOnly, browseInDomain}) => {
       const conceptCount = standardConceptsOnly ?
           conceptDomainInfo.standardConceptCount : conceptDomainInfo.allConceptCount;
-      return <WorkspaceCardBase style={{minWidth: '11rem'}} data-test-id='domain-box'>
+      return <DomainCardBase style={{minWidth: '11rem'}} data-test-id='domain-box'>
         <Clickable style={styles.domainBoxHeader}
              onClick={browseInDomain}
              data-test-id='domain-box-name'>{conceptDomainInfo.name}</Clickable>
@@ -109,12 +109,12 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
         </div>
         <Clickable style={styles.domainBoxLink}
                    onClick={browseInDomain}>Browse Domain</Clickable>
-      </WorkspaceCardBase>;
+      </DomainCardBase>;
     };
 
 const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: Function}> =
     ({survey, browseSurvey}) => {
-      return <WorkspaceCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
+      return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
         <div style={styles.domainBoxHeader} data-test-id='survey-box-name'>{survey.name}</div>
         <div style={styles.conceptText}>
           <span style={{fontSize: 30}}>{survey.questionCount}</span> survey questions with
@@ -125,7 +125,7 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
         </div>
         <Clickable style={{...styles.domainBoxLink}} onClick={browseSurvey}>Browse
           Survey</Clickable>
-      </WorkspaceCardBase>;
+      </DomainCardBase>;
     };
 
 interface Props {

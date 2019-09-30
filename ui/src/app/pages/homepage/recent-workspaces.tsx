@@ -5,6 +5,7 @@ import {SpinnerOverlay} from "app/components/spinners";
 import {WorkspaceCard} from "app/pages/workspace/workspace-card";
 import {Profile, RecentWorkspace} from 'generated/fetch';
 import {withUserProfile} from "app/utils";
+import {FlexRow} from "app/components/flex";
 
 interface State {
   loading: boolean,
@@ -39,7 +40,7 @@ export const RecentWorkspaces = withUserProfile()
 
   render() {
     // Needs a min-height so the spinner will render when loading and position: relative so said spinner will center.
-    return <div style={{display: 'flex', marginTop: '1rem', minHeight: 247, position: 'relative'}}>
+    return <FlexRow style={{marginTop: '1rem', minHeight: 247, position: 'relative'}}>
       {
         this.state.recentWorkspaces.map(recentWorkspace => {
           return <WorkspaceCard
@@ -52,6 +53,6 @@ export const RecentWorkspaces = withUserProfile()
         })
       }
       {this.state.loading && <SpinnerOverlay dark={true} />}
-    </div>;
+    </FlexRow>;
   }
 });
