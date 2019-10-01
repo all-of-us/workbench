@@ -1,8 +1,9 @@
 import {Component} from '@angular/core';
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 
-import {navigate} from 'app/utils/navigation';
-import {WorkspacePermissions} from 'app/utils/workspace-permissions';
+import {
+  ErrorResponse,
+  Profile
+} from 'generated/fetch';
 
 import {AlertDanger} from 'app/components/alert';
 import {
@@ -12,19 +13,19 @@ import {FadeBox} from 'app/components/containers';
 import {ListPageHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
+import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
+import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
   reactStyles,
   ReactWrapperBase,
   withUserProfile
 } from 'app/utils';
-import {
-  ErrorResponse,
-  Profile
-} from 'generated/fetch';
+import {navigate} from 'app/utils/navigation';
+import {WorkspacePermissions} from 'app/utils/workspace-permissions';
+
 import * as React from 'react';
 import RSelect from 'react-select';
-import {WorkspaceCard} from "app/pages/workspace/workspace-card";
 
 const styles = reactStyles({
   fadeBox: {

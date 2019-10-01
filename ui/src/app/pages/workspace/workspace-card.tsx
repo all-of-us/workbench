@@ -1,21 +1,23 @@
 import * as React from 'react';
-import {WorkspacePermissions, WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
+
+import {UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
+
+import {BugReportModal} from 'app/components/bug-report';
 import {Button, Clickable, Link, MenuItem} from 'app/components/buttons';
-import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
-import {ClrIcon, SnowmanIcon} from 'app/components/icons';
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {WorkspaceCardBase} from 'app/components/card';
+import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
+import {FlexColumn, FlexRow} from 'app/components/flex';
+import {ClrIcon, SnowmanIcon} from 'app/components/icons';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {triggerEvent} from 'app/utils/analytics';
+import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {displayDate, reactStyles} from 'app/utils';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
-import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
-import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
-import {BugReportModal} from 'app/components/bug-report';
-import {UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
-import {FlexColumn, FlexRow} from "app/components/flex";
+import {triggerEvent} from 'app/utils/analytics';
+import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 
 const EVENT_CATEGORY = 'Workspace list';
 
@@ -52,11 +54,11 @@ const styles = reactStyles({
 });
 
 interface WorkspaceCardMenuProps {
-  disabled: boolean,
+  disabled: boolean;
   workspace: Workspace;
   accessLevel: WorkspaceAccessLevel;
-  onShare: Function,
-  onDelete: Function
+  onShare: Function;
+  onDelete: Function;
 }
 
 const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
@@ -146,7 +148,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
   }
 
   async deleteWorkspace() {
-    const {workspace, accessLevel} = this.props;
+    const {workspace} = this.props;
     this.setState({
       confirmDeleting: false,
       loadingData: true});

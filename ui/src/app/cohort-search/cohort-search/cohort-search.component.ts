@@ -52,15 +52,15 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
           workspacesApi().updateRecentWorkspaces(workspace.namespace, workspace.id),
           cohortsApi().getCohort(workspace.namespace, workspace.id, cohortId)
         ]).then(values => {
-            const cohort = values[1];
-            this.loading = false;
-            this.cohort = cohort;
-            currentCohortStore.next(cohort);
-            if (cohort.criteria) {
-              initExisting.next(true);
-              searchRequestStore.next(parseCohortDefinition(cohort.criteria));
-            }
-          });
+          const cohort = values[1];
+          this.loading = false;
+          this.cohort = cohort;
+          currentCohortStore.next(cohort);
+          if (cohort.criteria) {
+            initExisting.next(true);
+            searchRequestStore.next(parseCohortDefinition(cohort.criteria));
+          }
+        });
       } else {
         this.cohort = {criteria: '{"includes":[],"excludes":[]}'};
       }

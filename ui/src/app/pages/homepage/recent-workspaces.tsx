@@ -1,15 +1,16 @@
 import * as React from 'react';
 
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
-import {SpinnerOverlay} from "app/components/spinners";
-import {WorkspaceCard} from "app/pages/workspace/workspace-card";
 import {Profile, RecentWorkspace} from 'generated/fetch';
-import {withUserProfile} from "app/utils";
-import {FlexRow} from "app/components/flex";
+
+import {FlexRow} from 'app/components/flex';
+import {SpinnerOverlay} from 'app/components/spinners';
+import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {withUserProfile} from 'app/utils';
 
 interface State {
-  loading: boolean,
-  recentWorkspaces: RecentWorkspace[],
+  loading: boolean;
+  recentWorkspaces: RecentWorkspace[];
 }
 
 export const RecentWorkspaces = withUserProfile()
@@ -49,7 +50,7 @@ export const RecentWorkspaces = withUserProfile()
             workspace={recentWorkspace.workspace}
             accessLevel={recentWorkspace.accessLevel}
             reload={() => this.loadWorkspaces()}
-          />
+          />;
         })
       }
       {this.state.loading && <SpinnerOverlay dark={true} />}

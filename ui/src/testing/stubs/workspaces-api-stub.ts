@@ -69,7 +69,7 @@ function buildRecentWorkspaceStub(suffix: string): RecentWorkspace {
     workspace: workspaceStub,
     accessLevel: WorkspaceAccessLevel.OWNER,
     accessedTime: 'now'
-  }
+  };
 }
 
 export function buildRecentWorkspaceResponseStub(suffixes: string[]): RecentWorkspaceResponse {

@@ -460,9 +460,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       if (!!this.props.workspace) {
         await workspacesApi().updateRecentWorkspaces(this.props.workspace.namespace, this.props.workspace.id);
       }
-      else {
-        return;
-      }
     }
 
     makeDiseaseInput() {

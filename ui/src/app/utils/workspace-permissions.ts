@@ -7,7 +7,7 @@ export namespace WorkspacePermissionsUtil {
   }
 
   export function isOwner(accessLevel: WorkspaceAccessLevel) {
-    return accessLevel == WorkspaceAccessLevel.OWNER;
+    return accessLevel === WorkspaceAccessLevel.OWNER;
   }
 }
 
