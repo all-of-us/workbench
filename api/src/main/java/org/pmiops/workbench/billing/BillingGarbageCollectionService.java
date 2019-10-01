@@ -7,10 +7,9 @@ import com.google.common.cache.LoadingCache;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
@@ -24,8 +23,6 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.BillingProjectGarbageCollectionResponse;
-import org.pmiops.workbench.model.GarbageCollectedProject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +35,8 @@ public class BillingGarbageCollectionService {
   private final Provider<CloudStorageService> cloudStorageServiceProvider;
   private final Clock clock;
   private final LoadingCache<String, GoogleCredential> garbageCollectionSACredentials;
+  private static final Logger log =
+      Logger.getLogger(BillingGarbageCollectionService.class.getName());
 
   @Autowired
   public BillingGarbageCollectionService(
@@ -99,8 +98,7 @@ public class BillingGarbageCollectionService {
     throw new ServerErrorException(msg);
   }
 
-  private GarbageCollectedProject recordGarbageCollection(
-      final String projectName, final String garbageCollectionSA) {
+  private void recordGarbageCollection(final String projectName, final String garbageCollectionSA) {
 
     final BillingProjectGarbageCollection gc = new BillingProjectGarbageCollection();
     gc.setFireCloudProjectName(projectName);
@@ -114,10 +112,13 @@ public class BillingGarbageCollectionService {
         () -> new Timestamp(clock.instant().toEpochMilli()));
     billingProjectBufferEntryDao.save(entry);
 
-    return gc.toGarbageCollectedProject();
+    log.info(
+        String.format(
+            "Project %s has been garbage-collected and is now owned by %s",
+            projectName, garbageCollectionSA));
   }
 
-  private GarbageCollectedProject transferOwnership(final String projectName) {
+  private void transferOwnership(final String projectName) {
     final String appEngineSA = workbenchConfigProvider.get().auth.serviceAccountApiUsers.get(0);
 
     final String garbageCollectionSA = chooseGarbageCollectionSA();
@@ -145,31 +146,21 @@ public class BillingGarbageCollectionService {
       throw new ServerErrorException(msg, e);
     }
 
-    return recordGarbageCollection(projectName, garbageCollectionSA);
+    recordGarbageCollection(projectName, garbageCollectionSA);
   }
 
-  BillingProjectGarbageCollectionResponse deletedWorkspaceGarbageCollection() {
-    final List<String> billingProjects =
-        billingProjectBufferEntryDao.findBillingProjectsForGarbageCollection();
-
-    final List<GarbageCollectedProject> garbageCollectedProjects =
-        billingProjects.stream()
-            .map(
-                projectName -> {
-                  // determine whether this candidate for garbage collection
-                  // has already been deleted or transferred by a process other than GC
-                  if (appSAIsMemberOfProject(projectName)) {
-                    return transferOwnership(projectName);
-                  } else {
-                    // if it's in the DB as garbage-collected we won't try to do it again
-                    return recordGarbageCollection(projectName, "unknown");
-                  }
-                })
-            .collect(Collectors.toList());
-
-    final BillingProjectGarbageCollectionResponse response =
-        new BillingProjectGarbageCollectionResponse();
-    response.addAll(garbageCollectedProjects);
-    return response;
+  void deletedWorkspaceGarbageCollection() {
+    billingProjectBufferEntryDao.findBillingProjectsForGarbageCollection().stream()
+        .forEach(
+            projectName -> {
+              // determine whether this candidate for garbage collection
+              // has already been deleted or transferred by a process other than GC
+              if (appSAIsMemberOfProject(projectName)) {
+                transferOwnership(projectName);
+              } else {
+                // if it's in the DB as garbage-collected we won't try to do it again
+                recordGarbageCollection(projectName, "unknown");
+              }
+            });
   }
 }

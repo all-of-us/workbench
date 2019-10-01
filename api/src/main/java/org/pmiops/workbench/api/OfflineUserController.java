@@ -14,7 +14,6 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -105,7 +104,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
           String.format("%d errors encountered during compliance training sync", errorCount));
     }
 
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    return ResponseEntity.noContent().build();
   }
 
   /**
@@ -169,7 +168,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
       throw new ServerErrorException(
           String.format("%d errors encountered during eRA Commons sync", errorCount));
     }
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    return ResponseEntity.noContent().build();
   }
 
   /**
@@ -227,7 +226,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
       throw new ServerErrorException(
           String.format("%d errors encountered during two-factor auth sync", errorCount));
     }
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    return ResponseEntity.noContent().build();
   }
 
   /**
@@ -253,6 +252,6 @@ public class OfflineUserController implements OfflineUserApiDelegate {
                 + String.join(", ", unauthorizedLogs));
       }
     }
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    return ResponseEntity.noContent().build();
   }
 }
