@@ -40,6 +40,9 @@ public interface CloudStorageService {
 
   GoogleCredential getDefaultServiceAccountCredentials() throws IOException;
 
+  GoogleCredential getGarbageCollectionServiceAccountCredentials(String garbageCollectionEmail)
+      throws IOException;
+
   JSONObject getFileAsJson(String bucketName, String fileName);
 
   Map<String, String> getMetadata(String bucketName, String objectPath);

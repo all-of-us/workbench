@@ -302,6 +302,7 @@ export const ListOverview = withCurrentWorkspace()(
         nameTouched, saving, saveError, stackChart, total} = this.state;
       const disableIcon = loading || !cohort ;
       const invalid = nameTouched && !name;
+      const showTotal = total !== undefined && total !== null;
       const items = [
         {label: 'Save', command: () => this.saveCohort(),
           disabled: cohort && cohort.criteria === this.criteria},
@@ -353,7 +354,7 @@ export const ListOverview = withCurrentWorkspace()(
                   <ClrIcon style={{color: '#F57600'}} shape='warning-standard' size={18} />
                 </TooltipTrigger>
               </span>
-              : loading ? <Spinner size={18} /> : <span>{!!total && total.toLocaleString()}</span>}
+              : loading ? <Spinner size={18} /> : <span>{showTotal && total.toLocaleString()}</span>}
             </h2>
           </div>
           {apiError && !this.definitionErrors && <div style={styles.totalError}>
