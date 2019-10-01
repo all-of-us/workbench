@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -268,10 +269,19 @@ public class UserService {
     if (demographicSurvey != null) demographicSurvey.setUser(user);
     if (institutionalAffiliations != null) {
       final User u = user;
-      institutionalAffiliations.forEach(
+      institutionalAffiliations.stream()
+          .filter(Objects::nonNull)
+          .forEach(
           affiliation -> {
-            affiliation.setUser(u);
-            u.addInstitutionalAffiliation(affiliation);
+                if (affiliation != null
+                    && ((affiliation.getInstitution() != null
+                    && !affiliation.getInstitution().isEmpty())
+                    || (affiliation.getNonAcademicAffiliation() != null
+                    || (affiliation.getRole() != null
+                    && !affiliation.getRole().isEmpty())))) {
+                  affiliation.setUser(u);
+                  u.addInstitutionalAffiliation(affiliation);
+                }
           });
     }
     try {
