@@ -239,6 +239,7 @@ interface State {
   filteredData: Array<any>;
   loading: boolean;
   updating: boolean;
+  loadingPrevious: boolean;
   page: number;
   start: number;
   sortField: string;
@@ -262,6 +263,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         filteredData: null,
         loading: true,
         updating: false,
+        loadingPrevious: false,
         page: 0,
         start: 0,
         sortField: null,
@@ -333,13 +335,14 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
-    updateDataRange(previous: boolean) {
-      this.setState({updating: true});
+    loadPrevious() {
+      this.setState({loadingPrevious: true, updating: true});
       const {columns, domain} = this.props;
-      const {range, requestPage, sortField, sortOrder} = this.state;
+      const {range, sortField, sortOrder} = this.state;
       let {filteredData} = this.state;
+      const requestPage = range[0] / 125;
       const pageFilterRequest = {
-        page: previous ? requestPage - 1 : requestPage + 1,
+        page: requestPage,
         pageSize: 125,
         sortOrder: sortOrder === 1 ? SortOrder.Asc :  SortOrder.Desc,
         sortColumn: columns[0].name,
@@ -353,18 +356,40 @@ export const DetailTabTable = withCurrentWorkspace()(
           }
           item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
         });
-        if (previous) {
-          filteredData = [...response.items, ...filteredData];
-          if (filteredData.length > 425) {
-            filteredData = filteredData.slice(0, filteredData.length - 125);
-            range[1] -= 125;
+        filteredData = [...response.items, ...filteredData];
+        if (filteredData.length > 425) {
+          filteredData = filteredData.slice(0, filteredData.length - 125);
+          range[1] -= 125;
+        }
+        this.setState({data: response.items, filteredData, range, loadingPrevious: false, updating: false});
+      });
+    }
+
+    loadNext() {
+      this.setState({updating: true});
+      const {columns, domain} = this.props;
+      const {range, sortField, sortOrder} = this.state;
+      let {filteredData} = this.state;
+      const requestPage = (filteredData.length + range[0]) / 125;
+      const pageFilterRequest = {
+        page: requestPage,
+        pageSize: 125,
+        sortOrder: sortOrder === 1 ? SortOrder.Asc :  SortOrder.Desc,
+        sortColumn: columns[0].name,
+        domain: domain,
+        filters: {items: []}
+      } as PageFilterRequest;
+      this.callApi(pageFilterRequest).then(response => {
+        response.items.forEach(item => {
+          if (domain === DomainType.VITAL || domain === DomainType.LAB) {
+            item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
           }
-        } else {
-          filteredData = [...filteredData, ...response.items];
-          if (filteredData.length > 425) {
-            filteredData = filteredData.slice(125);
-            range[0] += 125;
-          }
+          item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
+        });
+        filteredData = [...filteredData, ...response.items];
+        if (filteredData.length > 425) {
+          filteredData = filteredData.slice(125);
+          range[0] += 125;
         }
         this.setState({data: response.items, filteredData, range, updating: false});
       });
@@ -394,10 +419,10 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (!inMemory) {
         if (event.page < page && event.page > 1 && range[0] >= (event.first - rowsPerPage)) {
           range[0] -= 125;
-          this.updateDataRange(true);
+          this.loadPrevious();
         } else if (event.page > page && range[1] <= (event.first + (rowsPerPage * 2))) {
           range[1] += 125;
-          this.updateDataRange(false);
+          this.loadNext();
         }
       }
       this.setState({page: event.page, range, start: event.first});
@@ -747,24 +772,24 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {loading, inMemory, range, start, sortField, sortOrder, updating} = this.state;
+      const {loading, inMemory, loadingPrevious, range, start, sortField, sortOrder, totalCount, updating} = this.state;
       const {columns, filterState: {vocab}, tabName} = this.props;
       const filteredData = loading ? null : this.state.filteredData;
       let pageReportTemplate;
       let value = null;
       if (filteredData !== null) {
-        const lastRowOfPage = (start + rowsPerPage) > filteredData.length
-          ? start + rowsPerPage - (start + rowsPerPage - filteredData.length) : start + rowsPerPage;
-        pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${this.totalCount} records `;
+        const max = inMemory ? filteredData.length : totalCount;
+        const lastRowOfPage = (start + rowsPerPage) > max
+          ? start + rowsPerPage - (start + rowsPerPage - max) : start + rowsPerPage;
+        pageReportTemplate = `${(start + 1).toLocaleString()} -
+          ${lastRowOfPage.toLocaleString()} of
+          ${this.totalCount.toLocaleString()} records `;
         const pageStart = inMemory ? start : start - range[0];
-        value = filteredData.slice(pageStart, pageStart + rowsPerPage);
+        value = loadingPrevious && pageStart < 125 ? [] : filteredData.slice(pageStart, pageStart + rowsPerPage);
       }
       let paginatorTemplate = 'CurrentPageReport';
       if (filteredData && filteredData.length > rowsPerPage) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
-      }
-      if (updating) {
-        console.log(value);
       }
       const spinner = loading || (updating && value.length === 0);
       const cols = columns.map((col) => {
@@ -832,8 +857,8 @@ export const DetailTabTable = withCurrentWorkspace()(
           lazy
           paginator
           alwaysShowPaginator={false}
-          paginatorTemplate={filteredData && filteredData.length ? paginatorTemplate : ''}
-          currentPageReportTemplate={filteredData && filteredData.length ? pageReportTemplate : ''}
+          paginatorTemplate={!spinner && filteredData.length ? paginatorTemplate : ''}
+          currentPageReportTemplate={!spinner && filteredData.length ? pageReportTemplate : ''}
           onPage={this.onPage}
           first={start}
           rows={rowsPerPage}
