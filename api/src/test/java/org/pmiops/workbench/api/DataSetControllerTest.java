@@ -491,7 +491,7 @@ public class DataSetControllerTest {
     return new DataSetRequest()
         .conceptSetIds(new ArrayList<>())
         .cohortIds(new ArrayList<>())
-        .values(new ArrayList<>())
+        .domainValuePairs(new ArrayList<>())
         .name("blah")
         .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
   }
@@ -600,8 +600,8 @@ public class DataSetControllerTest {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValues = mockDomainValuePair();
-    dataSet.setValues(domainValues);
+    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
+    dataSet.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -647,8 +647,8 @@ public class DataSetControllerTest {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValues = mockDomainValuePair();
-    dataSet.setValues(domainValues);
+    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
+    dataSet.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -695,12 +695,12 @@ public class DataSetControllerTest {
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_TWO_ID);
-    List<DomainValuePair> domainValues = mockDomainValuePair();
+    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
     DomainValuePair drugDomainValue = new DomainValuePair();
     drugDomainValue.setDomain(Domain.DRUG);
     drugDomainValue.setValue("PERSON_ID");
-    domainValues.add(drugDomainValue);
-    dataSet.setValues(domainValues);
+    domainValuePairs.add(drugDomainValue);
+    dataSet.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -723,8 +723,8 @@ public class DataSetControllerTest {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_SURVEY_ID);
-    List<DomainValuePair> domainValues = mockSurveyDomainValuePair();
-    dataSet.setValues(domainValues);
+    List<DomainValuePair> domainValuePairs = mockSurveyDomainValuePair();
+    dataSet.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".ds_survey`");
@@ -748,7 +748,7 @@ public class DataSetControllerTest {
     dataSet = dataSet.addCohortIdsItem(COHORT_TWO_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
     List<DomainValuePair> domainValuePairList = mockDomainValuePair();
-    dataSet.setValues(domainValuePairList);
+    dataSet.setDomainValuePairs(domainValuePairList);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -826,7 +826,7 @@ public class DataSetControllerTest {
 
     valuePairList.add(domainValue);
 
-    dataSet.setValues(valuePairList);
+    dataSet.setDomainValuePairs(valuePairList);
     dataSet.setConceptSetIds(conceptIds);
     dataSet.setCohortIds(cohortIds);
 
@@ -852,7 +852,7 @@ public class DataSetControllerTest {
     dataSetController.createDataSet(workspace.getNamespace(), WORKSPACE_NAME, dataSet);
 
     dataSet.setConceptSetIds(conceptIds);
-    dataSet.setValues(null);
+    dataSet.setDomainValuePairs(null);
 
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing values");
@@ -865,8 +865,8 @@ public class DataSetControllerTest {
     DataSetRequest dataSet = buildEmptyDataSetRequest().name("blah");
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValues = mockDomainValuePair();
-    dataSet.setValues(domainValues);
+    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
+    dataSet.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -894,8 +894,8 @@ public class DataSetControllerTest {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValues = mockDomainValuePair();
-    dataSet.setValues(domainValues);
+    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
+    dataSet.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");

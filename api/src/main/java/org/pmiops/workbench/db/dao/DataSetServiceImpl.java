@@ -211,7 +211,7 @@ public class DataSetServiceImpl implements DataSetService {
     final ImmutableList<Cohort> cohortsSelected =
         ImmutableList.copyOf(this.cohortDao.findAllByCohortIdIn(dataSetRequest.getCohortIds()));
     final ImmutableList<DomainValuePair> domainValuePairs =
-        ImmutableList.copyOf(dataSetRequest.getValues());
+        ImmutableList.copyOf(dataSetRequest.getDomainValuePairs());
 
     final ImmutableList<org.pmiops.workbench.db.model.ConceptSet> expandedSelectedConceptSets =
         getExpandedConceptSetSelections(
@@ -544,9 +544,9 @@ public class DataSetServiceImpl implements DataSetService {
     return conceptColumn.get().name;
   }
 
-  private ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> valueSetList) {
+  private ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> domainValuePairs) {
     final Optional<Domain> domainMaybe =
-        valueSetList.stream().map(DomainValuePair::getDomain).findFirst();
+        domainValuePairs.stream().map(DomainValuePair::getDomain).findFirst();
     if (!domainMaybe.isPresent()) {
       return ValuesLinkingPair.emptyPair();
     }
@@ -554,8 +554,9 @@ public class DataSetServiceImpl implements DataSetService {
     final ImmutableList.Builder<String> valuesUppercaseBuilder = new Builder<>();
     valuesUppercaseBuilder.add("CORE_TABLE_FOR_DOMAIN");
     valuesUppercaseBuilder.addAll(
-        valueSetList.stream()
-            .map(valueSet -> valueSet.getValue().toUpperCase())
+        domainValuePairs.stream()
+            .map(DomainValuePair::getValue)
+            .map(String::toUpperCase)
             .collect(Collectors.toList()));
 
     final String domainName = domainMaybe.get().toString();

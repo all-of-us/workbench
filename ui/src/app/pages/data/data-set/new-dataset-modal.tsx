@@ -37,7 +37,7 @@ interface Props {
   prePackagedConceptSet: PrePackagedConceptSetEnum;
   selectedConceptSetIds: number[];
   selectedCohortIds: number[];
-  selectedValues: DomainValuePair[];
+  selectedValuePairs: DomainValuePair[];
   workspaceNamespace: string;
   workspaceId: string;
 }
@@ -114,12 +114,12 @@ class NewDataSetModal extends React.Component<Props, State> {
   async updateDataSet() {
     const {dataSet, workspaceNamespace, workspaceId} = this.props;
     const {name} = this.state;
-    const request = {
+    const request: DataSetRequest = {
       name: name,
       includesAllParticipants: dataSet.includesAllParticipants,
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
-      values: this.props.selectedValues,
+      domainValuePairs: this.props.selectedValuePairs,
       etag: dataSet.etag
     };
     await dataSetApi().updateDataSet(workspaceNamespace, workspaceId, dataSet.id, request);
@@ -133,13 +133,13 @@ class NewDataSetModal extends React.Component<Props, State> {
     }
     this.setState({conflictDataSetName: false, missingDataSetInfo: false, loading: true});
     const {name} = this.state;
-    const request = {
+    const request: DataSetRequest = {
       name: name,
       description: '',
       includesAllParticipants: this.props.includesAllParticipants,
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
-      values: this.props.selectedValues,
+      domainValuePairs: this.props.selectedValuePairs,
       prePackagedConceptSet: this.props.prePackagedConceptSet
     };
     try {
@@ -190,7 +190,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       name: 'dataSet',
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
-      values: this.props.selectedValues,
+      domainValuePairs: this.props.selectedValuePairs,
       includesAllParticipants: this.props.includesAllParticipants,
       prePackagedConceptSet: this.props.prePackagedConceptSet
     };

@@ -34,6 +34,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DataSetValues;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
@@ -127,7 +128,7 @@ public class DataSetController implements DataSetApiDelegate {
     final long workspaceId =
         workspaceService.get(workspaceNamespace, workspaceFirecloudName).getWorkspaceId();
     final ImmutableList<DataSetValues> dataSetValuesList =
-        dataSetRequest.getValues().stream()
+        dataSetRequest.getDomainValuePairs().stream()
             .map(this::getDataSetValuesFromDomainValueSet)
             .collect(toImmutableList());
     try {
@@ -150,10 +151,9 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   private DataSetValues getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
-    final DataSetValues dataSetValues =
-        new DataSetValues(domainValuePair.getDomain().name(), domainValuePair.getValue());
-    dataSetValues.setDomainEnum(domainValuePair.getDomain());
-    return dataSetValues;
+    return new DataSetValues(
+        CommonStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
+        domainValuePair.getValue());
   }
 
   private void validateDataSetCreateRequest(DataSetRequest dataSetRequest) {
@@ -165,10 +165,11 @@ public class DataSetController implements DataSetApiDelegate {
         || (dataSetRequest.getConceptSetIds().isEmpty()
             && dataSetRequest.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.NONE))) {
       throw new BadRequestException("Missing concept set ids");
-    } else if ((dataSetRequest.getCohortIds() == null || dataSetRequest.getCohortIds().size() == 0)
+    } else if ((dataSetRequest.getCohortIds() == null || dataSetRequest.getCohortIds().isEmpty())
         && !includesAllParticipants) {
       throw new BadRequestException("Missing cohort ids");
-    } else if (dataSetRequest.getValues() == null || dataSetRequest.getValues().size() == 0) {
+    } else if (dataSetRequest.getDomainValuePairs() == null
+        || dataSetRequest.getDomainValuePairs().isEmpty()) {
       throw new BadRequestException("Missing values");
     }
   }
@@ -203,7 +204,7 @@ public class DataSetController implements DataSetApiDelegate {
               StreamSupport.stream(cohortDao.findAll(dataSet.getCohortSetId()).spliterator(), false)
                   .map(CohortsController.TO_CLIENT_COHORT)
                   .collect(Collectors.toList()));
-          result.setValues(
+          result.setDomainValuePairs(
               dataSet.getValues().stream()
                   .map(TO_CLIENT_DOMAIN_VALUE)
                   .collect(Collectors.toList()));
@@ -372,7 +373,7 @@ public class DataSetController implements DataSetApiDelegate {
           }
 
           final List<String> requestValues =
-              dataSet.getValues().stream()
+              dataSet.getDomainValuePairs().stream()
                   .map(DomainValuePair::getValue)
                   .collect(Collectors.toList());
 
@@ -551,7 +552,7 @@ public class DataSetController implements DataSetApiDelegate {
     dbDataSet.setName(request.getName());
     dbDataSet.setPrePackagedConceptSetEnum(request.getPrePackagedConceptSet());
     dbDataSet.setValues(
-        request.getValues().stream()
+        request.getDomainValuePairs().stream()
             .map(this::getDataSetValuesFromDomainValueSet)
             .collect(Collectors.toList()));
     try {
