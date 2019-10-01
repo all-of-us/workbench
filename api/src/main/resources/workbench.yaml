@@ -1212,7 +1212,7 @@ paths:
       description: Trigger a bulk transfer of ownership of billing projects associated with deleted workspaces
       operationId: billingProjectGarbageCollection
       responses:
-        200:
+        204:
           description: Billing Project Garbage Collection was successful.
         500:
           description: Internal Error

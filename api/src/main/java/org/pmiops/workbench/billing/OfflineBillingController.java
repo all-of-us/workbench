@@ -26,7 +26,7 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
   @Override
   public ResponseEntity<Void> billingProjectGarbageCollection() {
     billingGarbageCollectionService.deletedWorkspaceGarbageCollection();
-    return ResponseEntity.status(HttpStatus.OK).build();
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
   @Override
