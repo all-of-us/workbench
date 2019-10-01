@@ -335,26 +335,38 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     updateDataRange(previous: boolean) {
       this.setState({updating: true});
-      const {columns, domain, filterType} = this.props;
-      const {requestPage, sortField, sortOrder} = this.state;
-      // let {filteredData} = this.state;
+      const {columns, domain} = this.props;
+      const {range, requestPage, sortField, sortOrder} = this.state;
+      let {filteredData} = this.state;
       const pageFilterRequest = {
         page: previous ? requestPage - 1 : requestPage + 1,
         pageSize: 125,
         sortOrder: sortOrder === 1 ? SortOrder.Asc :  SortOrder.Desc,
         sortColumn: columns[0].name,
-        pageFilterType: filterType,
         domain: domain,
         filters: {items: []}
       } as PageFilterRequest;
       this.callApi(pageFilterRequest).then(response => {
         response.items.forEach(item => {
-          if (domain === DomainType[DomainType.VITAL] || domain === DomainType[DomainType.LAB]) {
+          if (domain === DomainType.VITAL || domain === DomainType.LAB) {
             item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
           }
           item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
         });
-        // this.setState({data: response.items, filteredData: response.items, updating: false});
+        if (previous) {
+          filteredData = [...response.items, ...filteredData];
+          if (filteredData.length > 425) {
+            filteredData = filteredData.slice(0, filteredData.length - 125);
+            range[1] -= 125;
+          }
+        } else {
+          filteredData = [...filteredData, ...response.items];
+          if (filteredData.length > 425) {
+            filteredData = filteredData.slice(125);
+            range[0] += 125;
+          }
+        }
+        this.setState({data: response.items, filteredData, range, updating: false});
       });
     }
 
@@ -378,16 +390,17 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     onPage = (event: any) => {
-      console.log(event);
       const {inMemory, page, range} = this.state;
       if (!inMemory) {
-        if (event.page < page && range[0] >= (event.first - rowsPerPage)) {
+        if (event.page < page && event.page > 1 && range[0] >= (event.first - rowsPerPage)) {
+          range[0] -= 125;
           this.updateDataRange(true);
         } else if (event.page > page && range[1] <= (event.first + (rowsPerPage * 2))) {
+          range[1] += 125;
           this.updateDataRange(false);
         }
       }
-      this.setState({page: event.page, start: event.first});
+      this.setState({page: event.page, range, start: event.first});
     }
 
     overlayTemplate = (rowData: any, column: any) => {
@@ -734,7 +747,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {loading, start, sortField, sortOrder} = this.state;
+      const {loading, inMemory, range, start, sortField, sortOrder, updating} = this.state;
       const {columns, filterState: {vocab}, tabName} = this.props;
       const filteredData = loading ? null : this.state.filteredData;
       let pageReportTemplate;
@@ -743,12 +756,17 @@ export const DetailTabTable = withCurrentWorkspace()(
         const lastRowOfPage = (start + rowsPerPage) > filteredData.length
           ? start + rowsPerPage - (start + rowsPerPage - filteredData.length) : start + rowsPerPage;
         pageReportTemplate = `${start + 1} - ${lastRowOfPage} of ${this.totalCount} records `;
-        value = filteredData.slice(start, start + rowsPerPage);
+        const pageStart = inMemory ? start : start - range[0];
+        value = filteredData.slice(pageStart, pageStart + rowsPerPage);
       }
       let paginatorTemplate = 'CurrentPageReport';
       if (filteredData && filteredData.length > rowsPerPage) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
+      if (updating) {
+        console.log(value);
+      }
+      const spinner = loading || (updating && value.length === 0);
       const cols = columns.map((col) => {
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
@@ -826,7 +844,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           footer={this.errorMessage()}>
           {cols}
         </DataTable>
-        {loading && <SpinnerOverlay />}
+        {spinner && <SpinnerOverlay />}
       </div>;
     }
   }
