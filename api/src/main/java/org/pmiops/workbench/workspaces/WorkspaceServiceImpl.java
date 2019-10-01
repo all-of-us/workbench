@@ -567,10 +567,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     List<UserRecentWorkspace> userRecentWorkspaces =
         userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
 
+    ArrayList<Long> idsToDelete = new ArrayList<>();
     while (userRecentWorkspaces.size() > RECENT_WORKSPACE_COUNT) {
-      userRecentWorkspaceDao.delete(userRecentWorkspaces.get(userRecentWorkspaces.size() - 1));
+      idsToDelete.add(userRecentWorkspaces.get(userRecentWorkspaces.size() - 1).getId());
       userRecentWorkspaces.remove(userRecentWorkspaces.size() - 1);
     }
+    userRecentWorkspaceDao.deleteByWorkspaceIdIn(idsToDelete);
   }
 
   @Override

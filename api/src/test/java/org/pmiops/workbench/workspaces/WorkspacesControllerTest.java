@@ -481,7 +481,7 @@ public class WorkspacesControllerTest {
     researchPurpose.setReviewRequested(true);
     researchPurpose.setApproved(false);
     Workspace workspace = new Workspace();
-    workspace.setId("1");
+    workspace.setId(workspaceName);
     workspace.setName(workspaceName);
     workspace.setNamespace(workspaceNameSpace);
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
@@ -2560,6 +2560,7 @@ public class WorkspacesControllerTest {
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();
     RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
-    assertThat(recentWorkspace.getWorkspaceId()).isEqualTo(dbWorkspace.getWorkspaceId());
+    assertThat(recentWorkspace.getWorkspace().getNamespace()).isEqualTo(dbWorkspace.getWorkspaceNamespace());
+    assertThat(recentWorkspace.getWorkspace().getName()).isEqualTo(dbWorkspace.getName());
   }
 }

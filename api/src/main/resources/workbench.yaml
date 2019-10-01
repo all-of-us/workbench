@@ -3645,6 +3645,7 @@ definitions:
         $ref: '#/definitions/WorkspaceAccessLevel'
       accessedTime:
         type: string
+        description: The date and time that the workspace was last accessed, in ISO-8601 format
 
   RecentWorkspaceResponse:
     type: array

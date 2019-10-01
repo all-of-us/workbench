@@ -252,18 +252,20 @@ public class WorkspaceServiceTest {
         });
     List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT);
-    assertThat(
-            recentWorkspaces.stream()
-                .map(UserRecentWorkspace::getWorkspaceId)
-                .collect(Collectors.toList()))
-        .containsAll(
-            mockWorkspaces
-                .subList(
-                    mockWorkspaces.size() - WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT,
-                    mockWorkspaces.size())
-                .stream()
-                .map(org.pmiops.workbench.db.model.Workspace::getWorkspaceId)
-                .collect(Collectors.toList()));
+
+    List<Long> actualIds =
+        recentWorkspaces.stream()
+            .map(UserRecentWorkspace::getWorkspaceId)
+            .collect(Collectors.toList());
+    List<Long> expectedIds =
+        mockWorkspaces
+            .subList(
+                mockWorkspaces.size() - WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT,
+                mockWorkspaces.size())
+            .stream()
+            .map(org.pmiops.workbench.db.model.Workspace::getWorkspaceId)
+            .collect(Collectors.toList());
+    assertThat(actualIds).containsAll(expectedIds);
   }
 
   @Test
