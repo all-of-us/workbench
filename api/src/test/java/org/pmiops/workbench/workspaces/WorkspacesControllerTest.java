@@ -111,6 +111,7 @@ import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
+import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
@@ -2559,8 +2560,6 @@ public class WorkspacesControllerTest {
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();
     RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
-    assertThat(recentWorkspace.getWorkspace().getNamespace())
-        .isEqualTo(dbWorkspace.getWorkspaceNamespace());
-    assertThat(recentWorkspace.getWorkspace().getName()).isEqualTo(dbWorkspace.getName());
+    assertThat(recentWorkspace.getWorkspaceId()).isEqualTo(dbWorkspace.getWorkspaceId());
   }
 }
