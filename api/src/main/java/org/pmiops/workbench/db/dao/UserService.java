@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -261,8 +262,6 @@ public class UserService {
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     user.setAddress(address);
     user.setDemographicSurvey(demographicSurvey);
-    user.getInstitutionalAffiliations().clear();
-    user.getInstitutionalAffiliations().addAll(institutionalAffiliation);
     // For existing user that do not have address
     if (address != null) {
       address.setUser(user);
@@ -270,7 +269,19 @@ public class UserService {
     if (demographicSurvey != null) demographicSurvey.setUser(user);
     if (institutionalAffiliation != null) {
       final User u = user;
-      institutionalAffiliation.forEach(affiliation -> affiliation.setUser(u));
+      institutionalAffiliation.stream()
+          .filter(Objects::nonNull)
+          .forEach(
+              affiliation -> {
+                if (affiliation != null
+                    && affiliation.getInstitution() != null
+                    && !affiliation.getInstitution().isEmpty()
+                    && affiliation.getNonAcademicAffiliation() != null
+                    && affiliation.getRole() != null
+                    && !affiliation.getRole().isEmpty()) {
+                  affiliation.setUser(u);
+                }
+              });
     }
     try {
       userDao.save(user);
