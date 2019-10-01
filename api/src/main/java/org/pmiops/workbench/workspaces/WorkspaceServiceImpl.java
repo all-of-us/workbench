@@ -534,7 +534,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         .map(Workspace::getWorkspaceId)
         .collect(ImmutableList.toImmutableList());
 
-    userRecentWorkspaceDao.deleteAllByWorkspaceIdIn(idsToDelete);
+    if (!idsToDelete.isEmpty()) {
+      userRecentWorkspaceDao.deleteByWorkspaceIdIn(idsToDelete);
+    }
   }
 
   private boolean userHasWorkspaceAccess(String email, Workspace workspace) {

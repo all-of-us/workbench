@@ -10,5 +10,5 @@ public interface UserRecentWorkspaceDao extends CrudRepository<UserRecentWorkspa
   List<UserRecentWorkspace> findByUserIdOrderByLastAccessDateDesc(long userId);
 
   Optional<UserRecentWorkspace> findFirstByWorkspaceIdAndUserId(long workspaceId, long userId);
-  void deleteAllByWorkspaceIdIn(Collection<Long> workspaceIds);
+  void deleteByWorkspaceIdIn(List<Long> workspaceIds);
 }
