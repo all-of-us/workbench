@@ -9,7 +9,7 @@ import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stu
 import {CohortReviewServiceStub} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {CohortReview} from './cohort-review';
-import {WorkspacesApiStub} from "src/testing/stubs/workspaces-api-stub";
+import {WorkspacesApiStub} from "testing/stubs/workspaces-api-stub";
 
 describe('CohortReview', () => {
   registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
