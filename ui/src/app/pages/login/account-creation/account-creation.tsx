@@ -131,7 +131,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         },
         institutionalAffiliations: [
           {
-            institution: '',
+            institution: undefined,
             nonAcademicAffiliation: undefined,
             role: ''
           }
