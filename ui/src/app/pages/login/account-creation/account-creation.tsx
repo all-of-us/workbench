@@ -133,7 +133,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           {
             institution: undefined,
             nonAcademicAffiliation: undefined,
-            role: ''
+            role: undefined
           }
         ]
       },
