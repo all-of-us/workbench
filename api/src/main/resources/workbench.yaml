@@ -1214,8 +1214,6 @@ paths:
       responses:
         200:
           description: Billing Project Garbage Collection was successful.
-          schema:
-            $ref: "#/definitions/BillingProjectGarbageCollectionResponse"
         500:
           description: Internal Error
           schema:
@@ -3549,22 +3547,6 @@ definitions:
         format: int32
         description: >
           Number of clusters deleted during the check.
-
-  BillingProjectGarbageCollectionResponse:
-    type: array
-    items:
-      $ref: "#/definitions/GarbageCollectedProject"
-
-  GarbageCollectedProject:
-    type: object
-    properties:
-      project:
-        type: string
-      newOwner:
-        type: string
-    required:
-      - project
-      - newOwner
 
   User:
     type: object
