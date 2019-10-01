@@ -73,7 +73,8 @@ public interface WorkspaceService {
 
   List<UserRecentWorkspace> getRecentWorkspaces();
 
-  UserRecentWorkspace updateRecentWorkspaces(long workspaceId, long userId, Timestamp lastAccessDate);
+  UserRecentWorkspace updateRecentWorkspaces(
+      long workspaceId, long userId, Timestamp lastAccessDate);
 
   UserRecentWorkspace updateRecentWorkspaces(long workspaceId);
 

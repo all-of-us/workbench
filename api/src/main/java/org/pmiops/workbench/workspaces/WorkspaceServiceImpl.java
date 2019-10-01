@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -13,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -509,40 +509,27 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   private void enforceFirecloudAclsInRecentWorkspaces(List<UserRecentWorkspace> recentWorkspaces) {
-    // Map recentWorkspaces by id because we'll want to access them like that later when we delete
-    Map<Long, UserRecentWorkspace> recentWorkspacesById =
-        recentWorkspaces.stream()
-            .collect(Collectors.toMap(UserRecentWorkspace::getWorkspaceId, Function.identity()));
-
-    // Grab the dbWorkspaces.
     List<Workspace> dbWorkspaces =
         workspaceDao.findAllByWorkspaceIdIn(
             recentWorkspaces.stream()
                 .map(UserRecentWorkspace::getWorkspaceId)
                 .collect(Collectors.toList()));
 
-    // Map by primary key id bc it's illegal to string streams along in Java. not pretty enough.
-    Map<Long, Workspace> dbWorkspacesById =
+    final String email = userProvider.get().getEmail();
+    ImmutableList<Long> idsToDelete =
         dbWorkspaces.stream()
-            .collect(Collectors.toMap(Workspace::getWorkspaceId, Function.identity()));
+            .filter(workspace -> userHasWorkspaceAccess(email, workspace))
+            .map(Workspace::getWorkspaceId)
+            .collect(ImmutableList.toImmutableList());
 
-    // Unfortunately it doesn't look like there's a way to batch call this currently.
-    dbWorkspaces.forEach(
-        dbWorkspace -> {
-          // Grab the ACLs.
-          Map<String, WorkspaceAccessEntry> aclsByEmail =
-              getFirecloudWorkspaceAcls(
-                  dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-
-          String email = userProvider.get().getEmail();
-          if (userHasWorkspaceAccess(email, aclsByEmail)) {
-            userRecentWorkspaceDao.delete(recentWorkspacesById.get(dbWorkspace.getWorkspaceId()));
-          }
-        });
+    if (!idsToDelete.isEmpty()) {
+      userRecentWorkspaceDao.deleteByWorkspaceIdIn(idsToDelete);
+    }
   }
 
-  private boolean userHasWorkspaceAccess(
-      String email, Map<String, WorkspaceAccessEntry> aclsByEmail) {
+  private boolean userHasWorkspaceAccess(String email, Workspace workspace) {
+    Map<String, WorkspaceAccessEntry> aclsByEmail =
+        getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
     return !aclsByEmail.containsKey(email)
         || aclsByEmail
             .get(email)
@@ -551,16 +538,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public UserRecentWorkspace updateRecentWorkspaces(long workspaceId, long userId, Timestamp lastAccessDate) {
+  public UserRecentWorkspace updateRecentWorkspaces(
+      long workspaceId, long userId, Timestamp lastAccessDate) {
     Optional<UserRecentWorkspace> maybeRecentWorkspace =
-            userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
+        userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
     final UserRecentWorkspace matchingRecentWorkspace =
-            maybeRecentWorkspace
-                    .map(
-                            recentWorkspace ->
-                                    new UserRecentWorkspace(
-                                            recentWorkspace.getWorkspaceId(), recentWorkspace.getUserId(), lastAccessDate))
-                    .orElseGet(() -> new UserRecentWorkspace(workspaceId, userId, lastAccessDate));
+        maybeRecentWorkspace
+            .map(
+                recentWorkspace ->
+                    new UserRecentWorkspace(
+                        recentWorkspace.getWorkspaceId(),
+                        recentWorkspace.getUserId(),
+                        lastAccessDate))
+            .orElseGet(() -> new UserRecentWorkspace(workspaceId, userId, lastAccessDate));
     userRecentWorkspaceDao.save(matchingRecentWorkspace);
     handleWorkspaceLimit(userId);
     return matchingRecentWorkspace;
