@@ -2560,7 +2560,8 @@ public class WorkspacesControllerTest {
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();
     RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
-    assertThat(recentWorkspace.getWorkspace().getNamespace()).isEqualTo(dbWorkspace.getWorkspaceNamespace());
+    assertThat(recentWorkspace.getWorkspace().getNamespace())
+        .isEqualTo(dbWorkspace.getWorkspaceNamespace());
     assertThat(recentWorkspace.getWorkspace().getName()).isEqualTo(dbWorkspace.getName());
   }
 }
