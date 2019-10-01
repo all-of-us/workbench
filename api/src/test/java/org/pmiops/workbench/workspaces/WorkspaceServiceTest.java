@@ -145,18 +145,18 @@ public class WorkspaceServiceTest {
   }
 
   private org.pmiops.workbench.db.model.Workspace buildDbWorkspace(
-      long id, String name, String namespace, WorkspaceActiveStatus activeStatus) {
+      long dbId, String name, String namespace, WorkspaceActiveStatus activeStatus) {
     org.pmiops.workbench.db.model.Workspace workspace =
         new org.pmiops.workbench.db.model.Workspace();
     Timestamp nowTimestamp = Timestamp.from(NOW);
     workspace.setLastModifiedTime(nowTimestamp);
     workspace.setCreationTime(nowTimestamp);
     workspace.setName(name);
-    workspace.setWorkspaceId(id);
+    workspace.setWorkspaceId(dbId);
     workspace.setWorkspaceNamespace(namespace);
     workspace.setWorkspaceActiveStatusEnum(activeStatus);
     workspace.setFirecloudName(name);
-    workspace.setFirecloudUuid(Long.toString(id));
+    workspace.setFirecloudUuid(Long.toString(dbId));
     return workspace;
   }
 
