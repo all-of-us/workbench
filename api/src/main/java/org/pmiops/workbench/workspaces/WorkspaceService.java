@@ -10,6 +10,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.model.RecentWorkspace;
+import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -85,4 +86,6 @@ public interface WorkspaceService {
       org.pmiops.workbench.db.model.Workspace dbWorkspace,
       UserRecentWorkspace userRecentWorkspace,
       WorkspaceAccessLevel accessLevel);
+
+  RecentWorkspaceResponse updateRecentWorkspaces(String workspaceNamespace, String workspaceId);
 }

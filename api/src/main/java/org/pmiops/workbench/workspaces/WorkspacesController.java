@@ -725,17 +725,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<RecentWorkspaceResponse> updateRecentWorkspaces(
       String workspaceNamespace, String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
-        workspaceService.getRequired(workspaceNamespace, workspaceId);
-    UserRecentWorkspace userRecentWorkspace =
-        workspaceService.updateRecentWorkspaces(dbWorkspace.getWorkspaceId());
-    WorkspaceAccessLevel accessLevel =
-        workspaceService.getWorkspaceAccessLevel(
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-    RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
-    RecentWorkspace recentWorkspace =
-        workspaceService.buildRecentWorkspace(dbWorkspace, userRecentWorkspace, accessLevel);
-    recentWorkspaceResponse.add(recentWorkspace);
+    RecentWorkspaceResponse recentWorkspaceResponse = workspaceService.updateRecentWorkspaces(workspaceNamespace,
+        workspaceId);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
 

@@ -36,6 +36,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.model.RecentWorkspace;
+import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -564,6 +565,21 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     userRecentWorkspaceDao.save(matchingRecentWorkspace);
     handleWorkspaceLimit(userId);
     return matchingRecentWorkspace;
+  }
+
+  @Override
+  public RecentWorkspaceResponse updateRecentWorkspaces(String workspaceNamespace, String workspaceId) {
+    Workspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
+    UserRecentWorkspace userRecentWorkspace =
+        updateRecentWorkspaces(dbWorkspace.getWorkspaceId());
+    WorkspaceAccessLevel accessLevel =
+        getWorkspaceAccessLevel(
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+    RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
+    RecentWorkspace recentWorkspace =
+        buildRecentWorkspace(dbWorkspace, userRecentWorkspace, accessLevel);
+    recentWorkspaceResponse.add(recentWorkspace);
+    return recentWorkspaceResponse;
   }
 
   @Override
