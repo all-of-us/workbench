@@ -269,19 +269,10 @@ public class UserService {
     if (demographicSurvey != null) demographicSurvey.setUser(user);
     if (institutionalAffiliations != null) {
       final User u = user;
-      institutionalAffiliations.stream()
-          .filter(Objects::nonNull)
-          .forEach(
+      institutionalAffiliations.forEach(
               affiliation -> {
-                if (affiliation != null
-                    && ((affiliation.getInstitution() != null
-                            && !affiliation.getInstitution().isEmpty())
-                        || (affiliation.getNonAcademicAffiliation() != null
-                            || (affiliation.getRole() != null
-                                && !affiliation.getRole().isEmpty())))) {
                   affiliation.setUser(u);
                   u.addInstitutionalAffiliation(affiliation);
-                }
               });
     }
     try {
