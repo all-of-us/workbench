@@ -174,6 +174,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   createAccount(): void {
     const {invitationKey, setProfile} = this.props;
     const profile = this.state.profile;
+    profile.institutionalAffiliations = [];
     const emailValidRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/);
     this.setState({showAllFieldsRequiredError: false});
     this.setState({invalidEmail: false});
