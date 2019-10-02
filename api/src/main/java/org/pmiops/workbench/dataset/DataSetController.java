@@ -1,4 +1,4 @@
-package org.pmiops.workbench.api;
+package org.pmiops.workbench.dataset;
 
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -25,11 +25,16 @@ import javax.persistence.OptimisticLockException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.api.CohortsController;
+import org.pmiops.workbench.api.ConceptSetsController;
+import org.pmiops.workbench.api.ConceptsController;
+import org.pmiops.workbench.api.DataSetApiDelegate;
+import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
-import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.model.DataSetValues;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
