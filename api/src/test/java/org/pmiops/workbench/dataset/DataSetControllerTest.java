@@ -144,8 +144,7 @@ public class DataSetControllerTest {
 
   @Autowired BillingProjectBufferService billingProjectBufferService;
 
-  @Autowired
-  BigQueryService bigQueryService;
+  @Autowired BigQueryService bigQueryService;
 
   @Autowired CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
 

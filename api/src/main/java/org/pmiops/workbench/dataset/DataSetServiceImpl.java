@@ -100,14 +100,11 @@ public class DataSetServiceImpl implements DataSetService {
   private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private Provider<WorkbenchConfig> configProvider;
 
-  @Autowired
-  DataSetDao dataSetDao;
+  @Autowired DataSetDao dataSetDao;
 
-  @Autowired
-  ConceptSetDao conceptSetDao;
+  @Autowired ConceptSetDao conceptSetDao;
 
-  @Autowired
-  CohortDao cohortDao;
+  @Autowired CohortDao cohortDao;
 
   @Autowired
   @VisibleForTesting
