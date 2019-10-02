@@ -10,7 +10,7 @@ import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType, FilterColumns, PageFilterRequest, SortOrder} from 'generated/fetch';
+import {DomainType, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
@@ -335,12 +335,12 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
-    loadPrevious() {
-      this.setState({loadingPrevious: true, updating: true});
+    updatePageData(previous: boolean) {
+      this.setState({loadingPrevious: previous, updating: true});
       const {columns, domain} = this.props;
       const {range, sortOrder} = this.state;
       let {filteredData} = this.state;
-      const requestPage = range[0] / 125;
+      const requestPage = previous ? range[0] / 125 : (filteredData.length + range[0]) / 125;
       const pageFilterRequest = {
         page: requestPage,
         pageSize: 125,
@@ -356,42 +356,20 @@ export const DetailTabTable = withCurrentWorkspace()(
           }
           item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
         });
-        filteredData = [...response.items, ...filteredData];
-        if (filteredData.length > 425) {
-          filteredData = filteredData.slice(0, filteredData.length - 125);
-          range[1] -= 125;
+        if (previous) {
+          filteredData = [...response.items, ...filteredData];
+          if (filteredData.length > 425) {
+            filteredData = filteredData.slice(0, filteredData.length - 125);
+            range[1] -= 125;
+          }
+        } else {
+          filteredData = [...filteredData, ...response.items];
+          if (filteredData.length > 425) {
+            filteredData = filteredData.slice(125);
+            range[0] += 125;
+          }
         }
         this.setState({data: response.items, filteredData, range, loadingPrevious: false, updating: false});
-      });
-    }
-
-    loadNext() {
-      this.setState({updating: true});
-      const {columns, domain} = this.props;
-      const {range, sortOrder} = this.state;
-      let {filteredData} = this.state;
-      const requestPage = (filteredData.length + range[0]) / 125;
-      const pageFilterRequest = {
-        page: requestPage,
-        pageSize: 125,
-        sortOrder: sortOrder === 1 ? SortOrder.Asc :  SortOrder.Desc,
-        sortColumn: columns[0].name,
-        domain: domain,
-        filters: {items: []}
-      } as PageFilterRequest;
-      this.callApi(pageFilterRequest).then(response => {
-        response.items.forEach(item => {
-          if (domain === DomainType.VITAL || domain === DomainType.LAB) {
-            item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
-          }
-          item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
-        });
-        filteredData = [...filteredData, ...response.items];
-        if (filteredData.length > 425) {
-          filteredData = filteredData.slice(125);
-          range[0] += 125;
-        }
-        this.setState({data: response.items, filteredData, range, updating: false});
       });
     }
 
@@ -429,10 +407,10 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (lazyLoad) {
         if (event.page < page && event.page > 1 && range[0] >= (event.first - rowsPerPage)) {
           range[0] -= 125;
-          this.loadPrevious();
+          this.updatePageData(true);
         } else if (event.page > page && range[1] <= (event.first + (rowsPerPage * 2))) {
           range[1] += 125;
-          this.loadNext();
+          this.updatePageData(false);
         }
       }
       this.setState({page: event.page, range, start: event.first});
@@ -538,22 +516,24 @@ export const DetailTabTable = withCurrentWorkspace()(
         this.setState({filteredData: data, start: start});
       } else {
         for (const col in columnFilters) {
-          // Makes sure we only filter by correct concept type (standard/source)
-          if (columnCheck.includes(col)) {
-            if (Array.isArray(columnFilters[col])) {
-              // checkbox filters
-              if (!columnFilters[col].length) {
-                data = [];
-                break;
-              } else if (!columnFilters[col].includes('Select All')
-                && !(vocab === 'source' && domain === DomainType.OBSERVATION)) {
-                data = data.filter(row => columnFilters[col].includes(row[col]));
-              }
-            } else {
-              // text filters
-              if (columnFilters[col]) {
-                data = data.filter(row =>
-                  row[col] && row[col].toLowerCase().includes(columnFilters[col].toLowerCase()));
+          if (columnFilters.hasOwnProperty(col)) {
+            // Makes sure we only filter by correct concept type (standard/source)
+            if (columnCheck.includes(col)) {
+              if (Array.isArray(columnFilters[col])) {
+                // checkbox filters
+                if (!columnFilters[col].length) {
+                  data = [];
+                  break;
+                } else if (!columnFilters[col].includes('Select All')
+                  && !(vocab === 'source' && domain === DomainType.OBSERVATION)) {
+                  data = data.filter(row => columnFilters[col].includes(row[col]));
+                }
+              } else {
+                // text filters
+                if (columnFilters[col]) {
+                  data = data.filter(row =>
+                    row[col] && row[col].toLowerCase().includes(columnFilters[col].toLowerCase()));
+                }
               }
             }
           }
@@ -782,7 +762,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     render() {
-      const {loading, lazyLoad, loadingPrevious, range, start, sortField, sortOrder, totalCount, updating} = this.state;
+      const {expandedRows, loading, lazyLoad, loadingPrevious, range, start, sortField, sortOrder, totalCount, updating} = this.state;
       const {columns, filterState: {vocab}, tabName} = this.props;
       const filteredData = loading ? null : this.state.filteredData;
       let pageReportTemplate;
@@ -801,7 +781,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       if (filteredData && filteredData.length > rowsPerPage) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
-      const spinner = loading || (updating && value.length === 0);
+      const spinner = loading || (updating && value && value.length === 0);
       const cols = columns.map((col) => {
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
@@ -855,7 +835,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       return <div style={styles.container}>
         <style>{datatableStyles}</style>
         <DataTable
-          expandedRows={this.state.expandedRows}
+          expandedRows={expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
           rowExpansionTemplate={this.rowExpansionTemplate}
           rowClassName = {this.hideGraphIcon}
@@ -867,8 +847,8 @@ export const DetailTabTable = withCurrentWorkspace()(
           lazy={lazyLoad}
           paginator
           alwaysShowPaginator={false}
-          paginatorTemplate={!spinner && filteredData && filteredData.length ? paginatorTemplate : ''}
-          currentPageReportTemplate={!spinner && filteredData && filteredData.length ? pageReportTemplate : ''}
+          paginatorTemplate={!spinner && !!filteredData ? paginatorTemplate : ''}
+          currentPageReportTemplate={!spinner && !!filteredData ? pageReportTemplate : ''}
           onPage={this.onPage}
           first={start}
           rows={rowsPerPage}
