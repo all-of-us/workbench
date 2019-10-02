@@ -19,7 +19,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * See api/project.rb set-authority. Adds or removes authorities (permissions) from users in the db.
  */
 @SpringBootApplication
-@EnableJpaRepositories("org.pmiops.workbench.db.dao")
+@EnableJpaRepositories("org.pmiops.workbench")
 @EntityScan("org.pmiops.workbench.db.model")
 public class SetAuthority {
 

@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EnableJpaRepositories("org.pmiops.workbench.db.dao")
+@EnableJpaRepositories("org.pmiops.workbench")
 @EntityScan("org.pmiops.workbench.db.model")
 /**
  * Command-line tool to load a WorkbenchConfig or CdrBigQuerySchemaConfig from a local file and

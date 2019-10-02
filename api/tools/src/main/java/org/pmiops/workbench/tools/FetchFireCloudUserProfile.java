@@ -27,7 +27,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  */
 @SpringBootApplication
 // Load the DBA and DB model classes required for UserDao.
-@EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
+@EnableJpaRepositories({"org.pmiops.workbench"})
 @EntityScan("org.pmiops.workbench.db.model")
 public class FetchFireCloudUserProfile {
   private static final Logger log =
