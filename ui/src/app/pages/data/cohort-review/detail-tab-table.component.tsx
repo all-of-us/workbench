@@ -10,7 +10,7 @@ import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType, PageFilterRequest, SortOrder} from 'generated/fetch';
+import {DomainType, FilterColumns, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
@@ -247,7 +247,7 @@ interface State {
   expandedRows: Array<any>;
   codeResults: any;
   error: boolean;
-  inMemory: boolean;
+  lazyLoad: boolean;
   totalCount: number;
   requestPage: number;
   range: Array<number>;
@@ -266,12 +266,12 @@ export const DetailTabTable = withCurrentWorkspace()(
         loadingPrevious: false,
         page: 0,
         start: 0,
-        sortField: null,
+        sortField: props.columns[0].name,
         sortOrder: 1,
         expandedRows: [],
         codeResults: null,
         error: false,
-        inMemory: true,
+        lazyLoad: false,
         totalCount: null,
         requestPage: 0,
         range: [0, 124]
@@ -301,29 +301,29 @@ export const DetailTabTable = withCurrentWorkspace()(
     getParticipantData() {
       try {
         const {columns, domain} = this.props;
-        let {inMemory} = this.state;
+        let {lazyLoad, sortOrder} = this.state;
         const pageFilterRequest = {
           page: 0,
           pageSize: 125,
-          sortOrder: SortOrder.Asc,
+          sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
           sortColumn: columns[0].name,
           domain: domain,
           filters: {items: []}
         } as PageFilterRequest;
 
         this.callApi(pageFilterRequest).then(response => {
-          inMemory = response.count <= 1000;
+          lazyLoad = response.count > 1000;
           response.items.forEach(item => {
             if (domain === DomainType.VITAL || domain === DomainType.LAB) {
               item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
             }
             item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
           });
-          if (inMemory) {
-            this.setState({data: response.items, loading: false, inMemory});
-            this.filterData();
+          if (lazyLoad) {
+            this.setState({data: response.items, filteredData: response.items, loading: false, lazyLoad, totalCount: response.count});
           } else {
-            this.setState({data: response.items, filteredData: response.items, loading: false, inMemory, totalCount: response.count});
+            this.setState({data: response.items, loading: false, lazyLoad});
+            this.filterData();
           }
         });
       } catch (error) {
@@ -338,7 +338,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     loadPrevious() {
       this.setState({loadingPrevious: true, updating: true});
       const {columns, domain} = this.props;
-      const {range, sortField, sortOrder} = this.state;
+      const {range, sortOrder} = this.state;
       let {filteredData} = this.state;
       const requestPage = range[0] / 125;
       const pageFilterRequest = {
@@ -368,7 +368,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     loadNext() {
       this.setState({updating: true});
       const {columns, domain} = this.props;
-      const {range, sortField, sortOrder} = this.state;
+      const {range, sortOrder} = this.state;
       let {filteredData} = this.state;
       const requestPage = (filteredData.length + range[0]) / 125;
       const pageFilterRequest = {
@@ -403,6 +403,11 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     onSort = (event: any) => {
       this.setState({sortField: event.sortField, sortOrder: event.sortOrder});
+      const {lazyLoad} = this.state;
+      if (lazyLoad) {
+        this.setState({loading: true});
+        setTimeout(() => this.getParticipantData());
+      }
     }
 
     columnSort = (sortField: string) => {
@@ -412,11 +417,16 @@ export const DetailTabTable = withCurrentWorkspace()(
       } else {
         this.setState({sortField, sortOrder: 1});
       }
+      const {lazyLoad} = this.state;
+      if (lazyLoad) {
+        this.setState({loading: true});
+        setTimeout(() => this.getParticipantData());
+      }
     }
 
     onPage = (event: any) => {
-      const {inMemory, page, range} = this.state;
-      if (!inMemory) {
+      const {lazyLoad, page, range} = this.state;
+      if (lazyLoad) {
         if (event.page < page && event.page > 1 && range[0] >= (event.first - rowsPerPage)) {
           range[0] -= 125;
           this.loadPrevious();
@@ -763,28 +773,28 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     get totalCount() {
-      const {filteredData, inMemory, totalCount} = this.state;
-      if (inMemory) {
-        return !!filteredData ? filteredData.length : null;
-      } else {
+      const {filteredData, lazyLoad, totalCount} = this.state;
+      if (lazyLoad) {
         return totalCount;
+      } else {
+        return !!filteredData ? filteredData.length : null;
       }
     }
 
     render() {
-      const {loading, inMemory, loadingPrevious, range, start, sortField, sortOrder, totalCount, updating} = this.state;
+      const {loading, lazyLoad, loadingPrevious, range, start, sortField, sortOrder, totalCount, updating} = this.state;
       const {columns, filterState: {vocab}, tabName} = this.props;
       const filteredData = loading ? null : this.state.filteredData;
       let pageReportTemplate;
       let value = null;
       if (filteredData !== null) {
-        const max = inMemory ? filteredData.length : totalCount;
+        const max = lazyLoad ? totalCount : filteredData.length;
         const lastRowOfPage = (start + rowsPerPage) > max
           ? start + rowsPerPage - (start + rowsPerPage - max) : start + rowsPerPage;
         pageReportTemplate = `${(start + 1).toLocaleString()} -
           ${lastRowOfPage.toLocaleString()} of
           ${this.totalCount.toLocaleString()} records `;
-        const pageStart = inMemory ? start : start - range[0];
+        const pageStart = lazyLoad ? start - range[0] : start;
         value = loadingPrevious && pageStart < 125 ? [] : filteredData.slice(pageStart, pageStart + rowsPerPage);
       }
       let paginatorTemplate = 'CurrentPageReport';
@@ -854,11 +864,11 @@ export const DetailTabTable = withCurrentWorkspace()(
           sortField={sortField}
           sortOrder={sortOrder}
           onSort={this.onSort}
-          lazy
+          lazy={lazyLoad}
           paginator
           alwaysShowPaginator={false}
-          paginatorTemplate={!spinner && filteredData.length ? paginatorTemplate : ''}
-          currentPageReportTemplate={!spinner && filteredData.length ? pageReportTemplate : ''}
+          paginatorTemplate={!spinner && filteredData && filteredData.length ? paginatorTemplate : ''}
+          currentPageReportTemplate={!spinner && filteredData && filteredData.length ? pageReportTemplate : ''}
           onPage={this.onPage}
           first={start}
           rows={rowsPerPage}
