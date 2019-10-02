@@ -31,7 +31,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  */
 @SpringBootApplication
 @EnableJpaRepositories("org.pmiops.workbench")
-@EntityScan("org.pmiops.workbench.db.model")
+@EntityScan("org.pmiops.workbench")
 public class UpdateCdrVersions {
 
   private static final Logger logger = Logger.getLogger(UpdateCdrVersions.class.getName());
