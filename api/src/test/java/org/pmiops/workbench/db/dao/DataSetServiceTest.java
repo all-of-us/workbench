@@ -11,7 +11,6 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.StandardSQLTypeName;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import java.util.Collections;
@@ -127,15 +126,13 @@ public class DataSetServiceTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testThrowsForNoCohortOrConcept() throws Exception {
+  public void testThrowsForNoCohortOrConcept() {
     final DataSetRequest invalidRequest = buildEmptyRequest();
-    ImmutableMap<String, QueryJobConfiguration> configurationsByDomain =
-        ImmutableMap.copyOf(
-            dataSetServiceImpl.generateQueryJobConfigurationsByDomainName(invalidRequest));
+    dataSetServiceImpl.generateQueryJobConfigurationsByDomainName(invalidRequest);
   }
 
   @Test
-  public void testGetsCohortQueryStringAndCollectNamedParameters() throws Exception {
+  public void testGetsCohortQueryStringAndCollectsNamedParameters() {
     final Cohort cohortDbModel = buildSimpleCohort();
     final QueryAndParameters queryAndParameters =
         dataSetServiceImpl.getCohortQueryStringAndCollectNamedParameters(cohortDbModel);
@@ -223,8 +220,9 @@ public class DataSetServiceTest {
     Domain domain1 = Domain.CONDITION;
     ConceptSet conceptSet1 = buildConceptSet(1L, domain1, ImmutableSet.of(1L, 2L, 3L));
     ConceptSet conceptSet2 = buildConceptSet(2L, domain1, ImmutableSet.of(4L, 5L, 6L));
-    Optional<String> listClauseMaybe = dataSetServiceImpl.buildConceptIdListClause(
-        domain1, ImmutableList.of(conceptSet1, conceptSet2));
+    Optional<String> listClauseMaybe =
+        dataSetServiceImpl.buildConceptIdListClause(
+            domain1, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.isPresent()).isTrue();
     assertThat(listClauseMaybe.get().equals("1 2 3 4 5 6"));
   }
@@ -233,8 +231,9 @@ public class DataSetServiceTest {
   public void testBuildConceptIdListClause_differentDomains() {
     ConceptSet conceptSet1 = buildConceptSet(1L, Domain.CONDITION, ImmutableSet.of(1L, 2L, 3L));
     ConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, ImmutableSet.of(4L, 5L, 6L));
-    Optional<String> listClauseMaybe = dataSetServiceImpl.buildConceptIdListClause(
-        Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
+    Optional<String> listClauseMaybe =
+        dataSetServiceImpl.buildConceptIdListClause(
+            Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.isPresent()).isTrue();
     assertThat(listClauseMaybe.get().equals("1 2 3"));
   }
@@ -243,8 +242,9 @@ public class DataSetServiceTest {
   public void testBuildConceptIdListClause_noClauseForPersonDomain() {
     ConceptSet conceptSet1 = buildConceptSet(1L, Domain.CONDITION, ImmutableSet.of(1L, 2L, 3L));
     ConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, ImmutableSet.of(4L, 5L, 6L));
-    Optional<String> listClauseMaybe = dataSetServiceImpl.buildConceptIdListClause(
-        Domain.PERSON, ImmutableList.of(conceptSet1, conceptSet2));
+    Optional<String> listClauseMaybe =
+        dataSetServiceImpl.buildConceptIdListClause(
+            Domain.PERSON, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.isPresent()).isFalse();
   }
 }

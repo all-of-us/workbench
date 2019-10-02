@@ -52,15 +52,13 @@ public class DataSetServiceImpl implements DataSetService {
       CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY =
           ImmutableSet.of(PrePackagedConceptSetEnum.SURVEY, PrePackagedConceptSetEnum.BOTH);
 
+  private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
+  private static final int DATA_SET_VERSION = 1;
+
   /*
-   * A subclass to store the associated set of selects and joins for values for the data set builder.
-   *
-   * This is used to store the data pulled out of the linking table in bigquery.
+   * Stores the associated set of selects and joins for values for the data set builder,
+   * pulled out of the linking table in Big Query.
    */
-
-  public static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
-  public static final int DATA_SET_VERSION = 1;
-
   @VisibleForTesting
   private static class ValuesLinkingPair {
     private List<String> selects;
@@ -208,8 +206,6 @@ public class DataSetServiceImpl implements DataSetService {
   @Override
   public Map<String, QueryJobConfiguration> generateQueryJobConfigurationsByDomainName(
       DataSetRequest dataSetRequest) {
-    // TODO - migrate non-null constraint the DB column & API so that we don't have to use Boolean
-    // for IncludesAllPrticipants
     final boolean includesAllParticipants =
         getBuiltinBooleanFromNullable(dataSetRequest.getIncludesAllParticipants());
     final ImmutableList<Cohort> cohortsSelected =
@@ -267,17 +263,9 @@ public class DataSetServiceImpl implements DataSetService {
       List<DomainValuePair> domainValuePairs) {
     final ImmutableList<org.pmiops.workbench.db.model.ConceptSet> initialSelectedConceptSets =
         ImmutableList.copyOf(this.conceptSetDao.findAllByConceptSetIdIn(conceptSetIds));
-    // TODO: can we not check this earlier?
     final boolean noCohortsIncluded = selectedCohorts.isEmpty() && !includesAllParticipants;
     if (noCohortsIncluded
         || hasNoConcepts(prePackagedConceptSet, domainValuePairs, initialSelectedConceptSets)) {
-      // TODO: According to the unit tests, we should throw if there's no cohort or concept, but
-      // return an empty
-      // query if there's no value. This seems odd. Regardless, we should do this validation
-      // elsewhere,
-      // and maybe build a helper class with all these derived properties. Scout says we likely want
-      // to consider the request invalid if there are not values selected, except possibly in rare
-      // cases where some domains have none but others do.
       throw new BadRequestException("Data Sets must include at least one cohort and concept.");
     }
 
@@ -286,8 +274,7 @@ public class DataSetServiceImpl implements DataSetService {
     selectedConceptSetsBuilder.addAll(initialSelectedConceptSets);
 
     // If pre packaged all survey concept set is selected create a temp concept set with concept ids
-    // of all survey question
-    // TODO: why is survey special, and why should this class know this?
+    // of all survey questions
     if (CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY.contains(prePackagedConceptSet)) {
       selectedConceptSetsBuilder.add(buildPrePackagedSurveyConceptSet());
     }
@@ -325,7 +312,7 @@ public class DataSetServiceImpl implements DataSetService {
         .getNamedParameters()
         .forEach(
             (npKey, npValue) -> {
-              final String newKey = biuldNewKey(cohortDbModel, npKey);
+              final String newKey = buildReplacementKey(cohortDbModel, npKey);
               // replace the original key (when found as a word)
               participantQuery.getAndSet(
                   participantQuery.get().replaceAll("\\b".concat(npKey).concat("\\b"), newKey));
@@ -334,12 +321,11 @@ public class DataSetServiceImpl implements DataSetService {
     return new QueryAndParameters(participantQuery.get(), cohortNamedParametersBuilder.build());
   }
 
-  // Construct key the new cohort parameter format
-  private String biuldNewKey(Cohort cohort, String npKey) {
+  // Build a snake_case parameter key from this named parameter key and cohort ID.
+  private String buildReplacementKey(Cohort cohort, String npKey) {
     return String.format("%s_%d", npKey, cohort.getCohortId());
   }
 
-  // TODO(jaycarlton) Convert to its own class or owherwise consolidate argument list
   private Map<String, QueryJobConfiguration> buildQueriesByDomain(
       ImmutableList<Domain> domainList,
       ImmutableList<DomainValuePair> domainValuePairs,
@@ -460,8 +446,7 @@ public class DataSetServiceImpl implements DataSetService {
       Domain domain, List<ConceptSet> conceptSetsSelected) {
     final Optional<String> conceptSetSqlInClauseMaybe;
     if (supportsConceptSets(domain)) {
-      conceptSetSqlInClauseMaybe =
-          buildConceptIdSqlInClause(domain, conceptSetsSelected);
+      conceptSetSqlInClauseMaybe = buildConceptIdSqlInClause(domain, conceptSetsSelected);
     } else {
       conceptSetSqlInClauseMaybe = Optional.empty();
     }
@@ -538,7 +523,6 @@ public class DataSetServiceImpl implements DataSetService {
             "Kernel Type " + kernelTypeEnum.toString() + " not supported");
     }
     return queryJobConfigurationMap.entrySet().stream()
-        .filter(e -> e.getKey() != null)
         .map(
             entry ->
                 prerequisites
@@ -554,8 +538,6 @@ public class DataSetServiceImpl implements DataSetService {
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {
     Optional<CdrBigQuerySchemaConfig.ColumnConfig> conceptColumn =
         config.columns.stream().filter(column -> type.equals(column.domainConcept)).findFirst();
-    // TODO: move this logic to new DataSetRequestValidator class. Goal is for the service class
-    // to get out of the business of data validation
     if (!conceptColumn.isPresent()) {
       throw new ServerErrorException("Domain not supported");
     }
@@ -735,7 +717,6 @@ public class DataSetServiceImpl implements DataSetService {
     }
   }
 
-  // TODO(jaycarlton) use external query builder or build high-level tooling for constructing this.
   private static String buildPythonNamedParameterQuery(
       String key,
       QueryParameterValue namedParameterValue,
