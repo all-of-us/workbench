@@ -6,7 +6,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -270,10 +269,10 @@ public class UserService {
     if (institutionalAffiliations != null) {
       final User u = user;
       institutionalAffiliations.forEach(
-              affiliation -> {
-                  affiliation.setUser(u);
-                  u.addInstitutionalAffiliation(affiliation);
-              });
+          affiliation -> {
+            affiliation.setUser(u);
+            u.addInstitutionalAffiliation(affiliation);
+          });
     }
     try {
       userDao.save(user);
