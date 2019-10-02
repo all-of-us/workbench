@@ -424,6 +424,8 @@ dependencies {
   compile 'org.json:json:20160810'
 
   compile 'com.github.fge:json-patch:1.9'
+  // new StackDriver "Cloud Logging" Client
+  compile 'com.google.cloud:google-cloud-logging:1.90.0'
 
   // new StackDriver "Cloud Logging" Client
   compile 'com.google.cloud:google-cloud-logging:1.90.0'

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.audit;
 
 import com.google.cloud.logging.LogEntry;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -18,6 +19,7 @@ public class AuditDataGenerator {
           "OWNER", "RENTER");
   private static final List<String> TARGET_PROPERTY_VALUES = ImmutableList.of("3", "red", "\t\uD83C\uDFA9\n",
       "blue", "leavy", "heavy", "105", "867-5309", "lorem", "ipsum");
+  private static final float INCLUDE_THRESHOLD = 0.04f;
   /**
    * Generate a large number of random LogEntries
    * @param numRows
@@ -30,7 +32,6 @@ public class AuditDataGenerator {
   }
 
   private static LogEntry generateEntry() {
-    // todo: spread the timestamps out a bit
     final long timestamp = randomTimeInTrailingDuration(Duration.ofDays(365 * 2));
     final AgentType agentType = randomEnum(AgentType.class);
     final long agentId = random.nextInt(100); // agents are 0-99
@@ -62,20 +63,21 @@ public class AuditDataGenerator {
     return now - offsetMillis;
   }
 
-  private static long randomLongInRange(long low, long high) {
+  @VisibleForTesting
+  public static long randomLongInRange(long low, long high) {
     return low + (long) (random.nextFloat() * (high - low));
   }
 
-  public static <T> Optional<T> buildOptionally(Supplier<T> valueSupplier) {
-    if (includeOptionalColumn()) {
+  private static <T> Optional<T> buildOptionally(Supplier<T> valueSupplier) {
+    if (includeOptionalColumn(INCLUDE_THRESHOLD)) {
       return Optional.of(valueSupplier.get());
     } else {
       return Optional.empty();
     }
   }
 
-  public static boolean includeOptionalColumn() {
-    return Math.abs(random.nextGaussian()) > 0.8;
+  private static boolean includeOptionalColumn(float threshold) {
+    return random.nextFloat() < threshold;
   }
 
   private static <T extends Enum<?>> T randomEnum(Class<T> enumClass) {
