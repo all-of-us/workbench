@@ -272,17 +272,17 @@ public class UserService {
       institutionalAffiliations.stream()
           .filter(Objects::nonNull)
           .forEach(
-          affiliation -> {
+              affiliation -> {
                 if (affiliation != null
                     && ((affiliation.getInstitution() != null
-                    && !affiliation.getInstitution().isEmpty())
-                    || (affiliation.getNonAcademicAffiliation() != null
-                    || (affiliation.getRole() != null
-                    && !affiliation.getRole().isEmpty())))) {
+                            && !affiliation.getInstitution().isEmpty())
+                        || (affiliation.getNonAcademicAffiliation() != null
+                            || (affiliation.getRole() != null
+                                && !affiliation.getRole().isEmpty())))) {
                   affiliation.setUser(u);
                   u.addInstitutionalAffiliation(affiliation);
                 }
-          });
+              });
     }
     try {
       userDao.save(user);
