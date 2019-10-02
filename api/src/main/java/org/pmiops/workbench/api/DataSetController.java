@@ -362,9 +362,14 @@ public class DataSetController implements DataSetApiDelegate {
                 "Timeout while querying the CDR to pull preview information.");
           }
 
+          final List<String> requestValues =
+              dataSet.getValues().stream()
+                  .map(DomainValuePair::getValue)
+                  .collect(Collectors.toList());
+
           Collections.sort(
               valuePreviewList,
-              Comparator.comparing(item -> dataSet.getValues().indexOf(item.getValue())));
+              Comparator.comparing(item -> requestValues.indexOf(item.getValue())));
 
           previewQueryResponse.addDomainValueItem(
               new DataSetPreviewList().domain(domain).values(valuePreviewList));
@@ -581,10 +586,7 @@ public class DataSetController implements DataSetApiDelegate {
     }
     DataSetListResponse dataSetResponse =
         new DataSetListResponse()
-            .items(
-                dbDataSets.stream()
-                    .map(dbDataSet -> TO_CLIENT_DATA_SET.apply(dbDataSet))
-                    .collect(Collectors.toList()));
+            .items(dbDataSets.stream().map(TO_CLIENT_DATA_SET).collect(Collectors.toList()));
     return ResponseEntity.ok(dataSetResponse);
   }
 
