@@ -545,13 +545,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     async getPreviewList() {
       const {namespace, id} = this.props.workspace;
       const domains = fp.uniq(this.state.selectedValues.map(domainValue => domainValue.domain));
-      const newPreviewList: Map<Domain, DataSetPreviewInfo> = new Map();
-      domains.forEach(domain => {
-        newPreviewList.set(domain, {
-          isLoading: true,
-          values: []
-        });
-      });
+      const newPreviewList: Map<Domain, DataSetPreviewInfo> =
+        new Map(domains.map<[Domain, DataSetPreviewInfo]>(domain => [domain, {isLoading: true, values: []}]));
       this.setState({
         previewList: newPreviewList,
         selectedPreviewDomain: domains[0]
