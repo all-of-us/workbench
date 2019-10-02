@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -452,12 +453,15 @@ public class DataSetServiceImpl implements DataSetService {
     }
   }
 
-  private Optional<String> buildConceptIdListClause(
+  // In some cases, we don't require concept IDs, and in others their absense is fatal.
+  // Even if Concept IDs have been selected, these don't work with all domains.
+  @VisibleForTesting
+  public Optional<String> buildConceptIdListClause(
       Domain domain, List<ConceptSet> conceptSetsSelected) {
     final Optional<String> conceptSetSqlInClauseMaybe;
     if (supportsConceptSets(domain)) {
       conceptSetSqlInClauseMaybe =
-          Optional.of(buildConceptIdSqlInClause(domain, conceptSetsSelected));
+          buildConceptIdSqlInClause(domain, conceptSetsSelected);
     } else {
       conceptSetSqlInClauseMaybe = Optional.empty();
     }
@@ -468,23 +472,19 @@ public class DataSetServiceImpl implements DataSetService {
     return domain != Domain.PERSON;
   }
 
-  private String buildConceptIdSqlInClause(Domain domain, List<ConceptSet> conceptSetsSelected) {
+  // Gather all the concept IDs from the ConceptSets provided, taking account of
+  // domain-specific rules.
+  private Optional<String> buildConceptIdSqlInClause(Domain domain, List<ConceptSet> conceptSets) {
     final String conceptSetIDs =
-        conceptSetsSelected.stream()
+        conceptSets.stream()
             .filter(cs -> domain == cs.getDomainEnum())
             .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
             .collect(Collectors.joining(", "));
-    return buildSqlInConstraintList(conceptSetIDs);
-  }
-
-  private String buildSqlInConstraintList(String conceptSetIDs) {
     if (conceptSetIDs.isEmpty()) {
-      // TODO(jaycarlton): this wont' work if there aren't any concept set IDs b/c SQL IN() list
-      // can't be empty. In the meantime this error means user won't get a SQL syntax error.
-      throw new IllegalStateException("We currently can't handle an empty list of concept IDs");
+      return Optional.empty();
+    } else {
+      return Optional.of(String.format(" IN (%s)", conceptSetIDs));
     }
-
-    return " IN (" + conceptSetIDs + ")";
   }
 
   private QueryJobConfiguration buildQueryJobConfiguration(
@@ -555,7 +555,7 @@ public class DataSetServiceImpl implements DataSetService {
     Optional<CdrBigQuerySchemaConfig.ColumnConfig> conceptColumn =
         config.columns.stream().filter(column -> type.equals(column.domainConcept)).findFirst();
     // TODO: move this logic to new DataSetRequestValidator class. Goal is for the service class
-    // never to throw.
+    // to get out of the business of data validation
     if (!conceptColumn.isPresent()) {
       throw new ServerErrorException("Domain not supported");
     }
@@ -577,7 +577,7 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(Collectors.toList()));
 
     final String domainName = domainMaybe.get().toString();
-    final String domainTitleCase = toTitleCase(domainName);
+    final String domainTitleCase = StringUtils.capitalize(domainName);
 
     final ImmutableMap<String, QueryParameterValue> queryParameterValuesByDomain =
         ImmutableMap.of(
@@ -606,17 +606,6 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(ImmutableList.toImmutableList());
 
     return new ValuesLinkingPair(valueSelects, valueJoins);
-  }
-
-  // TODO(jaycarlton): replace with library function
-  private String toTitleCase(String name) {
-    if (name.isEmpty()) {
-      return name;
-    } else if (name.length() == 1) {
-      return name;
-    } else {
-      return String.format("%s%s", name.charAt(0), name.substring(1).toLowerCase());
-    }
   }
 
   private static String generateNotebookUserCode(

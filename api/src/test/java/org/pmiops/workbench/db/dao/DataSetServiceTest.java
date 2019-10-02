@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.db.model.CommonStorageEnums.domainToStorage;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
@@ -14,6 +15,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +30,6 @@ import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +44,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
 public class DataSetServiceTest {
-
-  private static final Long COHORT_ID_1 = 100L;
-  private static final DomainValuePair DOMAIN_VALUE_PAIR_PERSON_PERSON_ID =
-      new DomainValuePair().domain(Domain.PERSON).value("PERSON_ID");
-  private static final Long CONCEPT_SET_ID_1 = 200L;
   private static final QueryJobConfiguration QUERY_JOB_CONFIGURATION_1 =
       QueryJobConfiguration.newBuilder(
               "SELECT * FROM person_id from `${projectId}.${dataSetId}.person` person")
@@ -115,23 +112,22 @@ public class DataSetServiceTest {
     return cohortDbModel;
   }
 
+  private ConceptSet buildConceptSet(long conceptSetId, Domain domain, Set<Long> conceptIds) {
+    ConceptSet result = new ConceptSet();
+    result.setConceptSetId(conceptSetId);
+    result.setDomain(domainToStorage(domain));
+    result.setConceptIds(conceptIds);
+    return result;
+  }
+
   private static DataSetRequest buildEmptyRequest() {
     final DataSetRequest invalidRequest = new DataSetRequest();
     invalidRequest.setValues(Collections.emptyList());
     return invalidRequest;
   }
 
-  private static DataSetRequest buildTrivialRequest() {
-    final DataSetRequest result = new DataSetRequest();
-    result.setCohortIds(ImmutableList.of(COHORT_ID_1));
-    result.setConceptSetIds(ImmutableList.of(CONCEPT_SET_ID_1));
-    result.setValues(Collections.emptyList());
-    result.setValues(ImmutableList.of(DOMAIN_VALUE_PAIR_PERSON_PERSON_ID));
-    return result;
-  }
-
   @Test(expected = BadRequestException.class)
-  public void itThrowsForNoCohortOrConcept() throws Exception {
+  public void testThrowsForNoCohortOrConcept() throws Exception {
     final DataSetRequest invalidRequest = buildEmptyRequest();
     ImmutableMap<String, QueryJobConfiguration> configurationsByDomain =
         ImmutableMap.copyOf(
@@ -139,7 +135,7 @@ public class DataSetServiceTest {
   }
 
   @Test
-  public void itGetsCohortQueryStringAndCollectNamedParameters() throws Exception {
+  public void testGetsCohortQueryStringAndCollectNamedParameters() throws Exception {
     final Cohort cohortDbModel = buildSimpleCohort();
     final QueryAndParameters queryAndParameters =
         dataSetServiceImpl.getCohortQueryStringAndCollectNamedParameters(cohortDbModel);
@@ -148,7 +144,7 @@ public class DataSetServiceTest {
   }
 
   @Test
-  public void itRejectsConceptSetListWithNoConcepts() {
+  public void testRejectsConceptSetListWithNoConcepts() {
     final ConceptSet conceptSet1 = new ConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet1.setConceptIds(Collections.emptySet());
@@ -159,7 +155,7 @@ public class DataSetServiceTest {
   }
 
   @Test
-  public void itAcceptsTwoDomainsWithConcepts() {
+  public void testAcceptsTwoDomainsWithConcepts() {
     final ConceptSet conceptSet1 = new ConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet1.setConceptIds(ImmutableSet.of(1L, 2L, 3L));
@@ -175,7 +171,7 @@ public class DataSetServiceTest {
   }
 
   @Test
-  public void itRejectsSomeDomainsWithConceptsSomeWithout() {
+  public void testRejectsSomeDomainsWithConceptsSomeWithout() {
     final ConceptSet conceptSet1 = new ConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet1.setConceptIds(ImmutableSet.of(1L, 2L, 3L));
@@ -195,7 +191,7 @@ public class DataSetServiceTest {
   }
 
   @Test
-  public void itAcceptsEmptyConceptSetIfDomainIsPopulated() {
+  public void testAcceptsEmptyConceptSetIfDomainIsPopulated() {
     final ConceptSet conceptSet1 = new ConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet1.setConceptIds(ImmutableSet.of(1L, 2L, 3L));
@@ -215,10 +211,40 @@ public class DataSetServiceTest {
   }
 
   @Test
-  public void itRejectsEmptyConceptSetList() {
+  public void testRejectsEmptyConceptSetList() {
     final boolean isValid =
         dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
             Collections.emptyList());
     assertThat(isValid).isFalse();
+  }
+
+  @Test
+  public void testBuildConceptIdListClause_same() {
+    Domain domain1 = Domain.CONDITION;
+    ConceptSet conceptSet1 = buildConceptSet(1L, domain1, ImmutableSet.of(1L, 2L, 3L));
+    ConceptSet conceptSet2 = buildConceptSet(2L, domain1, ImmutableSet.of(4L, 5L, 6L));
+    Optional<String> listClauseMaybe = dataSetServiceImpl.buildConceptIdListClause(
+        domain1, ImmutableList.of(conceptSet1, conceptSet2));
+    assertThat(listClauseMaybe.isPresent()).isTrue();
+    assertThat(listClauseMaybe.get().equals("1 2 3 4 5 6"));
+  }
+
+  @Test
+  public void testBuildConceptIdListClause_differentDomains() {
+    ConceptSet conceptSet1 = buildConceptSet(1L, Domain.CONDITION, ImmutableSet.of(1L, 2L, 3L));
+    ConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, ImmutableSet.of(4L, 5L, 6L));
+    Optional<String> listClauseMaybe = dataSetServiceImpl.buildConceptIdListClause(
+        Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
+    assertThat(listClauseMaybe.isPresent()).isTrue();
+    assertThat(listClauseMaybe.get().equals("1 2 3"));
+  }
+
+  @Test
+  public void testBuildConceptIdListClause_noClauseForPersonDomain() {
+    ConceptSet conceptSet1 = buildConceptSet(1L, Domain.CONDITION, ImmutableSet.of(1L, 2L, 3L));
+    ConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, ImmutableSet.of(4L, 5L, 6L));
+    Optional<String> listClauseMaybe = dataSetServiceImpl.buildConceptIdListClause(
+        Domain.PERSON, ImmutableList.of(conceptSet1, conceptSet2));
+    assertThat(listClauseMaybe.isPresent()).isFalse();
   }
 }

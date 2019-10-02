@@ -149,10 +149,10 @@ public class DataSetController implements DataSetApiDelegate {
     }
   }
 
-  private DataSetValues getDataSetValuesFromDomainValueSet(DomainValuePair domainValueSet) {
+  private DataSetValues getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
     final DataSetValues dataSetValues =
-        new DataSetValues(domainValueSet.getDomain().name(), domainValueSet.getValue());
-    dataSetValues.setDomainEnum(domainValueSet.getDomain());
+        new DataSetValues(domainValuePair.getDomain().name(), domainValuePair.getValue());
+    dataSetValues.setDomainEnum(domainValuePair.getDomain());
     return dataSetValues;
   }
 
