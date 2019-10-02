@@ -42,7 +42,7 @@
             "local": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
+                  "replace": "src/environments/environment.localtest.ts",
                   "with": "src/environments/environment.local.ts"
                 }
               ]
@@ -50,7 +50,7 @@
             "test": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
+                  "replace": "src/environments/environment.localtest.ts",
                   "with": "src/environments/environment.test.ts"
                 }
               ]
@@ -58,7 +58,7 @@
             "perf": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
+                  "replace": "src/environments/environment.localtest.ts",
                   "with": "src/environments/environment.perf.ts"
                 }
               ],
@@ -75,7 +75,7 @@
             "staging": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
+                  "replace": "src/environments/environment.localtest.ts",
                   "with": "src/environments/environment.staging.ts"
                 }
               ],
@@ -92,7 +92,7 @@
             "stable": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
+                  "replace": "src/environments/environment.localtest.ts",
                   "with": "src/environments/environment.stable.ts"
                 }
               ],
@@ -109,7 +109,7 @@
             "prod": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
+                  "replace": "src/environments/environment.localtest.ts",
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
