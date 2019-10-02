@@ -48,15 +48,17 @@ const styles = reactStyles({
 
 const actionCards = [
   {
+    title: 'Create another Cohort',
+    description: `Create another cohort for your analysis.`,
+    action: 'newCohort'
+  }, {
     title: 'Create Review Sets',
     description: `The review set feature allows you to select a subset of your cohort to review
        participants row-level data and add notes and annotations.`,
     action: 'review'
-  },
-  {
+  }, {
     title: 'Create a Data Set',
-    description: `Here, you can build and preview a dataset for one or more cohorts by
-       selecting the desired concept sets and values for the cohorts.`,
+    description: `Create an analysis ready data set that can be exported to notebooks.`,
     action: 'dataSet'
   },
 ];
@@ -113,6 +115,8 @@ const CohortActions = withCurrentWorkspace()(
         case 'dataSet':
           url += 'data/data-sets';
           break;
+        case 'newCohort':
+          url += `data/cohorts/build`;
       }
       navigateByUrl(url);
     }
@@ -130,7 +134,7 @@ const CohortActions = withCurrentWorkspace()(
                onClick={() => this.navigateTo('cohort')}>
                 {cohort.name}
              </a>
-             has been saved and can now be used in analysis and concept sets.
+             has been saved.
           </div>
           <h3 style={{...styles.cohortsHeader, marginTop: '1.5rem'}}>What Next?</h3>
           <div style={styles.cardArea}>

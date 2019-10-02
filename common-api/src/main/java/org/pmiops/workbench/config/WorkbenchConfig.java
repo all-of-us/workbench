@@ -52,6 +52,9 @@ public class WorkbenchConfig {
     public String accountId;
     public String exportBigQueryTable;
     public Double defaultFreeCreditsLimit;
+    public Integer garbageCollectionUserCapacity;
+    // A list of GCP service accounts for billing project garbage collection
+    public ArrayList<String> garbageCollectionUsers;
   }
 
   public static class FireCloudConfig {
@@ -151,5 +154,8 @@ public class WorkbenchConfig {
     // Whether or not AoU should request Terra to create GCP projects inside a VPC
     // security perimeter.
     public boolean enableVpcServicePerimeter;
+    // Flag to indicate whether to enable the new Create Account flow
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
+    public boolean enableNewAccountCreation;
   }
 }

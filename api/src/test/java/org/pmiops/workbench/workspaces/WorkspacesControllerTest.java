@@ -91,6 +91,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AnnotationType;
+import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
@@ -104,13 +105,12 @@ import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
-import org.pmiops.workbench.model.PageFilterType;
+import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
-import org.pmiops.workbench.model.ParticipantCohortStatuses;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -245,9 +245,9 @@ public class WorkspacesControllerTest {
     @Bean
     GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
       Map<String, Map<Long, String>> concepts = new HashMap<>();
-      concepts.put(ParticipantCohortStatusColumns.RACE.name(), new HashMap<>());
-      concepts.put(ParticipantCohortStatusColumns.GENDER.name(), new HashMap<>());
-      concepts.put(ParticipantCohortStatusColumns.ETHNICITY.name(), new HashMap<>());
+      concepts.put(FilterColumns.RACE.name(), new HashMap<>());
+      concepts.put(FilterColumns.GENDER.name(), new HashMap<>());
+      concepts.put(FilterColumns.ETHNICITY.name(), new HashMap<>());
       return new GenderRaceEthnicityConcept(concepts);
     }
 
@@ -284,6 +284,7 @@ public class WorkspacesControllerTest {
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
+  private String archivedCdrVersionId;
 
   private TestMockFactory testMockFactory;
 
@@ -298,6 +299,13 @@ public class WorkspacesControllerTest {
     cdrVersion.setCdrDbName("");
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
+
+    CdrVersion archivedCdrVersion = new CdrVersion();
+    archivedCdrVersion.setName("archived");
+    archivedCdrVersion.setCdrDbName("");
+    archivedCdrVersion.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
+    archivedCdrVersion = cdrVersionDao.save(archivedCdrVersion);
+    archivedCdrVersionId = Long.toString(archivedCdrVersion.getCdrVersionId());
 
     conceptDao.save(CONCEPT_1);
     conceptDao.save(CONCEPT_2);
@@ -584,6 +592,13 @@ public class WorkspacesControllerTest {
       workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
     }
     assertThat(uniqueIds.size()).isEqualTo(1);
+  }
+
+  @Test(expected = FailedPreconditionException.class)
+  public void testCreateWorkspace_archivedCdrVersionThrows() throws Exception {
+    Workspace workspace = createWorkspace();
+    workspace.setCdrVersionId(archivedCdrVersionId);
+    workspacesController.createWorkspace(workspace).getBody();
   }
 
   @Test
@@ -1066,8 +1081,7 @@ public class WorkspacesControllerTest {
                 cloned.getId(),
                 cohortsByName.get("c1").getId(),
                 cdrVersion.getCdrVersionId(),
-                new ParticipantCohortStatuses()
-                    .pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES))
+                new PageFilterRequest())
             .getBody();
     assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
     assertThat(gotCr1.getParticipantCohortStatuses()).isEqualTo(cr1.getParticipantCohortStatuses());
@@ -1101,8 +1115,7 @@ public class WorkspacesControllerTest {
                 cloned.getId(),
                 cohortsByName.get("c2").getId(),
                 cdrVersion.getCdrVersionId(),
-                new ParticipantCohortStatuses()
-                    .pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES))
+                new PageFilterRequest())
             .getBody();
     assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
     assertThat(gotCr2.getParticipantCohortStatuses()).isEqualTo(cr2.getParticipantCohortStatuses());
@@ -1159,8 +1172,6 @@ public class WorkspacesControllerTest {
 
     CdrVersion cdrVersion2 = new CdrVersion();
     cdrVersion2.setName("2");
-    // set the db name to be empty since test cases currently
-    // run in the workbench schema only.
     cdrVersion2.setCdrDbName("");
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
@@ -1394,6 +1405,28 @@ public class WorkspacesControllerTest {
             .namespace("cloned-ns")
             .researchPurpose(workspace.getResearchPurpose())
             .cdrVersionId("bad-cdr-version-id");
+    stubGetWorkspace(
+        modWorkspace.getNamespace(),
+        modWorkspace.getName(),
+        "cloner@gmail.com",
+        WorkspaceAccessLevel.OWNER);
+    mockBillingProjectBuffer("cloned-ns");
+    workspacesController.cloneWorkspace(
+        workspace.getNamespace(),
+        workspace.getId(),
+        new CloneWorkspaceRequest().workspace(modWorkspace));
+  }
+
+  @Test(expected = FailedPreconditionException.class)
+  public void testCloneWorkspaceArchivedCdrVersionThrows() throws Exception {
+    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+
+    Workspace modWorkspace =
+        new Workspace()
+            .name("cloned")
+            .namespace("cloned-ns")
+            .researchPurpose(workspace.getResearchPurpose())
+            .cdrVersionId(archivedCdrVersionId);
     stubGetWorkspace(
         modWorkspace.getNamespace(),
         modWorkspace.getName(),

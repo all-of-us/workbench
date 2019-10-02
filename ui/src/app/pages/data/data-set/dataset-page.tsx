@@ -703,7 +703,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                              Domain.SURVEY, !prePackagedSurvey); });
 
                                          }}/>
-                    <Subheader>Workspace Concept Set</Subheader>
+                    <Subheader>Workspace Concept Sets</Subheader>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
                         <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
                                           data-test-id='concept-set-list-item'
@@ -734,7 +734,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       top: '2rem', left: 'calc(50% - 36px)'}}/>}
                     {valueSets.map(valueSet =>
                       <div key={valueSet.domain}>
-                        <Subheader>
+                        <Subheader style={{fontWeight: 'bold'}}>
                           {valueSet.survey ? 'Survey' : fp.capitalize(valueSet.domain.toString())}
                         </Subheader>
                         {valueSet.values.items.map(domainValue =>

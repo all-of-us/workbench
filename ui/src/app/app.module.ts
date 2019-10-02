@@ -30,6 +30,11 @@ import {AdminUserComponent} from './pages/admin/admin-user';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect/component';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
+import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
+import {CreateReviewModalComponent} from './pages/data/cohort-review/create-review-modal';
+import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
+import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
+import {TablePage} from './pages/data/cohort-review/table-page';
 import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
@@ -129,12 +134,15 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AppComponent,
     BugReportComponent,
     CohortActionsComponent,
+    CohortReviewComponent,
     ConceptSetActionsComponent,
     ConceptSetDetailsComponent,
     ConceptHomepageComponent,
+    CreateReviewModalComponent,
     DataPageComponent,
     DataSetPageComponent,
     DataUseAgreementComponent,
+    DetailPageComponent,
     ErrorHandlerComponent,
     InitialErrorComponent,
     InteractiveNotebookComponent,
@@ -142,11 +150,13 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     NotebookRedirectComponent,
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
+    QueryReportComponent,
     RoutingSpinnerComponent,
     SignedInComponent,
     NavBarComponent,
     SignInComponent,
     StigmatizationPageComponent,
+    TablePage,
     TextModalComponent,
     WorkspaceAboutComponent,
     WorkspaceEditComponent,

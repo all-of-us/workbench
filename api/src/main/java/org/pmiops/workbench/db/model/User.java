@@ -18,6 +18,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -95,6 +96,8 @@ public class User {
   private Timestamp idVerificationBypassTime;
   private Timestamp twoFactorAuthCompletionTime;
   private Timestamp twoFactorAuthBypassTime;
+  private DemographicSurvey demographicSurvey;
+  private Address address;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -339,8 +342,8 @@ public class User {
 
   @OneToMany(
       fetch = FetchType.EAGER,
-      mappedBy = "userId",
       orphanRemoval = true,
+      mappedBy = "user",
       cascade = CascadeType.ALL)
   @OrderColumn(name = "order_index")
   public List<InstitutionalAffiliation> getInstitutionalAffiliations() {
@@ -565,5 +568,31 @@ public class User {
 
   public void setTwoFactorAuthBypassTime(Timestamp twoFactorAuthBypassTime) {
     this.twoFactorAuthBypassTime = twoFactorAuthBypassTime;
+  }
+
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  public DemographicSurvey getDemographicSurvey() {
+    return demographicSurvey;
+  }
+
+  public void setDemographicSurvey(DemographicSurvey demographicSurvey) {
+    this.demographicSurvey = demographicSurvey;
+  }
+
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  public Address getAddress() {
+    return address;
+  }
+
+  public void setAddress(Address address) {
+    this.address = address;
   }
 }

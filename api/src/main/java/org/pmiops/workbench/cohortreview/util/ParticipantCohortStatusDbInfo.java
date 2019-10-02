@@ -8,40 +8,29 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Filter;
+import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.Operator;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 public enum ParticipantCohortStatusDbInfo {
   PARTICIPANT_ID(
-      ParticipantCohortStatusColumns.PARTICIPANTID.name(),
+      FilterColumns.PARTICIPANTID.name(),
       "participant_id",
       ParticipantCohortStatusDbInfo::buildLongSql),
-  STATUS(
-      ParticipantCohortStatusColumns.STATUS.name(),
-      "status",
-      ParticipantCohortStatusDbInfo::buildLongSql),
+  STATUS(FilterColumns.STATUS.name(), "status", ParticipantCohortStatusDbInfo::buildLongSql),
   GENDER(
-      ParticipantCohortStatusColumns.GENDER.name(),
+      FilterColumns.GENDER.name(),
       "gender_concept_id",
       ParticipantCohortStatusDbInfo::buildLongSql),
   BIRTH_DATE(
-      ParticipantCohortStatusColumns.BIRTHDATE.name(),
-      "birth_date",
-      ParticipantCohortStatusDbInfo::buildDateSql),
-  RACE(
-      ParticipantCohortStatusColumns.RACE.name(),
-      "race_concept_id",
-      ParticipantCohortStatusDbInfo::buildLongSql),
+      FilterColumns.BIRTHDATE.name(), "birth_date", ParticipantCohortStatusDbInfo::buildDateSql),
+  RACE(FilterColumns.RACE.name(), "race_concept_id", ParticipantCohortStatusDbInfo::buildLongSql),
   ETHNICITY(
-      ParticipantCohortStatusColumns.ETHNICITY.name(),
+      FilterColumns.ETHNICITY.name(),
       "ethnicity_concept_id",
       ParticipantCohortStatusDbInfo::buildLongSql),
-  DECEASED(
-      ParticipantCohortStatusColumns.DECEASED.name(),
-      "deceased",
-      ParticipantCohortStatusDbInfo::buildLongSql);
+  DECEASED(FilterColumns.DECEASED.name(), "deceased", ParticipantCohortStatusDbInfo::buildLongSql);
 
   private final String name;
   private final String dbName;
@@ -146,7 +135,7 @@ public enum ParticipantCohortStatusDbInfo {
   }
 
   private static String buildSqlString(Filter filter) {
-    if (filter.getProperty().equals(ParticipantCohortStatusColumns.BIRTHDATE)
+    if (filter.getProperty().equals(FilterColumns.BIRTHDATE)
         && filter.getOperator().equals(Operator.LIKE)) {
       return "cast("
           + fromName(filter.getProperty().name()).getDbName()

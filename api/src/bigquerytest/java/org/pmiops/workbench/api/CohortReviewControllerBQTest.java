@@ -51,22 +51,19 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
-import org.pmiops.workbench.model.AllEvents;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.Condition;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.PageFilterType;
+import org.pmiops.workbench.model.FilterColumns;
+import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.PageRequest;
 import org.pmiops.workbench.model.ParticipantChartData;
 import org.pmiops.workbench.model.ParticipantChartDataListResponse;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.ParticipantData;
 import org.pmiops.workbench.model.ParticipantDataListResponse;
-import org.pmiops.workbench.model.ReviewFilter;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.Vocabulary;
@@ -114,9 +111,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     @Bean
     public GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
       Map<String, Map<Long, String>> concepts = new HashMap<>();
-      concepts.put(ParticipantCohortStatusColumns.RACE.name(), new HashMap<>());
-      concepts.put(ParticipantCohortStatusColumns.GENDER.name(), new HashMap<>());
-      concepts.put(ParticipantCohortStatusColumns.ETHNICITY.name(), new HashMap<>());
+      concepts.put(FilterColumns.RACE.name(), new HashMap<>());
+      concepts.put(FilterColumns.GENDER.name(), new HashMap<>());
+      concepts.put(FilterColumns.ETHNICITY.name(), new HashMap<>());
       return new GenderRaceEthnicityConcept(concepts);
     }
 
@@ -246,7 +243,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   private static ParticipantData expectedAllEvents1() {
-    return new AllEvents()
+    return new ParticipantData()
         .domain("Condition")
         .standardVocabulary("SNOMED")
         .standardCode("002")
@@ -267,12 +264,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         .standardName("SNOMED")
         .ageAtEvent(28)
         .standardConceptId(1L)
-        .sourceConceptId(1L)
-        .domainType(DomainType.ALL_EVENTS);
+        .sourceConceptId(1L);
   }
 
   private static ParticipantData expectedAllEvents2() {
-    return new AllEvents()
+    return new ParticipantData()
         .domain("Condition")
         .standardVocabulary("SNOMED")
         .standardCode("002")
@@ -293,12 +289,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         .standardName("SNOMED")
         .ageAtEvent(28)
         .standardConceptId(1L)
-        .sourceConceptId(1L)
-        .domainType(DomainType.ALL_EVENTS);
+        .sourceConceptId(1L);
   }
 
   private static ParticipantData expectedCondition1() {
-    return new Condition()
+    return new ParticipantData()
+        .domain(DomainType.CONDITION.toString())
+        .value("1.0")
         .visitType("visit")
         .standardVocabulary("SNOMED")
         .standardCode("002")
@@ -310,11 +307,20 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         .ageAtEvent(28)
         .standardConceptId(1L)
         .sourceConceptId(1L)
-        .domainType(DomainType.CONDITION);
+        .numMentions("2")
+        .firstMention("2008-07-22 05:00:00 UTC")
+        .lastMention("2008-07-22 05:00:00 UTC")
+        .unit("unit")
+        .dose("1.0")
+        .strength("str")
+        .route("route")
+        .refRange("range");
   }
 
   private static ParticipantData expectedCondition2() {
-    return new Condition()
+    return new ParticipantData()
+        .domain(DomainType.CONDITION.toString())
+        .value("1.0")
         .visitType("visit")
         .standardVocabulary("SNOMED")
         .standardCode("002")
@@ -326,7 +332,14 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         .ageAtEvent(28)
         .standardConceptId(1L)
         .sourceConceptId(1L)
-        .domainType(DomainType.CONDITION);
+        .numMentions("2")
+        .firstMention("2008-08-01 05:00:00 UTC")
+        .lastMention("2008-08-01 05:00:00 UTC")
+        .unit("unit")
+        .dose("1.0")
+        .strength("str")
+        .route("route")
+        .refRange("range");
   }
 
   @Test
@@ -385,8 +398,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     PageRequest expectedPageRequest =
         new PageRequest().page(0).pageSize(25).sortOrder(SortOrder.ASC).sortColumn("startDate");
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.CONDITION);
-    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
+    PageFilterRequest testFilter = new PageFilterRequest().domain(DomainType.CONDITION);
 
     // no sort order or column
     ParticipantDataListResponse response =
@@ -424,11 +436,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     stubMockFirecloudGetWorkspace();
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.CONDITION);
-
-    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
-    testFilter.page(0);
-    testFilter.pageSize(1);
+    PageFilterRequest testFilter =
+        new PageFilterRequest().domain(DomainType.CONDITION).page(0).pageSize(1);
 
     // page 1 should have 1 item
     ParticipantDataListResponse response =
@@ -455,10 +464,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     PageRequest expectedPageRequest =
         new PageRequest().page(0).pageSize(1).sortOrder(SortOrder.ASC).sortColumn("startDate");
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.ALL_EVENTS);
-    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
-    testFilter.page(0);
-    testFilter.pageSize(1);
+    PageFilterRequest testFilter =
+        new PageFilterRequest().domain(DomainType.ALL_EVENTS).page(0).pageSize(1);
 
     // page 1 should have 1 item
     ParticipantDataListResponse response =
@@ -486,8 +493,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     PageRequest expectedPageRequest =
         new PageRequest().page(0).pageSize(25).sortOrder(SortOrder.ASC).sortColumn("startDate");
 
-    ReviewFilter testFilter = new ReviewFilter().domain(DomainType.ALL_EVENTS);
-    testFilter.pageFilterType(PageFilterType.REVIEWFILTER);
+    PageFilterRequest testFilter = new PageFilterRequest().domain(DomainType.ALL_EVENTS);
 
     // no sort order or column
     ParticipantDataListResponse response =
@@ -706,7 +712,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     for (ParticipantData actualData : data) {
       ParticipantData expected = expectedData.get(i++);
       assertThat(actualData).isEqualTo(expected);
-      assertThat(actualData.getDomainType()).isEqualTo(expected.getDomainType());
       assertThat(actualData.getItemDate()).isEqualTo(expected.getItemDate());
     }
   }

@@ -15,8 +15,11 @@ import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.Address;
 import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DemographicSurvey;
+import org.pmiops.workbench.db.model.InstitutionalAffiliation;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -219,6 +222,30 @@ public class UserService {
       String currentPosition,
       String organization,
       String areaOfResearch) {
+    return createUser(
+        givenName,
+        familyName,
+        email,
+        contactEmail,
+        currentPosition,
+        organization,
+        areaOfResearch,
+        null,
+        null,
+        null);
+  }
+
+  public User createUser(
+      String givenName,
+      String familyName,
+      String email,
+      String contactEmail,
+      String currentPosition,
+      String organization,
+      String areaOfResearch,
+      Address address,
+      DemographicSurvey demographicSurvey,
+      List<InstitutionalAffiliation> institutionalAffiliations) {
     User user = new User();
     user.setCreationNonce(Math.abs(random.nextLong()));
     user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
@@ -232,6 +259,21 @@ public class UserService {
     user.setDisabled(false);
     user.setAboutYou(null);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
+    user.setAddress(address);
+    user.setDemographicSurvey(demographicSurvey);
+    // For existing user that do not have address
+    if (address != null) {
+      address.setUser(user);
+    }
+    if (demographicSurvey != null) demographicSurvey.setUser(user);
+    if (institutionalAffiliations != null) {
+      final User u = user;
+      institutionalAffiliations.forEach(
+          affiliation -> {
+            affiliation.setUser(u);
+            u.addInstitutionalAffiliation(affiliation);
+          });
+    }
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {

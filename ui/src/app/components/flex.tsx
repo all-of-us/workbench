@@ -25,3 +25,9 @@ export const FlexColumn = (props) => {
     {props.children}
   </div>;
 };
+
+export const FlexRowWrap = (props) => {
+  return <FlexRow style={{flexWrap: 'wrap', ...props.style}}>
+    {props.children}
+  </FlexRow>;
+};

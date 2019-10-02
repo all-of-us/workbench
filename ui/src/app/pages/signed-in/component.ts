@@ -27,7 +27,7 @@ import Timeout = NodeJS.Timeout;
  * flow is ignored if there is no user session.
  */
 export const INACTIVITY_CONFIG = {
-  TRACKED_EVENTS: ['mousemove', 'mousedown', 'keypress', 'scroll', 'click'],
+  TRACKED_EVENTS: ['mousedown', 'keypress', 'scroll', 'click'],
   LOCAL_STORAGE_KEY_LAST_ACTIVE: 'LAST_ACTIVE_TIMESTAMP_EPOCH_MS',
   MESSAGE_KEY: 'USER_ACTIVITY_DETECTED'
 };
@@ -89,7 +89,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
         this.hasDataAccess = hasRegisteredAccess(profile.dataAccessLevel);
         if (this.hasDataAccess) {
           cdrVersionsApi().getCdrVersions().then(resp => {
-            cdrVersionStore.next(resp.items);
+            cdrVersionStore.next(resp);
           });
         }
 
@@ -114,11 +114,18 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       this.minimizeChrome = minimizeChrome;
     }));
 
+    const lastActive = window.localStorage.getItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE);
+    if (lastActive !== null && Date.now() - parseInt(lastActive, 10) > environment.inactivityTimeoutSeconds * 1000) {
+      localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
+      this.signOut();
+    }
+
     this.startUserActivityTracker();
     this.startInactivityTimers();
   }
 
   signOut(): void {
+    window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, null);
     this.signInService.signOut();
     navigateSignOut();
   }
@@ -145,18 +152,31 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     }, (environment.inactivityTimeoutSeconds - environment.inactivityWarningBeforeSeconds) * 1000);
     this.getInactivityModalTimer = resetInactivityModalTimeout.getTimer;
 
+    const hideModal = () => this.showInactivityModal = false;
+
+    function resetTimers() {
+      hideModal();
+      resetLogoutTimeout.reset();
+      resetInactivityModalTimeout.reset();
+    }
+
     localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
-    resetLogoutTimeout.reset();
-    resetInactivityModalTimeout.reset();
+    resetTimers();
+
     window.addEventListener('message', (e) => {
       if (e.data !== INACTIVITY_CONFIG.MESSAGE_KEY) {
         return;
       }
 
       window.localStorage.setItem(INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE, Date.now().toString());
-      resetLogoutTimeout.reset();
-      resetInactivityModalTimeout.reset();
+      resetTimers();
     }, false);
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === INACTIVITY_CONFIG.LOCAL_STORAGE_KEY_LAST_ACTIVE && e.newValue !== null) {
+        resetTimers();
+      }
+    });
   }
 
   ngAfterViewInit() {

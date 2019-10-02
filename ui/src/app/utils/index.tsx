@@ -7,10 +7,12 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 export const WINDOW_REF = 'window-ref';
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
+  cdrVersionStore,
   currentCohortStore,
   currentConceptSetStore,
   currentWorkspaceStore,
@@ -286,6 +288,37 @@ export const connectBehaviorSubject = <T extends {}>(subject: BehaviorSubject<T>
   };
 };
 
+export const connectReplaySubject = <T extends {}>(subject: ReplaySubject<T>, name: string) => {
+  return (WrappedComponent) => {
+    class Wrapper extends React.Component<any, {value: T}> {
+      static displayName = 'connectReplaySubject()';
+      private subscription;
+
+      constructor(props) {
+        super(props);
+        this.state = {value: null};
+      }
+
+      componentDidMount() {
+        this.subscription = subject.subscribe(v => this.setState({value: v}));
+      }
+
+      componentWillUnmount() {
+        this.subscription.unsubscribe();
+      }
+
+      render() {
+        const {value} = this.state;
+        // Since ReplaySubject may not have an initial value, only render the
+        // connected value once the value is available.
+        return value && <WrappedComponent {...{[name]: value}} {...this.props}/>;
+      }
+    }
+
+    return Wrapper;
+  };
+};
+
 // HOC that provides a 'workspace' prop with current WorkspaceData
 export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
@@ -314,6 +347,14 @@ export const withUrlParams = () => {
 // HOC that provides a 'routeConfigData' prop with current route's data object
 export const withRouteConfigData = () => {
   return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
+};
+
+// HOC that provides a 'cdrVersionListResponse' prop with the CDR version
+// information. Rendering of the connected component is blocked on initial load
+// of the CDR versions. This should only affect initial page loads, this HOC can
+// be included last (if multiple HOCs are in use) to minimize this impact.
+export const withCdrVersions = () => {
+  return connectReplaySubject(cdrVersionStore, 'cdrVersionListResponse');
 };
 
 // Temporary method for converting generated/models/Domain to generated/models/fetch/Domain
@@ -390,7 +431,7 @@ export function resettableTimeout(f, timeoutInSeconds) {
 }
 
 export function highlightSearchTerm(searchTerm: string, stringToHighlight: string, highlightColor: string) {
-  if (searchTerm === '' || searchTerm.length < 3) {
+  if (searchTerm.length < 3) {
     return stringToHighlight;
   }
   const words: string[] = [];

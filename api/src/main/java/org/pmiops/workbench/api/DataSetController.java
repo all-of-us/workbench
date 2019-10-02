@@ -371,9 +371,14 @@ public class DataSetController implements DataSetApiDelegate {
                 "Timeout while querying the CDR to pull preview information.");
           }
 
+          final List<String> requestValues =
+              dataSet.getValues().stream()
+                  .map(DomainValuePair::getValue)
+                  .collect(Collectors.toList());
+
           Collections.sort(
               valuePreviewList,
-              Comparator.comparing(item -> dataSet.getValues().indexOf(item.getValue())));
+              Comparator.comparing(item -> requestValues.indexOf(item.getValue())));
 
           previewQueryResponse.addDomainValueItem(
               new DataSetPreviewList().domain(domain).values(valuePreviewList));

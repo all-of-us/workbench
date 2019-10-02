@@ -180,7 +180,7 @@ export class DatePicker extends React.Component<
           {...props}
           value={date}
           onChange={v => {
-            this.popup.current.closeFunction();
+            this.popup.current.close();
             onChange(v);
           }}
         />}

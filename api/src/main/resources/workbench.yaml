@@ -727,6 +727,62 @@ paths:
           schema:
             $ref: '#/definitions/EmptyResponse'
 
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      consumes:
+        - application/json
+      description: >
+        Shares a workspace with the given users and permissions. Note that the entire ACL must
+        be provided to this method (including all existing users and roles), not just the additional
+        roles desired. Clients should first fetch existing ACLs via the getFirecloudWorkspaceUserRoles
+        method, make any changes desired, then pass the final list to this method.
+
+      operationId: shareWorkspace
+      parameters:
+        - in: body
+          name: body
+          description: users to share the workspace with
+          schema:
+            $ref: "#/definitions/ShareWorkspaceRequest"
+      responses:
+        200:
+          description: Successful share response
+          schema:
+            $ref: "#/definitions/WorkspaceUserRolesResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/duplicate:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      consumes:
+        - application/json
+      description: >
+        Duplicate an existing workspace, with given modifications to workspace metadata. Caller will own
+        the newly duplicated workspace, and must have read access to the source workspace. In
+        addition to workspace metadata, the following will also be duplicated:
+          - the associated Firecloud workspace
+          - cohorts, along with reviews and annotations
+          - notebooks located in the default notebook directory for this workspace
+      operationId: cloneWorkspace
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/CloneWorkspaceRequest"
+      responses:
+        200:
+          description: Successful duplicate response
+          schema:
+            $ref: "#/definitions/CloneWorkspaceResponse"
+
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/userRoles:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -975,6 +1031,7 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
+  # Cron ############################################################################
 
   # Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
   # true, which app engine itself only sets when invoking as a cronjob.
@@ -985,7 +1042,7 @@ paths:
     get:
       security: []
       tags:
-        - audit
+        - offlineAudit
         - cron
       description: >
         Endpoint meant to be called offline to trigger BigQuery auditing; may be
@@ -1023,7 +1080,7 @@ paths:
       description: sync moodle badge/training status for all users.
       operationId: bulkSyncComplianceTrainingStatus
       responses:
-        200:
+        204:
           description: The user table is updated with training status.
         404:
           description: User not found while retrieving  badge.
@@ -1041,7 +1098,7 @@ paths:
       description: sync eRA Commons linkage status for all users.
       operationId: bulkSyncEraCommonsStatus
       responses:
-        200:
+        204:
           description: All users' eRA Commons statuses were updated.
         500:
           description: Internal Error
@@ -1057,7 +1114,7 @@ paths:
       description: sync 2FA status for all users
       operationId: bulkSyncTwoFactorAuthStatus
       responses:
-        200:
+        204:
           description: All users' 2FA statuses were updated.
         500:
           description: Internal Error
@@ -1073,68 +1130,12 @@ paths:
       description: Audits project access for all users
       operationId: bulkAuditProjectAccess
       responses:
-        200:
+        204:
           description: All users' project access were audited.
         500:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorResponse'
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/share:
-    parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-    post:
-      tags:
-        - workspaces
-      consumes:
-        - application/json
-      description: >
-        Shares a workspace with the given users and permissions. Note that the entire ACL must
-        be provided to this method (including all existing users and roles), not just the additional
-        roles desired. Clients should first fetch existing ACLs via the getFirecloudWorkspaceUserRoles
-        method, make any changes desired, then pass the final list to this method.
-
-      operationId: shareWorkspace
-      parameters:
-        - in: body
-          name: body
-          description: users to share the workspace with
-          schema:
-            $ref: "#/definitions/ShareWorkspaceRequest"
-      responses:
-        200:
-          description: Successful share response
-          schema:
-            $ref: "#/definitions/WorkspaceUserRolesResponse"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/duplicate:
-    parameters:
-      - $ref: '#/parameters/workspaceNamespace'
-      - $ref: '#/parameters/workspaceId'
-    post:
-      tags:
-        - workspaces
-      consumes:
-        - application/json
-      description: >
-        Duplicate an existing workspace, with given modifications to workspace metadata. Caller will own
-        the newly duplicated workspace, and must have read access to the source workspace. In
-        addition to workspace metadata, the following will also be duplicated:
-          - the associated Firecloud workspace
-          - cohorts, along with reviews and annotations
-          - notebooks located in the default notebook directory for this workspace
-      operationId: cloneWorkspace
-      parameters:
-        - in: body
-          name: body
-          schema:
-            $ref: "#/definitions/CloneWorkspaceRequest"
-      responses:
-        200:
-          description: Successful duplicate response
-          schema:
-            $ref: "#/definitions/CloneWorkspaceResponse"
 
   # Billing ##############################################################################
 
@@ -1142,12 +1143,12 @@ paths:
     get:
       security: []
       tags:
-        - billing
+        - offlineBilling
         - cron
       description: If the AoU Billing Project buffer is not full, create a firecloud billing project and add one
       operationId: bufferBillingProject
       responses:
-        200:
+        204:
           description: No Error
         500:
           description: Internal Error
@@ -1158,12 +1159,12 @@ paths:
     get:
       security: []
       tags:
-        - billing
+        - offlineBilling
         - cron
       description: Fetch a BillingProjectBufferEntry that is in the CREATING state and check its status on Firecloud
       operationId: syncBillingProjectStatus
       responses:
-        200:
+        204:
           description: No Error
         500:
           description: Internal Error
@@ -1174,12 +1175,12 @@ paths:
     get:
       security: []
       tags:
-        - billing
+        - offlineBilling
         - cron
       description: Find BillingProjectBufferEntries that have failed during the creation or assignment step and set their statuses to ERROR
       operationId: cleanBillingBuffer
       responses:
-        200:
+        204:
           description: No Error
         500:
           description: Internal Error
@@ -1190,13 +1191,29 @@ paths:
     get:
       security: []
       tags:
-        - billing
+        - offlineBilling
         - cron
       description: Find and alert users that have exceeded their free tier billing usage
       operationId: checkFreeTierBillingUsage
       responses:
-        200:
+        204:
           description: No Error
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /v1/cron/billingProjectGarbageCollection:
+    get:
+      security: []
+      tags:
+        - offlineBilling
+        - cron
+      description: Trigger a bulk transfer of ownership of billing projects associated with deleted workspaces
+      operationId: billingProjectGarbageCollection
+      responses:
+        204:
+          description: Billing Project Garbage Collection was successful.
         500:
           description: Internal Error
           schema:
@@ -3214,6 +3231,8 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/InstitutionalAffiliation"
+      demographicSurvey:
+        $ref: "#/definitions/DemographicSurvey"
       idVerificationCompletionTime:
         type: integer
         format: int64
@@ -3282,16 +3301,56 @@ definitions:
         type: integer
         format: int32
         description: Version of the data use agreement that the user last signed.
+      address:
+        $ref: '#/definitions/Address'
 
   InstitutionalAffiliation:
     type: object
-    required:
-      - institution
-      - role
     properties:
       institution:
         type: string
       role:
+        type: string
+      nonAcademicAffiliation:
+        $ref: '#/definitions/NonAcademicAffiliation'
+        type: string
+      other:
+        type: string
+
+  DemographicSurvey:
+    type: object
+    properties:
+      race:
+        type: array
+        items:
+          $ref: '#/definitions/Race'
+      ethnicity:
+        $ref: '#/definitions/Ethnicity'
+      gender:
+        type: array
+        items:
+          $ref: '#/definitions/Gender'
+      yearOfBirth:
+        type: number
+      education:
+        $ref: '#/definitions/Education'
+      disability:
+        type: boolean
+
+  Address:
+    type: object
+    properties:
+      streetAddress1:
+        type: string
+      streetAddress2:
+        type: string
+      zipCode:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      country:
         type: string
 
   StackTraceElement:

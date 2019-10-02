@@ -173,9 +173,14 @@ buildscript {    // Configuration for building
   ext {
     GAE_VERSION = '1.9.64'
     SPRING_BOOT_VERSION = '1.5.22.RELEASE'
-    JACKSON_VERSION = '2.9.9'
-    JACKSON_DATABIND_VERSION = '2.9.9.3'  // security update on 2.9.9
+    JACKSON_VERSION = '2.9.10'
     ELASTICSEARCH_VERSION = '6.6.1'
+    OKHTTP_VERSION = '2.7.5'
+    GSON_VERSION = '2.8.5'
+    JODA_VERSION = '2.10'
+    OPENCENSUS_VERSION = '0.23.0'
+    HIBERNATE_VERSION = '5.2.10.Final'
+    SPRINGFOX_VERSION = '2.6.1'
   }
 
   repositories {
@@ -194,7 +199,7 @@ buildscript {    // Configuration for building
   }
 }
 
-ext['hibernate.version'] = '5.2.10.Final'
+ext['hibernate.version'] = HIBERNATE_VERSION
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
@@ -338,26 +343,30 @@ dependencies {
   compile 'ch.qos.logback:logback-classic:1.2.3'
 
   compile 'org.springframework.security:spring-security-web:4.2.13.RELEASE'
-  compile 'org.hibernate:hibernate-core:5.2.10.Final'
+  compile "org.hibernate:hibernate-core:${HIBERNATE_VERSION}"
 
   compile "com.fasterxml.jackson.core:jackson-annotations:${JACKSON_VERSION}"
   compile "com.fasterxml.jackson.core:jackson-core:${JACKSON_VERSION}"
-  compile "com.fasterxml.jackson.core:jackson-databind:${JACKSON_DATABIND_VERSION}"
+  compile "com.fasterxml.jackson.core:jackson-databind:${JACKSON_VERSION}"
 
-  compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev86-1.23.0'
+  compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev20190806-1.30.3'
   compile 'com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0'
   compile 'com.google.cloud:google-cloud-bigquery:1.51.0'
   compile 'com.google.cloud:google-cloud-storage:1.51.0'
-  compile 'com.google.code.gson:gson:2.8.5'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
   compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1'
-  compile 'com.squareup.okhttp:okhttp:2.7.5'
-  compile 'com.squareup.okhttp:logging-interceptor:2.7.5'
-  compile 'joda-time:joda-time:2.10'
+
+  compile "com.squareup.okhttp:okhttp:${OKHTTP_VERSION}"
+  compile "com.squareup.okhttp:logging-interceptor:${OKHTTP_VERSION}"
+
+  compile "com.google.code.gson:gson:${GSON_VERSION}"
+  compile "joda-time:joda-time:${JODA_VERSION}"
+
+  compile "io.opencensus:opencensus-api:${OPENCENSUS_VERSION}"
+  compile "io.opencensus:opencensus-exporter-trace-stackdriver:${OPENCENSUS_VERSION}"
+  compile "io.opencensus:opencensus-impl:${OPENCENSUS_VERSION}"
+
   compile 'javax.inject:javax.inject:1'
-  compile 'io.opencensus:opencensus-api:0.23.0'
-  compile 'io.opencensus:opencensus-exporter-trace-stackdriver:0.23.0'
-  compile 'io.opencensus:opencensus-impl:0.23.0'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.0'
   compile 'com.google.guava:guava:26.0-jre'
@@ -389,12 +398,12 @@ dependencies {
   // example here:
   // https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml
   generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:${SPRING_BOOT_VERSION}"
-  generatedCompile 'io.springfox:springfox-swagger2:2.6.1'
-  generatedCompile 'io.springfox:springfox-swagger-ui:2.6.1'
-  generatedCompile 'com.squareup.okhttp:okhttp:2.7.5'
-  generatedCompile 'com.squareup.okhttp:logging-interceptor:2.7.5'
-  generatedCompile 'com.google.code.gson:gson:2.8.5'
-  generatedCompile 'joda-time:joda-time:2.10'
+  generatedCompile "io.springfox:springfox-swagger2:${SPRINGFOX_VERSION}"
+  generatedCompile "io.springfox:springfox-swagger-ui:${SPRINGFOX_VERSION}"
+  generatedCompile "com.squareup.okhttp:okhttp:${OKHTTP_VERSION}"
+  generatedCompile "com.squareup.okhttp:logging-interceptor:${OKHTTP_VERSION}"
+  generatedCompile "com.google.code.gson:gson:${GSON_VERSION}"
+  generatedCompile "joda-time:joda-time:${JODA_VERSION}"
   generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:${JACKSON_VERSION}"
 }
 

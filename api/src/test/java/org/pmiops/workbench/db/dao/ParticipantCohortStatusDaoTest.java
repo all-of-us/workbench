@@ -20,9 +20,9 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Filter;
+import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.Operator;
 import org.pmiops.workbench.model.PageRequest;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,7 +170,7 @@ public class ParticipantCohortStatusDaoTest {
             .page(PAGE)
             .pageSize(PAGE_SIZE)
             .sortOrder(SortOrder.ASC)
-            .sortColumn(ParticipantCohortStatusColumns.PARTICIPANTID.toString());
+            .sortColumn(FilterColumns.PARTICIPANTID.toString());
     List<ParticipantCohortStatus> results =
         participantCohortStatusDao.findAll(
             COHORT_REVIEW_ID, Collections.<Filter>emptyList(), pageRequest);
@@ -185,7 +185,7 @@ public class ParticipantCohortStatusDaoTest {
             .page(PAGE)
             .pageSize(PAGE_SIZE)
             .sortOrder(SortOrder.ASC)
-            .sortColumn(ParticipantCohortStatusColumns.PARTICIPANTID.toString());
+            .sortColumn(FilterColumns.PARTICIPANTID.toString());
     List<ParticipantCohortStatus> results =
         participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
@@ -213,36 +213,36 @@ public class ParticipantCohortStatusDaoTest {
             .page(PAGE)
             .pageSize(PAGE_SIZE)
             .sortOrder(SortOrder.ASC)
-            .sortColumn(ParticipantCohortStatusColumns.PARTICIPANTID.toString());
+            .sortColumn(FilterColumns.PARTICIPANTID.toString());
     List<Filter> filters = new ArrayList<>();
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.PARTICIPANTID)
+            .property(FilterColumns.PARTICIPANTID)
             .operator(Operator.EQUAL)
             .values(Arrays.asList("1")));
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.STATUS)
+            .property(FilterColumns.STATUS)
             .operator(Operator.EQUAL)
             .values(Arrays.asList(CohortStatus.INCLUDED.toString())));
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.BIRTHDATE)
+            .property(FilterColumns.BIRTHDATE)
             .operator(Operator.EQUAL)
             .values(Arrays.asList(new Date(System.currentTimeMillis()).toString())));
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.GENDER)
+            .property(FilterColumns.GENDER)
             .operator(Operator.EQUAL)
             .values(Arrays.asList("8507")));
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.RACE)
+            .property(FilterColumns.RACE)
             .operator(Operator.EQUAL)
             .values(Arrays.asList("8515")));
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.ETHNICITY)
+            .property(FilterColumns.ETHNICITY)
             .operator(Operator.EQUAL)
             .values(Arrays.asList("38003564")));
     List<ParticipantCohortStatus> results =
@@ -266,37 +266,37 @@ public class ParticipantCohortStatusDaoTest {
             .page(PAGE)
             .pageSize(PAGE_SIZE)
             .sortOrder(SortOrder.ASC)
-            .sortColumn(ParticipantCohortStatusColumns.PARTICIPANTID.toString());
+            .sortColumn(FilterColumns.PARTICIPANTID.toString());
     List<Filter> filters = new ArrayList<>();
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.PARTICIPANTID)
+            .property(FilterColumns.PARTICIPANTID)
             .operator(Operator.IN)
             .values(Arrays.asList("1", "2")));
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.STATUS)
+            .property(FilterColumns.STATUS)
             .operator(Operator.IN)
             .values(
                 Arrays.asList(CohortStatus.INCLUDED.toString(), CohortStatus.EXCLUDED.toString())));
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.BIRTHDATE)
+            .property(FilterColumns.BIRTHDATE)
             .operator(Operator.IN)
             .values(Arrays.asList(new Date(System.currentTimeMillis()).toString())));
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.GENDER)
+            .property(FilterColumns.GENDER)
             .operator(Operator.IN)
             .values(Arrays.asList("8507", "8532")));
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.RACE)
+            .property(FilterColumns.RACE)
             .operator(Operator.IN)
             .values(Arrays.asList("8515", "8527")));
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.ETHNICITY)
+            .property(FilterColumns.ETHNICITY)
             .operator(Operator.IN)
             .values(Arrays.asList("38003564", "38003563")));
     List<ParticipantCohortStatus> results =
@@ -326,7 +326,7 @@ public class ParticipantCohortStatusDaoTest {
             .page(PAGE)
             .pageSize(1)
             .sortOrder(SortOrder.ASC)
-            .sortColumn(ParticipantCohortStatusColumns.PARTICIPANTID.toString());
+            .sortColumn(FilterColumns.PARTICIPANTID.toString());
     List<ParticipantCohortStatus> results =
         participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
@@ -345,7 +345,7 @@ public class ParticipantCohortStatusDaoTest {
             .page(1)
             .pageSize(1)
             .sortOrder(SortOrder.ASC)
-            .sortColumn(ParticipantCohortStatusColumns.PARTICIPANTID.toString());
+            .sortColumn(FilterColumns.PARTICIPANTID.toString());
     results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
     assertEquals(1, results.size());
@@ -366,7 +366,7 @@ public class ParticipantCohortStatusDaoTest {
             .page(PAGE)
             .pageSize(1)
             .sortOrder(SortOrder.ASC)
-            .sortColumn(ParticipantCohortStatusColumns.PARTICIPANTID.toString());
+            .sortColumn(FilterColumns.PARTICIPANTID.toString());
     Long results =
         participantCohortStatusDao.findCount(1L, Collections.<Filter>emptyList(), pageRequest);
 
@@ -380,7 +380,7 @@ public class ParticipantCohortStatusDaoTest {
             .page(PAGE)
             .pageSize(2)
             .sortOrder(SortOrder.ASC)
-            .sortColumn(ParticipantCohortStatusColumns.PARTICIPANTID.toString());
+            .sortColumn(FilterColumns.PARTICIPANTID.toString());
     List<ParticipantCohortStatus> results =
         participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
@@ -405,7 +405,7 @@ public class ParticipantCohortStatusDaoTest {
             .page(PAGE)
             .pageSize(2)
             .sortOrder(SortOrder.DESC)
-            .sortColumn(ParticipantCohortStatusColumns.PARTICIPANTID.toString());
+            .sortColumn(FilterColumns.PARTICIPANTID.toString());
     results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
     assertEquals(2, results.size());
@@ -432,7 +432,7 @@ public class ParticipantCohortStatusDaoTest {
             .page(PAGE)
             .pageSize(2)
             .sortOrder(SortOrder.ASC)
-            .sortColumn(ParticipantCohortStatusColumns.STATUS.toString());
+            .sortColumn(FilterColumns.STATUS.toString());
     List<ParticipantCohortStatus> results =
         participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
@@ -457,7 +457,7 @@ public class ParticipantCohortStatusDaoTest {
             .page(PAGE)
             .pageSize(2)
             .sortOrder(SortOrder.DESC)
-            .sortColumn(ParticipantCohortStatusColumns.STATUS.toString());
+            .sortColumn(FilterColumns.STATUS.toString());
     results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
 
     assertEquals(2, results.size());
@@ -484,12 +484,12 @@ public class ParticipantCohortStatusDaoTest {
             .page(PAGE)
             .pageSize(PAGE_SIZE)
             .sortOrder(SortOrder.ASC)
-            .sortColumn(ParticipantCohortStatusColumns.PARTICIPANTID.toString());
+            .sortColumn(FilterColumns.PARTICIPANTID.toString());
     List<Filter> filters = new ArrayList<>();
 
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.PARTICIPANTID)
+            .property(FilterColumns.PARTICIPANTID)
             .operator(Operator.EQUAL)
             .values(Arrays.asList("z")));
     assertBadRequest(
@@ -500,7 +500,7 @@ public class ParticipantCohortStatusDaoTest {
     filters.clear();
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.STATUS)
+            .property(FilterColumns.STATUS)
             .operator(Operator.EQUAL)
             .values(Arrays.asList("z")));
     assertBadRequest(
@@ -511,7 +511,7 @@ public class ParticipantCohortStatusDaoTest {
     filters.clear();
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.BIRTHDATE)
+            .property(FilterColumns.BIRTHDATE)
             .operator(Operator.EQUAL)
             .values(Arrays.asList("z")));
     assertBadRequest(
@@ -525,12 +525,12 @@ public class ParticipantCohortStatusDaoTest {
             .page(PAGE)
             .pageSize(PAGE_SIZE)
             .sortOrder(SortOrder.ASC)
-            .sortColumn(ParticipantCohortStatusColumns.PARTICIPANTID.toString());
+            .sortColumn(FilterColumns.PARTICIPANTID.toString());
     List<Filter> filters = new ArrayList<>();
 
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.PARTICIPANTID)
+            .property(FilterColumns.PARTICIPANTID)
             .operator(Operator.EQUAL)
             .values(Arrays.asList("1", "2")));
     assertBadRequest(
@@ -541,7 +541,7 @@ public class ParticipantCohortStatusDaoTest {
     filters.clear();
     filters.add(
         new Filter()
-            .property(ParticipantCohortStatusColumns.STATUS)
+            .property(FilterColumns.STATUS)
             .operator(Operator.EQUAL)
             .values(new ArrayList<>()));
     assertBadRequest(pageRequest, filters, "Bad Request: property STATUS is empty.");

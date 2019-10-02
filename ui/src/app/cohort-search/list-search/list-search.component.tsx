@@ -4,6 +4,7 @@ import {domainToTitle} from 'app/cohort-search/utils';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
+import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -149,6 +150,7 @@ interface State {
   results: string;
   sourceMatch: any;
   ingredients: any;
+  hoverId: string;
 }
 
 export const ListSearch = withCurrentWorkspace()(
@@ -161,7 +163,8 @@ export const ListSearch = withCurrentWorkspace()(
         loading: false,
         results: 'all',
         sourceMatch: undefined,
-        ingredients: {}
+        ingredients: {},
+        hoverId: undefined
       };
     }
 
@@ -225,9 +228,6 @@ export const ListSearch = withCurrentWorkspace()(
         if (row.group) {
           const groups = [...groupSelectionsStore.getValue(), row.id];
           groupSelectionsStore.next(groups);
-        }
-        if (this.checkSource && !selections.length) {
-          wizard.isStandard = row.isStandard;
         }
         wizard.item.searchParameters.push({parameterId, ...row, attributes: []});
         selections = [parameterId, ...selections];
@@ -297,17 +297,21 @@ export const ListSearch = withCurrentWorkspace()(
       );
     }
 
-    renderRow(row: any, child: boolean) {
-      const {wizard: {isStandard}} = this.props;
-      const {ingredients} = this.state;
+    onNameHover(el: HTMLDivElement, id: string) {
+      if (el.offsetWidth < el.scrollWidth) {
+        this.setState({hoverId: id});
+      }
+    }
+
+    renderRow(row: any, child: boolean, elementId: string) {
+      const {hoverId, ingredients} = this.state;
       const attributes = row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
+      const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
       const selected = !attributes && !brand && this.isSelected(row);
       const unselected = !attributes && !brand && !this.isSelected(row);
       const open = ingredients[row.id] && ingredients[row.id].open;
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
-      const disabled = this.checkSource && isStandard !== undefined
-        && row.isStandard !== isStandard;
       const columnStyle = child ?
         {...styles.columnBody, paddingLeft: '1.25rem'} : styles.columnBody;
       return <tr>
@@ -322,7 +326,7 @@ export const ListSearch = withCurrentWorkspace()(
               <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
             }
             {unselected &&
-              <ClrIcon style={disabled ? styles.disabledIcon : styles.selectIcon}
+              <ClrIcon style={styles.selectIcon}
                 shape='plus-circle' size='16'
                 onClick={() => this.selectItem(row)}/>
             }
@@ -333,7 +337,13 @@ export const ListSearch = withCurrentWorkspace()(
             }
             {loadingIngredients && <Spinner size={16}/>}
           </div>}
-          <div style={styles.nameDiv}>{row.name}{brand && <span> (BRAND NAME)</span>}</div>
+          <TooltipTrigger disabled={hoverId !== elementId} content={<div>{displayName}</div>}>
+            <div style={styles.nameDiv}
+              onMouseOver={(e) => this.onNameHover(e.target as HTMLDivElement, elementId)}
+              onMouseOut={() => this.setState({hoverId: undefined})}>
+              {displayName}
+            </div>
+          </TooltipTrigger>
         </td>
         <td style={styles.columnBody}>{row.code}</td>
         <td style={styles.columnBody}>{!brand && row.type}</td>
@@ -349,7 +359,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     render() {
-      const {wizard: {domain, isStandard}} = this.props;
+      const {wizard: {domain}} = this.props;
       const {data, error, ingredients, loading, results, sourceMatch} = this.state;
       const listStyle = domain === DomainType.DRUG ? {...styles.listContainer, marginTop: '3.75rem'}
         : styles.listContainer;
@@ -389,20 +399,11 @@ export const ListSearch = withCurrentWorkspace()(
               Return to source code
             </Clickable>.
           </div>}
-          {isStandard !== undefined && <div style={{...styles.error, margin: '-0.5rem 0 0.5rem'}}>
-            <div style={{float: 'left', height: '1.5rem'}}>
-              <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-                shape='exclamation-triangle' size='22'/>
-            </div>
-            You have added a {isStandard ? 'standard' : 'source'} code. To add a
-            {isStandard ? ' source' : ' standard'} code to your cohort, add new criteria
-              once you've clicked the FINISH button below.
-          </div>}
           {!!data.length && <table className='p-datatable' style={styles.table}>
             <thead className='p-datatable-thead'>
               <tr>
                 <th style={styles.columnHeader}>Name</th>
-                <th style={{...styles.columnHeader, width: '10%'}}>Code</th>
+                <th style={{...styles.columnHeader, width: '20%'}}>Code</th>
                 <th style={{...styles.columnHeader, width: '10%'}}>Vocab</th>
                 <th style={{...styles.columnHeader, width: '10%'}}>Count</th>
                 <th style={{...styles.columnHeader, padding: '0.2rem 0.5rem', width: '7%'}}>
@@ -415,9 +416,9 @@ export const ListSearch = withCurrentWorkspace()(
                 const open = ingredients[row.id] && ingredients[row.id].open;
                 const err = ingredients[row.id] && ingredients[row.id].error;
                 return <React.Fragment key={r}>
-                  {this.renderRow(row, false)}
+                  {this.renderRow(row, false, r)}
                   {open && !err && ingredients[row.id].items.map((item, i) => {
-                    return <React.Fragment key={i}>{this.renderRow(item, true)}</React.Fragment>;
+                    return <React.Fragment key={i}>{this.renderRow(item, true, `${r}.${i}`)}</React.Fragment>;
                   })}
                   {open && err && <tr>
                     <td colSpan={5}>

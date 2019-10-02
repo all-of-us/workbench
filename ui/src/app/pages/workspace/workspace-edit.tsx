@@ -9,11 +9,11 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {TwoColPaddedTable} from 'app/components/tables';
-import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
+import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCdrVersions, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
-import {CdrVersion, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
+import {ArchivalStatus, CdrVersion, CdrVersionListResponse, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -335,6 +335,7 @@ function getDiseaseNames(keyword) {
 
 export interface WorkspaceEditProps {
   routeConfigData: any;
+  cdrVersionListResponse: CdrVersionListResponse;
   workspace: Workspace;
   cancel: Function;
 }
@@ -351,7 +352,7 @@ export interface WorkspaceEditState {
   showStigmatizationDetails: boolean;
 }
 
-export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace())(
+export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     constructor(props: WorkspaceEditProps) {
       super(props);
@@ -393,7 +394,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       };
     }
 
-    componentDidMount() {
+    async componentDidMount() {
       if (!this.isMode(WorkspaceEditMode.Create)) {
         this.setState({workspace : {
           ...this.props.workspace,
@@ -414,7 +415,31 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           }});
         }
       }
-      this.setCdrVersions();
+
+      const cdrResp = this.props.cdrVersionListResponse;
+      const liveCdrVersions = cdrResp.items.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
+      if (liveCdrVersions.length === 0) {
+        throw Error('no live CDR versions were found');
+      }
+      if (this.isMode(WorkspaceEditMode.Edit)) {
+        // In edit mode, you cannot modify the CDR version, therefore it's fine
+        // to show archived CDRs in the drop-down so that it accurately displays
+        // the current value.
+        this.setState({cdrVersionItems: cdrResp.items.slice()});
+      } else {
+        // In create/clone, disallow selection of archived versions by omitting
+        // them. The server will also reject archived CDRs.
+        this.setState({cdrVersionItems: liveCdrVersions});
+      }
+
+      const selectedCdrIsLive = liveCdrVersions.some(cdr => cdr.cdrVersionId === this.state.workspace.cdrVersionId);
+      if (this.isMode(WorkspaceEditMode.Create) || (
+        this.isMode(WorkspaceEditMode.Duplicate) && !selectedCdrIsLive)) {
+        // We preselect the default CDR version when a new workspace is being
+        // created (via create or duplicate) with one exception: cloning a
+        // workspace which references a non-default, non-archived CDR version.
+        this.setState(fp.set(['workspace', 'cdrVersionId'], cdrResp.defaultCdrVersionId));
+      }
     }
 
     makeDiseaseInput() {
@@ -431,21 +456,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             'diseaseOfFocus'
           ], disease))}/>
       );
-    }
-
-    async setCdrVersions() {
-      try {
-        const cdrVersions = await cdrVersionsApi().getCdrVersions();
-        this.setState({cdrVersionItems: cdrVersions.items});
-        // TODO(RW-3342): On duplicate, use the source CDR unless it is archived, else use the
-        // default. For now we always use the default as a short-term band-aid during the VPC-SC
-        // transition (old CDRs won't work, don't default to them when cloning).
-        if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-          this.setState(fp.set(['workspace', 'cdrVersionId'], cdrVersions.defaultCdrVersionId));
-        }
-      } catch (exception) {
-        console.log(exception);
-      }
     }
 
     renderHeader() {

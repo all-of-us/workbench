@@ -36,19 +36,18 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public String readInvitationKey() {
-    return readToString(getCredentialsBucketName(), "invitation-key.txt");
+    return readCredentialsBucketString("invitation-key.txt");
   }
 
   @Override
   public String readMandrillApiKey() {
-    JSONObject mandrillKeys =
-        new JSONObject(readToString(getCredentialsBucketName(), "mandrill-keys.json"));
+    JSONObject mandrillKeys = getCredentialsBucketJSON("mandrill-keys.json");
     return mandrillKeys.getString("api-key");
   }
 
   @Override
   public String getMoodleApiKey() {
-    return readToString(getCredentialsBucketName(), "moodle-key.txt");
+    return readCredentialsBucketString("moodle-key.txt");
   }
 
   @Override
@@ -112,38 +111,54 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     storage.create(blobInfo, bytes);
   }
 
+  private JSONObject getCredentialsBucketJSON(final String objectPath) {
+    return new JSONObject(readCredentialsBucketString(objectPath));
+  }
+
   @Override
   public JSONObject getJiraCredentials() {
-    return new JSONObject(readToString(getCredentialsBucketName(), "jira-login.json"));
+    return getCredentialsBucketJSON("jira-login.json");
   }
 
   @Override
   public JSONObject getElasticCredentials() {
-    return new JSONObject(readToString(getCredentialsBucketName(), "elastic-cloud.json"));
+    return getCredentialsBucketJSON("elastic-cloud.json");
+  }
+
+  private String readCredentialsBucketString(String objectPath) {
+    return readToString(getCredentialsBucketName(), objectPath);
+  }
+
+  private GoogleCredential getCredential(final String objectPath) throws IOException {
+    final String json = readCredentialsBucketString(objectPath);
+    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
   }
 
   @Override
   public GoogleCredential getGSuiteAdminCredentials() throws IOException {
-    String json = readToString(getCredentialsBucketName(), "gsuite-admin-sa.json");
-    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
+    return getCredential("gsuite-admin-sa.json");
   }
 
   @Override
   public GoogleCredential getFireCloudAdminCredentials() throws IOException {
-    String json = readToString(getCredentialsBucketName(), "firecloud-admin-sa.json");
-    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
+    return getCredential("firecloud-admin-sa.json");
   }
 
   @Override
   public GoogleCredential getCloudResourceManagerAdminCredentials() throws IOException {
-    String json = readToString(getCredentialsBucketName(), "cloud-resource-manager-admin-sa.json");
-    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
+    return getCredential("cloud-resource-manager-admin-sa.json");
   }
 
   @Override
   public GoogleCredential getDefaultServiceAccountCredentials() throws IOException {
-    String json = readToString(getCredentialsBucketName(), "app-engine-default-sa.json");
-    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
+    return getCredential("app-engine-default-sa.json");
+  }
+
+  @Override
+  public GoogleCredential getGarbageCollectionServiceAccountCredentials(
+      String garbageCollectionEmail) throws IOException {
+    final String objectPath = String.format("garbage-collection/%s.json", garbageCollectionEmail);
+    return getCredential(objectPath);
   }
 
   @Override

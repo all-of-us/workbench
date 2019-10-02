@@ -8,7 +8,7 @@
     "registeredDomainName": "all-of-us-registered-perf",
     "registeredDomainGroup": "all-of-us-registered-perf@perf.test.firecloud.org",
     "xAppIdValue": "perf-AoU-RW",
-    "vpcServicePerimeterName": "",
+    "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_perf_aou_perf",
     "timeoutInSeconds": 40
   },
   "billing": {
@@ -16,8 +16,15 @@
     "projectNamePrefix": "aou-rw-perf-",
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_00293C-5DEA2D-6887E7",
     "retryCount": 4,
-    "bufferCapacity": 200,
-    "defaultFreeCreditsLimit": 300.0
+    "bufferCapacity": 500,
+    "defaultFreeCreditsLimit": 300.0,
+    "garbageCollectionUserCapacity": 1000,
+    "garbageCollectionUsers": [
+      "aou-rw-gc-perf-1@all-of-us-rw-perf.iam.gserviceaccount.com",
+      "aou-rw-gc-perf-2@all-of-us-rw-perf.iam.gserviceaccount.com",
+      "aou-rw-gc-perf-3@all-of-us-rw-perf.iam.gserviceaccount.com",
+      "aou-rw-gc-perf-4@all-of-us-rw-perf.iam.gserviceaccount.com"
+    ]
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -70,6 +77,7 @@
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
-    "enableVpcServicePerimeter": false
+    "enableVpcServicePerimeter": true,
+    "enableNewAccountCreation": false
   }
 }
