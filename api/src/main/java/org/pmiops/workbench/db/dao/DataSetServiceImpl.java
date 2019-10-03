@@ -232,10 +232,10 @@ public class DataSetServiceImpl implements DataSetService {
             .map(QueryAndParameters::getQuery)
             .collect(Collectors.joining(" UNION DISTINCT "));
 
-    final ImmutableList<Domain> domainList =
+    final ImmutableSet<Domain> domainSet =
         domainValuePairs.stream()
             .map(DomainValuePair::getDomain)
-            .collect(ImmutableList.toImmutableList());
+            .collect(ImmutableSet.toImmutableSet());
 
     // now merge all the individual maps from each configuration
     final ImmutableMap<String, QueryParameterValue> mergedQueryParameterValues =
@@ -245,7 +245,7 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
 
     return buildQueriesByDomain(
-        domainList,
+        domainSet,
         domainValuePairs,
         mergedQueryParameterValues,
         includesAllParticipants,
@@ -327,7 +327,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   private Map<String, QueryJobConfiguration> buildQueriesByDomain(
-      ImmutableList<Domain> domainList,
+      ImmutableSet<Domain> uniqueDomains,
       ImmutableList<DomainValuePair> domainValuePairs,
       ImmutableMap<String, QueryParameterValue> cohortParameters,
       boolean includesAllParticipants,
@@ -335,7 +335,7 @@ public class DataSetServiceImpl implements DataSetService {
       String cohortQueries) {
     final CdrBigQuerySchemaConfig bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
 
-    return domainList.stream()
+    return uniqueDomains.stream()
         .collect(
             ImmutableMap.toImmutableMap(
                 Domain::toString,
@@ -560,7 +560,7 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(Collectors.toList()));
 
     final String domainName = domainMaybe.get().toString();
-    final String domainTitleCase = StringUtils.capitalize(domainName);
+    final String domainTitleCase = toTitleCase(domainName);
 
     final ImmutableMap<String, QueryParameterValue> queryParameterValuesByDomain =
         ImmutableMap.of(
@@ -589,6 +589,16 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(ImmutableList.toImmutableList());
 
     return new ValuesLinkingPair(valueSelects, valueJoins);
+  }
+
+  private static String toTitleCase(String name) {
+    if (name.isEmpty()) {
+      return name;
+    } else if (name.length() == 1) {
+      return name;
+    } else {
+      return String.format("%s%s", name.charAt(0), name.substring(1).toLowerCase());
+    }
   }
 
   private static String generateNotebookUserCode(
