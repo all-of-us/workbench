@@ -5,5 +5,5 @@ import {testEnvironmentBase} from "environments/test-env-base";
 export const environment: Environment = {
   ...testEnvironmentBase,
   displayTag: 'Stub',
-  debug: false,
+  debug: false
 };
