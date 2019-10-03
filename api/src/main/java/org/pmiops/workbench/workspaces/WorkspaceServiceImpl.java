@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -508,7 +510,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
   }
 
-  private void enforceFirecloudAclsInRecentWorkspaces(List<UserRecentWorkspace> recentWorkspaces) {
+  private List<UserRecentWorkspace> enforceFirecloudAclsInRecentWorkspaces(List<UserRecentWorkspace> recentWorkspaces) {
     List<Workspace> dbWorkspaces =
         workspaceDao.findAllByWorkspaceIdIn(
             recentWorkspaces.stream()
@@ -518,23 +520,24 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     final String email = userProvider.get().getEmail();
     ImmutableList<Long> idsToDelete =
         dbWorkspaces.stream()
-            .filter(workspace -> userHasWorkspaceAccess(email, workspace))
+            .filter(workspace -> {
+              try {
+                enforceWorkspaceAccessLevel(workspace.getWorkspaceNamespace(), workspace.getName(), WorkspaceAccessLevel.READER);
+              } catch (ForbiddenException | NotFoundException e) {
+                return true;
+              }
+              return false;
+            })
             .map(Workspace::getWorkspaceId)
             .collect(ImmutableList.toImmutableList());
 
     if (!idsToDelete.isEmpty()) {
       userRecentWorkspaceDao.deleteByWorkspaceIdIn(idsToDelete);
     }
-  }
 
-  private boolean userHasWorkspaceAccess(String email, Workspace workspace) {
-    Map<String, WorkspaceAccessEntry> aclsByEmail =
-        getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-    return !aclsByEmail.containsKey(email)
-        || aclsByEmail
-            .get(email)
-            .getAccessLevel()
-            .equals(WorkspaceAccessLevel.NO_ACCESS.toString());
+    return recentWorkspaces.stream()
+            .filter(recentWorkspace -> !idsToDelete.contains(recentWorkspace.getWorkspaceId()))
+            .collect(Collectors.toList());
   }
 
   @Override
