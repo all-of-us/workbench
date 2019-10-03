@@ -272,7 +272,7 @@ public class DataSetController implements DataSetApiDelegate {
         .cohortIds(dataSetPreviewRequest.getCohortIds())
         .prePackagedConceptSet(dataSetPreviewRequest.getPrePackagedConceptSet())
         .includesAllParticipants(dataSetPreviewRequest.getIncludesAllParticipants())
-        .values(
+        .domainValuePairs(
             dataSetPreviewRequest.getValues().stream()
                 .map(
                     value ->
@@ -290,7 +290,7 @@ public class DataSetController implements DataSetApiDelegate {
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
     DataSetRequest dataSetRequest = generateDataSetRequestFromPreviewRequest(dataSetPreviewRequest);
     Map<String, QueryJobConfiguration> bigQueryJobConfig =
-        dataSetService.generateQuery(dataSetRequest);
+        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
 
     if (bigQueryJobConfig.size() > 1) {
       throw new BadRequestException(

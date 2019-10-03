@@ -544,7 +544,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
 
     async getPreviewList() {
       const {namespace, id} = this.props.workspace;
-      const domains = fp.uniq(this.state.selectedValues.map(domainValue => domainValue.domain));
+      const domains = fp.uniq(this.state.selectedDomainValuePairs.map(domainValue => domainValue.domain));
       const newPreviewList: Map<Domain, DataSetPreviewInfo> =
         new Map(domains.map<[Domain, DataSetPreviewInfo]>(domain => [domain, {isLoading: true, values: []}]));
       this.setState({
@@ -558,7 +558,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           includesAllParticipants: this.state.includesAllParticipants,
           cohortIds: this.state.selectedCohortIds,
           prePackagedConceptSet: this.getPrePackagedConceptSet(),
-          values: this.state.selectedValues.map(domainValue => domainValue.value)
+          values: this.state.selectedDomainValuePairs.map(domainValue => domainValue.value)
         };
         try {
           const dataSetPreviewResp = await dataSetApi().previewDataSetByDomain(namespace, id, request);
