@@ -247,4 +247,36 @@ public class DataSetServiceTest {
             Domain.PERSON, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.isPresent()).isFalse();
   }
+
+  @Test
+  public void testTitleCaseUppercaseWord() {
+    assertThat(DataSetServiceImpl.toTitleCase("QWERTY")).isEqualTo("Qwerty");
+  }
+
+  @Test
+  public void testTitleCaseHackerCaseString() {
+    assertThat(DataSetServiceImpl.toTitleCase("aLl YouR baSE"))
+        .isEqualTo("All your base");
+  }
+
+  @Test
+  public void testTitleCaseSingleLetterStrings() {
+    assertThat(DataSetServiceImpl.toTitleCase("a"))
+        .isEqualTo("A");
+    assertThat(DataSetServiceImpl.toTitleCase("B"))
+        .isEqualTo("B");
+  }
+
+  @Test
+  public void testTitleCaseEmptyString() {
+    assertThat(DataSetServiceImpl.toTitleCase(""))
+        .isEqualTo("");
+  }
+
+  @Test
+  public void testTitleCaseEmoji() {
+    assertThat(DataSetServiceImpl.toTitleCase("\uD83D\uDCAF"))
+        .isEqualTo("\uD83D\uDCAF");
+  }
+
 }
