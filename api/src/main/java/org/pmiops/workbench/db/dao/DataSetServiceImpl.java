@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
