@@ -769,9 +769,9 @@ public class DataSetControllerTest {
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addCohortIdsItem(COHORT_TWO_ID);
     dataSet.setPrePackagedConceptSet(PrePackagedConceptSetEnum.DEMOGRAPHICS);
-    List<DomainValuePair> domainValues = new ArrayList<>();
-    domainValues.add(new DomainValuePair().domain(Domain.PERSON).value("GENDER"));
-    dataSet.setValues(domainValues);
+    List<DomainValuePair> domainValuePairs = new ArrayList<>();
+    domainValuePairs.add(new DomainValuePair().domain(Domain.PERSON).value("GENDER"));
+    dataSet.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".person` person");
@@ -930,8 +930,8 @@ public class DataSetControllerTest {
   public void testGetQueryPersonDomainNoConceptSets() {
     DataSetRequest dataSetRequest = buildEmptyDataSetRequest();
     dataSetRequest = dataSetRequest.addCohortIdsItem(COHORT_ONE_ID);
-    List<DomainValuePair> domainValues = mockDomainValuePairWithPerson();
-    dataSetRequest.setValues(domainValues);
+    List<DomainValuePair> domainValuePairs = mockDomainValuePairWithPerson();
+    dataSetRequest.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".person` person");
