@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -51,6 +52,21 @@ public class UserRecentWorkspace {
 
   public void setLastAccessDate(Timestamp lastAccessDate) {
     this.lastAccessDate = lastAccessDate;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(workspaceId, userId);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof UserRecentWorkspace)) {
+      return false;
+    }
+    UserRecentWorkspace that = (UserRecentWorkspace) obj;
+    return this.workspaceId.equals(that.workspaceId)
+            && this.userId.equals(that.userId);
   }
 
   public UserRecentWorkspace() {}
