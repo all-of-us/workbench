@@ -38,11 +38,18 @@
             ]
           },
           "configurations": {
-            "dev": {},
+            "dev": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.localtest.ts"
+                }
+              ]
+            },
             "local": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.localtest.ts",
+                  "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.local.ts"
                 }
               ]
@@ -50,7 +57,7 @@
             "test": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.localtest.ts",
+                  "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.test.ts"
                 }
               ]
@@ -58,7 +65,7 @@
             "perf": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.localtest.ts",
+                  "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.perf.ts"
                 }
               ],
@@ -75,7 +82,7 @@
             "staging": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.localtest.ts",
+                  "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.staging.ts"
                 }
               ],
@@ -92,7 +99,7 @@
             "stable": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.localtest.ts",
+                  "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.stable.ts"
                 }
               ],
@@ -109,7 +116,7 @@
             "prod": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.localtest.ts",
+                  "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
