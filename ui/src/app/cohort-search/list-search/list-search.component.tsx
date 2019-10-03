@@ -183,14 +183,10 @@ export const ListSearch = withCurrentWorkspace()(
       try {
         this.setState({data: null, error: false, loading: true, results: 'all'});
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
-        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
-          +cdrVersionId, domain, value
-        );
+        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim());
         const data = resp.items;
         if (data.length && this.checkSource) {
-          sourceMatch = data.find(
-            item => item.code.toLowerCase() === value.toLowerCase() && !item.isStandard
-          );
+          sourceMatch = data.find(item => item.code.toLowerCase() === value.trim().toLowerCase() && !item.isStandard);
         }
         this.setState({data});
       } catch (err) {
@@ -206,9 +202,7 @@ export const ListSearch = withCurrentWorkspace()(
         const {sourceMatch} = this.state;
         this.trackEvent('Standard Vocab Hyperlink');
         this.setState({data: null, error: false, loading: true, results: 'standard'});
-        const resp = await cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(
-          +cdrVersionId, domain, sourceMatch.conceptId
-        );
+        const resp = await cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(+cdrVersionId, domain, sourceMatch.conceptId);
         this.setState({data: resp.items});
       } catch (err) {
         this.setState({error: true});
@@ -263,12 +257,7 @@ export const ListSearch = withCurrentWorkspace()(
           cohortBuilderApi()
             .getDrugIngredientByConceptId(+cdrVersionId, row.conceptId)
             .then(resp => {
-              ingredients[row.id] = {
-                open: true,
-                loading: false,
-                error: false,
-                items: resp.items
-              };
+              ingredients[row.id] = {open: true, loading: false, error: false, items: resp.items};
               this.setState({ingredients});
             });
         } catch (error) {
@@ -291,11 +280,7 @@ export const ListSearch = withCurrentWorkspace()(
 
     trackEvent = (label: string) => {
       const {wizard: {domain}} = this.props;
-      triggerEvent(
-        'Cohort Builder Search',
-        'Click',
-        `${label} - ${domainToTitle(domain)} - Cohort Builder Search`
-      );
+      triggerEvent('Cohort Builder Search', 'Click', `${label} - ${domainToTitle(domain)} - Cohort Builder Search`);
     }
 
     onNameHover(el: HTMLDivElement, id: string) {
