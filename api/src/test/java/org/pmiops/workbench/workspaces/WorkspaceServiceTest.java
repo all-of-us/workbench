@@ -270,15 +270,23 @@ public class WorkspaceServiceTest {
 
   @Test
   public void updateRecentWorkspaces_flipFlop() {
-    workspaceService.updateRecentWorkspaces(mockWorkspaces.get(0).getWorkspaceId(), USER_ID, Timestamp.from(NOW.minusSeconds(4)));
-    workspaceService.updateRecentWorkspaces(mockWorkspaces.get(1).getWorkspaceId(), USER_ID, Timestamp.from(NOW.minusSeconds(3)));
-    workspaceService.updateRecentWorkspaces(mockWorkspaces.get(0).getWorkspaceId(), USER_ID, Timestamp.from(NOW.minusSeconds(2)));
-    workspaceService.updateRecentWorkspaces(mockWorkspaces.get(1).getWorkspaceId(), USER_ID, Timestamp.from(NOW.minusSeconds(1)));
-    workspaceService.updateRecentWorkspaces(mockWorkspaces.get(0).getWorkspaceId(), USER_ID, Timestamp.from(NOW));
+    workspaceService.updateRecentWorkspaces(
+        mockWorkspaces.get(0).getWorkspaceId(), USER_ID, Timestamp.from(NOW.minusSeconds(4)));
+    workspaceService.updateRecentWorkspaces(
+        mockWorkspaces.get(1).getWorkspaceId(), USER_ID, Timestamp.from(NOW.minusSeconds(3)));
+    workspaceService.updateRecentWorkspaces(
+        mockWorkspaces.get(0).getWorkspaceId(), USER_ID, Timestamp.from(NOW.minusSeconds(2)));
+    workspaceService.updateRecentWorkspaces(
+        mockWorkspaces.get(1).getWorkspaceId(), USER_ID, Timestamp.from(NOW.minusSeconds(1)));
+    workspaceService.updateRecentWorkspaces(
+        mockWorkspaces.get(0).getWorkspaceId(), USER_ID, Timestamp.from(NOW));
 
     List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(2);
-    List<Long> actualIds = recentWorkspaces.stream().map(UserRecentWorkspace::getWorkspaceId).collect(Collectors.toList());
+    List<Long> actualIds =
+        recentWorkspaces.stream()
+            .map(UserRecentWorkspace::getWorkspaceId)
+            .collect(Collectors.toList());
     assertThat(actualIds).contains(1L, 2L);
   }
 

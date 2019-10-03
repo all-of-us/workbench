@@ -513,7 +513,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
   }
 
-  private List<UserRecentWorkspace> enforceFirecloudAclsInRecentWorkspaces(List<UserRecentWorkspace> recentWorkspaces) {
+  private List<UserRecentWorkspace> enforceFirecloudAclsInRecentWorkspaces(
+      List<UserRecentWorkspace> recentWorkspaces) {
     List<Workspace> dbWorkspaces =
         workspaceDao.findAllByWorkspaceIdIn(
             recentWorkspaces.stream()
@@ -523,14 +524,18 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     final String email = userProvider.get().getEmail();
     ImmutableList<Long> idsToDelete =
         dbWorkspaces.stream()
-            .filter(workspace -> {
-              try {
-                enforceWorkspaceAccessLevel(workspace.getWorkspaceNamespace(), workspace.getName(), WorkspaceAccessLevel.READER);
-              } catch (ForbiddenException | NotFoundException e) {
-                return true;
-              }
-              return false;
-            })
+            .filter(
+                workspace -> {
+                  try {
+                    enforceWorkspaceAccessLevel(
+                        workspace.getWorkspaceNamespace(),
+                        workspace.getName(),
+                        WorkspaceAccessLevel.READER);
+                  } catch (ForbiddenException | NotFoundException e) {
+                    return true;
+                  }
+                  return false;
+                })
             .map(Workspace::getWorkspaceId)
             .collect(ImmutableList.toImmutableList());
 
@@ -539,8 +544,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     }
 
     return recentWorkspaces.stream()
-            .filter(recentWorkspace -> !idsToDelete.contains(recentWorkspace.getWorkspaceId()))
-            .collect(Collectors.toList());
+        .filter(recentWorkspace -> !idsToDelete.contains(recentWorkspace.getWorkspaceId()))
+        .collect(Collectors.toList());
   }
 
   @Override
@@ -616,8 +621,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       UserRecentWorkspace userRecentWorkspace,
       WorkspaceAccessLevel accessLevel) {
     return new RecentWorkspace()
-            .workspace(workspaceMapper.toApiWorkspace(dbWorkspace))
-            .accessedTime(userRecentWorkspace.getLastAccessDate().toString())
-            .accessLevel(accessLevel);
+        .workspace(workspaceMapper.toApiWorkspace(dbWorkspace))
+        .accessedTime(userRecentWorkspace.getLastAccessDate().toString())
+        .accessLevel(accessLevel);
   }
 }
