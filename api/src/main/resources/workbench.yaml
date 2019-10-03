@@ -2806,10 +2806,10 @@ definitions:
         items:
           type: integer
           format: int64
-      values:
+      domainValuePairs:
         type: array
         description: >
-          All the selected values in the data set
+          All the selected domain/value pairs in the data set
         items:
           $ref: "#/definitions/DomainValuePair"
 
@@ -2899,10 +2899,10 @@ definitions:
           All cohorts in the data set
         items:
           $ref: "#/definitions/Cohort"
-      values:
+      domainValuePairs:
         type: array
         description: >
-          All the selected values in the data set
+          All the selected domain/value pairs in the data set
         items:
           $ref: "#/definitions/DomainValuePair"
       prePackagedConceptSet:

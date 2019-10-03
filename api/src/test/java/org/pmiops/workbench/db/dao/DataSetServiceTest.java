@@ -121,7 +121,7 @@ public class DataSetServiceTest {
 
   private static DataSetRequest buildEmptyRequest() {
     final DataSetRequest invalidRequest = new DataSetRequest();
-    invalidRequest.setValues(Collections.emptyList());
+    invalidRequest.setDomainValuePairs(Collections.emptyList());
     return invalidRequest;
   }
 
