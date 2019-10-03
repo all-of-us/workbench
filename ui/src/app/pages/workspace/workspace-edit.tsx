@@ -101,12 +101,6 @@ export const toolTipText = {
     publicly available <i>All of Us</i> website (https://www.researchallofus.org/) to inform our
     participants and other stakeholders about what kind of research their data is being used
     for.</div>,
-  reviewRequest: <div>If you are concerned that your research may be stigmatizing to a particular
-    group of research participants, you may request a review of your research purpose by
-    the <i>All of Us</i> Resource Access Board (RAB). The RAB will provide feedback regarding
-    potential for stigmatizing specific groups of participants and, if needed, guidance for
-    modifying your research purpose/scope. Even if you request a review, you will be able to
-    create a Workspace and proceed with your research.</div>
 };
 
 export const researchPurposeQuestions = [
@@ -260,6 +254,15 @@ const styles = reactStyles({
   checkboxRow: {
     display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
   },
+
+  radioLabel: {
+    fontSize: '13px',
+    color: colors.primary,
+    fontWeight: 400,
+    lineHeight: '24px',
+    marginLeft: '0.5rem',
+    marginRight: '3rem'
+  }
 });
 
 export const WorkspaceEditSection = (props) => {
@@ -350,6 +353,7 @@ export interface WorkspaceEditState {
   loading: boolean;
   showUnderservedPopulationDetails: boolean;
   showStigmatizationDetails: boolean;
+  reviewRequestedHasSelection: boolean;  // false initially, set to true once the user has chosen (either Yes or No)
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
@@ -379,7 +383,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             population: false,
             populationDetails: [],
             populationHealth: false,
-            reviewRequested: false,
+            reviewRequested: true,
             socialBehavioral: false,
             reasonForAllOfUs: '',
           }
@@ -391,6 +395,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         loading: false,
         showUnderservedPopulationDetails: false,
         showStigmatizationDetails: false,
+        reviewRequestedHasSelection: false,
       };
     }
 
@@ -505,7 +510,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         this.isEmpty(rp, 'reasonForAllOfUs') ||
         !this.categoryIsSelected ||
         this.noSpecificPopulationSelected ||
-        this.noDiseaseOfFocusSpecified;
+        this.noDiseaseOfFocusSpecified ||
+        !this.state.reviewRequestedHasSelection;
     }
 
     updateResearchPurpose(category, value) {
@@ -774,8 +780,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </div>
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Request a review of your research purpose for potential
-                                      stigmatization of research participants'
-                              tooltip={toolTipText.reviewRequest}>
+                                      stigmatization of research participants' required>
           <Link onClick={() => this.setState({showStigmatizationDetails:
               !this.state.showStigmatizationDetails})} style={{marginTop: '0.5rem'}}>
             More info on stigmatization
@@ -799,19 +804,37 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                  contentRight={specificPopulations.map(sp => sp.ubrDescription)}/>
             </div>
           }
-          <div style={{display: 'flex', flexDirection: 'row',
-            paddingBottom: '14.4px', paddingTop: '0.3rem'}}>
-            <CheckBox style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
-              onChange={v => this.setState(
-                fp.set(['workspace', 'researchPurpose', 'reviewRequested' ], v))}
-              checked={this.state.workspace.researchPurpose.reviewRequested}/>
+          <div style={{display: 'flex', flexDirection: 'row', paddingTop: '0.3rem'}}>
             <label style={styles.text}>
-              I am concerned about potential
-              <a href='/definitions/stigmatization' target='_blank'> stigmatization </a>
-              of research participants. I would like the <i>All of Us</i> Resource Access Board
-              (RAB) to review my research purpose.
-              (This will not prevent you from creating a workspace and proceeding.)
+              <div>
+              If you are concerned that your research may result in <a href='/definitions/stigmatization' target='_blank'>
+              stigmatization of research participants</a>,
+              please request review of your research purpose by the All of Us  Resource Access Board (RAB). The RAB
+              will provide feedback regarding the potential for stigmatizing specific groups of participants, and if
+              needed, guidance for modifying your research purpose/scope. Even if you request a review, you will be
+              able to continue creating the Workspace and proceed with your research, while RAB reviews your research
+              purpose.
+              </div>
+              <div style={{marginTop: '0.5rem'}}>Would you like to request a review of your research purpose?</div>
             </label>
+          </div>
+          <div>
+            <RadioButton name='reviewRequested'
+                         onChange={() => {
+                           this.updateResearchPurpose('reviewRequested', true);
+                           this.setState({reviewRequestedHasSelection: true});
+                         }}
+                         checked={this.state.reviewRequestedHasSelection &&
+                         this.state.workspace.researchPurpose.reviewRequested}/>
+            <label style={styles.radioLabel}>Yes</label>
+            <RadioButton name='reviewRequested'
+                         onChange={() => {
+                           this.updateResearchPurpose('reviewRequested', false);
+                           this.setState({reviewRequestedHasSelection: true});
+                         }}
+                         checked={this.state.reviewRequestedHasSelection &&
+                         !this.state.workspace.researchPurpose.reviewRequested}/>
+            <label style={styles.radioLabel}>No</label>
           </div>
         </WorkspaceEditSection>
         <div>
@@ -832,6 +855,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               { !this.categoryIsSelected && <li>Research focus</li>}
               { this.noSpecificPopulationSelected && <li>Population of study</li>}
               { this.noDiseaseOfFocusSpecified && <li>Disease of focus</li>}
+              { !this.state.reviewRequestedHasSelection && <li>Research purpose review choice</li>}
             </ul>]} disabled={!this.disableButton}>
               <Button type='primary' onClick={() => this.saveWorkspace()}
                       disabled={this.disableButton || this.state.loading}>
