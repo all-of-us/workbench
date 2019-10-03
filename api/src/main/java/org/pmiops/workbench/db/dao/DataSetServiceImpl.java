@@ -599,7 +599,9 @@ public class DataSetServiceImpl implements DataSetService {
     } else if (name.length() == 1) {
       return name.toUpperCase();
     } else {
-      return String.format("%s%s", name.charAt(0), name.substring(1).toLowerCase());
+      return String.format(
+          "%s%s",
+          Character.toString(name.charAt(0)).toUpperCase(), name.substring(1).toLowerCase());
     }
   }
 
