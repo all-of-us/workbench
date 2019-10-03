@@ -590,6 +590,9 @@ public class DataSetServiceImpl implements DataSetService {
     return new ValuesLinkingPair(valueSelects, valueJoins);
   }
 
+  // Capitalizes the first letter of a string and lowers the remaining ones.
+  // Assumes a single word, so you'd get "A tale of two cities" instead of
+  // "A Tale Of Two Cities"
   private static String toTitleCase(String name) {
     if (name.isEmpty()) {
       return name;
