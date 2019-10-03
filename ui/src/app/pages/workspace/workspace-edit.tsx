@@ -35,7 +35,7 @@ export const ResearchPurposeItems = [
     shortDescription: 'Methods development/validation study',
     longDescription: <div>The primary purpose of the use of <i>All of Us</i> data is to develop
     and/or validate specific methods/tools for analyzing or interpreting data (e.g. statistical
-    methods for describing data trends, developing more powerful methods to detec
+    methods for describing data trends, developing more powerful methods to detect
     gene-environment or other types of interactions in genome-wide association studies).</div>
   }, {
     shortName: 'controlSet',
