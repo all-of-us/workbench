@@ -44,7 +44,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataSetServiceImpl implements DataSetService {
 
-  private static final String SELCECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
+  private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
           + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
   private static final ImmutableSet<PrePackagedConceptSetEnum>
@@ -572,7 +572,7 @@ public class DataSetServiceImpl implements DataSetService {
         bigQueryService.executeQuery(
             buildQueryJobConfiguration(
                 queryParameterValuesByDomain,
-                SELCECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST));
+                SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST));
 
     final ImmutableList<String> valueSelects =
         StreamSupport.stream(valuesLinkingTableResult.getValues().spliterator(), false)
