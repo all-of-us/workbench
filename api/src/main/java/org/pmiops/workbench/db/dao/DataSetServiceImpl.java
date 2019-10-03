@@ -594,7 +594,7 @@ public class DataSetServiceImpl implements DataSetService {
     if (name.isEmpty()) {
       return name;
     } else if (name.length() == 1) {
-      return name;
+      return name.toUpperCase();
     } else {
       return String.format("%s%s", name.charAt(0), name.substring(1).toLowerCase());
     }
