@@ -551,11 +551,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     final UserRecentWorkspace matchingRecentWorkspace =
         maybeRecentWorkspace
             .map(
-                recentWorkspace ->
-                    new UserRecentWorkspace(
-                        recentWorkspace.getWorkspaceId(),
-                        recentWorkspace.getUserId(),
-                        lastAccessDate))
+                recentWorkspace -> {
+                  recentWorkspace.setLastAccessDate(lastAccessDate);
+                  return recentWorkspace;
+                })
             .orElseGet(() -> new UserRecentWorkspace(workspaceId, userId, lastAccessDate));
     userRecentWorkspaceDao.save(matchingRecentWorkspace);
     handleWorkspaceLimit(userId);
@@ -616,10 +615,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       org.pmiops.workbench.db.model.Workspace dbWorkspace,
       UserRecentWorkspace userRecentWorkspace,
       WorkspaceAccessLevel accessLevel) {
-    RecentWorkspace recentWorkspace = new RecentWorkspace();
-    recentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
-    recentWorkspace.setAccessedTime(userRecentWorkspace.getLastAccessDate().toString());
-    recentWorkspace.setAccessLevel(accessLevel);
-    return recentWorkspace;
+    return new RecentWorkspace()
+            .workspace(workspaceMapper.toApiWorkspace(dbWorkspace))
+            .accessedTime(userRecentWorkspace.getLastAccessDate().toString())
+            .accessLevel(accessLevel);
   }
 }
