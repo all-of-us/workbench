@@ -121,11 +121,11 @@ public class DataSetServiceImpl implements DataSetService {
       this.namedParameterValues = namedParameterValues;
     }
 
-    String getQuery() {
+    public String getQuery() {
       return query;
     }
 
-    Map<String, QueryParameterValue> getNamedParameterValues() {
+    public Map<String, QueryParameterValue> getNamedParameterValues() {
       return namedParameterValues;
     }
   }
