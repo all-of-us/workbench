@@ -17,7 +17,6 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
 import {RecentWork} from 'app/pages/homepage/recent-work';
-import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -356,7 +355,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
           <FadeBox style={styles.fadeBox}>
             {/* The elements inside this fadeBox will be changed as part of ongoing
             homepage redesign work*/}
-            <div style={{display: 'flex', justifyContent: 'flex-start', flexDirection: 'column'}}>
+            <div style={{display: 'flex', justifyContent: 'center'}}>
+              <FlexColumn style={styles.singleCard}>
                 {accessTasksLoaded ?
                   (accessTasksRemaining ?
                       (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
@@ -367,36 +367,30 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                               twoFactorAuthCompleted={twoFactorAuthCompleted}
                                             dataUseAgreementCompleted={dataUseAgreementCompleted}/>
                       ) : (
-                          <React.Fragment>
-                            <FlexColumn>
-                              <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
-                                <FlexRow style={{alignItems: 'center'}}>
-                                  <SmallHeader style={{marginTop: '0px'}}>Workspaces</SmallHeader>
-                                  <ClrIcon
-                                    shape='plus-circle'
-                                    size={21}
-                                    className={'is-solid'}
-                                    style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
-                                    onClick={() => navigate(['workspaces/build'])}
-                                  />
-                                </FlexRow>
-                                <span
-                                  style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
-                                  onClick={() => navigate(['workspaces'])}
-                                >
-                                  See all Workspaces
-                                </span>
-                              </FlexRow>
-                              <RecentWorkspaces />
+                        <FlexRow style={{paddingTop: '2rem'}}>
+                          <FlexColumn style={styles.contentWrapperLeft}>
+                            <FlexRow style={styles.mainHeader}>Researcher Workbench</FlexRow>
+                            <CardButton onClick={() => navigate(['workspaces/build'])}
+                                        style={{margin: '1.9rem 106px 0 3%'}}>
+                              Create a <br/> New Workspace
+                              <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
+                            </CardButton>
+                          </FlexColumn>
+                          <FlexColumn style={styles.contentWrapperRight}>
+                            <a onClick={() => navigate(['workspaces'])}
+                               style={{fontSize: '14px', color: colors.primary}}>
+                              See All Workspaces</a>
+                            <FlexColumn style={{marginRight: '3%'}}>
+                              <div style={{color: colors.primary, height: '1.9rem'}}>
+                                <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
+                              </div>
+                              <RecentWork dark={true}/>
                             </FlexColumn>
-                            <FlexColumn>
-                              <SmallHeader>Recently Accessed Items</SmallHeader>
-                              <RecentWork/>
-                            </FlexColumn>
-                          </React.Fragment>
-                        )
+                          </FlexColumn>
+                        </FlexRow>)
                   ) :
                   <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
+              </FlexColumn>
             </div>
           </FadeBox>
           <div>
@@ -504,8 +498,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                             <RecentWork dark={true}/>
                           </div>
                         </div>
-                      </div>
-                      )
+                      </div>)
                 ) :
                 <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
             </div>

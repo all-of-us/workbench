@@ -11,13 +11,7 @@ import {ResourceCard} from 'app/components/resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
-import {
-  cohortReviewApi,
-  cohortsApi,
-  conceptSetsApi,
-  dataSetApi,
-  workspacesApi
-} from 'app/services/swagger-fetch-clients';
+import {cohortReviewApi, cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
@@ -124,8 +118,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         cohortsApi().getCohortsInWorkspace(namespace, id),
         cohortReviewApi().getCohortReviewsInWorkspace(namespace, id),
         conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
-        dataSetApi().getDataSetsInWorkspace(namespace, id),
-        workspacesApi().updateRecentWorkspaces(namespace, id)
+        dataSetApi().getDataSetsInWorkspace(namespace, id)
       ]);
       // Show all concept set except the Dummy demographics Concept set created to be used only
       // in dataset

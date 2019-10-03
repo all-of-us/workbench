@@ -4,7 +4,7 @@ import * as React from 'react';
 import {AlertClose, AlertDanger} from 'app/components/alert';
 import {Clickable} from 'app/components/buttons';
 import {SlidingFabReact} from 'app/components/buttons';
-import {DomainCardBase} from 'app/components/card';
+import {WorkspaceCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {Header} from 'app/components/headers';
 import {HelpSidebar} from 'app/components/help-sidebar';
@@ -14,7 +14,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
 import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
 import {ConceptTable} from 'app/pages/data/concept/concept-table';
-import {conceptsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {NavStore, queryParamsStore} from 'app/utils/navigation';
@@ -99,7 +99,7 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
     ({conceptDomainInfo, standardConceptsOnly, browseInDomain}) => {
       const conceptCount = standardConceptsOnly ?
           conceptDomainInfo.standardConceptCount : conceptDomainInfo.allConceptCount;
-      return <DomainCardBase style={{minWidth: '11rem'}} data-test-id='domain-box'>
+      return <WorkspaceCardBase style={{minWidth: '11rem'}} data-test-id='domain-box'>
         <Clickable style={styles.domainBoxHeader}
              onClick={browseInDomain}
              data-test-id='domain-box-name'>{conceptDomainInfo.name}</Clickable>
@@ -109,12 +109,12 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
         </div>
         <Clickable style={styles.domainBoxLink}
                    onClick={browseInDomain}>Browse Domain</Clickable>
-      </DomainCardBase>;
+      </WorkspaceCardBase>;
     };
 
 const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: Function}> =
     ({survey, browseSurvey}) => {
-      return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
+      return <WorkspaceCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
         <div style={styles.domainBoxHeader} data-test-id='survey-box-name'>{survey.name}</div>
         <div style={styles.conceptText}>
           <span style={{fontSize: 30}}>{survey.questionCount}</span> survey questions with
@@ -125,7 +125,7 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
         </div>
         <Clickable style={{...styles.domainBoxLink}} onClick={browseSurvey}>Browse
           Survey</Clickable>
-      </DomainCardBase>;
+      </WorkspaceCardBase>;
     };
 
 interface Props {
@@ -216,8 +216,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      workspacesApi().updateRecentWorkspaces(this.props.workspace.namespace, this.props.workspace.id)
-        .then(_ => this.loadDomainsAndSurveys());
+      this.loadDomainsAndSurveys();
     }
 
     async loadDomainsAndSurveys() {
