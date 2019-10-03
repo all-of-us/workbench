@@ -37,7 +37,7 @@ interface Props {
   prePackagedConceptSet: PrePackagedConceptSetEnum;
   selectedConceptSetIds: number[];
   selectedCohortIds: number[];
-  selectedValuePairs: DomainValuePair[];
+  selectedDomainValuePairs: DomainValuePair[];
   workspaceNamespace: string;
   workspaceId: string;
 }
@@ -119,7 +119,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       includesAllParticipants: dataSet.includesAllParticipants,
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
-      domainValuePairs: this.props.selectedValuePairs,
+      domainValuePairs: this.props.selectedDomainValuePairs,
       etag: dataSet.etag
     };
     await dataSetApi().updateDataSet(workspaceNamespace, workspaceId, dataSet.id, request);
@@ -139,7 +139,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       includesAllParticipants: this.props.includesAllParticipants,
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
-      domainValuePairs: this.props.selectedValuePairs,
+      domainValuePairs: this.props.selectedDomainValuePairs,
       prePackagedConceptSet: this.props.prePackagedConceptSet
     };
     try {
@@ -190,7 +190,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       name: 'dataSet',
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
-      domainValuePairs: this.props.selectedValuePairs,
+      domainValuePairs: this.props.selectedDomainValuePairs,
       includesAllParticipants: this.props.includesAllParticipants,
       prePackagedConceptSet: this.props.prePackagedConceptSet
     };

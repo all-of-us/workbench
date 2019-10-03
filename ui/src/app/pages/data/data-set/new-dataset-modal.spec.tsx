@@ -25,7 +25,7 @@ const createNewDataSetModal = () => {
     includesAllParticipants={false}
     selectedConceptSetIds={[]}
     selectedCohortIds={[]}
-    selectedValuePairs={[]}
+    selectedDomainValuePairs={[]}
     workspaceNamespace={workspaceNamespace}
     workspaceId={workspaceId}
     dataSet={dataSet}

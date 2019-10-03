@@ -248,7 +248,7 @@ interface State {
   selectedCohortIds: number[];
   selectedConceptSetIds: number[];
   selectedPreviewDomain: string;
-  selectedValuePairs: DomainValuePair[];
+  selectedDomainValuePairs: DomainValuePair[];
   valueSets: ValueSet[];
   valuesLoading: boolean;
 }
@@ -276,7 +276,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         selectedCohortIds: [],
         selectedConceptSetIds: [],
         selectedPreviewDomain: '',
-        selectedValuePairs: [],
+        selectedDomainValuePairs: [],
         valueSets: [],
         valuesLoading: false,
       };
@@ -298,7 +298,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               includesAllParticipants: response.includesAllParticipants,
               selectedConceptSetIds: response.conceptSets.map(cs => cs.id),
               selectedCohortIds: response.cohorts.map(c => c.id),
-              selectedValuePairs: response.domainValuePairs,
+              selectedDomainValuePairs: response.domainValuePairs,
               valuesLoading: true,
             });
             if (response.prePackagedConceptSet === PrePackagedConceptSetEnum.BOTH) {
@@ -369,14 +369,14 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     }
 
     handlePrePackagedConceptSets(domain, selected) {
-      const {valueSets, selectedValuePairs} = this.state;
+      const {valueSets, selectedDomainValuePairs} = this.state;
       if (!selected) {
         const updatedValueSets =
             valueSets.filter(valueSet => !(fp.contains(valueSet.domain, domain)));
-        const updatedSelectedValuePairs =
-          selectedValuePairs.filter(selectedValuePair =>
-                !fp.contains(selectedValuePair.domain, domain));
-        this.setState({valueSets: updatedValueSets, selectedValuePairs: updatedSelectedValuePairs});
+        const updatedSelectedDomainValuePairs =
+          selectedDomainValuePairs.filter(selectedDomainValuePair =>
+                !fp.contains(selectedDomainValuePair.domain, domain));
+        this.setState({valueSets: updatedValueSets, selectedDomainValuePairs: updatedSelectedDomainValuePairs});
         return;
       }
       const currentDomains = [];
@@ -400,7 +400,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
       this.setState({dataSetTouched: true});
       if (rtype === ResourceType.CONCEPT_SET) {
-        const {valueSets, selectedValuePairs} = this.state;
+        const {valueSets, selectedDomainValuePairs} = this.state;
         const origSelected = this.state.selectedConceptSetIds;
         const newSelectedConceptSets =
           toggleIncludes(resource.id, origSelected)as unknown as number[];
@@ -410,12 +410,12 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         const removedDomains = fp.without(currentDomains, origDomains);
         const updatedValueSets =
           valueSets.filter(valueSet => !(fp.contains(valueSet.domain, removedDomains)));
-        const updatedSelectedValuePairs =
-          selectedValuePairs.filter(selectedValuePair =>
-            !fp.contains(selectedValuePair.domain, removedDomains));
+        const updatedSelectedDomainValuePairs =
+          selectedDomainValuePairs.filter(selectedDomainValuePair =>
+            !fp.contains(selectedDomainValuePair.domain, removedDomains));
         this.setState({
           selectedConceptSetIds: newSelectedConceptSets,
-          selectedValuePairs: updatedSelectedValuePairs});
+          selectedDomainValuePairs: updatedSelectedDomainValuePairs});
         if (newDomains.length > 0) {
           this.setState({valuesLoading: true});
           const cSet = resource as ConceptSet;
@@ -445,7 +445,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       const valueSets = this.state.valueSets
           .filter(value => value.domain === domain)
           .map(valueSet => valueSet.values.items)[0];
-      const origSelected = this.state.selectedValuePairs;
+      const origSelected = this.state.selectedDomainValuePairs;
       const selectObj = {domain: domain, value: domainValue.value};
       let valuesSelected = [];
       if (fp.some(selectObj, origSelected)) {
@@ -459,16 +459,16 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       valuesSelected = valuesSelected.sort((a, b) =>
           valueSets.findIndex(({value}) => a.value === value) -
           valueSets.findIndex(({value}) => b.value === value));
-      this.setState({selectedValuePairs: valuesSelected, dataSetTouched: true});
+      this.setState({selectedDomainValuePairs: valuesSelected, dataSetTouched: true});
     }
 
     get selectAll() {
-      return fp.isEmpty(this.state.selectedValuePairs);
+      return fp.isEmpty(this.state.selectedDomainValuePairs);
     }
 
     selectAllValues() {
       if (!this.selectAll) {
-        this.setState({selectedValuePairs: []});
+        this.setState({selectedDomainValuePairs: []});
         return;
       } else {
         const allValuesSelected = [];
@@ -477,7 +477,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             allValuesSelected.push({domain: valueSet.domain, value: value.value});
           });
         });
-        this.setState({selectedValuePairs: allValuesSelected});
+        this.setState({selectedDomainValuePairs: allValuesSelected});
       }
     }
 
@@ -489,8 +489,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       return !this.state.selectedConceptSetIds || (this.state.selectedConceptSetIds.length === 0
           && !this.state.prePackagedDemographics && !this.state.prePackagedSurvey) ||
           ((!this.state.selectedCohortIds || this.state.selectedCohortIds.length === 0) &&
-              !this.state.includesAllParticipants) || !this.state.selectedValuePairs ||
-          this.state.selectedValuePairs.length === 0;
+              !this.state.includesAllParticipants) || !this.state.selectedDomainValuePairs ||
+          this.state.selectedDomainValuePairs.length === 0;
     }
 
     getDataTableValue(data) {
@@ -529,7 +529,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         includesAllParticipants: this.state.includesAllParticipants,
         cohortIds: this.state.selectedCohortIds,
         prePackagedConceptSet: this.getPrePackagedConceptSet(),
-        domainValuePairs: this.state.selectedValuePairs
+        domainValuePairs: this.state.selectedDomainValuePairs
       };
       try {
         const dataSetPreviewResp = await dataSetApi().previewQuery(namespace, id, request);
@@ -637,7 +637,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         selectedCohortIds,
         selectedConceptSetIds,
         selectedPreviewDomain,
-        selectedValuePairs,
+        selectedDomainValuePairs,
         valuesLoading,
         valueSets
       } = this.state;
@@ -743,7 +743,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                             key={domainValue.value} domainValue={domainValue}
                             onChange={() => this.selectDomainValue(valueSet.domain, domainValue)}
                             checked={fp.some({domain: valueSet.domain, value: domainValue.value},
-                              selectedValuePairs)}/>
+                              selectedDomainValuePairs)}/>
                         )}
                       </div>)
                     }
@@ -843,7 +843,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
                                            selectedConceptSetIds={selectedConceptSetIds}
                                            selectedCohortIds={selectedCohortIds}
-                                           selectedValuePairs={selectedValuePairs}
+                                           selectedDomainValuePairs={selectedDomainValuePairs}
                                            workspaceNamespace={namespace}
                                            workspaceId={id}
                                            prePackagedConceptSet={this.getPrePackagedConceptSet()}
