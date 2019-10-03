@@ -22,7 +22,7 @@ export class DataSetApiStub extends DataSetApi {
         lastModifiedTime: 10000,
         conceptSets: [],
         cohorts: [],
-        values: []
+        domainValuePairs: []
       }
     ];
   }

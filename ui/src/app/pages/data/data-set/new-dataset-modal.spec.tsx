@@ -4,6 +4,7 @@ import * as React from 'react';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {
   DataSetApi,
+  DataSetRequest,
   KernelTypeEnum,
   PrePackagedConceptSetEnum,
   WorkspacesApi} from 'generated/fetch';
@@ -24,7 +25,7 @@ const createNewDataSetModal = () => {
     includesAllParticipants={false}
     selectedConceptSetIds={[]}
     selectedCohortIds={[]}
-    selectedValues={[]}
+    selectedDomainValuePairs={[]}
     workspaceNamespace={workspaceNamespace}
     workspaceId={workspaceId}
     dataSet={dataSet}
@@ -87,7 +88,7 @@ describe('NewDataSetModal', () => {
       description: '',
       conceptSetIds: [],
       cohortIds: [],
-      values: [],
+      domainValuePairs: [],
       prePackagedConceptSet: PrePackagedConceptSetEnum.NONE
     });
     expect(exportSpy).not.toHaveBeenCalled();
@@ -114,13 +115,13 @@ describe('NewDataSetModal', () => {
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
     const nameStub = 'Data Set Name';
     const notebookNameStub = 'Notebook Name';
-    const dataSetRequestStub = {
+    const dataSetRequestStub: DataSetRequest = {
       name: nameStub,
       includesAllParticipants: false,
       description: '',
       conceptSetIds: [],
       cohortIds: [],
-      values: [],
+      domainValuePairs: [],
       prePackagedConceptSet: PrePackagedConceptSetEnum.NONE
     };
 

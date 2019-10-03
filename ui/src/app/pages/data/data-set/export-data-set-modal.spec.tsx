@@ -13,7 +13,7 @@ const dataSet: DataSet = {
   description: 'hi',
   conceptSets: [],
   cohorts: [],
-  values: [],
+  domainValuePairs: [],
   includesAllParticipants: false,
 };
 

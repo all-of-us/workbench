@@ -34,10 +34,6 @@ public class DataSetValues {
     return CommonStorageEnums.domainFromStorage(Short.parseShort(domainId));
   }
 
-  public void setDomainEnum(Domain domain) {
-    this.domainId = CommonStorageEnums.domainToStorage(domain).toString();
-  }
-
   @Column(name = "value")
   public String getValue() {
     return value;
