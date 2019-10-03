@@ -372,8 +372,7 @@ export const ListSearch = withCurrentWorkspace()(
               onKeyPress={this.handleInput} />
           </div>
           {domain === DomainType.DRUG && <div style={styles.drugsText}>
-            Your search may bring back brand name drugs. You must select ingredients to include them
-             in your cohort.
+            Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria.
           </div>}
         </div>
         {!loading && data && <div style={listStyle}>
