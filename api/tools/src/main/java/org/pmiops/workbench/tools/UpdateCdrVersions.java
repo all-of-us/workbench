@@ -30,8 +30,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * database to match.
  */
 @SpringBootApplication
-@EnableJpaRepositories("org.pmiops.workbench.db.dao")
-@EntityScan("org.pmiops.workbench.db.model")
+@EnableJpaRepositories("org.pmiops.workbench")
+@EntityScan("org.pmiops.workbench")
 public class UpdateCdrVersions {
 
   private static final Logger logger = Logger.getLogger(UpdateCdrVersions.class.getName());

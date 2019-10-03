@@ -60,7 +60,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   @VisibleForTesting int maxConceptsPerSet;
 
-  static final Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>
+  public static final Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>
       TO_CLIENT_CONCEPT_SET =
           new Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>() {
             @Override
@@ -111,7 +111,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       Ordering.from(String.CASE_INSENSITIVE_ORDER).onResultOf(Concept::getConceptName);
 
   @Autowired
-  ConceptSetsController(
+  public ConceptSetsController(
       WorkspaceService workspaceService,
       ConceptSetDao conceptSetDao,
       ConceptDao conceptDao,

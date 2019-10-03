@@ -53,7 +53,7 @@ public class ConceptsController implements ConceptsApiDelegate {
   private final ConceptDao conceptDao;
   private final SurveyModuleDao surveyModuleDao;
 
-  static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
+  public static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
       (concept) ->
           new Concept()
               .conceptClassId(concept.getConceptClassId())
