@@ -40,7 +40,8 @@ const styles = reactStyles({
   },
   drugsText: {
     fontSize: '12px',
-    marginTop: '0.25rem'
+    marginTop: '0.25rem',
+    lineHeight: '0.75rem'
   },
   attrIcon: {
     marginRight: '0.5rem',
@@ -73,7 +74,7 @@ const styles = reactStyles({
   treeIcon: {
     color: colors.accent,
     cursor: 'pointer',
-    fontSize: '1.15rem'
+    fontSize: '1.15rem',
   },
   listContainer: {
     width: '99%',
@@ -318,18 +319,10 @@ export const ListSearch = withCurrentWorkspace()(
         <td style={columnStyle}>
           {row.selectable && <div style={{...styles.selectDiv}}>
             {attributes &&
-              <ClrIcon style={styles.attrIcon}
-                shape='slider' dir='right' size='20'
-                onClick={() => this.launchAttributes(row)}/>
+              <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => this.launchAttributes(row)}/>
             }
-            {selected &&
-              <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
-            }
-            {unselected &&
-              <ClrIcon style={styles.selectIcon}
-                shape='plus-circle' size='16'
-                onClick={() => this.selectItem(row)}/>
-            }
+            {selected && <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
+            {unselected && <ClrIcon style={styles.selectIcon} shape='plus-circle' size='16' onClick={() => this.selectItem(row)}/>}
             {brand && !loadingIngredients &&
               <ClrIcon style={styles.brandIcon}
                 shape={'angle ' + (open ? 'down' : 'right')} size='20'
@@ -348,12 +341,8 @@ export const ListSearch = withCurrentWorkspace()(
         <td style={styles.columnBody}>{row.code}</td>
         <td style={styles.columnBody}>{!brand && row.type}</td>
         <td style={styles.columnBody}>{row.count > -1 && row.count.toLocaleString()}</td>
-        <td style={{...styles.columnBody, padding: '0.2rem'}}>
-          {row.hasHierarchy &&
-            <i className='pi pi-sitemap'
-              style={styles.treeIcon}
-              onClick={() => this.showHierarchy(row)}/>
-          }
+        <td style={{...styles.columnBody, textAlign: 'center'}}>
+          {row.hasHierarchy && <i className='pi pi-sitemap' style={styles.treeIcon} onClick={() => this.showHierarchy(row)}/>}
         </td>
       </tr>;
     }
@@ -361,8 +350,7 @@ export const ListSearch = withCurrentWorkspace()(
     render() {
       const {wizard: {domain}} = this.props;
       const {data, error, ingredients, loading, results, sourceMatch} = this.state;
-      const listStyle = domain === DomainType.DRUG ? {...styles.listContainer, marginTop: '3.75rem'}
-        : styles.listContainer;
+      const listStyle = domain === DomainType.DRUG ? {...styles.listContainer, marginTop: '4.25rem'} : styles.listContainer;
       return <div style={{overflow: 'auto'}}>
         <div style={styles.searchContainer}>
           <div style={styles.searchBar}>
@@ -377,17 +365,12 @@ export const ListSearch = withCurrentWorkspace()(
         </div>
         {!loading && data && <div style={listStyle}>
           {results === 'all' && sourceMatch && <div style={{marginBottom: '0.75rem'}}>
-            There are {sourceMatch.count.toLocaleString()} participants with source code
-            &nbsp;{sourceMatch.code}. For more results, browse
-            &nbsp;<Clickable style={styles.vocabLink}
-              onClick={() => this.getStandardResults()}>
-              Standard Vocabulary
-            </Clickable>.
+            There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}. For more results, browse
+            &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.getStandardResults()}>Standard Vocabulary</Clickable>.
           </div>}
           {results === 'standard' && <div style={{marginBottom: '0.75rem'}}>
             {!!data.length && <span>
-              There are {data[0].count.toLocaleString()} participants for the standard version of
-               the code you searched.
+              There are {data[0].count.toLocaleString()} participants for the standard version of the code you searched.
             </span>}
             {!data.length && <span>
               There are no standard matches for source code {sourceMatch.code}.
@@ -404,10 +387,8 @@ export const ListSearch = withCurrentWorkspace()(
                 <th style={styles.columnHeader}>Name</th>
                 <th style={{...styles.columnHeader, width: '20%'}}>Code</th>
                 <th style={{...styles.columnHeader, width: '10%'}}>Vocab</th>
-                <th style={{...styles.columnHeader, width: '10%'}}>Count</th>
-                <th style={{...styles.columnHeader, padding: '0.2rem 0.5rem', width: '7%'}}>
-                  More Info
-                </th>
+                <th style={{...styles.columnHeader, width: '8%'}}>Count</th>
+                <th style={{...styles.columnHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
               </tr>
             </thead>
             <tbody className='p-datatable-tbody'>
@@ -422,8 +403,7 @@ export const ListSearch = withCurrentWorkspace()(
                   {open && err && <tr>
                     <td colSpan={5}>
                       <div style={{...styles.error, marginTop: 0}}>
-                        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-                          shape='exclamation-triangle' size='22'/>
+                        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
                         Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
                       </div>
                     </td>
@@ -436,12 +416,9 @@ export const ListSearch = withCurrentWorkspace()(
         </div>}
         {loading && <SpinnerOverlay/>}
         {error && <div style={{...styles.error, ...(domain === DomainType.DRUG ? {marginTop: '3.75rem'} : {})}}>
-          <ClrIcon
-            style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-            shape='exclamation-triangle' size='22'/>
+          <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
-          {results === 'standard' && <Clickable style={styles.vocabLink}
-            onClick={() => this.getResults(sourceMatch.code)}>
+          {results === 'standard' && <Clickable style={styles.vocabLink} onClick={() => this.getResults(sourceMatch.code)}>
             &nbsp;Return to source code.
           </Clickable>}
         </div>}
