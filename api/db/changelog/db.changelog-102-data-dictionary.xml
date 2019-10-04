@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="ericsong" id="changelog-102-data-dictionary">
+
+    <createTable tableName="data_dictionary_entry">
+      <column name="data_dictionary_entry_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+
+      <column name="relevant_omop_table" type="text"/>
+      <column name="field_name" type="text"/>
+      <column name="omop_cdm_standard_or_custom_field" type="text"/>
+      <column name="description" type="text"/>
+      <column name="field_type" type="text"/>
+      <column name="data_provenance" type="text"/>
+      <column name="source_ppi_module" type="text"/>
+      <column name="transformed_by_registered_tier_privacy_methods" type="boolean"/>
+
+    </createTable>
+  </changeSet>
+</databaseChangeLog>
