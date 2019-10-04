@@ -186,16 +186,14 @@ public class WorkspaceMapper {
   public List<RecentWorkspace> buildRecentWorkspaceList(
       List<UserRecentWorkspace> userRecentWorkspaces,
       Map<Long, org.pmiops.workbench.db.model.Workspace> dbWorkspacesByWorkspaceId,
-      Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsByWorkspaceId
-  ) {
+      Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsByWorkspaceId) {
     return userRecentWorkspaces.stream()
         .map(
-            userRecentWorkspace -> buildRecentWorkspace(
+            userRecentWorkspace ->
+                buildRecentWorkspace(
                     userRecentWorkspace,
                     dbWorkspacesByWorkspaceId.get(userRecentWorkspace.getWorkspaceId()),
-                    workspaceAccessLevelsByWorkspaceId.get(userRecentWorkspace.getWorkspaceId())
-            )
-        )
+                    workspaceAccessLevelsByWorkspaceId.get(userRecentWorkspace.getWorkspaceId())))
         .collect(Collectors.toList());
   }
 }

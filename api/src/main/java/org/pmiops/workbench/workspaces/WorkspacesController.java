@@ -765,10 +765,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =
         workspaceMapper.buildRecentWorkspace(
-                userRecentWorkspace,
-                dbWorkspace,
-                workspaceAccessLevel
-        );
+            userRecentWorkspace, dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
@@ -792,15 +789,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .collect(
                 Collectors.toMap(
                     org.pmiops.workbench.db.model.Workspace::getWorkspaceId,
-                    dbWorkspace -> workspaceService.getWorkspaceAccessLevel(
-                            dbWorkspace.getWorkspaceNamespace(),
-                            dbWorkspace.getFirecloudName()
-                    )
-                )
-            );
+                    dbWorkspace ->
+                        workspaceService.getWorkspaceAccessLevel(
+                            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())));
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
-    List<RecentWorkspace> recentWorkspaces = workspaceMapper.buildRecentWorkspaceList(userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
+    List<RecentWorkspace> recentWorkspaces =
+        workspaceMapper.buildRecentWorkspaceList(
+            userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
