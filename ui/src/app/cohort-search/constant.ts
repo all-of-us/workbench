@@ -14,9 +14,6 @@ export const LIST_PROGRAM_TYPES = [
     standard: false,
     fullTree: true
   },
-];
-
-export const LIST_DOMAIN_TYPES = [
   {
     name: 'Demographics', domain: DomainType.PERSON, children: [
       {name: 'Current Age/Deceased', domain: DomainType.PERSON, type: CriteriaType.AGE},
@@ -25,17 +22,14 @@ export const LIST_DOMAIN_TYPES = [
       {name: 'Ethnicity', domain: DomainType.PERSON, type: CriteriaType.ETHNICITY},
     ]
   },
+];
+
+export const LIST_DOMAIN_TYPES = [
   {name: 'Conditions', domain: DomainType.CONDITION},
   {name: 'Procedures', domain: DomainType.PROCEDURE},
   {name: 'Drugs', domain: DomainType.DRUG},
   {name: 'Measurements', domain: DomainType.MEASUREMENT},
-  {
-    name: 'Visits',
-    domain: DomainType.VISIT,
-    type: CriteriaType.VISIT,
-    standard: true,
-    fullTree: true
-  }
+  {name: 'Visits', domain: DomainType.VISIT, type: CriteriaType.VISIT, standard: true, fullTree: true}
 ];
 
 export const PM_UNITS = {

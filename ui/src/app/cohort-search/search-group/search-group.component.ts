@@ -70,7 +70,7 @@ export class SearchGroupComponent implements AfterViewInit, OnInit {
       const groupDiv = document.getElementById(this.group.id);
       ro.observe(groupDiv);
     }
-    const demoItem = document.getElementById('PERSON-' + this.index);
+    const demoItem = document.getElementById('DEMO-' + this.index);
     if (demoItem) {
       demoItem.addEventListener('mouseenter', () => {
         this.demoOpen = true;
