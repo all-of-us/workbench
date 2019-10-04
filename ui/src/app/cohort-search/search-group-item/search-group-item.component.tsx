@@ -3,9 +3,10 @@ import * as React from 'react';
 
 import {initExisting, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {attributeDisplay, domainToTitle, mapGroupItem, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
-import {Clickable} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -14,6 +15,11 @@ import {Menu} from 'primereact/menu';
 import Timeout = NodeJS.Timeout;
 
 const styles = reactStyles({
+  menu: {
+    minWidth: '5rem',
+    maxWidth: '15rem',
+    width: 'auto'
+  },
   lineItem: {
     minWidth: 0,
     flex: 4,
@@ -23,10 +29,27 @@ const styles = reactStyles({
   },
   codeText: {
     fontWeight: 300,
+    color: colors.dark
+  },
+  link: {
+    height: 'auto',
+    minWidth: '2rem',
+    marginLeft: '0.25rem',
+    padding: 0,
     fontSize: '12px',
-    color: '#333333'
+    fontWeight: 600
   }
 });
+
+const menuStyles = `
+  body .p-menu .p-menu-list {
+    padding: 0.5rem 0;
+  }
+  body .p-menu .p-menuitem-link {
+   padding: 0 1rem;
+   line-height: 1.25rem;
+  }
+`;
 
 interface Props {
   role: keyof SearchRequest;
@@ -82,31 +105,18 @@ export const SearchGroupItem = withCurrentWorkspace()(
       }
     }
 
-    get codeType() {
-      const {item: {type}} = this.props;
-      return domainToTitle(type);
-    }
-
     get codeTypeDisplay() {
-      return `${this.codeType} ${this.pluralizedCode}`;
+      const {item: {type}} = this.props;
+      return `${domainToTitle(type)} ${this.pluralizedCode}`;
     }
 
     get pluralizedCode() {
-      return this.parameters.length > 1 ? 'Codes' : 'Code';
-    }
-
-    get status() {
-      const {item: {status}} = this.props;
-      return status;
-    }
-
-    get parameters() {
       const {item: {searchParameters}} = this.props;
-      return searchParameters;
+      return searchParameters.length > 1 ? 'Codes' : 'Code';
     }
 
     get codes() {
-      const {item: {type}} = this.props;
+      const {item: {searchParameters, type}} = this.props;
       const formatter = (param) => {
         let funcs = [typeDisplay, attributeDisplay];
         if (type === DomainType.PERSON) {
@@ -121,26 +131,27 @@ export const SearchGroupItem = withCurrentWorkspace()(
         return funcs.map(f => f(param)).join(' ').trim();
       };
       const sep = type === DomainType[DomainType.PERSON] ? '; ' : ', ';
-      return this.parameters.map(formatter).join(sep);
+      return searchParameters.map(formatter).join(sep);
     }
 
     enable() {
-      const {item} = this.props;
       triggerEvent('Enable', 'Click', 'Enable - Suppress Criteria - Cohort Builder');
-      item.status = 'active';
-      // this.setState({item});
+      this.setState({status: 'active'});
+      this.props.item.status = 'active';
       this.updateSearchRequest();
     }
 
     suppress() {
       triggerEvent('Suppress', 'Click', 'Snowman - Suppress Criteria - Cohort Builder');
       this.setState({status: 'hidden'});
+      this.props.item.status = 'hidden';
       this.updateSearchRequest();
     }
 
     remove() {
       triggerEvent('Delete', 'Click', 'Snowman - Delete Criteria - Cohort Builder');
       this.setState({status: 'pending'});
+      this.props.item.status = 'pending';
       this.updateSearchRequest();
       this.timeout = setTimeout(() => {
         this.updateSearchRequest(true);
@@ -151,6 +162,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
       triggerEvent('Undo', 'Click', 'Undo - Delete Criteria - Cohort Builder');
       clearTimeout(this.timeout);
       this.setState({status: 'active'});
+      this.props.item.status = 'active';
       this.updateSearchRequest();
     }
 
@@ -174,18 +186,18 @@ export const SearchGroupItem = withCurrentWorkspace()(
     }
 
     get typeAndStandard() {
-      const {item: {type}} = this.props;
+      const {item: {searchParameters, type}} = this.props;
       switch (type) {
         case DomainType.PERSON:
-          const _type = this.parameters[0].type === CriteriaType.DECEASED
-            ? CriteriaType.AGE : this.parameters[0].type;
+          const _type = searchParameters[0].type === CriteriaType.DECEASED
+            ? CriteriaType.AGE : searchParameters[0].type;
           return {_type, standard: false};
         case DomainType.PHYSICALMEASUREMENT:
-          return {type: this.parameters[0].type, standard: false};
+          return {type: searchParameters[0].type, standard: false};
         case DomainType.SURVEY:
-          return {type: this.parameters[0].type, standard: false};
+          return {type: searchParameters[0].type, standard: false};
         case DomainType.VISIT:
-          return {type: this.parameters[0].type, standard: true};
+          return {type: searchParameters[0].type, standard: true};
         default:
           return {type: null, standard: null};
       }
@@ -216,32 +228,33 @@ export const SearchGroupItem = withCurrentWorkspace()(
         {label: 'Delete criteria', command: () => this.remove()},
       ];
       return <React.Fragment>
-        {status !== 'deleted' && <div style={{display: 'flex'}}>
+        <style>{menuStyles}</style>
+        {status !== 'deleted' && <div style={{display: 'flex', fontSize: '12px'}}>
           {(status === 'active' || !status) && <div style={styles.lineItem}>
-            <Menu appendTo={document.body} model={items} popup={true} ref={el => this.dropdown = el} />
+            <Menu style={styles.menu} appendTo={document.body} model={items} popup={true} ref={el => this.dropdown = el} />
             <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}} onClick={(event) => this.dropdown.toggle(event)}>
               <ClrIcon shape='ellipsis-vertical' />
             </Clickable>
-            <small style={{paddingRight: '10px', fontSize: '12px'}} onClick={() => this.launchWizard()}>
-              <span style={styles.codeText}>Contains {this.codeTypeDisplay}</span>
-            </small>
-            {status !== 'hidden' && <small style={{...styles.codeText, paddingRight: '10px'}}>|</small>}
+            <span style={{paddingRight: '10px'}} onClick={() => this.launchWizard()}>
+              <span style={{...styles.codeText, cursor: 'pointer'}}>Contains {this.codeTypeDisplay}</span>
+            </span>
+            {status !== 'hidden' && <span style={{...styles.codeText, paddingRight: '10px'}}>|</span>}
             {loading && <span className='spinner spinner-inline'>Loading...</span>}
-            {!loading && status !== 'hidden' && <small style={styles.codeText}>{count.toLocaleString()}</small>}
-            {error && <span><ClrIcon style={{color: '#f7981c'}} shape='exclamation-triangle' className='is-solid' size={22} /></span>}
+            {!loading && status !== 'hidden' && <span style={styles.codeText}>{count.toLocaleString()}</span>}
+            {error && <span><ClrIcon style={{color: colors.warning}} shape='exclamation-triangle' className='is-solid' size={22} /></span>}
           </div>}
-          {status === 'pending' && <div style={{color: '#E28327'}}>
+          {status === 'pending' && <div style={{color: colorWithWhiteness(colors.warning, -.35)}}>
             <ClrIcon shape='exclamation-triangle' className='is-solid' size={23} />
-            <span style={{fontSize: '12px', margin: '0 0 2px 2px'}}>
+            <span style={{margin: '0 0 2px 2px'}}>
               This criteria has been deleted
-              <button className='btn btn-link' onClick={() => this.undo()}>UNDO</button>
+              <Button type='link' style={styles.link} onClick={() => this.undo()}>UNDO</Button>
             </span>
           </div>}
-          {status === 'hidden' && <div style={{color: '#E28327'}}>
+          {status === 'hidden' && <div style={{color: colorWithWhiteness(colors.warning, -.35)}}>
             <ClrIcon shape='eye-hide' className='is-solid' size={23} />
-            <span style={{fontSize: '12px', margin: '0 0 2px 2px'}}>
+            <span style={{margin: '0 0 2px 2px'}}>
               This criteria has been suppressed
-              <button className='btn btn-link' onClick={() => this.enable()}>ENABLE</button>
+              <Button type='link' style={styles.link} onClick={() => this.enable()}>ENABLE</Button>
             </span>
           </div>}
         </div>}
