@@ -6,7 +6,6 @@ import static org.junit.Assert.fail;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
@@ -22,7 +22,6 @@ import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.Operator;
-import org.pmiops.workbench.model.PageRequest;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,8 +171,7 @@ public class ParticipantCohortStatusDaoTest {
             .sortOrder(SortOrder.ASC)
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
     List<ParticipantCohortStatus> results =
-        participantCohortStatusDao.findAll(
-            COHORT_REVIEW_ID, Collections.<Filter>emptyList(), pageRequest);
+        participantCohortStatusDao.findAll(COHORT_REVIEW_ID, pageRequest);
 
     assertEquals(2, results.size());
   }
@@ -186,8 +184,7 @@ public class ParticipantCohortStatusDaoTest {
             .pageSize(PAGE_SIZE)
             .sortOrder(SortOrder.ASC)
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
-    List<ParticipantCohortStatus> results =
-        participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
+    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(2, results.size());
 
@@ -245,8 +242,8 @@ public class ParticipantCohortStatusDaoTest {
             .property(FilterColumns.ETHNICITY)
             .operator(Operator.EQUAL)
             .values(Arrays.asList("38003564")));
-    List<ParticipantCohortStatus> results =
-        participantCohortStatusDao.findAll(1L, filters, pageRequest);
+    pageRequest.filters(filters);
+    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(1, results.size());
 
@@ -299,8 +296,8 @@ public class ParticipantCohortStatusDaoTest {
             .property(FilterColumns.ETHNICITY)
             .operator(Operator.IN)
             .values(Arrays.asList("38003564", "38003563")));
-    List<ParticipantCohortStatus> results =
-        participantCohortStatusDao.findAll(1L, filters, pageRequest);
+    pageRequest.filters(filters);
+    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(2, results.size());
 
@@ -327,8 +324,7 @@ public class ParticipantCohortStatusDaoTest {
             .pageSize(1)
             .sortOrder(SortOrder.ASC)
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
-    List<ParticipantCohortStatus> results =
-        participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
+    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(1, results.size());
 
@@ -346,7 +342,7 @@ public class ParticipantCohortStatusDaoTest {
             .pageSize(1)
             .sortOrder(SortOrder.ASC)
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
-    results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
+    results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(1, results.size());
 
@@ -367,8 +363,7 @@ public class ParticipantCohortStatusDaoTest {
             .pageSize(1)
             .sortOrder(SortOrder.ASC)
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
-    Long results =
-        participantCohortStatusDao.findCount(1L, Collections.<Filter>emptyList(), pageRequest);
+    Long results = participantCohortStatusDao.findCount(1L, pageRequest);
 
     assertEquals(2L, results.longValue());
   }
@@ -381,8 +376,7 @@ public class ParticipantCohortStatusDaoTest {
             .pageSize(2)
             .sortOrder(SortOrder.ASC)
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
-    List<ParticipantCohortStatus> results =
-        participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
+    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(2, results.size());
 
@@ -406,7 +400,7 @@ public class ParticipantCohortStatusDaoTest {
             .pageSize(2)
             .sortOrder(SortOrder.DESC)
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
-    results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
+    results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(2, results.size());
 
@@ -433,8 +427,7 @@ public class ParticipantCohortStatusDaoTest {
             .pageSize(2)
             .sortOrder(SortOrder.ASC)
             .sortColumn(FilterColumns.STATUS.toString());
-    List<ParticipantCohortStatus> results =
-        participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
+    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(2, results.size());
 
@@ -458,7 +451,7 @@ public class ParticipantCohortStatusDaoTest {
             .pageSize(2)
             .sortOrder(SortOrder.DESC)
             .sortColumn(FilterColumns.STATUS.toString());
-    results = participantCohortStatusDao.findAll(1L, Collections.<Filter>emptyList(), pageRequest);
+    results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(2, results.size());
 
@@ -492,10 +485,9 @@ public class ParticipantCohortStatusDaoTest {
             .property(FilterColumns.PARTICIPANTID)
             .operator(Operator.EQUAL)
             .values(Arrays.asList("z")));
+    pageRequest.filters(filters);
     assertBadRequest(
-        pageRequest,
-        filters,
-        "Bad Request: Problems parsing PARTICIPANTID: For input string: \"z\"");
+        pageRequest, "Bad Request: Problems parsing PARTICIPANTID: For input string: \"z\"");
 
     filters.clear();
     filters.add(
@@ -503,9 +495,9 @@ public class ParticipantCohortStatusDaoTest {
             .property(FilterColumns.STATUS)
             .operator(Operator.EQUAL)
             .values(Arrays.asList("z")));
+    pageRequest.filters(filters);
     assertBadRequest(
         pageRequest,
-        filters,
         "Bad Request: Problems parsing STATUS: No enum constant org.pmiops.workbench.model.CohortStatus.z");
 
     filters.clear();
@@ -514,8 +506,9 @@ public class ParticipantCohortStatusDaoTest {
             .property(FilterColumns.BIRTHDATE)
             .operator(Operator.EQUAL)
             .values(Arrays.asList("z")));
+    pageRequest.filters(filters);
     assertBadRequest(
-        pageRequest, filters, "Bad Request: Problems parsing BIRTHDATE: Unparseable date: \"z\"");
+        pageRequest, "Bad Request: Problems parsing BIRTHDATE: Unparseable date: \"z\"");
   }
 
   @Test
@@ -533,9 +526,9 @@ public class ParticipantCohortStatusDaoTest {
             .property(FilterColumns.PARTICIPANTID)
             .operator(Operator.EQUAL)
             .values(Arrays.asList("1", "2")));
+    pageRequest.filters(filters);
     assertBadRequest(
         pageRequest,
-        filters,
         "Bad Request: property PARTICIPANTID using operator EQUAL must have a single value.");
 
     filters.clear();
@@ -544,13 +537,13 @@ public class ParticipantCohortStatusDaoTest {
             .property(FilterColumns.STATUS)
             .operator(Operator.EQUAL)
             .values(new ArrayList<>()));
-    assertBadRequest(pageRequest, filters, "Bad Request: property STATUS is empty.");
+    pageRequest.filters(filters);
+    assertBadRequest(pageRequest, "Bad Request: property STATUS is empty.");
   }
 
-  private void assertBadRequest(
-      PageRequest pageRequest, List<Filter> filters, String expectedException) {
+  private void assertBadRequest(PageRequest pageRequest, String expectedException) {
     try {
-      participantCohortStatusDao.findAll(1L, filters, pageRequest);
+      participantCohortStatusDao.findAll(1L, pageRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException e) {
       assertEquals(expectedException, e.getMessage());

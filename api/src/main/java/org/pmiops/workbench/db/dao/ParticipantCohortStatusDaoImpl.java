@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.FilterColumns;
-import org.pmiops.workbench.model.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -122,14 +122,13 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
   }
 
   @Override
-  public List<ParticipantCohortStatus> findAll(
-      Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest) {
+  public List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
     MapSqlParameterSource parameters = new MapSqlParameterSource();
     parameters.addValue("cohortReviewId", cohortReviewId);
 
     String sqlStatement =
         SELECT_SQL_TEMPLATE
-            + buildFilteringSql(filtersList, parameters)
+            + buildFilteringSql(pageRequest.getFilters(), parameters)
             + String.format(ORDERBY_SQL_TEMPLATE, getSortColumn(pageRequest))
             + String.format(
                 LIMIT_SQL_TEMPLATE,
@@ -141,11 +140,12 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
   }
 
   @Override
-  public Long findCount(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest) {
+  public Long findCount(Long cohortReviewId, PageRequest pageRequest) {
     MapSqlParameterSource parameters = new MapSqlParameterSource();
     parameters.addValue("cohortReviewId", cohortReviewId);
 
-    String sqlStatement = SELECT_COUNT_SQL_TEMPLATE + buildFilteringSql(filtersList, parameters);
+    String sqlStatement =
+        SELECT_COUNT_SQL_TEMPLATE + buildFilteringSql(pageRequest.getFilters(), parameters);
 
     return namedParameterJdbcTemplate.queryForObject(sqlStatement, parameters, Long.class);
   }
@@ -153,7 +153,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
   private String getSortColumn(PageRequest pageRequest) {
     String sortColumn = pageRequest.getSortColumn();
     if (NON_GENDER_RACE_ETHNICITY_TYPES.contains(sortColumn)) {
-      sortColumn = ParticipantCohortStatusDbInfo.fromName(sortColumn).getDbName();
+      sortColumn = ParticipantCohortStatusDbInfo.getDbName(sortColumn);
 
       sortColumn =
           (sortColumn.equals(ParticipantCohortStatusDbInfo.PARTICIPANT_ID.getDbName()))
@@ -174,10 +174,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
     sqlParts.add(WHERE_CLAUSE_TEMPLATE);
     for (Filter filter : filtersList) {
-      String sql =
-          ParticipantCohortStatusDbInfo.fromName(filter.getProperty().name())
-              .getFunction()
-              .apply(filter, parameters);
+      String sql = ParticipantCohortStatusDbInfo.buildSql(filter, parameters);
       sqlParts.add(sql);
     }
 
