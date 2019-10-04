@@ -49,7 +49,7 @@ import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetListResponse;
-import org.pmiops.workbench.model.DataSetPreviewList;
+import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -263,127 +263,145 @@ public class DataSetController implements DataSetApiDelegate {
         new DataSetCodeResponse().code(generatedCode).kernelType(kernelTypeEnum));
   }
 
+  // TODO (srubenst): Delete this method and make generate query take the composite parts.
+  private DataSetRequest generateDataSetRequestFromPreviewRequest(
+      DataSetPreviewRequest dataSetPreviewRequest) {
+    return new DataSetRequest()
+        .name("Does not matter")
+        .conceptSetIds(dataSetPreviewRequest.getConceptSetIds())
+        .cohortIds(dataSetPreviewRequest.getCohortIds())
+        .prePackagedConceptSet(dataSetPreviewRequest.getPrePackagedConceptSet())
+        .includesAllParticipants(dataSetPreviewRequest.getIncludesAllParticipants())
+        .domainValuePairs(
+            dataSetPreviewRequest.getValues().stream()
+                .map(
+                    value ->
+                        new DomainValuePair()
+                            .domain(dataSetPreviewRequest.getDomain())
+                            .value(value))
+                .collect(Collectors.toList()));
+  }
+
   @Override
-  public ResponseEntity<DataSetPreviewResponse> previewQuery(
-      String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
+  public ResponseEntity<DataSetPreviewResponse> previewDataSetByDomain(
+      String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
+    DataSetRequest dataSetRequest = generateDataSetRequestFromPreviewRequest(dataSetPreviewRequest);
     Map<String, QueryJobConfiguration> bigQueryJobConfig =
-        dataSetService.generateQueryJobConfigurationsByDomainName(dataSet);
-    bigQueryJobConfig.forEach(
-        (domain, queryJobConfiguration) -> {
-          int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS;
-          List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
-          String originalQuery = queryJobConfiguration.getQuery();
-          do {
-            try {
-              String query = originalQuery.concat(" LIMIT " + rowsRequested);
+        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
 
-              queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
+    if (bigQueryJobConfig.size() > 1) {
+      throw new BadRequestException(
+          "There should never be a preview request with more than one domain");
+    }
+    List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
+    QueryJobConfiguration queryJobConfiguration =
+        bigQueryJobConfig.get(dataSetPreviewRequest.getDomain().toString());
 
-              /* Google appengine has a 60 second timeout, we want to make sure this endpoint completes
-               * before that limit is exceeded, or we get a 500 error with the following type:
-               * com.google.apphosting.runtime.HardDeadlineExceededError
-               * See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
-               */
-              TableResult queryResponse =
-                  bigQueryService.executeQuery(
-                      bigQueryService.filterBigQueryConfig(queryJobConfiguration),
-                      APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC / PREVIEW_RETRY_LIMIT + 1);
-              queryResponse
-                  .getSchema()
-                  .getFields()
-                  .forEach(
-                      fields -> {
-                        valuePreviewList.add(new DataSetPreviewValueList().value(fields.getName()));
-                      });
+    int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS;
+    String originalQuery = queryJobConfiguration.getQuery();
+    do {
+      try {
+        String query = originalQuery.concat(" LIMIT " + rowsRequested);
 
-              queryResponse
-                  .getValues()
-                  .forEach(
-                      fieldValueList -> {
-                        IntStream.range(0, fieldValueList.size())
-                            .forEach(
-                                columnNumber -> {
-                                  try {
-                                    valuePreviewList
-                                        .get(columnNumber)
-                                        .addQueryValueItem(
-                                            fieldValueList.get(columnNumber).getValue().toString());
-                                  } catch (NullPointerException ex) {
-                                    log.severe(
-                                        String.format(
-                                            "Null pointer exception while retriving value for query: Column %s ",
-                                            columnNumber));
-                                    valuePreviewList.get(columnNumber).addQueryValueItem("");
-                                  }
-                                });
-                      });
-              queryResponse
-                  .getSchema()
-                  .getFields()
-                  .forEach(
-                      fields -> {
-                        DataSetPreviewValueList previewValue =
-                            valuePreviewList.stream()
-                                .filter(
-                                    preview ->
-                                        preview.getValue().equalsIgnoreCase(fields.getName()))
-                                .findFirst()
-                                .get();
-                        if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
-                          List<String> queryValues = new ArrayList<String>();
-                          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                          previewValue
-                              .getQueryValue()
-                              .forEach(
-                                  value -> {
-                                    try {
-                                      Double fieldValue = Double.parseDouble(value);
-                                      queryValues.add(
-                                          dateFormat.format(new Date(fieldValue.longValue())));
-                                    } catch (NumberFormatException ex) {
-                                      queryValues.add("");
-                                    }
-                                  });
-                          previewValue.setQueryValue(queryValues);
-                        }
-                      });
-              break;
-            } catch (Exception ex) {
-              if ((ex.getCause() != null
-                  && ex.getCause().getMessage() != null
-                  && ex.getCause().getMessage().contains("Read timed out"))) {
-                rowsRequested = (rowsRequested / 2);
-                if (rowsRequested == 0) {
-                  throw new GatewayTimeoutException(
-                      "Timeout while querying the CDR to pull preview information.");
-                }
-                retry++;
-              } else {
-                throw ex;
-              }
-            }
-          } while (retry < PREVIEW_RETRY_LIMIT);
+        queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
-          if (retry == PREVIEW_RETRY_LIMIT) {
+        /* Google appengine has a 60 second timeout, we want to make sure this endpoint completes
+         * before that limit is exceeded, or we get a 500 error with the following type:
+         * com.google.apphosting.runtime.HardDeadlineExceededError
+         * See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
+         */
+        TableResult queryResponse =
+            bigQueryService.executeQuery(
+                bigQueryService.filterBigQueryConfig(queryJobConfiguration),
+                APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC / PREVIEW_RETRY_LIMIT + 1);
+        queryResponse
+            .getSchema()
+            .getFields()
+            .forEach(
+                fields -> {
+                  valuePreviewList.add(new DataSetPreviewValueList().value(fields.getName()));
+                });
+
+        queryResponse
+            .getValues()
+            .forEach(
+                fieldValueList -> {
+                  IntStream.range(0, fieldValueList.size())
+                      .forEach(
+                          columnNumber -> {
+                            try {
+                              valuePreviewList
+                                  .get(columnNumber)
+                                  .addQueryValueItem(
+                                      fieldValueList.get(columnNumber).getValue().toString());
+                            } catch (NullPointerException ex) {
+                              log.severe(
+                                  String.format(
+                                      "Null pointer exception while retriving value for query: Column %s ",
+                                      columnNumber));
+                              valuePreviewList.get(columnNumber).addQueryValueItem("");
+                            }
+                          });
+                });
+        queryResponse
+            .getSchema()
+            .getFields()
+            .forEach(
+                fields -> {
+                  DataSetPreviewValueList previewValue =
+                      valuePreviewList.stream()
+                          .filter(preview -> preview.getValue().equalsIgnoreCase(fields.getName()))
+                          .findFirst()
+                          .get();
+                  if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
+                    List<String> queryValues = new ArrayList<String>();
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                    previewValue
+                        .getQueryValue()
+                        .forEach(
+                            value -> {
+                              try {
+                                Double fieldValue = Double.parseDouble(value);
+                                queryValues.add(
+                                    dateFormat.format(new Date(fieldValue.longValue())));
+                              } catch (NumberFormatException ex) {
+                                queryValues.add("");
+                              }
+                            });
+                    previewValue.setQueryValue(queryValues);
+                  }
+                });
+        break;
+      } catch (Exception ex) {
+        if ((ex.getCause() != null
+            && ex.getCause().getMessage() != null
+            && ex.getCause().getMessage().contains("Read timed out"))) {
+          rowsRequested = (rowsRequested / 2);
+          if (rowsRequested == 0) {
             throw new GatewayTimeoutException(
                 "Timeout while querying the CDR to pull preview information.");
           }
+          retry++;
+        } else {
+          throw ex;
+        }
+      }
+    } while (retry < PREVIEW_RETRY_LIMIT);
 
-          final List<String> requestValues =
-              dataSet.getDomainValuePairs().stream()
-                  .map(DomainValuePair::getValue)
-                  .collect(Collectors.toList());
+    if (retry == PREVIEW_RETRY_LIMIT) {
+      throw new GatewayTimeoutException(
+          "Timeout while querying the CDR to pull preview information.");
+    }
 
-          Collections.sort(
-              valuePreviewList,
-              Comparator.comparing(item -> requestValues.indexOf(item.getValue())));
+    Collections.sort(
+        valuePreviewList,
+        Comparator.comparing(item -> dataSetPreviewRequest.getValues().indexOf(item.getValue())));
 
-          previewQueryResponse.addDomainValueItem(
-              new DataSetPreviewList().domain(domain).values(valuePreviewList));
-        });
+    previewQueryResponse.setDomain(dataSetPreviewRequest.getDomain());
+    previewQueryResponse.setValues(valuePreviewList);
     return ResponseEntity.ok(previewQueryResponse);
   }
 
