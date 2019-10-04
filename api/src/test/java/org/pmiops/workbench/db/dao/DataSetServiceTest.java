@@ -261,16 +261,13 @@ public class DataSetServiceTest {
 
   @Test
   public void testcapitalizeFirstCharacterOnly_singleLetterStrings() {
-    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("a"))
-        .isEqualTo("A");
-    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("B"))
-        .isEqualTo("B");
+    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("a")).isEqualTo("A");
+    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("B")).isEqualTo("B");
   }
 
   @Test
   public void testcapitalizeFirstCharacterOnly_emptyString() {
-    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly(""))
-        .isEqualTo("");
+    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("")).isEqualTo("");
   }
 
   @Test
@@ -280,5 +277,4 @@ public class DataSetServiceTest {
     assertThat((DataSetServiceImpl.capitalizeFirstCharacterOnly("マリオに感謝しますが、私たちの王女は別の城にいます")))
         .isEqualTo("マリオに感謝しますが、私たちの王女は別の城にいます");
   }
-
 }
