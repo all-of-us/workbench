@@ -14,7 +14,7 @@ public class InterceptorUtils {
               "org.pmiops.workbench.workspaces.WorkspacesController",
           "org.pmiops.workbench.api.OfflineBillingApiController",
               "org.pmiops.workbench.billing.OfflineBillingController",
-          "org.pmiops.workbench.api.DataSetController",
+          "org.pmiops.workbench.api.DataSetApiController",
           "org.pmiops.workbench.dataset.DataSetController");
 
   private InterceptorUtils() {}
