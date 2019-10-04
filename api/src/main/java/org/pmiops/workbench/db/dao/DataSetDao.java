@@ -1,4 +1,4 @@
-package org.pmiops.workbench.dataset;
+package org.pmiops.workbench.db.dao;
 
 import java.util.List;
 import org.pmiops.workbench.db.model.DataSet;
