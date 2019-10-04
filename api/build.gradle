@@ -638,3 +638,12 @@ task updateCdrVersions(type: JavaExec) {
     args Eval.me(appArgs)
   }
 }
+
+task loadDataDictionary(type: JavaExec) {
+  classpath sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.LoadDataDictionary"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
