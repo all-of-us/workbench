@@ -4,18 +4,24 @@ import com.google.common.collect.ImmutableMap;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.regex.Pattern;
+import org.pmiops.workbench.api.DataSetApiController;
+import org.pmiops.workbench.api.OfflineBillingApiController;
+import org.pmiops.workbench.api.WorkspacesApiController;
+import org.pmiops.workbench.billing.OfflineBillingController;
+import org.pmiops.workbench.dataset.DataSetController;
+import org.pmiops.workbench.workspaces.WorkspacesController;
 import org.springframework.web.method.HandlerMethod;
 
 public class InterceptorUtils {
 
   private static Map<String, String> apiImplMap =
       ImmutableMap.of(
-          "org.pmiops.workbench.api.WorkspacesApiController",
-              "org.pmiops.workbench.workspaces.WorkspacesController",
-          "org.pmiops.workbench.api.OfflineBillingApiController",
-              "org.pmiops.workbench.billing.OfflineBillingController",
-          "org.pmiops.workbench.api.DataSetApiController",
-          "org.pmiops.workbench.dataset.DataSetController");
+          WorkspacesApiController.class.getName(),
+          WorkspacesController.class.getName(),
+          OfflineBillingApiController.class.getName(),
+          OfflineBillingController.class.getName(),
+          DataSetApiController.class.getName(),
+          DataSetController.class.getName());
 
   private InterceptorUtils() {}
 
