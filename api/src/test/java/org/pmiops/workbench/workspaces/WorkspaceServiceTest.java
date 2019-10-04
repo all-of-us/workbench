@@ -160,7 +160,7 @@ public class WorkspaceServiceTest {
     return workspace;
   }
 
-  private void addMockedWorkspace(
+  private org.pmiops.workbench.db.model.Workspace addMockedWorkspace(
       long workspaceId,
       String workspaceName,
       String workspaceNamespace,
@@ -191,6 +191,7 @@ public class WorkspaceServiceTest {
                 activeStatus));
 
     mockWorkspaces.add(dbWorkspace);
+    return dbWorkspace;
   }
 
   @Test
@@ -246,7 +247,7 @@ public class WorkspaceServiceTest {
           // Need a new 'now' each time or else we won't have lastAccessDates that are different
           // from each other
           workspaceService.updateRecentWorkspaces(
-              workspace.getWorkspaceId(),
+              workspace,
               USER_ID,
               Timestamp.from(NOW.minusSeconds(mockWorkspaces.size() - workspace.getWorkspaceId())));
         });
@@ -271,15 +272,14 @@ public class WorkspaceServiceTest {
   @Test
   public void updateRecentWorkspaces_flipFlop() {
     workspaceService.updateRecentWorkspaces(
-        mockWorkspaces.get(0).getWorkspaceId(), USER_ID, Timestamp.from(NOW.minusSeconds(4)));
+        mockWorkspaces.get(0), USER_ID, Timestamp.from(NOW.minusSeconds(4)));
     workspaceService.updateRecentWorkspaces(
-        mockWorkspaces.get(1).getWorkspaceId(), USER_ID, Timestamp.from(NOW.minusSeconds(3)));
+        mockWorkspaces.get(1), USER_ID, Timestamp.from(NOW.minusSeconds(3)));
     workspaceService.updateRecentWorkspaces(
-        mockWorkspaces.get(0).getWorkspaceId(), USER_ID, Timestamp.from(NOW.minusSeconds(2)));
+        mockWorkspaces.get(0), USER_ID, Timestamp.from(NOW.minusSeconds(2)));
     workspaceService.updateRecentWorkspaces(
-        mockWorkspaces.get(1).getWorkspaceId(), USER_ID, Timestamp.from(NOW.minusSeconds(1)));
-    workspaceService.updateRecentWorkspaces(
-        mockWorkspaces.get(0).getWorkspaceId(), USER_ID, Timestamp.from(NOW));
+        mockWorkspaces.get(1), USER_ID, Timestamp.from(NOW.minusSeconds(1)));
+    workspaceService.updateRecentWorkspaces(mockWorkspaces.get(0), USER_ID, Timestamp.from(NOW));
 
     List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(2);
@@ -293,22 +293,23 @@ public class WorkspaceServiceTest {
   @Test
   public void enforceFirecloudAclsInRecentWorkspaces() {
     long ownedId = workspaceIdIncrementer.getAndIncrement();
-    addMockedWorkspace(
-        ownedId,
-        "owned",
-        "owned_namespace",
-        WorkspaceAccessLevel.OWNER,
-        WorkspaceActiveStatus.ACTIVE);
-    workspaceService.updateRecentWorkspaces(ownedId, USER_ID, Timestamp.from(NOW));
+    org.pmiops.workbench.db.model.Workspace ownedWorkspace =
+        addMockedWorkspace(
+            ownedId,
+            "owned",
+            "owned_namespace",
+            WorkspaceAccessLevel.OWNER,
+            WorkspaceActiveStatus.ACTIVE);
+    workspaceService.updateRecentWorkspaces(ownedWorkspace, USER_ID, Timestamp.from(NOW));
 
-    long sharedId = workspaceIdIncrementer.getAndIncrement();
-    addMockedWorkspace(
-        sharedId,
-        "shared",
-        "shared_namespace",
-        WorkspaceAccessLevel.NO_ACCESS,
-        WorkspaceActiveStatus.ACTIVE);
-    workspaceService.updateRecentWorkspaces(sharedId, USER_ID, Timestamp.from(NOW));
+    org.pmiops.workbench.db.model.Workspace sharedWorkspace =
+        addMockedWorkspace(
+            workspaceIdIncrementer.getAndIncrement(),
+            "shared",
+            "shared_namespace",
+            WorkspaceAccessLevel.NO_ACCESS,
+            WorkspaceActiveStatus.ACTIVE);
+    workspaceService.updateRecentWorkspaces(sharedWorkspace, USER_ID, Timestamp.from(NOW));
 
     List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(1);

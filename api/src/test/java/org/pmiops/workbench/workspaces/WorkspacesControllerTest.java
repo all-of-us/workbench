@@ -2555,8 +2555,7 @@ public class WorkspacesControllerTest {
     stubFcGetWorkspaceACL();
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.get(workspace.getNamespace(), workspace.getId());
-    workspaceService.updateRecentWorkspaces(
-        dbWorkspace.getWorkspaceId(), currentUser.getUserId(), NOW);
+    workspaceService.updateRecentWorkspaces(dbWorkspace, currentUser.getUserId(), NOW);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();
     RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);

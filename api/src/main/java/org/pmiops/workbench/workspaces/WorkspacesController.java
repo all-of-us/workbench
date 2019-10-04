@@ -24,6 +24,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -756,25 +757,51 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<RecentWorkspaceResponse> updateRecentWorkspaces(
       String workspaceNamespace, String workspaceId) {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
-        workspaceService.getRequired(workspaceNamespace, workspaceId);
-    UserRecentWorkspace userRecentWorkspace =
-        workspaceService.updateRecentWorkspaces(dbWorkspace.getWorkspaceId());
-    WorkspaceAccessLevel accessLevel =
-        workspaceService.getWorkspaceAccessLevel(
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+        workspaceService.get(workspaceNamespace, workspaceId);
+    UserRecentWorkspace userRecentWorkspace = workspaceService.updateRecentWorkspaces(dbWorkspace);
+    WorkspaceAccessLevel workspaceAccessLevel =
+        workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =
-        workspaceService.buildRecentWorkspace(dbWorkspace, userRecentWorkspace, accessLevel);
+        workspaceMapper.buildRecentWorkspace(
+                userRecentWorkspace,
+                dbWorkspace,
+                workspaceAccessLevel
+        );
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
 
   @Override
   public ResponseEntity<RecentWorkspaceResponse> getUserRecentWorkspaces() {
-    List<UserRecentWorkspace> userRecentWorkspaceList = workspaceService.getRecentWorkspaces();
+    List<UserRecentWorkspace> userRecentWorkspaces = workspaceService.getRecentWorkspaces();
+    List<Long> workspaceIds =
+        userRecentWorkspaces.stream()
+            .map(UserRecentWorkspace::getWorkspaceId)
+            .collect(Collectors.toList());
+    List<org.pmiops.workbench.db.model.Workspace> dbWorkspaces =
+        workspaceService.getDao().findAllByWorkspaceIdIn(workspaceIds);
+    Map<Long, org.pmiops.workbench.db.model.Workspace> dbWorkspacesById =
+        dbWorkspaces.stream()
+            .collect(
+                Collectors.toMap(
+                    org.pmiops.workbench.db.model.Workspace::getWorkspaceId, Function.identity()));
+    Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsById =
+        dbWorkspaces.stream()
+            .collect(
+                Collectors.toMap(
+                    org.pmiops.workbench.db.model.Workspace::getWorkspaceId,
+                    dbWorkspace -> workspaceService.getWorkspaceAccessLevel(
+                            dbWorkspace.getWorkspaceNamespace(),
+                            dbWorkspace.getFirecloudName()
+                    )
+                )
+            );
+
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
-    recentWorkspaceResponse.addAll(
-        workspaceService.buildRecentWorkspaceList(userRecentWorkspaceList));
+    List<RecentWorkspace> recentWorkspaces = workspaceMapper.buildRecentWorkspaceList(userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
+    recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
 }
