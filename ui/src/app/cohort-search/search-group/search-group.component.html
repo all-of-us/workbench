@@ -88,33 +88,13 @@
           </clr-dropdown>
           <div class="dropdown-divider"></div>
           <h4 class="dropdown-header">Domains</h4>
-          <clr-dropdown *ngFor="let criteria of domainTypes">
             <button
-              *ngIf="!criteria.children"
+              *ngFor="let criteria of domainTypes"
               [id]="criteria.domain"
               class="dropdown-item"
               type="button"
               (click)="launchWizard(criteria)"
               clrDropdownItem>{{criteria.name}}</button>
-            <ng-container *ngIf="criteria.children">
-              <button
-                [id]="criteria.domain + '-' + index"
-                class="dropdown-item"
-                type="button"
-                clrDropdownTrigger>{{criteria.name}}</button>
-              <ng-template [(clrIfOpen)]="demoOpen || demoMenuHover">
-                <clr-dropdown-menu [id]="'demo-menu-' + index">
-                  <button
-                    *ngFor="let child of criteria.children"
-                    [id]="child.subtype"
-                    class="dropdown-item"
-                    type="button"
-                    (click)="launchWizard(child)"
-                    clrDropdownItem>{{child.name}}</button>
-                </clr-dropdown-menu>
-              </ng-template>
-            </ng-container>
-          </clr-dropdown>
         </clr-dropdown-menu>
       </clr-dropdown>
     </ng-template>
@@ -123,14 +103,13 @@
         Add Criteria <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
-        <ng-container *ngFor="let criteria of domainTypes">
-          <button *ngIf="criteria.name !== 'Demographics'"
-            [id]="criteria.domain"
-            class="dropdown-item"
-            type="button"
-            (click)="launchWizard(criteria)"
-            clrDropdownItem>{{criteria.name}}</button>
-        </ng-container>
+        <button
+          *ngFor="let criteria of domainTypes"
+          [id]="criteria.domain"
+          class="dropdown-item"
+          type="button"
+          (click)="launchWizard(criteria)"
+          clrDropdownItem>{{criteria.name}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
   </div>
@@ -178,14 +157,12 @@
           Add Criteria <clr-icon shape="caret down"></clr-icon>
         </button>
         <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
-          <ng-container *ngFor="let criteria of domainTypes">
-            <button *ngIf="criteria.name !== 'Demographics'"
-                    [id]="criteria.domain"
-                    class="dropdown-item"
-                    type="button"
-                    (click)="launchWizard(criteria, 1)"
-                    clrDropdownItem>{{criteria.name}}</button>
-          </ng-container>
+          <button *ngFor="let criteria of domainTypes"
+            [id]="criteria.domain"
+            class="dropdown-item"
+            type="button"
+            (click)="launchWizard(criteria, 1)"
+            clrDropdownItem>{{criteria.name}}</button>
         </clr-dropdown-menu>
       </clr-dropdown>
     </div>

@@ -29,6 +29,7 @@
       [popper]="codesPopper"
       [popperTrigger]="'hover'"
       [popperPlacement]="'bottom'"
+      (click)="launchWizard()"
       class="trigger padding-right">
       <span class="code-text">Contains </span>
       <span class="code-text">{{codeTypeDisplay}}</span>
