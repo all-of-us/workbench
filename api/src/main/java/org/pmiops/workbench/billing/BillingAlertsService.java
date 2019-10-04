@@ -6,6 +6,7 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.Streams;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -80,11 +81,18 @@ public class BillingAlertsService {
             .collect(
                 Collectors.groupingBy(
                     SimpleImmutableEntry::getKey, Collectors.summingDouble(Entry::getValue)));
+    logger.info(String.format("Retrieved per-user spending for %d users", perUserSpend.size()));
+    List<User> usersWithOverspend =
+        perUserSpend.entrySet().stream()
+            .filter(entry -> isOutsideFreeTierLimit(entry.getValue(), entry.getKey()))
+            .map(Entry::getKey)
+            .collect(Collectors.toList());
 
-    perUserSpend.entrySet().stream()
-        .filter(entry -> entry.getValue() > getUserFreeTierLimit(entry.getKey()))
-        .map(Entry::getKey)
-        .forEach(this::alertUser);
+    logger.info(
+        String.format(
+            "Alerting %d users out of %d with spending retrieved",
+            usersWithOverspend.size(), perUserSpend.size()));
+    usersWithOverspend.forEach(this::alertUser);
   }
 
   private Optional<AbstractMap.SimpleImmutableEntry<User, Double>> buildMapEntry(
