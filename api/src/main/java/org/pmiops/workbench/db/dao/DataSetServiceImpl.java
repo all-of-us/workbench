@@ -559,7 +559,7 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(Collectors.toList()));
 
     final String domainName = domainMaybe.get().toString();
-    final String domainTitleCase = toTitleCase(domainName);
+    final String domainTitleCase = capitalizeFirstCharacterOnly(domainName);
 
     final ImmutableMap<String, QueryParameterValue> queryParameterValuesByDomain =
         ImmutableMap.of(
@@ -594,7 +594,7 @@ public class DataSetServiceImpl implements DataSetService {
   // Assumes a single word, so you'd get "A tale of two cities" instead of
   // "A Tale Of Two Cities"
   @VisibleForTesting
-  public static String toTitleCase(String name) {
+  public static String capitalizeFirstCharacterOnly(String name) {
     if (name.isEmpty()) {
       return name;
     } else if (name.length() == 1) {
