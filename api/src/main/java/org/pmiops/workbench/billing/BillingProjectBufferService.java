@@ -22,6 +22,7 @@ import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -85,9 +86,10 @@ public class BillingProjectBufferService {
       entry.setLastSyncRequestTime(new Timestamp(clock.instant().toEpochMilli()));
 
       try {
-        switch (fireCloudService
-            .getBillingProjectStatus(entry.getFireCloudProjectName())
-            .getCreationStatus()) {
+        BillingProjectStatus temp = fireCloudService
+            .getBillingProjectStatus(entry.getFireCloudProjectName());
+
+        switch (temp.getCreationStatus()) {
           case READY:
             entry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
             break;
@@ -104,6 +106,10 @@ public class BillingProjectBufferService {
         }
       } catch (WorkbenchException e) {
         log.log(Level.WARNING, "Get BillingProject status call failed", e);
+      } catch (NullPointerException e) {
+        int t2 = 1+1;
+
+        System.out.println(e);
       }
 
       billingProjectBufferEntryDao.save(entry);

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.dataset;
+package org.pmiops.workbench.db.dao;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import java.sql.Timestamp;
