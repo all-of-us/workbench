@@ -216,6 +216,9 @@ def dev_up()
     -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
   }
 
+  common.status "Loading Data Dictionary..."
+  common.run_inline %W{gradle loadDataDictionary}
+
   run_api()
 end
 
