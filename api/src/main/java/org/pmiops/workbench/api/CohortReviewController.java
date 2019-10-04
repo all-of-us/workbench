@@ -13,7 +13,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,7 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
+import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.Cohort;
@@ -53,7 +53,6 @@ import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.PageFilterRequest;
-import org.pmiops.workbench.model.PageRequest;
 import org.pmiops.workbench.model.ParticipantChartData;
 import org.pmiops.workbench.model.ParticipantChartDataListResponse;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
@@ -296,8 +295,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
 
     List<ParticipantCohortStatus> paginatedPCS =
-        cohortReviewService.findAll(
-            cohortReview.getCohortReviewId(), Collections.<Filter>emptyList(), pageRequest);
+        cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
     lookupGenderRaceEthnicityValues(paginatedPCS);
 
     org.pmiops.workbench.model.CohortReview responseReview =
@@ -513,25 +511,17 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     PageRequest pageRequest = createPageRequest(request);
+    convertGenderRaceEthnicityFilters(pageRequest);
+    convertGenderRaceEthnicitySortOrder(pageRequest);
 
-    List<Filter> filters =
-        request.getFilters() == null
-            ? Collections.<Filter>emptyList()
-            : request.getFilters().getItems();
     List<ParticipantCohortStatus> participantCohortStatuses =
-        cohortReviewService.findAll(
-            cohortReview.getCohortReviewId(),
-            convertGenderRaceEthnicityFilters(filters),
-            convertGenderRaceEthnicitySortOrder(pageRequest));
+        cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
     lookupGenderRaceEthnicityValues(participantCohortStatuses);
 
     Long queryResultSize =
-        filters.isEmpty()
+        pageRequest.getFilters().isEmpty()
             ? cohortReview.getReviewSize()
-            : cohortReviewService.findCount(
-                cohortReview.getCohortReviewId(),
-                convertGenderRaceEthnicityFilters(filters),
-                convertGenderRaceEthnicitySortOrder(pageRequest));
+            : cohortReviewService.findCount(cohortReview.getCohortReviewId(), pageRequest);
 
     org.pmiops.workbench.model.CohortReview responseReview =
         TO_CLIENT_COHORTREVIEW_WITH_PAGING.apply(cohortReview, pageRequest);
@@ -585,8 +575,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     } else {
       response.count(result.getTotalRows());
     }
-
-    response.setPageRequest(pageRequest);
     return ResponseEntity.ok(response);
   }
 
@@ -814,41 +802,41 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   /**
    * Helper method that generates a list of concept ids per demo
    *
-   * @param filters
-   * @return
+   * @param pageRequest
    */
-  private List<Filter> convertGenderRaceEthnicityFilters(List<Filter> filters) {
-    return filters.stream()
-        .map(
-            filter -> {
-              if (GENDER_RACE_ETHNICITY_TYPES.contains(filter.getProperty().name())) {
-                Map<Long, String> possibleConceptIds =
-                    genderRaceEthnicityConceptProvider
-                        .get()
-                        .getConcepts()
-                        .get(filter.getProperty().name());
-                List<String> values =
-                    possibleConceptIds.entrySet().stream()
-                        .filter(entry -> filter.getValues().contains(entry.getValue()))
-                        .map(entry -> entry.getKey().toString())
-                        .collect(Collectors.toList());
-                return new Filter()
-                    .property(filter.getProperty())
-                    .operator(filter.getOperator())
-                    .values(values);
-              }
-              return filter;
-            })
-        .collect(Collectors.toList());
+  private void convertGenderRaceEthnicityFilters(PageRequest pageRequest) {
+    List<Filter> filters =
+        pageRequest.getFilters().stream()
+            .map(
+                filter -> {
+                  if (GENDER_RACE_ETHNICITY_TYPES.contains(filter.getProperty().name())) {
+                    Map<Long, String> possibleConceptIds =
+                        genderRaceEthnicityConceptProvider
+                            .get()
+                            .getConcepts()
+                            .get(filter.getProperty().name());
+                    List<String> values =
+                        possibleConceptIds.entrySet().stream()
+                            .filter(entry -> filter.getValues().contains(entry.getValue()))
+                            .map(entry -> entry.getKey().toString())
+                            .collect(Collectors.toList());
+                    return new Filter()
+                        .property(filter.getProperty())
+                        .operator(filter.getOperator())
+                        .values(values);
+                  }
+                  return filter;
+                })
+            .collect(Collectors.toList());
+    pageRequest.filters(filters);
   }
 
   /**
    * Helper method that converts sortOrder if gender, race or ethnicity.
    *
    * @param pageRequest
-   * @return
    */
-  private PageRequest convertGenderRaceEthnicitySortOrder(PageRequest pageRequest) {
+  private void convertGenderRaceEthnicitySortOrder(PageRequest pageRequest) {
     String sortColumn = pageRequest.getSortColumn();
     if (GENDER_RACE_ETHNICITY_TYPES.contains(sortColumn)) {
       Map<String, Map<Long, String>> concepts =
@@ -862,14 +850,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       if (!demoList.isEmpty()) {
         pageRequest.setSortColumn(
             "FIELD("
-                + ParticipantCohortStatusDbInfo.fromName(sortColumn).getDbName()
+                + ParticipantCohortStatusDbInfo.getDbName(sortColumn)
                 + ","
                 + String.join(",", demoList)
                 + ") "
                 + pageRequest.getSortOrder().name());
       }
     }
-    return pageRequest;
   }
 
   private PageRequest createPageRequest(PageFilterRequest request) {
@@ -884,7 +871,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .page(pageParam)
         .pageSize(pageSizeParam)
         .sortOrder(sortOrderParam)
-        .sortColumn(sortColumn);
+        .sortColumn(sortColumn)
+        .filters(
+            request.getFilters() == null ? new ArrayList<>() : request.getFilters().getItems());
   }
 
   /**
