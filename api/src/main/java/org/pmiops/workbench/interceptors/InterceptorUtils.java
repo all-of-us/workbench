@@ -12,8 +12,10 @@ public class InterceptorUtils {
       ImmutableMap.of(
           "org.pmiops.workbench.api.WorkspacesApiController",
               "org.pmiops.workbench.workspaces.WorkspacesController",
-          "org.pmiops.workbench.api.BillingApiController",
-              "org.pmiops.workbench.billing.BillingController");
+          "org.pmiops.workbench.api.OfflineBillingApiController",
+              "org.pmiops.workbench.billing.OfflineBillingController",
+          "org.pmiops.workbench.api.DataSetController",
+          "org.pmiops.workbench.dataset.DataSetController");
 
   private InterceptorUtils() {}
 
