@@ -38,7 +38,14 @@
             ]
           },
           "configurations": {
-            "dev": {},
+            "dev": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.localtest.ts"
+                }
+              ]
+            },
             "local": {
               "fileReplacements": [
                 {
