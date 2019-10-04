@@ -720,8 +720,6 @@ definitions:
         type: integer
         format: int64
         description: the total count of items.
-      pageRequest:
-        $ref: "#/definitions/PageRequest"
 
   ModifyParticipantCohortAnnotationRequest:
     type: object
@@ -746,26 +744,6 @@ definitions:
     type: string
     description: possible values indicating whether review has been created
     enum: [NONE, CREATED]
-
-  PageRequest:
-    type: object
-    required:
-      - page
-      - pageSize
-      - sortOrder
-      - sortColumn
-    properties:
-      page:
-        type: integer
-        description: the page
-      pageSize:
-        type: integer
-        description: the page size.
-      sortOrder:
-        $ref: "#/definitions/SortOrder"
-      sortColumn:
-        type: string
-        description: sort column
 
   CohortChartData:
     type: object

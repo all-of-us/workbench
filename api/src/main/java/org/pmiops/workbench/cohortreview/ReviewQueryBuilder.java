@@ -4,8 +4,8 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.HashMap;
 import java.util.Map;
+import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.model.DomainType;
-import org.pmiops.workbench.model.PageRequest;
 import org.springframework.stereotype.Service;
 
 /** TODO: delete when ui work is done. */

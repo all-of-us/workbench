@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -47,7 +46,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataSetServiceImpl implements DataSetService {
 
-  private static final String SELCECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
+  private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
           + "WHERE DOMAIN = @pDomain AND DENORMALIZED_NAME in unnest(@pValuesList)";
   private static final ImmutableSet<PrePackagedConceptSetEnum>
@@ -234,10 +233,10 @@ public class DataSetServiceImpl implements DataSetService {
             .map(QueryAndParameters::getQuery)
             .collect(Collectors.joining(" UNION DISTINCT "));
 
-    final ImmutableList<Domain> domainList =
+    final ImmutableSet<Domain> domainSet =
         domainValuePairs.stream()
             .map(DomainValuePair::getDomain)
-            .collect(ImmutableList.toImmutableList());
+            .collect(ImmutableSet.toImmutableSet());
 
     // now merge all the individual maps from each configuration
     final ImmutableMap<String, QueryParameterValue> mergedQueryParameterValues =
@@ -247,7 +246,7 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
 
     return buildQueriesByDomain(
-        domainList,
+        domainSet,
         domainValuePairs,
         mergedQueryParameterValues,
         includesAllParticipants,
@@ -329,7 +328,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   private Map<String, QueryJobConfiguration> buildQueriesByDomain(
-      ImmutableList<Domain> domainList,
+      ImmutableSet<Domain> uniqueDomains,
       ImmutableList<DomainValuePair> domainValuePairs,
       ImmutableMap<String, QueryParameterValue> cohortParameters,
       boolean includesAllParticipants,
@@ -337,7 +336,7 @@ public class DataSetServiceImpl implements DataSetService {
       String cohortQueries) {
     final CdrBigQuerySchemaConfig bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
 
-    return domainList.stream()
+    return uniqueDomains.stream()
         .collect(
             ImmutableMap.toImmutableMap(
                 Domain::toString,
@@ -562,7 +561,7 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(Collectors.toList()));
 
     final String domainName = domainMaybe.get().toString();
-    final String domainTitleCase = StringUtils.capitalize(domainName);
+    final String domainTitleCase = toTitleCase(domainName);
 
     final ImmutableMap<String, QueryParameterValue> queryParameterValuesByDomain =
         ImmutableMap.of(
@@ -575,7 +574,7 @@ public class DataSetServiceImpl implements DataSetService {
         bigQueryService.executeQuery(
             buildQueryJobConfiguration(
                 queryParameterValuesByDomain,
-                SELCECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST));
+                SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST));
 
     final ImmutableList<String> valueSelects =
         StreamSupport.stream(valuesLinkingTableResult.getValues().spliterator(), false)
@@ -591,6 +590,21 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(ImmutableList.toImmutableList());
 
     return new ValuesLinkingPair(valueSelects, valueJoins);
+  }
+
+  // Capitalizes the first letter of a string and lowers the remaining ones.
+  // Assumes a single word, so you'd get "A tale of two cities" instead of
+  // "A Tale Of Two Cities"
+  private static String toTitleCase(String name) {
+    if (name.isEmpty()) {
+      return name;
+    } else if (name.length() == 1) {
+      return name.toUpperCase();
+    } else {
+      return String.format(
+          "%s%s",
+          Character.toString(name.charAt(0)).toUpperCase(), name.substring(1).toLowerCase());
+    }
   }
 
   private static String generateNotebookUserCode(

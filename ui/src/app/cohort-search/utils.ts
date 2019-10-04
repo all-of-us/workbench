@@ -1,3 +1,4 @@
+import {TitleCasePipe} from '@angular/common';
 import {
   CriteriaSubType,
   CriteriaType,
@@ -32,7 +33,11 @@ export function nameDisplay(parameter): string {
   if (parameter.type === CriteriaType.AGE || parameter.type === CriteriaType.DECEASED) {
     return '';
   } else {
-    return stripHtml(parameter.name);
+    let name = stripHtml(parameter.name);
+    if (parameter.type === CriteriaType.ETHNICITY || parameter.type === CriteriaType.RACE) {
+      name = new TitleCasePipe().transform(name);
+    }
+    return name;
   }
 }
 

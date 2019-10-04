@@ -383,6 +383,14 @@ export function formatRecentResourceDisplayDate(time: string): string {
   return date.toDateString().split(' ').slice(1).join(' ');
 }
 
+export function formatDomainString(domainString: string): string {
+  return fp.capitalize(domainString);
+}
+
+export function formatDomain(domain: FetchDomain): string {
+  return formatDomainString(domain.toString());
+}
+
 // Given a value and an array, return a new array with the value appended.
 export const append = fp.curry((value, arr) => fp.concat(arr, [value]));
 
