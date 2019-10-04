@@ -1,0 +1,267 @@
+import {Component, Input} from '@angular/core';
+import * as React from 'react';
+
+import {initExisting, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {attributeDisplay, domainToTitle, mapGroupItem, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
+import {Clickable} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
+import {Menu} from 'primereact/menu';
+import Timeout = NodeJS.Timeout;
+
+const styles = reactStyles({
+  lineItem: {
+    minWidth: 0,
+    flex: 4,
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis'
+  },
+  codeText: {
+    fontWeight: 300,
+    fontSize: '12px',
+    color: '#333333'
+  }
+});
+
+interface Props {
+  role: keyof SearchRequest;
+  groupId: string;
+  item: any;
+  index: number;
+  updateGroup: Function;
+}
+interface State {
+  count: number;
+  error: boolean;
+  loading: boolean;
+  status: string;
+}
+export const SearchGroupItem = withCurrentWorkspace()(
+  class extends React.Component<Props, State> {
+    dropdown: any;
+    timeout: Timeout;
+    constructor(props: Props) {
+      super(props);
+      this.state = {count: null, error: false, loading: true, status: props.item.status};
+    }
+
+    componentDidMount(): void {
+      this.getItemCount();
+    }
+
+    getItemCount() {
+      const {index, item, role, updateGroup} = this.props;
+      // prevent multiple group count calls when initializing multiple items simultaneously
+      // (on cohort edit or clone)
+      const init = initExisting.getValue();
+      if (!init || (init && index === 0)) {
+        updateGroup();
+      }
+      try {
+        const {cdrVersionId} = currentWorkspaceStore.getValue();
+        const mappedItem = mapGroupItem(item, false);
+        const request = {
+          includes: [],
+          excludes: [],
+          [role]: [{items: [mappedItem], temporal: false}]
+        };
+        cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
+          this.setState({count, loading: false});
+        }, (err) => {
+          console.error(err);
+          this.setState({error: true, loading: false});
+        });
+      } catch (error) {
+        console.error(error);
+        this.setState({error: true, loading: false});
+      }
+    }
+
+    get codeType() {
+      const {item: {type}} = this.props;
+      return domainToTitle(type);
+    }
+
+    get codeTypeDisplay() {
+      return `${this.codeType} ${this.pluralizedCode}`;
+    }
+
+    get pluralizedCode() {
+      return this.parameters.length > 1 ? 'Codes' : 'Code';
+    }
+
+    get status() {
+      const {item: {status}} = this.props;
+      return status;
+    }
+
+    get parameters() {
+      const {item: {searchParameters}} = this.props;
+      return searchParameters;
+    }
+
+    get codes() {
+      const {item: {type}} = this.props;
+      const formatter = (param) => {
+        let funcs = [typeDisplay, attributeDisplay];
+        if (type === DomainType.PERSON) {
+          funcs = [typeDisplay, nameDisplay, attributeDisplay];
+        } else if (type === DomainType.PHYSICALMEASUREMENT
+          || type === DomainType.VISIT
+          || type === DomainType.DRUG
+          || type === DomainType.MEASUREMENT
+          || type === DomainType.SURVEY) {
+          funcs = [nameDisplay];
+        }
+        return funcs.map(f => f(param)).join(' ').trim();
+      };
+      const sep = type === DomainType[DomainType.PERSON] ? '; ' : ', ';
+      return this.parameters.map(formatter).join(sep);
+    }
+
+    enable() {
+      const {item} = this.props;
+      triggerEvent('Enable', 'Click', 'Enable - Suppress Criteria - Cohort Builder');
+      item.status = 'active';
+      // this.setState({item});
+      this.updateSearchRequest();
+    }
+
+    suppress() {
+      triggerEvent('Suppress', 'Click', 'Snowman - Suppress Criteria - Cohort Builder');
+      this.setState({status: 'hidden'});
+      this.updateSearchRequest();
+    }
+
+    remove() {
+      triggerEvent('Delete', 'Click', 'Snowman - Delete Criteria - Cohort Builder');
+      this.setState({status: 'pending'});
+      this.updateSearchRequest();
+      this.timeout = setTimeout(() => {
+        this.updateSearchRequest(true);
+      }, 10000);
+    }
+
+    undo() {
+      triggerEvent('Undo', 'Click', 'Undo - Delete Criteria - Cohort Builder');
+      clearTimeout(this.timeout);
+      this.setState({status: 'active'});
+      this.updateSearchRequest();
+    }
+
+    updateSearchRequest(remove?: boolean) {
+      const sr = searchRequestStore.getValue();
+      const {item, groupId, role, updateGroup} = this.props;
+      const groupIndex = sr[role].findIndex(grp => grp.id === groupId);
+      if (groupIndex > -1) {
+        const itemIndex = sr[role][groupIndex].items.findIndex(it => it.id === item.id);
+        if (itemIndex > -1) {
+          if (remove) {
+            sr[role][groupIndex].items = sr[role][groupIndex].items.filter(it => it.id !== item.id);
+            searchRequestStore.next(sr);
+          } else {
+            sr[role][groupIndex].items[itemIndex] = item;
+            searchRequestStore.next(sr);
+            updateGroup();
+          }
+        }
+      }
+    }
+
+    get typeAndStandard() {
+      const {item: {type}} = this.props;
+      switch (type) {
+        case DomainType.PERSON:
+          const _type = this.parameters[0].type === CriteriaType.DECEASED
+            ? CriteriaType.AGE : this.parameters[0].type;
+          return {_type, standard: false};
+        case DomainType.PHYSICALMEASUREMENT:
+          return {type: this.parameters[0].type, standard: false};
+        case DomainType.SURVEY:
+          return {type: this.parameters[0].type, standard: false};
+        case DomainType.VISIT:
+          return {type: this.parameters[0].type, standard: true};
+        default:
+          return {type: null, standard: null};
+      }
+    }
+
+    launchWizard() {
+      triggerEvent('Edit', 'Click', 'Snowman - Edit Criteria - Cohort Builder');
+      const {item, item: {fullTree, groupId, role, searchParameters}} = this.props;
+      const selections = searchParameters.map(sp => sp.parameterId);
+      selectionsStore.next(selections);
+      const _item = JSON.parse(JSON.stringify(item));
+      const itemId = _item.id;
+      const domain = _item.type;
+      let isStandard;
+      if ([DomainType.CONDITION, DomainType.PROCEDURE].includes(domain)) {
+        isStandard = item.searchParameters[0].isStandard;
+      }
+      const {type, standard} = this.typeAndStandard;
+      const context = {item, domain, type, isStandard, role, groupId, itemId, fullTree, standard};
+      wizardStore.next(context);
+    }
+
+    render() {
+      const {count, error, loading, status} = this.state;
+      const items = [
+        {label: 'Edit criteria', command: () => this.launchWizard()},
+        {label: 'Suppress criteria from total count', command: () => this.suppress()},
+        {label: 'Delete criteria', command: () => this.remove()},
+      ];
+      return <React.Fragment>
+        {status !== 'deleted' && <div style={{display: 'flex'}}>
+          {(status === 'active' || !status) && <div style={styles.lineItem}>
+            <Menu appendTo={document.body} model={items} popup={true} ref={el => this.dropdown = el} />
+            <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}} onClick={(event) => this.dropdown.toggle(event)}>
+              <ClrIcon shape='ellipsis-vertical' />
+            </Clickable>
+            <small style={{paddingRight: '10px', fontSize: '12px'}} onClick={() => this.launchWizard()}>
+              <span style={styles.codeText}>Contains {this.codeTypeDisplay}</span>
+            </small>
+            {status !== 'hidden' && <small style={{...styles.codeText, paddingRight: '10px'}}>|</small>}
+            {loading && <span className='spinner spinner-inline'>Loading...</span>}
+            {!loading && status !== 'hidden' && <small style={styles.codeText}>{count.toLocaleString()}</small>}
+            {error && <span><ClrIcon style={{color: '#f7981c'}} shape='exclamation-triangle' className='is-solid' size={22} /></span>}
+          </div>}
+          {status === 'pending' && <div style={{color: '#E28327'}}>
+            <ClrIcon shape='exclamation-triangle' className='is-solid' size={23} />
+            <span style={{fontSize: '12px', margin: '0 0 2px 2px'}}>
+              This criteria has been deleted
+              <button className='btn btn-link' onClick={() => this.undo()}>UNDO</button>
+            </span>
+          </div>}
+          {status === 'hidden' && <div style={{color: '#E28327'}}>
+            <ClrIcon shape='eye-hide' className='is-solid' size={23} />
+            <span style={{fontSize: '12px', margin: '0 0 2px 2px'}}>
+              This criteria has been suppressed
+              <button className='btn btn-link' onClick={() => this.enable()}>ENABLE</button>
+            </span>
+          </div>}
+        </div>}
+      </React.Fragment>;
+    }
+  }
+);
+
+@Component({
+  selector: 'app-list-search-group-item',
+  template: '<div #root></div>'
+})
+export class SearchGroupItemComponent extends ReactWrapperBase {
+  @Input('role') role: Props['role'];
+  @Input('groupId') groupId: Props['groupId'];
+  @Input('item') item: Props['item'];
+  @Input('index') index: Props['index'];
+  @Input('updateGroup') updateGroup: Props['updateGroup'];
+
+  constructor() {
+    super(SearchGroupItem, ['role', 'groupId', 'item', 'index', 'updateGroup']);
+  }
+}
