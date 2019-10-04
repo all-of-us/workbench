@@ -559,11 +559,11 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(Collectors.toList()));
 
     final String domainName = domainMaybe.get().toString();
-    final String domainTitleCase = capitalizeFirstCharacterOnly(domainName);
+    final String domainFirstCharacterCapitalized = capitalizeFirstCharacterOnly(domainName);
 
     final ImmutableMap<String, QueryParameterValue> queryParameterValuesByDomain =
         ImmutableMap.of(
-            "pDomain", QueryParameterValue.string(domainTitleCase),
+            "pDomain", QueryParameterValue.string(domainFirstCharacterCapitalized),
             "pValuesList",
                 QueryParameterValue.array(
                     valuesUppercaseBuilder.build().toArray(new String[0]), String.class));
@@ -594,15 +594,15 @@ public class DataSetServiceImpl implements DataSetService {
   // Assumes a single word, so you'd get "A tale of two cities" instead of
   // "A Tale Of Two Cities"
   @VisibleForTesting
-  public static String capitalizeFirstCharacterOnly(String name) {
-    if (name.isEmpty()) {
-      return name;
-    } else if (name.length() == 1) {
-      return name.toUpperCase();
+  public static String capitalizeFirstCharacterOnly(String text) {
+    if (text.isEmpty()) {
+      return text;
+    } else if (text.length() == 1) {
+      return text.toUpperCase();
     } else {
       return String.format(
           "%s%s",
-          Character.toString(name.charAt(0)).toUpperCase(), name.substring(1).toLowerCase());
+          Character.toString(text.charAt(0)).toUpperCase(), text.substring(1).toLowerCase());
     }
   }
 
