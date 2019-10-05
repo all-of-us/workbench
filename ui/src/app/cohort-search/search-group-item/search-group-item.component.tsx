@@ -7,11 +7,12 @@ import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
+import {OverlayPanel} from 'primereact/overlaypanel';
 import Timeout = NodeJS.Timeout;
 
 const styles = reactStyles({
@@ -41,7 +42,7 @@ const styles = reactStyles({
   }
 });
 
-const menuStyles = `
+const itemStyles = `
   body .p-menu .p-menu-list {
     padding: 0.5rem 0;
   }
@@ -72,6 +73,7 @@ interface State {
 
 export class SearchGroupItem extends React.Component<Props, State> {
   dropdown: any;
+  op: any;
   timeout: Timeout;
   constructor(props: Props) {
     super(props);
@@ -80,6 +82,11 @@ export class SearchGroupItem extends React.Component<Props, State> {
 
   componentDidMount(): void {
     this.getItemCount();
+  }
+
+  componentDidUpdate(prevProps: Readonly<Props>): void {
+    console.log(prevProps);
+    console.log(this.props);
   }
 
   getItemCount() {
@@ -210,7 +217,7 @@ export class SearchGroupItem extends React.Component<Props, State> {
 
   launchWizard() {
     triggerEvent('Edit', 'Click', 'Snowman - Edit Criteria - Cohort Builder');
-    const {item, item: {fullTree, groupId, role, searchParameters}} = this.props;
+    const {groupId, item, item: {fullTree, searchParameters}, role} = this.props;
     const selections = searchParameters.map(sp => sp.parameterId);
     selectionsStore.next(selections);
     const _item = JSON.parse(JSON.stringify(item));
@@ -234,16 +241,23 @@ export class SearchGroupItem extends React.Component<Props, State> {
       {label: 'Delete criteria', command: () => this.remove()},
     ];
     return <React.Fragment>
-      <style>{menuStyles}</style>
+      <style>{itemStyles}</style>
       {status !== 'deleted' && <div style={{display: 'flex', fontSize: '12px'}}>
         {(status === 'active' || !status) && <div style={styles.lineItem}>
           <Menu style={styles.menu} appendTo={document.body} model={items} popup={true} ref={el => this.dropdown = el} />
           <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}} onClick={(event) => this.dropdown.toggle(event)}>
             <ClrIcon shape='ellipsis-vertical' />
           </Clickable>
-          <span style={{paddingRight: '10px'}} onClick={() => this.launchWizard()}>
+          <span style={{paddingRight: '10px'}}
+                onClick={() => this.launchWizard()}
+                onMouseEnter={(e) => this.op.toggle(e)}
+                onMouseLeave={(e) => this.op.toggle(e)}>
             <span className='item-title' style={styles.codeText}>Contains {this.codeTypeDisplay}</span>
           </span>
+          <OverlayPanel ref={(el) => this.op = el} appendTo={document.body} style={{maxWidth: '15rem'}}>
+            <h3 style={{margin: 0}}>{this.codeTypeDisplay}</h3>
+            {this.codes}
+          </OverlayPanel>
           {status !== 'hidden' && <span style={{...styles.codeText, paddingRight: '10px'}}>|</span>}
           {loading && <span className='spinner spinner-inline'>Loading...</span>}
           {showCount && <span style={styles.codeText}>{count.toLocaleString()}</span>}
