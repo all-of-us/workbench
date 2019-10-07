@@ -75,7 +75,7 @@ const resourceTypeStyles = reactStyles({
   conceptSet: {
     backgroundColor: colors.resourceCardHighlights.conceptSet
   },
-  dataSet: {
+  dataset: {
     backgroundColor: colors.resourceCardHighlights.dataSet
   }
 });

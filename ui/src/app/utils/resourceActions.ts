@@ -13,7 +13,7 @@ export enum ResourceType {
   COHORT = 'cohort',
   COHORT_REVIEW = 'cohortReview',
   CONCEPT_SET = 'conceptSet',
-  DATA_SET = 'dataSet',
+  DATA_SET = 'dataset',
   INVALID = 'invalid'
 }
 
