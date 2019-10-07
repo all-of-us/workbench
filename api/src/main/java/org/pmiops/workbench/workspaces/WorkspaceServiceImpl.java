@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -508,11 +509,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     long userId = userProvider.get().getUserId();
     List<UserRecentWorkspace> userRecentWorkspaces =
         userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
-    enforceFirecloudAclsInRecentWorkspaces(userRecentWorkspaces);
-    return userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
+    return pruneInaccessibleRecentWorkspaces(userRecentWorkspaces);
   }
 
-  private List<UserRecentWorkspace> enforceFirecloudAclsInRecentWorkspaces(
+  private List<UserRecentWorkspace> pruneInaccessibleRecentWorkspaces(
       List<UserRecentWorkspace> recentWorkspaces) {
     List<Workspace> dbWorkspaces =
         workspaceDao.findAllByWorkspaceIdIn(
@@ -520,7 +520,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                 .map(UserRecentWorkspace::getWorkspaceId)
                 .collect(Collectors.toList()));
 
-    ImmutableList<Long> idsToDelete =
+    Set<Long> idsToDelete =
         dbWorkspaces.stream()
             .filter(
                 workspace -> {
@@ -535,7 +535,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                   return false;
                 })
             .map(Workspace::getWorkspaceId)
-            .collect(ImmutableList.toImmutableList());
+            .collect(Collectors.toSet());
 
     if (!idsToDelete.isEmpty()) {
       userRecentWorkspaceDao.deleteByWorkspaceIdIn(idsToDelete);

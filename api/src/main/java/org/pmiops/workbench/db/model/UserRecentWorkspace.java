@@ -55,19 +55,19 @@ public class UserRecentWorkspace {
   }
 
   @Override
-  public int hashCode() {
-    return Objects.hash(workspaceId, userId);
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    UserRecentWorkspace that = (UserRecentWorkspace) o;
+    return id == that.id &&
+            lastAccessDate.equals(that.lastAccessDate) &&
+            userId.equals(that.userId) &&
+            workspaceId.equals(that.workspaceId);
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof UserRecentWorkspace)) {
-      return false;
-    }
-    UserRecentWorkspace that = (UserRecentWorkspace) obj;
-    return this.workspaceId.equals(that.workspaceId)
-        && this.userId.equals(that.userId)
-        && this.lastAccessDate.equals(that.lastAccessDate);
+  public int hashCode() {
+    return Objects.hash(lastAccessDate, id, userId, workspaceId);
   }
 
   public UserRecentWorkspace() {}
