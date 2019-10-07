@@ -412,73 +412,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getParticipantConditionsPagination() {
-    stubMockFirecloudGetWorkspace();
-
-    PageFilterRequest testFilter =
-        new PageFilterRequest().domain(DomainType.CONDITION).page(0).pageSize(1);
-
-    // page 1 should have 1 item
-    ParticipantDataListResponse response =
-        controller
-            .getParticipantData(
-                NAMESPACE,
-                NAME,
-                reviewWithoutEHRData.getCohortReviewId(),
-                PARTICIPANT_ID,
-                testFilter)
-            .getBody();
-
-    assertResponse(response, ImmutableList.of(expectedCondition1()), 2);
-
-    // page 2 should have 1 item
-    testFilter.page(1);
-    response =
-        controller
-            .getParticipantData(
-                NAMESPACE,
-                NAME,
-                reviewWithoutEHRData.getCohortReviewId(),
-                PARTICIPANT_ID,
-                testFilter)
-            .getBody();
-    assertResponse(response, ImmutableList.of(expectedCondition2()), 2);
-  }
-
-  @Test
-  public void getParticipantAllEventsPagination() {
-    PageFilterRequest testFilter =
-        new PageFilterRequest().domain(DomainType.ALL_EVENTS).page(0).pageSize(1);
-
-    // page 1 should have 1 item
-    ParticipantDataListResponse response =
-        controller
-            .getParticipantData(
-                NAMESPACE,
-                NAME,
-                reviewWithoutEHRData.getCohortReviewId(),
-                PARTICIPANT_ID2,
-                testFilter)
-            .getBody();
-
-    assertResponse(response, ImmutableList.of(expectedAllEvents1()), 2);
-
-    // page 2 should have 1 item
-    testFilter.page(1);
-    response =
-        controller
-            .getParticipantData(
-                NAMESPACE,
-                NAME,
-                reviewWithoutEHRData.getCohortReviewId(),
-                PARTICIPANT_ID2,
-                testFilter)
-            .getBody();
-
-    assertResponse(response, ImmutableList.of(expectedAllEvents2()), 2);
-  }
-
-  @Test
   public void getParticipantAllEventsSorting() {
     PageFilterRequest testFilter = new PageFilterRequest().domain(DomainType.ALL_EVENTS);
 
@@ -537,6 +470,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .standardName("SNOMED")
             .standardVocabulary("SNOMED")
             .startDate("2008-08-01");
+    ParticipantChartData expectedData3 =
+        new ParticipantChartData()
+            .ageAtEvent(21)
+            .rank(1)
+            .standardName("name")
+            .standardVocabulary("CPT4")
+            .startDate("2001-12-03");
     assertThat(response.getItems().size()).isEqualTo(2);
     assertThat(expectedData1).isIn(response.getItems());
     assertThat(expectedData2).isIn(response.getItems());
@@ -723,7 +663,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private void assertResponse(
       ParticipantDataListResponse response, List<ParticipantData> expectedData, int totalCount) {
     List<ParticipantData> data = response.getItems();
-    assertThat(response.getCount()).isEqualTo(totalCount);
     assertThat(data.size()).isEqualTo(expectedData.size());
     int i = 0;
     for (ParticipantData actualData : data) {

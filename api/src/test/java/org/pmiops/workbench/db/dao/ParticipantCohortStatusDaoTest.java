@@ -261,6 +261,40 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
+  public void findAllParticipantIdBetween() throws Exception {
+    PageRequest pageRequest =
+        new PageRequest()
+            .page(PAGE)
+            .pageSize(PAGE_SIZE)
+            .sortOrder(SortOrder.ASC)
+            .sortColumn(FilterColumns.PARTICIPANTID.toString());
+    List<Filter> filters = new ArrayList<>();
+    filters.add(
+        new Filter()
+            .property(FilterColumns.PARTICIPANTID)
+            .operator(Operator.BETWEEN)
+            .values(Arrays.asList("1", "2")));
+
+    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
+
+    assertEquals(2, results.size());
+
+    ParticipantCohortStatus expectedPCS1 =
+        createExpectedPCS(
+            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
+            CohortStatus.INCLUDED);
+    expectedPCS1.setBirthDate(results.get(0).getBirthDate());
+    ParticipantCohortStatus expectedPCS2 =
+        createExpectedPCS(
+            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
+            CohortStatus.EXCLUDED);
+    expectedPCS2.setBirthDate(results.get(0).getBirthDate());
+
+    assertEquals(expectedPCS1, results.get(0));
+    assertEquals(expectedPCS2, results.get(1));
+  }
+
+  @Test
   public void findAllSearchCriteriaIn() {
     PageRequest pageRequest =
         new PageRequest()

@@ -2798,6 +2798,31 @@ paths:
           description: A collection of ParticipantConditions.
           schema:
             "$ref": "#/definitions/ParticipantDataListResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/count":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/cohortReviewId"
+      - "$ref": "#/parameters/participantId"
+      post:
+        tags:
+          - cohortReview
+        consumes:
+          - application/json
+      description: Returns a count based on page, limit, order, sort column and/or filter.
+      operationId: getParticipantCount
+      parameters:
+      - in: body
+        name: request
+        required: true
+        description: request body for getting list of participant data.
+        schema:
+          "$ref": "#/definitions/PageFilterRequest"
+      responses:
+        200:
+          description: A count of Participants.
+          schema:
+            "$ref": "#/definitions/ParticipantDataCountResponse"
   ? "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}"
   : parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -6677,6 +6702,15 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ParticipantData"
+      count:
+        type: integer
+        format: int64
+        description: the total count of items.
+  ParticipantDataCountResponse:
+    type: object
+    required:
+    - count
+    properties:
       count:
         type: integer
         format: int64
