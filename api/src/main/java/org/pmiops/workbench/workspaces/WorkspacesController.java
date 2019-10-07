@@ -10,6 +10,8 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableBiMap.Builder;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -31,6 +33,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.api.WorkspacesApiDelegate;
+import org.pmiops.workbench.audit.ActionAuditService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -109,6 +112,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final NotebooksService notebooksService;
   private final UserService userService;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
+  private ActionAuditService actionAuditService;
 
   @Autowired
   public WorkspacesController(
@@ -123,7 +127,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Clock clock,
       NotebooksService notebooksService,
       UserService userService,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      ActionAuditService actionAuditService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.workspaceMapper = workspaceMapper;
@@ -136,6 +141,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.notebooksService = notebooksService;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.actionAuditService = actionAuditService;
   }
 
   @VisibleForTesting
@@ -265,8 +271,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-
-    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    fireCreateWorkspaceAction(createdWorkspace);
+    return ResponseEntity.ok(createdWorkspace);
   }
 
   @Override
@@ -747,4 +754,22 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
     return ResponseEntity.ok(new EmptyResponse());
   }
+
+  // Generate an action for the created workspace, capturing all required fields
+  private void fireCreateWorkspaceAction(Workspace createdWorkspace) {
+    String actionId = ActionAuditService.newActionId();
+    long userId = userProvider.get().getUserId();
+    Map<String, String> propertyValues = buildPropertyStringMap(createdWorkspace);
+
+
+  }
+
+  private Map<String, String> buildPropertyStringMap(Workspace createdWorkspace) {
+    ImmutableMap.Builder<String, String> propsBuilder = new Builder<>();
+    propsBuilder.put("NAME", createdWorkspace.getName());
+    propsBuilder.put("INTENDED_STUDY", createdWorkspace.getResearchPurpose().getIntendedStudy());
+    propsBuilder.put("CREATOR", createdWorkspace.getCreator());
+    return propsBuilder.build();
+  }
+
 }

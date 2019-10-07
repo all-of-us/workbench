@@ -1,7 +1,9 @@
 package org.pmiops.workbench.audit;
 
-import org.junit.Assert;
+import static com.google.common.truth.Truth.assertThat;
+
 import org.junit.Test;
+import org.pmiops.workbench.audit.synthetic.AuditDataGenerator;
 
 public class AuditDataGeneratorTest {
 
@@ -10,6 +12,6 @@ public class AuditDataGeneratorTest {
     final long low = 1000L;
     final long high = 2000L;
     final long random = AuditDataGenerator.randomLongInRange(low, high);
-    Assert.assertThat(low).isLess
+    assertThat(low < high).isTrue();
   }
 }

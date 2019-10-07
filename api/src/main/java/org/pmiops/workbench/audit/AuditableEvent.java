@@ -1,16 +1,14 @@
 package org.pmiops.workbench.audit;
 
-import java.sql.Timestamp;
 import java.util.Optional;
 
-/** temporary "immutable" class until i cna get immutables to work in gradle
- *
- */
+/** temporary "immutable" class until i cna get immutables to work in gradle */
 public class AuditableEvent extends AbstractAuditableEvent {
 
   private final long timestamp;
   private final AgentType agentType;
   private final long agentId;
+  private final String actionId;
   private Optional<String> agentEmail;
   private final ActionType actionType;
   private final TargetType targetType;
@@ -19,13 +17,23 @@ public class AuditableEvent extends AbstractAuditableEvent {
   private final Optional<String> previousValueMaybe;
   private final Optional<String> newValueMaybe;
 
-  public AuditableEvent(long timestamp, AgentType agentType, long agentId, Optional<String> agentEmail,
-      ActionType actionType, TargetType targetType, Optional<String> targetPropertyMaybe, Optional<Long> targetIdMaybe,
-      Optional<String> previousValueMaybe, Optional<String> newValueMaybe) {
+  public AuditableEvent(
+      long timestamp,
+      AgentType agentType,
+      long agentId,
+      Optional<String> agentEmail,
+      String actionId,
+      ActionType actionType,
+      TargetType targetType,
+      Optional<String> targetPropertyMaybe,
+      Optional<Long> targetIdMaybe,
+      Optional<String> previousValueMaybe,
+      Optional<String> newValueMaybe) {
     this.timestamp = timestamp;
     this.agentType = agentType;
     this.agentId = agentId;
     this.agentEmail = agentEmail;
+    this.actionId = actionId;
     this.actionType = actionType;
     this.targetType = targetType;
     this.targetPropertyMaybe = targetPropertyMaybe;
@@ -55,6 +63,11 @@ public class AuditableEvent extends AbstractAuditableEvent {
   }
 
   @Override
+  public String actionId() {
+    return actionId;
+  }
+
+  @Override
   public ActionType actionType() {
     return actionType;
   }
@@ -81,6 +94,91 @@ public class AuditableEvent extends AbstractAuditableEvent {
 
   @Override
   public Optional<String> newValue() {
-    return previousValueMaybe;
+    return newValueMaybe;
+  }
+
+  public static class Builder {
+
+    private long timestamp;
+    private AgentType agentType;
+    private long agentId;
+    private Optional<String> agentEmail;
+    private String actionId;
+    private ActionType actionType;
+    private TargetType targetType;
+    private Optional<String> targetPropertyMaybe;
+    private Optional<Long> targetIdMaybe;
+    private Optional<String> previousValueMaybe;
+    private Optional<String> newValueMaybe;
+
+    public Builder setTimestamp(long timestamp) {
+      this.timestamp = timestamp;
+      return this;
+    }
+
+    public Builder setAgentType(AgentType agentType) {
+      this.agentType = agentType;
+      return this;
+    }
+
+    public Builder setAgentId(long agentId) {
+      this.agentId = agentId;
+      return this;
+    }
+
+    public Builder setAgentEmail(Optional<String> agentEmail) {
+      this.agentEmail = agentEmail;
+      return this;
+    }
+
+    public Builder setActionId(String actionId) {
+      this.actionId = actionId;
+      return this;
+    }
+
+    public Builder setActionType(ActionType actionType) {
+      this.actionType = actionType;
+      return this;
+    }
+
+    public Builder setTargetType(TargetType targetType) {
+      this.targetType = targetType;
+      return this;
+    }
+
+    public Builder setTargetPropertyMaybe(Optional<String> targetPropertyMaybe) {
+      this.targetPropertyMaybe = targetPropertyMaybe;
+      return this;
+    }
+
+    public Builder setTargetIdMaybe(Optional<Long> targetIdMaybe) {
+      this.targetIdMaybe = targetIdMaybe;
+      return this;
+    }
+
+    public Builder setPreviousValueMaybe(Optional<String> previousValueMaybe) {
+      this.previousValueMaybe = previousValueMaybe;
+      return this;
+    }
+
+    public Builder setNewValueMaybe(Optional<String> newValueMaybe) {
+      this.newValueMaybe = newValueMaybe;
+      return this;
+    }
+
+    public AuditableEvent build() {
+      return new AuditableEvent(
+          timestamp,
+          agentType,
+          agentId,
+          agentEmail,
+          actionId,
+          actionType,
+          targetType,
+          targetPropertyMaybe,
+          targetIdMaybe,
+          previousValueMaybe,
+          newValueMaybe);
+    }
   }
 }

@@ -1,48 +1,6 @@
-buildscript {    // Configuration for building
-  ext {
-    GAE_VERSION = '1.9.64'
-    SPRING_BOOT_VERSION = '1.5.22.RELEASE'
-    JACKSON_VERSION = '2.9.9'
-    JACKSON_DATABIND_VERSION = '2.9.9.3'  // security update on 2.9.9
-    ELASTICSEARCH_VERSION = '6.6.1'
-  }
-
-  repositories {
-    jcenter()    // Bintray's repository - a fast Maven Central mirror & more
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${SPRING_BOOT_VERSION}"
-    classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
-    classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
-    classpath 'io.swagger:swagger-codegen:2.2.3'
-    classpath 'org.owasp:dependency-check-gradle:5.1.0'
-    classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
-  }
-}
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath "org.mozilla.apt:gradle-plugin:0.1-SNAPSHOT"
-  }
-}
-plugins {
-  id 'java-library'
-  id 'net.ltgt.apt' version '0.19'
-  id 'net.ltgt.apt-eclipse' version '0.19'
-  id 'net.ltgt.apt-idea' version '0.19'
-//  id "org.mozilla.apt" version "0.1-SNAPSHOT"
-}
-apply plugin: "org.mozilla.apt"
-
-import io.swagger.codegen.DefaultGenerator
 import io.swagger.codegen.config.CodegenConfigurator
+import io.swagger.codegen.DefaultGenerator
+import org.gradle.api.tasks.JavaExec
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
@@ -240,7 +198,6 @@ buildscript {    // Configuration for building
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
   }
 }
-// utils for logging and generating random values
 
 ext['hibernate.version'] = HIBERNATE_VERSION
 
@@ -424,20 +381,8 @@ dependencies {
   compile 'org.json:json:20160810'
 
   compile 'com.github.fge:json-patch:1.9'
-  // new StackDriver "Cloud Logging" Client
+  // ßStackDriver "Cloud Logging" Client
   compile 'com.google.cloud:google-cloud-logging:1.90.0'
-
-  // new StackDriver "Cloud Logging" Client
-  compile 'com.google.cloud:google-cloud-logging:1.90.0'
-
-  apt "org.immutables:value:2.7.3"
-  compileOnly "org.immutables:value:2.7.3:annotations"
-  compileOnly "org.immutables:builder:2.7.3"
-  compileOnly "org.immutables:gson:2.7.3:annotations"
-//  compile 'org.immutables:value:2.8.0'
-//  annotationProcessor "org.immutables:value:2.7.3"
-//  api "org.immutables:value-annotations:2.7.3" // or implementation, or compileOnly
-
   toolsCompile 'commons-cli:commons-cli:1.4'
 
   testCompile 'junit:junit:4.12'

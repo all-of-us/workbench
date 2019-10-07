@@ -1,6 +1,8 @@
-package org.pmiops.workbench.audit;
+package org.pmiops.workbench.audit.synthetic;
 
 import com.google.cloud.logging.LogEntry;
+import com.google.cloud.logging.Logging;
+import com.google.cloud.logging.LoggingOptions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.security.SecureRandom;
@@ -9,19 +11,36 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
+import org.elasticsearch.common.UUIDs;
+import org.pmiops.workbench.audit.AbstractAuditableEvent;
+import org.pmiops.workbench.audit.ActionType;
+import org.pmiops.workbench.audit.AgentType;
+import org.pmiops.workbench.audit.AuditableEvent.Builder;
+import org.pmiops.workbench.audit.TargetType;
 
 public class AuditDataGenerator {
   private static final SecureRandom random = new SecureRandom();
-  private static final List<String> USER_EMAIL_ADDRESSES = ImmutableList.of(
-      "a@b.co", "x@y.z", "me@there.now", "allyourbase@belongto.us", "genomeo77@dna.biz");
+  private static final List<String> USER_EMAIL_ADDRESSES =
+      ImmutableList.of(
+          "a@b.co", "x@y.z", "me@there.now", "allyourbase@belongto.us", "genomeo77@dna.biz");
   private static final List<String> TARGET_PROPERTIES =
-      ImmutableList.of("HEIGHT", "WIDTH", "VOLUME", "LUMINOSITY", "REFRACTION",
-          "OWNER", "RENTER");
-  private static final List<String> TARGET_PROPERTY_VALUES = ImmutableList.of("3", "red", "\t\uD83C\uDFA9\n",
-      "blue", "leavy", "heavy", "105", "867-5309", "lorem", "ipsum");
-  private static final float INCLUDE_THRESHOLD = 0.04f;
+      ImmutableList.of("HEIGHT", "WIDTH", "VOLUME", "LUMINOSITY", "REFRACTION", "OWNER", "RENTER");
+  private static final List<String> TARGET_PROPERTY_VALUES =
+      ImmutableList.of(
+          "3",
+          "red",
+          "\t\uD83C\uDFA9\n",
+          "blue",
+          "leavy",
+          "heavy",
+          "105",
+          "867-5309",
+          "lorem",
+          "ipsum");
+  private static final float INCLUDE_THRESHOLD = 0.95f;
   /**
    * Generate a large number of random LogEntries
+   *
    * @param numRows
    */
   public static List<LogEntry> generateRandomLogEntries(int numRows) {
@@ -32,27 +51,34 @@ public class AuditDataGenerator {
   }
 
   private static LogEntry generateEntry() {
+    final String actionId = UUIDs.randomBase64UUID();
     final long timestamp = randomTimeInTrailingDuration(Duration.ofDays(365 * 2));
     final AgentType agentType = randomEnum(AgentType.class);
     final long agentId = random.nextInt(100); // agents are 0-99
     final Optional<String> agentEmail = buildOptionally(() -> randomFromList(USER_EMAIL_ADDRESSES));
     final ActionType actionType = randomEnum(ActionType.class);
     final TargetType targetType = randomEnum(TargetType.class);
-    final Optional<Long> targetId = Optional.of((long) random.nextInt(100) + 100); // targets are 100-199
-    final Optional<String> targetProperty = buildOptionally(() -> randomFromList(TARGET_PROPERTIES));
-    final Optional<String> previousValue = buildOptionally(() -> randomFromList(TARGET_PROPERTY_VALUES));
+    final Optional<Long> targetId =
+        Optional.of((long) random.nextInt(100) + 100); // targets are 100-199
+    final Optional<String> targetProperty =
+        buildOptionally(() -> randomFromList(TARGET_PROPERTIES));
+    final Optional<String> previousValue =
+        buildOptionally(() -> randomFromList(TARGET_PROPERTY_VALUES));
     final Optional<String> newValue = buildOptionally(() -> randomFromList(TARGET_PROPERTY_VALUES));
-    final AbstractAuditableEvent event = new AuditableEvent(
-        timestamp,
-        agentType,
-        agentId,
-        agentEmail,
-        actionType,
-        targetType,
-        targetProperty,
-        targetId,
-        previousValue,
-        newValue);
+    final AbstractAuditableEvent event =
+        new Builder()
+            .setActionId(actionId)
+            .setTimestamp(timestamp)
+            .setAgentType(agentType)
+            .setAgentId(agentId)
+            .setAgentEmail(agentEmail)
+            .setActionType(actionType)
+            .setTargetType(targetType)
+            .setTargetIdMaybe(targetId)
+            .setTargetPropertyMaybe(targetProperty)
+            .setPreviousValueMaybe(previousValue)
+            .setNewValueMaybe(newValue)
+            .build();
     return event.toLogEntry();
   }
 
@@ -89,5 +115,13 @@ public class AuditDataGenerator {
   private static <T> T randomFromList(List<T> values) {
     int index = random.nextInt(values.size());
     return values.get(index);
+  }
+
+  // doesn't work b/c process doesn't have correct credentials
+  public static void main(String args[]) {
+//      Logging logging = LoggingOptions.getDefaultInstance().getService();
+      List<LogEntry> entries = generateRandomLogEntries(200);
+      entries.forEach(entry -> System.out.println(entry.toString()));
+//      logging.write(entries);
   }
 }
