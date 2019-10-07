@@ -4,7 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import org.pmiops.workbench.model.GarbageCollectedProject;
 
 @Entity
 @Table(name = "billing_project_garbage_collection")
@@ -29,10 +28,5 @@ public class BillingProjectGarbageCollection {
 
   public void setOwner(String owner) {
     this.owner = owner;
-  }
-
-  // convert to Swagger model class
-  public GarbageCollectedProject toGarbageCollectedProject() {
-    return new GarbageCollectedProject().project(fireCloudProjectName).newOwner(owner);
   }
 }

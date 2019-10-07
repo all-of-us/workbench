@@ -88,7 +88,7 @@ class ExportDataSetModal extends React.Component<
       name: dataSet.name,
       conceptSetIds: dataSet.conceptSets.map(cs => cs.id),
       cohortIds: dataSet.cohorts.map(c => c.id),
-      values: dataSet.values,
+      domainValuePairs: dataSet.domainValuePairs,
       includesAllParticipants: dataSet.includesAllParticipants,
     };
     dataSetApi().generateCode(
@@ -111,13 +111,13 @@ class ExportDataSetModal extends React.Component<
   async exportDataSet() {
     this.setState({loading: true});
     const {dataSet, workspaceNamespace, workspaceFirecloudName} = this.props;
-    const request = {
+    const request: DataSetRequest = {
       name: dataSet.name,
       includesAllParticipants: dataSet.includesAllParticipants,
       description: dataSet.description,
       conceptSetIds: dataSet.conceptSets.map(cs => cs.id),
       cohortIds: dataSet.cohorts.map(c => c.id),
-      values: dataSet.values
+      domainValuePairs: dataSet.domainValuePairs
     };
     await dataSetApi().exportToNotebook(
       workspaceNamespace, workspaceFirecloudName,

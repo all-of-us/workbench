@@ -9,6 +9,7 @@ import {
 } from './account-creation';
 import {DataAccessLevel} from 'generated/fetch';
 import {AccountCreationOptions} from './account-creation-options';
+import {environment} from 'environments/environment';
 
 
 let props: AccountCreationProps;
@@ -38,7 +39,7 @@ beforeEach(() => {
       },
       institutionalAffiliations: [
         {
-          institution: undefined,
+          institution: "institution",
           nonAcademicAffiliation: undefined,
           role: undefined
         }
@@ -68,23 +69,25 @@ it('should handle family name validity', () => {
   expect(wrapper.exists('#familyNameError')).toBeTruthy();
 });
 
-it('should handle organization validity', () => {
-  const wrapper = component();
-  const testInput = fp.repeat(300, 'a');
-  expect(wrapper.exists('#organization')).toBeTruthy();
-  expect(wrapper.exists('#organizationError')).toBeFalsy();
-  wrapper.find('input#organization').simulate('change', {target: {value: testInput}});
-  expect(wrapper.exists('#organizationError')).toBeTruthy();
-});
+if (!environment.enableAccountPages) {
+  it('should handle organization validity', () => {
+    const wrapper = component();
+    const testInput = fp.repeat(300, 'a');
+    expect(wrapper.exists('#organization')).toBeTruthy();
+    expect(wrapper.exists('#organizationError')).toBeFalsy();
+    wrapper.find('input#organization').simulate('change', {target: {value: testInput}});
+    expect(wrapper.exists('#organizationError')).toBeTruthy();
+  });
 
-it('should handle current position validity', () => {
-  const wrapper = component();
-  const testInput = fp.repeat(300, 'a');
-  expect(wrapper.exists('#currentPosition')).toBeTruthy();
-  expect(wrapper.exists('#currentPositionError')).toBeFalsy();
-  wrapper.find('input#currentPosition').simulate('change', {target: {value: testInput}});
-  expect(wrapper.exists('#currentPositionError')).toBeTruthy();
-});
+  it('should handle current position validity', () => {
+    const wrapper = component();
+    const testInput = fp.repeat(300, 'a');
+    expect(wrapper.exists('#currentPosition')).toBeTruthy();
+    expect(wrapper.exists('#currentPositionError')).toBeFalsy();
+    wrapper.find('input#currentPosition').simulate('change', {target: {value: testInput}});
+    expect(wrapper.exists('#currentPositionError')).toBeTruthy();
+  });
+}
 
 it('should handle username validity starts with .', () => {
   const wrapper = component();
@@ -147,63 +150,64 @@ it('should handle invalid Email', () => {
   expect(wrapper.exists('#invalidEmailError')).toBeFalsy();
 });
 
-// it('should display Institution name and role option by default', () => {
-//   const wrapper = component();
-//   const institutionName = wrapper.find('[data-test-id="institutionname"]');
-//   expect(institutionName).toBeTruthy();
-//   const institutionRole = wrapper.find('[data-test-id="institutionRole"]');
-//   expect(institutionRole).toBeTruthy();
-//   expect(institutionRole.find('li').length).toBe(AccountCreationOptions.roles.length);
-//   expect(institutionRole.find('li').get(0).props.children).toBe(AccountCreationOptions.roles[0].label);
-// });
-//
-// it('should display Affiliation information if No is selected', () => {
-//   const wrapper = component();
-//   const institutionAffilationOption = wrapper.find('[data-test-id="show-institution-no"]')
-//     .find('input');
-//   expect(institutionAffilationOption).toBeTruthy();
-//   institutionAffilationOption.simulate('click');
-//   const affiliationDropDown = wrapper.find('Dropdown');
-//   const affiliationOptions = affiliationDropDown.find('DropdownItem');
-//   expect(affiliationOptions.length).toBe(AccountCreationOptions.affiliations.length);
-//   expect(affiliationOptions.find('li').get(0).props.children)
-//     .toBe(AccountCreationOptions.affiliations[0].label);
-// });
-//
-// it('should display Affiliation Roles should change as per affiliation', () => {
-//   const wrapper = component();
-//   const institutionAffilationOption = wrapper.find('[data-test-id="show-institution-no"]')
-//       .find('input');
-//   expect(institutionAffilationOption).toBeTruthy();
-//   institutionAffilationOption.simulate('click');
-//   const affiliationDropDown = wrapper.find('Dropdown');
-//   affiliationDropDown.simulate('click');
-//   const affiliationOptions = affiliationDropDown.find('DropdownItem');
-//
-//   // Industry affiliation
-//   affiliationOptions.find('DropdownItem').find('li').first().simulate('click');
-//   // affiliationOptions.childAt(0).simulate('click');
-//   let affilationRoleDropDowns = wrapper.find('[data-test-id="affiliationrole"]');
-//   expect(affilationRoleDropDowns).toBeTruthy();
-//   expect(affilationRoleDropDowns.find('li').length).toBe(AccountCreationOptions.industryRole.length);
-//
-//   expect(affilationRoleDropDowns.find('li').get(0).props.children)
-//     .toBe(AccountCreationOptions.industryRole[0].label);
-//
-//   // Education affiliation
-//   affiliationOptions.find('DropdownItem').find('li').at(1).simulate('click');
-//   // affiliationOptions.childAt(0).simulate('click');
-//   affilationRoleDropDowns = wrapper.find('[data-test-id="affiliationrole"]');
-//   expect(affilationRoleDropDowns).toBeTruthy();
-//   expect(affilationRoleDropDowns.find('li').length).toBe(AccountCreationOptions.eductionRole.length);
-//
-//   expect(affilationRoleDropDowns.find('li').get(0).props.children)
-//     .toBe(AccountCreationOptions.eductionRole[0].label);
-//
-//   // Community Scientist
-//   affiliationOptions.find('DropdownItem').find('li').at(2).simulate('click');
-//   // affiliationOptions.childAt(0).simulate('click');
-//   affilationRoleDropDowns = wrapper.find('[data-test-id="affiliationrole"]');
-//   expect(affilationRoleDropDowns.length).toBe(0);
-// });
-//
+if (environment.enableAccountPages) {
+  it('should display Institution name and role option by default', () => {
+    const wrapper = component();
+    const institutionName = wrapper.find('[data-test-id="institutionname"]');
+    expect(institutionName).toBeTruthy();
+    const institutionRole = wrapper.find('[data-test-id="institutionRole"]');
+    expect(institutionRole).toBeTruthy();
+    expect(institutionRole.find('li').length).toBe(AccountCreationOptions.roles.length);
+    expect(institutionRole.find('li').get(0).props.children).toBe(AccountCreationOptions.roles[0].label);
+  });
+
+  it('should display Affiliation information if No is selected', () => {
+    const wrapper = component();
+    const institutionAffilationOption = wrapper.find('[data-test-id="show-institution-no"]')
+      .find('input');
+    expect(institutionAffilationOption).toBeTruthy();
+    institutionAffilationOption.simulate('click');
+    const affiliationDropDown = wrapper.find('Dropdown');
+    const affiliationOptions = affiliationDropDown.find('DropdownItem');
+    expect(affiliationOptions.length).toBe(AccountCreationOptions.nonAcademicAffiliations.length);
+    expect(affiliationOptions.find('li').get(0).props.children)
+      .toBe(AccountCreationOptions.nonAcademicAffiliations[0].label);
+  });
+
+  it('should display Affiliation Roles should change as per affiliation', () => {
+    const wrapper = component();
+    const institutionAffilationOption = wrapper.find('[data-test-id="show-institution-no"]')
+      .find('input');
+    expect(institutionAffilationOption).toBeTruthy();
+    institutionAffilationOption.simulate('click');
+    const affiliationDropDown = wrapper.find('Dropdown');
+    affiliationDropDown.simulate('click');
+    const affiliationOptions = affiliationDropDown.find('DropdownItem');
+
+    // Industry affiliation
+    affiliationOptions.find('DropdownItem').find('li').first().simulate('click');
+    // affiliationOptions.childAt(0).simulate('click');
+    let affilationRoleDropDowns = wrapper.find('[data-test-id="affiliationrole"]');
+    expect(affilationRoleDropDowns).toBeTruthy();
+    expect(affilationRoleDropDowns.find('li').length).toBe(AccountCreationOptions.industryRole.length);
+
+    expect(affilationRoleDropDowns.find('li').get(0).props.children)
+      .toBe(AccountCreationOptions.industryRole[0].label);
+
+    // Education affiliation
+    affiliationOptions.find('DropdownItem').find('li').at(1).simulate('click');
+    // affiliationOptions.childAt(0).simulate('click');
+    affilationRoleDropDowns = wrapper.find('[data-test-id="affiliationrole"]');
+    expect(affilationRoleDropDowns).toBeTruthy();
+    expect(affilationRoleDropDowns.find('li').length).toBe(AccountCreationOptions.educationRole.length);
+
+    expect(affilationRoleDropDowns.find('li').get(0).props.children)
+      .toBe(AccountCreationOptions.educationRole[0].label);
+
+    // Community Scientist
+    affiliationOptions.find('DropdownItem').find('li').at(2).simulate('click');
+    // affiliationOptions.childAt(0).simulate('click');
+    affilationRoleDropDowns = wrapper.find('[data-test-id="affiliationrole"]');
+    expect(affilationRoleDropDowns.length).toBe(0);
+  });
+}

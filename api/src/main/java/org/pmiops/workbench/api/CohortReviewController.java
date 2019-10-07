@@ -1,5 +1,30 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.model.FilterColumns.AGE_AT_EVENT;
+import static org.pmiops.workbench.model.FilterColumns.ANSWER;
+import static org.pmiops.workbench.model.FilterColumns.DOMAIN;
+import static org.pmiops.workbench.model.FilterColumns.DOSE;
+import static org.pmiops.workbench.model.FilterColumns.FIRST_MENTION;
+import static org.pmiops.workbench.model.FilterColumns.LAST_MENTION;
+import static org.pmiops.workbench.model.FilterColumns.NUM_OF_MENTIONS;
+import static org.pmiops.workbench.model.FilterColumns.QUESTION;
+import static org.pmiops.workbench.model.FilterColumns.REF_RANGE;
+import static org.pmiops.workbench.model.FilterColumns.ROUTE;
+import static org.pmiops.workbench.model.FilterColumns.SOURCE_CODE;
+import static org.pmiops.workbench.model.FilterColumns.SOURCE_CONCEPT_ID;
+import static org.pmiops.workbench.model.FilterColumns.SOURCE_NAME;
+import static org.pmiops.workbench.model.FilterColumns.SOURCE_VOCAB;
+import static org.pmiops.workbench.model.FilterColumns.STANDARD_CODE;
+import static org.pmiops.workbench.model.FilterColumns.STANDARD_CONCEPT_ID;
+import static org.pmiops.workbench.model.FilterColumns.STANDARD_NAME;
+import static org.pmiops.workbench.model.FilterColumns.STANDARD_VOCAB;
+import static org.pmiops.workbench.model.FilterColumns.START_DATE;
+import static org.pmiops.workbench.model.FilterColumns.STRENGTH;
+import static org.pmiops.workbench.model.FilterColumns.SURVEY_NAME;
+import static org.pmiops.workbench.model.FilterColumns.UNIT;
+import static org.pmiops.workbench.model.FilterColumns.VAL_AS_NUMBER;
+import static org.pmiops.workbench.model.FilterColumns.VISIT_TYPE;
+
 import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
@@ -13,7 +38,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +54,7 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
+import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.Cohort;
@@ -53,7 +78,6 @@ import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.PageFilterRequest;
-import org.pmiops.workbench.model.PageRequest;
 import org.pmiops.workbench.model.ParticipantChartData;
 import org.pmiops.workbench.model.ParticipantChartDataListResponse;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
@@ -296,8 +320,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
 
     List<ParticipantCohortStatus> paginatedPCS =
-        cohortReviewService.findAll(
-            cohortReview.getCohortReviewId(), Collections.<Filter>emptyList(), pageRequest);
+        cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
     lookupGenderRaceEthnicityValues(paginatedPCS);
 
     org.pmiops.workbench.model.CohortReview responseReview =
@@ -513,25 +536,17 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     PageRequest pageRequest = createPageRequest(request);
+    convertGenderRaceEthnicityFilters(pageRequest);
+    convertGenderRaceEthnicitySortOrder(pageRequest);
 
-    List<Filter> filters =
-        request.getFilters() == null
-            ? Collections.<Filter>emptyList()
-            : request.getFilters().getItems();
     List<ParticipantCohortStatus> participantCohortStatuses =
-        cohortReviewService.findAll(
-            cohortReview.getCohortReviewId(),
-            convertGenderRaceEthnicityFilters(filters),
-            convertGenderRaceEthnicitySortOrder(pageRequest));
+        cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
     lookupGenderRaceEthnicityValues(participantCohortStatuses);
 
     Long queryResultSize =
-        filters.isEmpty()
+        pageRequest.getFilters().isEmpty()
             ? cohortReview.getReviewSize()
-            : cohortReviewService.findCount(
-                cohortReview.getCohortReviewId(),
-                convertGenderRaceEthnicityFilters(filters),
-                convertGenderRaceEthnicitySortOrder(pageRequest));
+            : cohortReviewService.findCount(cohortReview.getCohortReviewId(), pageRequest);
 
     org.pmiops.workbench.model.CohortReview responseReview =
         TO_CLIENT_COHORTREVIEW_WITH_PAGING.apply(cohortReview, pageRequest);
@@ -578,15 +593,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       result =
           bigQueryService.executeQuery(
               bigQueryService.filterBigQueryConfig(
-                  reviewQueryBuilder.buildCountQuery(participantId, domain)));
+                  reviewQueryBuilder.buildCountQuery(participantId, domain, pageRequest)));
       rm = bigQueryService.getResultMapper(result);
       response.count(
           bigQueryService.getLong(result.iterateAll().iterator().next(), rm.get("count")));
     } else {
       response.count(result.getTotalRows());
     }
-
-    response.setPageRequest(pageRequest);
     return ResponseEntity.ok(response);
   }
 
@@ -814,41 +827,41 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   /**
    * Helper method that generates a list of concept ids per demo
    *
-   * @param filters
-   * @return
+   * @param pageRequest
    */
-  private List<Filter> convertGenderRaceEthnicityFilters(List<Filter> filters) {
-    return filters.stream()
-        .map(
-            filter -> {
-              if (GENDER_RACE_ETHNICITY_TYPES.contains(filter.getProperty().name())) {
-                Map<Long, String> possibleConceptIds =
-                    genderRaceEthnicityConceptProvider
-                        .get()
-                        .getConcepts()
-                        .get(filter.getProperty().name());
-                List<String> values =
-                    possibleConceptIds.entrySet().stream()
-                        .filter(entry -> filter.getValues().contains(entry.getValue()))
-                        .map(entry -> entry.getKey().toString())
-                        .collect(Collectors.toList());
-                return new Filter()
-                    .property(filter.getProperty())
-                    .operator(filter.getOperator())
-                    .values(values);
-              }
-              return filter;
-            })
-        .collect(Collectors.toList());
+  private void convertGenderRaceEthnicityFilters(PageRequest pageRequest) {
+    List<Filter> filters =
+        pageRequest.getFilters().stream()
+            .map(
+                filter -> {
+                  if (GENDER_RACE_ETHNICITY_TYPES.contains(filter.getProperty().name())) {
+                    Map<Long, String> possibleConceptIds =
+                        genderRaceEthnicityConceptProvider
+                            .get()
+                            .getConcepts()
+                            .get(filter.getProperty().name());
+                    List<String> values =
+                        possibleConceptIds.entrySet().stream()
+                            .filter(entry -> filter.getValues().contains(entry.getValue()))
+                            .map(entry -> entry.getKey().toString())
+                            .collect(Collectors.toList());
+                    return new Filter()
+                        .property(filter.getProperty())
+                        .operator(filter.getOperator())
+                        .values(values);
+                  }
+                  return filter;
+                })
+            .collect(Collectors.toList());
+    pageRequest.filters(filters);
   }
 
   /**
    * Helper method that converts sortOrder if gender, race or ethnicity.
    *
    * @param pageRequest
-   * @return
    */
-  private PageRequest convertGenderRaceEthnicitySortOrder(PageRequest pageRequest) {
+  private void convertGenderRaceEthnicitySortOrder(PageRequest pageRequest) {
     String sortColumn = pageRequest.getSortColumn();
     if (GENDER_RACE_ETHNICITY_TYPES.contains(sortColumn)) {
       Map<String, Map<Long, String>> concepts =
@@ -862,19 +875,17 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       if (!demoList.isEmpty()) {
         pageRequest.setSortColumn(
             "FIELD("
-                + ParticipantCohortStatusDbInfo.fromName(sortColumn).getDbName()
+                + ParticipantCohortStatusDbInfo.getDbName(sortColumn)
                 + ","
                 + String.join(",", demoList)
                 + ") "
                 + pageRequest.getSortOrder().name());
       }
     }
-    return pageRequest;
   }
 
   private PageRequest createPageRequest(PageFilterRequest request) {
-    FilterColumns col =
-        request.getDomain() == null ? FilterColumns.PARTICIPANTID : FilterColumns.STARTDATE;
+    FilterColumns col = request.getDomain() == null ? FilterColumns.PARTICIPANTID : START_DATE;
     String sortColumn = Optional.ofNullable(request.getSortColumn()).orElse(col).toString();
     int pageParam = Optional.ofNullable(request.getPage()).orElse(CohortReviewController.PAGE);
     int pageSizeParam =
@@ -884,7 +895,9 @@ public class CohortReviewController implements CohortReviewApiDelegate {
         .page(pageParam)
         .pageSize(pageSizeParam)
         .sortOrder(sortOrderParam)
-        .sortColumn(sortColumn);
+        .sortColumn(sortColumn)
+        .filters(
+            request.getFilters() == null ? new ArrayList<>() : request.getFilters().getItems());
   }
 
   /**
@@ -898,39 +911,39 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Map<String, Integer> rm, List<FieldValue> row, DomainType domain) {
     if (!domain.equals(DomainType.SURVEY)) {
       return new ParticipantData()
-          .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
-          .domain(bigQueryService.getString(row, rm.get("domain")))
-          .standardName(bigQueryService.getString(row, rm.get("standardName")))
-          .ageAtEvent(bigQueryService.getLong(row, rm.get("ageAtEvent")).intValue())
-          .standardConceptId(bigQueryService.getLong(row, rm.get("standardConceptId")))
-          .sourceConceptId(bigQueryService.getLong(row, rm.get("sourceConceptId")))
-          .standardVocabulary(bigQueryService.getString(row, rm.get("standardVocabulary")))
-          .sourceVocabulary(bigQueryService.getString(row, rm.get("sourceVocabulary")))
-          .sourceName(bigQueryService.getString(row, rm.get("sourceName")))
-          .sourceCode(bigQueryService.getString(row, rm.get("sourceCode")))
-          .standardCode(bigQueryService.getString(row, rm.get("standardCode")))
-          .value(bigQueryService.getString(row, rm.get("value")))
-          .visitType(bigQueryService.getString(row, rm.get("visitType")))
-          .numMentions(bigQueryService.getString(row, rm.get("numMentions")))
+          .itemDate(bigQueryService.getDateTime(row, rm.get(START_DATE.toString())))
+          .domain(bigQueryService.getString(row, rm.get(DOMAIN.toString())))
+          .standardName(bigQueryService.getString(row, rm.get(STANDARD_NAME.toString())))
+          .ageAtEvent(bigQueryService.getLong(row, rm.get(AGE_AT_EVENT.toString())).intValue())
+          .standardConceptId(bigQueryService.getLong(row, rm.get(STANDARD_CONCEPT_ID.toString())))
+          .sourceConceptId(bigQueryService.getLong(row, rm.get(SOURCE_CONCEPT_ID.toString())))
+          .standardVocabulary(bigQueryService.getString(row, rm.get(STANDARD_VOCAB.toString())))
+          .sourceVocabulary(bigQueryService.getString(row, rm.get(SOURCE_VOCAB.toString())))
+          .sourceName(bigQueryService.getString(row, rm.get(SOURCE_NAME.toString())))
+          .sourceCode(bigQueryService.getString(row, rm.get(SOURCE_CODE.toString())))
+          .standardCode(bigQueryService.getString(row, rm.get(STANDARD_CODE.toString())))
+          .value(bigQueryService.getString(row, rm.get(VAL_AS_NUMBER.toString())))
+          .visitType(bigQueryService.getString(row, rm.get(VISIT_TYPE.toString())))
+          .numMentions(bigQueryService.getString(row, rm.get(NUM_OF_MENTIONS.toString())))
           .firstMention(
-              row.get(rm.get("firstMention")).isNull()
+              row.get(rm.get(FIRST_MENTION.toString())).isNull()
                   ? ""
-                  : bigQueryService.getDateTime(row, rm.get("firstMention")))
+                  : bigQueryService.getDateTime(row, rm.get(FIRST_MENTION.toString())))
           .lastMention(
-              row.get(rm.get("lastMention")).isNull()
+              row.get(rm.get(LAST_MENTION.toString())).isNull()
                   ? ""
-                  : bigQueryService.getDateTime(row, rm.get("lastMention")))
-          .unit(bigQueryService.getString(row, rm.get("unit")))
-          .dose(bigQueryService.getString(row, rm.get("dose")))
-          .strength(bigQueryService.getString(row, rm.get("strength")))
-          .route(bigQueryService.getString(row, rm.get("route")))
-          .refRange(bigQueryService.getString(row, rm.get("refRange")));
+                  : bigQueryService.getDateTime(row, rm.get(LAST_MENTION.toString())))
+          .unit(bigQueryService.getString(row, rm.get(UNIT.toString())))
+          .dose(bigQueryService.getString(row, rm.get(DOSE.toString())))
+          .strength(bigQueryService.getString(row, rm.get(STRENGTH.toString())))
+          .route(bigQueryService.getString(row, rm.get(ROUTE.toString())))
+          .refRange(bigQueryService.getString(row, rm.get(REF_RANGE.toString())));
     } else {
       return new ParticipantData()
-          .itemDate(bigQueryService.getDateTime(row, rm.get("startDate")))
-          .survey(bigQueryService.getString(row, rm.get("survey")))
-          .question(bigQueryService.getString(row, rm.get("question")))
-          .answer(bigQueryService.getString(row, rm.get("answer")));
+          .itemDate(bigQueryService.getDateTime(row, rm.get(START_DATE.toString())))
+          .survey(bigQueryService.getString(row, rm.get(SURVEY_NAME.toString())))
+          .question(bigQueryService.getString(row, rm.get(QUESTION.toString())))
+          .answer(bigQueryService.getString(row, rm.get(ANSWER.toString())));
     }
   }
 

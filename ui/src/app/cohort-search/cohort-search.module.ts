@@ -1,3 +1,4 @@
+import {TitleCasePipe} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule, Routes} from '@angular/router';
@@ -80,5 +81,6 @@ const routes: Routes = [{
     SafeHtmlPipe,
     SearchGroupSelectComponent,
   ],
+  providers: [TitleCasePipe]
 })
 export class CohortSearchModule {}
