@@ -62,7 +62,7 @@ export class ResourceCardMenu extends React.Component<ResourceCardMenuProps> {
               </MenuItem>
             </React.Fragment>;
           }],
-          ['dataSet', () => {
+          ['dataset', () => {
             return <React.Fragment>
               <MenuItem icon='pencil'
                         onClick={this.props.onRenameResource}
