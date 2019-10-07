@@ -105,7 +105,7 @@ export const ConceptAddModal = withCurrentWorkspace()
     const conceptIds = fp.map(selected => selected.conceptId, selectedConceptsInDomain);
 
     // This is added temporary until users can create concept sets of Domain PERSON,
-    // in the meantime there will be default Demogrpahics Concept Set on DATA SET PAGE
+    // in the meantime there will be default Demogrpahics Concept Set on DATASET PAGE
 
     if (name === 'Demographics') {
       this.setState({

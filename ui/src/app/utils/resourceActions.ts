@@ -21,7 +21,7 @@ export const ResourceTypeDisplayNames = new Map()
   .set(ResourceType.NOTEBOOK, 'notebook')
   .set(ResourceType.COHORT, 'cohort')
   .set(ResourceType.CONCEPT_SET, 'concept set')
-  .set(ResourceType.DATA_SET, 'data set');
+  .set(ResourceType.DATA_SET, 'dataset');
 
 export function convertToResources(list: FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[]
   | DataSet[], workspaceNamespace: string, workspaceId: string,

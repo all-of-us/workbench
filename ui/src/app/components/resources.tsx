@@ -68,7 +68,7 @@ export class ResourceCardMenu extends React.Component<ResourceCardMenuProps> {
                         onClick={this.props.onRenameResource}
                         disabled={!this.props.canEdit}
               >
-                Rename Data Set
+                Rename Dataset
               </MenuItem>
               <MenuItem icon='pencil'
                         onClick={this.props.onEdit}

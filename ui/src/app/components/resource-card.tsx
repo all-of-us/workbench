@@ -463,7 +463,7 @@ export class ResourceCard extends React.Component<Props, State> {
       {this.state.renaming && this.isDataSet &&
         <RenameModal
           onRename={(newName, newDescription) => this.receiveDataSetRename(newName, newDescription)}
-          type='Data Set'
+          type='Dataset'
           onCancel={() => this.cancelRename()}
           oldDescription ={this.props.resourceCard.dataSet.description}
           oldName={this.props.resourceCard.dataSet.name}
@@ -483,14 +483,14 @@ export class ResourceCard extends React.Component<Props, State> {
         <ModalBody>
           <div style={{paddingBottom: '1rem'}}>
             The {this.resourceType} <b>{fp.startCase(this.displayName)}&nbsp;</b>
-            is referenced by the following Data Sets:
+            is referenced by the following Datasets:
             <b>
               &nbsp;
               {fp.join(', ' ,
                 this.state.dataSetByResourceIdList.map((data) => data.name))}
             </b>.
             Deleting the {this.resourceType} <b>{fp.startCase(this.displayName)} </b>
-            will make these Data Sets unavailable for use. Are you sure you want to delete
+            will make these Datasets unavailable for use. Are you sure you want to delete
             <b>{fp.startCase(this.displayName)}</b> ?
           </div>
           <div style={{float: 'right'}}>

@@ -57,8 +57,8 @@ const actionCards = [
        participants row-level data and add notes and annotations.`,
     action: 'review'
   }, {
-    title: 'Create a Data Set',
-    description: `Create an analysis ready data set that can be exported to notebooks.`,
+    title: 'Create a Dataset',
+    description: `Create an analysis ready dataset that can be exported to notebooks.`,
     action: 'dataSet'
   },
 ];
