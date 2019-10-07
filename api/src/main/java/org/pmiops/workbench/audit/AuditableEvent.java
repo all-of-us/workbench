@@ -1,6 +1,7 @@
 package org.pmiops.workbench.audit;
 
 import java.util.Optional;
+import javax.swing.text.html.Option;
 
 /** temporary "immutable" class until i cna get immutables to work in gradle */
 public class AuditableEvent extends AbstractAuditableEvent {
@@ -79,7 +80,7 @@ public class AuditableEvent extends AbstractAuditableEvent {
 
   @Override
   public Optional<Long> targetId() {
-    return targetIdMaybe;
+    return targetIdMaybe; // check if this is null somehow
   }
 
   @Override
@@ -97,6 +98,7 @@ public class AuditableEvent extends AbstractAuditableEvent {
     return newValueMaybe;
   }
 
+  // todo: replace with smarter builder implementation. Explicitly set optionals to Optional.empty();
   public static class Builder {
 
     private long timestamp;

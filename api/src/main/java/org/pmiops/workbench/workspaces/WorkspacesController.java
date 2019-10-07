@@ -227,7 +227,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } else if (workspace.getName().length() > 80) {
       throw new BadRequestException("Workspace name must be 80 characters or less");
     }
-
+    // TODO: move call after creation once billing buffer problem is fixed!!!
+    fireCreateWorkspaceAction(workspace);
     User user = userProvider.get();
     String workspaceNamespace;
     BillingProjectBufferEntry bufferedBillingProject;
@@ -780,13 +781,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private Map<String, String> buildPropertyStringMap(Workspace createdWorkspace) {
-    ImmutableMap.Builder<String, String> propsBuilder = new Builder<>();
-    propsBuilder.put("namespace", createdWorkspace.getNamespace());
-    propsBuilder.put("firecloud_name", createdWorkspace.getId());
-    propsBuilder.put("name", createdWorkspace.getName());
-    propsBuilder.put("intended_study", createdWorkspace.getResearchPurpose().getIntendedStudy());
-    propsBuilder.put("creator", createdWorkspace.getCreator());
+    ImmutableMap.Builder<String, String> propsBuilder = new ImmutableMap.Builder<>();
+    insertIfNotNull(propsBuilder, "intended_study", createdWorkspace.getResearchPurpose().getIntendedStudy());
+    insertIfNotNull(propsBuilder, "creator", createdWorkspace.getCreator());
+    Optional.ofNullable(createdWorkspace.getNamespace())
+        .ifPresent(ns -> propsBuilder.put("namespace", ns));
+    Optional.ofNullable(createdWorkspace.getId())
+        .ifPresent(id -> propsBuilder.put("firecloud_name", id));
+    Optional.ofNullable(createdWorkspace.getName())
+        .ifPresent(n -> propsBuilder.put("name", n));
     return propsBuilder.build();
   }
 
+  private void insertIfNotNull(ImmutableMap.Builder<String, String> mapBuilder, String key, String value) {
+    Optional.ofNullable(value).ifPresent(v -> mapBuilder.put(key, v));
+  }
 }
