@@ -65,7 +65,9 @@ public class UserRecentWorkspace {
       return false;
     }
     UserRecentWorkspace that = (UserRecentWorkspace) obj;
-    return this.workspaceId.equals(that.workspaceId) && this.userId.equals(that.userId);
+    return this.workspaceId.equals(that.workspaceId)
+        && this.userId.equals(that.userId)
+        && this.lastAccessDate.equals(that.lastAccessDate);
   }
 
   public UserRecentWorkspace() {}
