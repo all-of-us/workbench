@@ -77,7 +77,6 @@ public class DataSetController implements DataSetApiDelegate {
   private final WorkspaceService workspaceService;
 
   private static int NO_OF_PREVIEW_ROWS = 20;
-  private static int PREVIEW_RETRY_LIMIT = 2;
   // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
   private static long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000l;
   private static String CONCEPT_SET = "conceptSet";
@@ -300,101 +299,88 @@ public class DataSetController implements DataSetApiDelegate {
     QueryJobConfiguration queryJobConfiguration =
         bigQueryJobConfig.get(dataSetPreviewRequest.getDomain().toString());
 
-    int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS;
     String originalQuery = queryJobConfiguration.getQuery();
-    do {
-      try {
-        String query = originalQuery.concat(" LIMIT " + rowsRequested);
+    TableResult queryResponse;
+    try {
+      String query = originalQuery.concat(" LIMIT " + NO_OF_PREVIEW_ROWS);
 
-        queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
+      queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
-        /* Google appengine has a 60 second timeout, we want to make sure this endpoint completes
-         * before that limit is exceeded, or we get a 500 error with the following type:
-         * com.google.apphosting.runtime.HardDeadlineExceededError
-         * See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
-         */
-        TableResult queryResponse =
-            bigQueryService.executeQuery(
-                bigQueryService.filterBigQueryConfig(queryJobConfiguration),
-                APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC / PREVIEW_RETRY_LIMIT + 1);
-        queryResponse
-            .getSchema()
-            .getFields()
-            .forEach(
-                fields -> {
-                  valuePreviewList.add(new DataSetPreviewValueList().value(fields.getName()));
-                });
-
-        queryResponse
-            .getValues()
-            .forEach(
-                fieldValueList -> {
-                  IntStream.range(0, fieldValueList.size())
-                      .forEach(
-                          columnNumber -> {
-                            try {
-                              valuePreviewList
-                                  .get(columnNumber)
-                                  .addQueryValueItem(
-                                      fieldValueList.get(columnNumber).getValue().toString());
-                            } catch (NullPointerException ex) {
-                              log.severe(
-                                  String.format(
-                                      "Null pointer exception while retriving value for query: Column %s ",
-                                      columnNumber));
-                              valuePreviewList.get(columnNumber).addQueryValueItem("");
-                            }
-                          });
-                });
-        queryResponse
-            .getSchema()
-            .getFields()
-            .forEach(
-                fields -> {
-                  DataSetPreviewValueList previewValue =
-                      valuePreviewList.stream()
-                          .filter(preview -> preview.getValue().equalsIgnoreCase(fields.getName()))
-                          .findFirst()
-                          .get();
-                  if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
-                    List<String> queryValues = new ArrayList<String>();
-                    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                    previewValue
-                        .getQueryValue()
-                        .forEach(
-                            value -> {
-                              try {
-                                Double fieldValue = Double.parseDouble(value);
-                                queryValues.add(
-                                    dateFormat.format(new Date(fieldValue.longValue())));
-                              } catch (NumberFormatException ex) {
-                                queryValues.add("");
-                              }
-                            });
-                    previewValue.setQueryValue(queryValues);
-                  }
-                });
-        break;
-      } catch (Exception ex) {
-        if ((ex.getCause() != null
-            && ex.getCause().getMessage() != null
-            && ex.getCause().getMessage().contains("Read timed out"))) {
-          rowsRequested = (rowsRequested / 2);
-          if (rowsRequested == 0) {
-            throw new GatewayTimeoutException(
-                "Timeout while querying the CDR to pull preview information.");
-          }
-          retry++;
-        } else {
-          throw ex;
-        }
+      /* Google appengine has a 60 second timeout, we want to make sure this endpoint completes
+       * before that limit is exceeded, or we get a 500 error with the following type:
+       * com.google.apphosting.runtime.HardDeadlineExceededError
+       * See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
+       */
+      queryResponse =
+          bigQueryService.executeQuery(
+              bigQueryService.filterBigQueryConfig(queryJobConfiguration),
+              APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC);
+    } catch (Exception ex) {
+      if ((ex.getCause() != null
+          && ex.getCause().getMessage() != null
+          && ex.getCause().getMessage().contains("Read timed out"))) {
+        throw new GatewayTimeoutException(
+            "Timeout while querying the CDR to pull preview information.");
+      } else {
+        throw ex;
       }
-    } while (retry < PREVIEW_RETRY_LIMIT);
-
-    if (retry == PREVIEW_RETRY_LIMIT) {
-      throw new GatewayTimeoutException(
-          "Timeout while querying the CDR to pull preview information.");
     }
+    queryResponse
+        .getSchema()
+        .getFields()
+        .forEach(
+            fields -> {
+              valuePreviewList.add(new DataSetPreviewValueList().value(fields.getName()));
+            });
+
+    queryResponse
+        .getValues()
+        .forEach(
+            fieldValueList -> {
+              IntStream.range(0, fieldValueList.size())
+                  .forEach(
+                      columnNumber -> {
+                        try {
+                          valuePreviewList
+                              .get(columnNumber)
+                              .addQueryValueItem(
+                                  fieldValueList.get(columnNumber).getValue().toString());
+                        } catch (NullPointerException ex) {
+                          log.severe(
+                              String.format(
+                                  "Null pointer exception while retriving value for query: Column %s ",
+                                  columnNumber));
+                          valuePreviewList.get(columnNumber).addQueryValueItem("");
+                        }
+                      });
+            });
+    queryResponse
+        .getSchema()
+        .getFields()
+        .forEach(
+            fields -> {
+              DataSetPreviewValueList previewValue =
+                  valuePreviewList.stream()
+                      .filter(preview -> preview.getValue().equalsIgnoreCase(fields.getName()))
+                      .findFirst()
+                      .get();
+              if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
+                List<String> queryValues = new ArrayList<String>();
+                DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                previewValue
+                    .getQueryValue()
+                    .forEach(
+                        value -> {
+                          try {
+                            Double fieldValue = Double.parseDouble(value);
+                            queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
+                          } catch (NumberFormatException ex) {
+                            queryValues.add("");
+                          }
+                        });
+                previewValue.setQueryValue(queryValues);
+              }
+            });
 
     Collections.sort(
         valuePreviewList,

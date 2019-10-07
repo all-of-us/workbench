@@ -22,6 +22,7 @@ import {
 import colors from 'app/styles/colors';
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
+  apiCallWithGatewayTimeoutRetries,
   formatDomain,
   formatDomainString,
   ReactWrapperBase,
@@ -566,7 +567,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         values: this.state.selectedDomainValuePairs.map(domainValue => domainValue.value)
       };
       try {
-        const dataSetPreviewResp = await dataSetApi().previewDataSetByDomain(namespace, id, request);
+        const dataSetPreviewResp = await apiCallWithGatewayTimeoutRetries(
+          () => dataSetApi().previewDataSetByDomain(namespace, id, request));
         const newPreviewInformation = {
           isLoading: false,
           values: dataSetPreviewResp.values

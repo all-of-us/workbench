@@ -463,3 +463,18 @@ export function highlightSearchTerm(searchTerm: string, stringToHighlight: strin
       {word}
     </span>);
 }
+
+const BACKOFF_DEFAULT_WAIT_TIME_IN_MS = 1000;
+
+export async function apiCallWithGatewayTimeoutRetries<T>(
+  apiCall: () => Promise<T>, maxRetries = 3, retryCount = 1): Promise<T> {
+  try {
+    return await apiCall();
+  } catch (ex) {
+    if (ex.status !== 504 || retryCount > maxRetries) {
+      throw ex;
+    }
+    await new Promise(resolve => setTimeout(resolve, BACKOFF_DEFAULT_WAIT_TIME_IN_MS * retryCount));
+    return await apiCallWithGatewayTimeoutRetries(apiCall, maxRetries, retryCount + 1);
+  }
+}
