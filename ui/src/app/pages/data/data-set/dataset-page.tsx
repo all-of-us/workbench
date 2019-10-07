@@ -543,7 +543,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     }
 
     async getPreviewList() {
-      const {namespace, id} = this.props.workspace;
       const domains = fp.uniq(this.state.selectedDomainValuePairs.map(domainValue => domainValue.domain));
       const newPreviewList: Map<Domain, DataSetPreviewInfo> =
         new Map(domains.map<[Domain, DataSetPreviewInfo]>(domain => [domain, {isLoading: true, values: []}]));
@@ -552,28 +551,33 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         selectedPreviewDomain: domains[0]
       });
       domains.forEach(async domain => {
-        const request: DataSetPreviewRequest = {
-          domain: domain,
-          conceptSetIds: this.state.selectedConceptSetIds,
-          includesAllParticipants: this.state.includesAllParticipants,
-          cohortIds: this.state.selectedCohortIds,
-          prePackagedConceptSet: this.getPrePackagedConceptSet(),
-          values: this.state.selectedDomainValuePairs.map(domainValue => domainValue.value)
-        };
-        try {
-          const dataSetPreviewResp = await dataSetApi().previewDataSetByDomain(namespace, id, request);
-          const newPreviewInformation = {
-            isLoading: false,
-            values: dataSetPreviewResp.values
-          };
-          this.setState({previewList: this.state.previewList.set(dataSetPreviewResp.domain, newPreviewInformation)});
-        } catch (ex) {
-          const exceptionResponse = await ex.json() as unknown as ErrorResponse;
-          const errorText = this.generateErrorTextFromPreviewException(exceptionResponse, domain);
-          this.setState({previewError: true, previewErrorText: errorText});
-          console.error(ex);
-        }
+        this.getPreviewByDomain(domain);
       });
+    }
+
+    async getPreviewByDomain(domain: Domain) {
+      const {namespace, id} = this.props.workspace;
+      const request: DataSetPreviewRequest = {
+        domain: domain,
+        conceptSetIds: this.state.selectedConceptSetIds,
+        includesAllParticipants: this.state.includesAllParticipants,
+        cohortIds: this.state.selectedCohortIds,
+        prePackagedConceptSet: this.getPrePackagedConceptSet(),
+        values: this.state.selectedDomainValuePairs.map(domainValue => domainValue.value)
+      };
+      try {
+        const dataSetPreviewResp = await dataSetApi().previewDataSetByDomain(namespace, id, request);
+        const newPreviewInformation = {
+          isLoading: false,
+          values: dataSetPreviewResp.values
+        };
+        this.setState({previewList: this.state.previewList.set(dataSetPreviewResp.domain, newPreviewInformation)});
+      } catch (ex) {
+        const exceptionResponse = await ex.json() as unknown as ErrorResponse;
+        const errorText = this.generateErrorTextFromPreviewException(exceptionResponse, domain);
+        this.setState({previewError: true, previewErrorText: errorText});
+        console.error(ex);
+      }
     }
 
     // TODO: Move to using a response based error handling method, rather than a error based one
