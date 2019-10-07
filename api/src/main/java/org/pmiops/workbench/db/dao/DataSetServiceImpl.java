@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -595,15 +596,7 @@ public class DataSetServiceImpl implements DataSetService {
   // "A Tale Of Two Cities"
   @VisibleForTesting
   public static String capitalizeFirstCharacterOnly(String text) {
-    if (text.isEmpty()) {
-      return text;
-    } else if (text.length() == 1) {
-      return text.toUpperCase();
-    } else {
-      return String.format(
-          "%s%s",
-          Character.toString(text.charAt(0)).toUpperCase(), text.substring(1).toLowerCase());
-    }
+    return StringUtils.capitalize(text.toLowerCase());
   }
 
   private static String generateNotebookUserCode(
