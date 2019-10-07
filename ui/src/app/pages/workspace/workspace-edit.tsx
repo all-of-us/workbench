@@ -383,7 +383,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             population: false,
             populationDetails: [],
             populationHealth: false,
-            reviewRequested: true,
+            reviewRequested: false,
             socialBehavioral: false,
             reasonForAllOfUs: '',
           }
