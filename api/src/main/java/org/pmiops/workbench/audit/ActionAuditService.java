@@ -2,6 +2,7 @@ package org.pmiops.workbench.audit;
 
 import java.util.Collection;
 import org.elasticsearch.common.UUIDs;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 @Service

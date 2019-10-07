@@ -5,6 +5,7 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
+import com.google.cloud.logging.LogEntry;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
@@ -34,6 +35,9 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.api.WorkspacesApiDelegate;
 import org.pmiops.workbench.audit.ActionAuditService;
+import org.pmiops.workbench.audit.ActionType;
+import org.pmiops.workbench.audit.AgentType;
+import org.pmiops.workbench.audit.AuditableEvent;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -760,15 +764,28 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     String actionId = ActionAuditService.newActionId();
     long userId = userProvider.get().getUserId();
     Map<String, String> propertyValues = buildPropertyStringMap(createdWorkspace);
-
-
+    List<AuditableEvent> events = propertyValues.entrySet().stream()
+        .map(entry -> new AuditableEvent.Builder()
+            .setActionId(actionId)
+            .setAgentEmail(Optional.of(userProvider.get().getEmail()))
+            .setActionType(ActionType.CREATE)
+            .setAgentType(AgentType.USER)
+            .setAgentId(userId)
+            .setTargetPropertyMaybe(Optional.of(entry.getKey()))
+            .setPreviousValueMaybe(Optional.empty())
+            .setNewValueMaybe(Optional.of(entry.getValue()))
+            .build())
+        .collect(Collectors.toList());
+    actionAuditService.send(events);
   }
 
   private Map<String, String> buildPropertyStringMap(Workspace createdWorkspace) {
     ImmutableMap.Builder<String, String> propsBuilder = new Builder<>();
-    propsBuilder.put("NAME", createdWorkspace.getName());
-    propsBuilder.put("INTENDED_STUDY", createdWorkspace.getResearchPurpose().getIntendedStudy());
-    propsBuilder.put("CREATOR", createdWorkspace.getCreator());
+    propsBuilder.put("namespace", createdWorkspace.getNamespace());
+    propsBuilder.put("firecloud_name", createdWorkspace.getId());
+    propsBuilder.put("name", createdWorkspace.getName());
+    propsBuilder.put("intended_study", createdWorkspace.getResearchPurpose().getIntendedStudy());
+    propsBuilder.put("creator", createdWorkspace.getCreator());
     return propsBuilder.build();
   }
 
