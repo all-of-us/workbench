@@ -1,4 +1,4 @@
 1570505534
-relevant omop table:field name 1:omop cdm standardz:desc:field type:data provenance:source ppi module:false
-relevant omop table:field name 2:omop cdm standardzz:desc:field type:data provenance:source ppi module:false
-relevant omop table:field name 3:omop cdm standardzzz:desc:field type:data provenance:source ppi module:false
+TEST TABLE:TEST FIELD 1:A:B:C:D:E:false
+TEST TABLE:TEST FIELD 2:A:B:C:D:E:true
+TEST TABLE:TEST FIELD 3:A:B:C:D:E:false
