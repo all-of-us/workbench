@@ -84,10 +84,9 @@ export class SearchGroupItem extends React.Component<Props, State> {
     this.getItemCount();
   }
 
-  getItemCount() {
+  async getItemCount() {
     const {index, item, role, updateGroup} = this.props;
-    // prevent multiple group count calls when initializing multiple items simultaneously
-    // (on cohort edit or clone)
+    // prevent multiple group count calls when initializing multiple items simultaneously (on cohort edit or clone)
     const init = initExisting.getValue();
     if (!init || (init && index === 0)) {
       updateGroup();
@@ -100,19 +99,16 @@ export class SearchGroupItem extends React.Component<Props, State> {
         excludes: [],
         [role]: [{items: [mappedItem], temporal: false}]
       };
-      cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => {
-        this.setState({count, loading: false});
-      }, (err) => {
-        console.error(err);
-        this.setState({error: true, loading: false});
-      });
+      await cohortBuilderApi().countParticipants(+cdrVersionId, request).then(count => this.setState({count}));
     } catch (error) {
       console.error(error);
-      this.setState({error: true, loading: false});
+      this.setState({error: true});
+    } finally {
+      this.setState({loading: false});
     }
   }
 
-  get codeTypeDisplay() {
+  get itemTitleDisplay() {
     const {item: {type}} = this.props;
     return `${domainToTitle(type)} ${this.pluralizedCode}`;
   }
@@ -122,7 +118,7 @@ export class SearchGroupItem extends React.Component<Props, State> {
     return searchParameters.length > 1 ? 'Codes' : 'Code';
   }
 
-  get codes() {
+  get selectionsDisplay() {
     const {item: {searchParameters, type}} = this.props;
     const formatter = (param) => {
       let funcs = [typeDisplay, attributeDisplay];
@@ -213,18 +209,18 @@ export class SearchGroupItem extends React.Component<Props, State> {
 
   launchWizard() {
     triggerEvent('Edit', 'Click', 'Snowman - Edit Criteria - Cohort Builder');
-    const {groupId, item, item: {fullTree, searchParameters}, role} = this.props;
+    const {groupId, item, role} = this.props;
+    const _item = JSON.parse(JSON.stringify(item));
+    const {fullTree, id, searchParameters} = _item;
     const selections = searchParameters.map(sp => sp.parameterId);
     selectionsStore.next(selections);
-    const _item = JSON.parse(JSON.stringify(item));
-    const itemId = _item.id;
     const domain = _item.type;
     let isStandard;
     if ([DomainType.CONDITION, DomainType.PROCEDURE].includes(domain)) {
       isStandard = item.searchParameters[0].isStandard;
     }
     const {type, standard} = this.typeAndStandard;
-    const context = {item: _item, domain, type, isStandard, role, groupId, itemId, fullTree, standard};
+    const context = {item: _item, domain, type, isStandard, role, groupId, itemId: id, fullTree, standard};
     wizardStore.next(context);
   }
 
@@ -248,11 +244,11 @@ export class SearchGroupItem extends React.Component<Props, State> {
                 onClick={() => this.launchWizard()}
                 onMouseEnter={(e) => this.op.toggle(e)}
                 onMouseLeave={(e) => this.op.toggle(e)}>
-            <span className='item-title' style={styles.codeText}>Contains {this.codeTypeDisplay}</span>
+            <span className='item-title' style={styles.codeText}>Contains {this.itemTitleDisplay}</span>
           </span>
           <OverlayPanel ref={(el) => this.op = el} appendTo={document.body} style={{maxWidth: '15rem'}}>
-            <h3 style={{margin: 0}}>{this.codeTypeDisplay}</h3>
-            {this.codes}
+            <h3 style={{margin: 0}}>{this.itemTitleDisplay}</h3>
+            {this.selectionsDisplay}
           </OverlayPanel>
           {status !== 'hidden' && <span style={{...styles.codeText, paddingRight: '10px'}}>|</span>}
           {loading && <span className='spinner spinner-inline'>Loading...</span>}
