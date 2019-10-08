@@ -88,7 +88,6 @@ public class DataSetController implements DataSetApiDelegate {
   private static final String dateFormatString = "yyyy/MM/dd HH:mm:ss";
   private static final String emptyCellMarker = "";
 
-
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   private final CohortDao cohortDao;
@@ -333,13 +332,10 @@ public class DataSetController implements DataSetApiDelegate {
       }
     }
 
-    valuePreviewList.addAll(queryResponse
-        .getSchema()
-        .getFields()
-        .stream()
-        .map(fields ->
-          new DataSetPreviewValueList().value(fields.getName())
-        ).collect(Collectors.toList()));
+    valuePreviewList.addAll(
+        queryResponse.getSchema().getFields().stream()
+            .map(fields -> new DataSetPreviewValueList().value(fields.getName()))
+            .collect(Collectors.toList()));
 
     queryResponse
         .getValues()
@@ -365,7 +361,8 @@ public class DataSetController implements DataSetApiDelegate {
     return ResponseEntity.ok(previewQueryResponse);
   }
 
-  private void addFieldValuesFromBigQueryToPreviewList(List<DataSetPreviewValueList> valuePreviewList, FieldValueList fieldValueList) {
+  private void addFieldValuesFromBigQueryToPreviewList(
+      List<DataSetPreviewValueList> valuePreviewList, FieldValueList fieldValueList) {
     IntStream.range(0, fieldValueList.size())
         .forEach(
             columnNumber -> {
@@ -383,7 +380,10 @@ public class DataSetController implements DataSetApiDelegate {
         valuePreviewList.stream()
             .filter(preview -> preview.getValue().equalsIgnoreCase(fields.getName()))
             .findFirst()
-            .orElseThrow(() -> new ServerErrorException("Value should be present when it is not in dataset preview request"));
+            .orElseThrow(
+                () ->
+                    new ServerErrorException(
+                        "Value should be present when it is not in dataset preview request"));
     if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
       List<String> queryValues = new ArrayList<>();
       DateFormat dateFormat = new SimpleDateFormat(dateFormatString);
