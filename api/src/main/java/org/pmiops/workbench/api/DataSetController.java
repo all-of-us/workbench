@@ -348,7 +348,8 @@ public class DataSetController implements DataSetApiDelegate {
                                     .toString());
                       });
             });
-    String dateFormatString = "yyyy/MM/dd HH:mm:ss";
+    final String dateFormatString = "yyyy/MM/dd HH:mm:ss";
+    final String emptyCellMarker = "";
     queryResponse
         .getSchema()
         .getFields()
@@ -366,11 +367,11 @@ public class DataSetController implements DataSetApiDelegate {
                     .getQueryValue()
                     .forEach(
                         value -> {
-                          try {
+                          if (!value.equals(emptyCellMarker)) {
                             Double fieldValue = Double.parseDouble(value);
                             queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
-                          } catch (NumberFormatException ex) {
-                            queryValues.add("");
+                          } else {
+                            queryValues.add(value);
                           }
                         });
                 previewValue.setQueryValue(queryValues);
