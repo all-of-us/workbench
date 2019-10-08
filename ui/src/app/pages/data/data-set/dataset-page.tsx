@@ -8,7 +8,6 @@ import {FlexRow} from 'app/components/flex';
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
