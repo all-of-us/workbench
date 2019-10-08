@@ -11,5 +11,6 @@ public enum TargetType {
   DATASET,
   CONCEPT_SET,
   COHORT,
-  CREDIT
+  CREDIT,
+  WORKSPACE
 }

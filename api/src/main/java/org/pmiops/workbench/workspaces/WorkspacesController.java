@@ -10,6 +10,7 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 import java.nio.charset.StandardCharsets;
@@ -109,7 +110,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private final BillingProjectBufferService billingProjectBufferService;
   private final WorkspaceService workspaceService;
-  private final WorkspaceMapper workspaceMapper;
   private final CdrVersionDao cdrVersionDao;
   private final UserDao userDao;
   private Provider<User> userProvider;
@@ -125,7 +125,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public WorkspacesController(
       BillingProjectBufferService billingProjectBufferService,
       WorkspaceService workspaceService,
-      WorkspaceMapper workspaceMapper,
       CdrVersionDao cdrVersionDao,
       UserDao userDao,
       Provider<User> userProvider,
@@ -138,7 +137,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       ActionAuditService actionAuditService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
-    this.workspaceMapper = workspaceMapper;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -253,7 +251,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    org.pmiops.workbench.db.model.Workspace reqWorkspace = workspaceMapper.toDbWorkspace(workspace);
+    org.pmiops.workbench.db.model.Workspace reqWorkspace = WorkspaceMapper.toDbWorkspace(workspace);
     // TODO: enforce data access level authorization
     dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
     dbWorkspace.setName(reqWorkspace.getName());
@@ -269,7 +267,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-    Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    Workspace createdWorkspace = WorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     fireCreateWorkspaceAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
   }
@@ -304,7 +302,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     workspaceService.maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
-
+    fireDeleteWorkspaceAction(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -360,7 +358,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    return ResponseEntity.ok(WorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
   @Override
@@ -492,7 +490,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     return ResponseEntity.ok(
         new CloneWorkspaceResponse()
-            .workspace(workspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
+            .workspace(WorkspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
   }
 
   // A retry period is needed because the permission to copy files into the cloned workspace is not
@@ -574,7 +572,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceListResponse response = new WorkspaceListResponse();
     List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
     response.setItems(
-        workspaces.stream().map(workspaceMapper::toApiWorkspace).collect(Collectors.toList()));
+        workspaces.stream().map(WorkspaceMapper::toApiWorkspace).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
@@ -788,7 +786,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     List<RecentWorkspace> recentWorkspaces =
-        workspaceMapper.buildRecentWorkspaceList(
+        WorkspaceMapper.buildRecentWorkspaceList(
             userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
@@ -810,7 +808,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                         .setActionType(ActionType.CREATE)
                         .setAgentType(AgentType.USER)
                         .setAgentId(userId)
-                        .setTargetType(TargetType.WORKBENCH)
+                        .setTargetType(TargetType.WORKSPACE)
                         .setTargetPropertyMaybe(Optional.of(entry.getKey()))
                         .setTargetIdMaybe(Optional.of(dbWorkspaceId))
                         .setPreviousValueMaybe(Optional.empty())
@@ -818,6 +816,31 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                         .build())
             .collect(Collectors.toList());
     actionAuditService.send(events);
+  }
+
+  private void fireDeleteWorkspaceAction(org.pmiops.workbench.db.model.Workspace dbWorkspace) {
+    final Workspace workspace = WorkspaceMapper.toApiWorkspace(dbWorkspace);
+    final String actionId = ActionAuditService.newActionId();
+    final long userId = userProvider.get().getUserId();
+    final String userEmail = userProvider.get().getEmail();
+    Map<String, String> propertyValuesByName = buildPropertyStringMap(workspace);
+    ImmutableList<AuditableEvent> events = propertyValuesByName.entrySet().stream()
+        .map(entry ->
+            new AuditableEvent.Builder()
+                .setActionId(actionId)
+                .setAgentEmailMaybe(Optional.of(userEmail))
+                .setActionType(ActionType.DELETE)
+                .setAgentType(AgentType.USER)
+                .setAgentId(userId)
+                .setTargetType(TargetType.WORKSPACE)
+                .setTargetPropertyMaybe(Optional.of(entry.getKey()))
+                .setTargetIdMaybe(Optional.of(dbWorkspace.getWorkspaceId()))
+                .setPreviousValueMaybe(Optional.empty())
+                .setNewValueMaybe(Optional.of(entry.getValue()))
+                .build())
+        .collect(ImmutableList.toImmutableList());
+    actionAuditService.send(events);
+
   }
 
   private Map<String, String> buildPropertyStringMap(Workspace workspace) {
@@ -832,8 +855,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return propsBuilder.build();
   }
 
-  private void insertIfNotNull(
-      ImmutableMap.Builder<String, String> mapBuilder, String key, String value) {
+  private void insertIfNotNull(ImmutableMap.Builder<String, String> mapBuilder,
+      String key,
+      String value) {
     Optional.ofNullable(value).ifPresent(v -> mapBuilder.put(key, v));
   }
 
@@ -848,7 +872,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =
-        workspaceMapper.buildRecentWorkspace(
+        WorkspaceMapper.buildRecentWorkspace(
             userRecentWorkspace, dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);

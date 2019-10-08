@@ -17,10 +17,9 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.stereotype.Service;
 
-@Service
 public class WorkspaceMapper {
 
-  public WorkspaceAccessLevel toApiWorkspaceAccessLevel(String firecloudAccessLevel) {
+  public static WorkspaceAccessLevel toApiWorkspaceAccessLevel(String firecloudAccessLevel) {
     if (firecloudAccessLevel.equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
       return WorkspaceAccessLevel.OWNER;
     } else {
@@ -28,7 +27,7 @@ public class WorkspaceMapper {
     }
   }
 
-  public Workspace toApiWorkspace(org.pmiops.workbench.db.model.Workspace workspace) {
+  public static Workspace toApiWorkspace(org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
 
@@ -53,7 +52,7 @@ public class WorkspaceMapper {
     return result;
   }
 
-  public Workspace toApiWorkspace(
+  public static Workspace toApiWorkspace(
       org.pmiops.workbench.db.model.Workspace workspace,
       org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
@@ -83,7 +82,7 @@ public class WorkspaceMapper {
     return result;
   }
 
-  public org.pmiops.workbench.db.model.Workspace toDbWorkspace(Workspace workspace) {
+  public static org.pmiops.workbench.db.model.Workspace toDbWorkspace(Workspace workspace) {
     org.pmiops.workbench.db.model.Workspace result = new org.pmiops.workbench.db.model.Workspace();
 
     if (workspace.getDataAccessLevel() != null) {
@@ -104,7 +103,7 @@ public class WorkspaceMapper {
     return result;
   }
 
-  public UserRole toApiUserRole(
+  public static UserRole toApiUserRole(
       org.pmiops.workbench.db.model.User user, WorkspaceAccessEntry aclEntry) {
     UserRole result = new UserRole();
     result.setEmail(user.getEmail());
@@ -143,7 +142,7 @@ public class WorkspaceMapper {
     dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
   }
 
-  private ResearchPurpose createResearchPurpose(org.pmiops.workbench.db.model.Workspace workspace) {
+  private static ResearchPurpose createResearchPurpose(org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose =
         new ResearchPurpose()
             .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())
@@ -172,7 +171,7 @@ public class WorkspaceMapper {
     return researchPurpose;
   }
 
-  public RecentWorkspace buildRecentWorkspace(
+  public static RecentWorkspace buildRecentWorkspace(
       UserRecentWorkspace userRecentWorkspace,
       org.pmiops.workbench.db.model.Workspace dbWorkspace,
       WorkspaceAccessLevel accessLevel) {
@@ -182,7 +181,7 @@ public class WorkspaceMapper {
         .accessLevel(accessLevel);
   }
 
-  public List<RecentWorkspace> buildRecentWorkspaceList(
+  public static List<RecentWorkspace> buildRecentWorkspaceList(
       List<UserRecentWorkspace> userRecentWorkspaces,
       Map<Long, org.pmiops.workbench.db.model.Workspace> dbWorkspacesByWorkspaceId,
       Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsByWorkspaceId) {

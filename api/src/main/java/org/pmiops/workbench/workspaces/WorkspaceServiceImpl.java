@@ -70,7 +70,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private Provider<User> userProvider;
   private UserRecentWorkspaceDao userRecentWorkspaceDao;
   private WorkspaceDao workspaceDao;
-  private WorkspaceMapper workspaceMapper;
 
   private FireCloudService fireCloudService;
   private Clock clock;
@@ -84,8 +83,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       UserDao userDao,
       Provider<User> userProvider,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
-      WorkspaceDao workspaceDao,
-      WorkspaceMapper workspaceMapper) {
+      WorkspaceDao workspaceDao) {
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
@@ -94,7 +92,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.userDao = userDao;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
     this.workspaceDao = workspaceDao;
-    this.workspaceMapper = workspaceMapper;
   }
 
   /**
@@ -152,9 +149,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               String fcWorkspaceAccessLevel =
                   fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
               WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
+              currentWorkspace.setWorkspace(WorkspaceMapper.toApiWorkspace(dbWorkspace));
               currentWorkspace.setAccessLevel(
-                  workspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
+                  WorkspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
               return currentWorkspace;
             })
         .collect(Collectors.toList());
@@ -183,7 +180,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
       }
     }
-    workspaceResponse.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    workspaceResponse.setWorkspace(WorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
 
     return workspaceResponse;
   }
@@ -472,7 +469,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       } else {
-        userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
+        userRoles.add(WorkspaceMapper.toApiUserRole(user, entry.getValue()));
       }
     }
     return userRoles.stream()

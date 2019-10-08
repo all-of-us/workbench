@@ -1,7 +1,6 @@
 package org.pmiops.workbench.audit;
 
-import static org.pmiops.workbench.api.StatusController.LOGGING_RESOURCE;
-
+import com.google.cloud.MonitoredResource;
 import com.google.cloud.logging.LogEntry;
 import com.google.cloud.logging.Payload.JsonPayload;
 import com.google.cloud.logging.Severity;
@@ -10,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public abstract class AbstractAuditableEvent {
-
+  private static final MonitoredResource MONITORED_RESOURCE = MonitoredResource.newBuilder("global").build();
   private static final String LOG_NAME = "action-audit-test-3";
 
   public abstract long timestamp();
@@ -53,13 +52,16 @@ public abstract class AbstractAuditableEvent {
   }
 
   public LogEntry toLogEntry() {
+
     return LogEntry.newBuilder(toJsonPayload())
         .setSeverity(Severity.INFO)
         .setLogName(LOG_NAME)
-        .setResource(LOGGING_RESOURCE)
+        .setResource(MONITORED_RESOURCE)
         .build();
   }
 
+  // Inverse of Optional.ofNullable(). Used for JSON api which expects null values for empty
+  // columns. Though perhaps we could just leave those out...
   private static <T> T toNullable(Optional<T> opt) {
     return opt.orElse(null);
   }
