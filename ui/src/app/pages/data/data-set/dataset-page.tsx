@@ -268,8 +268,6 @@ interface State {
   prePackagedSurvey: boolean;
   loadingResources: boolean;
   openSaveModal: boolean;
-  previewError: boolean;
-  previewErrorText: string;
   previewList: Map<Domain, DataSetPreviewInfo>;
   selectedCohortIds: number[];
   selectedConceptSetIds: number[];
@@ -295,8 +293,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         openSaveModal: false,
         prePackagedDemographics: false,
         prePackagedSurvey: false,
-        previewError: false,
-        previewErrorText: '',
         previewList: new Map(),
         selectedCohortIds: [],
         selectedConceptSetIds: [],
@@ -679,8 +675,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         openSaveModal,
         prePackagedDemographics,
         prePackagedSurvey,
-        previewError,
-        previewErrorText,
         previewList,
         selectedCohortIds,
         selectedConceptSetIds,
@@ -897,15 +891,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                              this.setState({openSaveModal: false});
                                            }}
         />}
-        {previewError && <Modal>
-          <ModalTitle>Error Loading Data Set Preview</ModalTitle>
-          <ModalBody>{previewErrorText}</ModalBody>
-          <ModalFooter>
-            <Button type='secondary' onClick={() => {this.setState({previewError: false}); }}>
-              Close
-            </Button>
-          </ModalFooter>
-        </Modal>}
         <HelpSidebar location='datasetBuilder' />
       </React.Fragment>;
     }
