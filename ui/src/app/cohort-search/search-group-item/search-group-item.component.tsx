@@ -84,11 +84,6 @@ export class SearchGroupItem extends React.Component<Props, State> {
     this.getItemCount();
   }
 
-  componentDidUpdate(prevProps: Readonly<Props>): void {
-    console.log(prevProps);
-    console.log(this.props);
-  }
-
   getItemCount() {
     const {index, item, role, updateGroup} = this.props;
     // prevent multiple group count calls when initializing multiple items simultaneously
@@ -228,7 +223,7 @@ export class SearchGroupItem extends React.Component<Props, State> {
       isStandard = item.searchParameters[0].isStandard;
     }
     const {type, standard} = this.typeAndStandard;
-    const context = {item, domain, type, isStandard, role, groupId, itemId, fullTree, standard};
+    const context = {item: _item, domain, type, isStandard, role, groupId, itemId, fullTree, standard};
     wizardStore.next(context);
   }
 
