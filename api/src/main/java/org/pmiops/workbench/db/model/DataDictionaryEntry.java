@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,7 +12,12 @@ import javax.persistence.Table;
 @Table(name = "data_dictionary_entry")
 public class DataDictionaryEntry {
 
+  // Meta data fields
   private long dataDictionaryEntryId;
+  private CdrVersion cdrVersion;
+  private Timestamp definedTime;
+
+  // Fields copied from the Data Dictionary export
   private String relevantOmopTable;
   private String fieldName;
   private String omopCdmStandardOrCustomField;
@@ -32,6 +38,14 @@ public class DataDictionaryEntry {
   public void setDataDictionaryEntryId(long dataDictionaryEntryId) {
     this.dataDictionaryEntryId = dataDictionaryEntryId;
   }
+
+  @Column(name = "cdr_version")
+  public CdrVersion getCdrVersion() { return cdrVersion; }
+  public void setCdrVersion(CdrVersion cdrVersion) { this.cdrVersion = cdrVersion; }
+
+  @Column(name = "defined_time")
+  public Timestamp getDefinedTime() { return definedTime; }
+  public void setDefinedTime(Timestamp definedTime) { this.definedTime = definedTime; }
 
   @Column(name = "relevant_omop_table")
   public String getRelevantOmopTable() {
