@@ -217,7 +217,7 @@ def dev_up()
   }
 
   common.status "Loading Data Dictionary..."
-  common.run_inline %W{gradle loadDataDictionary}
+  common.run_inline %W{docker-compose run api-scripts ./gradlew loadDataDictionary}
 
   run_api()
 end

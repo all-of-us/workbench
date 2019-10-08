@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -39,7 +41,8 @@ public class DataDictionaryEntry {
     this.dataDictionaryEntryId = dataDictionaryEntryId;
   }
 
-  @Column(name = "cdr_version")
+  @ManyToOne
+  @JoinColumn(name = "cdr_version_id")
   public CdrVersion getCdrVersion() { return cdrVersion; }
   public void setCdrVersion(CdrVersion cdrVersion) { this.cdrVersion = cdrVersion; }
 

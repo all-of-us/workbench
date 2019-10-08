@@ -1,8 +1,11 @@
 package org.pmiops.workbench.tools;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.logging.Logger;
 import org.pmiops.workbench.dataset.DataDictionaryEntryDao;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DataDictionaryEntry;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,10 +23,14 @@ public class LoadDataDictionary {
   private static final Logger logger = Logger.getLogger(LoadDataDictionary.class.getName());
 
   @Bean
-  public CommandLineRunner run(DataDictionaryEntryDao dataDictionaryEntryDao)
-      throws IOException {
+  public CommandLineRunner run(Clock clock,
+      CdrVersionDao cdrVersinoDao,
+      DataDictionaryEntryDao dataDictionaryEntryDao) {
     return (args) -> {
       DataDictionaryEntry entry = new DataDictionaryEntry();
+      entry.setCdrVersion(cdrVersinoDao.findByIsDefault(true));
+      entry.setDefinedTime(new Timestamp(clock.instant().toEpochMilli()));
+
       entry.setRelevantOmopTable("relevant omop table");
       entry.setFieldName("field name");
       entry.setOmopCdmStandardOrCustomField("omop cdm standard");
