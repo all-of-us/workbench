@@ -86,10 +86,9 @@ public class BillingProjectBufferService {
       entry.setLastSyncRequestTime(new Timestamp(clock.instant().toEpochMilli()));
 
       try {
-        BillingProjectStatus temp = fireCloudService
-            .getBillingProjectStatus(entry.getFireCloudProjectName());
-
-        switch (temp.getCreationStatus()) {
+        switch (fireCloudService
+            .getBillingProjectStatus(entry.getFireCloudProjectName())
+            .getCreationStatus()) {
           case READY:
             entry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
             break;
@@ -106,10 +105,6 @@ public class BillingProjectBufferService {
         }
       } catch (WorkbenchException e) {
         log.log(Level.WARNING, "Get BillingProject status call failed", e);
-      } catch (NullPointerException e) {
-        int t2 = 1+1;
-
-        System.out.println(e);
       }
 
       billingProjectBufferEntryDao.save(entry);
