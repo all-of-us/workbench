@@ -15,7 +15,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -30,8 +29,7 @@ public class LoadDataDictionary {
   private static final Logger logger = Logger.getLogger(LoadDataDictionary.class.getName());
 
   @Bean
-  public CommandLineRunner run(Clock clock,
-      CdrVersionDao cdrVersionDao,
+  public CommandLineRunner run(CdrVersionDao cdrVersionDao,
       DataDictionaryEntryDao dataDictionaryEntryDao) {
     return (args) -> {
 
@@ -40,10 +38,13 @@ public class LoadDataDictionary {
       ClassLoader cl = this.getClass().getClassLoader();
       ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
       Resource[] resources = resolver.getResources("classpath*:/data_dictionary_exports/*.txt") ;
+
       for (Resource resource : resources) {
         InputStream is = resource.getInputStream();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        Timestamp definedTime = new Timestamp(Long.parseLong(reader.readLine()) * 1000);
+
         String line;
         while ((line = reader.readLine()) != null) {
           String[] fields = line.split(":");
@@ -54,6 +55,10 @@ public class LoadDataDictionary {
           DataDictionaryEntry entry = dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
               relevantOmopTable, fieldName, defaultCdrVersion);
 
+          if (entry != null && entry.getDefinedTime().after(definedTime)) {
+            continue;
+          }
+
           if (entry == null) {
             entry = new DataDictionaryEntry();
             entry.setRelevantOmopTable(relevantOmopTable);
@@ -61,7 +66,7 @@ public class LoadDataDictionary {
             entry.setCdrVersion((defaultCdrVersion));
           }
 
-          entry.setDefinedTime(new Timestamp(clock.instant().toEpochMilli()));
+          entry.setDefinedTime(definedTime);
           entry.setOmopCdmStandardOrCustomField(fields[2]);
           entry.setDescription(fields[3]);
           entry.setFieldType(fields[4]);

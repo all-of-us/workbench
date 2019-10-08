@@ -10,4 +10,5 @@ import org.springframework.data.repository.query.Param;
 public interface DataDictionaryEntryDao extends CrudRepository<DataDictionaryEntry, Long> {
 
   DataDictionaryEntry findByRelevantOmopTableAndFieldNameAndCdrVersion(String relevantOmopTable, String fieldName, CdrVersion cdrVersion);
+
 }
