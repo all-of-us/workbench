@@ -476,7 +476,7 @@ export function highlightSearchTerm(searchTerm: string, stringToHighlight: strin
  */
 export async function apiCallWithGatewayTimeoutRetries<T>(
   apiCall: () => Promise<T>, maxRetries = 3, initialWaitTime = 1000): Promise<T> {
-  return apiCallWithGatewayTimeoutRetriesAndRetryCount(apiCall, maxRetries, 1, defaultWaitTime);
+  return apiCallWithGatewayTimeoutRetriesAndRetryCount(apiCall, maxRetries, 1, initialWaitTime);
 }
 
 async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
@@ -487,8 +487,8 @@ async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
     if (ex.status !== 504 || retryCount > maxRetries) {
       throw ex;
     }
-    await new Promise(resolve => setTimeout(resolve, defaultWaitTime * Math.pow(2, retryCount)));
+    await new Promise(resolve => setTimeout(resolve, initialWaitTime * Math.pow(2, retryCount)));
     return await apiCallWithGatewayTimeoutRetriesAndRetryCount(
-      apiCall, maxRetries, retryCount + 1, defaultWaitTime);
+      apiCall, maxRetries, retryCount + 1, initialWaitTime);
   }
 }
