@@ -25,6 +25,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -46,6 +47,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -68,6 +70,8 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
+import org.pmiops.workbench.model.RecentWorkspace;
+import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -296,6 +300,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+    workspaceService.maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
 
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -755,6 +760,37 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(new EmptyResponse());
   }
 
+  @Override
+  public ResponseEntity<RecentWorkspaceResponse> getUserRecentWorkspaces() {
+    List<UserRecentWorkspace> userRecentWorkspaces = workspaceService.getRecentWorkspaces();
+    List<Long> workspaceIds =
+        userRecentWorkspaces.stream()
+            .map(UserRecentWorkspace::getWorkspaceId)
+            .collect(Collectors.toList());
+    List<org.pmiops.workbench.db.model.Workspace> dbWorkspaces =
+        workspaceService.getDao().findAllByWorkspaceIdIn(workspaceIds);
+    Map<Long, org.pmiops.workbench.db.model.Workspace> dbWorkspacesById =
+        dbWorkspaces.stream()
+            .collect(
+                Collectors.toMap(
+                    org.pmiops.workbench.db.model.Workspace::getWorkspaceId, Function.identity()));
+    Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsById =
+        dbWorkspaces.stream()
+            .collect(
+                Collectors.toMap(
+                    org.pmiops.workbench.db.model.Workspace::getWorkspaceId,
+                    dbWorkspace ->
+                        workspaceService.getWorkspaceAccessLevel(
+                            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())));
+
+    RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
+    List<RecentWorkspace> recentWorkspaces =
+        workspaceMapper.buildRecentWorkspaceList(
+            userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
+    recentWorkspaceResponse.addAll(recentWorkspaces);
+    return ResponseEntity.ok(recentWorkspaceResponse);
+  }
+
   // Generate an action for the created workspace, capturing all required fields
   private void fireCreateWorkspaceAction(Workspace createdWorkspace, long dbWorkspaceId) {
     final String actionId = ActionAuditService.newActionId();
@@ -793,5 +829,22 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private void insertIfNotNull(ImmutableMap.Builder<String, String> mapBuilder, String key, String value) {
     Optional.ofNullable(value).ifPresent(v -> mapBuilder.put(key, v));
+  }
+
+  @Override
+  public ResponseEntity<RecentWorkspaceResponse> updateRecentWorkspaces(
+      String workspaceNamespace, String workspaceId) {
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.get(workspaceNamespace, workspaceId);
+    UserRecentWorkspace userRecentWorkspace = workspaceService.updateRecentWorkspaces(dbWorkspace);
+    WorkspaceAccessLevel workspaceAccessLevel =
+        workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+
+    RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
+    RecentWorkspace recentWorkspace =
+        workspaceMapper.buildRecentWorkspace(
+            userRecentWorkspace, dbWorkspace, workspaceAccessLevel);
+    recentWorkspaceResponse.add(recentWorkspace);
+    return ResponseEntity.ok(recentWorkspaceResponse);
   }
 }
