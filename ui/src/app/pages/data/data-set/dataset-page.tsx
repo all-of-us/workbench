@@ -248,6 +248,7 @@ const BoxHeader = ({text= '', header =  '', subHeader = '', style= {}, ...props}
 
 interface DataSetPreviewInfo {
   isLoading: boolean;
+  errorText: string;
   values?: Array<DataSetPreviewValueList>;
 }
 
@@ -546,7 +547,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     async getPreviewList() {
       const domains = fp.uniq(this.state.selectedDomainValuePairs.map(domainValue => domainValue.domain));
       const newPreviewList: Map<Domain, DataSetPreviewInfo> =
-        new Map(domains.map<[Domain, DataSetPreviewInfo]>(domain => [domain, {isLoading: true, values: []}]));
+        new Map(domains.map<[Domain, DataSetPreviewInfo]>(domain => [domain, {
+          isLoading: true, errorText: '', values: []}]));
       this.setState({
         previewList: newPreviewList,
         selectedPreviewDomain: domains[0]
@@ -566,19 +568,25 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         prePackagedConceptSet: this.getPrePackagedConceptSet(),
         values: this.state.selectedDomainValuePairs.map(domainValue => domainValue.value)
       };
+      let newPreviewInformation;
       try {
         const domainPreviewResponse = await apiCallWithGatewayTimeoutRetries(
           () => dataSetApi().previewDataSetByDomain(namespace, id, domainRequest));
-        const newPreviewInformation = {
+        newPreviewInformation = {
           isLoading: false,
+          errorText: '',
           values: domainPreviewResponse.values
         };
-        this.setState(state => ({previewList: state.previewList.set(domainPreviewResponse.domain, newPreviewInformation)}));
       } catch (ex) {
         const exceptionResponse = await ex.json() as unknown as ErrorResponse;
         const errorText = this.generateErrorTextFromPreviewException(exceptionResponse, domain);
-        this.setState({previewError: true, previewErrorText: errorText});
+        newPreviewInformation = {
+          isLoading: false,
+          errorText: errorText,
+          values: []
+        };
       }
+      this.setState(state => ({previewList: state.previewList.set(domain, newPreviewInformation)}));
     }
 
     // TODO: Move to using a response based error handling method, rather than a error based one
@@ -653,7 +661,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       return <div style={styles.warningMessage}>
         {filteredPreviewData.isLoading ?
           <div>Generating preview for {domainDisplayed}</div> :
-          <div>No values found for {domainDisplayed}</div>
+          <div>{filteredPreviewData.errorText}</div>
         }
       </div>;
     }
