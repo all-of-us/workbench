@@ -198,22 +198,22 @@ def dev_up()
   init_new_cdr_db %W{--cdr-db-name cdr}
 
   common.status "Updating CDR versions..."
-  common.run_inline %W{docker-compose run update-cdr-versions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
+  common.run_inline %W{docker-compose run api-scripts ./gradlew updateCdrVersions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
 
   common.status "Updating workbench configuration..."
   common.run_inline %W{
-    docker-compose run update-config
-    -Pconfig_key=main -Pconfig_file=config/config_local.json
+    docker-compose run api-scripts
+    ./gradlew loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json
   }
   common.status "Updating CDR schema configuration..."
   common.run_inline %W{
-    docker-compose run update-config
-    -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
+    docker-compose run api-scripts
+    ./gradlew loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
   }
   common.status "Updating featured workspaces..."
   common.run_inline %W{
-    docker-compose run update-config
-    -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
+    docker-compose run api-scripts
+    ./gradlew loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
   }
 
   common.status "Loading Data Dictionary..."
@@ -1346,7 +1346,7 @@ def update_cdr_versions_local(cmd_name, *args)
   versions_file = 'config/cdr_versions_local.json'
   app_args = ["-PappArgs=['/w/api/" + versions_file + "',false]"]
   common = Common.new
-  common.run_inline %W{docker-compose run update-cdr-versions} + app_args
+  common.run_inline %W{docker-compose run api-scripts ./gradlew updateCdrVersions} + app_args
 end
 
 Common.register_command({

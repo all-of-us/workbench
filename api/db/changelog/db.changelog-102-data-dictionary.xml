@@ -31,7 +31,7 @@
 
     <addUniqueConstraint
       tableName="data_dictionary_entry"
-      columnNames="relevant_omop_table, field_name"
-      constraintName="unique_omop_field_pair"/>
+      columnNames="relevant_omop_table, field_name, cdr_version_id"
+      constraintName="unique_omop_field_tuple"/>
   </changeSet>
 </databaseChangeLog>

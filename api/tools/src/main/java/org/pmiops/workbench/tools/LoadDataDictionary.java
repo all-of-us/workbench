@@ -1,6 +1,9 @@
 package org.pmiops.workbench.tools;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.logging.Logger;
@@ -24,23 +27,35 @@ public class LoadDataDictionary {
 
   @Bean
   public CommandLineRunner run(Clock clock,
-      CdrVersionDao cdrVersinoDao,
+      CdrVersionDao cdrVersionDao,
       DataDictionaryEntryDao dataDictionaryEntryDao) {
     return (args) -> {
-      DataDictionaryEntry entry = new DataDictionaryEntry();
-      entry.setCdrVersion(cdrVersinoDao.findByIsDefault(true));
-      entry.setDefinedTime(new Timestamp(clock.instant().toEpochMilli()));
+      InputStream is = getClass().getClassLoader().getResourceAsStream("data_dictionary_export.txt");
 
-      entry.setRelevantOmopTable("relevant omop table");
-      entry.setFieldName("field name");
-      entry.setOmopCdmStandardOrCustomField("omop cdm standard");
-      entry.setDescription("desc");
-      entry.setFieldType("field type");
-      entry.setDataProvenance("data provenance");
-      entry.setSourcePpiModule("source ppi module");
-      entry.setTransformedByRegisteredTierPrivacyMethods(false);
 
-      dataDictionaryEntryDao.save(entry);
+      BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+      String line;
+      while ((line = reader.readLine()) != null) {
+        String[] fields = line.split(":");
+        System.out.println(fields.length);
+
+        DataDictionaryEntry entry = new DataDictionaryEntry();
+        entry.setCdrVersion(cdrVersionDao.findByIsDefault(true));
+        entry.setDefinedTime(new Timestamp(clock.instant().toEpochMilli()));
+
+        entry.setRelevantOmopTable(fields[0]);
+        entry.setFieldName(fields[1]);
+        entry.setOmopCdmStandardOrCustomField(fields[2]);
+        entry.setDescription(fields[3]);
+        entry.setFieldType(fields[4]);
+        entry.setDataProvenance(fields[5]);
+        entry.setSourcePpiModule(fields[6]);
+        entry.setTransformedByRegisteredTierPrivacyMethods("true".equals(fields[7]));
+
+        dataDictionaryEntryDao.save(entry);
+
+        System.out.println(line);
+      }
     };
   }
 
