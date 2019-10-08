@@ -2,6 +2,8 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
@@ -42,6 +44,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.ConceptSet;
@@ -81,6 +84,10 @@ public class DataSetController implements DataSetApiDelegate {
   private static long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000l;
   private static String CONCEPT_SET = "conceptSet";
   private static String COHORT = "cohort";
+
+  private static final String dateFormatString = "yyyy/MM/dd HH:mm:ss";
+  private static final String emptyCellMarker = "";
+
 
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
@@ -325,57 +332,28 @@ public class DataSetController implements DataSetApiDelegate {
         throw ex;
       }
     }
-    queryResponse
+
+    valuePreviewList.addAll(queryResponse
         .getSchema()
         .getFields()
-        .forEach(
-            fields -> {
-              valuePreviewList.add(new DataSetPreviewValueList().value(fields.getName()));
-            });
+        .stream()
+        .map(fields ->
+          new DataSetPreviewValueList().value(fields.getName())
+        ).collect(Collectors.toList()));
 
     queryResponse
         .getValues()
         .forEach(
             fieldValueList -> {
-              IntStream.range(0, fieldValueList.size())
-                  .forEach(
-                      columnNumber -> {
-                        valuePreviewList
-                            .get(columnNumber)
-                            .addQueryValueItem(
-                                Optional.ofNullable(fieldValueList.get(columnNumber).getValue())
-                                    .orElse("")
-                                    .toString());
-                      });
+              addFieldValuesFromBigQueryToPreviewList(valuePreviewList, fieldValueList);
             });
-    final String dateFormatString = "yyyy/MM/dd HH:mm:ss";
-    final String emptyCellMarker = "";
+
     queryResponse
         .getSchema()
         .getFields()
         .forEach(
             fields -> {
-              DataSetPreviewValueList previewValue =
-                  valuePreviewList.stream()
-                      .filter(preview -> preview.getValue().equalsIgnoreCase(fields.getName()))
-                      .findFirst()
-                      .get();
-              if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
-                List<String> queryValues = new ArrayList<String>();
-                DateFormat dateFormat = new SimpleDateFormat(dateFormatString);
-                previewValue
-                    .getQueryValue()
-                    .forEach(
-                        value -> {
-                          if (!value.equals(emptyCellMarker)) {
-                            Double fieldValue = Double.parseDouble(value);
-                            queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
-                          } else {
-                            queryValues.add(value);
-                          }
-                        });
-                previewValue.setQueryValue(queryValues);
-              }
+              formatTimestampValues(valuePreviewList, fields);
             });
 
     Collections.sort(
@@ -385,6 +363,43 @@ public class DataSetController implements DataSetApiDelegate {
     previewQueryResponse.setDomain(dataSetPreviewRequest.getDomain());
     previewQueryResponse.setValues(valuePreviewList);
     return ResponseEntity.ok(previewQueryResponse);
+  }
+
+  private void addFieldValuesFromBigQueryToPreviewList(List<DataSetPreviewValueList> valuePreviewList, FieldValueList fieldValueList) {
+    IntStream.range(0, fieldValueList.size())
+        .forEach(
+            columnNumber -> {
+              valuePreviewList
+                  .get(columnNumber)
+                  .addQueryValueItem(
+                      Optional.ofNullable(fieldValueList.get(columnNumber).getValue())
+                          .orElse("")
+                          .toString());
+            });
+  }
+
+  private void formatTimestampValues(List<DataSetPreviewValueList> valuePreviewList, Field fields) {
+    DataSetPreviewValueList previewValue =
+        valuePreviewList.stream()
+            .filter(preview -> preview.getValue().equalsIgnoreCase(fields.getName()))
+            .findFirst()
+            .orElseThrow(() -> new ServerErrorException("Value should be present when it is not in dataset preview request"));
+    if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
+      List<String> queryValues = new ArrayList<>();
+      DateFormat dateFormat = new SimpleDateFormat(dateFormatString);
+      previewValue
+          .getQueryValue()
+          .forEach(
+              value -> {
+                if (!value.equals(emptyCellMarker)) {
+                  Double fieldValue = Double.parseDouble(value);
+                  queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
+                } else {
+                  queryValues.add(value);
+                }
+              });
+      previewValue.setQueryValue(queryValues);
+    }
   }
 
   @Override
