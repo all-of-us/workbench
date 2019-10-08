@@ -5,13 +5,11 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
-import com.google.cloud.logging.LogEntry;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableBiMap.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 import java.nio.charset.StandardCharsets;
@@ -38,6 +36,7 @@ import org.pmiops.workbench.audit.ActionAuditService;
 import org.pmiops.workbench.audit.ActionType;
 import org.pmiops.workbench.audit.AgentType;
 import org.pmiops.workbench.audit.AuditableEvent;
+import org.pmiops.workbench.audit.TargetType;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -227,8 +226,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } else if (workspace.getName().length() > 80) {
       throw new BadRequestException("Workspace name must be 80 characters or less");
     }
-    // TODO: move call after creation once billing buffer problem is fixed!!!
-    fireCreateWorkspaceAction(workspace);
     User user = userProvider.get();
     String workspaceNamespace;
     BillingProjectBufferEntry bufferedBillingProject;
@@ -242,21 +239,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId =
         generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
-    FirecloudWorkspaceId fcWorkspaceId = workspaceId;
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        attemptFirecloudWorkspaceCreation(fcWorkspaceId);
+        attemptFirecloudWorkspaceCreation(workspaceId);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         new org.pmiops.workbench.db.model.Workspace();
-    dbWorkspace.setFirecloudName(fcWorkspaceId.getWorkspaceName());
-    dbWorkspace.setWorkspaceNamespace(fcWorkspaceId.getWorkspaceNamespace());
-    dbWorkspace.setCreator(user);
-    dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
-    dbWorkspace.setCreationTime(now);
-    dbWorkspace.setLastModifiedTime(now);
-    dbWorkspace.setVersion(1);
-    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
 
     setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
@@ -266,7 +255,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setName(reqWorkspace.getName());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
-    workspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
+    WorkspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
     if (reqWorkspace.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -277,8 +266,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
-    fireCreateWorkspaceAction(createdWorkspace);
+    fireCreateWorkspaceAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
+  }
+
+  private void setDbWorkspaceFields(org.pmiops.workbench.db.model.Workspace dbWorkspace, User user,
+      FirecloudWorkspaceId workspaceId, org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+      Timestamp now) {
+    dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
+    dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
+    dbWorkspace.setCreator(user);
+    dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
+    dbWorkspace.setCreationTime(now);
+    dbWorkspace.setLastModifiedTime(now);
+    dbWorkspace.setVersion(1);
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
 
   @Override
@@ -340,7 +342,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
     if (researchPurpose != null) {
-      workspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+      WorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
       if (researchPurpose.getReviewRequested()) {
         Timestamp now = new Timestamp(clock.instant().toEpochMilli());
         dbWorkspace.setTimeRequested(now);
@@ -435,18 +437,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         new org.pmiops.workbench.db.model.Workspace();
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    dbWorkspace.setFirecloudName(toFcWorkspaceId.getWorkspaceName());
-    dbWorkspace.setWorkspaceNamespace(toFcWorkspaceId.getWorkspaceNamespace());
-    dbWorkspace.setCreator(user);
-    dbWorkspace.setFirecloudUuid(toFcWorkspace.getWorkspaceId());
-    dbWorkspace.setCreationTime(now);
-    dbWorkspace.setLastModifiedTime(now);
-    dbWorkspace.setVersion(1);
-    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    setDbWorkspaceFields(dbWorkspace, user, toFcWorkspaceId, toFcWorkspace, now);
 
     dbWorkspace.setName(body.getWorkspace().getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
-    workspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+    WorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -761,18 +756,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   // Generate an action for the created workspace, capturing all required fields
-  private void fireCreateWorkspaceAction(Workspace createdWorkspace) {
-    String actionId = ActionAuditService.newActionId();
-    long userId = userProvider.get().getUserId();
-    Map<String, String> propertyValues = buildPropertyStringMap(createdWorkspace);
+  private void fireCreateWorkspaceAction(Workspace createdWorkspace, long dbWorkspaceId) {
+    final String actionId = ActionAuditService.newActionId();
+    final long userId = userProvider.get().getUserId();
+    final String userEmail = userProvider.get().getEmail();
+    final Map<String, String> propertyValues = buildPropertyStringMap(createdWorkspace);
     List<AuditableEvent> events = propertyValues.entrySet().stream()
         .map(entry -> new AuditableEvent.Builder()
             .setActionId(actionId)
-            .setAgentEmail(Optional.of(userProvider.get().getEmail()))
+            .setAgentEmailMaybe(Optional.of(userEmail))
             .setActionType(ActionType.CREATE)
             .setAgentType(AgentType.USER)
             .setAgentId(userId)
+            .setTargetType(TargetType.WORKBENCH)
             .setTargetPropertyMaybe(Optional.of(entry.getKey()))
+            .setTargetIdMaybe(Optional.of(dbWorkspaceId))
             .setPreviousValueMaybe(Optional.empty())
             .setNewValueMaybe(Optional.of(entry.getValue()))
             .build())
@@ -780,15 +778,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     actionAuditService.send(events);
   }
 
-  private Map<String, String> buildPropertyStringMap(Workspace createdWorkspace) {
+  private Map<String, String> buildPropertyStringMap(Workspace workspace) {
     ImmutableMap.Builder<String, String> propsBuilder = new ImmutableMap.Builder<>();
-    insertIfNotNull(propsBuilder, "intended_study", createdWorkspace.getResearchPurpose().getIntendedStudy());
-    insertIfNotNull(propsBuilder, "creator", createdWorkspace.getCreator());
-    Optional.ofNullable(createdWorkspace.getNamespace())
+    insertIfNotNull(propsBuilder, "intended_study", workspace.getResearchPurpose().getIntendedStudy());
+    insertIfNotNull(propsBuilder, "creator", workspace.getCreator());
+    Optional.ofNullable(workspace.getNamespace())
         .ifPresent(ns -> propsBuilder.put("namespace", ns));
-    Optional.ofNullable(createdWorkspace.getId())
+    Optional.ofNullable(workspace.getId())
         .ifPresent(id -> propsBuilder.put("firecloud_name", id));
-    Optional.ofNullable(createdWorkspace.getName())
+    Optional.ofNullable(workspace.getName())
         .ifPresent(n -> propsBuilder.put("name", n));
     return propsBuilder.build();
   }

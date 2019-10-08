@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public abstract class AbstractAuditableEvent {
 
-  private static final String LOG_NAME = "action-audit-test-2";
+  private static final String LOG_NAME = "action-audit-test-3";
 
   public abstract long timestamp();
 
@@ -42,12 +42,12 @@ public abstract class AbstractAuditableEvent {
     result.put(AuditColumn.ACTION_TYPE.name(), actionType());
     result.put(AuditColumn.AGENT_TYPE.name(), agentType());
     result.put(AuditColumn.AGENT_ID.name(), agentId());
-    result.put(AuditColumn.AGENT_EMAIL.name(), toNullable(agentEmail());
+    result.put(AuditColumn.AGENT_EMAIL.name(), toNullable(agentEmail()));
     result.put(AuditColumn.TARGET_TYPE.name(), targetType());
     result.put(AuditColumn.TARGET_ID.name(), toNullable(targetId()));
     result.put(AuditColumn.AGENT_ID.name(), agentId());
     result.put(AuditColumn.TARGET_PROPERTY.name(), toNullable(targetProperty()));
-    result.put(AuditColumn.PREV_VALUE.name(), toNullable(previousValue());
+    result.put(AuditColumn.PREV_VALUE.name(), toNullable(previousValue()));
     result.put(AuditColumn.NEW_VALUE.name(), toNullable(newValue()));
     return JsonPayload.of(result);
   }

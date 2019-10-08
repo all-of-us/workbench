@@ -138,7 +138,7 @@ public class WorkspaceMapper {
     dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
   }
 
-  private final ResearchPurpose createResearchPurpose(
+  private ResearchPurpose createResearchPurpose(
       org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose =
         new ResearchPurpose()

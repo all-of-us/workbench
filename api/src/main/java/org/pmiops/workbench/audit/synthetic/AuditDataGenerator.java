@@ -1,8 +1,6 @@
 package org.pmiops.workbench.audit.synthetic;
 
 import com.google.cloud.logging.LogEntry;
-import com.google.cloud.logging.Logging;
-import com.google.cloud.logging.LoggingOptions;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.security.SecureRandom;
@@ -71,7 +69,7 @@ public class AuditDataGenerator {
             .setTimestamp(timestamp)
             .setAgentType(agentType)
             .setAgentId(agentId)
-            .setAgentEmail(agentEmail)
+            .setAgentEmailMaybe(agentEmail)
             .setActionType(actionType)
             .setTargetType(targetType)
             .setTargetIdMaybe(targetId)
