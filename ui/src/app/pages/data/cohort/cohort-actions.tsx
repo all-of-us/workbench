@@ -116,6 +116,7 @@ const CohortActions = withCurrentWorkspace()(
           url += 'data/data-sets';
           break;
         case 'newCohort':
+          currentCohortStore.next(undefined);
           url += `data/cohorts/build`;
       }
       navigateByUrl(url);
