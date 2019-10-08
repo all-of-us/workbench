@@ -348,6 +348,7 @@ public class DataSetController implements DataSetApiDelegate {
                                     .toString());
                       });
             });
+    String dateFormatString = "yyyy/MM/dd HH:mm:ss";
     queryResponse
         .getSchema()
         .getFields()
@@ -360,7 +361,7 @@ public class DataSetController implements DataSetApiDelegate {
                       .get();
               if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
                 List<String> queryValues = new ArrayList<String>();
-                DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                DateFormat dateFormat = new SimpleDateFormat(dateFormatString);
                 previewValue
                     .getQueryValue()
                     .forEach(
