@@ -44,7 +44,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.ConceptSet;
