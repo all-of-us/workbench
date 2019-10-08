@@ -1,0 +1,3 @@
+relevant omop table:field name 1:omop cdm standardz:desc:field type:data provenance:source ppi module:false
+relevant omop table:field name 2:omop cdm standardzz:desc:field type:data provenance:source ppi module:false
+relevant omop table:field name 3:omop cdm standardzzz:desc:field type:data provenance:source ppi module:false
