@@ -25,7 +25,6 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
   @ViewChild('wrapper') wrapper;
 
-  includeSize: number;
   private subscription;
   loading = false;
   count: number;
@@ -111,9 +110,5 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
   updateSaving = (flag: boolean) => {
     this.saving = flag;
-  }
-
-  get showExcludes() {
-    return this.criteria.includes.length > 0 || this.criteria.excludes.length > 0;
   }
 }
