@@ -69,15 +69,15 @@ interface State {
   error: boolean;
   loading: boolean;
   status: string;
+  timeout: Timeout;
 }
 
 export class SearchGroupItem extends React.Component<Props, State> {
   dropdown: any;
   op: any;
-  timeout: Timeout;
   constructor(props: Props) {
     super(props);
-    this.state = {count: null, error: false, loading: true, status: props.item.status};
+    this.state = {count: null, error: false, loading: true, status: props.item.status, timeout: null};
   }
 
   componentDidMount(): void {
@@ -160,14 +160,15 @@ export class SearchGroupItem extends React.Component<Props, State> {
     this.setState({status: 'pending'});
     this.props.item.status = 'pending';
     this.updateSearchRequest();
-    this.timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       this.updateSearchRequest(true);
     }, 10000);
+    this.setState({timeout});
   }
 
   undo() {
     triggerEvent('Undo', 'Click', 'Undo - Delete Criteria - Cohort Builder');
-    clearTimeout(this.timeout);
+    clearTimeout(this.state.timeout);
     this.setState({status: 'active'});
     this.props.item.status = 'active';
     this.updateSearchRequest();
