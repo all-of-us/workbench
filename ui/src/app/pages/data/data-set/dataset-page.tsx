@@ -8,7 +8,6 @@ import {FlexRow} from 'app/components/flex';
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
@@ -22,6 +21,7 @@ import {
 import colors from 'app/styles/colors';
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
+  apiCallWithGatewayTimeoutRetries,
   formatDomain,
   formatDomainString,
   ReactWrapperBase,
@@ -247,6 +247,7 @@ const BoxHeader = ({text= '', header =  '', subHeader = '', style= {}, ...props}
 
 interface DataSetPreviewInfo {
   isLoading: boolean;
+  errorText: string;
   values?: Array<DataSetPreviewValueList>;
 }
 
@@ -266,8 +267,6 @@ interface State {
   prePackagedSurvey: boolean;
   loadingResources: boolean;
   openSaveModal: boolean;
-  previewError: boolean;
-  previewErrorText: string;
   previewList: Map<Domain, DataSetPreviewInfo>;
   selectedCohortIds: number[];
   selectedConceptSetIds: number[];
@@ -293,8 +292,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         openSaveModal: false,
         prePackagedDemographics: false,
         prePackagedSurvey: false,
-        previewError: false,
-        previewErrorText: '',
         previewList: new Map(),
         selectedCohortIds: [],
         selectedConceptSetIds: [],
@@ -543,37 +540,48 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     }
 
     async getPreviewList() {
-      const {namespace, id} = this.props.workspace;
       const domains = fp.uniq(this.state.selectedDomainValuePairs.map(domainValue => domainValue.domain));
       const newPreviewList: Map<Domain, DataSetPreviewInfo> =
-        new Map(domains.map<[Domain, DataSetPreviewInfo]>(domain => [domain, {isLoading: true, values: []}]));
+        new Map(domains.map<[Domain, DataSetPreviewInfo]>(domain => [domain, {
+          isLoading: true, errorText: '', values: []}]));
       this.setState({
         previewList: newPreviewList,
         selectedPreviewDomain: domains[0]
       });
       domains.forEach(async domain => {
-        const request: DataSetPreviewRequest = {
-          domain: domain,
-          conceptSetIds: this.state.selectedConceptSetIds,
-          includesAllParticipants: this.state.includesAllParticipants,
-          cohortIds: this.state.selectedCohortIds,
-          prePackagedConceptSet: this.getPrePackagedConceptSet(),
-          values: this.state.selectedDomainValuePairs.map(domainValue => domainValue.value)
-        };
-        try {
-          const dataSetPreviewResp = await dataSetApi().previewDataSetByDomain(namespace, id, request);
-          const newPreviewInformation = {
-            isLoading: false,
-            values: dataSetPreviewResp.values
-          };
-          this.setState({previewList: this.state.previewList.set(dataSetPreviewResp.domain, newPreviewInformation)});
-        } catch (ex) {
-          const exceptionResponse = await ex.json() as unknown as ErrorResponse;
-          const errorText = this.generateErrorTextFromPreviewException(exceptionResponse, domain);
-          this.setState({previewError: true, previewErrorText: errorText});
-          console.error(ex);
-        }
+        this.getPreviewByDomain(domain);
       });
+    }
+
+    async getPreviewByDomain(domain: Domain) {
+      const {namespace, id} = this.props.workspace;
+      const domainRequest: DataSetPreviewRequest = {
+        domain: domain,
+        conceptSetIds: this.state.selectedConceptSetIds,
+        includesAllParticipants: this.state.includesAllParticipants,
+        cohortIds: this.state.selectedCohortIds,
+        prePackagedConceptSet: this.getPrePackagedConceptSet(),
+        values: this.state.selectedDomainValuePairs.map(domainValue => domainValue.value)
+      };
+      let newPreviewInformation;
+      try {
+        const domainPreviewResponse = await apiCallWithGatewayTimeoutRetries(
+          () => dataSetApi().previewDataSetByDomain(namespace, id, domainRequest));
+        newPreviewInformation = {
+          isLoading: false,
+          errorText: '',
+          values: domainPreviewResponse.values
+        };
+      } catch (ex) {
+        const exceptionResponse = await ex.json() as unknown as ErrorResponse;
+        const errorText = this.generateErrorTextFromPreviewException(exceptionResponse, domain);
+        newPreviewInformation = {
+          isLoading: false,
+          errorText: errorText,
+          values: []
+        };
+      }
+      this.setState(state => ({previewList: state.previewList.set(domain, newPreviewInformation)}));
     }
 
     // TODO: Move to using a response based error handling method, rather than a error based one
@@ -648,7 +656,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       return <div style={styles.warningMessage}>
         {filteredPreviewData.isLoading ?
           <div>Generating preview for {domainDisplayed}</div> :
-          <div>No values found for {domainDisplayed}</div>
+          <div>{filteredPreviewData.errorText}</div>
         }
       </div>;
     }
@@ -666,8 +674,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         openSaveModal,
         prePackagedDemographics,
         prePackagedSurvey,
-        previewError,
-        previewErrorText,
         previewList,
         selectedCohortIds,
         selectedConceptSetIds,
@@ -884,15 +890,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                              this.setState({openSaveModal: false});
                                            }}
         />}
-        {previewError && <Modal>
-          <ModalTitle>Error Loading Data Set Preview</ModalTitle>
-          <ModalBody>{previewErrorText}</ModalBody>
-          <ModalFooter>
-            <Button type='secondary' onClick={() => {this.setState({previewError: false}); }}>
-              Close
-            </Button>
-          </ModalFooter>
-        </Modal>}
         <HelpSidebar location='datasetBuilder' />
       </React.Fragment>;
     }
