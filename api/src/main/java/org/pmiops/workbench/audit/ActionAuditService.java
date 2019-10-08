@@ -2,7 +2,6 @@ package org.pmiops.workbench.audit;
 
 import java.util.Collection;
 import org.elasticsearch.common.UUIDs;
-import org.springframework.stereotype.Service;
 
 public interface ActionAuditService {
   void send(Collection<AuditableEvent> events);

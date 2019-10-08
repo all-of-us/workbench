@@ -97,7 +97,8 @@ public class AuditableEvent extends AbstractAuditableEvent {
     return newValueMaybe;
   }
 
-  // todo: replace with smarter builder implementation. Explicitly set optionals to Optional.empty();
+  // todo: replace with smarter builder implementation. Explicitly set optionals to
+  // Optional.empty();
   public static class Builder {
 
     private long timestamp;

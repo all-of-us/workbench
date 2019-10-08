@@ -19,9 +19,8 @@ public class ActionAuditServiceImpl implements ActionAuditService {
 
   @Override
   public void send(Collection<AuditableEvent> events) {
-    ImmutableList<LogEntry> logEntries = events.stream()
-        .map(AuditableEvent::toLogEntry)
-        .collect(ImmutableList.toImmutableList());
+    ImmutableList<LogEntry> logEntries =
+        events.stream().map(AuditableEvent::toLogEntry).collect(ImmutableList.toImmutableList());
     logging.write(logEntries);
   }
 }

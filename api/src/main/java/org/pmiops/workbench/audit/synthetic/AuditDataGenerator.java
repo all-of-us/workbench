@@ -117,9 +117,9 @@ public class AuditDataGenerator {
 
   // doesn't work b/c process doesn't have correct credentials
   public static void main(String args[]) {
-//      Logging logging = LoggingOptions.getDefaultInstance().getService();
-      List<LogEntry> entries = generateRandomLogEntries(200);
-      entries.forEach(entry -> System.out.println(entry.toString()));
-//      logging.write(entries);
+    //      Logging logging = LoggingOptions.getDefaultInstance().getService();
+    List<LogEntry> entries = generateRandomLogEntries(200);
+    entries.forEach(entry -> System.out.println(entry.toString()));
+    //      logging.write(entries);
   }
 }

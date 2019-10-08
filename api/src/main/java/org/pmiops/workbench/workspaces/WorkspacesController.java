@@ -274,8 +274,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(createdWorkspace);
   }
 
-  private void setDbWorkspaceFields(org.pmiops.workbench.db.model.Workspace dbWorkspace, User user,
-      FirecloudWorkspaceId workspaceId, org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+  private void setDbWorkspaceFields(
+      org.pmiops.workbench.db.model.Workspace dbWorkspace,
+      User user,
+      FirecloudWorkspaceId workspaceId,
+      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
       Timestamp now) {
     dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
     dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
@@ -797,37 +800,40 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     final long userId = userProvider.get().getUserId();
     final String userEmail = userProvider.get().getEmail();
     final Map<String, String> propertyValues = buildPropertyStringMap(createdWorkspace);
-    List<AuditableEvent> events = propertyValues.entrySet().stream()
-        .map(entry -> new AuditableEvent.Builder()
-            .setActionId(actionId)
-            .setAgentEmailMaybe(Optional.of(userEmail))
-            .setActionType(ActionType.CREATE)
-            .setAgentType(AgentType.USER)
-            .setAgentId(userId)
-            .setTargetType(TargetType.WORKBENCH)
-            .setTargetPropertyMaybe(Optional.of(entry.getKey()))
-            .setTargetIdMaybe(Optional.of(dbWorkspaceId))
-            .setPreviousValueMaybe(Optional.empty())
-            .setNewValueMaybe(Optional.of(entry.getValue()))
-            .build())
-        .collect(Collectors.toList());
+    List<AuditableEvent> events =
+        propertyValues.entrySet().stream()
+            .map(
+                entry ->
+                    new AuditableEvent.Builder()
+                        .setActionId(actionId)
+                        .setAgentEmailMaybe(Optional.of(userEmail))
+                        .setActionType(ActionType.CREATE)
+                        .setAgentType(AgentType.USER)
+                        .setAgentId(userId)
+                        .setTargetType(TargetType.WORKBENCH)
+                        .setTargetPropertyMaybe(Optional.of(entry.getKey()))
+                        .setTargetIdMaybe(Optional.of(dbWorkspaceId))
+                        .setPreviousValueMaybe(Optional.empty())
+                        .setNewValueMaybe(Optional.of(entry.getValue()))
+                        .build())
+            .collect(Collectors.toList());
     actionAuditService.send(events);
   }
 
   private Map<String, String> buildPropertyStringMap(Workspace workspace) {
     ImmutableMap.Builder<String, String> propsBuilder = new ImmutableMap.Builder<>();
-    insertIfNotNull(propsBuilder, "intended_study", workspace.getResearchPurpose().getIntendedStudy());
+    insertIfNotNull(
+        propsBuilder, "intended_study", workspace.getResearchPurpose().getIntendedStudy());
     insertIfNotNull(propsBuilder, "creator", workspace.getCreator());
     Optional.ofNullable(workspace.getNamespace())
         .ifPresent(ns -> propsBuilder.put("namespace", ns));
-    Optional.ofNullable(workspace.getId())
-        .ifPresent(id -> propsBuilder.put("firecloud_name", id));
-    Optional.ofNullable(workspace.getName())
-        .ifPresent(n -> propsBuilder.put("name", n));
+    Optional.ofNullable(workspace.getId()).ifPresent(id -> propsBuilder.put("firecloud_name", id));
+    Optional.ofNullable(workspace.getName()).ifPresent(n -> propsBuilder.put("name", n));
     return propsBuilder.build();
   }
 
-  private void insertIfNotNull(ImmutableMap.Builder<String, String> mapBuilder, String key, String value) {
+  private void insertIfNotNull(
+      ImmutableMap.Builder<String, String> mapBuilder, String key, String value) {
     Optional.ofNullable(value).ifPresent(v -> mapBuilder.put(key, v));
   }
 

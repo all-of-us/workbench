@@ -5,7 +5,7 @@ import com.google.api.client.http.HttpTransport;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-  @Configuration
+@Configuration
 public class AppEngineConfig {
 
   @Bean
