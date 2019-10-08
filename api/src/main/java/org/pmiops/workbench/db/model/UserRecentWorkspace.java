@@ -59,10 +59,10 @@ public class UserRecentWorkspace {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     UserRecentWorkspace that = (UserRecentWorkspace) o;
-    return id == that.id &&
-            lastAccessDate.equals(that.lastAccessDate) &&
-            userId.equals(that.userId) &&
-            workspaceId.equals(that.workspaceId);
+    return id == that.id
+        && lastAccessDate.equals(that.lastAccessDate)
+        && userId.equals(that.userId)
+        && workspaceId.equals(that.workspaceId);
   }
 
   @Override
