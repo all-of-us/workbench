@@ -1,6 +1,7 @@
 package org.pmiops.workbench.tools;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Timestamp;
@@ -28,6 +29,13 @@ public class LoadDataDictionary {
 
   private static final Logger logger = Logger.getLogger(LoadDataDictionary.class.getName());
 
+
+  private Resource[] getDataDictionaryExportFiles() throws IOException {
+    ClassLoader cl = this.getClass().getClassLoader();
+    ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
+    return resolver.getResources("classpath*:/data_dictionary_exports/*.txt") ;
+  }
+
   @Bean
   public CommandLineRunner run(CdrVersionDao cdrVersionDao,
       DataDictionaryEntryDao dataDictionaryEntryDao) {
@@ -35,11 +43,7 @@ public class LoadDataDictionary {
 
       CdrVersion defaultCdrVersion = cdrVersionDao.findByIsDefault(true);
 
-      ClassLoader cl = this.getClass().getClassLoader();
-      ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
-      Resource[] resources = resolver.getResources("classpath*:/data_dictionary_exports/*.txt") ;
-
-      for (Resource resource : resources) {
+      for (Resource resource : getDataDictionaryExportFiles()) {
         InputStream is = resource.getInputStream();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
