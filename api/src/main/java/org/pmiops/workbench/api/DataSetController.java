@@ -340,18 +340,12 @@ public class DataSetController implements DataSetApiDelegate {
               IntStream.range(0, fieldValueList.size())
                   .forEach(
                       columnNumber -> {
-                        try {
-                          valuePreviewList
-                              .get(columnNumber)
-                              .addQueryValueItem(
-                                  fieldValueList.get(columnNumber).getValue().toString());
-                        } catch (NullPointerException ex) {
-                          log.severe(
-                              String.format(
-                                  "Null pointer exception while retriving value for query: Column %s ",
-                                  columnNumber));
-                          valuePreviewList.get(columnNumber).addQueryValueItem("");
-                        }
+                        valuePreviewList
+                            .get(columnNumber)
+                            .addQueryValueItem(
+                                Optional.ofNullable(fieldValueList.get(columnNumber).getValue())
+                                    .orElse("")
+                                    .toString());
                       });
             });
     queryResponse
