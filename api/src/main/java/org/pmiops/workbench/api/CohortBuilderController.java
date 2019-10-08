@@ -285,6 +285,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<DemoChartInfoListResponse> getDemoChartInfo(
       Long cdrVersionId, SearchRequest request) {
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
+    if (request.getIncludes().isEmpty()) {
+      return ResponseEntity.ok(response);
+    }
     CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
     cdrVersionService.setCdrVersion(cdrVersion);
     if (configProvider.get().elasticsearch.enableElasticsearchBackend

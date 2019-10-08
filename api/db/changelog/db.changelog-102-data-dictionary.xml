@@ -4,7 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="ericsong" id="changelog-102-data-dictionary">
+  <changeSet author="ericsong" id="changelog-103-data-dictionary">
 
     <createTable tableName="data_dictionary_entry">
       <column name="data_dictionary_entry_id" type="bigint" autoIncrement="true">

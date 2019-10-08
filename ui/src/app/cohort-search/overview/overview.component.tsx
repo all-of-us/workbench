@@ -166,15 +166,19 @@ export const ListOverview = withCurrentWorkspace()(
         this.setState({apiCallCheck: localCheck});
         const {cdrVersionId} = currentWorkspaceStore.getValue();
         const request = mapRequest(searchRequest);
-        cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
-          if (localCheck === this.state.apiCallCheck) {
-            this.setState({
-              chartData: response.items,
-              total: response.items.reduce((sum, data) => sum + data.count, 0),
-              loading: false
-            });
-          }
-        });
+        if (request.includes.length > 0) {
+          cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
+            if (localCheck === this.state.apiCallCheck) {
+              this.setState({
+                chartData: response.items,
+                total: response.items.reduce((sum, data) => sum + data.count, 0),
+                loading: false
+              });
+            }
+          });
+        } else {
+          this.setState({chartData: [], total: 0, loading: false});
+        }
       } catch (error) {
         console.error(error);
         this.setState({apiError: true, loading: false});
