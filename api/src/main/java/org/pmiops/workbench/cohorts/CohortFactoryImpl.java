@@ -55,10 +55,6 @@ public class CohortFactoryImpl implements CohortFactory {
     newCohortReview.setReviewSize(original.getReviewSize());
     newCohortReview.setReviewedCount(original.getReviewedCount());
     newCohortReview.setReviewStatusEnum(original.getReviewStatusEnum());
-    newCohortReview.setCohortName(original.getCohortName());
-    newCohortReview.setCohortDefinition(original.getCohortDefinition());
-    newCohortReview.setDescription(original.getDescription());
-    newCohortReview.setCreator(original.getCreator());
 
     return newCohortReview;
   }
