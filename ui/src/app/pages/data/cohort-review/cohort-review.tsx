@@ -6,7 +6,7 @@ import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-modal';
 import {cohortReviewStore, visitsFilterOptions} from 'app/services/review-state.service';
-import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortReviewApi, cohortsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
@@ -40,12 +40,16 @@ export class CohortReview extends React.Component<{}, State> {
     const {ns, wsid, cid} = urlParamsStore.getValue();
     const {accessLevel, cdrVersionId} = currentWorkspaceStore.getValue();
     this.setState({readonly: accessLevel === WorkspaceAccessLevel.READER});
-    cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
-      page: 0,
-      pageSize: 25,
-      sortOrder: SortOrder.Asc,
-      filters: {items: []}
-    }).then(review => {
+    Promise.all([
+      workspacesApi().updateRecentWorkspaces(ns, wsid),
+      cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
+        page: 0,
+        pageSize: 25,
+        sortOrder: SortOrder.Asc,
+        filters: {items: []}
+      })
+    ]).then(values => {
+      const review = values[1];
       cohortReviewStore.next(review);
       const reviewPresent = review.reviewStatus !== ReviewStatus.NONE;
       this.setState({reviewPresent});

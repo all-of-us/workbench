@@ -5,7 +5,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {cohortsApi} from 'app/services/swagger-fetch-clients';
+import {cohortsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {Observable} from 'rxjs/Observable';
 
 import {idsInUse, initExisting, searchRequestStore} from 'app/cohort-search/search-state.service';
@@ -47,16 +47,19 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
       const cohortId = params.cohortId;
       if (cohortId) {
         this.loading = true;
-        cohortsApi().getCohort(workspace.namespace, workspace.id, cohortId)
-          .then(cohort => {
-            this.loading = false;
-            this.cohort = cohort;
-            currentCohortStore.next(cohort);
-            if (cohort.criteria) {
-              initExisting.next(true);
-              searchRequestStore.next(parseCohortDefinition(cohort.criteria));
-            }
-          });
+        Promise.all([
+          workspacesApi().updateRecentWorkspaces(workspace.namespace, workspace.id),
+          cohortsApi().getCohort(workspace.namespace, workspace.id, cohortId)
+        ]).then(values => {
+          const cohort = values[1];
+          this.loading = false;
+          this.cohort = cohort;
+          currentCohortStore.next(cohort);
+          if (cohort.criteria) {
+            initExisting.next(true);
+            searchRequestStore.next(parseCohortDefinition(cohort.criteria));
+          }
+        });
       } else {
         this.cohort = {criteria: '{"includes":[],"excludes":[]}'};
       }

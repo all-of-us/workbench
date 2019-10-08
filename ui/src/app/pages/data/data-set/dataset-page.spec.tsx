@@ -10,7 +10,8 @@ import {
   ConceptsApi,
   ConceptSetsApi,
   DataSetApi,
-  WorkspaceAccessLevel
+  WorkspaceAccessLevel,
+  WorkspacesApi
 } from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
@@ -18,6 +19,7 @@ import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {
+  WorkspacesApiStub,
   workspaceDataStub,
   workspaceStubs,
   WorkspaceStubVariables
@@ -29,6 +31,7 @@ describe('DataSet', () => {
     registerApiClient(ConceptsApi, new ConceptsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(DataSetApi, new DataSetApiStub());
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
