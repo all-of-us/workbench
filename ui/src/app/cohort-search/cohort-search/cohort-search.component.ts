@@ -64,7 +64,6 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     });
 
     searchRequestStore.subscribe(sr => {
-      this.includeSize = sr.includes.length;
       this.criteria = sr;
       this.overview = sr.includes.length || sr.excludes.length;
     });
@@ -112,5 +111,9 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
   updateSaving = (flag: boolean) => {
     this.saving = flag;
+  }
+
+  get showExcludes() {
+    return this.criteria.includes.length > 0 || this.criteria.excludes.length > 0;
   }
 }
