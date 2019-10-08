@@ -19,7 +19,7 @@ describe('IndexUtils', () => {
     expect(successfulFunctionSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should retry three times by default', async() => {
+  it('should retry three times by default using apiCallWithGatewayTimeout', async() => {
     const failedFunctionSpy = spyOn(functionStub, 'failedFunction').and.callThrough();
     await apiCallWithGatewayTimeoutRetries(() => functionStub.failedFunction(), 3, 1).catch(() => {});
     expect(failedFunctionSpy).toHaveBeenCalledTimes(4);

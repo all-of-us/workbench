@@ -475,12 +475,12 @@ export function highlightSearchTerm(searchTerm: string, stringToHighlight: strin
  *      2s for the second, etc.
  */
 export async function apiCallWithGatewayTimeoutRetries<T>(
-  apiCall: () => Promise<T>, maxRetries = 3, defaultWaitTime = 1000): Promise<T> {
+  apiCall: () => Promise<T>, maxRetries = 3, initialWaitTime = 1000): Promise<T> {
   return apiCallWithGatewayTimeoutRetriesAndRetryCount(apiCall, maxRetries, 1, defaultWaitTime);
 }
 
 async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
-  apiCall: () => Promise<T>, maxRetries = 3, retryCount = 1, defaultWaitTime = 1000): Promise<T> {
+  apiCall: () => Promise<T>, maxRetries = 3, retryCount = 1, initialWaitTime = 1000): Promise<T> {
   try {
     return await apiCall();
   } catch (ex) {
