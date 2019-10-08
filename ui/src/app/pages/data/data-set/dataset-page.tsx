@@ -558,7 +558,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
 
     async getPreviewByDomain(domain: Domain) {
       const {namespace, id} = this.props.workspace;
-      const request: DataSetPreviewRequest = {
+      const domainRequest: DataSetPreviewRequest = {
         domain: domain,
         conceptSetIds: this.state.selectedConceptSetIds,
         includesAllParticipants: this.state.includesAllParticipants,
@@ -567,18 +567,17 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         values: this.state.selectedDomainValuePairs.map(domainValue => domainValue.value)
       };
       try {
-        const dataSetPreviewResp = await apiCallWithGatewayTimeoutRetries(
-          () => dataSetApi().previewDataSetByDomain(namespace, id, request));
+        const domainPreviewResponse = await apiCallWithGatewayTimeoutRetries(
+          () => dataSetApi().previewDataSetByDomain(namespace, id, domainRequest));
         const newPreviewInformation = {
           isLoading: false,
-          values: dataSetPreviewResp.values
+          values: domainPreviewResponse.values
         };
-        this.setState({previewList: this.state.previewList.set(dataSetPreviewResp.domain, newPreviewInformation)});
+        this.setState(state => ({previewList: state.previewList.set(domainPreviewResponse.domain, newPreviewInformation)}));
       } catch (ex) {
         const exceptionResponse = await ex.json() as unknown as ErrorResponse;
         const errorText = this.generateErrorTextFromPreviewException(exceptionResponse, domain);
         this.setState({previewError: true, previewErrorText: errorText});
-        console.error(ex);
       }
     }
 
