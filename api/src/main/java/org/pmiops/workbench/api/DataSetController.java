@@ -85,8 +85,8 @@ public class DataSetController implements DataSetApiDelegate {
   private static String CONCEPT_SET = "conceptSet";
   private static String COHORT = "cohort";
 
-  private static final String dateFormatString = "yyyy/MM/dd HH:mm:ss";
-  private static final String emptyCellMarker = "";
+  private static final String DATE_FORMAT_STRING = "yyyy/MM/dd HH:mm:ss";
+  private static final String EMPTY_CELL_MARKER = "";
 
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
@@ -369,29 +369,30 @@ public class DataSetController implements DataSetApiDelegate {
               valuePreviewList
                   .get(columnNumber)
                   .addQueryValueItem(
-                      Optional.ofNullable(fieldValueList.get(columnNumber).getValue())
-                          .orElse("")
-                          .toString());
+                      Optional.ofNullable(fieldValueList.get(columnNumber).getValue().toString())
+                          .orElse(""));
             });
   }
 
-  private void formatTimestampValues(List<DataSetPreviewValueList> valuePreviewList, Field fields) {
+  // Iterates through all values associated with a specific field, and converts all timestamps
+  // to a timestamp formatted string.
+  private void formatTimestampValues(List<DataSetPreviewValueList> valuePreviewList, Field field) {
     DataSetPreviewValueList previewValue =
         valuePreviewList.stream()
-            .filter(preview -> preview.getValue().equalsIgnoreCase(fields.getName()))
+            .filter(preview -> preview.getValue().equalsIgnoreCase(field.getName()))
             .findFirst()
             .orElseThrow(
                 () ->
-                    new ServerErrorException(
+                    new IllegalStateException(
                         "Value should be present when it is not in dataset preview request"));
-    if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
+    if (field.getType() == LegacySQLTypeName.TIMESTAMP) {
       List<String> queryValues = new ArrayList<>();
-      DateFormat dateFormat = new SimpleDateFormat(dateFormatString);
+      DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
       previewValue
           .getQueryValue()
           .forEach(
               value -> {
-                if (!value.equals(emptyCellMarker)) {
+                if (!value.equals(EMPTY_CELL_MARKER)) {
                   Double fieldValue = Double.parseDouble(value);
                   queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
                 } else {
