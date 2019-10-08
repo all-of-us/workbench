@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.util.logging.Logger;
 import org.pmiops.workbench.dataset.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -21,7 +20,6 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-
 @SpringBootApplication
 @EnableJpaRepositories("org.pmiops.workbench")
 @EntityScan("org.pmiops.workbench")
@@ -29,18 +27,16 @@ public class LoadDataDictionary {
 
   private static final Logger logger = Logger.getLogger(LoadDataDictionary.class.getName());
 
-
   private Resource[] getDataDictionaryExportFiles() throws IOException {
     ClassLoader cl = this.getClass().getClassLoader();
     ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
-    return resolver.getResources("classpath*:/data_dictionary_exports/*.txt") ;
+    return resolver.getResources("classpath*:/data_dictionary_exports/*.txt");
   }
 
   @Bean
-  public CommandLineRunner run(CdrVersionDao cdrVersionDao,
-      DataDictionaryEntryDao dataDictionaryEntryDao) {
+  public CommandLineRunner run(
+      CdrVersionDao cdrVersionDao, DataDictionaryEntryDao dataDictionaryEntryDao) {
     return (args) -> {
-
       CdrVersion defaultCdrVersion = cdrVersionDao.findByIsDefault(true);
 
       for (Resource resource : getDataDictionaryExportFiles()) {
@@ -56,8 +52,9 @@ public class LoadDataDictionary {
           String relevantOmopTable = fields[0];
           String fieldName = fields[1];
 
-          DataDictionaryEntry entry = dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
-              relevantOmopTable, fieldName, defaultCdrVersion);
+          DataDictionaryEntry entry =
+              dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
+                  relevantOmopTable, fieldName, defaultCdrVersion);
 
           if (entry != null && entry.getDefinedTime().after(definedTime)) {
             continue;

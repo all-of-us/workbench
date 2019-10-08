@@ -37,23 +37,35 @@ public class DataDictionaryEntry {
   public long getDataDictionaryEntryId() {
     return dataDictionaryEntryId;
   }
+
   public void setDataDictionaryEntryId(long dataDictionaryEntryId) {
     this.dataDictionaryEntryId = dataDictionaryEntryId;
   }
 
   @ManyToOne
   @JoinColumn(name = "cdr_version_id")
-  public CdrVersion getCdrVersion() { return cdrVersion; }
-  public void setCdrVersion(CdrVersion cdrVersion) { this.cdrVersion = cdrVersion; }
+  public CdrVersion getCdrVersion() {
+    return cdrVersion;
+  }
+
+  public void setCdrVersion(CdrVersion cdrVersion) {
+    this.cdrVersion = cdrVersion;
+  }
 
   @Column(name = "defined_time")
-  public Timestamp getDefinedTime() { return definedTime; }
-  public void setDefinedTime(Timestamp definedTime) { this.definedTime = definedTime; }
+  public Timestamp getDefinedTime() {
+    return definedTime;
+  }
+
+  public void setDefinedTime(Timestamp definedTime) {
+    this.definedTime = definedTime;
+  }
 
   @Column(name = "relevant_omop_table")
   public String getRelevantOmopTable() {
     return relevantOmopTable;
   }
+
   public void setRelevantOmopTable(String relevantOmopTable) {
     this.relevantOmopTable = relevantOmopTable;
   }
@@ -62,6 +74,7 @@ public class DataDictionaryEntry {
   public String getFieldName() {
     return fieldName;
   }
+
   public void setFieldName(String fieldName) {
     this.fieldName = fieldName;
   }
@@ -70,6 +83,7 @@ public class DataDictionaryEntry {
   public String getOmopCdmStandardOrCustomField() {
     return omopCdmStandardOrCustomField;
   }
+
   public void setOmopCdmStandardOrCustomField(String omopCdmStandardOrCustomField) {
     this.omopCdmStandardOrCustomField = omopCdmStandardOrCustomField;
   }
@@ -78,6 +92,7 @@ public class DataDictionaryEntry {
   public String getDescription() {
     return description;
   }
+
   public void setDescription(String description) {
     this.description = description;
   }
@@ -86,6 +101,7 @@ public class DataDictionaryEntry {
   public String getFieldType() {
     return fieldType;
   }
+
   public void setFieldType(String fieldType) {
     this.fieldType = fieldType;
   }
@@ -94,6 +110,7 @@ public class DataDictionaryEntry {
   public String getDataProvenance() {
     return dataProvenance;
   }
+
   public void setDataProvenance(String dataProvenance) {
     this.dataProvenance = dataProvenance;
   }
@@ -102,6 +119,7 @@ public class DataDictionaryEntry {
   public String getSourcePpiModule() {
     return sourcePpiModule;
   }
+
   public void setSourcePpiModule(String sourcePpiModule) {
     this.sourcePpiModule = sourcePpiModule;
   }
@@ -110,8 +128,9 @@ public class DataDictionaryEntry {
   public Boolean getTransformedByRegisteredTierPrivacyMethods() {
     return transformedByRegisteredTierPrivacyMethods;
   }
-  public void setTransformedByRegisteredTierPrivacyMethods(Boolean transformedByRegisteredTierPrivacyMethods) {
+
+  public void setTransformedByRegisteredTierPrivacyMethods(
+      Boolean transformedByRegisteredTierPrivacyMethods) {
     this.transformedByRegisteredTierPrivacyMethods = transformedByRegisteredTierPrivacyMethods;
   }
-
 }

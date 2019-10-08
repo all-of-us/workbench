@@ -28,8 +28,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * Command-line tool to load a WorkbenchConfig or CdrBigQuerySchemaConfig from a local file and
  * store it in the MySQL database for the current environment.
  *
- * <p>Run by api/project.rb update-cloud-config and (locally) docker-compose run api-scripts ./gradlew loadConfig,
- * which is automatically invoked during api/project.rb dev-up.
+ * <p>Run by api/project.rb update-cloud-config and (locally) docker-compose run api-scripts
+ * ./gradlew loadConfig, which is automatically invoked during api/project.rb dev-up.
  */
 public class ConfigLoader {
 
