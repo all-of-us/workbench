@@ -211,8 +211,5 @@ public class BillingProjectBufferService {
   private int getBufferMaxCapacity() {
     return workbenchConfigProvider.get().billing.bufferCapacity;
   }
-
-  private int minutesToMs(int minutes) {
-    return minutes * 60 * 1000;
-  }
+  
 }
