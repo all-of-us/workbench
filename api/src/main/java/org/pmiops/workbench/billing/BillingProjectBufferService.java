@@ -211,5 +211,4 @@ public class BillingProjectBufferService {
   private int getBufferMaxCapacity() {
     return workbenchConfigProvider.get().billing.bufferCapacity;
   }
-  
 }
