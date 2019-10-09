@@ -3,6 +3,7 @@ package org.pmiops.workbench.cdr.dao;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.CBCriteriaAttribute;
@@ -11,28 +12,35 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 public class CBCriteriaAttributeDaoTest {
 
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
+  private CBCriteriaAttribute attribute;
+
+  @Before
+  public void onSetup() {
+    attribute =
+        cbCriteriaAttributeDao.save(
+            new CBCriteriaAttribute()
+                .conceptId(1L)
+                .conceptName("test")
+                .estCount("10")
+                .type("type")
+                .valueAsConceptId(12345678L));
+  }
 
   @Test
   public void findCriteriaAttributeByConceptId() throws Exception {
-    CBCriteriaAttribute attribute =
-        new CBCriteriaAttribute()
-            .conceptId(1L)
-            .conceptName("test")
-            .estCount("10")
-            .type("type")
-            .valueAsConceptId(12345678L);
-    cbCriteriaAttributeDao.save(attribute);
     List<CBCriteriaAttribute> attributes =
         cbCriteriaAttributeDao.findCriteriaAttributeByConceptId(1L);
     assertEquals(1, attributes.size());
