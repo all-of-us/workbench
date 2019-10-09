@@ -20,6 +20,7 @@ import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,13 +64,13 @@ public class BillingProjectBufferService {
 
     final String projectName = createBillingProjectName();
 
-    fireCloudService.createAllOfUsBillingProject(projectName);
     BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
     entry.setFireCloudProjectName(projectName);
     entry.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
     entry.setStatusEnum(CREATING, this::getCurrentTimestamp);
-
     billingProjectBufferEntryDao.save(entry);
+
+    fireCloudService.createAllOfUsBillingProject(projectName);
   }
 
   public void syncBillingProjectStatus() {
@@ -103,8 +104,15 @@ public class BillingProjectBufferService {
           default:
             break;
         }
+      } catch (NotFoundException e) {
+        log.log(Level.WARNING, "Get BillingProjectStatus call failed for " + entry.getCreationTime() + ". Project not found.");
+
+        if ((getCurrentTimestamp().getTime() - entry.getCreationTime().getTime()) > minutesToMs(CREATING_TIMEOUT_MINUTES)) {
+          // If we still cannot find the billing project after the timeout period has passed, assume that the initial call failed
+          entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
+        }
       } catch (WorkbenchException e) {
-        log.log(Level.WARNING, "Get BillingProject status call failed", e);
+        log.log(Level.WARNING, "Get BillingProjectStatus call failed for " + entry.getFireCloudProjectName(), e);
       }
 
       billingProjectBufferEntryDao.save(entry);
@@ -194,5 +202,9 @@ public class BillingProjectBufferService {
 
   private int getBufferMaxCapacity() {
     return workbenchConfigProvider.get().billing.bufferCapacity;
+  }
+
+  private int minutesToMs(int minutes) {
+    return minutes * 60 * 1000;
   }
 }

@@ -43,6 +43,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
@@ -132,6 +133,19 @@ public class BillingProjectBufferServiceTest {
                 .findByFireCloudProjectName(billingProjectName)
                 .getStatusEnum())
         .isEqualTo(CREATING);
+  }
+
+  @Test
+  public void fillBuffer_failedCreateRequest() {
+    long expectedCount = billingProjectBufferEntryDao.count() + 1;
+
+    doThrow(RuntimeException.class).when(fireCloudService).createAllOfUsBillingProject(anyString());
+    try {
+      billingProjectBufferService.bufferBillingProject();
+    } catch (Exception e) {}
+
+
+    assertThat(billingProjectBufferEntryDao.count()).isEqualTo(expectedCount);
   }
 
   @Test
@@ -291,6 +305,48 @@ public class BillingProjectBufferServiceTest {
             billingProjectBufferEntryDao
                 .findByFireCloudProjectName(billingProjectName)
                 .getStatusEnum())
+        .isEqualTo(ERROR);
+  }
+
+  @Test
+  public void syncBillingProjectStatus_notFound() {
+    billingProjectBufferService.bufferBillingProject();
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
+    String billingProjectName = captor.getValue();
+
+    doThrow(NotFoundException.class)
+        .when(fireCloudService)
+        .getBillingProjectStatus(billingProjectName);
+    billingProjectBufferService.syncBillingProjectStatus();
+
+    assertThat(
+        billingProjectBufferEntryDao
+            .findByFireCloudProjectName(billingProjectName)
+            .getStatusEnum())
+        .isEqualTo(CREATING);
+  }
+
+  @Test
+  public void syncBillingProjectStatus_notFound_timedOut() {
+    billingProjectBufferService.bufferBillingProject();
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
+    String billingProjectName = captor.getValue();
+
+    CLOCK.increment(60*1000*1000);
+
+    doThrow(NotFoundException.class)
+        .when(fireCloudService)
+        .getBillingProjectStatus(billingProjectName);
+    billingProjectBufferService.syncBillingProjectStatus();
+
+    assertThat(
+        billingProjectBufferEntryDao
+            .findByFireCloudProjectName(billingProjectName)
+            .getStatusEnum())
         .isEqualTo(ERROR);
   }
 
