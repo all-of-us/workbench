@@ -7,6 +7,7 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import java.sql.Date;
@@ -85,7 +86,7 @@ public class DataSetController implements DataSetApiDelegate {
   private static String COHORT = "cohort";
 
   private static final String DATE_FORMAT_STRING = "yyyy/MM/dd HH:mm:ss";
-  private static final String EMPTY_CELL_MARKER = "";
+  public static final String EMPTY_CELL_MARKER = "";
 
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
@@ -360,7 +361,8 @@ public class DataSetController implements DataSetApiDelegate {
     return ResponseEntity.ok(previewQueryResponse);
   }
 
-  private void addFieldValuesFromBigQueryToPreviewList(
+  @VisibleForTesting
+  public void addFieldValuesFromBigQueryToPreviewList(
       List<DataSetPreviewValueList> valuePreviewList, FieldValueList fieldValueList) {
     IntStream.range(0, fieldValueList.size())
         .forEach(
@@ -370,7 +372,7 @@ public class DataSetController implements DataSetApiDelegate {
                   .addQueryValueItem(
                       Optional.ofNullable(fieldValueList.get(columnNumber).getValue())
                           .map(Object::toString)
-                          .orElse(""));
+                          .orElse(EMPTY_CELL_MARKER));
             });
   }
 
