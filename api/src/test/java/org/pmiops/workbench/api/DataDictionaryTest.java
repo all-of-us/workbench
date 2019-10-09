@@ -1,0 +1,155 @@
+package org.pmiops.workbench.api;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import javax.inject.Provider;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.DataSetService;
+import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DataDictionaryEntry;
+import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit4.SpringRunner;
+
+@RunWith(SpringRunner.class)
+@DataJpaTest
+@Import(LiquibaseAutoConfiguration.class)
+public class DataDictionaryTest {
+
+  @Autowired
+  BigQueryService bigQueryService;
+  @Autowired
+  CohortDao cohortDao;
+  @Autowired
+  ConceptDao conceptDao;
+  @Autowired
+  ConceptSetDao conceptSetDao;
+  @Autowired
+  DataSetDao dataSetDao;
+  @Autowired
+  DataSetService dataSetService;
+  @Autowired
+  FireCloudService fireCloudService;
+  @Autowired
+  NotebooksService notebooksService;
+  @Autowired
+  WorkspaceService workspaceService;
+  @Mock
+  Provider<User> userProvider;
+
+  @Autowired
+  CdrVersionDao cdrVersionDao;
+  @Autowired
+  org.pmiops.workbench.dataset.DataDictionaryEntryDao dataDictionaryEntryDao;
+
+  private static final Instant NOW = Instant.now();
+  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+  private static User currentUser;
+
+  @TestConfiguration
+  @Import({
+  })
+  @MockBean({
+      BigQueryService.class,
+      CohortDao.class,
+      ConceptDao.class,
+      ConceptSetDao.class,
+      DataSetDao.class,
+      DataSetService.class,
+      FireCloudService.class,
+      NotebooksService.class,
+      WorkspaceService.class
+  })
+  static class Configuration {
+    @Bean
+    Clock clock() {
+      return CLOCK;
+    }
+
+    @Bean
+    @Scope("prototype")
+    User user() {
+      return currentUser;
+    }
+  }
+
+  private DataSetController dataSetController;
+
+  @Before
+  public void setUp() {
+    dataSetController =
+        new DataSetController(
+            bigQueryService,
+            CLOCK,
+            cohortDao,
+            conceptDao,
+            conceptSetDao,
+            dataSetDao,
+            dataSetService,
+            fireCloudService,
+            notebooksService,
+            userProvider,
+            workspaceService);
+  }
+
+  @Test
+  public void testGetDataDictionaryEntry() {
+    final String domain = "OMOP TABLE / DOMAIN";
+    final String domainValue = "FIELD NAME / DOMAIN VALUE";
+
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersionDao.save(cdrVersion);
+
+    DataDictionaryEntry dataDictionaryEntry = new DataDictionaryEntry();
+    dataDictionaryEntry.setCdrVersion(cdrVersion);
+    dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
+    dataDictionaryEntry.setRelevantOmopTable(domain);
+    dataDictionaryEntry.setFieldName(domainValue);
+    dataDictionaryEntry.setOmopCdmStandardOrCustomField("A");
+    dataDictionaryEntry.setDescription("B");
+    dataDictionaryEntry.setFieldType("C");
+    dataDictionaryEntry.setDataProvenance("D");
+    dataDictionaryEntry.setSourcePpiModule("E");
+    dataDictionaryEntry.setTransformedByRegisteredTierPrivacyMethods(true);
+
+    dataDictionaryEntryDao.save(dataDictionaryEntry);
+
+    org.pmiops.workbench.model.DataDictionaryEntry response = dataSetController.getDataDictionaryEntry(cdrVersion.getCdrVersionId(), domain, domainValue).getBody();
+
+    assertThat(response.getCdrVersionId().longValue()).isEqualTo(dataDictionaryEntry.getCdrVersion().getCdrVersionId());
+    assertThat(new Timestamp(response.getDefinedTime())).isEqualTo(dataDictionaryEntry.getDefinedTime());
+    assertThat(response.getRelevantOmopTable()).isEqualTo(dataDictionaryEntry.getRelevantOmopTable());
+    assertThat(response.getFieldName()).isEqualTo(dataDictionaryEntry.getFieldName());
+    assertThat(response.getOmopCdmStandardOrCustomField()).isEqualTo(dataDictionaryEntry.getOmopCdmStandardOrCustomField());
+    assertThat(response.getDescription()).isEqualTo(dataDictionaryEntry.getDescription());
+    assertThat(response.getFieldType()).isEqualTo(dataDictionaryEntry.getFieldType());
+    assertThat(response.getDataProvenance()).isEqualTo(dataDictionaryEntry.getDataProvenance());
+    assertThat(response.getSourcePpiModule()).isEqualTo(dataDictionaryEntry.getSourcePpiModule());
+    assertThat(response.getTransformedByRegisteredTierPrivacyMethods()).isEqualTo(dataDictionaryEntry.getTransformedByRegisteredTierPrivacyMethods());
+
+  }
+}

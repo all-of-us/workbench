@@ -2031,6 +2031,31 @@ paths:
           schema:
             $ref: "#/definitions/DataSetListResponse"
 
+  /v1/dataDictionaryEntry:
+    get:
+      parameters:
+        - in: query
+          name: cdrVersionId
+          type: integer
+          format: int64
+          required: true
+        - in: query
+          name: domain
+          type: string
+          required: true
+        - in: query
+          name: domainValue
+          type: string
+          required: true
+      tags:
+        - dataSet
+      operationId: "getDataDictionaryEntry"
+      responses:
+        200:
+          description: Detailed definition of a given domain value for the specified CDR Version
+          schema:
+            $ref: "#/definitions/DataDictionaryEntry"
+
   /v1/{workspaceNamespace}/{workspaceId}/data-set/markDirty:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -2169,6 +2194,32 @@ definitions:
         description: the role of the current user in the project
       status:
         $ref: "#/definitions/BillingProjectStatus"
+
+  DataDictionaryEntry:
+    type: object
+    properties:
+      cdrVersionId:
+        type: integer
+        format: int64
+      definedTime:
+        type: integer
+        format: int64
+      relevantOmopTable:
+        type: string
+      fieldName:
+        type: string
+      omopCdmStandardOrCustomField:
+        type: string
+      description:
+        type: string
+      fieldType:
+        type: string
+      dataProvenance:
+        type: string
+      sourcePpiModule:
+        type: string
+      transformedByRegisteredTierPrivacyMethods:
+        type: boolean
 
   BillingProjectStatus:
     type: string
