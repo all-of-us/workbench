@@ -576,10 +576,12 @@ public class DataSetControllerTest {
   public void testAddFieldValuesFromBigQueryToPreviewListWorksWithNullValues() {
     DataSetPreviewValueList dataSetPreviewValueList = new DataSetPreviewValueList();
     List<DataSetPreviewValueList> valuePreviewList = ImmutableList.of(dataSetPreviewValueList);
-    List<FieldValue> fieldValueListRows = ImmutableList.of(FieldValue.of(FieldValue.Attribute.PRIMITIVE, null));
+    List<FieldValue> fieldValueListRows =
+        ImmutableList.of(FieldValue.of(FieldValue.Attribute.PRIMITIVE, null));
     FieldValueList fieldValueList = FieldValueList.of(fieldValueListRows);
     dataSetController.addFieldValuesFromBigQueryToPreviewList(valuePreviewList, fieldValueList);
-    assertThat(valuePreviewList.get(0).getQueryValue().get(0)).isEqualTo(DataSetController.EMPTY_CELL_MARKER);
+    assertThat(valuePreviewList.get(0).getQueryValue().get(0))
+        .isEqualTo(DataSetController.EMPTY_CELL_MARKER);
   }
 
   @Test(expected = BadRequestException.class)
