@@ -55,10 +55,12 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl;
@@ -180,7 +182,11 @@ public class DataSetControllerTest {
 
   @Autowired ConceptSetDao conceptSetDao;
 
+  @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
+
   @Autowired DataSetDao dataSetDao;
+
+  @Mock DataSetMapper dataSetMapper;
 
   @Autowired DataSetService dataSetService;
 
@@ -228,6 +234,7 @@ public class DataSetControllerTest {
     ConceptBigQueryService.class,
     ConceptSetService.class,
     DataSetService.class,
+    DataSetMapper.class,
     FireCloudService.class,
     DirectoryService.class,
     NotebooksService.class,
@@ -277,10 +284,13 @@ public class DataSetControllerTest {
         new DataSetController(
             bigQueryService,
             CLOCK,
+            cdrVersionDao,
             cohortDao,
             conceptDao,
             conceptSetDao,
+            dataDictionaryEntryDao,
             dataSetDao,
+            dataSetMapper,
             dataSetService,
             fireCloudService,
             notebooksService,

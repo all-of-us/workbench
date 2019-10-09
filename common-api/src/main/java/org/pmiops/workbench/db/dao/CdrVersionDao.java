@@ -7,6 +7,8 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface CdrVersionDao extends CrudRepository<CdrVersion, Long> {
 
+  CdrVersion findByCdrVersionId(long id);
+
   CdrVersion findByName(String name);
 
   CdrVersion findByIsDefault(boolean isDefault);

@@ -32,10 +32,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.dataset.DataSetMapper;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DataSetValues;
 import org.pmiops.workbench.db.model.User;
@@ -56,6 +60,7 @@ import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -90,10 +95,13 @@ public class DataSetController implements DataSetApiDelegate {
 
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
+  private final CdrVersionDao cdrVersionDao;
   private final CohortDao cohortDao;
   private final ConceptDao conceptDao;
   private final ConceptSetDao conceptSetDao;
+  private final DataDictionaryEntryDao dataDictionaryEntryDao;
   private final DataSetDao dataSetDao;
+  private final DataSetMapper dataSetMapper;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
 
@@ -101,10 +109,13 @@ public class DataSetController implements DataSetApiDelegate {
   DataSetController(
       BigQueryService bigQueryService,
       Clock clock,
+      CdrVersionDao cdrVersionDao,
       CohortDao cohortDao,
       ConceptDao conceptDao,
       ConceptSetDao conceptSetDao,
+      DataDictionaryEntryDao dataDictionaryEntryDao,
       DataSetDao dataSetDao,
+      DataSetMapper dataSetMapper,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
       NotebooksService notebooksService,
@@ -112,10 +123,13 @@ public class DataSetController implements DataSetApiDelegate {
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
+    this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
     this.conceptDao = conceptDao;
     this.conceptSetDao = conceptSetDao;
+    this.dataDictionaryEntryDao = dataDictionaryEntryDao;
     this.dataSetDao = dataSetDao;
+    this.dataSetMapper = dataSetMapper;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
     this.notebooksService = notebooksService;
@@ -613,8 +627,26 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataDictionaryEntry> getDataDictionaryEntry(
       Long cdrVersionId, String domain, String domainValue) {
+    CdrVersion cdrVersion = cdrVersionDao.findByCdrVersionId(cdrVersionId);
 
-    return ResponseEntity.ok(new DataDictionaryEntry());
+    if (cdrVersion == null) {
+      throw new BadRequestException("Invalid CDR Version");
+    }
+
+    String omopTable = conceptSetDao.DOMAIN_TO_TABLE_NAME.get(Domain.fromValue(domain));
+
+    if (omopTable == null) {
+      throw new BadRequestException("Invalid Domain");
+    }
+
+    org.pmiops.workbench.db.model.DataDictionaryEntry dataDictionaryEntry = dataDictionaryEntryDao
+        .findByRelevantOmopTableAndFieldNameAndCdrVersion(omopTable, domainValue, cdrVersion);
+
+    if (dataDictionaryEntry == null) {
+      throw new NotFoundException();
+    }
+
+    return ResponseEntity.ok(dataSetMapper.toApi(dataDictionaryEntry));
   }
 
   // TODO(jaycarlton) create a class that knows about code cells and their properties,

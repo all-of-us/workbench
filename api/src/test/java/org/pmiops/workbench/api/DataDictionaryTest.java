@@ -12,15 +12,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.dataset.DataSetMapper;
+import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DataDictionaryEntry;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -32,7 +36,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -51,6 +54,8 @@ public class DataDictionaryTest {
   @Autowired
   DataSetDao dataSetDao;
   @Autowired
+  DataSetMapper dataSetMapper;
+  @Autowired
   DataSetService dataSetService;
   @Autowired
   FireCloudService fireCloudService;
@@ -64,7 +69,7 @@ public class DataDictionaryTest {
   @Autowired
   CdrVersionDao cdrVersionDao;
   @Autowired
-  org.pmiops.workbench.dataset.DataDictionaryEntryDao dataDictionaryEntryDao;
+  DataDictionaryEntryDao dataDictionaryEntryDao;
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
@@ -72,6 +77,7 @@ public class DataDictionaryTest {
 
   @TestConfiguration
   @Import({
+      DataSetMapperImpl.class
   })
   @MockBean({
       BigQueryService.class,
@@ -105,10 +111,13 @@ public class DataDictionaryTest {
         new DataSetController(
             bigQueryService,
             CLOCK,
+            cdrVersionDao,
             cohortDao,
             conceptDao,
             conceptSetDao,
+            dataDictionaryEntryDao,
             dataSetDao,
+            dataSetMapper,
             dataSetService,
             fireCloudService,
             notebooksService,
@@ -118,7 +127,7 @@ public class DataDictionaryTest {
 
   @Test
   public void testGetDataDictionaryEntry() {
-    final String domain = "OMOP TABLE / DOMAIN";
+    final Domain domain = Domain.DRUG;
     final String domainValue = "FIELD NAME / DOMAIN VALUE";
 
     CdrVersion cdrVersion = new CdrVersion();
@@ -127,7 +136,7 @@ public class DataDictionaryTest {
     DataDictionaryEntry dataDictionaryEntry = new DataDictionaryEntry();
     dataDictionaryEntry.setCdrVersion(cdrVersion);
     dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
-    dataDictionaryEntry.setRelevantOmopTable(domain);
+    dataDictionaryEntry.setRelevantOmopTable(ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(domain));
     dataDictionaryEntry.setFieldName(domainValue);
     dataDictionaryEntry.setOmopCdmStandardOrCustomField("A");
     dataDictionaryEntry.setDescription("B");
@@ -138,7 +147,7 @@ public class DataDictionaryTest {
 
     dataDictionaryEntryDao.save(dataDictionaryEntry);
 
-    org.pmiops.workbench.model.DataDictionaryEntry response = dataSetController.getDataDictionaryEntry(cdrVersion.getCdrVersionId(), domain, domainValue).getBody();
+    org.pmiops.workbench.model.DataDictionaryEntry response = dataSetController.getDataDictionaryEntry(cdrVersion.getCdrVersionId(), domain.toString(), domainValue).getBody();
 
     assertThat(response.getCdrVersionId().longValue()).isEqualTo(dataDictionaryEntry.getCdrVersion().getCdrVersionId());
     assertThat(new Timestamp(response.getDefinedTime())).isEqualTo(dataDictionaryEntry.getDefinedTime());
