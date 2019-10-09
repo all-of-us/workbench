@@ -4,6 +4,7 @@ import com.google.cloud.logging.LogEntry;
 import com.google.cloud.logging.Logging;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,11 @@ public class ActionAuditServiceImpl implements ActionAuditService {
   @Autowired
   public ActionAuditServiceImpl(Logging logging) {
     this.logging = logging;
+  }
+
+  @Override
+  public void send(AuditableEvent event) {
+    send(Collections.singleton(event));
   }
 
   @Override

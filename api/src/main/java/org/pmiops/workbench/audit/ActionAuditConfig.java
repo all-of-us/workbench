@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ActionAuditConfig {
 
-    @Bean
-    public Logging getCloudLogging() {
-      return LoggingOptions.getDefaultInstance().getService();
-    }
+  @Bean
+  public Logging getCloudLogging() {
+    return LoggingOptions.getDefaultInstance().getService();
+  }
 }

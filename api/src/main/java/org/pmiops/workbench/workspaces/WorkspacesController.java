@@ -10,8 +10,6 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -34,11 +32,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.api.WorkspacesApiDelegate;
-import org.pmiops.workbench.audit.ActionAuditService;
-import org.pmiops.workbench.audit.ActionType;
-import org.pmiops.workbench.audit.AgentType;
-import org.pmiops.workbench.audit.AuditableEvent;
-import org.pmiops.workbench.audit.TargetType;
+import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -119,7 +113,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final NotebooksService notebooksService;
   private final UserService userService;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private ActionAuditService actionAuditService;
+  private WorkspaceAuditAdapterService workspaceAuditAdapterService;
 
   @Autowired
   public WorkspacesController(
@@ -134,7 +128,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       NotebooksService notebooksService,
       UserService userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      ActionAuditService actionAuditService) {
+      WorkspaceAuditAdapterService workspaceAuditAdapterService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -146,7 +140,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.notebooksService = notebooksService;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.actionAuditService = actionAuditService;
+    this.workspaceAuditAdapterService = workspaceAuditAdapterService;
   }
 
   @VisibleForTesting
@@ -228,48 +222,53 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } else if (workspace.getName().length() > 80) {
       throw new BadRequestException("Workspace name must be 80 characters or less");
     }
-    User user = userProvider.get();
-    String workspaceNamespace;
-    BillingProjectBufferEntry bufferedBillingProject;
-    try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
-    } catch (EmptyBufferException e) {
-      throw new TooManyRequestsException();
-    }
-    workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+    workspaceAuditAdapterService.fireCreateAction(
+        workspace, 9999L); // workaround for billing buffer problem
+    return ResponseEntity.ok(workspace);
 
-    // Note: please keep any initialization logic here in sync with CloneWorkspace().
-    FirecloudWorkspaceId workspaceId =
-        generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        attemptFirecloudWorkspaceCreation(workspaceId);
-
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
-        new org.pmiops.workbench.db.model.Workspace();
-    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
-
-    setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
-
-    org.pmiops.workbench.db.model.Workspace reqWorkspace = WorkspaceMapper.toDbWorkspace(workspace);
-    // TODO: enforce data access level authorization
-    dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
-    dbWorkspace.setName(reqWorkspace.getName());
-
-    // Ignore incoming fields pertaining to review status; clients can only request a review.
-    WorkspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
-    if (reqWorkspace.getReviewRequested()) {
-      // Use a consistent timestamp.
-      dbWorkspace.setTimeRequested(now);
-    }
-    dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
-
-    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
-
-    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-    Workspace createdWorkspace = WorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
-    fireCreateWorkspaceAction(createdWorkspace, dbWorkspace.getWorkspaceId());
-    return ResponseEntity.ok(createdWorkspace);
+//    User user = userProvider.get();
+//    String workspaceNamespace;
+//    BillingProjectBufferEntry bufferedBillingProject;
+//    try {
+//      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+//    } catch (EmptyBufferException e) {
+//      throw new TooManyRequestsException();
+//    }
+//    workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+//
+//    // Note: please keep any initialization logic here in sync with CloneWorkspace().
+//    FirecloudWorkspaceId workspaceId =
+//        generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
+//    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
+//        attemptFirecloudWorkspaceCreation(workspaceId);
+//
+//    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+//    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+//        new org.pmiops.workbench.db.model.Workspace();
+//    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
+//
+//    setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
+//
+//    org.pmiops.workbench.db.model.Workspace reqWorkspace = WorkspaceMapper.toDbWorkspace(workspace);
+//    // TODO: enforce data access level authorization
+//    dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
+//    dbWorkspace.setName(reqWorkspace.getName());
+//
+//    // Ignore incoming fields pertaining to review status; clients can only request a review.
+//    WorkspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
+//    if (reqWorkspace.getReviewRequested()) {
+//      // Use a consistent timestamp.
+//      dbWorkspace.setTimeRequested(now);
+//    }
+//    dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
+//
+//    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
+//
+//    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+//    Workspace createdWorkspace = WorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+//    workspaceAuditAdapterService.fireCreateWorkspaceAction(
+//        createdWorkspace, dbWorkspace.getWorkspaceId());
+//    return ResponseEntity.ok(createdWorkspace);
   }
 
   private void setDbWorkspaceFields(
@@ -302,7 +301,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     workspaceService.maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
-    fireDeleteWorkspaceAction(dbWorkspace);
+    workspaceAuditAdapterService.fireDeleteAction(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -790,75 +789,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
-  }
-
-  // Generate an action for the created workspace, capturing all required fields
-  private void fireCreateWorkspaceAction(Workspace createdWorkspace, long dbWorkspaceId) {
-    final String actionId = ActionAuditService.newActionId();
-    final long userId = userProvider.get().getUserId();
-    final String userEmail = userProvider.get().getEmail();
-    final Map<String, String> propertyValues = buildPropertyStringMap(createdWorkspace);
-    List<AuditableEvent> events =
-        propertyValues.entrySet().stream()
-            .map(
-                entry ->
-                    new AuditableEvent.Builder()
-                        .setActionId(actionId)
-                        .setAgentEmailMaybe(Optional.of(userEmail))
-                        .setActionType(ActionType.CREATE)
-                        .setAgentType(AgentType.USER)
-                        .setAgentId(userId)
-                        .setTargetType(TargetType.WORKSPACE)
-                        .setTargetPropertyMaybe(Optional.of(entry.getKey()))
-                        .setTargetIdMaybe(Optional.of(dbWorkspaceId))
-                        .setPreviousValueMaybe(Optional.empty())
-                        .setNewValueMaybe(Optional.of(entry.getValue()))
-                        .build())
-            .collect(Collectors.toList());
-    actionAuditService.send(events);
-  }
-
-  private void fireDeleteWorkspaceAction(org.pmiops.workbench.db.model.Workspace dbWorkspace) {
-    final Workspace workspace = WorkspaceMapper.toApiWorkspace(dbWorkspace);
-    final String actionId = ActionAuditService.newActionId();
-    final long userId = userProvider.get().getUserId();
-    final String userEmail = userProvider.get().getEmail();
-    Map<String, String> propertyValuesByName = buildPropertyStringMap(workspace);
-    ImmutableList<AuditableEvent> events = propertyValuesByName.entrySet().stream()
-        .map(entry ->
-            new AuditableEvent.Builder()
-                .setActionId(actionId)
-                .setAgentEmailMaybe(Optional.of(userEmail))
-                .setActionType(ActionType.DELETE)
-                .setAgentType(AgentType.USER)
-                .setAgentId(userId)
-                .setTargetType(TargetType.WORKSPACE)
-                .setTargetPropertyMaybe(Optional.of(entry.getKey()))
-                .setTargetIdMaybe(Optional.of(dbWorkspace.getWorkspaceId()))
-                .setPreviousValueMaybe(Optional.empty())
-                .setNewValueMaybe(Optional.of(entry.getValue()))
-                .build())
-        .collect(ImmutableList.toImmutableList());
-    actionAuditService.send(events);
-
-  }
-
-  private Map<String, String> buildPropertyStringMap(Workspace workspace) {
-    ImmutableMap.Builder<String, String> propsBuilder = new ImmutableMap.Builder<>();
-    insertIfNotNull(
-        propsBuilder, "intended_study", workspace.getResearchPurpose().getIntendedStudy());
-    insertIfNotNull(propsBuilder, "creator", workspace.getCreator());
-    Optional.ofNullable(workspace.getNamespace())
-        .ifPresent(ns -> propsBuilder.put("namespace", ns));
-    Optional.ofNullable(workspace.getId()).ifPresent(id -> propsBuilder.put("firecloud_name", id));
-    Optional.ofNullable(workspace.getName()).ifPresent(n -> propsBuilder.put("name", n));
-    return propsBuilder.build();
-  }
-
-  private void insertIfNotNull(ImmutableMap.Builder<String, String> mapBuilder,
-      String key,
-      String value) {
-    Optional.ofNullable(value).ifPresent(v -> mapBuilder.put(key, v));
   }
 
   @Override

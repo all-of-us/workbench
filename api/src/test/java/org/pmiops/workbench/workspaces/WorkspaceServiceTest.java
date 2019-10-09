@@ -86,8 +86,7 @@ public class WorkspaceServiceTest {
             userDao,
             mockUserProvider,
             userRecentWorkspaceDao,
-            workspaceDao,
-            workspaceMapper);
+            workspaceDao);
 
     mockWorkspaceResponses.clear();
     mockWorkspaces.clear();

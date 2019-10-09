@@ -9,7 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public abstract class AbstractAuditableEvent {
-  private static final MonitoredResource MONITORED_RESOURCE = MonitoredResource.newBuilder("global").build();
+  private static final MonitoredResource MONITORED_RESOURCE =
+      MonitoredResource.newBuilder("global").build();
   private static final String LOG_NAME = "action-audit-test-3";
 
   public abstract long timestamp();

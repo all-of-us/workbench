@@ -42,6 +42,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.pmiops.workbench.audit.ActionAuditService;
+import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -207,7 +208,7 @@ public class DataSetControllerTest {
 
   @Autowired WorkspaceService workspaceService;
 
-  @Autowired WorkspaceMapper workspaceMapper;
+  @Autowired WorkspaceAuditAdapterService workspaceAuditAdapterService;
 
   @TestConfiguration
   @Import({
@@ -294,7 +295,6 @@ public class DataSetControllerTest {
         new WorkspacesController(
             billingProjectBufferService,
             workspaceService,
-            workspaceMapper,
             cdrVersionDao,
             userDao,
             userProvider,
@@ -304,7 +304,7 @@ public class DataSetControllerTest {
             notebooksService,
             userService,
             workbenchConfigProvider,
-            actionAuditService);
+            workspaceAuditAdapterService);
     CohortsController cohortsController =
         new CohortsController(
             workspaceService,

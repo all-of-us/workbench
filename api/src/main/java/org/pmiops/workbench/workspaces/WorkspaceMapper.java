@@ -15,7 +15,6 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.springframework.stereotype.Service;
 
 public class WorkspaceMapper {
 
@@ -142,7 +141,8 @@ public class WorkspaceMapper {
     dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
   }
 
-  private static ResearchPurpose createResearchPurpose(org.pmiops.workbench.db.model.Workspace workspace) {
+  private static ResearchPurpose createResearchPurpose(
+      org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose =
         new ResearchPurpose()
             .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())
