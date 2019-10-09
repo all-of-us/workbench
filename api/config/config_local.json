@@ -75,7 +75,7 @@
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
-    "enableVpcServicePerimeter": true,
+    "enableVpcServicePerimeter": false,
     "enableNewAccountCreation": true
   }
 }
