@@ -254,15 +254,6 @@ const styles = reactStyles({
   checkboxRow: {
     display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
   },
-
-  radioLabel: {
-    fontSize: '13px',
-    color: colors.primary,
-    fontWeight: 400,
-    lineHeight: '24px',
-    marginLeft: '0.5rem',
-    marginRight: '3rem'
-  }
 });
 
 export const WorkspaceEditSection = (props) => {
@@ -826,7 +817,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                          }}
                          checked={this.state.reviewRequestedHasSelection &&
                          this.state.workspace.researchPurpose.reviewRequested}/>
-            <label style={styles.radioLabel}>Yes</label>
+            <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>Yes</label>
             <RadioButton name='reviewRequested'
                          onChange={() => {
                            this.updateResearchPurpose('reviewRequested', false);
@@ -834,7 +825,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                          }}
                          checked={this.state.reviewRequestedHasSelection &&
                          !this.state.workspace.researchPurpose.reviewRequested}/>
-            <label style={styles.radioLabel}>No</label>
+            <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>No</label>
           </div>
         </WorkspaceEditSection>
         <div>
