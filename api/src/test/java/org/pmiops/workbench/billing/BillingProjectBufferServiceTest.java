@@ -231,6 +231,19 @@ public class BillingProjectBufferServiceTest {
     doReturn(billingProjectStatus)
         .when(fireCloudService)
         .getBillingProjectStatus(billingProjectName);
+
+    billingProjectBufferService.syncBillingProjectStatus();
+    assertThat(
+            billingProjectBufferEntryDao
+                .findByFireCloudProjectName(billingProjectName)
+                .getStatusEnum())
+        .isEqualTo(CREATING);
+
+    billingProjectStatus.setCreationStatus(CreationStatusEnum.ADDINGTOPERIMETER);
+    doReturn(billingProjectStatus)
+        .when(fireCloudService)
+        .getBillingProjectStatus(billingProjectName);
+
     billingProjectBufferService.syncBillingProjectStatus();
     assertThat(
             billingProjectBufferEntryDao

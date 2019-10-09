@@ -791,7 +791,7 @@ definitions:
         description: the name of the billing project
       creationStatus:
         type: string
-        enum: ["Creating", "Ready", "Error"]
+        enum: ["Creating", "AddingToPerimeter", "Ready", "Error"]
 
   CreateRawlsBillingProjectFullRequest:
     description: ''

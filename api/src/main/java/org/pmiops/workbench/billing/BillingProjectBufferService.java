@@ -99,6 +99,7 @@ public class BillingProjectBufferService {
             entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
             break;
           case CREATING:
+          case ADDINGTOPERIMETER:
           default:
             break;
         }
