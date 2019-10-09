@@ -105,14 +105,17 @@ public class BillingProjectBufferService {
             break;
         }
       } catch (NotFoundException e) {
-        log.log(Level.WARNING, "Get BillingProjectStatus call failed for " + entry.getCreationTime() + ". Project not found.");
-
-        if ((getCurrentTimestamp().getTime() - entry.getCreationTime().getTime()) > minutesToMs(CREATING_TIMEOUT_MINUTES)) {
-          // If we still cannot find the billing project after the timeout period has passed, assume that the initial call failed
-          entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
-        }
+        log.log(
+            Level.WARNING,
+            "Get BillingProjectStatus call failed for "
+                + entry.getFireCloudProjectName()
+                + ". Project not found.",
+            e);
       } catch (WorkbenchException e) {
-        log.log(Level.WARNING, "Get BillingProjectStatus call failed for " + entry.getFireCloudProjectName(), e);
+        log.log(
+            Level.WARNING,
+            "Get BillingProjectStatus call failed for " + entry.getFireCloudProjectName(),
+            e);
       }
 
       billingProjectBufferEntryDao.save(entry);
@@ -137,6 +140,11 @@ public class BillingProjectBufferService {
                         .toEpochMilli())))
         .forEach(
             entry -> {
+              log.warning(
+                  "CleanBillingBuffer: Setting status of "
+                      + entry.getFireCloudProjectName()
+                      + " to ERROR from "
+                      + entry.getStatusEnum());
               entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
               billingProjectBufferEntryDao.save(entry);
             });

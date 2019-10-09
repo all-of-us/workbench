@@ -142,8 +142,8 @@ public class BillingProjectBufferServiceTest {
     doThrow(RuntimeException.class).when(fireCloudService).createAllOfUsBillingProject(anyString());
     try {
       billingProjectBufferService.bufferBillingProject();
-    } catch (Exception e) {}
-
+    } catch (Exception e) {
+    }
 
     assertThat(billingProjectBufferEntryDao.count()).isEqualTo(expectedCount);
   }
@@ -322,32 +322,10 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.syncBillingProjectStatus();
 
     assertThat(
-        billingProjectBufferEntryDao
-            .findByFireCloudProjectName(billingProjectName)
-            .getStatusEnum())
+            billingProjectBufferEntryDao
+                .findByFireCloudProjectName(billingProjectName)
+                .getStatusEnum())
         .isEqualTo(CREATING);
-  }
-
-  @Test
-  public void syncBillingProjectStatus_notFound_timedOut() {
-    billingProjectBufferService.bufferBillingProject();
-
-    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
-    String billingProjectName = captor.getValue();
-
-    CLOCK.increment(60*1000*1000);
-
-    doThrow(NotFoundException.class)
-        .when(fireCloudService)
-        .getBillingProjectStatus(billingProjectName);
-    billingProjectBufferService.syncBillingProjectStatus();
-
-    assertThat(
-        billingProjectBufferEntryDao
-            .findByFireCloudProjectName(billingProjectName)
-            .getStatusEnum())
-        .isEqualTo(ERROR);
   }
 
   @Test
