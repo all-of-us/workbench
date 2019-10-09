@@ -246,9 +246,9 @@ public class BillingProjectBufferServiceTest {
 
     billingProjectBufferService.syncBillingProjectStatus();
     assertThat(
-        billingProjectBufferEntryDao
-            .findByFireCloudProjectName(billingProjectName)
-            .getStatusEnum())
+            billingProjectBufferEntryDao
+                .findByFireCloudProjectName(billingProjectName)
+                .getStatusEnum())
         .isEqualTo(CREATING);
   }
 
