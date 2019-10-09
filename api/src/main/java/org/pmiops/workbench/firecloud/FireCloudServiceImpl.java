@@ -87,6 +87,9 @@ public class FireCloudServiceImpl implements FireCloudService {
           "workspace.bucketName",
           "workspace.createdBy");
 
+  public static final List<String> FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS =
+      ImmutableList.of("accessLevel", "workspace.workspaceId");
+
   @Autowired
   public FireCloudServiceImpl(
       Provider<WorkbenchConfig> configProvider,
@@ -350,7 +353,9 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public List<WorkspaceResponse> getWorkspaces() {
-    return retryHandler.run((context) -> workspacesApiProvider.get().listWorkspaces());
+    return retryHandler.run(
+        (context) ->
+            workspacesApiProvider.get().listWorkspaces(FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS));
   }
 
   @Override
