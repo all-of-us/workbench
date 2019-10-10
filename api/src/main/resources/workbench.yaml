@@ -2031,19 +2031,19 @@ paths:
           schema:
             $ref: "#/definitions/DataSetListResponse"
 
-  /v1/dataDictionaryEntry:
+  /v1/cdrVersionId/{cdrVersionId}/domain/{domain}/domainValue/{domainValue}/dataDictionaryEntry:
     get:
       parameters:
-        - in: query
+        - in: path
           name: cdrVersionId
           type: integer
           format: int64
           required: true
-        - in: query
+        - in: path
           name: domain
-          type: string
           required: true
-        - in: query
+          type: string
+        - in: path
           name: domainValue
           type: string
           required: true

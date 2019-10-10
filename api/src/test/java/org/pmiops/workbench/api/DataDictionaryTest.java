@@ -6,11 +6,11 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import javax.inject.Provider;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
@@ -22,7 +22,8 @@ import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DataDictionaryEntry;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -35,7 +36,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -44,26 +44,31 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class DataDictionaryTest {
 
   @Autowired BigQueryService bigQueryService;
+  @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortDao cohortDao;
   @Autowired ConceptDao conceptDao;
   @Autowired ConceptSetDao conceptSetDao;
+  @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired DataSetDao dataSetDao;
   @Autowired DataSetMapper dataSetMapper;
   @Autowired DataSetService dataSetService;
   @Autowired FireCloudService fireCloudService;
   @Autowired NotebooksService notebooksService;
   @Autowired WorkspaceService workspaceService;
-  @Mock Provider<User> userProvider;
 
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
+  @Autowired DataSetController dataSetController;
+
+  @Rule
+  public ExpectedException expectedEx = ExpectedException.none();
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
-  private static User currentUser;
 
   @TestConfiguration
-  @Import({DataSetMapperImpl.class})
+  @Import({
+      DataSetController.class,
+      DataSetMapperImpl.class
+  })
   @MockBean({
     BigQueryService.class,
     CohortDao.class,
@@ -80,34 +85,26 @@ public class DataDictionaryTest {
     Clock clock() {
       return CLOCK;
     }
-
-    @Bean
-    @Scope("prototype")
-    User user() {
-      return currentUser;
-    }
   }
-
-  private DataSetController dataSetController;
 
   @Before
   public void setUp() {
-    dataSetController =
-        new DataSetController(
-            bigQueryService,
-            CLOCK,
-            cdrVersionDao,
-            cohortDao,
-            conceptDao,
-            conceptSetDao,
-            dataDictionaryEntryDao,
-            dataSetDao,
-            dataSetMapper,
-            dataSetService,
-            fireCloudService,
-            notebooksService,
-            userProvider,
-            workspaceService);
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersionDao.save(cdrVersion);
+
+    DataDictionaryEntry dataDictionaryEntry = new DataDictionaryEntry();
+    dataDictionaryEntry.setCdrVersion(cdrVersion);
+    dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
+    dataDictionaryEntry.setRelevantOmopTable(ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(Domain.DRUG));
+    dataDictionaryEntry.setFieldName("TEST FIELD");
+    dataDictionaryEntry.setOmopCdmStandardOrCustomField("A");
+    dataDictionaryEntry.setDescription("B");
+    dataDictionaryEntry.setFieldType("C");
+    dataDictionaryEntry.setDataProvenance("D");
+    dataDictionaryEntry.setSourcePpiModule("E");
+    dataDictionaryEntry.setTransformedByRegisteredTierPrivacyMethods(true);
+
+    dataDictionaryEntryDao.save(dataDictionaryEntry);
   }
 
   @Test
@@ -152,5 +149,31 @@ public class DataDictionaryTest {
     assertThat(response.getSourcePpiModule()).isEqualTo(dataDictionaryEntry.getSourcePpiModule());
     assertThat(response.getTransformedByRegisteredTierPrivacyMethods())
         .isEqualTo(dataDictionaryEntry.getTransformedByRegisteredTierPrivacyMethods());
+  }
+
+  @Test
+  public void testGetDataDictionaryEntry_invalidCdr() {
+    expectedEx.expect(BadRequestException.class);
+    expectedEx.expectMessage("Invalid CDR Version");
+
+    dataSetController.getDataDictionaryEntry(
+        -1L, Domain.DRUG.toString(), "TEST FIELD");
+  }
+
+  @Test
+  public void testGetDataDictionaryEntry_invalidDomain() {
+    expectedEx.expect(BadRequestException.class);
+    expectedEx.expectMessage("Invalid Domain");
+
+    dataSetController.getDataDictionaryEntry(
+        cdrVersionDao.findAll().iterator().next().getCdrVersionId(), "random", "TEST FIELD");
+  }
+
+  @Test
+  public void testGetDataDictionaryEntry_notFound() {
+    expectedEx.expect(NotFoundException.class);
+
+    dataSetController.getDataDictionaryEntry(
+        1L, Domain.DRUG.toString(), "random");
   }
 }

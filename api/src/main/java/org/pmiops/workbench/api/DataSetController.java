@@ -628,13 +628,11 @@ public class DataSetController implements DataSetApiDelegate {
   public ResponseEntity<DataDictionaryEntry> getDataDictionaryEntry(
       Long cdrVersionId, String domain, String domainValue) {
     CdrVersion cdrVersion = cdrVersionDao.findByCdrVersionId(cdrVersionId);
-
     if (cdrVersion == null) {
       throw new BadRequestException("Invalid CDR Version");
     }
 
     String omopTable = conceptSetDao.DOMAIN_TO_TABLE_NAME.get(Domain.fromValue(domain));
-
     if (omopTable == null) {
       throw new BadRequestException("Invalid Domain");
     }
@@ -642,7 +640,7 @@ public class DataSetController implements DataSetApiDelegate {
     org.pmiops.workbench.db.model.DataDictionaryEntry dataDictionaryEntry =
         dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
             omopTable, domainValue, cdrVersion);
-
+    
     if (dataDictionaryEntry == null) {
       throw new NotFoundException();
     }
