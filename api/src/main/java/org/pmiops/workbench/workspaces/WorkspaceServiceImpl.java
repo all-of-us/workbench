@@ -504,6 +504,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
+  @Transactional
   public List<UserRecentWorkspace> getRecentWorkspaces() {
     long userId = userProvider.get().getUserId();
     List<UserRecentWorkspace> userRecentWorkspaces =
