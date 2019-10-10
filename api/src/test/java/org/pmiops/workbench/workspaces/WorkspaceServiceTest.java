@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -122,7 +123,7 @@ public class WorkspaceServiceTest {
         WorkspaceAccessLevel.OWNER,
         WorkspaceActiveStatus.ACTIVE);
 
-    doReturn(mockWorkspaceResponses).when(mockFireCloudService).getWorkspaces();
+    doReturn(mockWorkspaceResponses).when(mockFireCloudService).getWorkspaces(any());
     User mockUser = mock(User.class);
     doReturn(mockUser).when(mockUserProvider).get();
     doReturn(DEFAULT_USER_EMAIL).when(mockUser).getEmail();
