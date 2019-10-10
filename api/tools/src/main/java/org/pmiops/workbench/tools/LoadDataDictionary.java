@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Timestamp;
 import java.util.logging.Logger;
-import org.pmiops.workbench.dataset.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DataDictionaryEntry;
 import org.springframework.boot.CommandLineRunner;
@@ -56,7 +56,9 @@ public class LoadDataDictionary {
               dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
                   relevantOmopTable, fieldName, defaultCdrVersion);
 
-          if (entry != null && entry.getDefinedTime().after(definedTime)) {
+          // We are skipping ahead if the defined times match by assuming that the definition has
+          // not changed.
+          if (entry != null && definedTime.before(entry.getDefinedTime())) {
             continue;
           }
 

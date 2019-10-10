@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -14,12 +15,14 @@ import javax.persistence.Table;
 @Table(name = "data_dictionary_entry")
 public class DataDictionaryEntry {
 
-  // Meta data fields
+  // Metadata fields
   private long dataDictionaryEntryId;
   private CdrVersion cdrVersion;
   private Timestamp definedTime;
 
   // Fields copied from the Data Dictionary export
+  // See available_field_item in the following
+  // https://github.com/all-of-us/cdrdatadictionary/blob/development/cdr_data_dictionary/schema.yaml
   private String relevantOmopTable;
   private String fieldName;
   private String omopCdmStandardOrCustomField;
@@ -132,5 +135,41 @@ public class DataDictionaryEntry {
   public void setTransformedByRegisteredTierPrivacyMethods(
       Boolean transformedByRegisteredTierPrivacyMethods) {
     this.transformedByRegisteredTierPrivacyMethods = transformedByRegisteredTierPrivacyMethods;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    DataDictionaryEntry that = (DataDictionaryEntry) o;
+    return dataDictionaryEntryId == that.dataDictionaryEntryId
+        && Objects.equals(cdrVersion, that.cdrVersion)
+        && Objects.equals(definedTime, that.definedTime)
+        && Objects.equals(relevantOmopTable, that.relevantOmopTable)
+        && Objects.equals(fieldName, that.fieldName)
+        && Objects.equals(omopCdmStandardOrCustomField, that.omopCdmStandardOrCustomField)
+        && Objects.equals(description, that.description)
+        && Objects.equals(fieldType, that.fieldType)
+        && Objects.equals(dataProvenance, that.dataProvenance)
+        && Objects.equals(sourcePpiModule, that.sourcePpiModule)
+        && Objects.equals(
+            transformedByRegisteredTierPrivacyMethods,
+            that.transformedByRegisteredTierPrivacyMethods);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        dataDictionaryEntryId,
+        cdrVersion,
+        definedTime,
+        relevantOmopTable,
+        fieldName,
+        omopCdmStandardOrCustomField,
+        description,
+        fieldType,
+        dataProvenance,
+        sourcePpiModule,
+        transformedByRegisteredTierPrivacyMethods);
   }
 }
