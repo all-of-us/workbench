@@ -1,4 +1,4 @@
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {switchCase} from 'app/utils';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -22,7 +22,7 @@ const styles = {
   popup: {
     position: 'fixed', top: 0, left: 0, zIndex: 105,
     backgroundColor: colors.white,
-    border: `1px solid`, borderColor: colors.border, borderRadius: 4,
+    border: `1px solid`, borderColor: colorWithWhiteness(colors.dark, .6), borderRadius: 4,
     boxShadow: '0 3px 2px 0 rgba(0,0,0,0.12)'
   }
 };

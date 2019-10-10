@@ -7,6 +7,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {withUserProfile} from 'app/utils';
+import {NewWorkspaceButton} from "app/pages/workspace/new-workspace-button";
 
 interface State {
   loading: boolean;
@@ -42,6 +43,9 @@ export const RecentWorkspaces = withUserProfile()
   render() {
     // Needs a min-height so the spinner will render when loading and position: relative so said spinner will center.
     return <FlexRow style={{marginTop: '1rem', minHeight: 247, position: 'relative'}}>
+      {
+        this.state.recentWorkspaces.length === 0 && <NewWorkspaceButton />
+      }
       {
         this.state.recentWorkspaces.map(recentWorkspace => {
           return <WorkspaceCard

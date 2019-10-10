@@ -13,7 +13,7 @@ import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDate, reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
@@ -31,7 +31,7 @@ const styles = reactStyles({
   workspaceCardContents: {
     paddingTop: '.5rem',
     borderRight: '1px solid',
-    borderColor: colors.border,
+    borderColor: colorWithWhiteness(colors.dark, .6),
     flex: '0 0 1rem',
     justifyContent: 'center'
   },

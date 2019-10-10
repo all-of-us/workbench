@@ -11,9 +11,7 @@ export const baseStyles = reactStyles({
     backgroundColor: colors.white,
     border: `1px solid ${cardBorderColor}`,
     display: 'flex',
-    flexDirection: 'column'
-  },
-  cardPadding: {
+    flexDirection: 'column',
     padding: '1rem',
   }
 });
@@ -21,24 +19,22 @@ export const baseStyles = reactStyles({
 export const styles = reactStyles({
   workspaceCard: {
     ...baseStyles.card,
+    padding: '0px',
     minWidth: '300px', maxWidth: '300px',
     minHeight: '223px', maxHeight: '223px',
   },
   domainCard: {
     ...baseStyles.card,
-    ...baseStyles.cardPadding,
     minWidth: '300px', maxWidth: '300px',
     minHeight: '223px', maxHeight: '223px',
   },
   resourceCard: {
     ...baseStyles.card,
-    ...baseStyles.cardPadding,
     minWidth: '200px', maxWidth: '200px',
     minHeight: '223px', maxHeight: '223px'
   },
   cohortActionCard: {
     ...baseStyles.card,
-    ...baseStyles.cardPadding,
     width: '30%',
     height: '12rem'
   }

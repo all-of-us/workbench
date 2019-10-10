@@ -16,7 +16,7 @@ import {Modal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
-import {RecentWork} from 'app/pages/homepage/recent-work';
+import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi} from 'app/services/swagger-fetch-clients';
@@ -391,7 +391,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                             </FlexColumn>
                             <FlexColumn>
                               <SmallHeader>Recently Accessed Items</SmallHeader>
-                              <RecentWork/>
+                              <RecentResources/>
                             </FlexColumn>
                           </React.Fragment>
                         )
@@ -500,7 +500,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                             <div style={{color: colors.white, height: '1.9rem'}}>
                               <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
                             </div>
-                            <RecentWork dark={true}/>
+                            <RecentResources dark={true}/>
                           </FlexColumn>
                         </div>
                       </FlexRow>)

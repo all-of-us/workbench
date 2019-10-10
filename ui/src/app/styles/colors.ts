@@ -25,7 +25,6 @@ export default {
     dataSet: '#6CACE4',
     notebook: '#8BC990'
   },
-  border: '#b7b7b7',
   white: '#fff',
   workspacePermissionsHighlights: {
     'OWNER': '#4996A2',

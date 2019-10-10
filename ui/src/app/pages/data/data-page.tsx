@@ -120,12 +120,12 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       this.setState({
         isLoading: true
       });
+      workspacesApi().updateRecentWorkspaces(namespace, id);
       const [cohorts, cohortReviews, conceptSets, dataSets] = await Promise.all([
         cohortsApi().getCohortsInWorkspace(namespace, id),
         cohortReviewApi().getCohortReviewsInWorkspace(namespace, id),
         conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
         dataSetApi().getDataSetsInWorkspace(namespace, id),
-        workspacesApi().updateRecentWorkspaces(namespace, id)
       ]);
       // Show all concept set except the Dummy demographics Concept set created to be used only
       // in dataset

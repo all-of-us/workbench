@@ -352,10 +352,10 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     async loadResources(): Promise<void> {
       try {
         const {namespace, id} = this.props.workspace;
+        workspacesApi().updateRecentWorkspaces(namespace, id);
         const [conceptSets, cohorts] = await Promise.all([
           conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
-          cohortsApi().getCohortsInWorkspace(namespace, id),
-          workspacesApi().updateRecentWorkspaces(namespace, id)
+          cohortsApi().getCohortsInWorkspace(namespace, id)
         ]);
         this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
           loadingResources: false});

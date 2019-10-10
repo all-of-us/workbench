@@ -40,16 +40,13 @@ export class CohortReview extends React.Component<{}, State> {
     const {ns, wsid, cid} = urlParamsStore.getValue();
     const {accessLevel, cdrVersionId} = currentWorkspaceStore.getValue();
     this.setState({readonly: accessLevel === WorkspaceAccessLevel.READER});
-    Promise.all([
-      workspacesApi().updateRecentWorkspaces(ns, wsid),
-      cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
-        page: 0,
-        pageSize: 25,
-        sortOrder: SortOrder.Asc,
-        filters: {items: []}
-      })
-    ]).then(values => {
-      const review = values[1];
+    workspacesApi().updateRecentWorkspaces(ns, wsid);
+    cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
+      page: 0,
+      pageSize: 25,
+      sortOrder: SortOrder.Asc,
+      filters: {items: []}
+    }).then(review => {
       cohortReviewStore.next(review);
       const reviewPresent = review.reviewStatus !== ReviewStatus.NONE;
       this.setState({reviewPresent});

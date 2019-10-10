@@ -6,14 +6,12 @@ import {
 } from 'generated/fetch';
 
 import {AlertDanger} from 'app/components/alert';
-import {
-  CardButton,
-} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexRow} from 'app/components/flex';
 import {ListPageHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
+import {NewWorkspaceButton} from 'app/pages/workspace/new-workspace-button';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -22,9 +20,8 @@ import {
   ReactWrapperBase,
   withUserProfile
 } from 'app/utils';
-import {navigate} from 'app/utils/navigation';
-import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 
+import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import * as React from 'react';
 import RSelect from 'react-select';
 
@@ -34,9 +31,6 @@ const styles = reactStyles({
   },
   cardArea: {
     display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'
-  },
-  addCard: {
-    margin: '0 1rem 1rem 0', fontWeight: 600, color: 'rgb(33, 111, 180)'
   }
 });
 
@@ -122,11 +116,7 @@ export const WorkspaceList = withUserProfile()
             {workspacesLoading ?
               (<Spinner style={{width: '100%', marginTop: '1.5rem'}}/>) :
               (<div style={{display: 'flex', marginTop: '1.5rem', flexWrap: 'wrap'}}>
-                <CardButton onClick={() => navigate(['workspaces/build'])}
-                            style={styles.addCard}>
-                  Create a <br/> New Workspace
-                  <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
-                </CardButton>
+                <NewWorkspaceButton />
                 {workspaceList.map(wp => {
                   return <WorkspaceCard
                     key={wp.workspace.name}
