@@ -25,7 +25,7 @@ export class ResourceCardMenu extends React.Component<ResourceCardMenuProps> {
       closeOnClick
       content={
         switchCase(this.props.resourceType,
-          ['cohortReview', () => {
+          [ResourceType.COHORT_REVIEW, () => {
             return <React.Fragment>
               <MenuItem icon='note'
                         onClick={this.props.onRenameResource}
@@ -41,7 +41,7 @@ export class ResourceCardMenu extends React.Component<ResourceCardMenuProps> {
               </MenuItem>
             </React.Fragment>;
           }],
-          ['conceptSet', () => {
+          [ResourceType.CONCEPT_SET, () => {
             return <React.Fragment>
               <MenuItem icon='pencil'
                         onClick={this.props.onEdit}
@@ -62,7 +62,7 @@ export class ResourceCardMenu extends React.Component<ResourceCardMenuProps> {
               </MenuItem>
             </React.Fragment>;
           }],
-          ['dataset', () => {
+          [ResourceType.DATA_SET, () => {
             return <React.Fragment>
               <MenuItem icon='pencil'
                         onClick={this.props.onRenameResource}
