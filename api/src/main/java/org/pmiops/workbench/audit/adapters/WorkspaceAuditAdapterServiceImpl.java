@@ -2,6 +2,7 @@ package org.pmiops.workbench.audit.adapters;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -12,8 +13,8 @@ import org.pmiops.workbench.audit.ActionAuditService;
 import org.pmiops.workbench.audit.ActionType;
 import org.pmiops.workbench.audit.AgentType;
 import org.pmiops.workbench.audit.TargetType;
+import org.pmiops.workbench.audit.targetproperties.WorkspaceTargetProperty;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,7 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
       final String actionId = ActionAuditService.newActionId();
       final long userId = userProvider.get().getUserId();
       final String userEmail = userProvider.get().getEmail();
-      final Map<String, String> propertyValues = buildPropertyValuesByName(createdWorkspace);
+      final Map<String, String> propertyValues = WorkspaceTargetProperty.getPropertyValuesByName(createdWorkspace);
       // omit the previous value column
       ImmutableList<ActionAuditEvent> events =
           propertyValues.entrySet().stream()
@@ -92,27 +93,5 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
     } catch (RuntimeException e) {
       logAndSwallow(e);
     }
-  }
-
-  private Map<String, String> buildPropertyValuesByName(Workspace workspace) {
-    ImmutableMap.Builder<String, String> propsBuilder = new ImmutableMap.Builder<>();
-    final ResearchPurpose researchPurpose = workspace.getResearchPurpose(); // required field
-    insertIfNotNull(propsBuilder, "intended_study", researchPurpose.getIntendedStudy());
-    insertIfNotNull(propsBuilder, "additional_notes", researchPurpose.getAdditionalNotes());
-    insertIfNotNull(propsBuilder, "anticipated_findings", researchPurpose.getAnticipatedFindings());
-    insertIfNotNull(propsBuilder, "disease_of_focus", researchPurpose.getDiseaseOfFocus());
-    insertIfNotNull(propsBuilder, "reason_for_aou", researchPurpose.getReasonForAllOfUs());
-    insertIfNotNull(propsBuilder, "creator", workspace.getCreator());
-    Optional.ofNullable(workspace.getNamespace())
-        .ifPresent(ns -> propsBuilder.put("namespace", ns));
-    Optional.ofNullable(workspace.getId()).ifPresent(id -> propsBuilder.put("firecloud_name", id));
-    Optional.ofNullable(workspace.getName()).ifPresent(n -> propsBuilder.put("name", n));
-    return propsBuilder.build();
-  }
-
-  // ImmutableMaps don't allow null values, and we don't want them anyway, so
-  private void insertIfNotNull(
-      ImmutableMap.Builder<String, String> mapBuilder, String key, String value) {
-    Optional.ofNullable(value).ifPresent(v -> mapBuilder.put(key, v));
   }
 }

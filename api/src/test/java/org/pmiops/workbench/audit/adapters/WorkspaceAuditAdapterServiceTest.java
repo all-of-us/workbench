@@ -100,6 +100,14 @@ public class WorkspaceAuditAdapterServiceTest {
   }
 
   @Test
+  public void testFirestNoEventsForNullWorkspace() {
+    workspaceAuditAdapterService.fireCreateAction(null, WORKSPACE_1_DB_ID);
+    verify(mockActionAuditService).send(eventListCaptor.capture());
+    Collection<ActionAuditEvent> eventsSent = eventListCaptor.getValue();
+    assertThat(eventsSent).isEmpty();
+  }
+
+  @Test
   public void testFiresDeleteWorkspaceEvents() {
     workspaceAuditAdapterService.fireDeleteAction(dbWorkspace1);
     verify(mockActionAuditService).send(eventCaptor.capture());
