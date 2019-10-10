@@ -16,7 +16,7 @@
     "projectNamePrefix": "aou-rw-perf-",
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_00293C-5DEA2D-6887E7",
     "retryCount": 4,
-    "bufferCapacity": 500,
+    "bufferCapacity": 300,
     "defaultFreeCreditsLimit": 300.0,
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
