@@ -497,9 +497,7 @@ public class DataSetControllerTest {
               returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
               return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
             });
-
     when(dataSetController.generateRandomEightCharacterQualifier()).thenReturn("00000000");
-    //    doReturn("00000000").when(dataSetController.generateRandomEightCharacterQualifier());
   }
 
   private DataSetRequest buildEmptyDataSetRequest() {
