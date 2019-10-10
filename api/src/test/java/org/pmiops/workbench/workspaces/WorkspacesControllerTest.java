@@ -55,6 +55,7 @@ import org.pmiops.workbench.api.CohortReviewController;
 import org.pmiops.workbench.api.CohortsController;
 import org.pmiops.workbench.api.ConceptSetsController;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -204,7 +205,8 @@ public class WorkspacesControllerTest {
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_3 =
       makeConcept(CLIENT_CONCEPT_3);
 
-  @Autowired BillingProjectBufferService billingProjectBufferService;
+  @Autowired private BillingProjectBufferService billingProjectBufferService;
+  @Autowired private WorkspaceAuditAdapterService workspaceAuditAdapterService;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
 
@@ -235,7 +237,8 @@ public class WorkspacesControllerTest {
     CohortQueryBuilder.class,
     UserService.class,
     UserRecentResourceService.class,
-    ConceptService.class
+    ConceptService.class,
+    WorkspaceAuditAdapterService.class
   })
   static class Configuration {
 
