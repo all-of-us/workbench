@@ -1,2 +1,2 @@
 1570565534
-TEST TABLE:TEST FIELD 4:A:B:C:D:E:false
+drug_exposure:TEST FIELD 4:A:B:C:D:E:false
