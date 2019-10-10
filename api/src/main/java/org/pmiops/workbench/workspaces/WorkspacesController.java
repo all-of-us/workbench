@@ -222,53 +222,50 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } else if (workspace.getName().length() > 80) {
       throw new BadRequestException("Workspace name must be 80 characters or less");
     }
-    workspaceAuditAdapterService.fireCreateAction(
-        workspace, 9999L); // workaround for billing buffer problem
-    return ResponseEntity.ok(workspace);
 
-//    User user = userProvider.get();
-//    String workspaceNamespace;
-//    BillingProjectBufferEntry bufferedBillingProject;
-//    try {
-//      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
-//    } catch (EmptyBufferException e) {
-//      throw new TooManyRequestsException();
-//    }
-//    workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
-//
-//    // Note: please keep any initialization logic here in sync with CloneWorkspace().
-//    FirecloudWorkspaceId workspaceId =
-//        generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
-//    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-//        attemptFirecloudWorkspaceCreation(workspaceId);
-//
-//    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-//    org.pmiops.workbench.db.model.Workspace dbWorkspace =
-//        new org.pmiops.workbench.db.model.Workspace();
-//    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
-//
-//    setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
-//
-//    org.pmiops.workbench.db.model.Workspace reqWorkspace = WorkspaceMapper.toDbWorkspace(workspace);
-//    // TODO: enforce data access level authorization
-//    dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
-//    dbWorkspace.setName(reqWorkspace.getName());
-//
-//    // Ignore incoming fields pertaining to review status; clients can only request a review.
-//    WorkspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
-//    if (reqWorkspace.getReviewRequested()) {
-//      // Use a consistent timestamp.
-//      dbWorkspace.setTimeRequested(now);
-//    }
-//    dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
-//
-//    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
-//
-//    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-//    Workspace createdWorkspace = WorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
-//    workspaceAuditAdapterService.fireCreateWorkspaceAction(
-//        createdWorkspace, dbWorkspace.getWorkspaceId());
-//    return ResponseEntity.ok(createdWorkspace);
+    User user = userProvider.get();
+    String workspaceNamespace;
+    BillingProjectBufferEntry bufferedBillingProject;
+    try {
+      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+    } catch (EmptyBufferException e) {
+      throw new TooManyRequestsException();
+    }
+    workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+
+    // Note: please keep any initialization logic here in sync with CloneWorkspace().
+    FirecloudWorkspaceId workspaceId =
+        generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
+    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
+        attemptFirecloudWorkspaceCreation(workspaceId);
+
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        new org.pmiops.workbench.db.model.Workspace();
+    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
+
+    setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
+
+    org.pmiops.workbench.db.model.Workspace reqWorkspace = WorkspaceMapper.toDbWorkspace(workspace);
+    // TODO: enforce data access level authorization
+    dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
+    dbWorkspace.setName(reqWorkspace.getName());
+
+    // Ignore incoming fields pertaining to review status; clients can only request a review.
+    WorkspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
+    if (reqWorkspace.getReviewRequested()) {
+      // Use a consistent timestamp.
+      dbWorkspace.setTimeRequested(now);
+    }
+    dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
+
+    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
+
+    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+    Workspace createdWorkspace = WorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    workspaceAuditAdapterService.fireCreateAction(
+        createdWorkspace, dbWorkspace.getWorkspaceId());
+    return ResponseEntity.ok(createdWorkspace);
   }
 
   private void setDbWorkspaceFields(
