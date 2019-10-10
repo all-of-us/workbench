@@ -86,10 +86,7 @@ public class FireCloudServiceImpl implements FireCloudService {
           "workspace.namespace",
           "workspace.bucketName",
           "workspace.createdBy");
-
-  public static final List<String> FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS =
-      ImmutableList.of("accessLevel", "workspace.workspaceId");
-
+  
   @Autowired
   public FireCloudServiceImpl(
       Provider<WorkbenchConfig> configProvider,
