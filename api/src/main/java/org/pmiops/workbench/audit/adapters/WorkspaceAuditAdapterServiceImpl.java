@@ -2,25 +2,26 @@ package org.pmiops.workbench.audit.adapters;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.audit.ActionAuditService;
 import org.pmiops.workbench.audit.ActionType;
 import org.pmiops.workbench.audit.AgentType;
-import org.pmiops.workbench.audit.AuditableEvent;
+import org.pmiops.workbench.audit.ActionAuditEvent;
 import org.pmiops.workbench.audit.TargetType;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterService {
+
+  private static final Logger logger = Logger.getLogger(WorkspaceAuditAdapterServiceImpl.class.getName());
 
   private Provider<User> userProvider;
   private ActionAuditService actionAuditService;
@@ -34,28 +35,36 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
 
   @Override
   public void fireCreateAction(Workspace createdWorkspace, long dbWorkspaceId) {
-    final String actionId = ActionAuditService.newActionId();
-    final long userId = userProvider.get().getUserId();
-    final String userEmail = userProvider.get().getEmail();
-    final Map<String, String> propertyValues = buildPropertyStringMap(createdWorkspace);
-    List<AuditableEvent> events =
-        propertyValues.entrySet().stream()
-            .map(
-                entry ->
-                    new AuditableEvent.Builder()
-                        .setActionId(actionId)
-                        .setAgentEmailMaybe(Optional.of(userEmail))
-                        .setActionType(ActionType.CREATE)
-                        .setAgentType(AgentType.USER)
-                        .setAgentId(userId)
-                        .setTargetType(TargetType.WORKSPACE)
-                        .setTargetPropertyMaybe(Optional.of(entry.getKey()))
-                        .setTargetIdMaybe(Optional.of(dbWorkspaceId))
-                        .setPreviousValueMaybe(Optional.empty())
-                        .setNewValueMaybe(Optional.of(entry.getValue()))
-                        .build())
-            .collect(Collectors.toList());
-    actionAuditService.send(events);
+    try {
+      final String actionId = ActionAuditService.newActionId();
+      final long userId = userProvider.get().getUserId();
+      final String userEmail = userProvider.get().getEmail();
+      final Map<String, String> propertyValues = buildPropertyValuesByName(createdWorkspace);
+      // omit the previous value column
+      ImmutableList<ActionAuditEvent> events =
+          propertyValues.entrySet().stream()
+              .map(
+                  entry ->
+                      new ActionAuditEvent.Builder()
+                          .setActionId(actionId)
+                          .setAgentEmail(userEmail)
+                          .setActionType(ActionType.CREATE)
+                          .setAgentType(AgentType.USER)
+                          .setAgentId(userId)
+                          .setTargetType(TargetType.WORKSPACE)
+                          .setTargetProperty(entry.getKey())
+                          .setTargetId(dbWorkspaceId)
+                          .setNewValue(entry.getValue())
+                          .build())
+              .collect(ImmutableList.toImmutableList());
+      actionAuditService.send(events);
+    } catch (RuntimeException e) {
+      logAndSwallow(e);
+    }
+  }
+
+  private void logAndSwallow(RuntimeException e) {
+    logger.log(Level.WARNING, e, () -> "Exception encountered during audit.");
   }
 
   // Because the deleteWorkspace() method operates at the DB level, this method
@@ -63,24 +72,27 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
   // consistent across actions somewhat challenging.
   @Override
   public void fireDeleteAction(org.pmiops.workbench.db.model.Workspace dbWorkspace) {
-    final Workspace workspace = WorkspaceMapper.toApiWorkspace(dbWorkspace);
-    final String actionId = ActionAuditService.newActionId();
-    final long userId = userProvider.get().getUserId();
-    final String userEmail = userProvider.get().getEmail();
-    final AuditableEvent event = new AuditableEvent.Builder()
-        .setActionId(actionId)
-        .setAgentEmailMaybe(Optional.of(userEmail))
-        .setActionType(ActionType.DELETE)
-        .setAgentType(AgentType.USER)
-        .setAgentId(userId)
-        .setTargetType(TargetType.WORKSPACE)
-        .setTargetIdMaybe(Optional.of(dbWorkspace.getWorkspaceId()))
-        .build();
+    try {
+      final String actionId = ActionAuditService.newActionId();
+      final long userId = userProvider.get().getUserId();
+      final String userEmail = userProvider.get().getEmail();
+      final ActionAuditEvent event = new ActionAuditEvent.Builder()
+          .setActionId(actionId)
+          .setAgentEmail(userEmail)
+          .setActionType(ActionType.DELETE)
+          .setAgentType(AgentType.USER)
+          .setAgentId(userId)
+          .setTargetType(TargetType.WORKSPACE)
+          .setTargetId(dbWorkspace.getWorkspaceId())
+          .build();
 
-    actionAuditService.send(event);
+      actionAuditService.send(event);
+    } catch (RuntimeException e) {
+      logAndSwallow(e);
+    }
   }
 
-  private Map<String, String> buildPropertyStringMap(Workspace workspace) {
+  private Map<String, String> buildPropertyValuesByName(Workspace workspace) {
     ImmutableMap.Builder<String, String> propsBuilder = new ImmutableMap.Builder<>();
     final ResearchPurpose researchPurpose = workspace.getResearchPurpose(); // required field
     insertIfNotNull(propsBuilder, "intended_study", researchPurpose.getIntendedStudy());
@@ -96,6 +108,7 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
     return propsBuilder.build();
   }
 
+  // ImmutableMaps don't allow null values, and we don't want them anyway, so
   private void insertIfNotNull(
       ImmutableMap.Builder<String, String> mapBuilder, String key, String value) {
     Optional.ofNullable(value).ifPresent(v -> mapBuilder.put(key, v));

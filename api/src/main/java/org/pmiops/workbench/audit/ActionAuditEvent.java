@@ -3,7 +3,7 @@ package org.pmiops.workbench.audit;
 import java.util.Optional;
 
 /** temporary "immutable" class until i cna get immutables to work in gradle */
-public class AuditableEvent extends AbstractAuditableEvent {
+public class ActionAuditEvent extends AbstractAuditableEvent {
 
   private final long timestamp;
   private final AgentType agentType;
@@ -17,7 +17,7 @@ public class AuditableEvent extends AbstractAuditableEvent {
   private final Optional<String> previousValueMaybe;
   private final Optional<String> newValueMaybe;
 
-  public AuditableEvent(
+  public ActionAuditEvent(
       long timestamp,
       AgentType agentType,
       long agentId,
@@ -97,28 +97,24 @@ public class AuditableEvent extends AbstractAuditableEvent {
     return newValueMaybe;
   }
 
-  // todo: replace with smarter builder implementation. Explicitly set optionals to
-  // Optional.empty();
+
+  // This builder handles null inputs for optional fields, simplifying code at the call site.
+  // For example setAgentEmail() can be called safely with null (or just not called it's not known).
   public static class Builder {
 
     private long timestamp;
     private AgentType agentType;
     private long agentId;
-    private Optional<String> agentEmailMaybe;
+    private String agentEmail;
     private String actionId;
     private ActionType actionType;
     private TargetType targetType;
-    private Optional<String> targetPropertyMaybe;
-    private Optional<Long> targetIdMaybe;
-    private Optional<String> previousValueMaybe;
-    private Optional<String> newValueMaybe;
+    private String targetProperty;
+    private Long targetId;
+    private String previousValue;
+    private String newValue;
 
     public Builder() {
-      agentEmailMaybe = Optional.empty();
-      targetPropertyMaybe = Optional.empty();
-      targetIdMaybe = Optional.empty();
-      previousValueMaybe = Optional.empty();
-      newValueMaybe = Optional.empty();
     }
 
     public Builder setTimestamp(long timestamp) {
@@ -136,8 +132,8 @@ public class AuditableEvent extends AbstractAuditableEvent {
       return this;
     }
 
-    public Builder setAgentEmailMaybe(Optional<String> agentEmailMaybe) {
-      this.agentEmailMaybe = agentEmailMaybe;
+    public Builder setAgentEmail(String agentEmail) {
+      this.agentEmail = agentEmail;
       return this;
     }
 
@@ -156,49 +152,39 @@ public class AuditableEvent extends AbstractAuditableEvent {
       return this;
     }
 
-    public Builder setTargetPropertyMaybe(Optional<String> targetPropertyMaybe) {
-      this.targetPropertyMaybe = targetPropertyMaybe;
+    public Builder setTargetProperty(String targetProperty) {
+      this.targetProperty = targetProperty;
       return this;
     }
 
-    public Builder setTargetIdMaybe(Optional<Long> targetIdMaybe) {
-      this.targetIdMaybe = targetIdMaybe;
+    public Builder setTargetId(Long targetId) {
+      this.targetId = targetId;
       return this;
     }
 
-    public Builder setPreviousValueMaybe(Optional<String> previousValueMaybe) {
-      this.previousValueMaybe = previousValueMaybe;
+    public Builder setPreviousValue(String previousValue) {
+      this.previousValue = previousValue;
       return this;
     }
 
-    public Builder setNewValueMaybe(Optional<String> newValueMaybe) {
-      this.newValueMaybe = newValueMaybe;
+    public Builder setNewValue(String newValue) {
+      this.newValue = newValue;
       return this;
     }
 
-    public AuditableEvent build() {
-      return new AuditableEvent(
+    public ActionAuditEvent build() {
+      return new ActionAuditEvent(
           timestamp,
           agentType,
           agentId,
-          nullToOptional(agentEmailMaybe),
+          Optional.ofNullable(agentEmail),
           actionId,
           actionType,
           targetType,
-          nullToOptional(targetPropertyMaybe),
-          nullToOptional(targetIdMaybe),
-          nullToOptional(previousValueMaybe),
-          nullToOptional(newValueMaybe));
-    }
-
-    // Since this class doesn't have a constructor and we're storing the fields as Optional,
-    // if the values aren't set, we can run into NPEs.
-    private <T> Optional<T> nullToOptional(Optional<T> valueMaybe) {
-      if (valueMaybe == null) {
-        return Optional.empty();
-      } else {
-        return valueMaybe;
-      }
+          Optional.ofNullable(targetProperty),
+          Optional.ofNullable(targetId),
+          Optional.ofNullable(previousValue),
+          Optional.ofNullable(newValue));
     }
   }
 }

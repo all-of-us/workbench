@@ -11,9 +11,10 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import org.elasticsearch.common.UUIDs;
 import org.pmiops.workbench.audit.AbstractAuditableEvent;
+import org.pmiops.workbench.audit.ActionAuditEvent;
 import org.pmiops.workbench.audit.ActionType;
 import org.pmiops.workbench.audit.AgentType;
-import org.pmiops.workbench.audit.AuditableEvent.Builder;
+import org.pmiops.workbench.audit.ActionAuditEvent.Builder;
 import org.pmiops.workbench.audit.TargetType;
 
 public class AuditDataGenerator {
@@ -63,20 +64,20 @@ public class AuditDataGenerator {
     final Optional<String> previousValue =
         buildOptionally(() -> randomFromList(TARGET_PROPERTY_VALUES));
     final Optional<String> newValue = buildOptionally(() -> randomFromList(TARGET_PROPERTY_VALUES));
-    final AbstractAuditableEvent event =
-        new Builder()
+    final ActionAuditEvent.Builder eventBuidler = new Builder();
+    eventBuidler
             .setActionId(actionId)
             .setTimestamp(timestamp)
             .setAgentType(agentType)
             .setAgentId(agentId)
-            .setAgentEmailMaybe(agentEmail)
             .setActionType(actionType)
-            .setTargetType(targetType)
-            .setTargetIdMaybe(targetId)
-            .setTargetPropertyMaybe(targetProperty)
-            .setPreviousValueMaybe(previousValue)
-            .setNewValueMaybe(newValue)
-            .build();
+            .setTargetType(targetType);
+    targetId.ifPresent(eventBuidler::setTargetId);
+    agentEmail.ifPresent(eventBuidler::setAgentEmail);
+    targetProperty.ifPresent(eventBuidler::setTargetProperty);
+    previousValue.ifPresent(eventBuidler::setPreviousValue);
+    newValue.ifPresent(eventBuidler::setNewValue);
+    final ActionAuditEvent event = eventBuidler.build();
     return event.toLogEntry();
   }
 
