@@ -56,7 +56,9 @@ public class LoadDataDictionary {
               dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
                   relevantOmopTable, fieldName, defaultCdrVersion);
 
-          if (entry != null && entry.getDefinedTime().after(definedTime)) {
+          // We are skipping ahead if the defined times match by assuming that the definition has
+          // not changed.
+          if (entry != null && definedTime.before(entry.getDefinedTime())) {
             continue;
           }
 

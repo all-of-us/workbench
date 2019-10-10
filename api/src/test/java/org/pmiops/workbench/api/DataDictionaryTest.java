@@ -43,52 +43,37 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import(LiquibaseAutoConfiguration.class)
 public class DataDictionaryTest {
 
-  @Autowired
-  BigQueryService bigQueryService;
-  @Autowired
-  CohortDao cohortDao;
-  @Autowired
-  ConceptDao conceptDao;
-  @Autowired
-  ConceptSetDao conceptSetDao;
-  @Autowired
-  DataSetDao dataSetDao;
-  @Autowired
-  DataSetMapper dataSetMapper;
-  @Autowired
-  DataSetService dataSetService;
-  @Autowired
-  FireCloudService fireCloudService;
-  @Autowired
-  NotebooksService notebooksService;
-  @Autowired
-  WorkspaceService workspaceService;
-  @Mock
-  Provider<User> userProvider;
+  @Autowired BigQueryService bigQueryService;
+  @Autowired CohortDao cohortDao;
+  @Autowired ConceptDao conceptDao;
+  @Autowired ConceptSetDao conceptSetDao;
+  @Autowired DataSetDao dataSetDao;
+  @Autowired DataSetMapper dataSetMapper;
+  @Autowired DataSetService dataSetService;
+  @Autowired FireCloudService fireCloudService;
+  @Autowired NotebooksService notebooksService;
+  @Autowired WorkspaceService workspaceService;
+  @Mock Provider<User> userProvider;
 
-  @Autowired
-  CdrVersionDao cdrVersionDao;
-  @Autowired
-  DataDictionaryEntryDao dataDictionaryEntryDao;
+  @Autowired CdrVersionDao cdrVersionDao;
+  @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static User currentUser;
 
   @TestConfiguration
-  @Import({
-      DataSetMapperImpl.class
-  })
+  @Import({DataSetMapperImpl.class})
   @MockBean({
-      BigQueryService.class,
-      CohortDao.class,
-      ConceptDao.class,
-      ConceptSetDao.class,
-      DataSetDao.class,
-      DataSetService.class,
-      FireCloudService.class,
-      NotebooksService.class,
-      WorkspaceService.class
+    BigQueryService.class,
+    CohortDao.class,
+    ConceptDao.class,
+    ConceptSetDao.class,
+    DataSetDao.class,
+    DataSetService.class,
+    FireCloudService.class,
+    NotebooksService.class,
+    WorkspaceService.class
   })
   static class Configuration {
     @Bean
@@ -147,18 +132,25 @@ public class DataDictionaryTest {
 
     dataDictionaryEntryDao.save(dataDictionaryEntry);
 
-    org.pmiops.workbench.model.DataDictionaryEntry response = dataSetController.getDataDictionaryEntry(cdrVersion.getCdrVersionId(), domain.toString(), domainValue).getBody();
+    org.pmiops.workbench.model.DataDictionaryEntry response =
+        dataSetController
+            .getDataDictionaryEntry(cdrVersion.getCdrVersionId(), domain.toString(), domainValue)
+            .getBody();
 
-    assertThat(response.getCdrVersionId().longValue()).isEqualTo(dataDictionaryEntry.getCdrVersion().getCdrVersionId());
-    assertThat(new Timestamp(response.getDefinedTime())).isEqualTo(dataDictionaryEntry.getDefinedTime());
-    assertThat(response.getRelevantOmopTable()).isEqualTo(dataDictionaryEntry.getRelevantOmopTable());
+    assertThat(response.getCdrVersionId().longValue())
+        .isEqualTo(dataDictionaryEntry.getCdrVersion().getCdrVersionId());
+    assertThat(new Timestamp(response.getDefinedTime()))
+        .isEqualTo(dataDictionaryEntry.getDefinedTime());
+    assertThat(response.getRelevantOmopTable())
+        .isEqualTo(dataDictionaryEntry.getRelevantOmopTable());
     assertThat(response.getFieldName()).isEqualTo(dataDictionaryEntry.getFieldName());
-    assertThat(response.getOmopCdmStandardOrCustomField()).isEqualTo(dataDictionaryEntry.getOmopCdmStandardOrCustomField());
+    assertThat(response.getOmopCdmStandardOrCustomField())
+        .isEqualTo(dataDictionaryEntry.getOmopCdmStandardOrCustomField());
     assertThat(response.getDescription()).isEqualTo(dataDictionaryEntry.getDescription());
     assertThat(response.getFieldType()).isEqualTo(dataDictionaryEntry.getFieldType());
     assertThat(response.getDataProvenance()).isEqualTo(dataDictionaryEntry.getDataProvenance());
     assertThat(response.getSourcePpiModule()).isEqualTo(dataDictionaryEntry.getSourcePpiModule());
-    assertThat(response.getTransformedByRegisteredTierPrivacyMethods()).isEqualTo(dataDictionaryEntry.getTransformedByRegisteredTierPrivacyMethods());
-
+    assertThat(response.getTransformedByRegisteredTierPrivacyMethods())
+        .isEqualTo(dataDictionaryEntry.getTransformedByRegisteredTierPrivacyMethods());
   }
 }

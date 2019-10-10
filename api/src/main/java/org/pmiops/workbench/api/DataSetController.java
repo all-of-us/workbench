@@ -639,8 +639,9 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("Invalid Domain");
     }
 
-    org.pmiops.workbench.db.model.DataDictionaryEntry dataDictionaryEntry = dataDictionaryEntryDao
-        .findByRelevantOmopTableAndFieldNameAndCdrVersion(omopTable, domainValue, cdrVersion);
+    org.pmiops.workbench.db.model.DataDictionaryEntry dataDictionaryEntry =
+        dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
+            omopTable, domainValue, cdrVersion);
 
     if (dataDictionaryEntry == null) {
       throw new NotFoundException();

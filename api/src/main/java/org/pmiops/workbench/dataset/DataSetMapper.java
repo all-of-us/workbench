@@ -7,11 +7,9 @@ import org.pmiops.workbench.utils.CommonMappers;
 
 @Mapper(
     componentModel = "spring",
-    uses = {CommonMappers.class}
-)
+    uses = {CommonMappers.class})
 public interface DataSetMapper {
 
   @Mapping(target = "cdrVersionId", source = "dbModel.cdrVersion.cdrVersionId")
   org.pmiops.workbench.model.DataDictionaryEntry toApi(DataDictionaryEntry dbModel);
-
 }

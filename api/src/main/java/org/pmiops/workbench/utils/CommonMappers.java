@@ -21,5 +21,4 @@ public class CommonMappers {
 
     return null;
   }
-
 }
