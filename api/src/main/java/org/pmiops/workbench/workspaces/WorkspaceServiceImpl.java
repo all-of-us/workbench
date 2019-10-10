@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -137,7 +138,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces() {
     Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
-        getFirecloudWorkspaces();
+        getFirecloudWorkspaces(ImmutableList.of("accessLevel", "workspace.workspaceId"));
     List<Workspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
 
     return dbWorkspaces.stream()
@@ -186,8 +187,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   private Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse>
-      getFirecloudWorkspaces() {
-    return fireCloudService.getWorkspaces().stream()
+      getFirecloudWorkspaces(List<String> fields) {
+    // fields must include at least "workspace.workspaceId", otherwise
+    // the map creation will fail
+    return fireCloudService.getWorkspaces(fields).stream()
         .collect(
             Collectors.toMap(
                 fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
@@ -501,6 +504,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
+  @Transactional
   public List<UserRecentWorkspace> getRecentWorkspaces() {
     long userId = userProvider.get().getUserId();
     List<UserRecentWorkspace> userRecentWorkspaces =

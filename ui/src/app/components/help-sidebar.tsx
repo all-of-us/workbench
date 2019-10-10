@@ -285,7 +285,7 @@ export const HelpSidebar = withUserProfile()(
             </div>
             <div style={contentStyle('annotations')}>
               {!!participant &&
-                <SidebarContent participant={participant} setParticipant={() => setParticipant(participant)} />
+                <SidebarContent participant={participant} setParticipant={(p) => setParticipant(p)} />
               }
             </div>
             <div style={styles.footer}>

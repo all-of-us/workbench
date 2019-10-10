@@ -17,24 +17,23 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 public class CohortReviewDaoTest {
 
   private static long CDR_VERSION_ID = 1;
-
   @Autowired WorkspaceDao workspaceDao;
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewDao cohortReviewDao;
-  @Autowired JdbcTemplate jdbcTemplate;
-
+  private CohortReview cohortReview;
   private long cohortId;
 
   @Before
@@ -46,50 +45,24 @@ public class CohortReviewDaoTest {
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     cohort.setWorkspaceId(workspaceDao.save(workspace).getWorkspaceId());
     cohortId = cohortDao.save(cohort).getCohortId();
+    cohortReview = cohortReviewDao.save(createCohortReview());
   }
 
   @Test
   public void save() throws Exception {
-    CohortReview cohortReview = createCohortReview();
-
-    cohortReviewDao.save(cohortReview);
-
-    String sql = "select count(*) from cohort_review where cohort_review_id = ?";
-    final Object[] sqlParams = {cohortReview.getCohortReviewId()};
-    final Integer expectedCount = new Integer("1");
-
-    assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
+    assertEquals(cohortReview, cohortReviewDao.findOne(cohortReview.getCohortReviewId()));
   }
 
   @Test
   public void update() throws Exception {
-    CohortReview cohortReview = createCohortReview();
-
-    cohortReviewDao.save(cohortReview);
-
-    String sql =
-        "select count(*) from cohort_review where cohort_review_id = ? and reviewed_count = ?";
-    Object[] sqlParams = {cohortReview.getCohortReviewId(), cohortReview.getReviewedCount()};
-    Integer expectedCount = new Integer("1");
-
-    assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
-
     cohortReview = cohortReviewDao.findOne(cohortReview.getCohortReviewId());
     cohortReview.setReviewedCount(3);
     cohortReviewDao.saveAndFlush(cohortReview);
-
-    sql = "select count(*) from cohort_review where cohort_review_id = ? and reviewed_count = ?";
-    sqlParams = new Object[] {cohortReview.getCohortReviewId(), cohortReview.getReviewedCount()};
-
-    assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
+    assertEquals(cohortReview, cohortReviewDao.findOne(cohortReview.getCohortReviewId()));
   }
 
   @Test
   public void findCohortReviewByCohortIdAndCdrVersionId() throws Exception {
-    CohortReview cohortReview = createCohortReview();
-
-    cohortReviewDao.save(cohortReview);
-
     assertEquals(
         cohortReview,
         cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
@@ -98,10 +71,6 @@ public class CohortReviewDaoTest {
 
   @Test
   public void findByFirecloudNameAndActiveStatus() throws Exception {
-    CohortReview cohortReview = createCohortReview();
-
-    cohortReviewDao.save(cohortReview);
-
     assertEquals(
         cohortReview,
         cohortReviewDao

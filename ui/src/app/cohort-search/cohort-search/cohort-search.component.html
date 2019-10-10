@@ -15,7 +15,7 @@
 
         <div class="col-xl-6 col-lg-12" id="list-exclude-groups">
           <app-list-search-group-list
-            *ngIf="includeSize > 0"
+            *ngIf="overview"
             [role]="'excludes'"
             [groups]="criteria.excludes"
             [updateRequest]="updateRequest">

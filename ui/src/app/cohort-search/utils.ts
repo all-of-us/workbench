@@ -262,7 +262,7 @@ export function parseCohortDefinition(json: string) {
 
 export function mapRequest(sr: any) {
   const grpFilter = (role: string) => sr[role].reduce((acc, grp) => {
-    if (grp.status === 'active') {
+    if (grp.status === 'active' && hasActiveItems(grp)) {
       acc.push(mapGroup(grp));
     }
     return acc;
@@ -323,6 +323,10 @@ export function mapParameter(sp: any) {
     param.value = code;
   }
   return param;
+}
+
+export function hasActiveItems(group: any) {
+  return group.items.some(it => it.status === 'active');
 }
 
 export function sanitizeNumericalInput(input: string) {

@@ -18,6 +18,7 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.io.FileReader;
@@ -83,6 +84,7 @@ import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
+import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
@@ -574,6 +576,18 @@ public class DataSetControllerTest {
         });
     doReturn(values).when(tableResultMock).getValues();
     doReturn(tableResultMock).when(bigQueryService).executeQuery(any());
+  }
+
+  @Test
+  public void testAddFieldValuesFromBigQueryToPreviewListWorksWithNullValues() {
+    DataSetPreviewValueList dataSetPreviewValueList = new DataSetPreviewValueList();
+    List<DataSetPreviewValueList> valuePreviewList = ImmutableList.of(dataSetPreviewValueList);
+    List<FieldValue> fieldValueListRows =
+        ImmutableList.of(FieldValue.of(FieldValue.Attribute.PRIMITIVE, null));
+    FieldValueList fieldValueList = FieldValueList.of(fieldValueListRows);
+    dataSetController.addFieldValuesFromBigQueryToPreviewList(valuePreviewList, fieldValueList);
+    assertThat(valuePreviewList.get(0).getQueryValue().get(0))
+        .isEqualTo(DataSetController.EMPTY_CELL_MARKER);
   }
 
   @Test(expected = BadRequestException.class)
