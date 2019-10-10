@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import {AlertDanger} from 'app/components/alert';
 import {Clickable} from 'app/components/buttons';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
@@ -188,9 +189,9 @@ export const WorkspaceLibrary = withUserProfile()
       publishedWorkspaces,
       workspacesLoading
     } = this.state;
-    return <div style={{display: 'flex', flexDirection: 'row', height: '100%'}}>
+    return <FlexRow style={{height: '100%'}}>
       <div style={styles.navPanel}>
-        <div style={{display: 'flex', flexDirection: 'column'}}>
+        <FlexColumn>
           {this.libraryTabs.map((tab, i) => {
             return <React.Fragment key={i}>
               <LibraryTab icon={tab.icon} title={tab.title} selected={currentTab === tab}
@@ -200,21 +201,21 @@ export const WorkspaceLibrary = withUserProfile()
                 <hr style={{width: '100%', margin: '0.5rem 0'}}/>}
             </React.Fragment>;
           })}
-        </div>
+        </FlexColumn>
       </div>
       <div style={{padding: '1rem', width: '100%'}}>
         <Header style={{textTransform: 'uppercase'}}>Researcher Workbench Workspace Library</Header>
         <div style={{color: colors.primary, fontSize: 16, marginTop: '1rem'}}>
           Search through featured and public workspaces.
         </div>
-        <div style={{display: 'flex', flexDirection: 'column', marginTop: '2rem'}}>
-          <div style={{display: 'flex', flexDirection: 'row'}}>
+        <FlexColumn style={{marginTop: '2rem'}}>
+          <FlexRow>
             <ClrIcon shape={currentTab.icon} style={styles.iconStyling}
                      class='is-solid' size={24}/>
             <div style={{color: colors.primary, fontSize: 18, fontWeight: 600}}>
               {currentTab.title}
             </div>
-          </div>
+          </FlexRow>
           <hr style={styles.divider}/>
           {errorText && <AlertDanger>{errorText}</AlertDanger>}
 
@@ -245,9 +246,9 @@ export const WorkspaceLibrary = withUserProfile()
                   })}
               </div>)}
           </div>}
-        </div>
+        </FlexColumn>
       </div>
-    </div>;
+    </FlexRow>;
   }
 });
 

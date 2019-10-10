@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -131,12 +132,12 @@ export const ConceptSetActions = withCurrentWorkspace()(
           <div style={styles.cardArea}>
             {actionCards.map((card, i) => {
               return <ActionCardBase key={i} style={styles.card}>
-                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
-                  <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
+                <FlexColumn style={{alignItems: 'flex-start'}}>
+                  <FlexRow style={{alignItems: 'flex-start'}}>
                     <div style={styles.cardName}>{card.title}</div>
-                  </div>
+                  </FlexRow>
                   <div style={styles.cardDescription}>{card.description}</div>
-                </div>
+                </FlexColumn>
                 <div>
                   <Button
                     type='primary'

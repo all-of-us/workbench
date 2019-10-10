@@ -16,6 +16,7 @@ import {
 import {WorkspaceCardBase} from 'app/components/card';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ListPageHeader} from 'app/components/headers';
 import {ClrIcon, SnowmanIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -213,8 +214,8 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
       <WorkspaceCardBase>
         <div style={styles.workspaceCard} data-test-id='workspace-card'>
           {loadingData && <SpinnerOverlay/>}
-          <div style={{display: 'flex', flexDirection: 'column'}}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'row'}}>
+          <FlexColumn>
+            <FlexRow style={{alignItems: 'flex-start'}}>
               <WorkspaceCardMenu wp={wp}
                                  onDelete={() => {
                                    triggerEvent(
@@ -235,7 +236,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
                      }}>
                   {wp.workspace.name}</div>
               </Clickable>
-            </div>
+            </FlexRow>
             {wp.isPending && <div style={{color: colors.warning}}>
               <ClrIcon shape='exclamation-triangle' className='is-solid'
                        style={{fill: colors.warning}}/>
@@ -246,7 +247,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
                        style={{fill: colors.danger}}/>
               Rejected
             </div> }
-          </div>
+          </FlexColumn>
           <div style={styles.workspaceCardFooter}>
             <div style={{fontSize: 12, lineHeight: '17px'}}>Last Changed: <br/>
               {displayDate(wp.workspace.lastModifiedTime)}</div>
@@ -355,14 +356,14 @@ export const WorkspaceList = withUserProfile()
       <FadeBox style={styles.fadeBox}>
         <div style={{padding: '0 1rem'}}>
           <ListPageHeader>Workspaces</ListPageHeader>
-          <div style={{marginTop: '0.5em', display: 'flex', flexDirection: 'row'}}>
+          <FlexRow style={{marginTop: '0.5em'}}>
             <div style={{margin: '0', padding: '0.5em 0.75em 0 0'}}>Filter by</div>
             <RSelect options={filters}
               defaultValue={defaultFilter}
               onChange={(levels) => {
                 this.reloadWorkspaces(level => levels.value.includes(level));
               }}/>
-          </div>
+          </FlexRow>
           {errorText && <AlertDanger>
             <ClrIcon shape='exclamation-circle'/>
             {errorText}

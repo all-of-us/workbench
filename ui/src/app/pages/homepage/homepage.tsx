@@ -477,7 +477,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                             twoFactorAuthCompleted={twoFactorAuthCompleted}
                                             dataUseAgreementCompleted={dataUseAgreementCompleted}/>
                     ) : (
-                      <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
+                      <FlexRow style={{paddingTop: '2rem'}}>
                         <div style={styles.contentWrapperLeft}>
                           <div style={styles.mainHeaderToDelete}>Researcher Workbench</div>
                           <CardButton onClick={() => navigate(['workspaces/build'])}
@@ -490,15 +490,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
                           <a onClick={() => navigate(['workspaces'])}
                              style={{fontSize: '14px', color: colors.white}}>
                             See All Workspaces</a>
-                          <div
-                            style={{marginRight: '3%', display: 'flex', flexDirection: 'column'}}>
+                          <FlexColumn style={{marginRight: '3%'}}>
                             <div style={{color: colors.white, height: '1.9rem'}}>
                               <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
                             </div>
                             <RecentWork dark={true}/>
-                          </div>
+                          </FlexColumn>
                         </div>
-                      </div>)
+                      </FlexRow>)
                 ) :
                 <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
             </div>
@@ -526,8 +525,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                       <a href='#' style={{color: colors.white}}>See all documentation</a>
                     </TooltipTrigger>
                   </div>
-                  <div style={{display: 'flex', flexDirection: 'row',
-                    width: '87.34%', justifyContent: 'space-between'}}>
+                  <FlexRow style={{width: '87.34%', justifyContent: 'space-between'}}>
                     {footerLinks.map((col, i) => {
                       return <React.Fragment key={i}>
                         <div style={styles.linksBlockToDelete}>
@@ -544,7 +542,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                         </div>
                       </React.Fragment>;
                     })}
-                  </div>
+                  </FlexRow>
                 </div>
               </div>
               <div style={styles.bottomBannerToDelete}>

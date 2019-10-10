@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {FlexRow} from 'app/components/flex';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
@@ -797,7 +797,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         <FadeBox style={{marginTop: '1rem'}}>
           <div style={{backgroundColor: 'white', border: `1px solid ${colors.light}`}}>
             <div style={styles.previewDataHeaderBox}>
-              <div style={{display: 'flex', flexDirection: 'column'}}>
+              <FlexColumn>
               <div style={{display: 'flex', alignItems: 'flex-end'}}>
                 <div style={styles.previewDataHeader}>
                   <div>
@@ -813,7 +813,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                   and values you selected above. Once complete, export for analysis
                 </div>
               </div>
-              </div>
+              </FlexColumn>
               <Clickable data-test-id='preview-button' style={{
                 marginTop: '0.5rem',
                 cursor: this.disableSave() ? 'not-allowed' : 'pointer', height: '1.8rem',
@@ -824,8 +824,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               </Clickable>
             </div>
             {fp.toPairs(previewList).length > 0 &&
-              <div style={{display: 'flex', flexDirection: 'column'}}>
-                <div style={{display: 'flex', flexDirection: 'row', paddingTop: '0.5rem'}}>
+              <FlexColumn>
+                <FlexRow style={{paddingTop: '0.5rem'}}>
                   {fp.toPairs(previewList).map((value) => {
                     const domain: string = value[0];
                     const previewRow: DataSetPreviewInfo = value[1];
@@ -850,9 +850,9 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       </Clickable>
                     </TooltipTrigger>;
                   })}
-                </div>
+                </FlexRow>
                 {this.renderPreviewDataTableSection()}
-              </div>
+              </FlexColumn>
             }
             {fp.entries(previewList).length === 0 &&
               <div style={styles.previewButtonBox}>

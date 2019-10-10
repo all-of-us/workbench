@@ -1,3 +1,4 @@
+import {FlexColumn} from 'app/components/flex';
 import {CheckBox} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
@@ -107,7 +108,7 @@ export const SurveyDetails = withCurrentWorkspace()(
     }
 
     getQuestion(row, col) {
-      return  <div style={{display: 'flex', flexDirection: 'column'}}>
+      return <FlexColumn>
       <div style={{display: 'flex'}}>
         <CheckBox style={{marginTop: '0.3rem'}}
                   onChange={(value) => this.setSelectedSurveyQuestion(row, value)}/>
@@ -120,7 +121,7 @@ export const SurveyDetails = withCurrentWorkspace()(
           See my Answers
         </a>
         {this.state.seeMyAnswers[col.rowIndex] && this.renderAnswerTable(col.rowIndex)}
-      </div>;
+      </FlexColumn>;
     }
 
     renderAnswerTable(index) {
