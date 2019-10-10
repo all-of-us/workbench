@@ -86,7 +86,7 @@ public class FireCloudServiceImpl implements FireCloudService {
           "workspace.namespace",
           "workspace.bucketName",
           "workspace.createdBy");
-  
+
   @Autowired
   public FireCloudServiceImpl(
       Provider<WorkbenchConfig> configProvider,
