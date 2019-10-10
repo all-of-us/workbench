@@ -16,8 +16,8 @@
     "accountId": "014D91-FCB792-33D2C0",
     "projectNamePrefix": "aou-rw-local1-",
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0",
-    "retryCount": 4,
-    "bufferCapacity": 10,
+    "retryCount": 2,
+    "bufferCapacity": 2,
     "defaultFreeCreditsLimit": 300.0,
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
