@@ -483,14 +483,14 @@ export class ResourceCard extends React.Component<Props, State> {
         <ModalBody>
           <div style={{paddingBottom: '1rem'}}>
             The {this.resourceType} <b>{fp.startCase(this.displayName)}&nbsp;</b>
-            is referenced by the following Datasets:
+            is referenced by the following datasets:
             <b>
               &nbsp;
               {fp.join(', ' ,
                 this.state.dataSetByResourceIdList.map((data) => data.name))}
             </b>.
             Deleting the {this.resourceType} <b>{fp.startCase(this.displayName)} </b>
-            will make these Datasets unavailable for use. Are you sure you want to delete
+            will make these datasets unavailable for use. Are you sure you want to delete
             <b>{fp.startCase(this.displayName)}</b> ?
           </div>
           <div style={{float: 'right'}}>

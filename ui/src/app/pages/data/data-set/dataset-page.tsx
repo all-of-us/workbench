@@ -681,7 +681,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           <h2 style={{paddingTop: 0, marginTop: 0}}>Datasets{this.editing &&
             dataSet !== undefined && ' - ' + dataSet.name}</h2>
           <div style={{color: colors.primary, fontSize: '14px'}}>Build a dataset by selecting the
-            variables and values for one or more of your cohorts. Then export the completed Dataset
+            variables and values for one or more of your cohorts. Then export the completed dataset
             to Notebooks where you can perform your analysis</div>
           <div style={{display: 'flex', paddingTop: '1rem'}}>
             <div style={{width: '33%', height: '80%'}}>
