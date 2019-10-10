@@ -20,6 +20,7 @@ export enum ResourceType {
 export const ResourceTypeDisplayNames = new Map()
   .set(ResourceType.NOTEBOOK, 'notebook')
   .set(ResourceType.COHORT, 'cohort')
+  .set(ResourceType.COHORT_REVIEW, 'cohort review')
   .set(ResourceType.CONCEPT_SET, 'concept set')
   .set(ResourceType.DATA_SET, 'dataset');
 
