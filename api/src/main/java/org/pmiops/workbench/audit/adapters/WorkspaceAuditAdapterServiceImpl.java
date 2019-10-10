@@ -1,10 +1,7 @@
 package org.pmiops.workbench.audit.adapters;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -41,7 +38,8 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
       final String actionId = ActionAuditService.newActionId();
       final long userId = userProvider.get().getUserId();
       final String userEmail = userProvider.get().getEmail();
-      final Map<String, String> propertyValues = WorkspaceTargetProperty.getPropertyValuesByName(createdWorkspace);
+      final Map<String, String> propertyValues =
+          WorkspaceTargetProperty.getPropertyValuesByName(createdWorkspace);
       // omit the previous value column
       ImmutableList<ActionAuditEvent> events =
           propertyValues.entrySet().stream()

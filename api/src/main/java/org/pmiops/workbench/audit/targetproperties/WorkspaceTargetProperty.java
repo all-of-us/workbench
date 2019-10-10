@@ -6,9 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.pmiops.workbench.model.Workspace;
 
 public enum WorkspaceTargetProperty {
@@ -16,7 +14,8 @@ public enum WorkspaceTargetProperty {
   INTENDED_STUDY("intended_study", w -> w.getResearchPurpose().getIntendedStudy()),
   CREATOR("creator", Workspace::getCreator),
   ADDITIONAL_NOTES("additional_notes", w -> w.getResearchPurpose().getAdditionalNotes()),
-  ANTICIPATED_FINDINGS("anticipated_findings", w -> w.getResearchPurpose().getAnticipatedFindings()),
+  ANTICIPATED_FINDINGS(
+      "anticipated_findings", w -> w.getResearchPurpose().getAnticipatedFindings()),
   DISEASE_OF_FOCUS("disease_of_focus", w -> w.getResearchPurpose().getDiseaseOfFocus()),
   REASON_FOR_ALL_OF_US("reason_for_all_of_us", w -> w.getResearchPurpose().getReasonForAllOfUs()),
   NAMESPACE("namespace", Workspace::getNamespace),
@@ -44,7 +43,10 @@ public enum WorkspaceTargetProperty {
     }
 
     return Arrays.stream(WorkspaceTargetProperty.values())
-        .map(prop -> new AbstractMap.SimpleImmutableEntry<>(prop.getPropertyName(), prop.extract(workspace)))
+        .map(
+            prop ->
+                new AbstractMap.SimpleImmutableEntry<>(
+                    prop.getPropertyName(), prop.extract(workspace)))
         .filter(entry -> entry.getValue() != null)
         .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
   }
