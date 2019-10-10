@@ -8,7 +8,7 @@ import {TextModal} from 'app/components/text-modal';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {navigate, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActions';
+import {ResourceType, ResourceTypeDisplayNames} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {CopyModal} from 'app/components/copy-modal';
@@ -120,13 +120,13 @@ export class ResourceCard extends React.Component<Props, State> {
 
   get resourceType(): ResourceType {
     if (this.props.resourceCard.cohortReview) {
-      return ResourceType.COHORT_REVIEW;
+      return ResourceTypeDisplayNames.get(ResourceType.COHORT_REVIEW);
     } else if (this.props.resourceCard.conceptSet) {
-      return ResourceType.CONCEPT_SET;
+      return ResourceTypeDisplayNames.get(ResourceType.CONCEPT_SET);
     } else if (this.props.resourceCard.dataSet) {
-      return ResourceType.DATA_SET;
+      return ResourceTypeDisplayNames.get(ResourceType.DATA_SET);
     } else {
-      return ResourceType.INVALID;
+      return ResourceTypeDisplayNames.get(ResourceType.INVALID);
     }
   }
 
