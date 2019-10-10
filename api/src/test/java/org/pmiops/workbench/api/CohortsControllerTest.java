@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -195,7 +196,8 @@ public class CohortsControllerTest {
     CdrVersionService.class,
     ConceptService.class,
     ComplianceService.class,
-    DirectoryService.class
+    DirectoryService.class,
+    WorkspaceAuditAdapterService.class
   })
   static class Configuration {
 

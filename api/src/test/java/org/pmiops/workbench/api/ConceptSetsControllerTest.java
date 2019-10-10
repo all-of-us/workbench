@@ -226,7 +226,8 @@ public class ConceptSetsControllerTest {
     NotebooksService.class,
     UserRecentResourceService.class,
     ComplianceService.class,
-    DirectoryService.class
+    DirectoryService.class,
+    WorkspaceAuditAdapterService.class
   })
   static class Configuration {
     @Bean

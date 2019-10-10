@@ -237,7 +237,8 @@ public class DataSetControllerTest {
     DirectoryService.class,
     NotebooksService.class,
     CohortQueryBuilder.class,
-    UserRecentResourceService.class
+    UserRecentResourceService.class,
+    WorkspaceAuditAdapterService.class
   })
   static class Configuration {
     @Bean
