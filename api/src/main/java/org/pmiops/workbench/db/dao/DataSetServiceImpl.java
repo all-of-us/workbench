@@ -616,15 +616,15 @@ public class DataSetServiceImpl implements DataSetService {
 
     // Define [namespace]_sql, [namespace]_query_config, and [namespace]_df variables
     String domainAsString = domain.toString().toLowerCase();
-    String namespace =
-        "dataset_" + qualifier + "_" + domainAsString + "_";
+    String namespace = "dataset_" + qualifier + "_" + domainAsString + "_";
     // Comments in R and Python have the same syntax
-    String descriptiveComment = new StringBuilder("# This query represents dataset \"")
-        .append(dataSetName)
-        .append("\" for domain \"")
-        .append(domainAsString)
-        .append("\"")
-        .toString();
+    String descriptiveComment =
+        new StringBuilder("# This query represents dataset \"")
+            .append(dataSetName)
+            .append("\" for domain \"")
+            .append(domainAsString)
+            .append("\"")
+            .toString();
     String sqlSection;
     String namedParamsSection;
     String dataFrameSection;

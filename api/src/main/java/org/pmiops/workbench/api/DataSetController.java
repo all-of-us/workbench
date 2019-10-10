@@ -29,7 +29,6 @@ import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -256,7 +255,8 @@ public class DataSetController implements DataSetApiDelegate {
         return domainValuePair;
       };
 
-  private String generateRandomEightCharacterQualifier() {
+  @VisibleForTesting
+  public String generateRandomEightCharacterQualifier() {
     return RandomStringUtils.randomNumeric(8);
   }
 
