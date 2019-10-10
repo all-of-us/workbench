@@ -105,11 +105,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
 
   async componentDidMount() {
     this.setVisits();
-    const workspace = currentWorkspaceStore.getValue();
-    await Promise.all([
-      workspacesApi().updateRecentWorkspaces(workspace.namespace, workspace.id),
-      this.reloadWorkspace(workspace)
-    ]);
+    await this.reloadWorkspace(currentWorkspaceStore.getValue());
     this.loadUserRoles();
     const cdrs = this.props.cdrVersionListResponse.items;
     this.setState({cdrVersion: cdrs.find(v => v.cdrVersionId === this.state.workspace.cdrVersionId)});

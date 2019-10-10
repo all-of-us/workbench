@@ -102,7 +102,6 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
 
     componentDidMount(): void {
       const {ns, wsid, nbName} = this.props.urlParams;
-      workspacesApi().updateRecentWorkspaces(ns, wsid);
 
       workspacesApi().readOnlyNotebook(ns, wsid, nbName).then(html => {
         this.setState({html: html.html});

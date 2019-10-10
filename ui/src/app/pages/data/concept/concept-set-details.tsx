@@ -139,8 +139,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
     }
 
     componentDidMount() {
-      workspacesApi().updateRecentWorkspaces(this.props.workspace.namespace, this.props.workspace.id)
-        .then(_ => this.getConceptSet());
+      this.getConceptSet();
     }
 
     async getConceptSet() {

@@ -40,7 +40,6 @@ export class CohortReview extends React.Component<{}, State> {
     const {ns, wsid, cid} = urlParamsStore.getValue();
     const {accessLevel, cdrVersionId} = currentWorkspaceStore.getValue();
     this.setState({readonly: accessLevel === WorkspaceAccessLevel.READER});
-    workspacesApi().updateRecentWorkspaces(ns, wsid);
     cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
       page: 0,
       pageSize: 25,

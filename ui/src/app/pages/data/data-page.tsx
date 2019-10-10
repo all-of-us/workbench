@@ -120,7 +120,6 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       this.setState({
         isLoading: true
       });
-      workspacesApi().updateRecentWorkspaces(namespace, id);
       const [cohorts, cohortReviews, conceptSets, dataSets] = await Promise.all([
         cohortsApi().getCohortsInWorkspace(namespace, id),
         cohortReviewApi().getCohortReviewsInWorkspace(namespace, id),

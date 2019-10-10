@@ -47,10 +47,7 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
       const cohortId = params.cohortId;
       if (cohortId) {
         this.loading = true;
-        Promise.all([
-          workspacesApi().updateRecentWorkspaces(workspace.namespace, workspace.id),
-          cohortsApi().getCohort(workspace.namespace, workspace.id, cohortId)
-        ]).then(values => {
+        cohortsApi().getCohort(workspace.namespace, workspace.id, cohortId).then(values => {
           const cohort = values[1];
           this.loading = false;
           this.cohort = cohort;

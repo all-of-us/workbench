@@ -58,7 +58,6 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
     try {
       const {workspace: {namespace, id}} = this.props;
       this.setState({loading: true});
-      workspacesApi().updateRecentWorkspaces(namespace, id);
       const notebooks = await workspacesApi().getNoteBookList(namespace, id);
       this.setState({notebooks});
     } catch (error) {

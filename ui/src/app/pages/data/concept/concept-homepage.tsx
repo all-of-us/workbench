@@ -217,8 +217,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      workspacesApi().updateRecentWorkspaces(this.props.workspace.namespace, this.props.workspace.id)
-        .then(_ => this.loadDomainsAndSurveys());
+      this.loadDomainsAndSurveys();
     }
 
     async loadDomainsAndSurveys() {
