@@ -613,7 +613,7 @@ public class DataSetServiceImpl implements DataSetService {
 
     // Define [namespace]_sql, [namespace]_query_config, and [namespace]_df variables
     String namespace =
-        prefix.toLowerCase().replaceAll(" ", "_") + "_" + domain.toString().toLowerCase() + "_";
+        prefix.toLowerCase().replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", "") + "_" + domain.toString().toLowerCase() + "_";
     String sqlSection;
     String namedParamsSection;
     String dataFrameSection;
