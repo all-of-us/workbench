@@ -45,7 +45,7 @@ public class UserRecentWorkspace {
     this.workspaceId = workspaceId;
   }
 
-  @Column(name = "lastAccessDate")
+  @Column(name = "last_access_date")
   public Timestamp getLastAccessDate() {
     return lastAccessDate;
   }
