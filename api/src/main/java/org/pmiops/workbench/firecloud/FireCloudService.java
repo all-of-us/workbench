@@ -84,7 +84,7 @@ public interface FireCloudService {
    */
   WorkspaceResponse getWorkspace(String projectName, String workspaceName);
 
-  List<WorkspaceResponse> getWorkspaces();
+  List<WorkspaceResponse> getWorkspaces(List<String> fields);
 
   void deleteWorkspace(String projectName, String workspaceName);
 
