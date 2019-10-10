@@ -640,7 +640,7 @@ public class DataSetController implements DataSetApiDelegate {
     org.pmiops.workbench.db.model.DataDictionaryEntry dataDictionaryEntry =
         dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
             omopTable, domainValue, cdrVersion);
-    
+
     if (dataDictionaryEntry == null) {
       throw new NotFoundException();
     }

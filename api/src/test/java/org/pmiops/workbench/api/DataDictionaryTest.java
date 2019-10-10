@@ -58,17 +58,13 @@ public class DataDictionaryTest {
 
   @Autowired DataSetController dataSetController;
 
-  @Rule
-  public ExpectedException expectedEx = ExpectedException.none();
+  @Rule public ExpectedException expectedEx = ExpectedException.none();
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   @TestConfiguration
-  @Import({
-      DataSetController.class,
-      DataSetMapperImpl.class
-  })
+  @Import({DataSetController.class, DataSetMapperImpl.class})
   @MockBean({
     BigQueryService.class,
     CohortDao.class,
@@ -156,8 +152,7 @@ public class DataDictionaryTest {
     expectedEx.expect(BadRequestException.class);
     expectedEx.expectMessage("Invalid CDR Version");
 
-    dataSetController.getDataDictionaryEntry(
-        -1L, Domain.DRUG.toString(), "TEST FIELD");
+    dataSetController.getDataDictionaryEntry(-1L, Domain.DRUG.toString(), "TEST FIELD");
   }
 
   @Test
@@ -173,7 +168,6 @@ public class DataDictionaryTest {
   public void testGetDataDictionaryEntry_notFound() {
     expectedEx.expect(NotFoundException.class);
 
-    dataSetController.getDataDictionaryEntry(
-        1L, Domain.DRUG.toString(), "random");
+    dataSetController.getDataDictionaryEntry(1L, Domain.DRUG.toString(), "random");
   }
 }
