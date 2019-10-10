@@ -12,12 +12,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ActionAuditServiceImpl implements ActionAuditService {
-  private static final Logger logger = Logger.getLogger(ActionAuditServiceImpl.class.getName());
-  private final Logging logging;
+  private static final Logger serviceLogger = Logger.getLogger(ActionAuditServiceImpl.class.getName());
+  private final Logging cloudLogging;
 
   @Autowired
   public ActionAuditServiceImpl(Logging logging) {
-    this.logging = logging;
+    this.cloudLogging = logging;
   }
 
   @Override
@@ -32,9 +32,9 @@ public class ActionAuditServiceImpl implements ActionAuditService {
           events.stream()
               .map(ActionAuditEvent::toLogEntry)
               .collect(ImmutableList.toImmutableList());
-      logging.write(logEntries);
+      cloudLogging.write(logEntries);
     } catch (RuntimeException e) {
-      logger.log(
+      serviceLogger.log(
           Level.SEVERE, e, () -> "Exception encountered writing log entries to Cloud Logging.");
     }
   }
