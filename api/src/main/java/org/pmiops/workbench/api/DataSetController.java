@@ -29,6 +29,8 @@ import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
+
+import org.apache.commons.lang3.RandomStringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -254,11 +256,15 @@ public class DataSetController implements DataSetApiDelegate {
         return domainValuePair;
       };
 
+  private String generateRandomEightCharacterQualifier() {
+    return RandomStringUtils.randomNumeric(8);
+  }
+
   public ResponseEntity<DataSetCodeResponse> generateCode(
       String workspaceNamespace,
       String workspaceId,
       String kernelTypeEnumString,
-      DataSetRequest dataSet) {
+      DataSetRequest dataSetRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
@@ -267,16 +273,18 @@ public class DataSetController implements DataSetApiDelegate {
     // TODO(jaycarlton): return better error information form this function for common validation
     // scenarios
     final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain =
-        dataSetService.generateQueryJobConfigurationsByDomainName(dataSet);
+        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
 
     if (bigQueryJobConfigsByDomain.isEmpty()) {
       log.warning("Empty query map generated for this DataSetRequest");
     }
 
+    String qualifier = generateRandomEightCharacterQualifier();
+
     final ImmutableList<String> codeCells =
         ImmutableList.copyOf(
             dataSetService.generateCodeCells(
-                kernelTypeEnum, dataSet.getName(), bigQueryJobConfigsByDomain));
+                kernelTypeEnum, dataSetRequest.getName(), qualifier, bigQueryJobConfigsByDomain));
     final String generatedCode = String.join("\n\n", codeCells);
 
     return ResponseEntity.ok(
@@ -478,10 +486,14 @@ public class DataSetController implements DataSetApiDelegate {
     Map<String, QueryJobConfiguration> queriesByDomain =
         dataSetService.generateQueryJobConfigurationsByDomainName(
             dataSetExportRequest.getDataSetRequest());
+
+    String qualifier = generateRandomEightCharacterQualifier();
+
     List<String> queriesAsStrings =
         dataSetService.generateCodeCells(
             dataSetExportRequest.getKernelType(),
             dataSetExportRequest.getDataSetRequest().getName(),
+            qualifier,
             queriesByDomain);
 
     if (dataSetExportRequest.getNewNotebook()) {
