@@ -331,7 +331,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             return response;
           }));
         const [, dataSet] = await Promise.all(allPromises);
-        // We can only run this command once both the data set fetch and the
+        // We can only run this command once both the dataset fetch and the
         // load resources have concluded. However, we want those to happen in
         // parallel, and one is conditional, so we add them to an array to await
         // and only run once both have finished.
@@ -596,7 +596,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           break;
         case 504:
           return `Query to load data from the All of Us Database timed out for domain:
-                ${domain}. Please either try again or export data set to a notebook to try
+                ${domain}. Please either try again or export dataset to a notebook to try
                 there`;
           break;
         default:
@@ -684,10 +684,10 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       } = this.state;
       return <React.Fragment>
         <FadeBox style={{paddingTop: '1rem'}}>
-          <h2 style={{paddingTop: 0, marginTop: 0}}>Data Sets{this.editing &&
+          <h2 style={{paddingTop: 0, marginTop: 0}}>Datasets{this.editing &&
             dataSet !== undefined && ' - ' + dataSet.name}</h2>
-          <div style={{color: colors.primary, fontSize: '14px'}}>Build a data set by selecting the
-            variables and values for one or more of your cohorts. Then export the completed Data Set
+          <div style={{color: colors.primary, fontSize: '14px'}}>Build a dataset by selecting the
+            variables and values for one or more of your cohorts. Then export the completed dataset
             to Notebooks where you can perform your analysis</div>
           <div style={{display: 'flex', paddingTop: '1rem'}}>
             <div style={{width: '33%', height: '80%'}}>
@@ -805,7 +805,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       style={{marignTop: '0.3rem', fill: colorWithWhiteness(colors.primary, 0.5)}}/>
                   </div>
                   <label style={{marginLeft: '0.5rem', color: colors.primary}}>
-                    Preview Data Set
+                    Preview Dataset
                   </label>
                 </div>
                 <div style={{color: colors.primary, fontSize: '14px', width: '60%'}}>

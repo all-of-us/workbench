@@ -159,7 +159,7 @@ const routes: Routes = [
                     path: 'data-sets',
                     component: DataSetPageComponent,
                     data: {
-                      title: 'Data Set Page',
+                      title: 'Dataset Page',
                       breadcrumb: BreadcrumbType.Dataset
                     }
                   },
@@ -167,7 +167,7 @@ const routes: Routes = [
                     path: 'data-sets/:dataSetId',
                     component: DataSetPageComponent,
                     data: {
-                      title: 'Edit Data Set',
+                      title: 'Edit Dataset',
                       breadcrumb: BreadcrumbType.Dataset
                     }
                   }, {
