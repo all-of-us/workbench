@@ -7,10 +7,10 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.pmiops.workbench.audit.ActionAuditEvent;
 import org.pmiops.workbench.audit.ActionAuditService;
 import org.pmiops.workbench.audit.ActionType;
 import org.pmiops.workbench.audit.AgentType;
-import org.pmiops.workbench.audit.ActionAuditEvent;
 import org.pmiops.workbench.audit.TargetType;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -21,7 +21,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterService {
 
-  private static final Logger logger = Logger.getLogger(WorkspaceAuditAdapterServiceImpl.class.getName());
+  private static final Logger logger =
+      Logger.getLogger(WorkspaceAuditAdapterServiceImpl.class.getName());
 
   private Provider<User> userProvider;
   private ActionAuditService actionAuditService;
@@ -76,15 +77,16 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
       final String actionId = ActionAuditService.newActionId();
       final long userId = userProvider.get().getUserId();
       final String userEmail = userProvider.get().getEmail();
-      final ActionAuditEvent event = new ActionAuditEvent.Builder()
-          .setActionId(actionId)
-          .setAgentEmail(userEmail)
-          .setActionType(ActionType.DELETE)
-          .setAgentType(AgentType.USER)
-          .setAgentId(userId)
-          .setTargetType(TargetType.WORKSPACE)
-          .setTargetId(dbWorkspace.getWorkspaceId())
-          .build();
+      final ActionAuditEvent event =
+          new ActionAuditEvent.Builder()
+              .setActionId(actionId)
+              .setAgentEmail(userEmail)
+              .setActionType(ActionType.DELETE)
+              .setAgentType(AgentType.USER)
+              .setAgentId(userId)
+              .setTargetType(TargetType.WORKSPACE)
+              .setTargetId(dbWorkspace.getWorkspaceId())
+              .build();
 
       actionAuditService.send(event);
     } catch (RuntimeException e) {

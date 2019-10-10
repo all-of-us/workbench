@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ActionAuditServiceImpl implements ActionAuditService {
-private static final Logger logger = Logger.getLogger(ActionAuditServiceImpl.class.getName());
+  private static final Logger logger = Logger.getLogger(ActionAuditServiceImpl.class.getName());
   private final Logging logging;
 
   @Autowired
@@ -29,10 +29,13 @@ private static final Logger logger = Logger.getLogger(ActionAuditServiceImpl.cla
   public void send(Collection<ActionAuditEvent> events) {
     try {
       ImmutableList<LogEntry> logEntries =
-          events.stream().map(ActionAuditEvent::toLogEntry).collect(ImmutableList.toImmutableList());
+          events.stream()
+              .map(ActionAuditEvent::toLogEntry)
+              .collect(ImmutableList.toImmutableList());
       logging.write(logEntries);
     } catch (RuntimeException e) {
-      logger.log(Level.SEVERE, e, () -> "Exception encountered writing log entries to Cloud Logging.");
+      logger.log(
+          Level.SEVERE, e, () -> "Exception encountered writing log entries to Cloud Logging.");
     }
   }
 }

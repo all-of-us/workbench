@@ -263,8 +263,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     Workspace createdWorkspace = WorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
-    workspaceAuditAdapterService.fireCreateAction(
-        createdWorkspace, dbWorkspace.getWorkspaceId());
+    workspaceAuditAdapterService.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
   }
 

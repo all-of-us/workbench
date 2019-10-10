@@ -15,9 +15,9 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.pmiops.workbench.audit.ActionAuditEvent;
 import org.pmiops.workbench.audit.ActionAuditService;
 import org.pmiops.workbench.audit.ActionType;
-import org.pmiops.workbench.audit.ActionAuditEvent;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -44,8 +44,7 @@ public class WorkspaceAuditAdapterServiceTest {
 
   @TestConfiguration
   @MockBean(value = {ActionAuditService.class})
-  static class Configuration {
-  }
+  static class Configuration {}
 
   @Before
   public void setUp() {
@@ -55,7 +54,8 @@ public class WorkspaceAuditAdapterServiceTest {
     user1.setGivenName("Fred");
     user1.setFamilyName("Flintstone");
     doReturn(user1).when(mockUserProvider).get();
-    workspaceAuditAdapterService = new WorkspaceAuditAdapterServiceImpl(mockUserProvider, mockActionAuditService);
+    workspaceAuditAdapterService =
+        new WorkspaceAuditAdapterServiceImpl(mockUserProvider, mockActionAuditService);
 
     final ResearchPurpose researchPurpose1 = new ResearchPurpose();
     researchPurpose1.setIntendedStudy("stubbed toes");
@@ -88,13 +88,14 @@ public class WorkspaceAuditAdapterServiceTest {
     verify(mockActionAuditService).send(eventListCaptor.capture());
     Collection<ActionAuditEvent> eventsSent = eventListCaptor.getValue();
     assertThat(eventsSent.size()).isEqualTo(6);
-    Optional<ActionAuditEvent> firstEvent = eventsSent.stream()
-        .findFirst();
+    Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
     assertThat(firstEvent.isPresent()).isTrue();
     assertThat(firstEvent.get().actionType()).isEqualTo(ActionType.CREATE);
-    assertThat(eventsSent.stream()
-        .map(ActionAuditEvent::actionType)
-        .collect(Collectors.toSet()).size())
+    assertThat(
+            eventsSent.stream()
+                .map(ActionAuditEvent::actionType)
+                .collect(Collectors.toSet())
+                .size())
         .isEqualTo(1);
   }
 

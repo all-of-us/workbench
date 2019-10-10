@@ -10,11 +10,10 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import org.elasticsearch.common.UUIDs;
-import org.pmiops.workbench.audit.AbstractAuditableEvent;
 import org.pmiops.workbench.audit.ActionAuditEvent;
+import org.pmiops.workbench.audit.ActionAuditEvent.Builder;
 import org.pmiops.workbench.audit.ActionType;
 import org.pmiops.workbench.audit.AgentType;
-import org.pmiops.workbench.audit.ActionAuditEvent.Builder;
 import org.pmiops.workbench.audit.TargetType;
 
 public class AuditDataGenerator {
@@ -66,12 +65,12 @@ public class AuditDataGenerator {
     final Optional<String> newValue = buildOptionally(() -> randomFromList(TARGET_PROPERTY_VALUES));
     final ActionAuditEvent.Builder eventBuidler = new Builder();
     eventBuidler
-            .setActionId(actionId)
-            .setTimestamp(timestamp)
-            .setAgentType(agentType)
-            .setAgentId(agentId)
-            .setActionType(actionType)
-            .setTargetType(targetType);
+        .setActionId(actionId)
+        .setTimestamp(timestamp)
+        .setAgentType(agentType)
+        .setAgentId(agentId)
+        .setActionType(actionType)
+        .setTargetType(targetType);
     targetId.ifPresent(eventBuidler::setTargetId);
     agentEmail.ifPresent(eventBuidler::setAgentEmail);
     targetProperty.ifPresent(eventBuidler::setTargetProperty);

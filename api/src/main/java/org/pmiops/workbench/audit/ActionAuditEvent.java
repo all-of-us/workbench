@@ -2,7 +2,6 @@ package org.pmiops.workbench.audit;
 
 import java.util.Optional;
 
-/** temporary "immutable" class until i cna get immutables to work in gradle */
 public class ActionAuditEvent extends AbstractAuditableEvent {
 
   private final long timestamp;
@@ -97,7 +96,6 @@ public class ActionAuditEvent extends AbstractAuditableEvent {
     return newValueMaybe;
   }
 
-
   // This builder handles null inputs for optional fields, simplifying code at the call site.
   // For example setAgentEmail() can be called safely with null (or just not called it's not known).
   public static class Builder {
@@ -114,8 +112,7 @@ public class ActionAuditEvent extends AbstractAuditableEvent {
     private String previousValue;
     private String newValue;
 
-    public Builder() {
-    }
+    public Builder() {}
 
     public Builder setTimestamp(long timestamp) {
       this.timestamp = timestamp;
