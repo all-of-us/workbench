@@ -21,21 +21,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ActionAuditServiceImpl implements ActionAuditService {
-  private final String logName;
   private static final Logger serviceLogger =
       Logger.getLogger(ActionAuditServiceImpl.class.getName());
 
   private final Logging cloudLogging;
-  private MonitoredResource monitoredResource;
+  private Provider<WorkbenchConfig> configProvider;
 
   @Autowired
   public ActionAuditServiceImpl(
       Provider<WorkbenchConfig> configProvider) {
+    this.configProvider = configProvider;
     this.cloudLogging = LoggingOptions.getDefaultInstance().getService();
-    this.monitoredResource = MonitoredResource.newBuilder(
-        configProvider.get().actionAudit.monitoredResourceName)
-    .build();
-    this.logName = configProvider.get().actionAudit.logName;
   }
 
   @Override
@@ -56,10 +52,13 @@ public class ActionAuditServiceImpl implements ActionAuditService {
   }
 
   private LogEntry auditEventToLogEntry(ActionAuditEvent auditEvent) {
+    WorkbenchConfig.ActionAuditConfig actionAuditConfig = configProvider.get().actionAudit;
     return LogEntry.newBuilder(toJsonPayload(auditEvent))
         .setSeverity(Severity.INFO)
-        .setLogName(logName)
-        .setResource(monitoredResource)
+        .setLogName(actionAuditConfig.logName)
+        .setResource(MonitoredResource.newBuilder(
+            actionAuditConfig.monitoredResourceName)
+            .build())
         .build();
   }
 
