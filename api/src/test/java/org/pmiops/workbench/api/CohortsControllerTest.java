@@ -195,7 +195,7 @@ public class CohortsControllerTest {
     ConceptService.class,
     ConceptSetService.class,
     DataSetService.class,
-    DirectoryService.class
+    DirectoryService.class,
     FireCloudService.class,
     LeonardoNotebooksClient.class,
     UserRecentResourceService.class,

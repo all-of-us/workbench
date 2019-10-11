@@ -225,7 +225,7 @@ public class ConceptSetsControllerTest {
     ConceptBigQueryService.class,
     ConceptSetService.class,
     DataSetService.class,
-    DirectoryService.class
+    DirectoryService.class,
     FireCloudService.class,
     NotebooksService.class,
     UserRecentResourceService.class,
