@@ -16,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.pmiops.workbench.audit.ActionAuditEvent;
+import org.pmiops.workbench.audit.ActionAuditEventImpl;
 import org.pmiops.workbench.audit.ActionAuditService;
 import org.pmiops.workbench.audit.ActionType;
 import org.pmiops.workbench.db.model.User;

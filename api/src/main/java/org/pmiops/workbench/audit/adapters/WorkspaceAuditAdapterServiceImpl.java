@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.audit.ActionAuditEvent;
+import org.pmiops.workbench.audit.ActionAuditEventImpl;
 import org.pmiops.workbench.audit.ActionAuditService;
 import org.pmiops.workbench.audit.ActionType;
 import org.pmiops.workbench.audit.AgentType;
@@ -45,7 +46,7 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
           propertyValues.entrySet().stream()
               .map(
                   entry ->
-                      new ActionAuditEvent.Builder()
+                      new ActionAuditEventImpl.Builder()
                           .setActionId(actionId)
                           .setAgentEmail(userEmail)
                           .setActionType(ActionType.CREATE)
@@ -76,8 +77,8 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
       final String actionId = ActionAuditService.newActionId();
       final long userId = userProvider.get().getUserId();
       final String userEmail = userProvider.get().getEmail();
-      final ActionAuditEvent event =
-          new ActionAuditEvent.Builder()
+      final ActionAuditEventImpl event =
+          new ActionAuditEventImpl.Builder()
               .setActionId(actionId)
               .setAgentEmail(userEmail)
               .setActionType(ActionType.DELETE)
