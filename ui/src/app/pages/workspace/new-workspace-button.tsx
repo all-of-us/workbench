@@ -1,9 +1,9 @@
-import {CardButton} from "app/components/buttons";
-import {navigate} from "app/utils/navigation";
-import {ClrIcon} from "app/components/icons";
-import * as React from "react";
-import {reactStyles} from "app/utils";
-import colors from "app/styles/colors";
+import {CardButton} from 'app/components/buttons';
+import {ClrIcon} from 'app/components/icons';
+import colors from 'app/styles/colors';
+import {reactStyles} from 'app/utils';
+import {navigate} from 'app/utils/navigation';
+import * as React from 'react';
 
 const styles = reactStyles({
   addCard: {

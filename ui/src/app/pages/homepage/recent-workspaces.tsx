@@ -4,10 +4,10 @@ import {Profile, RecentWorkspace} from 'generated/fetch';
 
 import {FlexRow} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {NewWorkspaceButton} from 'app/pages/workspace/new-workspace-button';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {withUserProfile} from 'app/utils';
-import {NewWorkspaceButton} from "app/pages/workspace/new-workspace-button";
 
 interface State {
   loading: boolean;
