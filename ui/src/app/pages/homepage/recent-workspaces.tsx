@@ -44,7 +44,7 @@ export const RecentWorkspaces = withUserProfile()
     // Needs a min-height so the spinner will render when loading and position: relative so said spinner will center.
     return <FlexRow style={{marginTop: '1rem', minHeight: 247, position: 'relative'}}>
       {
-        this.state.recentWorkspaces.length === 0 && <NewWorkspaceButton />
+        !this.state.loading && this.state.recentWorkspaces.length === 0 && <NewWorkspaceButton />
       }
       {
         this.state.recentWorkspaces.map(recentWorkspace => {

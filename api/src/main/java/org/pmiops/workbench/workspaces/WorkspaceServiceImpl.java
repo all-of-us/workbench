@@ -530,7 +530,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                   try {
                     enforceWorkspaceAccessLevel(
                         workspace.getWorkspaceNamespace(),
-                        workspace.getName(),
+                        workspace.getFirecloudName(),
                         WorkspaceAccessLevel.READER);
                   } catch (ForbiddenException | NotFoundException e) {
                     return true;
