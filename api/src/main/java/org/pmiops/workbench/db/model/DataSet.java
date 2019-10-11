@@ -64,7 +64,12 @@ public class DataSet {
     setDescription(dataSet.getDescription());
     setInvalid(dataSet.getInvalid());
     setIncludesAllParticipants(dataSet.getIncludesAllParticipants());
-    setValues(dataSet.getValues().stream().map(dataSetValue -> new DataSetValues(dataSetValue.getDomainId(), dataSetValue.getValue())).collect(Collectors.toList()));
+    setValues(
+        dataSet.getValues().stream()
+            .map(
+                dataSetValue ->
+                    new DataSetValues(dataSetValue.getDomainId(), dataSetValue.getValue()))
+            .collect(Collectors.toList()));
     setPrePackagedConceptSet(dataSet.getPrePackagedConceptSet());
   }
 
