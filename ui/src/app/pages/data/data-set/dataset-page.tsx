@@ -16,7 +16,7 @@ import {
   cohortsApi,
   conceptsApi,
   conceptSetsApi,
-  dataSetApi,
+  dataSetApi
 } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {colorWithWhiteness} from 'app/styles/colors';
