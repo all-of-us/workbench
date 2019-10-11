@@ -18,6 +18,7 @@ public class ActionAuditSpringConfiguration {
   ActionAuditSpringConfiguration(Provider<WorkbenchConfig> configProvider) {
     this.configProvider = configProvider;
   }
+
   @Bean
   public Logging getCloudLogging() {
     return LoggingOptions.getDefaultInstance().getService();

@@ -49,9 +49,8 @@ public class ActionAuditServiceTest {
     workbenchConfig.actionAudit = actionAudit;
     doReturn(workbenchConfig).when(mockConfigProvider).get();
 
-    actionAuditService = new ActionAuditServiceImpl(mockLogging,
-        mockMonitoredResource,
-        mockConfigProvider);
+    actionAuditService =
+        new ActionAuditServiceImpl(mockLogging, mockMonitoredResource, mockConfigProvider);
     final String actionId = ActionAuditService.newActionId();
 
     // ordinarily events sharing an action would have more things in common than this,

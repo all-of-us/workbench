@@ -5,7 +5,6 @@ import com.google.cloud.logging.LogEntry;
 import com.google.cloud.logging.Logging;
 import com.google.cloud.logging.Payload.JsonPayload;
 import com.google.cloud.logging.Severity;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,9 +46,7 @@ public class ActionAuditServiceImpl implements ActionAuditService {
   public void send(Collection<ActionAuditEvent> events) {
     try {
       ImmutableList<LogEntry> logEntries =
-          events.stream()
-              .map(this::auditEventToLogEntry)
-              .collect(ImmutableList.toImmutableList());
+          events.stream().map(this::auditEventToLogEntry).collect(ImmutableList.toImmutableList());
       cloudLogging.write(logEntries);
     } catch (RuntimeException e) {
       serviceLogger.log(
@@ -87,5 +84,4 @@ public class ActionAuditServiceImpl implements ActionAuditService {
   private static <T> T toNullable(Optional<T> opt) {
     return opt.orElse(null);
   }
-
 }
