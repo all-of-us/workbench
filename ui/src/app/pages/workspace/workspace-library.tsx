@@ -8,7 +8,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
-import {WorkspaceCard} from 'app/pages/workspace/workspace-list';
+import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {featuredWorkspacesConfigApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -226,7 +226,8 @@ export const WorkspaceLibrary = withUserProfile()
               (<div style={{display: 'flex', marginTop: '0.5rem', flexWrap: 'wrap'}}>
                 {publishedWorkspaces.map(wp => {
                   return <WorkspaceCard key={wp.workspace.name}
-                                        wp={wp}
+                                        workspace={wp.workspace}
+                                        accessLevel={wp.accessLevel}
                                         userEmail={username}
                                         reload={() => this.updateWorkspaces()}/>;
                 })}
@@ -239,10 +240,13 @@ export const WorkspaceLibrary = withUserProfile()
               (<div style={{display: 'flex', marginTop: '0.5rem', flexWrap: 'wrap'}}>
                 {featuredWorkspaces
                   .map(wp => {
-                    return <WorkspaceCard key={wp.workspace.name}
-                                          wp={wp}
-                                          userEmail={username}
-                                          reload={() => this.updateWorkspaces()}/>;
+                    return <WorkspaceCard
+                      key={wp.workspace.name}
+                      workspace={wp.workspace}
+                      accessLevel={wp.accessLevel}
+                      userEmail={username}
+                      reload={() => this.updateWorkspaces()}
+                    />;
                   })}
               </div>)}
           </div>}

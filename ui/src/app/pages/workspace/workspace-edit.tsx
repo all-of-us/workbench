@@ -406,10 +406,22 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         if (this.isMode(WorkspaceEditMode.Duplicate)) {
           this.setState({workspace: {
             ...this.props.workspace,
-            // This is the only field which is not automatically handled/differentiated
-            // on the API level.
-            name: 'Duplicate of ' + this.props.workspace.name
+              // Replace potential nulls with empty string or empty array
+            researchPurpose: {
+              ...this.props.workspace.researchPurpose,
+              populationDetails: !this.props.workspace.researchPurpose.populationDetails ?
+                [] : this.props.workspace.researchPurpose.populationDetails,
+              diseaseOfFocus: !this.props.workspace.researchPurpose.diseaseOfFocus ?
+                '' : this.props.workspace.researchPurpose.diseaseOfFocus}
           }});
+          if (this.isMode(WorkspaceEditMode.Duplicate)) {
+            this.setState({workspace: {
+              ...this.props.workspace,
+              // This is the only field which is not automatically handled/differentiated
+              // on the API level.
+              name: 'Duplicate of ' + this.props.workspace.name
+            }});
+          }
         }
       }
 

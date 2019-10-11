@@ -11,7 +11,7 @@ import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
 import {RecentResource} from 'generated/fetch';
 
-export const RecentWork = (fp.flow as any)(
+export const RecentResources = (fp.flow as any)(
   withContentRect('client'),
 )(class extends React.Component<{
   measureRef: React.Ref<any>,
