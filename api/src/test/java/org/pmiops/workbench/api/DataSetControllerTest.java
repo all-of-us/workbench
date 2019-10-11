@@ -275,21 +275,22 @@ public class DataSetControllerTest {
             cohortQueryBuilder,
             dataSetDao);
     dataSetController =
-        spy(new DataSetController(
-            bigQueryService,
-            CLOCK,
-            cdrVersionDao,
-            cohortDao,
-            conceptDao,
-            conceptSetDao,
-            dataDictionaryEntryDao,
-            dataSetDao,
-            dataSetMapper,
-            dataSetService,
-            fireCloudService,
-            notebooksService,
-            userProvider,
-            workspaceService));
+        spy(
+            new DataSetController(
+                bigQueryService,
+                CLOCK,
+                cdrVersionDao,
+                cohortDao,
+                conceptDao,
+                conceptSetDao,
+                dataDictionaryEntryDao,
+                dataSetDao,
+                dataSetMapper,
+                dataSetService,
+                fireCloudService,
+                notebooksService,
+                userProvider,
+                workspaceService));
     WorkspacesController workspacesController =
         new WorkspacesController(
             billingProjectBufferService,
