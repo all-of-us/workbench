@@ -7,6 +7,8 @@ import com.google.cloud.logging.LogEntry;
 import com.google.cloud.logging.Logging;
 import com.google.cloud.logging.Payload;
 import com.google.cloud.logging.Payload.JsonPayload;
+import com.google.cloud.logging.Payload.Type;
+import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -21,28 +23,47 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class ActionAuditServiceTest {
 
+  private static final long AGENT_ID_1 = 101L;
+  private static final long AGENT_ID_2 = 102L;
   @Mock private Logging mockLogging;
   @Captor
   private ArgumentCaptor<List<LogEntry>> logEntryListCaptor;
 
+  private String actionId;
   private ActionAuditEvent event1;
+  private ActionAuditEvent event2;
   private ActionAuditService actionAuditService;
 
   @Before
   public void setUp() {
     actionAuditService = new ActionAuditServiceImpl(mockLogging);
+    actionId = ActionAuditService.newActionId();
 
+    // ordinarily events sharing an action would have more things in common than this,
+    // but the schema doesn't require it
     event1 = new ActionAuditEvent.Builder()
-        .setActionId("foo")
         .setAgentEmail("a@b.co")
         .setTargetType(TargetType.DATASET)
         .setTargetId(1L)
         .setAgentType(AgentType.USER)
-        .setAgentId(2L)
-        .setActionId(ActionAuditService.newActionId())
+        .setAgentId(AGENT_ID_1)
+        .setActionId(actionId)
         .setTargetProperty("foot")
         .setPreviousValue("bare")
         .setNewValue("shod")
+        .setTimestamp(System.currentTimeMillis())
+        .build();
+
+    event2 = new ActionAuditEvent.Builder()
+        .setAgentEmail("f@b.co")
+        .setTargetType(TargetType.DATASET)
+        .setTargetId(2L)
+        .setAgentType(AgentType.USER)
+        .setAgentId(AGENT_ID_2)
+        .setActionId(actionId)
+        .setTargetProperty("height")
+        .setPreviousValue("yay high")
+        .setNewValue("about that tall")
         .setTimestamp(System.currentTimeMillis())
         .build();
   }
@@ -61,8 +82,29 @@ public class ActionAuditServiceTest {
     Map<String, Object> payloadMap = jsonPayload.getDataAsMap();
     assertThat(payloadMap.get(AuditColumn.NEW_VALUE.name()))
         .isEqualTo("shod");
+    // Logging passes numeric json fields as doubles when building a JsonPayload
     assertThat(payloadMap.get(AuditColumn.AGENT_ID.name()))
-        .isEqualTo(2.0);
+        .isEqualTo((double) AGENT_ID_1);
+  }
+
+  @Test
+  public void testSendsMultipleEvents() {
+    actionAuditService.send(ImmutableList.of(event1, event2));
+    verify(mockLogging).write(logEntryListCaptor.capture());
+    List<LogEntry> entryList = logEntryListCaptor.getValue();
+    assertThat(entryList.size()).isEqualTo(2);
+
+    final ImmutableList<JsonPayload> payloads = entryList.stream()
+        .map(LogEntry::getPayload)
+        .filter(p -> ((Payload) p).getType() == Type.JSON)
+        .map(p -> (JsonPayload) p)
+        .collect(ImmutableList.toImmutableList());
+
+    assertThat(payloads.stream()
+        .map(JsonPayload::getDataAsMap)
+        .map(entry -> entry.get(AuditColumn.ACTION_ID.name()))
+        .distinct()
+        .count()).isEqualTo(1);
   }
 
   @Test
