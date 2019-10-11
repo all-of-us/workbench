@@ -28,7 +28,7 @@ const styles = reactStyles({
     // Set relative positioning so the spinner overlay is centered in the card.
     position: 'relative'
   },
-  workspaceCardContents: {
+  workspaceMenuWrapper: {
     paddingTop: '.5rem',
     borderRight: '1px solid',
     borderColor: colorWithWhiteness(colors.dark, .6),
@@ -210,7 +210,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
     return <React.Fragment>
       <WorkspaceCardBase>
         <FlexRow style={{height: '100%'}}>
-          <FlexColumn style={styles.workspaceCardContents}>
+          <FlexColumn style={styles.workspaceMenuWrapper}>
             <WorkspaceCardMenu
               workspace={workspace}
               accessLevel={accessLevel}
