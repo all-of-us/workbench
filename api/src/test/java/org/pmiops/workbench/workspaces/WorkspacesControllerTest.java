@@ -222,7 +222,6 @@ public class WorkspacesControllerTest {
     CohortReviewController.class,
     CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,
-    DataSetService.class,
     ReviewQueryBuilder.class,
     ConceptSetService.class,
     ConceptSetsController.class
@@ -235,6 +234,7 @@ public class WorkspacesControllerTest {
     CloudStorageService.class,
     BigQueryService.class,
     CohortQueryBuilder.class,
+    DataSetService.class,
     UserService.class,
     UserRecentResourceService.class,
     ConceptService.class
