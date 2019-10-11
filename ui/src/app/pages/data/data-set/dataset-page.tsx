@@ -16,7 +16,7 @@ import {
   cohortsApi,
   conceptsApi,
   conceptSetsApi,
-  dataSetApi, workspacesApi
+  dataSetApi,
 } from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {colorWithWhiteness} from 'app/styles/colors';
@@ -354,8 +354,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         const {namespace, id} = this.props.workspace;
         const [conceptSets, cohorts] = await Promise.all([
           conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
-          cohortsApi().getCohortsInWorkspace(namespace, id)
-        ]);
+          cohortsApi().getCohortsInWorkspace(namespace, id)]);
         this.setState({conceptSetList: conceptSets.items, cohortList: cohorts.items,
           loadingResources: false});
         return Promise.resolve();

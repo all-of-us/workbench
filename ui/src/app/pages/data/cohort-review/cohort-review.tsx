@@ -6,7 +6,7 @@ import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-modal';
 import {cohortReviewStore, visitsFilterOptions} from 'app/services/review-state.service';
-import {cohortBuilderApi, cohortReviewApi, cohortsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';

@@ -17,7 +17,7 @@ import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit';
 import {ConceptTable} from 'app/pages/data/concept/concept-table';
-import {conceptSetsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
