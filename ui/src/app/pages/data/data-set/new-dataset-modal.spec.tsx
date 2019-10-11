@@ -73,7 +73,7 @@ describe('NewDataSetModal', () => {
     const wrapper = mount(createNewDataSetModal());
     const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-    const nameStub = 'Data Set Name';
+    const nameStub = 'Dataset Name';
 
     wrapper.find('[data-test-id="data-set-name-input"]')
       .first().simulate('change', {target: {value: nameStub}});
@@ -98,7 +98,7 @@ describe('NewDataSetModal', () => {
     const wrapper = mount(createNewDataSetModal());
     const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-    const nameStub = 'Data Set Name';
+    const nameStub = 'Dataset Name';
 
     wrapper.find('[data-test-id="data-set-name-input"]')
       .first().simulate('change', {target: {value: nameStub}});
@@ -113,7 +113,7 @@ describe('NewDataSetModal', () => {
     const wrapper = mount(createNewDataSetModal());
     const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-    const nameStub = 'Data Set Name';
+    const nameStub = 'Dataset Name';
     const notebookNameStub = 'Notebook Name';
     const dataSetRequestStub: DataSetRequest = {
       name: nameStub,
@@ -141,8 +141,8 @@ describe('NewDataSetModal', () => {
       kernelType: KernelTypeEnum.Python
     });
   });
-  it ('should have default dataSet name if data set is passed as props', () => {
-    const name = 'Update Data Set';
+  it ('should have default dataSet name if dataset is passed as props', () => {
+    const name = 'Update Dataset';
     dataSet = {...dataSet, name: name, description: 'dataset'};
     const wrapper = mount(createNewDataSetModal());
     const dataSetName  =
