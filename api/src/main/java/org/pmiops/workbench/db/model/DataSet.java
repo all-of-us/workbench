@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -18,6 +19,7 @@ import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 @Entity
 @Table(name = "data_set")
 public class DataSet {
+  private static final int INITIAL_VERSION = 1;
 
   private long dataSetId;
   private long workspaceId;
@@ -34,7 +36,9 @@ public class DataSet {
   private List<DataSetValues> values;
   private short prePackagedConceptSet;
 
-  public DataSet() {}
+  public DataSet() {
+    setVersion(DataSet.INITIAL_VERSION);
+  }
 
   public DataSet(
       long dataSetId,
@@ -47,10 +51,21 @@ public class DataSet {
     this.dataSetId = dataSetId;
     this.workspaceId = workspaceId;
     this.name = name;
+    this.version = DataSet.INITIAL_VERSION;
     this.description = description;
     this.creatorId = creatorId;
     this.creationTime = creationTime;
     this.invalid = invalid;
+  }
+
+  public DataSet(DataSet dataSet) {
+    setName(dataSet.getName());
+    setVersion(DataSet.INITIAL_VERSION);
+    setDescription(dataSet.getDescription());
+    setInvalid(dataSet.getInvalid());
+    setIncludesAllParticipants(dataSet.getIncludesAllParticipants());
+    setValues(dataSet.getValues().stream().map(dataSetValue -> new DataSetValues(dataSetValue.getDomainId(), dataSetValue.getValue())).collect(Collectors.toList()));
+    setPrePackagedConceptSet(dataSet.getPrePackagedConceptSet());
   }
 
   @Id

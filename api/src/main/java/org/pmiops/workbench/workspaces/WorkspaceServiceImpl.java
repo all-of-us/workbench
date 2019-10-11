@@ -22,11 +22,13 @@ import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentWorkspace;
@@ -67,6 +69,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
   private CohortCloningService cohortCloningService;
   private ConceptSetService conceptSetService;
+  private DataSetService dataSetService;
   private UserDao userDao;
   private Provider<User> userProvider;
   private UserRecentWorkspaceDao userRecentWorkspaceDao;
@@ -81,6 +84,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       Clock clock,
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
+      DataSetService dataSetService,
       FireCloudService fireCloudService,
       UserDao userDao,
       Provider<User> userProvider,
@@ -90,6 +94,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
+    this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
     this.userDao = userDao;
@@ -397,11 +402,30 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(saved.getCdrVersion());
     boolean cdrVersionChanged =
         from.getCdrVersion().getCdrVersionId() != to.getCdrVersion().getCdrVersionId();
+    Map<Long, Long> toCohortIdByFromCohortId = new HashMap<>();
     for (Cohort fromCohort : from.getCohorts()) {
-      cohortCloningService.cloneCohortAndReviews(fromCohort, to);
+      toCohortIdByFromCohortId.put(
+          fromCohort.getCohortId(),
+          cohortCloningService.cloneCohortAndReviews(fromCohort, to).getCohortId());
     }
-    for (ConceptSet conceptSet : conceptSetService.getConceptSets(from)) {
-      conceptSetService.cloneConceptSetAndConceptIds(conceptSet, to, cdrVersionChanged);
+    Map<Long, Long> toConceptSetIdByFromConceptSetId = new HashMap<>();
+    for (ConceptSet fromConceptSet : conceptSetService.getConceptSets(from)) {
+      toConceptSetIdByFromConceptSetId.put(
+          fromConceptSet.getConceptSetId(),
+          conceptSetService
+              .cloneConceptSetAndConceptIds(fromConceptSet, to, cdrVersionChanged)
+              .getConceptSetId());
+    }
+    for (DataSet dataSet : from.getDataSets()) {
+      dataSetService.cloneDataSetToWorkspace(
+          dataSet,
+          to,
+          toCohortIdByFromCohortId.values().stream()
+              .filter(cohortId -> dataSet.getCohortSetId().contains(cohortId))
+              .collect(Collectors.toSet()),
+          toConceptSetIdByFromConceptSetId.values().stream()
+              .filter(conceptSetId -> dataSet.getConceptSetId().contains(conceptSetId))
+              .collect(Collectors.toSet()));
     }
     return saved;
   }
