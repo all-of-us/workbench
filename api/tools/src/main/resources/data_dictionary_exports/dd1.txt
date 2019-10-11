@@ -1,4 +1,0 @@
-1570505534
-observation:question:A:B:C:D:E:false
-observation:answer_concept_id:A:B:C:D:E:true
-observation:answer:A:B:C:D:E:false

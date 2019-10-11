@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Timestamp;
+import java.util.Map;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
@@ -19,6 +20,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 @SpringBootApplication
 @EnableJpaRepositories("org.pmiops.workbench")
@@ -30,7 +34,7 @@ public class LoadDataDictionary {
   private Resource[] getDataDictionaryExportFiles() throws IOException {
     ClassLoader cl = this.getClass().getClassLoader();
     ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
-    return resolver.getResources("classpath*:/data_dictionary_exports/*.txt");
+    return resolver.getResources("classpath*:/data_dictionary_exports/*.yaml");
   }
 
   @Bean
@@ -42,46 +46,62 @@ public class LoadDataDictionary {
       for (Resource resource : getDataDictionaryExportFiles()) {
         InputStream is = resource.getInputStream();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        Timestamp definedTime = new Timestamp(Long.parseLong(reader.readLine()) * 1000);
+        Representer representer = new Representer();
+        representer.getPropertyUtils().setSkipMissingProperties(true);
 
-        String line;
-        while ((line = reader.readLine()) != null) {
-          String[] fields = line.split(":");
+        Yaml yaml = new Yaml(new Constructor(DataDictionary.class), representer);
+        DataDictionary obj = yaml.loadAs(is, DataDictionary.class);
 
-          String relevantOmopTable = fields[0];
-          String fieldName = fields[1];
+        System.out.println("this is a resource");
+        System.out.println(obj);
+        System.out.println(obj.meta_data[0].name);
 
-          DataDictionaryEntry entry =
-              dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
-                  relevantOmopTable, fieldName, defaultCdrVersion);
-
-          // We are skipping ahead if the defined times match by assuming that the definition has
-          // not changed.
-          if (entry != null && definedTime.before(entry.getDefinedTime())) {
-            continue;
-          }
-
-          if (entry == null) {
-            entry = new DataDictionaryEntry();
-            entry.setRelevantOmopTable(relevantOmopTable);
-            entry.setFieldName(fieldName);
-            entry.setCdrVersion((defaultCdrVersion));
-          }
-
-          entry.setDefinedTime(definedTime);
-          entry.setOmopCdmStandardOrCustomField(fields[2]);
-          entry.setDescription(fields[3]);
-          entry.setFieldType(fields[4]);
-          entry.setDataProvenance(fields[5]);
-          entry.setSourcePpiModule(fields[6]);
-          entry.setTransformedByRegisteredTierPrivacyMethods("true".equals(fields[7]));
-
-          dataDictionaryEntryDao.save(entry);
+        for (AvailableField field : obj.transformations[1].available_fields) {
+          System.out.println(field.relevant_omop_table + " : " + field.field_name);
         }
       }
     };
   }
+
+//        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+//        Timestamp definedTime = new Timestamp(Long.parseLong(reader.readLine()) * 1000);
+
+//        String line;
+//        while ((line = reader.readLine()) != null) {
+//          String[] fields = line.split(":");
+//
+//          String relevantOmopTable = fields[0];
+//          String fieldName = fields[1];
+//
+//          DataDictionaryEntry entry =
+//              dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
+//                  relevantOmopTable, fieldName, defaultCdrVersion);
+//
+//          // We are skipping ahead if the defined times match by assuming that the definition has
+//          // not changed.
+//          if (entry != null && definedTime.before(entry.getDefinedTime())) {
+//            continue;
+//          }
+//
+//          if (entry == null) {
+//            entry = new DataDictionaryEntry();
+//            entry.setRelevantOmopTable(relevantOmopTable);
+//            entry.setFieldName(fieldName);
+//            entry.setCdrVersion((defaultCdrVersion));
+//          }
+//
+//          entry.setDefinedTime(definedTime);
+//          entry.setOmopCdmStandardOrCustomField(fields[2]);
+//          entry.setDescription(fields[3]);
+//          entry.setFieldType(fields[4]);
+//          entry.setDataProvenance(fields[5]);
+//          entry.setSourcePpiModule(fields[6]);
+//          entry.setTransformedByRegisteredTierPrivacyMethods("true".equals(fields[7]));
+//
+//          dataDictionaryEntryDao.save(entry);
+//        }
+//      }
+//    }
 
   public static void main(String[] args) throws Exception {
     new SpringApplicationBuilder(LoadDataDictionary.class).web(false).run(args);
