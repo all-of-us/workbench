@@ -12,7 +12,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ActionAuditServiceImpl implements ActionAuditService {
-  private static final Logger serviceLogger = Logger.getLogger(ActionAuditServiceImpl.class.getName());
+  private static final Logger serviceLogger =
+      Logger.getLogger(ActionAuditServiceImpl.class.getName());
   private final Logging cloudLogging;
 
   @Autowired

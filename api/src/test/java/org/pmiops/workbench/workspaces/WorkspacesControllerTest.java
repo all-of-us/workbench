@@ -216,7 +216,7 @@ public class WorkspacesControllerTest {
     NotebooksServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
-    WorkspaceMapper.class,
+    WorkspaceConversionUtils.class,
     CohortsController.class,
     CohortFactoryImpl.class,
     CohortCloningService.class,

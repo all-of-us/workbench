@@ -150,9 +150,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               String fcWorkspaceAccessLevel =
                   fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
               WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(WorkspaceMapper.toApiWorkspace(dbWorkspace));
+              currentWorkspace.setWorkspace(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace));
               currentWorkspace.setAccessLevel(
-                  WorkspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
+                  WorkspaceConversionUtils.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
               return currentWorkspace;
             })
         .collect(Collectors.toList());
@@ -181,7 +181,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
       }
     }
-    workspaceResponse.setWorkspace(WorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    workspaceResponse.setWorkspace(
+        WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
 
     return workspaceResponse;
   }
@@ -472,7 +473,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       } else {
-        userRoles.add(WorkspaceMapper.toApiUserRole(user, entry.getValue()));
+        userRoles.add(WorkspaceConversionUtils.toApiUserRole(user, entry.getValue()));
       }
     }
     return userRoles.stream()

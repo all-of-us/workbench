@@ -76,7 +76,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.workspaces.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -179,7 +179,7 @@ public class CohortsControllerTest {
     CohortFactoryImpl.class,
     NotebooksServiceImpl.class,
     UserService.class,
-    WorkspaceMapper.class,
+    WorkspaceConversionUtils.class,
     WorkspacesController.class,
     CohortsController.class,
     ConceptSetsController.class

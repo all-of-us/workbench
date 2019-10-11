@@ -246,13 +246,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    org.pmiops.workbench.db.model.Workspace reqWorkspace = WorkspaceMapper.toDbWorkspace(workspace);
+    org.pmiops.workbench.db.model.Workspace reqWorkspace =
+        WorkspaceConversionUtils.toDbWorkspace(workspace);
     // TODO: enforce data access level authorization
     dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
     dbWorkspace.setName(reqWorkspace.getName());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
-    WorkspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
+    WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
     if (reqWorkspace.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -262,7 +263,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-    Workspace createdWorkspace = WorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditAdapterService.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
   }
@@ -343,7 +344,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
     if (researchPurpose != null) {
-      WorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+      WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, researchPurpose);
       if (researchPurpose.getReviewRequested()) {
         Timestamp now = new Timestamp(clock.instant().toEpochMilli());
         dbWorkspace.setTimeRequested(now);
@@ -353,7 +354,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-    return ResponseEntity.ok(WorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    return ResponseEntity.ok(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
   @Override
@@ -442,7 +443,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setName(body.getWorkspace().getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
-    WorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+    WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -485,7 +486,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     return ResponseEntity.ok(
         new CloneWorkspaceResponse()
-            .workspace(WorkspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
+            .workspace(WorkspaceConversionUtils.toApiWorkspace(savedWorkspace, toFcWorkspace)));
   }
 
   // A retry period is needed because the permission to copy files into the cloned workspace is not
@@ -567,7 +568,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceListResponse response = new WorkspaceListResponse();
     List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
     response.setItems(
-        workspaces.stream().map(WorkspaceMapper::toApiWorkspace).collect(Collectors.toList()));
+        workspaces.stream()
+            .map(WorkspaceConversionUtils::toApiWorkspace)
+            .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
@@ -781,7 +784,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     List<RecentWorkspace> recentWorkspaces =
-        WorkspaceMapper.buildRecentWorkspaceList(
+        WorkspaceConversionUtils.buildRecentWorkspaceList(
             userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
@@ -798,7 +801,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =
-        WorkspaceMapper.buildRecentWorkspace(
+        WorkspaceConversionUtils.buildRecentWorkspace(
             userRecentWorkspace, dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);

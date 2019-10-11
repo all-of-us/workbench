@@ -16,7 +16,7 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
-public class WorkspaceMapper {
+public class WorkspaceConversionUtils {
 
   public static WorkspaceAccessLevel toApiWorkspaceAccessLevel(String firecloudAccessLevel) {
     if (firecloudAccessLevel.equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {

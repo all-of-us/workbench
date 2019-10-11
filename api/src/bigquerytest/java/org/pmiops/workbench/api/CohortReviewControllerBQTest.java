@@ -72,7 +72,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
-import org.pmiops.workbench.workspaces.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -91,7 +91,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
-    WorkspaceMapper.class,
+    WorkspaceConversionUtils.class,
     CohortReviewServiceImpl.class,
     CohortReviewController.class,
     BigQueryTestService.class,

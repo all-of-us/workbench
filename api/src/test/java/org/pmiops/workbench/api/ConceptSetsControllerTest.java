@@ -59,7 +59,7 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.workspaces.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -175,7 +175,7 @@ public class ConceptSetsControllerTest {
 
   @Autowired WorkspaceService workspaceService;
 
-  @Autowired WorkspaceMapper workspaceMapper;
+  @Autowired WorkspaceConversionUtils workspaceConversionUtils;
 
   @Autowired ConceptSetDao conceptSetDao;
 
@@ -210,7 +210,7 @@ public class ConceptSetsControllerTest {
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
-    WorkspaceMapper.class,
+    WorkspaceConversionUtils.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     UserService.class,
