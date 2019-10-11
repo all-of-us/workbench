@@ -10,4 +10,6 @@ public interface DataSetDao extends CrudRepository<DataSet, Long> {
   List<DataSet> findDataSetsByCohortSetId(long cohortId);
 
   List<DataSet> findDataSetsByConceptSetId(long conceptId);
+
+  List<DataSet> findByWorkspaceId(long workspaceId);
 }

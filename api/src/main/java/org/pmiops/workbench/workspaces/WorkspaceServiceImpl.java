@@ -396,7 +396,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   @Transactional
-  public Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to) {
+  public Workspace saveAndCloneCohortsConceptSetsAndDataSets(Workspace from, Workspace to) {
     // Save the workspace first to allocate an ID.
     Workspace saved = workspaceDao.save(to);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(saved.getCdrVersion());
@@ -416,7 +416,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               .cloneConceptSetAndConceptIds(fromConceptSet, to, cdrVersionChanged)
               .getConceptSetId());
     }
-    for (DataSet dataSet : from.getDataSets()) {
+    for (DataSet dataSet : dataSetService.getDataSets(from)) {
       dataSetService.cloneDataSetToWorkspace(
           dataSet,
           to,

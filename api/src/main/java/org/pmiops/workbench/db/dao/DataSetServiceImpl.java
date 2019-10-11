@@ -552,6 +552,13 @@ public class DataSetServiceImpl implements DataSetService {
     return dataSetDao.save(toDataSet);
   }
 
+  @Override
+  public List<DataSet> getDataSets(Workspace workspace) {
+    // Allows for fetching data sets for a workspace once its collection is no longer
+    // bound to a session.
+    return dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+  }
+
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {
     Optional<CdrBigQuerySchemaConfig.ColumnConfig> conceptColumn =
         config.columns.stream().filter(column -> type.equals(column.domainConcept)).findFirst();

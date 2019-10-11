@@ -37,4 +37,6 @@ public interface DataSetService {
 
   DataSet cloneDataSetToWorkspace(
       DataSet fromDataSet, Workspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds);
+
+  List<DataSet> getDataSets(Workspace workspace);
 }
