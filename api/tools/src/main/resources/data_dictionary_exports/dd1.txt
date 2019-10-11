@@ -1,4 +1,4 @@
 1570505534
-drug_exposure:TEST FIELD 1:A:B:C:D:E:false
-drug_exposure:TEST FIELD 2:A:B:C:D:E:true
-drug_exposure:TEST FIELD 3:A:B:C:D:E:false
+observation:question:A:B:C:D:E:false
+observation:answer_concept_id:A:B:C:D:E:true
+observation:answer:A:B:C:D:E:false
