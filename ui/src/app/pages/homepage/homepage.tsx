@@ -356,7 +356,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
           <FadeBox style={styles.fadeBox}>
             {/* The elements inside this fadeBox will be changed as part of ongoing
             homepage redesign work*/}
-            <div style={{display: 'flex', justifyContent: 'flex-start', flexDirection: 'column'}}>
+            <FlexColumn style={{justifyContent: 'flex-start'}}>
                 {accessTasksLoaded ?
                   (accessTasksRemaining ?
                       (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
@@ -397,7 +397,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                         )
                   ) :
                   <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
-            </div>
+            </FlexColumn>
           </FadeBox>
           <div>
             <FlexColumn style={{marginLeft: '3%'}}>

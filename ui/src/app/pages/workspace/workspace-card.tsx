@@ -277,7 +277,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
             <div
               style={{
                 fontSize: 12,
-                lineHeight: '17px'
+                lineHeight: 17
               }}
             >
               Last Changed: {displayDate(workspace.lastModifiedTime)}
