@@ -33,7 +33,8 @@ const styles = reactStyles({
     borderRight: '1px solid',
     borderColor: colorWithWhiteness(colors.dark, .6),
     flex: '0 0 1rem',
-    justifyContent: 'center'
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
   workspaceName: {
     color: colors.accent,
@@ -209,7 +210,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
     return <React.Fragment>
       <WorkspaceCardBase>
         <FlexRow style={{height: '100%'}}>
-          <FlexRow style={styles.workspaceCardContents}>
+          <FlexColumn style={styles.workspaceCardContents}>
             <WorkspaceCardMenu
               workspace={workspace}
               accessLevel={accessLevel}
@@ -224,7 +225,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
               }}
               disabled={false}
             />
-          </FlexRow>
+          </FlexColumn>
           <FlexColumn
             style={{
               ...styles.workspaceCard,

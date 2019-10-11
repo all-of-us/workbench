@@ -7,13 +7,14 @@ import onClickOutside from 'react-onclickoutside';
 
 const styles = {
   tooltip: {
-    background: 'black', color: colors.white,
+    background: colors.dark,
+    color: colors.white,
     padding: '0.5rem',
     position: 'fixed', top: 0, left: 0, pointerEvents: 'none', zIndex: 105,
     maxWidth: 400, borderRadius: 4
   },
   notch: {
-    fill: 'black',
+    fill: colors.dark,
     position: 'absolute',
     width: 16, height: 8,
     marginLeft: -8, marginRight: -8, marginTop: -8,
