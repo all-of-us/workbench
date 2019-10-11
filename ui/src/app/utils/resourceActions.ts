@@ -18,11 +18,12 @@ export enum ResourceType {
 }
 
 export const ResourceTypeDisplayNames = new Map()
-  .set(ResourceType.NOTEBOOK, 'notebook')
-  .set(ResourceType.COHORT, 'cohort')
-  .set(ResourceType.COHORT_REVIEW, 'cohort review')
-  .set(ResourceType.CONCEPT_SET, 'concept set')
-  .set(ResourceType.DATA_SET, 'dataset');
+  .set(ResourceType.NOTEBOOK, 'Notebook')
+  .set(ResourceType.COHORT, 'Cohort')
+  .set(ResourceType.COHORT_REVIEW, 'Cohort Review')
+  .set(ResourceType.CONCEPT_SET, 'Concept Set')
+  .set(ResourceType.DATA_SET, 'Dataset')
+  .set(ResourceType.INVALID, 'Invalid');
 
 export function convertToResources(list: FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[]
   | DataSet[], workspaceNamespace: string, workspaceId: string,

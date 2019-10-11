@@ -8,7 +8,7 @@ import {TextModal} from 'app/components/text-modal';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {navigate, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActions';
+import {ResourceType, ResourceTypeDisplayNames} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {CopyModal} from 'app/components/copy-modal';
@@ -128,6 +128,10 @@ export class ResourceCard extends React.Component<Props, State> {
     } else {
       return ResourceType.INVALID;
     }
+  }
+
+  get resourceTypeDisplayName(): string {
+    return ResourceTypeDisplayNames.get(this.resourceType);
   }
 
   get isCohortReview(): boolean {
@@ -428,7 +432,7 @@ export class ResourceCard extends React.Component<Props, State> {
             Last Modified: {this.displayDate}</div>
           <div style={{...styles.resourceType, ...resourceTypeStyles[this.resourceType]}}
                data-test-id='card-type'>
-            {fp.startCase(fp.camelCase(this.resourceType.toString()))}</div>
+            {this.resourceTypeDisplayName}</div>
         </div>
       </ResourceCardBase>
 
@@ -452,6 +456,7 @@ export class ResourceCard extends React.Component<Props, State> {
           existingNames={this.props.existingNameList}/>}
       {this.state.confirmDeleting &&
       <ConfirmDeleteModal resourceName={this.displayName}
+                          resourceTypeDisplayName={this.resourceTypeDisplayName}
                           resourceType={this.resourceType}
                           receiveDelete={() => this.receiveDelete()}
                           closeFunction={() => this.closeConfirmDelete()}/>}
@@ -473,6 +478,7 @@ export class ResourceCard extends React.Component<Props, State> {
         fromWorkspaceNamespace={this.props.resourceCard.workspaceNamespace}
         fromWorkspaceName={this.props.resourceCard.workspaceFirecloudName}
         fromResourceName={this.props.resourceCard.conceptSet.name}
+        resourceTypeDisplayName={this.resourceTypeDisplayName}
         resourceType={this.resourceType}
         onClose={() => this.setState({copyingConceptSet: false})}
         onCopy={() => this.props.onUpdate()}
@@ -482,16 +488,16 @@ export class ResourceCard extends React.Component<Props, State> {
         <ModalTitle>WARNING</ModalTitle>
         <ModalBody>
           <div style={{paddingBottom: '1rem'}}>
-            The {this.resourceType} <b>{fp.startCase(this.displayName)}&nbsp;</b>
+            The {this.resourceTypeDisplayName} <b>{fp.startCase(this.displayName)}&nbsp;</b>
             is referenced by the following datasets:
             <b>
               &nbsp;
               {fp.join(', ' ,
                 this.state.dataSetByResourceIdList.map((data) => data.name))}
             </b>.
-            Deleting the {this.resourceType} <b>{fp.startCase(this.displayName)} </b>
-            will make these datasets unavailable for use. Are you sure you want to delete
-            <b>{fp.startCase(this.displayName)}</b> ?
+            Deleting the {this.resourceTypeDisplayName}
+            <b>{fp.startCase(this.displayName)} </b> will make these datasets unavailable for use.
+            Are you sure you want to delete <b>{fp.startCase(this.displayName)}</b> ?
           </div>
           <div style={{float: 'right'}}>
             <Button type='secondary' style={{ marginRight: '2rem'}} onClick={() => {
