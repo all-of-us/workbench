@@ -79,7 +79,7 @@
     "enableNewAccountCreation": true
   },
   "actionAudit": {
-    "monitoredResourceName": "global",
+    "monitoredResourceName": "All of Us",
     "logName":"action-audit-test-3"
   }
 }

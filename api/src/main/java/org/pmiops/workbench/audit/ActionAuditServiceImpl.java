@@ -3,6 +3,7 @@ package org.pmiops.workbench.audit;
 import com.google.cloud.MonitoredResource;
 import com.google.cloud.logging.LogEntry;
 import com.google.cloud.logging.Logging;
+import com.google.cloud.logging.LoggingOptions;
 import com.google.cloud.logging.Payload.JsonPayload;
 import com.google.cloud.logging.Severity;
 import com.google.common.collect.ImmutableList;
@@ -29,11 +30,11 @@ public class ActionAuditServiceImpl implements ActionAuditService {
 
   @Autowired
   public ActionAuditServiceImpl(
-      Logging logging,
-      MonitoredResource monitoredResource,
       Provider<WorkbenchConfig> configProvider) {
-    this.cloudLogging = logging;
-    this.monitoredResource = monitoredResource;
+    this.cloudLogging = LoggingOptions.getDefaultInstance().getService();
+    this.monitoredResource = MonitoredResource.newBuilder(
+        configProvider.get().actionAudit.monitoredResourceName)
+    .build();
     this.logName = configProvider.get().actionAudit.logName;
   }
 
