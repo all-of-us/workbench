@@ -1,5 +1,8 @@
 package org.pmiops.workbench.tools;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,18 +49,12 @@ public class LoadDataDictionary {
       for (Resource resource : getDataDictionaryExportFiles()) {
         InputStream is = resource.getInputStream();
 
-        Representer representer = new Representer();
-        representer.getPropertyUtils().setSkipMissingProperties(true);
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        mapper.registerModule(new KotlinModule());
 
-        Yaml yaml = new Yaml(new Constructor(DataDictionary.class), representer);
-        DataDictionary obj = yaml.loadAs(is, DataDictionary.class);
-
-        System.out.println("this is a resource");
-        System.out.println(obj);
-        System.out.println(obj.meta_data[0].name);
-
-        for (AvailableField field : obj.transformations[1].available_fields) {
-          System.out.println(field.relevant_omop_table + " : " + field.field_name);
+        DataDictionary dd = mapper.readValue(is, DataDictionary.class);
+        for (AvailableField field : dd.getTransformations()[1].getAvailable_fields()) {
+          System.out.println(field.getRelevant_omop_table() + " : " + field.getField_name());
         }
       }
     };
