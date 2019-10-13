@@ -8,7 +8,7 @@ import {FlexRow} from 'app/components/flex';
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
-import {LoadingTooltipTrigger, TooltipTrigger} from 'app/components/popups';
+import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
@@ -210,25 +210,14 @@ const Subheader = (props) => {
   return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
 };
 
-function bold(text) {
-  return <b>{text}</b>
-}
-
-function getDataDictionaryEntry(domain, domainValue) {
-  return new Promise((resolve) => {
-    dataSetApi().getDataDictionaryEntry(
-      parseInt(currentWorkspaceStore.getValue().cdrVersionId), domain.toString(), domainValue.value)
-      .then(entry => resolve(bold(entry.description)))
-      .catch(err => {
-        resolve("Could not find a definition");
-      });
-  });
-}
-
 export const ValueListItem: React.FunctionComponent <
   {domain: Domain, domainValue: DomainValue, onChange: Function, checked: boolean}> =
   ({domain, domainValue, onChange, checked}) => {
     console.log(currentWorkspaceStore.getValue().cdrVersionId + " : " + domain.toString() + " : " + domainValue.value);
+    dataSetApi().getDataDictionaryEntry(
+      parseInt(currentWorkspaceStore.getValue().cdrVersionId), domain.toString(), domainValue.value)
+      .then(result => console.log(result))
+      .catch(err => console.error(err));
 
     return <div style={{
       ...styles.listItem,
@@ -240,16 +229,10 @@ export const ValueListItem: React.FunctionComponent <
       <input type='checkbox' value={domainValue.value} onChange={() => onChange()}
              style={{...styles.listItemCheckbox, marginTop: 3, marginLeft: 0, marginRight: 0}} checked={checked}/>
       <div style={{lineHeight: '1.5rem', paddingLeft: '10px', wordWrap: 'break-word', color: colors.primary}}>{domainValue.value}</div>
-      <LoadingTooltipTrigger style={{
-        background: colors.white
-      }} getContent={() =>  getDataDictionaryEntry(domain, domainValue)}>
-        <ClrIcon style={{
-          color: colors.accent,
-          marginLeft: 'auto'
-        }} shape='info-standard' class='is-solid'/>
-      </LoadingTooltipTrigger>
-
-
+      <ClrIcon style={{
+        color: colors.accent,
+        marginLeft: 'auto'
+      }} shape='info-standard' class='is-solid' size={16}/>
     </div>;
   };
 

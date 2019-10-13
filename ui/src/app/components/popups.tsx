@@ -6,8 +6,7 @@ import onClickOutside from 'react-onclickoutside';
 
 const styles = {
   tooltip: {
-    background: 'black',
-    color: 'white',
+    background: 'black', color: 'white',
     padding: '0.5rem',
     position: 'fixed', top: 0, left: 0, pointerEvents: 'none', zIndex: 105,
     maxWidth: 400, borderRadius: 4
@@ -166,49 +165,21 @@ export const Tooltip = withDynamicPosition()(class TooltipComponent extends Reac
 
 export class TooltipTrigger extends React.Component {
   props: any;
-
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    const {children, content, disabled, ...props} = this.props;
-
-    return <LoadingTooltipTrigger {...props} getContent={() => Promise.resolve(content)}>
-      {children}
-    </LoadingTooltipTrigger>;
-  }
-}
-
-export class LoadingTooltipTrigger extends React.Component {
-  props: any;
   state: any;
   id: string;
 
   constructor(props) {
     super(props);
-    this.state = {
-      open: false,
-      content: null
-    };
+    this.state = {open: false};
     this.id = `tooltip-trigger-${fp.uniqueId('')}`;
   }
 
-  componentDidMount(): void {
-    this.props.getContent().then(result =>
-      this.setState({
-        content: result
-      })
-    );
-  }
-
   render() {
-    const {children, getContent, disabled, ...props} = this.props;
+    const {children, content, disabled, ...props} = this.props;
     const {open} = this.state;
-    if (!getContent) {
+    if (!content) {
       return children;
     }
-
     const child = React.Children.only(children);
     return <React.Fragment>
       {React.cloneElement(child, {
@@ -226,7 +197,7 @@ export class LoadingTooltipTrigger extends React.Component {
           this.setState({open: false});
         }
       })}
-      {open && !disabled && <Tooltip target={this.id} {...props}>{this.state.content}</Tooltip>}
+      {open && !disabled && <Tooltip target={this.id} {...props}>{content}</Tooltip>}
     </React.Fragment>;
   }
 }
