@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -48,57 +50,52 @@ public class LoadDataDictionary {
 
       for (Resource resource : getDataDictionaryExportFiles()) {
         InputStream is = resource.getInputStream();
-
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        mapper.registerModule(new KotlinModule());
+        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+        mapper.setDateFormat(df);
 
+        mapper.registerModule(new KotlinModule());
         DataDictionary dd = mapper.readValue(is, DataDictionary.class);
-        for (AvailableField field : dd.getTransformations()[1].getAvailable_fields()) {
-          System.out.println(field.getRelevant_omop_table() + " : " + field.getField_name());
+
+        Timestamp newEntryDefinedTime = dd.getMeta_data()[0].getCreated_time();
+
+        CdrVersion cdrVersion = cdrVersionDao.findByName(dd.getMeta_data()[0].getCdr_version());
+
+        if (cdrVersion == null) {
+          // Skip over Data Dictionaries for CDR Versions not in the current environment
+          continue;
+        }
+
+        for (AvailableField field : dd.getTransformations()[0].getAvailable_fields()) {
+          DataDictionaryEntry entry = dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
+              field.getRelevant_omop_table(), field.getField_name(), cdrVersion);
+
+          // We are skipping ahead if the defined times match by assuming that the definition has
+          // not changed.
+          if (entry != null && newEntryDefinedTime.before(entry.getDefinedTime())) {
+            continue;
+          }
+
+          if (entry == null) {
+            entry = new DataDictionaryEntry();
+            entry.setRelevantOmopTable(field.getRelevant_omop_table());
+            entry.setFieldName(field.getField_name());
+            entry.setCdrVersion(defaultCdrVersion);
+          }
+
+          entry.setDefinedTime(newEntryDefinedTime);
+          entry.setOmopCdmStandardOrCustomField(field.getOmop_cdm_standard_or_custom_field());
+          entry.setDescription(field.getDescription());
+          entry.setFieldType(field.getField_type());
+          entry.setDataProvenance(field.getData_provenance());
+          entry.setSourcePpiModule(field.getSource_ppi_module());
+          entry.setTransformedByRegisteredTierPrivacyMethods(field.getTransformed_by_registered_tier_privacy_methods());
+
+          dataDictionaryEntryDao.save(entry);
         }
       }
     };
   }
-
-//        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-//        Timestamp definedTime = new Timestamp(Long.parseLong(reader.readLine()) * 1000);
-
-//        String line;
-//        while ((line = reader.readLine()) != null) {
-//          String[] fields = line.split(":");
-//
-//          String relevantOmopTable = fields[0];
-//          String fieldName = fields[1];
-//
-//          DataDictionaryEntry entry =
-//              dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
-//                  relevantOmopTable, fieldName, defaultCdrVersion);
-//
-//          // We are skipping ahead if the defined times match by assuming that the definition has
-//          // not changed.
-//          if (entry != null && definedTime.before(entry.getDefinedTime())) {
-//            continue;
-//          }
-//
-//          if (entry == null) {
-//            entry = new DataDictionaryEntry();
-//            entry.setRelevantOmopTable(relevantOmopTable);
-//            entry.setFieldName(fieldName);
-//            entry.setCdrVersion((defaultCdrVersion));
-//          }
-//
-//          entry.setDefinedTime(definedTime);
-//          entry.setOmopCdmStandardOrCustomField(fields[2]);
-//          entry.setDescription(fields[3]);
-//          entry.setFieldType(fields[4]);
-//          entry.setDataProvenance(fields[5]);
-//          entry.setSourcePpiModule(fields[6]);
-//          entry.setTransformedByRegisteredTierPrivacyMethods("true".equals(fields[7]));
-//
-//          dataDictionaryEntryDao.save(entry);
-//        }
-//      }
-//    }
 
   public static void main(String[] args) throws Exception {
     new SpringApplicationBuilder(LoadDataDictionary.class).web(false).run(args);
