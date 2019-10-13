@@ -1,6 +1,6 @@
 package org.pmiops.workbench.tools
 
-data class AvailableField(
+internal data class AvailableField(
         val field_name: String,
         val relevant_omop_table: String,
         val omop_cdm_standard_or_custom_field: String,

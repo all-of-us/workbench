@@ -1,10 +1,8 @@
 package org.pmiops.workbench.tools
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.sql.Timestamp
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class MetaData(
+internal data class MetaData(
         val id: String,
         val name: String,
         val version: Long,
