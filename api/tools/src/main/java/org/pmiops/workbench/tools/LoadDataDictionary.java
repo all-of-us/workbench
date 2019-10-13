@@ -3,14 +3,10 @@ package org.pmiops.workbench.tools;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
@@ -25,9 +21,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-import org.yaml.snakeyaml.representer.Representer;
 
 @SpringBootApplication
 @EnableJpaRepositories("org.pmiops.workbench")
@@ -67,8 +60,9 @@ public class LoadDataDictionary {
         }
 
         for (AvailableField field : dd.getTransformations()[0].getAvailable_fields()) {
-          DataDictionaryEntry entry = dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
-              field.getRelevant_omop_table(), field.getField_name(), cdrVersion);
+          DataDictionaryEntry entry =
+              dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
+                  field.getRelevant_omop_table(), field.getField_name(), cdrVersion);
 
           // We are skipping ahead if the defined times match by assuming that the definition has
           // not changed.
@@ -89,7 +83,8 @@ public class LoadDataDictionary {
           entry.setFieldType(field.getField_type());
           entry.setDataProvenance(field.getData_provenance());
           entry.setSourcePpiModule(field.getSource_ppi_module());
-          entry.setTransformedByRegisteredTierPrivacyMethods(field.getTransformed_by_registered_tier_privacy_methods());
+          entry.setTransformedByRegisteredTierPrivacyMethods(
+              field.getTransformed_by_registered_tier_privacy_methods());
 
           dataDictionaryEntryDao.save(entry);
         }
