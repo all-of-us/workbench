@@ -29,7 +29,7 @@ import {
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
-import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -211,28 +211,13 @@ const Subheader = (props) => {
 };
 
 export const ValueListItem: React.FunctionComponent <
-  {domain: Domain, domainValue: DomainValue, onChange: Function, checked: boolean}> =
-  ({domain, domainValue, onChange, checked}) => {
-    console.log(currentWorkspaceStore.getValue().cdrVersionId + " : " + domain.toString() + " : " + domainValue.value);
-    dataSetApi().getDataDictionaryEntry(
-      parseInt(currentWorkspaceStore.getValue().cdrVersionId), domain.toString(), domainValue.value)
-      .then(result => console.log(result))
-      .catch(err => console.error(err));
-
-    return <div style={{
-      ...styles.listItem,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingLeft: '10px',
-      paddingRight: '10px'
-    }}>
+  {domainValue: DomainValue, onChange: Function, checked: boolean}> =
+  ({domainValue, onChange, checked}) => {
+    return <div style={{display: 'flex', height: '1.2rem', marginLeft: '0.55rem'}}>
       <input type='checkbox' value={domainValue.value} onChange={() => onChange()}
-             style={{...styles.listItemCheckbox, marginTop: 3, marginLeft: 0, marginRight: 0}} checked={checked}/>
-      <div style={{lineHeight: '1.5rem', paddingLeft: '10px', wordWrap: 'break-word', color: colors.primary}}>{domainValue.value}</div>
-      <ClrIcon style={{
-        color: colors.accent,
-        marginLeft: 'auto'
-      }} shape='info-standard' class='is-solid' size={16}/>
+             style={styles.valueListItemCheckboxStyling} checked={checked}/>
+      <div style={{lineHeight: '1.5rem', wordWrap: 'break-word', color: colors.primary}}>
+        {domainValue.value}</div>
     </div>;
   };
 
@@ -796,9 +781,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                         </Subheader>
                         {valueSet.values.items.map(domainValue =>
                           <ValueListItem data-test-id='value-list-items'
-                            key={domainValue.value}
-                            domain={valueSet.domain}
-                            domainValue={domainValue}
+                            key={domainValue.value} domainValue={domainValue}
                             onChange={() => this.selectDomainValue(valueSet.domain, domainValue)}
                             checked={fp.some({domain: valueSet.domain, value: domainValue.value},
                               selectedDomainValuePairs)}/>
