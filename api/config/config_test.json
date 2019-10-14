@@ -77,5 +77,8 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": true
+  },
+  "actionAudit": {
+    "logName":"action-audit-test-3"
   }
 }

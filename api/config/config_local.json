@@ -79,7 +79,6 @@
     "enableNewAccountCreation": true
   },
   "actionAudit": {
-    "monitoredResourceName": "All of Us",
     "logName":"action-audit-test-3"
   }
 }

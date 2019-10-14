@@ -31,7 +31,6 @@ public class ActionAuditServiceTest {
   private static final long AGENT_ID_1 = 101L;
   private static final long AGENT_ID_2 = 102L;
   @Mock private Logging mockLogging;
-  @Mock private MonitoredResource mockMonitoredResource;
   @Mock private Provider<WorkbenchConfig> mockConfigProvider;
   @Captor private ArgumentCaptor<List<LogEntry>> logEntryListCaptor;
 
@@ -50,7 +49,7 @@ public class ActionAuditServiceTest {
     doReturn(workbenchConfig).when(mockConfigProvider).get();
 
     actionAuditService =
-        new ActionAuditServiceImpl(mockLogging, mockConfigProvider);
+        new ActionAuditServiceImpl(mockConfigProvider, mockLogging);
     final String actionId = ActionAuditService.newActionId();
 
     // ordinarily events sharing an action would have more things in common than this,

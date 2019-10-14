@@ -1,9 +1,11 @@
 package org.pmiops.workbench.audit.targetproperties;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -24,7 +26,8 @@ public enum WorkspaceTargetProperty {
   private String propertyName;
   private Function<Workspace, String> extractor;
 
-  WorkspaceTargetProperty(String propertyName, Function<Workspace, String> extractor) {
+  WorkspaceTargetProperty(String propertyName,
+      Function<Workspace, String> extractor) {
     this.propertyName = propertyName;
     this.extractor = extractor;
   }
@@ -34,6 +37,9 @@ public enum WorkspaceTargetProperty {
   }
 
   public String extract(Workspace workspace) {
+    if (workspace == null) {
+      return null;
+    }
     return extractor.apply(workspace);
   }
 
@@ -49,5 +55,24 @@ public enum WorkspaceTargetProperty {
                     prop.getPropertyName(), prop.extract(workspace)))
         .filter(entry -> entry.getValue() != null)
         .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
+  }
+
+  public static Map<String, PreviousNewValuePair> getChangedValuesByName(Workspace previousWorkspace,
+      Workspace newWorkspace) {
+    ImmutableMap.Builder<String, PreviousNewValuePair> resultBuilder = new Builder<>();
+    for (WorkspaceTargetProperty property : WorkspaceTargetProperty.values()) {
+      final String previousValue = property.extract(previousWorkspace);
+      final String newValue = property.extract(newWorkspace);
+      if (previousValue != null || newValue != null) {
+        if (previousValue != null && !previousValue.equals(newValue)
+            || !newValue.equals(previousValue)) {
+          resultBuilder.put(property.propertyName, PreviousNewValuePair.builder()
+              .setNewValue(newValue)
+              .setPreviousValue(previousValue)
+              .build());
+        }
+      }
+    }
+    return resultBuilder.build();
   }
 }

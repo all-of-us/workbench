@@ -21,17 +21,22 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ActionAuditServiceImpl implements ActionAuditService {
+
   private static final Logger serviceLogger =
       Logger.getLogger(ActionAuditServiceImpl.class.getName());
+
+  private static final String MONITORED_RESOURCE_TYPE = "project";
+  private static final String PROJECT_ID_LABEL = "project_id";
 
   private final Logging cloudLogging;
   private Provider<WorkbenchConfig> configProvider;
 
   @Autowired
   public ActionAuditServiceImpl(
-      Provider<WorkbenchConfig> configProvider) {
+      Provider<WorkbenchConfig> configProvider,
+      Logging cloudLogging) {
     this.configProvider = configProvider;
-    this.cloudLogging = LoggingOptions.getDefaultInstance().getService();
+    this.cloudLogging = cloudLogging;
   }
 
   @Override
@@ -56,9 +61,7 @@ public class ActionAuditServiceImpl implements ActionAuditService {
     return LogEntry.newBuilder(toJsonPayload(auditEvent))
         .setSeverity(Severity.INFO)
         .setLogName(actionAuditConfig.logName)
-        .setResource(MonitoredResource.newBuilder(
-            actionAuditConfig.monitoredResourceName)
-            .build())
+        .setResource(getMonitoredResource())
         .build();
   }
 
@@ -77,6 +80,13 @@ public class ActionAuditServiceImpl implements ActionAuditService {
     result.put(AuditColumn.PREV_VALUE.name(), toNullable(auditEvent.previousValue()));
     result.put(AuditColumn.NEW_VALUE.name(), toNullable(auditEvent.newValue()));
     return JsonPayload.of(result);
+  }
+
+  private MonitoredResource getMonitoredResource() {
+    final String projectId = configProvider.get().server.projectId;
+    return MonitoredResource.newBuilder(MONITORED_RESOURCE_TYPE)
+        .addLabel(PROJECT_ID_LABEL, projectId)
+        .build();
   }
 
   // Inverse of Optional.ofNullable(). Used for JSON api which expects null values for empty
