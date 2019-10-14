@@ -1,15 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
@@ -289,21 +281,22 @@ public class DataSetControllerTest {
             cohortQueryBuilder,
             dataSetDao);
     dataSetController =
-        new DataSetController(
-            bigQueryService,
-            CLOCK,
-            cdrVersionDao,
-            cohortDao,
-            conceptDao,
-            conceptSetDao,
-            dataDictionaryEntryDao,
-            dataSetDao,
-            dataSetMapper,
-            dataSetService,
-            fireCloudService,
-            notebooksService,
-            userProvider,
-            workspaceService);
+        spy(
+            new DataSetController(
+                bigQueryService,
+                CLOCK,
+                cdrVersionDao,
+                cohortDao,
+                conceptDao,
+                conceptSetDao,
+                dataDictionaryEntryDao,
+                dataSetDao,
+                dataSetMapper,
+                dataSetService,
+                fireCloudService,
+                notebooksService,
+                userProvider,
+                workspaceService));
     WorkspacesController workspacesController =
         new WorkspacesController(
             billingProjectBufferService,
@@ -511,6 +504,7 @@ public class DataSetControllerTest {
               returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
               return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
             });
+    when(dataSetController.generateRandomEightCharacterQualifier()).thenReturn("00000000");
   }
 
   private DataSetRequest buildEmptyDataSetRequest() {
@@ -652,10 +646,13 @@ public class DataSetControllerTest {
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
+    String prefix = "dataset_00000000_condition_";
     assertThat(response.getCode())
         .isEqualTo(
             "import pandas\n\n"
-                + "blah_condition_sql = \"\"\"SELECT PERSON_ID FROM `"
+                + "# This query represents dataset \"blah\" for domain \"condition\"\n"
+                + prefix
+                + "sql = \"\"\"SELECT PERSON_ID FROM `"
                 + TEST_CDR_TABLE
                 + ".condition_occurrence` c_occurrence WHERE \n"
                 + "(condition_concept_id IN (123) OR \n"
@@ -664,7 +661,8 @@ public class DataSetControllerTest {
                 + TEST_CDR_TABLE
                 + ".person` person))\"\"\"\n"
                 + "\n"
-                + "blah_condition_query_config = {\n"
+                + prefix
+                + "query_config = {\n"
                 + "  'query': {\n"
                 + "  'parameterMode': 'NAMED',\n"
                 + "  'queryParameters': [\n\n"
@@ -674,10 +672,16 @@ public class DataSetControllerTest {
                 + "\n"
                 + "\n"
                 + "\n"
-                + "blah_condition_df = pandas.read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)"
+                + prefix
+                + "df = pandas.read_gbq("
+                + prefix
+                + "sql, dialect=\"standard\", configuration="
+                + prefix
+                + "query_config)"
                 + "\n"
                 + "\n"
-                + "blah_condition_df.head(5)");
+                + prefix
+                + "df.head(5)");
   }
 
   @Test
@@ -699,12 +703,15 @@ public class DataSetControllerTest {
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.R.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
+    String prefix = "dataset_00000000_condition_";
     assertThat(response.getCode())
         .isEqualTo(
             "if(! \"reticulate\" %in% installed.packages()) { install.packages(\"reticulate\") }\n"
                 + "library(reticulate)\n"
                 + "pd <- reticulate::import(\"pandas\")\n\n"
-                + "blah_condition_sql <- \"SELECT PERSON_ID FROM `"
+                + "# This query represents dataset \"blah\" for domain \"condition\"\n"
+                + prefix
+                + "sql <- \"SELECT PERSON_ID FROM `"
                 + TEST_CDR_TABLE
                 + ".condition_occurrence` c_occurrence WHERE \n"
                 + "(condition_concept_id IN (123) OR \n"
@@ -713,7 +720,8 @@ public class DataSetControllerTest {
                 + TEST_CDR_TABLE
                 + ".person` person))\"\n"
                 + "\n"
-                + "blah_condition_query_config <- list(\n"
+                + prefix
+                + "query_config <- list(\n"
                 + "  query = list(\n"
                 + "    parameterMode = 'NAMED',\n"
                 + "    queryParameters = list(\n\n"
@@ -721,10 +729,17 @@ public class DataSetControllerTest {
                 + "  )\n"
                 + ")\n"
                 + "\n"
-                + "blah_condition_df <- pd$read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)"
+                + prefix
+                + "df <- pd$read_gbq("
+                + prefix
+                + "sql, dialect=\"standard\", configuration="
+                + prefix
+                + "query_config)"
                 + "\n"
                 + "\n"
-                + "head(blah_condition_df, 5)");
+                + "head("
+                + prefix
+                + "df, 5)");
   }
 
   @Test
@@ -752,8 +767,8 @@ public class DataSetControllerTest {
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(2)).executeQuery(any());
-    assertThat(response.getCode()).contains("blah_condition_df");
-    assertThat(response.getCode()).contains("blah_drug_df");
+    assertThat(response.getCode()).contains("condition_df");
+    assertThat(response.getCode()).contains("drug_df");
   }
 
   @Test
@@ -775,7 +790,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
-    assertThat(response.getCode()).contains("blah_observation_df");
+    assertThat(response.getCode()).contains("observation_df");
     assertThat(response.getCode()).contains("ds_survey");
   }
 
@@ -839,7 +854,7 @@ public class DataSetControllerTest {
     */
     assertThat(response.getCode())
         .contains(
-            "blah_person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person");
+            "person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person");
     // For demographic unlike other domains WHERE should be followed by person.person_id rather than
     // concept_id
     assertThat(response.getCode().contains("WHERE person.PERSON_ID"));

@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
 import {RadioButton, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
@@ -158,7 +159,7 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
             <Spinner style={{alignContent: 'center'}}/>
           </div> :
           <ModalBody>
-            <div style={{display: 'flex', flexDirection: 'row'}}>
+            <FlexRow>
               <TooltipTrigger content={
                 <div>No concept sets in survey {surveyName} </div>}
                               disabled={conceptSets.length > 0}>
@@ -186,7 +187,7 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
                              }}/>
                 <label style={styles.label}>Create new set</label>
               </div>
-            </div>
+            </FlexRow>
             {addingToExistingSet ? (
                     <ModalBody data-test-id='add-to-existing'>
                       <select style={{marginTop: '1rem', height: '1.5rem', width: '100%'}}

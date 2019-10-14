@@ -4,6 +4,7 @@ import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
 import {CheckBox, RadioButton} from 'app/components/inputs';
 import colors from 'app/styles/colors';
 import {
@@ -148,14 +149,14 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
 
       {/*Gender section*/}
       <Section header='3. Gender'>
-        <div style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
+        <FlexRow style={{flexWrap: 'wrap'}}>
           {AccountCreationOptions.Gender.map((gender) => {
             return <CheckBoxWithLabel attribute='gender'
                                       onChange={(value) => this.updateList('gender', gender.value)}
                                       label={gender.label} value={gender.value}/>;
           })
           }
-        </div>
+        </FlexRow>
       </Section>
 
       {/*Year of birth section*/}

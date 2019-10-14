@@ -8,6 +8,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {Button, Link} from 'app/components/buttons';
+import {FlexColumn} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
@@ -198,7 +199,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     const {cdrVersion, workspace, workspaceUserRoles, googleBucketModalOpen,
       sharing, publishing} = this.state;
     return <div style={styles.mainPage}>
-      <div style={{display: 'flex', flexDirection: 'column', margin: '1rem', width: '98%'}}>
+      <FlexColumn style={{margin: '1rem', width: '98%'}}>
         <ResearchPurpose data-test-id='researchPurpose'/>
         {profile.authorities.includes(Authority.FEATUREDWORKSPACEADMIN) &&
         <div style={{display: 'flex', justifyContent: 'flex-end'}}>
@@ -207,7 +208,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
             <Button onClick={() => this.publishUnpublishWorkspace(true)}
                     disabled={publishing} style={{marginLeft: '0.5rem'}}>Publish</Button>
         </div>}
-      </div>
+      </FlexColumn>
       <div style={styles.rightSidebar}>
         <div style={styles.shareHeader}>
           <h3 style={{marginTop: 0}}>Collaborators:</h3>
