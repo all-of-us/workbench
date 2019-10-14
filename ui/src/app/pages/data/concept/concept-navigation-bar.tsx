@@ -1,4 +1,5 @@
 import {Clickable} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
@@ -53,7 +54,7 @@ const tooltipContent = [
 export const ConceptNavigationBar: React.FunctionComponent<
   {ns: string, wsId: string, showConcepts: boolean}> =
   ({ns, wsId, showConcepts}) => {
-    return <div style={{display: 'flex', flexDirection: 'row'}}>
+    return <FlexRow>
       <Clickable style={showConcepts ? activatedStyles.headerActivated : styles.headerLinks}
                  onClick={() => navigate(['workspaces', ns, wsId, 'data', 'concepts'])}
                  data-test-id='concepts-link'>
@@ -69,5 +70,5 @@ export const ConceptNavigationBar: React.FunctionComponent<
       <TooltipTrigger content={tooltipContent}>
         <ClrIcon shape='info' className='is-solid' style={styles.infoIcon}/>
       </TooltipTrigger>
-    </div>;
+    </FlexRow>;
   };

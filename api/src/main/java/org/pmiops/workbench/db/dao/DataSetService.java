@@ -31,5 +31,6 @@ public interface DataSetService {
   List<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,
       String dataSetName,
+      String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);
 }

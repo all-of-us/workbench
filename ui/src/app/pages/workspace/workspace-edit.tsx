@@ -2,6 +2,7 @@ import {Location} from '@angular/common';
 import {Component} from '@angular/core';
 import {Button, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {CheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -258,7 +259,7 @@ const styles = reactStyles({
 
 export const WorkspaceEditSection = (props) => {
   return <div key={props.header} style={{marginBottom: '0.5rem'}}>
-    <div style={{display: 'flex', flexDirection: 'row', marginBottom: (props.largeHeader ? 12 : 0),
+    <FlexRow style={{marginBottom: (props.largeHeader ? 12 : 0),
       marginTop: (props.largeHeader ? 12 : 24)}}>
       <div style={{...styles.header,
         fontSize: (props.largeHeader ? 20 : 16)}}>
@@ -272,7 +273,7 @@ export const WorkspaceEditSection = (props) => {
         <InfoIcon style={{...styles.infoIcon,  marginTop: '0.2rem'}}/>
       </TooltipTrigger>
       }
-    </div>
+    </FlexRow>
     {props.subHeader && <div style={{...styles.header, color: colors.primary, fontSize: 14}}>
       {props.subHeader}
     </div>
@@ -290,7 +291,7 @@ export const WorkspaceCategory = (props) => {
   return <div style={...fp.merge(styles.categoryRow, props.style)}>
     <CheckBox style={styles.checkBoxStyle} checked={!!props.value}
       onChange={e => props.onChange(e)}/>
-    <div style={{display: 'flex', flexDirection: 'column', marginTop: '-0.2rem'}}>
+    <FlexColumn style={{marginTop: '-0.2rem'}}>
       <label style={styles.shortDescription}>
         {props.shortDescription}
       </label>
@@ -300,7 +301,7 @@ export const WorkspaceCategory = (props) => {
         </label>
         {props.children}
       </div>
-    </div>
+    </FlexColumn>
   </div>;
 };
 
@@ -405,10 +406,22 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         if (this.isMode(WorkspaceEditMode.Duplicate)) {
           this.setState({workspace: {
             ...this.props.workspace,
-            // This is the only field which is not automatically handled/differentiated
-            // on the API level.
-            name: 'Duplicate of ' + this.props.workspace.name
+              // Replace potential nulls with empty string or empty array
+            researchPurpose: {
+              ...this.props.workspace.researchPurpose,
+              populationDetails: !this.props.workspace.researchPurpose.populationDetails ?
+                [] : this.props.workspace.researchPurpose.populationDetails,
+              diseaseOfFocus: !this.props.workspace.researchPurpose.diseaseOfFocus ?
+                '' : this.props.workspace.researchPurpose.diseaseOfFocus}
           }});
+          if (this.isMode(WorkspaceEditMode.Duplicate)) {
+            this.setState({workspace: {
+              ...this.props.workspace,
+              // This is the only field which is not automatically handled/differentiated
+              // on the API level.
+              name: 'Duplicate of ' + this.props.workspace.name
+            }});
+          }
         }
       }
 
@@ -609,7 +622,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           }}/>}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                               section={{marginTop: '24px'}} largeHeader required>
-          <div style={{display: 'flex', flexDirection: 'row'}}>
+          <FlexRow>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
               value = {this.state.workspace.name}
               onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
@@ -635,16 +648,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <TooltipTrigger content={toolTipText.cdrSelect}>
               <InfoIcon style={{...styles.infoIcon, marginTop: '0.5rem'}}/>
             </TooltipTrigger>
-          </div>
+          </FlexRow>
         </WorkspaceEditSection>
         {this.isMode(WorkspaceEditMode.Duplicate) &&
-        <div style={{display: 'flex', flexDirection: 'row'}}>
+        <FlexRow>
           <CheckBox
                  style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '1.2rem'}}
           onChange={v => this.setState({cloneUserRole: v})}/>
           <WorkspaceEditSection header='Copy Original workspace Collaborators'
             description='Share cloned workspace with same collaborators'/>
-        </div>
+        </FlexRow>
         }
         <WorkspaceEditSection header='Billing Account' subHeader='National Institutes of Health'
             tooltip={toolTipText.billingAccount}/>
@@ -659,8 +672,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             }/>
         <WorkspaceEditSection header={researchPurposeQuestions[0].header}
             description={researchPurposeQuestions[0].description} required>
-          <div style={{display: 'flex', flexDirection: 'row'}}>
-            <div style={{display: 'flex', flexDirection: 'column', flex: '1 1 0'}}>
+          <FlexRow>
+            <FlexColumn style={{flex: '1 1 0'}}>
               {ResearchPurposeItems.slice(0, sliceByHalfLength(ResearchPurposeItems))
                 .map((rp, i) =>
                   <WorkspaceCategory shortDescription={rp.shortDescription} key={i}
@@ -669,8 +682,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     onChange={v => this.updateResearchPurpose(rp.shortName, v)}
                     children={rp.shortName === 'diseaseFocusedResearch' ?
                       this.makeDiseaseInput() : undefined} />)}
-            </div>
-            <div style={{display: 'flex', flexDirection: 'column', flex: '1 1 0'}}>
+            </FlexColumn>
+            <FlexColumn style={{flex: '1 1 0'}}>
               {ResearchPurposeItems.slice(sliceByHalfLength(ResearchPurposeItems))
                 .map((rp, i) =>
                   <WorkspaceCategory shortDescription={rp.shortDescription}
@@ -683,8 +696,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                         disabled={!this.state.workspace.researchPurpose.otherPurpose}
                         style={{marginTop: '0.5rem'}}/> : undefined}/>
                 )}
-            </div>
-          </div>
+            </FlexColumn>
+          </FlexRow>
         </WorkspaceEditSection>
         <WorkspaceEditSection
           header={researchPurposeQuestions[1].header}
@@ -739,17 +752,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <strong>If "Yes": </strong> Please specify the demographic category or categories of the
             population(s) that you are interested in exploring in your study.
             Select as many as applicable.
-            <div style={{display: 'flex', flexDirection: 'row', flex: '1 1 0',
-              marginTop: '0.5rem'}}>
-              <div style={{display: 'flex', flexDirection: 'column'}}>
+            <FlexRow style={{flex: '1 1 0', marginTop: '0.5rem'}}>
+              <FlexColumn>
                 {specificPopulations.slice(0, sliceByHalfLength(specificPopulations) + 1).map(i =>
                   <LabeledCheckBox label={i.label} key={i.label}
                                    value={this.specificPopulationSelected(i.object)}
                                    onChange={v => this.updateSpecificPopulation(i.object, v)}
                                    disabled={!this.state.workspace.researchPurpose.population}/>
                 )}
-              </div>
-              <div style={{display: 'flex', flexDirection: 'column'}}>
+              </FlexColumn>
+              <FlexColumn>
                 {specificPopulations.slice(sliceByHalfLength(specificPopulations) + 1).map(i =>
                   <LabeledCheckBox label={i.label} key={i.label}
                                    value={this.specificPopulationSelected(i.object)}
@@ -766,8 +778,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                              this.state.workspace.researchPurpose.populationDetails)}
                            onChange={v => this.setState(fp.set(
                              ['workspace', 'researchPurpose', 'otherPopulationDetails'], v))}/>
-              </div>
-            </div>
+              </FlexColumn>
+            </FlexRow>
           </div>
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Request a review of your research purpose for potential
@@ -795,7 +807,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                  contentRight={specificPopulations.map(sp => sp.ubrDescription)}/>
             </div>
           }
-          <div style={{display: 'flex', flexDirection: 'row', paddingTop: '0.3rem'}}>
+          <FlexRow style={{paddingTop: '0.3rem'}}>
             <label style={styles.text}>
               <div>
               If you are concerned that your research may result in <a href='/definitions/stigmatization' target='_blank'>
@@ -808,7 +820,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </div>
               <div style={{marginTop: '0.5rem'}}>Would you like to request a review of your research purpose?</div>
             </label>
-          </div>
+          </FlexRow>
           <div>
             <RadioButton name='reviewRequested'
                          onChange={() => {
@@ -829,8 +841,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </div>
         </WorkspaceEditSection>
         <div>
-          <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem',
-            marginBottom: '1rem'}}>
+          <FlexRow style={{marginTop: '1rem', marginBottom: '1rem'}}>
             <Button type='secondary' style={{marginRight: '1rem'}}
                     onClick = {() => this.props.cancel()}>
               Cancel
@@ -853,7 +864,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 {this.renderButtonText()}
               </Button>
             </TooltipTrigger>
-          </div>
+          </FlexRow>
         </div>
         {this.state.workspaceCreationError &&
         <Modal>
