@@ -198,7 +198,7 @@ public class DataSetServiceImpl implements DataSetService {
           .put(Domain.OBSERVATION, "observation")
           .put(Domain.PERSON, "person")
           .put(Domain.PROCEDURE, "procedure")
-          .put(Domain.SURVEY, "survey")
+          .put(Domain.SURVEY, "answer")
           .put(Domain.VISIT, "visit")
           .build();
 
