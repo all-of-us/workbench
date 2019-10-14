@@ -50,8 +50,8 @@ public final class SearchGroupItemQueryBuilder {
   private static final String UNION_TEMPLATE = "union all\n";
   private static final String DESC = " desc";
   private static final String BASE_SQL =
-      "select distinct person_id, entry_date, concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_search_all_events`\n"
+      "select distinct cb_search.person_id, cb_search.entry_date, cb_search.concept_id\n"
+          + "from `${projectId}.${dataSetId}.cb_search_all_events` cb_search\n"
           + "where ";
   private static final String STANDARD_SQL = "(is_standard = %s and concept_id in unnest(%s))\n";
   private static final String SOURCE_SQL = STANDARD_SQL;
@@ -89,8 +89,8 @@ public final class SearchGroupItemQueryBuilder {
           + "from (%s)\n"
           + ") temp2 on (%s)\n";
   private static final String TEMPORAL_SQL =
-      "select person_id, visit_occurrence_id, entry_date%s\n"
-          + "from `${projectId}.${dataSetId}.cb_search_all_events`\n"
+      "select cb_search.person_id, cb_search.visit_occurrence_id, cb_search.entry_date%s\n"
+          + "from `${projectId}.${dataSetId}.cb_search_all_events` cb_search\n"
           + "where %s\n"
           + "and person_id in (%s)\n";
   private static final String RANK_1_SQL =
