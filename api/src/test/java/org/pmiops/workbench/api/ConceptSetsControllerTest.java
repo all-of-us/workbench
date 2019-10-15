@@ -30,6 +30,7 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -59,7 +60,6 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -175,13 +175,13 @@ public class ConceptSetsControllerTest {
 
   @Autowired WorkspaceService workspaceService;
 
-  @Autowired WorkspaceConversionUtils workspaceConversionUtils;
-
   @Autowired ConceptSetDao conceptSetDao;
 
   @Autowired CdrVersionDao cdrVersionDao;
 
   @Autowired ConceptDao conceptDao;
+
+  @Autowired DataSetService dataSetService;
 
   @Autowired WorkspaceDao workspaceDao;
 
@@ -210,7 +210,6 @@ public class ConceptSetsControllerTest {
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
-    WorkspaceConversionUtils.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     UserService.class,
@@ -220,14 +219,15 @@ public class ConceptSetsControllerTest {
   })
   @MockBean({
     BillingProjectBufferService.class,
-    ConceptBigQueryService.class,
-    FireCloudService.class,
     CloudStorageService.class,
+    ComplianceService.class,
+    ConceptBigQueryService.class,
     ConceptSetService.class,
+    DataSetService.class,
+    DirectoryService.class,
+    FireCloudService.class,
     NotebooksService.class,
     UserRecentResourceService.class,
-    ComplianceService.class,
-    DirectoryService.class,
     WorkspaceAuditAdapterService.class
   })
   static class Configuration {

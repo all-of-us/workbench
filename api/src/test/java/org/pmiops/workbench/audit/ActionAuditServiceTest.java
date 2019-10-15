@@ -11,6 +11,7 @@ import com.google.cloud.logging.Payload;
 import com.google.cloud.logging.Payload.JsonPayload;
 import com.google.cloud.logging.Payload.Type;
 import com.google.common.collect.ImmutableList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +109,23 @@ public class ActionAuditServiceTest {
   }
 
   @Test
-  public void testSendsMultipleEvents() {
+  public void testSendsExpectedColumnNames() {
+    actionAuditService.send(event1);
+    verify(mockLogging).write(logEntryListCaptor.capture());
+    List<LogEntry> entryList = logEntryListCaptor.getValue();
+    assertThat(entryList.size()).isEqualTo(1);
+    LogEntry entry = entryList.get(0);
+    assertThat(entry.getPayload().getType()).isEqualTo(Payload.Type.JSON);
+    JsonPayload jsonPayload = entry.getPayload();
+
+    for (String key : jsonPayload.getDataAsMap().keySet()) {
+      assertThat(Arrays.stream(AuditColumn.values()).anyMatch(col -> col.toString().equals(key)))
+          .isTrue();
+    }
+  }
+
+  @Test
+  public void testSendsMultipleEventsAsSingleAction() {
     actionAuditService.send(ImmutableList.of(event1, event2));
     verify(mockLogging).write(logEntryListCaptor.capture());
     List<LogEntry> entryList = logEntryListCaptor.getValue();

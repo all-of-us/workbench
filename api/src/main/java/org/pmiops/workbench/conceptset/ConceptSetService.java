@@ -34,8 +34,7 @@ public class ConceptSetService {
     c.setLastModifiedTime(targetWorkspace.getLastModifiedTime());
     c.setCreationTime(targetWorkspace.getCreationTime());
     c.setVersion(1);
-    ConceptSet saved = conceptSetDao.save(c);
-    return saved;
+    return conceptSetDao.save(c);
   }
 
   public List<ConceptSet> getConceptSets(Workspace workspace) {

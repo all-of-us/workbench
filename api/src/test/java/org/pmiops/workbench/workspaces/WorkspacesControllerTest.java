@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -70,8 +71,11 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.DataSetService;
+import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -206,7 +210,7 @@ public class WorkspacesControllerTest {
       makeConcept(CLIENT_CONCEPT_3);
 
   @Autowired private BillingProjectBufferService billingProjectBufferService;
-  @Autowired private WorkspaceAuditAdapterService workspaceAuditAdapterService;
+  @Autowired private WorkspaceAuditAdapterService mockWorkspaceAuditAdapterService;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
 
@@ -216,22 +220,23 @@ public class WorkspacesControllerTest {
     NotebooksServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
-    WorkspaceConversionUtils.class,
     CohortsController.class,
     CohortFactoryImpl.class,
     CohortCloningService.class,
     CohortReviewController.class,
     CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,
+    DataSetServiceImpl.class,
     ReviewQueryBuilder.class,
     ConceptSetService.class,
     ConceptSetsController.class
   })
   @MockBean({
     BillingProjectBufferService.class,
-    ConceptBigQueryService.class,
-    FireCloudService.class,
     CohortMaterializationService.class,
+    ConceptBigQueryService.class,
+    CdrBigQuerySchemaConfigService.class,
+    FireCloudService.class,
     CloudStorageService.class,
     BigQueryService.class,
     CohortQueryBuilder.class,
@@ -282,6 +287,7 @@ public class WorkspacesControllerTest {
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortsController cohortsController;
   @Autowired ConceptSetsController conceptSetsController;
+  @Autowired DataSetService dataSetService;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
@@ -516,6 +522,7 @@ public class WorkspacesControllerTest {
   public void getWorkspaces() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
+    verify(mockWorkspaceAuditAdapterService).fireCreateAction(any(Workspace.class), anyLong());
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
@@ -612,7 +619,8 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
-
+    verify(mockWorkspaceAuditAdapterService)
+        .fireDeleteAction(any(org.pmiops.workbench.db.model.Workspace.class));
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");

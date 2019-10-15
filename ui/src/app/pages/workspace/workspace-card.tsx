@@ -274,12 +274,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
             >
               {accessLevel}
             </div>
-            <div
-              style={{
-                fontSize: 12,
-                lineHeight: 17
-              }}
-            >
+            <div style={{fontSize: 12}}>
               Last Changed: {displayDate(workspace.lastModifiedTime)}
             </div>
           </FlexColumn>

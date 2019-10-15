@@ -39,6 +39,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -76,7 +77,6 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -162,6 +162,7 @@ public class CohortsControllerTest {
   @Autowired ConceptSetDao conceptSetDao;
   @Autowired ConceptDao conceptDao;
   @Autowired CohortReviewDao cohortReviewDao;
+  @Autowired DataSetService dataSetService;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired UserDao userDao;
   @Autowired CohortMaterializationService cohortMaterializationService;
@@ -179,24 +180,24 @@ public class CohortsControllerTest {
     CohortFactoryImpl.class,
     NotebooksServiceImpl.class,
     UserService.class,
-    WorkspaceConversionUtils.class,
     WorkspacesController.class,
     CohortsController.class,
     ConceptSetsController.class
   })
   @MockBean({
     BillingProjectBufferService.class,
+    CdrVersionService.class,
+    CloudStorageService.class,
+    CohortMaterializationService.class,
+    ComplianceService.class,
     ConceptBigQueryService.class,
+    ConceptService.class,
+    ConceptSetService.class,
+    DataSetService.class,
+    DirectoryService.class,
     FireCloudService.class,
     LeonardoNotebooksClient.class,
-    CloudStorageService.class,
-    ConceptSetService.class,
     UserRecentResourceService.class,
-    CohortMaterializationService.class,
-    CdrVersionService.class,
-    ConceptService.class,
-    ComplianceService.class,
-    DirectoryService.class,
     WorkspaceAuditAdapterService.class
   })
   static class Configuration {

@@ -34,7 +34,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.pmiops.workbench.audit.ActionAuditService;
 import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -95,7 +94,6 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -151,8 +149,6 @@ public class DataSetControllerTest {
   private SearchRequest searchRequest;
   private TestMockFactory testMockFactory;
   private Workspace workspace;
-
-  @Autowired ActionAuditService actionAuditService;
 
   @Autowired BillingProjectBufferService billingProjectBufferService;
 
@@ -217,11 +213,9 @@ public class DataSetControllerTest {
     TestBigQueryCdrSchemaConfig.class,
     UserService.class,
     WorkspacesController.class,
-    WorkspaceConversionUtils.class,
     WorkspaceServiceImpl.class
   })
   @MockBean({
-    ActionAuditService.class,
     BillingProjectBufferService.class,
     BigQueryService.class,
     CdrBigQuerySchemaConfigService.class,

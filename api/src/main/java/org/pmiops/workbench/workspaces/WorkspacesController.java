@@ -273,13 +273,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       User user,
       FirecloudWorkspaceId workspaceId,
       org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
-      Timestamp now) {
+      Timestamp createdAndLastModifiedTime) {
     dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
     dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
     dbWorkspace.setCreator(user);
     dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
-    dbWorkspace.setCreationTime(now);
-    dbWorkspace.setLastModifiedTime(now);
+    dbWorkspace.setCreationTime(createdAndLastModifiedTime);
+    dbWorkspace.setLastModifiedTime(createdAndLastModifiedTime);
     dbWorkspace.setVersion(1);
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
@@ -464,7 +464,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
     org.pmiops.workbench.db.model.Workspace savedWorkspace =
-        workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
+        workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
 
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, WorkspaceAccessEntry> fromAclsMap =
