@@ -31,9 +31,9 @@ public class DataSet {
   private Timestamp lastModifiedTime;
   private Boolean invalid;
   private Boolean includesAllParticipants;
-  private List<Long> conceptSetId;
-  private List<Long> cohortSetId;
-  private List<DataSetValues> values;
+  private List<Long> conceptSetIds;
+  private List<Long> cohortIds;
+  private List<DataSetValue> values;
   private short prePackagedConceptSet;
 
   public DataSet() {
@@ -66,9 +66,7 @@ public class DataSet {
     setIncludesAllParticipants(dataSet.getIncludesAllParticipants());
     setValues(
         dataSet.getValues().stream()
-            .map(
-                dataSetValue ->
-                    new DataSetValues(dataSetValue.getDomainId(), dataSetValue.getValue()))
+            .map(DataSetValue::new)
             .collect(Collectors.toList()));
     setPrePackagedConceptSet(dataSet.getPrePackagedConceptSet());
   }
@@ -169,33 +167,33 @@ public class DataSet {
   @ElementCollection
   @CollectionTable(name = "data_set_concept_set", joinColumns = @JoinColumn(name = "data_set_id"))
   @Column(name = "concept_set_id")
-  public List<Long> getConceptSetId() {
-    return conceptSetId;
+  public List<Long> getConceptSetIds() {
+    return conceptSetIds;
   }
 
-  public void setConceptSetId(List<Long> conceptSetId) {
-    this.conceptSetId = conceptSetId;
+  public void setConceptSetIds(List<Long> conceptSetIds) {
+    this.conceptSetIds = conceptSetIds;
   }
 
   @ElementCollection
   @CollectionTable(name = "data_set_cohort", joinColumns = @JoinColumn(name = "data_set_id"))
   @Column(name = "cohort_id")
-  public List<Long> getCohortSetId() {
-    return cohortSetId;
+  public List<Long> getCohortIds() {
+    return cohortIds;
   }
 
-  public void setCohortSetId(List<Long> cohortSetId) {
-    this.cohortSetId = cohortSetId;
+  public void setCohortIds(List<Long> cohortIds) {
+    this.cohortIds = cohortIds;
   }
 
   @ElementCollection
   @CollectionTable(name = "data_set_values", joinColumns = @JoinColumn(name = "data_set_id"))
   @Column(name = "values")
-  public List<DataSetValues> getValues() {
+  public List<DataSetValue> getValues() {
     return values;
   }
 
-  public void setValues(List<DataSetValues> values) {
+  public void setValues(List<DataSetValue> values) {
     this.values = values;
   }
 

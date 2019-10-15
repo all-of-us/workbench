@@ -402,15 +402,15 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(saved.getCdrVersion());
     boolean cdrVersionChanged =
         from.getCdrVersion().getCdrVersionId() != to.getCdrVersion().getCdrVersionId();
-    Map<Long, Long> toCohortIdByFromCohortId = new HashMap<>();
+    Map<Long, Long> fromCohortIdToToCohortId = new HashMap<>();
     for (Cohort fromCohort : from.getCohorts()) {
-      toCohortIdByFromCohortId.put(
+      fromCohortIdToToCohortId.put(
           fromCohort.getCohortId(),
           cohortCloningService.cloneCohortAndReviews(fromCohort, to).getCohortId());
     }
-    Map<Long, Long> toConceptSetIdByFromConceptSetId = new HashMap<>();
+    Map<Long, Long> fromConceptSetIdToToConceptSetId = new HashMap<>();
     for (ConceptSet fromConceptSet : conceptSetService.getConceptSets(from)) {
-      toConceptSetIdByFromConceptSetId.put(
+      fromConceptSetIdToToConceptSetId.put(
           fromConceptSet.getConceptSetId(),
           conceptSetService
               .cloneConceptSetAndConceptIds(fromConceptSet, to, cdrVersionChanged)
@@ -420,11 +420,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       dataSetService.cloneDataSetToWorkspace(
           dataSet,
           to,
-          toCohortIdByFromCohortId.values().stream()
-              .filter(cohortId -> dataSet.getCohortSetId().contains(cohortId))
+          fromCohortIdToToCohortId.values().stream()
+              .filter(cohortId -> dataSet.getCohortIds().contains(cohortId))
               .collect(Collectors.toSet()),
-          toConceptSetIdByFromConceptSetId.values().stream()
-              .filter(conceptSetId -> dataSet.getConceptSetId().contains(conceptSetId))
+          fromConceptSetIdToToConceptSetId.values().stream()
+              .filter(conceptSetId -> dataSet.getConceptSetIds().contains(conceptSetId))
               .collect(Collectors.toSet()));
     }
     return saved;

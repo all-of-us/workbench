@@ -30,7 +30,7 @@ import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.DataSet;
-import org.pmiops.workbench.db.model.DataSetValues;
+import org.pmiops.workbench.db.model.DataSetValue;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -166,7 +166,7 @@ public class DataSetServiceImpl implements DataSetService {
       long workspaceId,
       List<Long> cohortIdList,
       List<Long> conceptIdList,
-      List<DataSetValues> values,
+      List<DataSetValue> values,
       PrePackagedConceptSetEnum prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime) {
@@ -179,8 +179,8 @@ public class DataSetServiceImpl implements DataSetService {
     dataSetModel.setInvalid(false);
     dataSetModel.setCreatorId(creatorId);
     dataSetModel.setCreationTime(creationTime);
-    dataSetModel.setCohortSetId(cohortIdList);
-    dataSetModel.setConceptSetId(conceptIdList);
+    dataSetModel.setCohortIds(cohortIdList);
+    dataSetModel.setConceptSetIds(conceptIdList);
     dataSetModel.setValues(values);
     dataSetModel.setPrePackagedConceptSetEnum(prePackagedConceptSetEnum);
 
@@ -547,8 +547,8 @@ public class DataSetServiceImpl implements DataSetService {
     toDataSet.setLastModifiedTime(toWorkspace.getLastModifiedTime());
     toDataSet.setCreationTime(toWorkspace.getCreationTime());
 
-    toDataSet.setConceptSetId(new ArrayList<>(conceptSetIds));
-    toDataSet.setCohortSetId(new ArrayList<>(conceptSetIds));
+    toDataSet.setConceptSetIds(new ArrayList<>(conceptSetIds));
+    toDataSet.setCohortIds(new ArrayList<>(conceptSetIds));
     return dataSetDao.save(toDataSet);
   }
 
