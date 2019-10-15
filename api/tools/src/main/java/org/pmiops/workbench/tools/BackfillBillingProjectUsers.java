@@ -1,11 +1,13 @@
 package org.pmiops.workbench.tools;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,6 +36,9 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class BackfillBillingProjectUsers {
+  public static final List<String> FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS =
+      ImmutableList.of(
+          "accessLevel", "workspace.namespace", "workspace.name", "workspace.createdBy");
 
   private static Option fcBaseUrlOpt =
       Option.builder()
@@ -112,7 +117,8 @@ public class BackfillBillingProjectUsers {
       boolean dryRun)
       throws ApiException {
     int userUpgrades = 0;
-    for (WorkspaceResponse resp : workspacesApi.listWorkspaces()) {
+    for (WorkspaceResponse resp :
+        workspacesApi.listWorkspaces(FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS)) {
       Workspace w = resp.getWorkspace();
       if (!w.getNamespace().startsWith(billingProjectPrefix)) {
         continue;

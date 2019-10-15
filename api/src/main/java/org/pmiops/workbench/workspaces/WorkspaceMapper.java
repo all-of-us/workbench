@@ -3,9 +3,14 @@ package org.pmiops.workbench.workspaces;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
@@ -166,5 +171,29 @@ public class WorkspaceMapper {
       researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
     }
     return researchPurpose;
+  }
+
+  public RecentWorkspace buildRecentWorkspace(
+      UserRecentWorkspace userRecentWorkspace,
+      org.pmiops.workbench.db.model.Workspace dbWorkspace,
+      WorkspaceAccessLevel accessLevel) {
+    return new RecentWorkspace()
+        .workspace(toApiWorkspace(dbWorkspace))
+        .accessedTime(userRecentWorkspace.getLastAccessDate().toString())
+        .accessLevel(accessLevel);
+  }
+
+  public List<RecentWorkspace> buildRecentWorkspaceList(
+      List<UserRecentWorkspace> userRecentWorkspaces,
+      Map<Long, org.pmiops.workbench.db.model.Workspace> dbWorkspacesByWorkspaceId,
+      Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsByWorkspaceId) {
+    return userRecentWorkspaces.stream()
+        .map(
+            userRecentWorkspace ->
+                buildRecentWorkspace(
+                    userRecentWorkspace,
+                    dbWorkspacesByWorkspaceId.get(userRecentWorkspace.getWorkspaceId()),
+                    workspaceAccessLevelsByWorkspaceId.get(userRecentWorkspace.getWorkspaceId())))
+        .collect(Collectors.toList());
   }
 }

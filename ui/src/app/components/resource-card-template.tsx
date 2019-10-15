@@ -1,5 +1,6 @@
 import {Clickable, MenuItem} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SnowmanIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
@@ -84,8 +85,8 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
 
       <ResourceCardBase style={styles.card}
                         data-test-id='card'>
-        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
-          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
+        <FlexColumn style={{alignItems: 'flex-start'}}>
+          <FlexRow style={{alignItems: 'flex-start'}}>
             <PopupTrigger
               data-test-id='resource-card-menu'
               side='bottom'
@@ -118,9 +119,9 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
                  }}> {this.props.displayName}
               </a>
             </Clickable>
-          </div>
+          </FlexRow>
           <div style={styles.cardDescription}>{this.props.description}</div>
-        </div>
+        </FlexColumn>
         <div style={styles.cardFooter}>
           <div style={styles.lastModified} data-test-id='last-modified'>
             Last Modified: {this.props.displayDate}</div>

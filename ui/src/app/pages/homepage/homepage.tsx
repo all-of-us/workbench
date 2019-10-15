@@ -16,7 +16,8 @@ import {Modal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
-import {RecentWork} from 'app/pages/homepage/recent-work';
+import {RecentResources} from 'app/pages/homepage/recent-resources';
+import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -355,8 +356,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
           <FadeBox style={styles.fadeBox}>
             {/* The elements inside this fadeBox will be changed as part of ongoing
             homepage redesign work*/}
-            <div style={{display: 'flex', justifyContent: 'center'}}>
-              <FlexColumn style={styles.singleCard}>
+            <FlexColumn style={{justifyContent: 'flex-start'}}>
                 {accessTasksLoaded ?
                   (accessTasksRemaining ?
                       (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
@@ -367,31 +367,37 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                               twoFactorAuthCompleted={twoFactorAuthCompleted}
                                             dataUseAgreementCompleted={dataUseAgreementCompleted}/>
                       ) : (
-                        <FlexRow style={{paddingTop: '2rem'}}>
-                          <FlexColumn style={styles.contentWrapperLeft}>
-                            <FlexRow style={styles.mainHeader}>Researcher Workbench</FlexRow>
-                            <CardButton onClick={() => navigate(['workspaces/build'])}
-                                        style={{margin: '1.9rem 106px 0 3%'}}>
-                              Create a <br/> New Workspace
-                              <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
-                            </CardButton>
-                          </FlexColumn>
-                          <FlexColumn style={styles.contentWrapperRight}>
-                            <a onClick={() => navigate(['workspaces'])}
-                               style={{fontSize: '14px', color: colors.primary}}>
-                              See All Workspaces</a>
-                            <FlexColumn style={{marginRight: '3%'}}>
-                              <div style={{color: colors.primary, height: '1.9rem'}}>
-                                <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
-                              </div>
-                              <RecentWork dark={true}/>
+                          <React.Fragment>
+                            <FlexColumn>
+                              <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
+                                <FlexRow style={{alignItems: 'center'}}>
+                                  <SmallHeader style={{marginTop: '0px'}}>Workspaces</SmallHeader>
+                                  <ClrIcon
+                                    shape='plus-circle'
+                                    size={21}
+                                    className={'is-solid'}
+                                    style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
+                                    onClick={() => navigate(['workspaces/build'])}
+                                  />
+                                </FlexRow>
+                                <span
+                                  style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
+                                  onClick={() => navigate(['workspaces'])}
+                                >
+                                  See all Workspaces
+                                </span>
+                              </FlexRow>
+                              <RecentWorkspaces />
                             </FlexColumn>
-                          </FlexColumn>
-                        </FlexRow>)
+                            <FlexColumn>
+                              <SmallHeader>Recently Accessed Items</SmallHeader>
+                              <RecentResources/>
+                            </FlexColumn>
+                          </React.Fragment>
+                        )
                   ) :
                   <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
-              </FlexColumn>
-            </div>
+            </FlexColumn>
           </FadeBox>
           <div>
             <FlexColumn style={{marginLeft: '3%'}}>
@@ -477,7 +483,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                             twoFactorAuthCompleted={twoFactorAuthCompleted}
                                             dataUseAgreementCompleted={dataUseAgreementCompleted}/>
                     ) : (
-                      <div style={{display: 'flex', flexDirection: 'row', paddingTop: '2rem'}}>
+                      <FlexRow style={{paddingTop: '2rem'}}>
                         <div style={styles.contentWrapperLeft}>
                           <div style={styles.mainHeaderToDelete}>Researcher Workbench</div>
                           <CardButton onClick={() => navigate(['workspaces/build'])}
@@ -490,15 +496,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
                           <a onClick={() => navigate(['workspaces'])}
                              style={{fontSize: '14px', color: colors.white}}>
                             See All Workspaces</a>
-                          <div
-                            style={{marginRight: '3%', display: 'flex', flexDirection: 'column'}}>
+                          <FlexColumn style={{marginRight: '3%'}}>
                             <div style={{color: colors.white, height: '1.9rem'}}>
                               <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
                             </div>
-                            <RecentWork dark={true}/>
-                          </div>
+                            <RecentResources dark={true}/>
+                          </FlexColumn>
                         </div>
-                      </div>)
+                      </FlexRow>)
                 ) :
                 <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
             </div>
@@ -526,8 +531,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                       <a href='#' style={{color: colors.white}}>See all documentation</a>
                     </TooltipTrigger>
                   </div>
-                  <div style={{display: 'flex', flexDirection: 'row',
-                    width: '87.34%', justifyContent: 'space-between'}}>
+                  <FlexRow style={{width: '87.34%', justifyContent: 'space-between'}}>
                     {footerLinks.map((col, i) => {
                       return <React.Fragment key={i}>
                         <div style={styles.linksBlockToDelete}>
@@ -544,7 +548,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                         </div>
                       </React.Fragment>;
                     })}
-                  </div>
+                  </FlexRow>
                 </div>
               </div>
               <div style={styles.bottomBannerToDelete}>

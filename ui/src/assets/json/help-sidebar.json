@@ -30,7 +30,7 @@
     {
       "title": "Data Type",
       "content": [
-        "This table displays details about cohorts, concept sets, and data sets within the workspace, including the name, owner and last changed date."
+        "This table displays details about cohorts, concept sets, and datasets within the workspace, including the name, owner and last changed date."
       ]
     }
   ],
@@ -177,7 +177,7 @@
         {
           "title": "Modifiers",
           "content": [
-            "Modifiers allow you to specify the age at event, date of event and/or number of occurrences for a selected criteria. Privacy preserving methods in our curated data set require that all dates are consistently shifted within a particular participants record."
+            "Modifiers allow you to specify the age at event, date of event and/or number of occurrences for a selected criteria. Privacy preserving methods in our curated dataset require that all dates are consistently shifted within a particular participants record."
           ]
         },
         {

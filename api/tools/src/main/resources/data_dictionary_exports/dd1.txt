@@ -1,0 +1,4 @@
+1570505534
+drug_exposure:TEST FIELD 1:A:B:C:D:E:false
+drug_exposure:TEST FIELD 2:A:B:C:D:E:true
+drug_exposure:TEST FIELD 3:A:B:C:D:E:false

@@ -16,8 +16,8 @@ export class DataSetApiStub extends DataSetApi {
     return [
       {
         id: 0,
-        name: 'Stub Data Set',
-        description: 'Stub Data Set',
+        name: 'Stub Dataset',
+        description: 'Stub Dataset',
         includesAllParticipants: false,
         workspaceId: 0,
         lastModifiedTime: 10000,

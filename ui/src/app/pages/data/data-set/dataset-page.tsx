@@ -4,11 +4,10 @@ import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {FlexRow} from 'app/components/flex';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
@@ -22,6 +21,7 @@ import {
 import colors from 'app/styles/colors';
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
+  apiCallWithGatewayTimeoutRetries,
   formatDomain,
   formatDomainString,
   ReactWrapperBase,
@@ -247,6 +247,7 @@ const BoxHeader = ({text= '', header =  '', subHeader = '', style= {}, ...props}
 
 interface DataSetPreviewInfo {
   isLoading: boolean;
+  errorText: string;
   values?: Array<DataSetPreviewValueList>;
 }
 
@@ -266,8 +267,6 @@ interface State {
   prePackagedSurvey: boolean;
   loadingResources: boolean;
   openSaveModal: boolean;
-  previewError: boolean;
-  previewErrorText: string;
   previewList: Map<Domain, DataSetPreviewInfo>;
   selectedCohortIds: number[];
   selectedConceptSetIds: number[];
@@ -293,8 +292,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         openSaveModal: false,
         prePackagedDemographics: false,
         prePackagedSurvey: false,
-        previewError: false,
-        previewErrorText: '',
         previewList: new Map(),
         selectedCohortIds: [],
         selectedConceptSetIds: [],
@@ -334,7 +331,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
             return response;
           }));
         const [, dataSet] = await Promise.all(allPromises);
-        // We can only run this command once both the data set fetch and the
+        // We can only run this command once both the dataset fetch and the
         // load resources have concluded. However, we want those to happen in
         // parallel, and one is conditional, so we add them to an array to await
         // and only run once both have finished.
@@ -543,37 +540,48 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
     }
 
     async getPreviewList() {
-      const {namespace, id} = this.props.workspace;
       const domains = fp.uniq(this.state.selectedDomainValuePairs.map(domainValue => domainValue.domain));
       const newPreviewList: Map<Domain, DataSetPreviewInfo> =
-        new Map(domains.map<[Domain, DataSetPreviewInfo]>(domain => [domain, {isLoading: true, values: []}]));
+        new Map(domains.map<[Domain, DataSetPreviewInfo]>(domain => [domain, {
+          isLoading: true, errorText: '', values: []}]));
       this.setState({
         previewList: newPreviewList,
         selectedPreviewDomain: domains[0]
       });
       domains.forEach(async domain => {
-        const request: DataSetPreviewRequest = {
-          domain: domain,
-          conceptSetIds: this.state.selectedConceptSetIds,
-          includesAllParticipants: this.state.includesAllParticipants,
-          cohortIds: this.state.selectedCohortIds,
-          prePackagedConceptSet: this.getPrePackagedConceptSet(),
-          values: this.state.selectedDomainValuePairs.map(domainValue => domainValue.value)
-        };
-        try {
-          const dataSetPreviewResp = await dataSetApi().previewDataSetByDomain(namespace, id, request);
-          const newPreviewInformation = {
-            isLoading: false,
-            values: dataSetPreviewResp.values
-          };
-          this.setState({previewList: this.state.previewList.set(dataSetPreviewResp.domain, newPreviewInformation)});
-        } catch (ex) {
-          const exceptionResponse = await ex.json() as unknown as ErrorResponse;
-          const errorText = this.generateErrorTextFromPreviewException(exceptionResponse, domain);
-          this.setState({previewError: true, previewErrorText: errorText});
-          console.error(ex);
-        }
+        this.getPreviewByDomain(domain);
       });
+    }
+
+    async getPreviewByDomain(domain: Domain) {
+      const {namespace, id} = this.props.workspace;
+      const domainRequest: DataSetPreviewRequest = {
+        domain: domain,
+        conceptSetIds: this.state.selectedConceptSetIds,
+        includesAllParticipants: this.state.includesAllParticipants,
+        cohortIds: this.state.selectedCohortIds,
+        prePackagedConceptSet: this.getPrePackagedConceptSet(),
+        values: this.state.selectedDomainValuePairs.map(domainValue => domainValue.value)
+      };
+      let newPreviewInformation;
+      try {
+        const domainPreviewResponse = await apiCallWithGatewayTimeoutRetries(
+          () => dataSetApi().previewDataSetByDomain(namespace, id, domainRequest));
+        newPreviewInformation = {
+          isLoading: false,
+          errorText: '',
+          values: domainPreviewResponse.values
+        };
+      } catch (ex) {
+        const exceptionResponse = await ex.json() as unknown as ErrorResponse;
+        const errorText = this.generateErrorTextFromPreviewException(exceptionResponse, domain);
+        newPreviewInformation = {
+          isLoading: false,
+          errorText: errorText,
+          values: []
+        };
+      }
+      this.setState(state => ({previewList: state.previewList.set(domain, newPreviewInformation)}));
     }
 
     // TODO: Move to using a response based error handling method, rather than a error based one
@@ -588,7 +596,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           break;
         case 504:
           return `Query to load data from the All of Us Database timed out for domain:
-                ${domain}. Please either try again or export data set to a notebook to try
+                ${domain}. Please either try again or export dataset to a notebook to try
                 there`;
           break;
         default:
@@ -648,7 +656,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       return <div style={styles.warningMessage}>
         {filteredPreviewData.isLoading ?
           <div>Generating preview for {domainDisplayed}</div> :
-          <div>No values found for {domainDisplayed}</div>
+          <div>{filteredPreviewData.errorText}</div>
         }
       </div>;
     }
@@ -666,8 +674,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         openSaveModal,
         prePackagedDemographics,
         prePackagedSurvey,
-        previewError,
-        previewErrorText,
         previewList,
         selectedCohortIds,
         selectedConceptSetIds,
@@ -678,10 +684,10 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       } = this.state;
       return <React.Fragment>
         <FadeBox style={{paddingTop: '1rem'}}>
-          <h2 style={{paddingTop: 0, marginTop: 0}}>Data Sets{this.editing &&
+          <h2 style={{paddingTop: 0, marginTop: 0}}>Datasets{this.editing &&
             dataSet !== undefined && ' - ' + dataSet.name}</h2>
-          <div style={{color: colors.primary, fontSize: '14px'}}>Build a data set by selecting the
-            variables and values for one or more of your cohorts. Then export the completed Data Set
+          <div style={{color: colors.primary, fontSize: '14px'}}>Build a dataset by selecting the
+            variables and values for one or more of your cohorts. Then export the completed dataset
             to Notebooks where you can perform your analysis</div>
           <div style={{display: 'flex', paddingTop: '1rem'}}>
             <div style={{width: '33%', height: '80%'}}>
@@ -791,7 +797,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
         <FadeBox style={{marginTop: '1rem'}}>
           <div style={{backgroundColor: 'white', border: `1px solid ${colors.light}`}}>
             <div style={styles.previewDataHeaderBox}>
-              <div style={{display: 'flex', flexDirection: 'column'}}>
+              <FlexColumn>
               <div style={{display: 'flex', alignItems: 'flex-end'}}>
                 <div style={styles.previewDataHeader}>
                   <div>
@@ -799,7 +805,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       style={{marignTop: '0.3rem', fill: colorWithWhiteness(colors.primary, 0.5)}}/>
                   </div>
                   <label style={{marginLeft: '0.5rem', color: colors.primary}}>
-                    Preview Data Set
+                    Preview Dataset
                   </label>
                 </div>
                 <div style={{color: colors.primary, fontSize: '14px', width: '60%'}}>
@@ -807,7 +813,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                   and values you selected above. Once complete, export for analysis
                 </div>
               </div>
-              </div>
+              </FlexColumn>
               <Clickable data-test-id='preview-button' style={{
                 marginTop: '0.5rem',
                 cursor: this.disableSave() ? 'not-allowed' : 'pointer', height: '1.8rem',
@@ -818,8 +824,8 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
               </Clickable>
             </div>
             {fp.toPairs(previewList).length > 0 &&
-              <div style={{display: 'flex', flexDirection: 'column'}}>
-                <div style={{display: 'flex', flexDirection: 'row', paddingTop: '0.5rem'}}>
+              <FlexColumn>
+                <FlexRow style={{paddingTop: '0.5rem'}}>
                   {fp.toPairs(previewList).map((value) => {
                     const domain: string = value[0];
                     const previewRow: DataSetPreviewInfo = value[1];
@@ -844,9 +850,9 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       </Clickable>
                     </TooltipTrigger>;
                   })}
-                </div>
+                </FlexRow>
                 {this.renderPreviewDataTableSection()}
-              </div>
+              </FlexColumn>
             }
             {fp.entries(previewList).length === 0 &&
               <div style={styles.previewButtonBox}>
@@ -884,15 +890,6 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                                              this.setState({openSaveModal: false});
                                            }}
         />}
-        {previewError && <Modal>
-          <ModalTitle>Error Loading Data Set Preview</ModalTitle>
-          <ModalBody>{previewErrorText}</ModalBody>
-          <ModalFooter>
-            <Button type='secondary' onClick={() => {this.setState({previewError: false}); }}>
-              Close
-            </Button>
-          </ModalFooter>
-        </Modal>}
         <HelpSidebar location='datasetBuilder' />
       </React.Fragment>;
     }

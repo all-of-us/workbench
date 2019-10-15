@@ -101,20 +101,19 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     componentDidMount(): void {
-      workspacesApi().readOnlyNotebook(this.props.urlParams.ns,
-        this.props.urlParams.wsid, this.props.urlParams.nbName)
-        .then(html => {
-          this.setState({html: html.html});
-          this.loadNotebookActivityTracker();
-        });
+      const {ns, wsid, nbName} = this.props.urlParams;
 
-      workspacesApi().getNotebookLockingMetadata(this.props.urlParams.ns,
-        this.props.urlParams.wsid, this.props.urlParams.nbName).then((resp) => {
-          this.setState({
-            lastLockedBy: resp.lastLockedBy,
-            lockExpirationTime: resp.lockExpirationTime
-          });
+      workspacesApi().readOnlyNotebook(ns, wsid, nbName).then(html => {
+        this.setState({html: html.html});
+        this.loadNotebookActivityTracker();
+      });
+
+      workspacesApi().getNotebookLockingMetadata(ns, wsid, nbName).then((resp) => {
+        this.setState({
+          lastLockedBy: resp.lastLockedBy,
+          lockExpirationTime: resp.lockExpirationTime
         });
+      });
     }
 
     loadNotebookActivityTracker() {

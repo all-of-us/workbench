@@ -11,6 +11,7 @@ import {AccountCreation} from './account-creation/account-creation';
 
 import {Profile} from 'generated/fetch';
 
+import {FlexColumn} from 'app/components/flex';
 import * as React from 'react';
 import {AccountCreationSurvey} from './account-creation/account-creation-survey';
 
@@ -154,7 +155,7 @@ export const SignInReact = withWindowSize()(
 
     render() {
       return <div style={styles.signedInContainer}>
-        <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
+        <FlexColumn style={{width: '100%'}}>
           <div data-test-id='template'
                style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
             <img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
@@ -163,7 +164,7 @@ export const SignInReact = withWindowSize()(
               {this.nextDirective(this.state.currentStep)}
             </div>
           </div>
-        </div>
+        </FlexColumn>
       </div>;
     }
   });

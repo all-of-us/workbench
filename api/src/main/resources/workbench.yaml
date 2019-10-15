@@ -1611,6 +1611,34 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
+  ######### USER RECENT WORKSPACES ############################################################
+  /v1/workspaces/user-recent-workspaces:
+    get:
+      tags:
+        - workspaces
+      description: Returns the workspaces edited by the user in descending order of update time
+      operationId: getUserRecentWorkspaces
+      responses:
+        200:
+          description: A list of workspaces order by last-updated time in descending order
+          schema:
+            $ref: "#/definitions/RecentWorkspaceResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/user-recent-workspaces/update:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+    post:
+      tags:
+        - workspaces
+      description: Add/update user recent workspaces
+      operationId: updateRecentWorkspaces
+      responses:
+        200:
+          description: Successfully added/updated
+          schema:
+            $ref: "#/definitions/RecentWorkspaceResponse"
+
 
   # Concept sets ##############################################################################
 
@@ -2003,6 +2031,31 @@ paths:
           schema:
             $ref: "#/definitions/DataSetListResponse"
 
+  /v1/cdrVersionId/{cdrVersionId}/domain/{domain}/domainValue/{domainValue}/dataDictionaryEntry:
+    get:
+      parameters:
+        - in: path
+          name: cdrVersionId
+          type: integer
+          format: int64
+          required: true
+        - in: path
+          name: domain
+          required: true
+          type: string
+        - in: path
+          name: domainValue
+          type: string
+          required: true
+      tags:
+        - dataSet
+      operationId: "getDataDictionaryEntry"
+      responses:
+        200:
+          description: Detailed definition of a given domain value for the specified CDR Version
+          schema:
+            $ref: "#/definitions/DataDictionaryEntry"
+
   /v1/{workspaceNamespace}/{workspaceId}/data-set/markDirty:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -2141,6 +2194,32 @@ definitions:
         description: the role of the current user in the project
       status:
         $ref: "#/definitions/BillingProjectStatus"
+
+  DataDictionaryEntry:
+    type: object
+    properties:
+      cdrVersionId:
+        type: integer
+        format: int64
+      definedTime:
+        type: integer
+        format: int64
+      relevantOmopTable:
+        type: string
+      fieldName:
+        type: string
+      omopCdmStandardOrCustomField:
+        type: string
+      description:
+        type: string
+      fieldType:
+        type: string
+      dataProvenance:
+        type: string
+      sourcePpiModule:
+        type: string
+      transformedByRegisteredTierPrivacyMethods:
+        type: boolean
 
   BillingProjectStatus:
     type: string
@@ -3635,6 +3714,22 @@ definitions:
     properties:
       notebookName:
         type: string
+
+  RecentWorkspace:
+    type: object
+    properties:
+      workspace:
+        $ref: '#/definitions/Workspace'
+      accessLevel:
+        $ref: '#/definitions/WorkspaceAccessLevel'
+      accessedTime:
+        type: string
+        description: The date and time that the workspace was last accessed, in ISO-8601 format
+
+  RecentWorkspaceResponse:
+    type: array
+    items:
+      $ref: "#/definitions/RecentWorkspace"
 
   NotebookLockingMetadataResponse:
     type: object

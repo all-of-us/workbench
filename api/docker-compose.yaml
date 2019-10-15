@@ -78,6 +78,21 @@ services:
     entrypoint: ['with-uid.sh', 'wait-for-it', 'db:3306', --]
     env_file:
       - db/vars.env
+
+  api-scripts:
+    depends_on:
+      - db
+    build:
+      context: ./src/dev/server
+    user: ${UID}
+    working_dir: /w/api
+    volumes:
+      - ..:/w:cached
+      - gradle-cache:/.gradle
+    entrypoint: ['with-uid.sh', 'wait-for-it', 'db:3306', --]
+    env_file:
+      - db/vars.env
+
   cdr-scripts:
     depends_on:
       - db
@@ -170,33 +185,6 @@ services:
       - .:/w:cached
     entrypoint: mysql --host=cloud-sql-proxy --port=3307
 
-  update-config:
-    depends_on:
-      - db
-    build:
-     context: ./src/dev/server
-    user: ${UID}
-    working_dir: /w/api
-    volumes:
-      - ..:/w:cached
-      - gradle-cache:/.gradle
-    entrypoint: wait-for-it db:3306 -- ./gradlew :loadConfig
-    env_file:
-      - db/vars.env
-
-  update-cdr-versions:
-      depends_on:
-        - db
-      build:
-       context: ./src/dev/server
-      user: ${UID}
-      working_dir: /w/api
-      volumes:
-        - ..:/w:cached
-        - gradle-cache:/.gradle
-      entrypoint: wait-for-it db:3306 -- ./gradlew :updateCdrVersions
-      env_file:
-        - db/vars.env
 volumes:
   db:
   esdata:
