@@ -17,6 +17,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDate, reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
+import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 
 const EVENT_CATEGORY = 'Workspace list';
@@ -298,7 +299,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
       </Modal>}
       {confirmDeleting &&
       <ConfirmDeleteModal data-test-id='confirm-delete-modal'
-                          resourceType='workspace'
+                          resourceType={ResourceType.WORKSPACE}
                           resourceName={workspace.name}
                           receiveDelete={() => {this.deleteWorkspace(); }}
                           closeFunction={() => {this.setState({confirmDeleting: false}); }}/>}
