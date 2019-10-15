@@ -616,7 +616,6 @@ public class WorkspacesControllerTest {
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
     verify(mockWorkspaceAuditAdapterService)
         .fireDeleteAction(any(org.pmiops.workbench.db.model.Workspace.class));
-
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");
