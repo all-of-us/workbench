@@ -179,7 +179,6 @@ public class CohortsControllerTest {
     CohortFactoryImpl.class,
     NotebooksServiceImpl.class,
     UserService.class,
-    WorkspaceConversionUtils.class,
     WorkspacesController.class,
     CohortsController.class,
     ConceptSetsController.class

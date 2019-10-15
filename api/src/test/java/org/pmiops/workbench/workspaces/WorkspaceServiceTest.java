@@ -51,13 +51,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WorkspaceServiceTest {
   @TestConfiguration
-  @Import({WorkspaceConversionUtils.class})
   static class Configuration {}
 
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private UserDao userDao;
   @Autowired private UserRecentWorkspaceDao userRecentWorkspaceDao;
-  @Autowired private WorkspaceConversionUtils workspaceConversionUtils;
 
   @Mock private CohortCloningService mockCohortCloningService;
   @Mock private ConceptSetService mockConceptSetService;

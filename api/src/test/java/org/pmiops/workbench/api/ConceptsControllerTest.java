@@ -233,7 +233,7 @@ public class ConceptsControllerTest {
   private static User currentUser;
 
   @TestConfiguration
-  @Import({WorkspaceServiceImpl.class, WorkspaceConversionUtils.class})
+  @Import({WorkspaceServiceImpl.class})
   @MockBean({
     BigQueryService.class,
     FireCloudService.class,

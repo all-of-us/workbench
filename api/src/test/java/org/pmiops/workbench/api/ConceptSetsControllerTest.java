@@ -175,8 +175,6 @@ public class ConceptSetsControllerTest {
 
   @Autowired WorkspaceService workspaceService;
 
-  @Autowired WorkspaceConversionUtils workspaceConversionUtils;
-
   @Autowired ConceptSetDao conceptSetDao;
 
   @Autowired CdrVersionDao cdrVersionDao;
@@ -210,7 +208,6 @@ public class ConceptSetsControllerTest {
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
-    WorkspaceConversionUtils.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     UserService.class,

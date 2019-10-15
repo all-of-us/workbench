@@ -12,6 +12,7 @@ public class AuditDataGeneratorTest {
     final long low = 1000L;
     final long high = 2000L;
     final long random = AuditDataGenerator.randomLongInRange(low, high);
-    assertThat(low < high).isTrue();
+    assertThat(low <= random).isTrue();
+    assertThat(random < high).isTrue();
   }
 }

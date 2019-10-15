@@ -217,7 +217,6 @@ public class DataSetControllerTest {
     TestBigQueryCdrSchemaConfig.class,
     UserService.class,
     WorkspacesController.class,
-    WorkspaceConversionUtils.class,
     WorkspaceServiceImpl.class
   })
   @MockBean({
