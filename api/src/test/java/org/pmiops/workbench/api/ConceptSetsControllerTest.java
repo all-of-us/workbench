@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -59,7 +60,6 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -175,8 +175,6 @@ public class ConceptSetsControllerTest {
 
   @Autowired WorkspaceService workspaceService;
 
-  @Autowired WorkspaceMapper workspaceMapper;
-
   @Autowired ConceptSetDao conceptSetDao;
 
   @Autowired CdrVersionDao cdrVersionDao;
@@ -207,10 +205,11 @@ public class ConceptSetsControllerTest {
 
   @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
 
+  @Autowired WorkspaceAuditAdapterService workspaceAuditAdapterService;
+
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
-    WorkspaceMapper.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     UserService.class,
@@ -229,6 +228,7 @@ public class ConceptSetsControllerTest {
     FireCloudService.class,
     NotebooksService.class,
     UserRecentResourceService.class,
+    WorkspaceAuditAdapterService.class
   })
   static class Configuration {
     @Bean
@@ -272,7 +272,6 @@ public class ConceptSetsControllerTest {
         new WorkspacesController(
             billingProjectBufferService,
             workspaceService,
-            workspaceMapper,
             cdrVersionDao,
             userDao,
             userProvider,
@@ -281,7 +280,8 @@ public class ConceptSetsControllerTest {
             CLOCK,
             notebooksService,
             userService,
-            workbenchConfigProvider);
+            workbenchConfigProvider,
+            workspaceAuditAdapterService);
 
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);

@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -55,6 +56,7 @@ import org.pmiops.workbench.api.CohortReviewController;
 import org.pmiops.workbench.api.CohortsController;
 import org.pmiops.workbench.api.ConceptSetsController;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -207,7 +209,8 @@ public class WorkspacesControllerTest {
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_3 =
       makeConcept(CLIENT_CONCEPT_3);
 
-  @Autowired BillingProjectBufferService billingProjectBufferService;
+  @Autowired private BillingProjectBufferService billingProjectBufferService;
+  @Autowired private WorkspaceAuditAdapterService mockWorkspaceAuditAdapterService;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
 
@@ -217,7 +220,6 @@ public class WorkspacesControllerTest {
     NotebooksServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
-    WorkspaceMapper.class,
     CohortsController.class,
     CohortFactoryImpl.class,
     CohortCloningService.class,
@@ -240,7 +242,8 @@ public class WorkspacesControllerTest {
     CohortQueryBuilder.class,
     UserService.class,
     UserRecentResourceService.class,
-    ConceptService.class
+    ConceptService.class,
+    WorkspaceAuditAdapterService.class
   })
   static class Configuration {
 
@@ -519,6 +522,7 @@ public class WorkspacesControllerTest {
   public void getWorkspaces() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
+    verify(mockWorkspaceAuditAdapterService).fireCreateAction(any(Workspace.class), anyLong());
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
@@ -615,7 +619,8 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
-
+    verify(mockWorkspaceAuditAdapterService)
+        .fireDeleteAction(any(org.pmiops.workbench.db.model.Workspace.class));
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");

@@ -32,6 +32,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.api.WorkspacesApiDelegate;
+import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -103,7 +104,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private final BillingProjectBufferService billingProjectBufferService;
   private final WorkspaceService workspaceService;
-  private final WorkspaceMapper workspaceMapper;
   private final CdrVersionDao cdrVersionDao;
   private final UserDao userDao;
   private Provider<User> userProvider;
@@ -113,12 +113,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final NotebooksService notebooksService;
   private final UserService userService;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
+  private WorkspaceAuditAdapterService workspaceAuditAdapterService;
 
   @Autowired
   public WorkspacesController(
       BillingProjectBufferService billingProjectBufferService,
       WorkspaceService workspaceService,
-      WorkspaceMapper workspaceMapper,
       CdrVersionDao cdrVersionDao,
       UserDao userDao,
       Provider<User> userProvider,
@@ -127,10 +127,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Clock clock,
       NotebooksService notebooksService,
       UserService userService,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      WorkspaceAuditAdapterService workspaceAuditAdapterService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
-    this.workspaceMapper = workspaceMapper;
     this.cdrVersionDao = cdrVersionDao;
     this.userDao = userDao;
     this.userProvider = userProvider;
@@ -140,6 +140,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.notebooksService = notebooksService;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.workspaceAuditAdapterService = workspaceAuditAdapterService;
   }
 
   @VisibleForTesting
@@ -235,31 +236,24 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId =
         generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
-    FirecloudWorkspaceId fcWorkspaceId = workspaceId;
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        attemptFirecloudWorkspaceCreation(fcWorkspaceId);
+        attemptFirecloudWorkspaceCreation(workspaceId);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         new org.pmiops.workbench.db.model.Workspace();
-    dbWorkspace.setFirecloudName(fcWorkspaceId.getWorkspaceName());
-    dbWorkspace.setWorkspaceNamespace(fcWorkspaceId.getWorkspaceNamespace());
-    dbWorkspace.setCreator(user);
-    dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
-    dbWorkspace.setCreationTime(now);
-    dbWorkspace.setLastModifiedTime(now);
-    dbWorkspace.setVersion(1);
-    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
 
     setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    org.pmiops.workbench.db.model.Workspace reqWorkspace = workspaceMapper.toDbWorkspace(workspace);
+    org.pmiops.workbench.db.model.Workspace reqWorkspace =
+        WorkspaceConversionUtils.toDbWorkspace(workspace);
     // TODO: enforce data access level authorization
     dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
     dbWorkspace.setName(reqWorkspace.getName());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
-    workspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
+    WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
     if (reqWorkspace.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -269,8 +263,25 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+    Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
+    workspaceAuditAdapterService.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
+    return ResponseEntity.ok(createdWorkspace);
+  }
 
-    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+  private void setDbWorkspaceFields(
+      org.pmiops.workbench.db.model.Workspace dbWorkspace,
+      User user,
+      FirecloudWorkspaceId workspaceId,
+      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+      Timestamp createdAndLastModifiedTime) {
+    dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
+    dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
+    dbWorkspace.setCreator(user);
+    dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
+    dbWorkspace.setCreationTime(createdAndLastModifiedTime);
+    dbWorkspace.setLastModifiedTime(createdAndLastModifiedTime);
+    dbWorkspace.setVersion(1);
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
 
   @Override
@@ -287,7 +298,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     workspaceService.maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
-
+    workspaceAuditAdapterService.fireDeleteAction(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -333,7 +344,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
     if (researchPurpose != null) {
-      workspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+      WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, researchPurpose);
       if (researchPurpose.getReviewRequested()) {
         Timestamp now = new Timestamp(clock.instant().toEpochMilli());
         dbWorkspace.setTimeRequested(now);
@@ -343,7 +354,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-    return ResponseEntity.ok(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    return ResponseEntity.ok(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
   @Override
@@ -428,18 +439,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         new org.pmiops.workbench.db.model.Workspace();
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    dbWorkspace.setFirecloudName(toFcWorkspaceId.getWorkspaceName());
-    dbWorkspace.setWorkspaceNamespace(toFcWorkspaceId.getWorkspaceNamespace());
-    dbWorkspace.setCreator(user);
-    dbWorkspace.setFirecloudUuid(toFcWorkspace.getWorkspaceId());
-    dbWorkspace.setCreationTime(now);
-    dbWorkspace.setLastModifiedTime(now);
-    dbWorkspace.setVersion(1);
-    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    setDbWorkspaceFields(dbWorkspace, user, toFcWorkspaceId, toFcWorkspace, now);
 
     dbWorkspace.setName(body.getWorkspace().getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
-    workspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+    WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -482,7 +486,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     return ResponseEntity.ok(
         new CloneWorkspaceResponse()
-            .workspace(workspaceMapper.toApiWorkspace(savedWorkspace, toFcWorkspace)));
+            .workspace(WorkspaceConversionUtils.toApiWorkspace(savedWorkspace, toFcWorkspace)));
   }
 
   // A retry period is needed because the permission to copy files into the cloned workspace is not
@@ -564,7 +568,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceListResponse response = new WorkspaceListResponse();
     List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
     response.setItems(
-        workspaces.stream().map(workspaceMapper::toApiWorkspace).collect(Collectors.toList()));
+        workspaces.stream()
+            .map(WorkspaceConversionUtils::toApiWorkspace)
+            .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
 
@@ -754,23 +760,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<RecentWorkspaceResponse> updateRecentWorkspaces(
-      String workspaceNamespace, String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
-        workspaceService.get(workspaceNamespace, workspaceId);
-    UserRecentWorkspace userRecentWorkspace = workspaceService.updateRecentWorkspaces(dbWorkspace);
-    WorkspaceAccessLevel workspaceAccessLevel =
-        workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-
-    RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
-    RecentWorkspace recentWorkspace =
-        workspaceMapper.buildRecentWorkspace(
-            userRecentWorkspace, dbWorkspace, workspaceAccessLevel);
-    recentWorkspaceResponse.add(recentWorkspace);
-    return ResponseEntity.ok(recentWorkspaceResponse);
-  }
-
-  @Override
   public ResponseEntity<RecentWorkspaceResponse> getUserRecentWorkspaces() {
     List<UserRecentWorkspace> userRecentWorkspaces = workspaceService.getRecentWorkspaces();
     List<Long> workspaceIds =
@@ -795,9 +784,26 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     List<RecentWorkspace> recentWorkspaces =
-        workspaceMapper.buildRecentWorkspaceList(
+        WorkspaceConversionUtils.buildRecentWorkspaceList(
             userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
     recentWorkspaceResponse.addAll(recentWorkspaces);
+    return ResponseEntity.ok(recentWorkspaceResponse);
+  }
+
+  @Override
+  public ResponseEntity<RecentWorkspaceResponse> updateRecentWorkspaces(
+      String workspaceNamespace, String workspaceId) {
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.get(workspaceNamespace, workspaceId);
+    UserRecentWorkspace userRecentWorkspace = workspaceService.updateRecentWorkspaces(dbWorkspace);
+    WorkspaceAccessLevel workspaceAccessLevel =
+        workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+
+    RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
+    RecentWorkspace recentWorkspace =
+        WorkspaceConversionUtils.buildRecentWorkspace(
+            userRecentWorkspace, dbWorkspace, workspaceAccessLevel);
+    recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);
   }
 }
