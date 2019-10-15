@@ -146,15 +146,12 @@ const styles = reactStyles({
   },
   showMore: {
     width: '70px',
-    marginLeft: '-80px',
-    bottom: '14px',
-    left: '100%',
+    bottom: 0,
+    right: 0,
     background: colors.white,
     color: colors.accent,
     boxSizing: 'content-box',
-    float: 'right',
-    position: 'relative',
-    marginRight: '1px',
+    position: 'absolute',
     paddingLeft: '10px',
     textAlign: 'left',
     cursor: 'pointer',
@@ -194,6 +191,49 @@ const domains = [
   DomainType.VITAL,
   DomainType.SURVEY,
 ];
+
+class NameContainer extends React.Component<{data: any, vocab: string}, {showMore: boolean}> {
+  container: HTMLDivElement;
+  constructor(props: any) {
+    super(props);
+    this.state = {showMore: false};
+  }
+
+  handleResize = fp.debounce(100, () => {
+    this.checkContainerHeight();
+  });
+
+  componentDidMount(): void {
+    this.checkContainerHeight();
+    window.addEventListener('resize', this.handleResize);
+  }
+
+  componentWillUnmount(): void {
+    window.removeEventListener('resize', this.handleResize);
+  }
+
+  checkContainerHeight() {
+    const {offsetHeight, scrollHeight} = this.container;
+    this.setState({showMore: scrollHeight > offsetHeight});
+  }
+
+  render() {
+    const {data, vocab} = this.props;
+    const {showMore} = this.state;
+    let nl: any;
+    return <div ref={(e) => this.container = e} style={{overflow: 'hidden', maxHeight: '1.2rem'}}>
+      <div style={styles.nameWrapper}>
+        <p style={styles.nameContent}>{data[`${vocab}Name`]}</p>
+      </div>
+      {showMore && <React.Fragment>
+        <span style={styles.showMore} onClick={(e) => nl.toggle(e)}>Show more</span>
+        <OverlayPanel className='labOverlay' ref={(el) => nl = el} showCloseIcon={true} dismissable={true}>
+          <div style={{paddingBottom: '0.2rem'}}>{data[`${vocab}Name`]}</div>
+        </OverlayPanel>
+      </React.Fragment>}
+    </div>;
+  }
+}
 
 interface Props {
   tabName: string;
@@ -314,24 +354,14 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     overlayTemplate = (rowData: any, column: any) => {
-      let nl: any, vl: any;
+      let vl: any;
       const {filterState: {vocab}} = this.props;
       const valueField = (rowData.refRange || rowData.unit) && column.field === 'value';
       const nameField = rowData.route && column.field === `${vocab}Name`;
       return <React.Fragment>
         <div style={{position: 'relative'}}>
           {column.field === 'value' && <span>{rowData.value}</span>}
-          {column.field === `${vocab}Name` && <div className='name-container'>
-            <div style={styles.nameWrapper}>
-              <p style={styles.nameContent}>{rowData[`${vocab}Name`]}</p>
-            </div>
-            <span style={styles.showMore} onClick={(e) => nl.toggle(e)}>Show more</span>
-            <OverlayPanel className='labOverlay' ref={(el) => nl = el}
-                          showCloseIcon={true} dismissable={true}>
-              <div style={{paddingBottom: '0.2rem'}}>{rowData[`${vocab}Name`]}</div>
-            </OverlayPanel>
-          </div>
-          }
+          {column.field === `${vocab}Name` && <NameContainer data={rowData} vocab={vocab} />}
           {(valueField || nameField)
           && <i className='pi pi-caret-down' style={styles.caretIcon}
               onClick={(e) => vl.toggle(e)}/>}
