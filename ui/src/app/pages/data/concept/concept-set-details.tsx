@@ -8,6 +8,7 @@ import {SlidingFabReact} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
 import {CopyModal} from 'app/components/copy-modal';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon, SnowmanIcon} from 'app/components/icons';
 import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
@@ -251,9 +252,9 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
           {loading ? <SpinnerOverlay/> :
-          <div style={{display: 'flex', flexDirection: 'column'}}>
+          <FlexColumn>
             <div style={styles.conceptSetHeader}>
-              <div style={{display: 'flex', flexDirection: 'row'}}>
+              <FlexRow>
                 <ConceptSetMenu canDelete={workspace.accessLevel === WorkspaceAccessLevel.OWNER}
                                 canEdit={WorkspacePermissionsUtil.canWrite(workspace.accessLevel)}
                                 onDelete={() => this.setState({deleting: true})}
@@ -261,7 +262,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                                 onCopy={() => this.setState({copying: true})}/>
                 <div style={styles.conceptSetMetadataWrapper}>
                 {editing ?
-                  <div style={{display: 'flex', flexDirection: 'column'}}>
+                  <FlexColumn>
                     <TextInput value={editName} disabled={editSaving}
                                id='edit-name'
                                style={{marginBottom: '0.5rem'}} data-test-id='edit-name'
@@ -285,7 +286,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                                 editDescription: conceptSet.description
                               })}>Cancel</Button>
                     </div>
-                  </div> :
+                  </FlexColumn> :
                   <React.Fragment>
                     <div style={styles.conceptSetTitle} data-test-id='concept-set-title'>
                       {conceptSet.name}
@@ -313,13 +314,13 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                           Domain: {fp.capitalize(conceptSet.domain.toString())}</div>
                   </div>
                 </div>
-              </div>
-              <div style={{display: 'flex', flexDirection: 'column'}}>
+              </FlexRow>
+              <FlexColumn>
                 <Button type='secondaryLight' style={styles.buttonBoxes}
                         onClick={() => this.addToConceptSet()}>
                   <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
                 </Button>
-              </div>
+              </FlexColumn>
             </div>
             {!!conceptSet.concepts ?
             <ConceptTable concepts={conceptSet.concepts} loading={loading}
@@ -344,7 +345,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                                disable={!WorkspacePermissionsUtil.canWrite(workspace.accessLevel) ||
                                  this.selectedConceptsCount === 0 ||
                                this.conceptSetConceptsCount === this.selectedConceptsCount}/>}
-          </div>}
+          </FlexColumn>}
           {!loading && deleting &&
           <ConfirmDeleteModal closeFunction={() => this.setState({deleting: false})}
                               receiveDelete={() => this.onDeleteConceptSet()}

@@ -198,7 +198,7 @@ public class DataSetServiceImpl implements DataSetService {
           .put(Domain.OBSERVATION, "observation")
           .put(Domain.PERSON, "person")
           .put(Domain.PROCEDURE, "procedure")
-          .put(Domain.SURVEY, "survey")
+          .put(Domain.SURVEY, "answer")
           .put(Domain.VISIT, "visit")
           .build();
 
@@ -505,6 +505,7 @@ public class DataSetServiceImpl implements DataSetService {
   public List<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,
       String dataSetName,
+      String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
     String prerequisites;
     switch (kernelTypeEnum) {
@@ -530,6 +531,7 @@ public class DataSetServiceImpl implements DataSetService {
                         entry.getValue(),
                         Domain.fromValue(entry.getKey()),
                         dataSetName,
+                        qualifier,
                         kernelTypeEnum))
         .collect(Collectors.toList());
   }
@@ -608,12 +610,21 @@ public class DataSetServiceImpl implements DataSetService {
   private static String generateNotebookUserCode(
       QueryJobConfiguration queryJobConfiguration,
       Domain domain,
-      String prefix,
+      String dataSetName,
+      String qualifier,
       KernelTypeEnum kernelTypeEnum) {
 
     // Define [namespace]_sql, [namespace]_query_config, and [namespace]_df variables
-    String namespace =
-        prefix.toLowerCase().replaceAll(" ", "_") + "_" + domain.toString().toLowerCase() + "_";
+    String domainAsString = domain.toString().toLowerCase();
+    String namespace = "dataset_" + qualifier + "_" + domainAsString + "_";
+    // Comments in R and Python have the same syntax
+    String descriptiveComment =
+        new StringBuilder("# This query represents dataset \"")
+            .append(dataSetName)
+            .append("\" for domain \"")
+            .append(domainAsString)
+            .append("\"")
+            .toString();
     String sqlSection;
     String namedParamsSection;
     String dataFrameSection;
@@ -678,7 +689,9 @@ public class DataSetServiceImpl implements DataSetService {
         throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
     }
 
-    return sqlSection
+    return descriptiveComment
+        + "\n"
+        + sqlSection
         + "\n\n"
         + namedParamsSection
         + "\n\n"

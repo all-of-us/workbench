@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ResourceCardMenu} from 'app/components/resources';
 import {TextModal} from 'app/components/text-modal';
 import colors from 'app/styles/colors';
@@ -405,8 +406,8 @@ export class ResourceCard extends React.Component<Props, State> {
       }
       <ResourceCardBase style={styles.card}
                         data-test-id='card'>
-        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
-          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
+        <FlexColumn style={{alignItems: 'flex-start'}}>
+          <FlexRow style={{alignItems: 'flex-start'}}>
             <ResourceCardMenu resourceType={this.resourceType}
                               onCopyConceptSet={() => this.setState({copyingConceptSet: true})}
                               canDelete={this.ownerPermission}
@@ -424,9 +425,9 @@ export class ResourceCard extends React.Component<Props, State> {
                  }}>{this.displayName}
               </a>
             </Clickable>
-          </div>
+          </FlexRow>
           <div style={styles.cardDescription}>{this.description}</div>
-        </div>
+        </FlexColumn>
         <div style={styles.cardFooter}>
           <div style={styles.lastModified} data-test-id='last-modified'>
             Last Modified: {this.displayDate}</div>

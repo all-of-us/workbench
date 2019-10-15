@@ -4,6 +4,7 @@ import * as React from 'react';
 import {AlertClose, AlertDanger, AlertWarning} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
 import {baseStyles, ResourceCardBase} from 'app/components/card';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
@@ -291,16 +292,16 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                    style={styles.warningIcon}/>
           You have not been granted beta access. Please contact support@researchallofus.org.
         </div>}
-      <div style={{display: 'flex', flexDirection: 'row'}}>
+      <FlexRow>
         {getRegistrationTasks().map((card, i) => {
           return <ResourceCardBase key={i} data-test-id={'registration-task-' + i.toString()}
             style={this.isEnabled(i) ? styles.cardStyle : {...styles.cardStyle,
               opacity: '0.6', maxHeight: this.allTasksCompleted() ? '160px' : '305px',
               minHeight: this.allTasksCompleted() ? '160px' : '305px'}}>
-            <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-start'}}>
+            <FlexColumn style={{justifyContent: 'flex-start'}}>
               <div style={styles.cardHeader}>STEP {i + 1}</div>
               <div style={styles.cardHeader}>{card.title}</div>
-            </div>
+            </FlexColumn>
             {!this.allTasksCompleted() &&
             <div style={styles.cardDescription}>{card.description}</div>}
             {this.taskCompletionList[i] ?
@@ -322,7 +323,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
             </Button>}
           </ResourceCardBase>;
         })}
-      </div>
+      </FlexRow>
 
       {eraCommonsError && <AlertDanger data-test-id='era-commons-error'
                                         style={{margin: '0px 1rem 1rem 0px'}}>
