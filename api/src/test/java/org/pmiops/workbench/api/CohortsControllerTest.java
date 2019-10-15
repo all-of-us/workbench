@@ -38,6 +38,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -161,6 +162,7 @@ public class CohortsControllerTest {
   @Autowired ConceptSetDao conceptSetDao;
   @Autowired ConceptDao conceptDao;
   @Autowired CohortReviewDao cohortReviewDao;
+  @Autowired DataSetService dataSetService;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired UserDao userDao;
   @Autowired CohortMaterializationService cohortMaterializationService;
@@ -185,17 +187,18 @@ public class CohortsControllerTest {
   })
   @MockBean({
     BillingProjectBufferService.class,
+    CdrVersionService.class,
+    CloudStorageService.class,
+    CohortMaterializationService.class,
+    ComplianceService.class,
     ConceptBigQueryService.class,
+    ConceptService.class,
+    ConceptSetService.class,
+    DataSetService.class,
+    DirectoryService.class,
     FireCloudService.class,
     LeonardoNotebooksClient.class,
-    CloudStorageService.class,
-    ConceptSetService.class,
     UserRecentResourceService.class,
-    CohortMaterializationService.class,
-    CdrVersionService.class,
-    ConceptService.class,
-    ComplianceService.class,
-    DirectoryService.class
   })
   static class Configuration {
 

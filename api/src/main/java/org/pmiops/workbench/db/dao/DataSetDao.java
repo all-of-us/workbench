@@ -7,7 +7,9 @@ import org.springframework.data.repository.CrudRepository;
 public interface DataSetDao extends CrudRepository<DataSet, Long> {
   List<DataSet> findByWorkspaceIdAndInvalid(long workspaceId, boolean invalid);
 
-  List<DataSet> findDataSetsByCohortSetId(long cohortId);
+  List<DataSet> findDataSetsByCohortIds(long cohortId);
 
-  List<DataSet> findDataSetsByConceptSetId(long conceptId);
+  List<DataSet> findDataSetsByConceptSetIds(long conceptId);
+
+  List<DataSet> findByWorkspaceId(long workspaceId);
 }
