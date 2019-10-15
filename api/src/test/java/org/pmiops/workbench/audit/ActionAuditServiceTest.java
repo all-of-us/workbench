@@ -98,9 +98,8 @@ public class ActionAuditServiceTest {
     JsonPayload jsonPayload = entry.getPayload();
 
     for (String key : jsonPayload.getDataAsMap().keySet()) {
-      assertThat(Arrays.stream(AuditColumn.values())
-        .anyMatch(col -> col.toString().equals(key)))
-      .isTrue();
+      assertThat(Arrays.stream(AuditColumn.values()).anyMatch(col -> col.toString().equals(key)))
+          .isTrue();
     }
   }
 
