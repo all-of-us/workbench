@@ -3743,3 +3743,19 @@ definitions:
         description: The time when the lock will expire, in ms from the Unix epoch
         type: integer
         format: int64
+
+  BillingStatus:
+    type: string
+    description: >
+      Is the billing account associated with this workspace available to incur costs?  For a free
+      tier project, this indicates whether a user has an available balance in their quota.  For a
+      user-provided billing account, this corresponds to whether payment is valid and up to date.
+    enum: [ ACTIVE, INACTIVE ]
+
+  BillingAccountType:
+    type: string
+    description: >
+      Whether a billing project is provided by the Researcher Workbench as a Free Tier project
+      subject to quota checks, or the project has a billing account provided by the user
+    enum: [ FREE_TIER, USER_PROVIDED ]
+

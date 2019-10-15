@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="thibault" id="changelog-105-workspace-free-tier-usage">
+
+    <createTable tableName="workspace_free_tier_usage">
+      <column name="id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="workspace_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="cost" type="double">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_update_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseColumnNames="user_id"
+      baseTableName="workspace_free_tier_usage"
+      constraintName="fk_user_id"
+      referencedColumnNames="user_id"
+      referencedTableName="user" onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint baseColumnNames="workspace_id"
+      baseTableName="workspace_free_tier_usage"
+      constraintName="fk_workspace_id"
+      referencedColumnNames="workspace_id"
+      referencedTableName="workspace" onDelete="CASCADE"/>
+
+  </changeSet>
+</databaseChangeLog>

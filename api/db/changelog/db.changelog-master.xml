@@ -112,6 +112,8 @@
     <include file="changelog/db.changelog-102-user-recent-workspace.xml"/>
     <include file="changelog/db.changelog-103-data-dictionary.xml"/>
     <include file="changelog/db.changelog-104-dataset-name-unique-in-workspace.xml"/>
+    <include file="changelog/db.changelog-105-workspace-free-tier-usage.xml"/>
+    <include file="changelog/db.changelog-106-workspace-billing-account-fields.xml"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`

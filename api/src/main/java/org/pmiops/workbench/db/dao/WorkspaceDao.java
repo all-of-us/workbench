@@ -2,11 +2,10 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.model.BillingStatus;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -43,12 +42,9 @@ public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
 
   List<Workspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
 
-  @Query(
-      "SELECT distinct w.workspaceNamespace, u from Workspace w INNER JOIN User u ON w.creator = u.userId")
-  List<Object[]> findAllWorkspaceCreators();
+  List<Workspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
 
-  default Map<String, User> namespaceToCreator() {
-    return findAllWorkspaceCreators().stream()
-        .collect(Collectors.toMap(e -> (String) e[0], e -> (User) e[1]));
-  }
+  @Query("UPDATE Workspace SET billingStatus = :status WHERE workspaceId = :id")
+  @Modifying
+  void updateBillingStatus(@Param("id") long workspaceId, @Param("status") BillingStatus status);
 }
