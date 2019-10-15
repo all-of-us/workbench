@@ -329,6 +329,23 @@ export function hasActiveItems(group: any) {
   return group.items.some(it => it.status === 'active');
 }
 
+export function getTypeAndStandard(searchParameters: Array<any>, type: DomainType) {
+  switch (type) {
+    case DomainType.PERSON:
+      const _type = searchParameters[0].type === CriteriaType.DECEASED
+        ? CriteriaType.AGE : searchParameters[0].type;
+      return {type: _type, standard: false};
+    case DomainType.PHYSICALMEASUREMENT:
+      return {type: searchParameters[0].type, standard: false};
+    case DomainType.SURVEY:
+      return {type: searchParameters[0].type, standard: false};
+    case DomainType.VISIT:
+      return {type: searchParameters[0].type, standard: true};
+    default:
+      return {type: null, standard: null};
+  }
+}
+
 export function sanitizeNumericalInput(input: string) {
   return (input && input.length > 10) ? input.slice(0, 10) : input;
 }

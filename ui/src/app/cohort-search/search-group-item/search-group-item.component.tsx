@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
 import {initExisting, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {attributeDisplay, domainToTitle, mapGroupItem, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
+import {attributeDisplay, domainToTitle, getTypeAndStandard, mapGroupItem, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
@@ -10,7 +10,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
+import {DomainType, SearchRequest} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import Timeout = NodeJS.Timeout;
@@ -189,24 +189,6 @@ export class SearchGroupItem extends React.Component<Props, State> {
     }
   }
 
-  get typeAndStandard() {
-    const {item: {searchParameters, type}} = this.props;
-    switch (type) {
-      case DomainType.PERSON:
-        const _type = searchParameters[0].type === CriteriaType.DECEASED
-          ? CriteriaType.AGE : searchParameters[0].type;
-        return {_type, standard: false};
-      case DomainType.PHYSICALMEASUREMENT:
-        return {type: searchParameters[0].type, standard: false};
-      case DomainType.SURVEY:
-        return {type: searchParameters[0].type, standard: false};
-      case DomainType.VISIT:
-        return {type: searchParameters[0].type, standard: true};
-      default:
-        return {type: null, standard: null};
-    }
-  }
-
   launchWizard() {
     triggerEvent('Edit', 'Click', 'Snowman - Edit Criteria - Cohort Builder');
     const {groupId, item, role} = this.props;
@@ -219,7 +201,7 @@ export class SearchGroupItem extends React.Component<Props, State> {
     if ([DomainType.CONDITION, DomainType.PROCEDURE].includes(domain)) {
       isStandard = item.searchParameters[0].isStandard;
     }
-    const {type, standard} = this.typeAndStandard;
+    const {type, standard} = getTypeAndStandard(searchParameters, domain);
     const context = {item: _item, domain, type, isStandard, role, groupId, itemId: id, fullTree, standard};
     wizardStore.next(context);
   }
