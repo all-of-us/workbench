@@ -31,6 +31,7 @@ import {
   withUserProfile
 } from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
+import {ResourceType} from 'app/utils/resourceActions';
 import {
   ErrorResponse,
   Profile, UserRole,
@@ -270,7 +271,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
       </Modal>}
       {confirmDeleting &&
         <ConfirmDeleteModal data-test-id='confirm-delete-modal'
-                            resourceType='workspace'
+                            resourceType={ResourceType.WORKSPACE}
                             resourceName={wp.workspace.name}
                             receiveDelete={() => {this.deleteWorkspace(); }}
                             closeFunction={() => {this.setState({confirmDeleting: false}); }}/>}

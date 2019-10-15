@@ -456,7 +456,6 @@ export class ResourceCard extends React.Component<Props, State> {
           existingNames={this.props.existingNameList}/>}
       {this.state.confirmDeleting &&
       <ConfirmDeleteModal resourceName={this.displayName}
-                          resourceTypeDisplayName={this.resourceTypeDisplayName}
                           resourceType={this.resourceType}
                           receiveDelete={() => this.receiveDelete()}
                           closeFunction={() => this.closeConfirmDelete()}/>}
@@ -478,7 +477,6 @@ export class ResourceCard extends React.Component<Props, State> {
         fromWorkspaceNamespace={this.props.resourceCard.workspaceNamespace}
         fromWorkspaceName={this.props.resourceCard.workspaceFirecloudName}
         fromResourceName={this.props.resourceCard.conceptSet.name}
-        resourceTypeDisplayName={this.resourceTypeDisplayName}
         resourceType={this.resourceType}
         onClose={() => this.setState({copyingConceptSet: false})}
         onCopy={() => this.props.onUpdate()}

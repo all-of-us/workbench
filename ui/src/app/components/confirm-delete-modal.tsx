@@ -16,12 +16,11 @@ import {
 import {
   ReactWrapperBase
 } from 'app/utils';
-import {ResourceType} from 'app/utils/resourceActions';
+import {ResourceType, ResourceTypeDisplayNames} from 'app/utils/resourceActions';
 import * as React from 'react';
 
 export interface ConfirmDeleteModalProps {
   closeFunction: Function;
-  resourceTypeDisplayName: string;
   resourceType: string;
   receiveDelete: Function;
   resourceName: string;
@@ -39,6 +38,10 @@ export class ConfirmDeleteModal
     this.state = {loading: false};
   }
 
+  get resourceTypeDisplayName(): any {
+    return ResourceTypeDisplayNames.get(this.props.resourceType);
+  }
+
   emitDelete(): void {
     this.setState({loading: true});
     this.props.receiveDelete();
@@ -48,12 +51,12 @@ export class ConfirmDeleteModal
     return <Modal loading={this.state.loading}>
         <ModalTitle style={{lineHeight: '28px'}}>
           Are you sure you want to
-          delete {this.props.resourceTypeDisplayName}
+          delete {this.resourceTypeDisplayName}
           : {this.props.resourceName}?
         </ModalTitle>
         <ModalBody style={{marginTop: '0.2rem', lineHeight: '28.px'}}>
           This will permanently delete
-          the {this.props.resourceTypeDisplayName}
+          the {this.resourceTypeDisplayName}
           {this.props.resourceType === ResourceType.COHORT &&
           <span> and all associated review sets</span>}.
         </ModalBody>
@@ -66,7 +69,7 @@ export class ConfirmDeleteModal
             style={{marginLeft: '0.5rem'}}
             data-test-id='confirm-delete'
             onClick={() => this.emitDelete()}>
-              Delete {this.props.resourceTypeDisplayName}
+              Delete {this.resourceTypeDisplayName}
           </Button>
         </ModalFooter>
       </Modal>;
@@ -79,14 +82,12 @@ export class ConfirmDeleteModal
 })
 export class ConfirmDeleteModalComponent extends ReactWrapperBase {
   @Input('resourceType') resourceType: ConfirmDeleteModalProps['resourceType'];
-  @Input('resourceTypeDisplayName') resourceTypeDisplayName:
-    ConfirmDeleteModalProps['resourceTypeDisplayName'];
   @Input('resourceName') resourceName: ConfirmDeleteModalProps['resourceName'];
   @Input('closeFunction') closeFunction: ConfirmDeleteModalProps['closeFunction'];
   @Input('receiveDelete') receiveDelete: ConfirmDeleteModalProps['receiveDelete'];
 
   constructor() {
-    super(ConfirmDeleteModal, ['resourceType', 'resourceTypeDisplayName', 'resourceName',
+    super(ConfirmDeleteModal, ['resourceType', 'resourceName',
       'closeFunction', 'receiveDelete']);
   }
 }
