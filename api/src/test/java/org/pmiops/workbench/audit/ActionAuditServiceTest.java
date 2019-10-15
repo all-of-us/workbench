@@ -23,6 +23,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -41,11 +42,14 @@ public class ActionAuditServiceTest {
   @Before
   public void setUp() {
 
-    final WorkbenchConfig.ActionAuditConfig actionAudit = new ActionAuditConfig();
-    actionAudit.logName = "log_path_1";
-    actionAudit.monitoredResourceName = "monitored_resource_name_1";
+    final WorkbenchConfig.ActionAuditConfig actionAuditConfig = new ActionAuditConfig();
+    actionAuditConfig.logName = "log_path_1";
+    final WorkbenchConfig.ServerConfig serverConfig = new ServerConfig();
+    serverConfig.projectId = "gcp-project-id";
+
     final WorkbenchConfig workbenchConfig = new WorkbenchConfig();
-    workbenchConfig.actionAudit = actionAudit;
+    workbenchConfig.actionAudit = actionAuditConfig;
+    workbenchConfig.server = serverConfig;
     doReturn(workbenchConfig).when(mockConfigProvider).get();
 
     actionAuditService =
