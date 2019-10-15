@@ -534,9 +534,9 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     List<org.pmiops.workbench.db.model.DataSet> dbDataSetList = new ArrayList<>();
     if (markDataSetRequest.getResourceType().equalsIgnoreCase(COHORT)) {
-      dbDataSetList = dataSetDao.findDataSetsByCohortSetId(markDataSetRequest.getId());
+      dbDataSetList = dataSetDao.findDataSetsByCohortIds(markDataSetRequest.getId());
     } else if (markDataSetRequest.getResourceType().equalsIgnoreCase(CONCEPT_SET)) {
-      dbDataSetList = dataSetDao.findDataSetsByConceptSetId(markDataSetRequest.getId());
+      dbDataSetList = dataSetDao.findDataSetsByConceptSetIds(markDataSetRequest.getId());
     }
     dbDataSetList =
         dbDataSetList.stream()
@@ -617,9 +617,9 @@ public class DataSetController implements DataSetApiDelegate {
     List<org.pmiops.workbench.db.model.DataSet> dbDataSets =
         new ArrayList<org.pmiops.workbench.db.model.DataSet>();
     if (resourceType.equals(COHORT)) {
-      dbDataSets = dataSetDao.findDataSetsByCohortSetId(id);
+      dbDataSets = dataSetDao.findDataSetsByCohortIds(id);
     } else if (resourceType.equals(CONCEPT_SET)) {
-      dbDataSets = dataSetDao.findDataSetsByConceptSetId(id);
+      dbDataSets = dataSetDao.findDataSetsByConceptSetIds(id);
     }
     DataSetListResponse dataSetResponse =
         new DataSetListResponse()

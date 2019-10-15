@@ -49,6 +49,7 @@ public class DataSetValue {
   }
 
   public boolean equals(DataSetValue dataSetValue) {
-    return getValue().equals(dataSetValue.getValue()) && getDomainEnum().equals(dataSetValue.getDomainEnum());
+    return getValue().equals(dataSetValue.getValue())
+        && getDomainEnum().equals(dataSetValue.getDomainEnum());
   }
 }

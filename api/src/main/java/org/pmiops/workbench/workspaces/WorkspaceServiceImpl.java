@@ -420,11 +420,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       dataSetService.cloneDataSetToWorkspace(
           dataSet,
           to,
-          fromCohortIdToToCohortId.values().stream()
-              .filter(cohortId -> dataSet.getCohortIds().contains(cohortId))
+          fromCohortIdToToCohortId.entrySet().stream()
+              .filter(cohortIdEntry -> dataSet.getCohortIds().contains(cohortIdEntry.getKey()))
+              .map(Entry::getValue)
               .collect(Collectors.toSet()),
-          fromConceptSetIdToToConceptSetId.values().stream()
-              .filter(conceptSetId -> dataSet.getConceptSetIds().contains(conceptSetId))
+          fromConceptSetIdToToConceptSetId.entrySet().stream()
+              .filter(conceptSetId -> dataSet.getConceptSetIds().contains(conceptSetId.getKey()))
+              .map(Entry::getValue)
               .collect(Collectors.toSet()));
     }
     return saved;
