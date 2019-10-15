@@ -71,8 +71,11 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.DataSetService;
+import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -223,15 +226,17 @@ public class WorkspacesControllerTest {
     CohortReviewController.class,
     CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,
+    DataSetServiceImpl.class,
     ReviewQueryBuilder.class,
     ConceptSetService.class,
     ConceptSetsController.class
   })
   @MockBean({
     BillingProjectBufferService.class,
-    ConceptBigQueryService.class,
-    FireCloudService.class,
     CohortMaterializationService.class,
+    ConceptBigQueryService.class,
+    CdrBigQuerySchemaConfigService.class,
+    FireCloudService.class,
     CloudStorageService.class,
     BigQueryService.class,
     CohortQueryBuilder.class,
@@ -282,6 +287,7 @@ public class WorkspacesControllerTest {
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortsController cohortsController;
   @Autowired ConceptSetsController conceptSetsController;
+  @Autowired DataSetService dataSetService;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;

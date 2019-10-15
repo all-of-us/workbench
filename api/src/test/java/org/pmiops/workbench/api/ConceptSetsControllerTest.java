@@ -30,6 +30,7 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -180,6 +181,8 @@ public class ConceptSetsControllerTest {
 
   @Autowired ConceptDao conceptDao;
 
+  @Autowired DataSetService dataSetService;
+
   @Autowired WorkspaceDao workspaceDao;
 
   @Autowired UserDao userDao;
@@ -216,14 +219,15 @@ public class ConceptSetsControllerTest {
   })
   @MockBean({
     BillingProjectBufferService.class,
-    ConceptBigQueryService.class,
-    FireCloudService.class,
     CloudStorageService.class,
+    ComplianceService.class,
+    ConceptBigQueryService.class,
     ConceptSetService.class,
+    DataSetService.class,
+    DirectoryService.class,
+    FireCloudService.class,
     NotebooksService.class,
     UserRecentResourceService.class,
-    ComplianceService.class,
-    DirectoryService.class,
     WorkspaceAuditAdapterService.class
   })
   static class Configuration {

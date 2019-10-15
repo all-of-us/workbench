@@ -31,6 +31,7 @@ import org.pmiops.workbench.cdr.model.DomainVocabularyInfo.DomainVocabularyInfoI
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -239,7 +240,8 @@ public class ConceptsControllerTest {
     CohortCloningService.class,
     ConceptSetService.class,
     ConceptBigQueryService.class,
-    Clock.class
+    Clock.class,
+    DataSetService.class
   })
   static class Configuration {
     @Bean
@@ -251,6 +253,7 @@ public class ConceptsControllerTest {
 
   @Autowired private BigQueryService bigQueryService;
   @Autowired private ConceptDao conceptDao;
+  @Autowired private DataSetService dataSetService;
   @Autowired private WorkspaceService workspaceService;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private CdrVersionDao cdrVersionDao;

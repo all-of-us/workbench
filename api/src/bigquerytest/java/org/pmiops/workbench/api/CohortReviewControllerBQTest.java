@@ -35,6 +35,7 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -102,7 +103,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     FireCloudService.class,
     UserRecentResourceService.class,
     CohortFactory.class,
-    ConceptSetService.class
+    ConceptSetService.class,
+    DataSetService.class
   })
   static class Configuration {
     @Bean
@@ -141,6 +143,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Autowired private CohortDao cohortDao;
 
   @Autowired private CohortReviewDao cohortReviewDao;
+
+  @Autowired private DataSetService dataSetService;
 
   @Autowired private WorkspaceDao workspaceDao;
 

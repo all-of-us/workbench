@@ -464,7 +464,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
     org.pmiops.workbench.db.model.Workspace savedWorkspace =
-        workspaceService.saveAndCloneCohortsAndConceptSets(fromWorkspace, dbWorkspace);
+        workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
 
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, WorkspaceAccessEntry> fromAclsMap =

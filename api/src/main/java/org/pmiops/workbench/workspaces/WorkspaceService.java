@@ -50,7 +50,7 @@ public interface WorkspaceService {
       Map<String, WorkspaceAccessLevel> userRoleMap,
       String registeredUsersGroup);
 
-  Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to);
+  Workspace saveAndCloneCohortsConceptSetsAndDataSets(Workspace from, Workspace to);
 
   WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId);
 
