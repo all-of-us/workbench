@@ -195,11 +195,11 @@ buildscript {    // Configuration for building
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
     classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
     classpath 'io.swagger:swagger-codegen:2.2.3'
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
+    classpath "org.jetbrains.kotlin:kotlin-noarg:$KOTLIN_VERSION"
     classpath 'org.owasp:dependency-check-gradle:5.1.0'
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
     classpath 'net.ltgt.gradle:gradle-apt-plugin:0.21'
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
-    classpath "org.jetbrains.kotlin:kotlin-noarg:$KOTLIN_VERSION"
   }
 }
 

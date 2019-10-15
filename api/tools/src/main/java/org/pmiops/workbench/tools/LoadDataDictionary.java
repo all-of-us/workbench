@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
@@ -21,6 +22,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.security.access.method.P;
 
 @SpringBootApplication
 @EnableJpaRepositories("org.pmiops.workbench")
@@ -29,7 +31,7 @@ public class LoadDataDictionary {
 
   private static final Logger logger = Logger.getLogger(LoadDataDictionary.class.getName());
 
-  private Resource[] getDataDictionaryExportFiles() throws IOException {
+  private Resource[] getDataDictionaryResources() throws IOException {
     ClassLoader cl = this.getClass().getClassLoader();
     ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
     return resolver.getResources("classpath*:/data_dictionary_exports/*.yaml");
@@ -40,53 +42,54 @@ public class LoadDataDictionary {
       CdrVersionDao cdrVersionDao, DataDictionaryEntryDao dataDictionaryEntryDao) {
     return (args) -> {
       CdrVersion defaultCdrVersion = cdrVersionDao.findByIsDefault(true);
+      ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+      SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+      mapper.setDateFormat(df);
+      mapper.registerModule(new KotlinModule());
 
-      for (Resource resource : getDataDictionaryExportFiles()) {
+      for (Resource resource : getDataDictionaryResources()) {
         InputStream is = resource.getInputStream();
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
-        mapper.setDateFormat(df);
-
-        mapper.registerModule(new KotlinModule());
         DataDictionary dd = mapper.readValue(is, DataDictionary.class);
 
         Timestamp newEntryDefinedTime = dd.getMeta_data()[0].getCreated_time();
 
         CdrVersion cdrVersion = cdrVersionDao.findByName(dd.getMeta_data()[0].getCdr_version());
-
         if (cdrVersion == null) {
           // Skip over Data Dictionaries for CDR Versions not in the current environment
           continue;
         }
 
         for (AvailableField field : dd.getTransformations()[0].getAvailable_fields()) {
-          DataDictionaryEntry entry =
+          Optional<DataDictionaryEntry> entry =
               dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
                   field.getRelevant_omop_table(), field.getField_name(), cdrVersion);
 
           // We are skipping ahead if the defined times match by assuming that the definition has
           // not changed.
-          if (entry != null && newEntryDefinedTime.before(entry.getDefinedTime())) {
+          if (entry.isPresent() && newEntryDefinedTime.before(entry.get().getDefinedTime())) {
             continue;
           }
 
-          if (entry == null) {
-            entry = new DataDictionaryEntry();
-            entry.setRelevantOmopTable(field.getRelevant_omop_table());
-            entry.setFieldName(field.getField_name());
-            entry.setCdrVersion(defaultCdrVersion);
+          DataDictionaryEntry targetEntry;
+          if (!entry.isPresent()) {
+            targetEntry = new DataDictionaryEntry();
+            targetEntry.setRelevantOmopTable(field.getRelevant_omop_table());
+            targetEntry.setFieldName(field.getField_name());
+            targetEntry.setCdrVersion(defaultCdrVersion);
+          } else {
+            targetEntry = entry.get();
           }
 
-          entry.setDefinedTime(newEntryDefinedTime);
-          entry.setOmopCdmStandardOrCustomField(field.getOmop_cdm_standard_or_custom_field());
-          entry.setDescription(field.getDescription());
-          entry.setFieldType(field.getField_type());
-          entry.setDataProvenance(field.getData_provenance());
-          entry.setSourcePpiModule(field.getSource_ppi_module());
-          entry.setTransformedByRegisteredTierPrivacyMethods(
+          targetEntry.setDefinedTime(newEntryDefinedTime);
+          targetEntry.setOmopCdmStandardOrCustomField(field.getOmop_cdm_standard_or_custom_field());
+          targetEntry.setDescription(field.getDescription());
+          targetEntry.setFieldType(field.getField_type());
+          targetEntry.setDataProvenance(field.getData_provenance());
+          targetEntry.setSourcePpiModule(field.getSource_ppi_module());
+          targetEntry.setTransformedByRegisteredTierPrivacyMethods(
               field.getTransformed_by_registered_tier_privacy_methods());
 
-          dataDictionaryEntryDao.save(entry);
+          dataDictionaryEntryDao.save(targetEntry);
         }
       }
     };

@@ -2,7 +2,7 @@ package org.pmiops.workbench.tools
 
 import java.sql.Timestamp
 
-internal data class MetaData(
+internal data class Metadata(
         val id: String,
         val name: String,
         val version: Long,
