@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
-import com.google.cloud.MonitoredResource;
 import com.google.cloud.logging.LogEntry;
 import com.google.cloud.logging.Logging;
 import com.google.cloud.logging.Payload;
@@ -16,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Provider;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +42,6 @@ public class ActionAuditServiceTest {
 
   @Before
   public void setUp() {
-
     final WorkbenchConfig.ActionAuditConfig actionAuditConfig = new ActionAuditConfig();
     actionAuditConfig.logName = "log_path_1";
     final WorkbenchConfig.ServerConfig serverConfig = new ServerConfig();

@@ -47,8 +47,9 @@ public class ActionAuditServiceImpl implements ActionAuditService {
   @Override
   public void send(Collection<ActionAuditEvent> events) {
     try {
-      ImmutableList<LogEntry> logEntries =
-          events.stream().map(this::auditEventToLogEntry).collect(ImmutableList.toImmutableList());
+      ImmutableList<LogEntry> logEntries = events.stream()
+          .map(this::auditEventToLogEntry)
+          .collect(ImmutableList.toImmutableList());
       cloudLogging.write(logEntries);
     } catch (RuntimeException e) {
       serviceLogger.log(

@@ -96,6 +96,9 @@ public class ActionAuditEventImpl implements ActionAuditEvent {
     return newValueMaybe;
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
   // This builder handles null inputs for optional fields, simplifying code at the call site.
   // For example setAgentEmail() can be called safely with null (or just not called it's not known).
   public static class Builder {

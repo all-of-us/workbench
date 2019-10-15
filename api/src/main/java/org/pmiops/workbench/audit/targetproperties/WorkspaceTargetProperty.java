@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap.Builder;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
