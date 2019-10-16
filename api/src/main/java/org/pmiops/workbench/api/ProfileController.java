@@ -17,6 +17,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.pmiops.workbench.annotations.AuthorityRequired;
+import org.pmiops.workbench.audit.adapters.ProfileAuditAdapterService;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
@@ -186,6 +187,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
   private final Provider<MailService> mailServiceProvider;
+  private ProfileAuditAdapterService profileAuditAdapterService;
 
   @Autowired
   ProfileController(
@@ -201,7 +203,8 @@ public class ProfileController implements ProfileApiDelegate {
       LeonardoNotebooksClient leonardoNotebooksClient,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment,
-      Provider<MailService> mailServiceProvider) {
+      Provider<MailService> mailServiceProvider,
+      ProfileAuditAdapterService profileAuditAdapterService) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -215,6 +218,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
     this.mailServiceProvider = mailServiceProvider;
+    this.profileAuditAdapterService = profileAuditAdapterService;
   }
 
   @Override
@@ -780,9 +784,10 @@ public class ProfileController implements ProfileApiDelegate {
     }
     User user = userProvider.get();
     log.log(Level.WARNING, "Deleting profile: user email: " + user.getEmail());
+
     directoryService.deleteUser(user.getEmail().split("@")[0]);
     userDao.delete(user.getUserId());
-
+    profileAuditAdapterService.fireDeleteAction(user.getUserId(), user.getEmail()); // not sure if user profider will survive the next line
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

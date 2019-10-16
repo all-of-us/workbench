@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -224,8 +225,8 @@ public class WorkspaceAuditAdapterServiceTest {
 
   @Test
   public void testCollaborateWithEmptyMapDoesNothing() {
-    workspaceAuditAdapterService.fireCollaborateAction(101L, Collections.emptyMap());
-    verify(mockActionAuditService, never()).send(anyCollection());
+    workspaceAuditAdapterService.fireCollaborateAction(WORKSPACE_1_DB_ID, Collections.emptyMap());
+    verifyZeroInteractions(mockActionAuditService);
   }
 
   @Test
