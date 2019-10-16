@@ -61,7 +61,7 @@ jobs:
   api-local-test:
     docker:
       - image: allofustest/workbench:buildimage-0.0.13
-      - image: mysql:5.7
+      - image: mysql:5.7.27
         environment:
           - MYSQL_ROOT_PASSWORD=ubuntu
           - MYSQL_USER=ubuntu
