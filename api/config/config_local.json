@@ -76,7 +76,7 @@
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": true
+    "enableNewAccountCreation": false // this is busted currently when enabled. Can't escape the Profile edit page
   },
   "actionAudit": {
     "logName":"action-audit-test-3"

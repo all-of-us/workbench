@@ -3,7 +3,6 @@ package org.pmiops.workbench.audit;
 import com.google.cloud.MonitoredResource;
 import com.google.cloud.logging.LogEntry;
 import com.google.cloud.logging.Logging;
-import com.google.cloud.logging.LoggingOptions;
 import com.google.cloud.logging.Payload.JsonPayload;
 import com.google.cloud.logging.Severity;
 import com.google.common.collect.ImmutableList;
@@ -25,8 +24,9 @@ public class ActionAuditServiceImpl implements ActionAuditService {
   private static final Logger serviceLogger =
       Logger.getLogger(ActionAuditServiceImpl.class.getName());
 
-  private static final String MONITORED_RESOURCE_TYPE = "project";
-  private static final String PROJECT_ID_LABEL = "project_id";
+  private static final String MONITORED_RESOURCE_TYPE = "Global";
+  public static final MonitoredResource MONITORED_RESOURCE = MonitoredResource.newBuilder(MONITORED_RESOURCE_TYPE)
+      .build();
 
   private final Logging cloudLogging;
   private Provider<WorkbenchConfig> configProvider;
@@ -62,7 +62,7 @@ public class ActionAuditServiceImpl implements ActionAuditService {
     return LogEntry.newBuilder(toJsonPayload(auditEvent))
         .setSeverity(Severity.INFO)
         .setLogName(actionAuditConfig.logName)
-        .setResource(getMonitoredResource())
+        .setResource(MONITORED_RESOURCE)
         .build();
   }
 
@@ -81,13 +81,6 @@ public class ActionAuditServiceImpl implements ActionAuditService {
     result.put(AuditColumn.PREV_VALUE.name(), toNullable(auditEvent.previousValue()));
     result.put(AuditColumn.NEW_VALUE.name(), toNullable(auditEvent.newValue()));
     return JsonPayload.of(result);
-  }
-
-  private MonitoredResource getMonitoredResource() {
-    final String projectId = configProvider.get().server.projectId;
-    return MonitoredResource.newBuilder(MONITORED_RESOURCE_TYPE)
-        .addLabel(PROJECT_ID_LABEL, projectId)
-        .build();
   }
 
   // Inverse of Optional.ofNullable(). Used for JSON api which expects null values for empty
