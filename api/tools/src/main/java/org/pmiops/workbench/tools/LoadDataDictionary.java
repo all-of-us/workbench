@@ -42,8 +42,7 @@ public class LoadDataDictionary {
       CdrVersionDao cdrVersionDao, DataDictionaryEntryDao dataDictionaryEntryDao) {
     return (args) -> {
       if (args.length != 1) {
-        throw new IllegalArgumentException(
-            "Expected 1 arg. Got " + Arrays.asList(args));
+        throw new IllegalArgumentException("Expected 1 arg. Got " + Arrays.asList(args));
       }
 
       boolean dryRun = Boolean.parseBoolean(args[0]);
@@ -97,8 +96,14 @@ public class LoadDataDictionary {
               field.getTransformed_by_registered_tier_privacy_methods());
 
           if (dryRun) {
-            logger.info("Would have saved (" + targetEntry.getRelevantOmopTable() + ", " +
-                targetEntry.getFieldName() + ", " + cdrVersion.getName() + ")");
+            logger.info(
+                "Would have saved ("
+                    + targetEntry.getRelevantOmopTable()
+                    + ", "
+                    + targetEntry.getFieldName()
+                    + ", "
+                    + cdrVersion.getName()
+                    + ")");
           } else {
             dataDictionaryEntryDao.save(targetEntry);
           }
