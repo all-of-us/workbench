@@ -652,15 +652,15 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("Invalid Domain");
     }
 
-    org.pmiops.workbench.db.model.DataDictionaryEntry dataDictionaryEntry =
+    Optional<org.pmiops.workbench.db.model.DataDictionaryEntry> dataDictionaryEntry =
         dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
             omopTable, domainValue, cdrVersion);
 
-    if (dataDictionaryEntry == null) {
+    if (!dataDictionaryEntry.isPresent()) {
       throw new NotFoundException();
     }
 
-    return ResponseEntity.ok(dataSetMapper.toApi(dataDictionaryEntry));
+    return ResponseEntity.ok(dataSetMapper.toApi(dataDictionaryEntry.get()));
   }
 
   // TODO(jaycarlton) create a class that knows about code cells and their properties,
