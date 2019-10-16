@@ -227,6 +227,10 @@ spotless {
       exclude 'build/**'
     }
   }
+
+  kotlin {
+    ktlint()
+  }
 }
 
 configurations {
