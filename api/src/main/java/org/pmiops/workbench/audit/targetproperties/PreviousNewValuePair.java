@@ -34,10 +34,14 @@ public class PreviousNewValuePair {
 
   @Override
   public String toString() {
-    return "PreviousNewValuePair{" +
-        "previousValue='" + previousValue + '\'' +
-        ", newValue='" + newValue + '\'' +
-        '}';
+    return "PreviousNewValuePair{"
+        + "previousValue='"
+        + previousValue
+        + '\''
+        + ", newValue='"
+        + newValue
+        + '\''
+        + '}';
   }
 
   @Override
@@ -49,8 +53,8 @@ public class PreviousNewValuePair {
       return false;
     }
     PreviousNewValuePair that = (PreviousNewValuePair) o;
-    return Objects.equals(previousValue, that.previousValue) &&
-        Objects.equals(newValue, that.newValue);
+    return Objects.equals(previousValue, that.previousValue)
+        && Objects.equals(newValue, that.newValue);
   }
 
   @Override

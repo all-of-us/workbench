@@ -25,16 +25,14 @@ public class ActionAuditServiceImpl implements ActionAuditService {
       Logger.getLogger(ActionAuditServiceImpl.class.getName());
 
   private static final String MONITORED_RESOURCE_TYPE = "Global";
-  public static final MonitoredResource MONITORED_RESOURCE = MonitoredResource.newBuilder(MONITORED_RESOURCE_TYPE)
-      .build();
+  public static final MonitoredResource MONITORED_RESOURCE =
+      MonitoredResource.newBuilder(MONITORED_RESOURCE_TYPE).build();
 
   private final Logging cloudLogging;
   private Provider<WorkbenchConfig> configProvider;
 
   @Autowired
-  public ActionAuditServiceImpl(
-      Provider<WorkbenchConfig> configProvider,
-      Logging cloudLogging) {
+  public ActionAuditServiceImpl(Provider<WorkbenchConfig> configProvider, Logging cloudLogging) {
     this.configProvider = configProvider;
     this.cloudLogging = cloudLogging;
   }
@@ -47,9 +45,8 @@ public class ActionAuditServiceImpl implements ActionAuditService {
   @Override
   public void send(Collection<ActionAuditEvent> events) {
     try {
-      ImmutableList<LogEntry> logEntries = events.stream()
-          .map(this::auditEventToLogEntry)
-          .collect(ImmutableList.toImmutableList());
+      ImmutableList<LogEntry> logEntries =
+          events.stream().map(this::auditEventToLogEntry).collect(ImmutableList.toImmutableList());
       cloudLogging.write(logEntries);
     } catch (RuntimeException e) {
       serviceLogger.log(

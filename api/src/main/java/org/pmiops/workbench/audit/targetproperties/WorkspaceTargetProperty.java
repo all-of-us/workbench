@@ -25,8 +25,7 @@ public enum WorkspaceTargetProperty {
   private String propertyName;
   private Function<Workspace, String> extractor;
 
-  WorkspaceTargetProperty(String propertyName,
-      Function<Workspace, String> extractor) {
+  WorkspaceTargetProperty(String propertyName, Function<Workspace, String> extractor) {
     this.propertyName = propertyName;
     this.extractor = extractor;
   }
@@ -56,8 +55,8 @@ public enum WorkspaceTargetProperty {
         .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
   }
 
-  public static Map<String, PreviousNewValuePair> getChangedValuesByName(Workspace previousWorkspace,
-      Workspace newWorkspace) {
+  public static Map<String, PreviousNewValuePair> getChangedValuesByName(
+      Workspace previousWorkspace, Workspace newWorkspace) {
     ImmutableMap.Builder<String, PreviousNewValuePair> resultBuilder = new Builder<>();
     for (WorkspaceTargetProperty property : WorkspaceTargetProperty.values()) {
       final String previousValue = property.extract(previousWorkspace);
@@ -65,10 +64,12 @@ public enum WorkspaceTargetProperty {
       if (previousValue != null || newValue != null) {
         if (previousValue != null && !previousValue.equals(newValue)
             || !newValue.equals(previousValue)) {
-          resultBuilder.put(property.propertyName, PreviousNewValuePair.builder()
-              .setNewValue(newValue)
-              .setPreviousValue(previousValue)
-              .build());
+          resultBuilder.put(
+              property.propertyName,
+              PreviousNewValuePair.builder()
+                  .setNewValue(newValue)
+                  .setPreviousValue(previousValue)
+                  .build());
         }
       }
     }

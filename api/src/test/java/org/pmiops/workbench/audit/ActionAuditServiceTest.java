@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Provider;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,8 +51,7 @@ public class ActionAuditServiceTest {
     workbenchConfig.server = serverConfig;
     doReturn(workbenchConfig).when(mockConfigProvider).get();
 
-    actionAuditService =
-        new ActionAuditServiceImpl(mockConfigProvider, mockLogging);
+    actionAuditService = new ActionAuditServiceImpl(mockConfigProvider, mockLogging);
     final String actionId = ActionAuditService.newActionId();
 
     // ordinarily events sharing an action would have more things in common than this,

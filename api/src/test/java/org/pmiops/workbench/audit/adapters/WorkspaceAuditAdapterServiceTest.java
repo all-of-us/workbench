@@ -1,20 +1,17 @@
 package org.pmiops.workbench.audit.adapters;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,9 +32,7 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -46,9 +41,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class WorkspaceAuditAdapterServiceTest {
 
   private static final long WORKSPACE_1_DB_ID = 101L;
-  public static final long Y2K_EPOCH_MILLIS = Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
-  public static final long REMOVED_USER_ID = 301L;
-  public static final long ADDED_USER_ID = 401L;
+  private static final long Y2K_EPOCH_MILLIS =
+      Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
+  private static final long REMOVED_USER_ID = 301L;
+  private static final long ADDED_USER_ID = 401L;
+
   private WorkspaceAuditAdapterService workspaceAuditAdapterService;
   private Workspace workspace1;
   private User user1;
@@ -56,7 +53,7 @@ public class WorkspaceAuditAdapterServiceTest {
   private org.pmiops.workbench.db.model.Workspace dbWorkspace2;
 
   @Mock private Provider<User> mockUserProvider;
-  @Mock private FakeClock mockClock;
+  @Mock private Clock mockClock;
   @Mock private ActionAuditService mockActionAuditService;
 
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventListCaptor;
@@ -108,9 +105,7 @@ public class WorkspaceAuditAdapterServiceTest {
     dbWorkspace2.setCreationTime(new Timestamp(now));
     dbWorkspace2.setCreator(user1);
 
-    doReturn(Y2K_EPOCH_MILLIS)
-        .when(mockClock)
-        .millis();
+    doReturn(Y2K_EPOCH_MILLIS).when(mockClock).millis();
   }
 
   @Test
@@ -155,71 +150,71 @@ public class WorkspaceAuditAdapterServiceTest {
     assertThat(eventsSent).hasSize(2);
 
     // need same actionId for all events
-    assertThat(eventsSent.stream()
-          .map(ActionAuditEvent::actionId)
-          .distinct()
-          .count())
-        .isEqualTo(1);
+    assertThat(eventsSent.stream().map(ActionAuditEvent::actionId).distinct().count()).isEqualTo(1);
 
-    assertThat(eventsSent.stream()
-        .map(ActionAuditEvent::targetType)
-        .allMatch(t -> t.equals(TargetType.WORKSPACE)))
+    assertThat(
+            eventsSent.stream()
+                .map(ActionAuditEvent::targetType)
+                .allMatch(t -> t.equals(TargetType.WORKSPACE)))
         .isTrue();
 
-    ImmutableSet<ActionType> expectedActionTypes = ImmutableSet.of(ActionType.DUPLICATE_FROM,
-        ActionType.DUPLICATE_TO);
-    ImmutableSet<ActionType> actualActionTypes = eventsSent.stream()
-        .map(ActionAuditEvent::actionType)
-        .collect(ImmutableSet.toImmutableSet());
+    ImmutableSet<ActionType> expectedActionTypes =
+        ImmutableSet.of(ActionType.DUPLICATE_FROM, ActionType.DUPLICATE_TO);
+    ImmutableSet<ActionType> actualActionTypes =
+        eventsSent.stream()
+            .map(ActionAuditEvent::actionType)
+            .collect(ImmutableSet.toImmutableSet());
     assertThat(actualActionTypes).containsExactlyElementsIn(expectedActionTypes);
   }
 
   @Test
   public void testFiresCollaborateAction() {
-    final ImmutableMap<Long, String> aclsByUserId = ImmutableMap.of(
-        user1.getUserId(), WorkspaceAccessLevel.OWNER.toString(),
-        REMOVED_USER_ID, WorkspaceAccessLevel.NO_ACCESS.toString(),
-        ADDED_USER_ID, WorkspaceAccessLevel.READER.toString());
-    workspaceAuditAdapterService.fireCollaborateAction(
-        dbWorkspace1.getWorkspaceId(),
-        aclsByUserId);
+    final ImmutableMap<Long, String> aclsByUserId =
+        ImmutableMap.of(
+            user1.getUserId(),
+            WorkspaceAccessLevel.OWNER.toString(),
+            REMOVED_USER_ID,
+            WorkspaceAccessLevel.NO_ACCESS.toString(),
+            ADDED_USER_ID,
+            WorkspaceAccessLevel.READER.toString());
+    workspaceAuditAdapterService.fireCollaborateAction(dbWorkspace1.getWorkspaceId(), aclsByUserId);
     verify(mockActionAuditService).send(eventListCaptor.capture());
     Collection<ActionAuditEvent> eventsSent = eventListCaptor.getValue();
     assertThat(eventsSent).hasSize(4);
 
-    Map<String, Long> countByTargetType = eventsSent.stream()
-        .collect(Collectors.groupingBy(e -> e.targetType().toString(), Collectors.counting()));
+    Map<String, Long> countByTargetType =
+        eventsSent.stream()
+            .collect(Collectors.groupingBy(e -> e.targetType().toString(), Collectors.counting()));
 
-    assertThat(countByTargetType.get(TargetType.WORKSPACE.toString()))
-        .isEqualTo(1);
-    assertThat(countByTargetType.get(TargetType.USER.toString()))
-        .isEqualTo(3);
+    assertThat(countByTargetType.get(TargetType.WORKSPACE.toString())).isEqualTo(1);
+    assertThat(countByTargetType.get(TargetType.USER.toString())).isEqualTo(3);
 
-    Optional<String> targetPropertyMaybe = eventsSent.stream()
-        .filter(e -> e.targetType() == TargetType.USER)
-        .findFirst()
-        .flatMap(ActionAuditEvent::targetProperty);
+    Optional<String> targetPropertyMaybe =
+        eventsSent.stream()
+            .filter(e -> e.targetType() == TargetType.USER)
+            .findFirst()
+            .flatMap(ActionAuditEvent::targetProperty);
 
     assertThat(targetPropertyMaybe.isPresent()).isTrue();
-    assertThat(targetPropertyMaybe.get())
-        .isEqualTo(AclTargetProperty.ACCESS_LEVEL.toString());
+    assertThat(targetPropertyMaybe.get()).isEqualTo(AclTargetProperty.ACCESS_LEVEL.toString());
 
     // need same actionId for all events
-    assertThat(eventsSent.stream()
-        .map(ActionAuditEvent::actionId)
-        .distinct()
-        .count())
-        .isEqualTo(1);
+    assertThat(eventsSent.stream().map(ActionAuditEvent::actionId).distinct().count()).isEqualTo(1);
 
-    Optional<ActionAuditEvent> readerEventMaybe = eventsSent.stream()
-        .filter(e -> e.targetType() == TargetType.USER
-          && e.targetId().isPresent()
-          && e.targetId().get().equals(ADDED_USER_ID))
-        .findFirst();
+    Optional<ActionAuditEvent> readerEventMaybe =
+        eventsSent.stream()
+            .filter(
+                e ->
+                    e.targetType() == TargetType.USER
+                        && e.targetId().isPresent()
+                        && e.targetId().get().equals(ADDED_USER_ID))
+            .findFirst();
     assertThat(readerEventMaybe.isPresent()).isTrue();
     assertThat(readerEventMaybe.get().targetProperty().isPresent()).isTrue();
-    assertThat(readerEventMaybe.get().targetProperty().get()).isEqualTo(AclTargetProperty.ACCESS_LEVEL.toString());
-    assertThat(readerEventMaybe.get().newValue().get()).isEqualTo(WorkspaceAccessLevel.READER.toString());
+    assertThat(readerEventMaybe.get().targetProperty().get())
+        .isEqualTo(AclTargetProperty.ACCESS_LEVEL.toString());
+    assertThat(readerEventMaybe.get().newValue().get())
+        .isEqualTo(WorkspaceAccessLevel.READER.toString());
     assertThat(readerEventMaybe.get().previousValue().isPresent()).isFalse();
   }
 

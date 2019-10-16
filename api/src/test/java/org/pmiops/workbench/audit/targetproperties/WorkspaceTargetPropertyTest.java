@@ -61,11 +61,10 @@ public class WorkspaceTargetPropertyTest {
     emptyWorkspace.setResearchPurpose(new ResearchPurpose());
   }
 
-
-
   @Test
   public void testExtractsStringPropertiesFromWorkspace() {
-    Map<String, String> propertiesByName = WorkspaceTargetProperty.getPropertyValuesByName(workspace1);
+    Map<String, String> propertiesByName =
+        WorkspaceTargetProperty.getPropertyValuesByName(workspace1);
 
     assertThat(propertiesByName).hasSize(6);
     assertThat(propertiesByName.get(WorkspaceTargetProperty.INTENDED_STUDY.getPropertyName()))
@@ -78,54 +77,68 @@ public class WorkspaceTargetPropertyTest {
 
   @Test
   public void testEmptyWorkspaceGivesEmptyMap() {
-    assertThat(WorkspaceTargetProperty.getPropertyValuesByName(emptyWorkspace))
-        .isEmpty();
-    assertThat(WorkspaceTargetProperty.getPropertyValuesByName(null))
-        .isEmpty();
+    assertThat(WorkspaceTargetProperty.getPropertyValuesByName(emptyWorkspace)).isEmpty();
+    assertThat(WorkspaceTargetProperty.getPropertyValuesByName(null)).isEmpty();
   }
 
   @Test
   public void testMapsChanges() {
-    Map<String, PreviousNewValuePair> changesByPropertyName = WorkspaceTargetProperty
-        .getChangedValuesByName(workspace1, workspace2);
+    Map<String, PreviousNewValuePair> changesByPropertyName =
+        WorkspaceTargetProperty.getChangedValuesByName(workspace1, workspace2);
 
     assertThat(changesByPropertyName).hasSize(5);
 
-    assertThat(changesByPropertyName.get(WorkspaceTargetProperty.ADDITIONAL_NOTES.getPropertyName()).getPreviousValue())
+    assertThat(
+            changesByPropertyName
+                .get(WorkspaceTargetProperty.ADDITIONAL_NOTES.getPropertyName())
+                .getPreviousValue())
         .isEqualTo("I really like the cloud.");
 
-    assertThat(changesByPropertyName.get(WorkspaceTargetProperty.ADDITIONAL_NOTES.getPropertyName()).getNewValue())
+    assertThat(
+            changesByPropertyName
+                .get(WorkspaceTargetProperty.ADDITIONAL_NOTES.getPropertyName())
+                .getNewValue())
         .isEqualTo("I changed my mind");
   }
 
   @Test
   public void testHandlesMissingValues() {
     workspace2.setCdrVersionId(null);
-    Map<String, PreviousNewValuePair> changesByName = WorkspaceTargetProperty
-        .getChangedValuesByName(workspace1, workspace2);
-    assertThat(changesByName.get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName()).getPreviousValue())
+    Map<String, PreviousNewValuePair> changesByName =
+        WorkspaceTargetProperty.getChangedValuesByName(workspace1, workspace2);
+    assertThat(
+            changesByName
+                .get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName())
+                .getPreviousValue())
         .isEqualTo("1");
-    assertThat(changesByName.get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName()).getNewValue())
+    assertThat(
+            changesByName
+                .get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName())
+                .getNewValue())
         .isNull();
 
-    Map<String, PreviousNewValuePair> reverseChangesByName = WorkspaceTargetProperty
-        .getChangedValuesByName(workspace2, workspace1);
-    assertThat(reverseChangesByName.get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName()).getPreviousValue())
+    Map<String, PreviousNewValuePair> reverseChangesByName =
+        WorkspaceTargetProperty.getChangedValuesByName(workspace2, workspace1);
+    assertThat(
+            reverseChangesByName
+                .get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName())
+                .getPreviousValue())
         .isNull();
-    assertThat(reverseChangesByName.get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName()).getNewValue())
+    assertThat(
+            reverseChangesByName
+                .get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName())
+                .getNewValue())
         .isEqualTo("1");
   }
 
   @Test
   public void testComparisonToSelfIsEmpty() {
     assertThat(WorkspaceTargetProperty.getChangedValuesByName(workspace1, workspace1)).isEmpty();
-    assertThat(WorkspaceTargetProperty.getChangedValuesByName(null, null))
-        .isEmpty();
+    assertThat(WorkspaceTargetProperty.getChangedValuesByName(null, null)).isEmpty();
   }
 
   @Test
   public void testComparisonToNullMatchesAllProperties() {
-    assertThat(WorkspaceTargetProperty.getChangedValuesByName(workspace1, null))
-        .hasSize(6);
+    assertThat(WorkspaceTargetProperty.getChangedValuesByName(workspace1, null)).hasSize(6);
   }
 }

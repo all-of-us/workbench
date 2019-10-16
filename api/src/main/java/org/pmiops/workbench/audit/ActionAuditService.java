@@ -2,7 +2,6 @@ package org.pmiops.workbench.audit;
 
 import java.util.Collection;
 import java.util.UUID;
-import org.springframework.stereotype.Service;
 
 public interface ActionAuditService {
   void send(ActionAuditEvent event);

@@ -10,10 +10,7 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.io.BaseEncoding;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -522,8 +519,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     ImmutableMap.Builder<String, WorkspaceAccessLevel> shareRolesMapBuilder =
         new ImmutableMap.Builder<>();
-    ImmutableMap.Builder<Long, String> aclStringsByUserIdBuilder =
-        new ImmutableMap.Builder<>();
+    ImmutableMap.Builder<Long, String> aclStringsByUserIdBuilder = new ImmutableMap.Builder<>();
 
     for (UserRole role : request.getItems()) {
       if (role.getRole() == null || role.getRole().toString().trim().isEmpty()) {
@@ -553,8 +549,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.convertWorkspaceAclsToUserRoles(updatedWsAcls);
     resp.setItems(updatedUserRoles);
 
-    workspaceAuditAdapterService.fireCollaborateAction(dbWorkspace.getWorkspaceId(),
-        aclStringsByUserIdBuilder.build());
+    workspaceAuditAdapterService.fireCollaborateAction(
+        dbWorkspace.getWorkspaceId(), aclStringsByUserIdBuilder.build());
     return ResponseEntity.ok(resp);
   }
 

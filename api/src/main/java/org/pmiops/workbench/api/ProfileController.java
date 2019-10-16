@@ -787,7 +787,8 @@ public class ProfileController implements ProfileApiDelegate {
 
     directoryService.deleteUser(user.getEmail().split("@")[0]);
     userDao.delete(user.getUserId());
-    profileAuditAdapterService.fireDeleteAction(user.getUserId(), user.getEmail()); // not sure if user profider will survive the next line
+    profileAuditAdapterService.fireDeleteAction(
+        user.getUserId(), user.getEmail()); // not sure if user profider will survive the next line
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

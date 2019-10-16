@@ -8,7 +8,8 @@ public interface WorkspaceAuditAdapterService {
 
   void fireDeleteAction(org.pmiops.workbench.db.model.Workspace dbWorkspace);
 
-  void fireDuplicateAction(org.pmiops.workbench.db.model.Workspace sourceWorkspaceDbModel,
+  void fireDuplicateAction(
+      org.pmiops.workbench.db.model.Workspace sourceWorkspaceDbModel,
       org.pmiops.workbench.db.model.Workspace destinationWorkspaceDbModel);
 
   void fireCollaborateAction(long sourceWorkspaceId, Map<Long, String> aclStringsByUserId);

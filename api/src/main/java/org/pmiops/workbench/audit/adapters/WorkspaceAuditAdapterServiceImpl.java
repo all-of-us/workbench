@@ -32,9 +32,7 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
 
   @Autowired
   public WorkspaceAuditAdapterServiceImpl(
-      Provider<User> userProvider,
-      ActionAuditService actionAuditService,
-      Clock clock) {
+      Provider<User> userProvider, ActionAuditService actionAuditService, Clock clock) {
     this.userProvider = userProvider;
     this.actionAuditService = actionAuditService;
     this.clock = clock;
@@ -105,7 +103,8 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
   }
 
   @Override
-  public void fireDuplicateAction(org.pmiops.workbench.db.model.Workspace sourceWorkspaceDbModel,
+  public void fireDuplicateAction(
+      org.pmiops.workbench.db.model.Workspace sourceWorkspaceDbModel,
       org.pmiops.workbench.db.model.Workspace destinationWorkspaceDbModel) {
     try {
       // We represent the duplication as a single action with events with different
@@ -116,18 +115,20 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
       final long userId = userProvider.get().getUserId();
       final String userEmail = userProvider.get().getEmail();
       final long timestamp = clock.millis();
-      final ActionAuditEvent sourceEvent = ActionAuditEventImpl.builder()
-          .setActionId(actionId)
-          .setAgentEmail(userEmail)
-          .setActionType(ActionType.DUPLICATE_FROM)
-          .setAgentType(AgentType.USER)
-          .setAgentId(userId)
-          .setTargetType(TargetType.WORKSPACE)
-          .setTargetId(sourceWorkspaceDbModel.getWorkspaceId())
-          .setTimestamp(timestamp)
-          .build();
+      final ActionAuditEvent sourceEvent =
+          ActionAuditEventImpl.builder()
+              .setActionId(actionId)
+              .setAgentEmail(userEmail)
+              .setActionType(ActionType.DUPLICATE_FROM)
+              .setAgentType(AgentType.USER)
+              .setAgentId(userId)
+              .setTargetType(TargetType.WORKSPACE)
+              .setTargetId(sourceWorkspaceDbModel.getWorkspaceId())
+              .setTimestamp(timestamp)
+              .build();
       final Map<String, String> propertyValues =
-          WorkspaceTargetProperty.getPropertyValuesByName(WorkspaceConversionUtils.toApiWorkspace(destinationWorkspaceDbModel));
+          WorkspaceTargetProperty.getPropertyValuesByName(
+              WorkspaceConversionUtils.toApiWorkspace(destinationWorkspaceDbModel));
 
       ImmutableList<ActionAuditEvent> destinationEvents =
           propertyValues.entrySet().stream()
@@ -172,31 +173,35 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
       final String userEmail = userProvider.get().getEmail();
       final long timestamp = clock.millis();
 
-      final ActionAuditEvent workspaceTargetEvent = ActionAuditEventImpl.builder()
-          .setActionId(actionId)
-          .setActionType(ActionType.COLLABORATE)
-          .setAgentType(AgentType.USER)
-          .setAgentEmail(userEmail)
-          .setAgentId(sharingUserId)
-          .setTimestamp(timestamp)
-          .setTargetType(TargetType.WORKSPACE)
-          .setTargetId(sourceWorkspaceId)
-          .build();
+      final ActionAuditEvent workspaceTargetEvent =
+          ActionAuditEventImpl.builder()
+              .setActionId(actionId)
+              .setActionType(ActionType.COLLABORATE)
+              .setAgentType(AgentType.USER)
+              .setAgentEmail(userEmail)
+              .setAgentId(sharingUserId)
+              .setTimestamp(timestamp)
+              .setTargetType(TargetType.WORKSPACE)
+              .setTargetId(sourceWorkspaceId)
+              .build();
 
-      ImmutableList<ActionAuditEvent> inviteeEvents = aclStringsByUserId.entrySet().stream()
-        .map(entry -> ActionAuditEventImpl.builder()
-            .setActionId(actionId)
-            .setActionType(ActionType.COLLABORATE)
-            .setAgentType(AgentType.USER)
-            .setAgentEmail(userEmail)
-            .setAgentId(sharingUserId)
-            .setTimestamp(timestamp)
-            .setTargetType(TargetType.USER)
-            .setTargetId(entry.getKey())
-            .setTargetProperty(AclTargetProperty.ACCESS_LEVEL.name())
-            .setNewValue(entry.getValue())
-            .build())
-          .collect(ImmutableList.toImmutableList());
+      ImmutableList<ActionAuditEvent> inviteeEvents =
+          aclStringsByUserId.entrySet().stream()
+              .map(
+                  entry ->
+                      ActionAuditEventImpl.builder()
+                          .setActionId(actionId)
+                          .setActionType(ActionType.COLLABORATE)
+                          .setAgentType(AgentType.USER)
+                          .setAgentEmail(userEmail)
+                          .setAgentId(sharingUserId)
+                          .setTimestamp(timestamp)
+                          .setTargetType(TargetType.USER)
+                          .setTargetId(entry.getKey())
+                          .setTargetProperty(AclTargetProperty.ACCESS_LEVEL.name())
+                          .setNewValue(entry.getValue())
+                          .build())
+              .collect(ImmutableList.toImmutableList());
 
       ImmutableList.Builder<ActionAuditEvent> allEventsBuilder = new ImmutableList.Builder<>();
       allEventsBuilder.add(workspaceTargetEvent);

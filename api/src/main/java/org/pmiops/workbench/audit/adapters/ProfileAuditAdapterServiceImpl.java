@@ -7,6 +7,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.audit.ActionAuditEvent;
 import org.pmiops.workbench.audit.ActionAuditEventImpl;
 import org.pmiops.workbench.audit.ActionAuditService;
+import org.pmiops.workbench.audit.ActionType;
 import org.pmiops.workbench.audit.AgentType;
 import org.pmiops.workbench.audit.TargetType;
 import org.pmiops.workbench.db.model.User;
@@ -26,37 +27,34 @@ public class ProfileAuditAdapterServiceImpl implements ProfileAuditAdapterServic
 
   @Autowired
   public ProfileAuditAdapterServiceImpl(
-      Provider<User> userProvider,
-      ActionAuditService actionAuditService,
-      Clock clock) {
+      Provider<User> userProvider, ActionAuditService actionAuditService, Clock clock) {
     this.userProvider = userProvider;
     this.actionAuditService = actionAuditService;
     this.clock = clock;
   }
 
   @Override
-  public void fireCreateAction(Profile createdProfile) {
-
-  }
+  public void fireCreateAction(Profile createdProfile) {}
 
   @Override
-  public void fireUpdateAction(Profile previousProfile, Profile updatedProfile) {
-
-  }
+  public void fireUpdateAction(Profile previousProfile, Profile updatedProfile) {}
 
   // Each user is assumed to have only one profile, but we shouldn't rely on
   // the userProvider if the user is deleted.
   @Override
   public void fireDeleteAction(long userId, String userEmail) {
     try {
-      ActionAuditEvent deleteProfileEvent = ActionAuditEventImpl.builder()
-          .setActionId(ActionAuditService.newActionId())
-          .setAgentType(AgentType.USER)
-          .setAgentId(userId)
-          .setAgentEmail(userEmail)
-          .setTargetType(TargetType.PROFILE)
-          .setTimestamp(clock.millis())
-          .build();
+      ActionAuditEvent deleteProfileEvent =
+          ActionAuditEventImpl.builder()
+              .setActionId(ActionAuditService.newActionId())
+              .setActionType(ActionType.DELETE)
+              .setAgentType(AgentType.USER)
+              .setAgentId(userId)
+              .setAgentEmail(userEmail)
+              .setTargetType(TargetType.PROFILE)
+              .setTargetId(userId)
+              .setTimestamp(clock.millis())
+              .build();
       actionAuditService.send(deleteProfileEvent);
     } catch (RuntimeException e) {
       logAndSwallow(e);
@@ -66,5 +64,4 @@ public class ProfileAuditAdapterServiceImpl implements ProfileAuditAdapterServic
   private void logAndSwallow(RuntimeException e) {
     logger.log(Level.WARNING, e, () -> "Exception encountered during audit.");
   }
-
 }
