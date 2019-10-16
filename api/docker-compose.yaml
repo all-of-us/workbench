@@ -11,6 +11,7 @@ services:
       - ~/.config:/.config:cached
       - ~/.gsutil:/.gsutil:cached
   db:
+    # TODO: An update to MySql 5.7.28 broke Circle, try reverting to 5.7 when newer releases are published
     image: mysql:5.7.27
     env_file:
       - db/vars.env
