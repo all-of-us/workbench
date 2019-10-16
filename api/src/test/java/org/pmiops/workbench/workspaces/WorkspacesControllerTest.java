@@ -864,6 +864,7 @@ public class WorkspacesControllerTest {
             .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
             .getBody()
             .getWorkspace();
+    verify(mockWorkspaceAuditAdapterService).fireDuplicateAction(anyLong(), anyLong());
 
     assertWithMessage("get and clone responses are inconsistent")
         .that(workspace2)

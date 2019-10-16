@@ -4,8 +4,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -18,10 +22,12 @@ import org.mockito.Mock;
 import org.pmiops.workbench.audit.ActionAuditEvent;
 import org.pmiops.workbench.audit.ActionAuditService;
 import org.pmiops.workbench.audit.ActionType;
+import org.pmiops.workbench.audit.TargetType;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -32,13 +38,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class WorkspaceAuditAdapterServiceTest {
 
   private static final long WORKSPACE_1_DB_ID = 101L;
+  public static final long Y2K_EPOCH_MILLIS = Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
   private WorkspaceAuditAdapterService workspaceAuditAdapterService;
   private Workspace workspace1;
   private User user1;
   private org.pmiops.workbench.db.model.Workspace dbWorkspace1;
 
   @Mock private Provider<User> mockUserProvider;
-  @Autowired private ActionAuditService mockActionAuditService;
+  @Mock private FakeClock mockClock;
+  @Mock private ActionAuditService mockActionAuditService;
+
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventListCaptor;
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
 
@@ -55,7 +64,7 @@ public class WorkspaceAuditAdapterServiceTest {
     user1.setFamilyName("Flintstone");
     doReturn(user1).when(mockUserProvider).get();
     workspaceAuditAdapterService =
-        new WorkspaceAuditAdapterServiceImpl(mockUserProvider, mockActionAuditService);
+        new WorkspaceAuditAdapterServiceImpl(mockUserProvider, mockActionAuditService, mockClock);
 
     final ResearchPurpose researchPurpose1 = new ResearchPurpose();
     researchPurpose1.setIntendedStudy("stubbed toes");
@@ -80,6 +89,10 @@ public class WorkspaceAuditAdapterServiceTest {
     dbWorkspace1.setLastAccessedTime(new Timestamp(now));
     dbWorkspace1.setLastModifiedTime(new Timestamp(now));
     dbWorkspace1.setCreationTime(new Timestamp(now));
+
+    doReturn(Y2K_EPOCH_MILLIS)
+        .when(mockClock)
+        .millis();
   }
 
   @Test
@@ -108,11 +121,44 @@ public class WorkspaceAuditAdapterServiceTest {
   }
 
   @Test
-  public void testFiresDeleteWorkspaceEvents() {
+  public void testFiresDeleteWorkspaceEvent() {
     workspaceAuditAdapterService.fireDeleteAction(dbWorkspace1);
     verify(mockActionAuditService).send(eventCaptor.capture());
     final ActionAuditEvent eventSent = eventCaptor.getValue();
     assertThat(eventSent.actionType()).isEqualTo(ActionType.DELETE);
+    assertThat(eventSent.timestamp()).isEqualTo(Y2K_EPOCH_MILLIS);
+  }
+
+  @Test
+  public void testFiresDuplicateEvent() {
+    workspaceAuditAdapterService.fireDuplicateAction(101L, 201L);
+    verify(mockActionAuditService).send(eventListCaptor.capture());
+    final Collection<ActionAuditEvent> eventsSent = eventListCaptor.getValue();
+    assertThat(eventsSent).hasSize(2);
+
+    Optional<String> firstActionIdMaybe = eventsSent.stream()
+        .map(ActionAuditEvent::actionId)
+        .findFirst();
+    assertThat(firstActionIdMaybe.isPresent()).isTrue();
+    final String firstActionId = firstActionIdMaybe.get();
+
+    // need same actionId for all events
+    assertThat(eventsSent.stream()
+            .allMatch(event -> event.actionId().equals(firstActionId)))
+        .isTrue();
+
+    assertThat(eventsSent.stream()
+        .map(ActionAuditEvent::targetType)
+        .allMatch(t -> t.equals(TargetType.WORKSPACE)))
+        .isTrue();
+
+    ImmutableSet<ActionType> expectedActionTypes = ImmutableSet.of(ActionType.DUPLICATE_FROM,
+        ActionType.DUPLICATE_TO);
+    ImmutableSet<ActionType> actualActionTypes = eventsSent.stream()
+        .map(ActionAuditEvent::actionType)
+        .collect(ImmutableSet.toImmutableSet());
+    assertThat(actualActionTypes).containsExactlyElementsIn(expectedActionTypes);
+
   }
 
   @Test
