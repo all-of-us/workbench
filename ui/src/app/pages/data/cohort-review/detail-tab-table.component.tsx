@@ -19,19 +19,6 @@ import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
 
-const css = `
-  .name-container {
-    overflow: hidden;
-    height: 1.2rem;
-  }
-  .name-container:before {
-    content:"";
-    float: left;
-    width: 1px;
-    height: 100%;
-  }
-`;
-
 const styles = reactStyles({
   container: {
     position: 'relative',
@@ -45,9 +32,11 @@ const styles = reactStyles({
     lineHeight: '0.75rem'
   },
   columnHeader: {
+    display: 'inline-block',
     background: '#f4f4f4',
     color: colors.primary,
     fontWeight: 600,
+    maxWidth: '80%'
   },
   columnBody: {
     background: colors.white,
@@ -70,8 +59,7 @@ const styles = reactStyles({
     width: '2rem',
   },
   filterIcon: {
-    marginLeft: '0.3rem',
-    padding: '2px 2px 1px 1px',
+    marginTop: '2px',
     borderRadius: '50%',
     fontWeight: 600,
     float: 'right'
@@ -536,7 +524,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {domain, filterState, filterState: {vocab}} = this.props;
       const columnFilters = filterState.tabs[domain];
       if (!data) {
-        return '';
+        return <i className='pi pi-filter' style={filterIcons.default} />;
       }
       const counts = {total: 0};
       let options: Array<any>;
@@ -596,7 +584,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         }, []);
       const filtered = !columnFilters[column].includes('Select All');
       let fl: any;
-      return <span>
+      return <React.Fragment>
         <i className='pi pi-filter'
            style={filtered ? filterIcons.active : filterIcons.default}
            onClick={(e) => {
@@ -622,7 +610,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             <label style={{paddingLeft: '0.4rem'}}> Select All ({counts.total}) </label>
           </div>
         </OverlayPanel>
-      </span>;
+      </React.Fragment>;
     }
 
     textFilter(column: string) {
@@ -630,7 +618,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       const columnFilters = filterState.tabs[domain];
       const filtered = !!columnFilters[column];
       let fl: any, ip: any;
-      return <span>
+      return <React.Fragment>
         <i className='pi pi-filter'
           style={filtered ? filterIcons.active : filterIcons.default}
           onClick={(e) => {
@@ -650,7 +638,7 @@ export const DetailTabTable = withCurrentWorkspace()(
               placeholder={'Search'} />
           </div>
         </OverlayPanel>
-      </span>;
+      </React.Fragment>;
     }
 
     rowExpansionTemplate = (rowData: any) => {
@@ -731,12 +719,14 @@ export const DetailTabTable = withCurrentWorkspace()(
             style={styles.columnHeader}>
             {col.displayName}
           </span>
-          {hasCheckboxFilter && this.checkboxFilter(col.name)}
-          {hasTextFilter && this.textFilter(col.name)}
-          {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon}
-            onClick={() => this.columnSort(col.name)} />}
-          {(desc && !isExpanderNeeded) && <i className='pi pi-arrow-down' style={styles.sortIcon}
-            onClick={() => this.columnSort(col.name)} />}
+          <span style={{display: 'inline-block', marginTop: '-3px', float: 'right'}}>
+            {hasCheckboxFilter && this.checkboxFilter(col.name)}
+            {hasTextFilter && this.textFilter(col.name)}
+            {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon}
+              onClick={() => this.columnSort(col.name)} />}
+            {(desc && !isExpanderNeeded) && <i className='pi pi-arrow-down' style={styles.sortIcon}
+              onClick={() => this.columnSort(col.name)} />}
+          </span>
         </React.Fragment>;
         return <Column
           expander={isExpanderNeeded}
@@ -750,7 +740,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           body={overlayTemplate}/>;
       });
       return <div style={styles.container}>
-        <style>{datatableStyles + css}</style>
+        <style>{datatableStyles}</style>
         <DataTable
           expandedRows={this.state.expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
