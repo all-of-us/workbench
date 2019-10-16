@@ -39,11 +39,6 @@ jobs:
           working_directory: ~/workbench/api
           command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
       - run:
-          # Lint before tests because it's much faster
-          name: Java linting
-          working_directory: ~/workbench/api
-          command: ./gradlew spotlessCheck
-      - run:
           name: Integration tests compile
           working_directory: ~/workbench/api
           command: ./project.rb gradle compileBigQuery compileIntegration
@@ -241,15 +236,23 @@ jobs:
           name: Build with strict compilation
           working_directory: ~/workbench/ui
           command: ./project.rb build --environment test
-      - run:
-          # Lint last; it's more important to surface test failures early.
-          name: Lint Typescript
-          working_directory: ~/workbench/ui
-          command: yarn run lint
       - persist_to_workspace:
           root: .
           paths:
             - ui
+
+  lint:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+        name: Lint Typescript
+        working_directory: ~/workbench/ui
+        command: yarn run lint
+      - run:
+	name: Java/Kotlin linting
+	working_directory: ~/workbench/api
+	command: ./gradlew spotlessCheck
 
   ui-deploy-to-test:
     <<: *defaults
@@ -349,6 +352,7 @@ workflows:
       - ui-build-test
       - api-bigquery-test
       - api-integration-test
+      - lint
       # Run deployment to "test" on master merges.
       - api-deploy-to-test:
           <<: *filter_master
