@@ -69,7 +69,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
   onShare,
   onDelete
 }) => {
-  const wsPathPrefix = 'recentWorkspaces/' + workspace.namespace + '/' + workspace.id;
+  const wsPathPrefix = 'workspaces/' + workspace.namespace + '/' + workspace.id;
 
   return <PopupTrigger
     side='bottom'
