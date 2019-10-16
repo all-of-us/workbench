@@ -172,9 +172,9 @@ export class TooltipTrigger extends React.Component {
   }
 
   render() {
-    const {children, content, disabled, ...props} = this.props;
+    const {children, content} = this.props;
 
-    return <LoadingTooltipTrigger {...props} getContent={() => Promise.resolve(content)}>
+    return <LoadingTooltipTrigger {...this.props} getContent={() => Promise.resolve(content)}>
       {children}
     </LoadingTooltipTrigger>;
   }
@@ -203,9 +203,9 @@ export class LoadingTooltipTrigger extends React.Component {
   }
 
   render() {
-    const {children, getContent, disabled, ...props} = this.props;
+    const {children, content, disabled, ...props} = this.props;
     const {open} = this.state;
-    if (!getContent) {
+    if (!this.state.content) {
       return children;
     }
 
