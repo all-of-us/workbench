@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -40,6 +41,13 @@ public class LoadDataDictionary {
   public CommandLineRunner run(
       CdrVersionDao cdrVersionDao, DataDictionaryEntryDao dataDictionaryEntryDao) {
     return (args) -> {
+      if (args.length != 1) {
+        throw new IllegalArgumentException(
+            "Expected 1 arg. Got " + Arrays.asList(args));
+      }
+
+      boolean dryRun = Boolean.parseBoolean(args[0]);
+
       CdrVersion defaultCdrVersion = cdrVersionDao.findByIsDefault(true);
       ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
       SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
@@ -88,7 +96,12 @@ public class LoadDataDictionary {
           targetEntry.setTransformedByRegisteredTierPrivacyMethods(
               field.getTransformed_by_registered_tier_privacy_methods());
 
-          dataDictionaryEntryDao.save(targetEntry);
+          if (dryRun) {
+            logger.info("Would have saved (" + targetEntry.getRelevantOmopTable() + ", " +
+                targetEntry.getFieldName() + ", " + cdrVersion.getName() + ")");
+          } else {
+            dataDictionaryEntryDao.save(targetEntry);
+          }
         }
       }
     };
