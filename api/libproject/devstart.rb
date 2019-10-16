@@ -1685,6 +1685,8 @@ def deploy(cmd_name, args)
     versions_file = get_cdr_versions_file(ctx.project)
     update_cdr_versions_for_project("config/#{versions_file}", op.opts.dry_run)
 
+    common.run_inline %W{gradle loadDataDictionary}
+
     common.status "Pushing GCS artifacts..."
     dry_flag = op.opts.dry_run ? %W{--dry-run} : []
     deploy_gcs_artifacts(cmd_name, %W{--project #{ctx.project}} + dry_flag)
