@@ -406,7 +406,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           // on the API level.
           this.setState(fp.set(['workspace', 'name'], 'Duplicate of ' + this.props.workspace.name));
           // if the original workspace was reviewed, it's unlikely that we need a re-review
-          this.setState(fp.set(['workspace', 'reviewRequested'], false));
+          this.updateResearchPurpose('reviewRequested', false);
         }
       }
 
