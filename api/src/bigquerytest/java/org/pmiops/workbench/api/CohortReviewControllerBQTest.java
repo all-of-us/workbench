@@ -35,6 +35,7 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -72,7 +73,6 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
-import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -91,7 +91,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
-    WorkspaceMapper.class,
     CohortReviewServiceImpl.class,
     CohortReviewController.class,
     BigQueryTestService.class,
@@ -104,7 +103,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     FireCloudService.class,
     UserRecentResourceService.class,
     CohortFactory.class,
-    ConceptSetService.class
+    ConceptSetService.class,
+    DataSetService.class
   })
   static class Configuration {
     @Bean
@@ -143,6 +143,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Autowired private CohortDao cohortDao;
 
   @Autowired private CohortReviewDao cohortReviewDao;
+
+  @Autowired private DataSetService dataSetService;
 
   @Autowired private WorkspaceDao workspaceDao;
 

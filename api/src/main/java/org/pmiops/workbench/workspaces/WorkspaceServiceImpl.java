@@ -22,11 +22,13 @@ import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentWorkspace;
@@ -67,11 +69,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
   private CohortCloningService cohortCloningService;
   private ConceptSetService conceptSetService;
+  private DataSetService dataSetService;
   private UserDao userDao;
   private Provider<User> userProvider;
   private UserRecentWorkspaceDao userRecentWorkspaceDao;
   private WorkspaceDao workspaceDao;
-  private WorkspaceMapper workspaceMapper;
 
   private FireCloudService fireCloudService;
   private Clock clock;
@@ -81,21 +83,21 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       Clock clock,
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
+      DataSetService dataSetService,
       FireCloudService fireCloudService,
       UserDao userDao,
       Provider<User> userProvider,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
-      WorkspaceDao workspaceDao,
-      WorkspaceMapper workspaceMapper) {
+      WorkspaceDao workspaceDao) {
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
+    this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
     this.workspaceDao = workspaceDao;
-    this.workspaceMapper = workspaceMapper;
   }
 
   /**
@@ -153,9 +155,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               String fcWorkspaceAccessLevel =
                   fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
               WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
+              currentWorkspace.setWorkspace(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace));
               currentWorkspace.setAccessLevel(
-                  workspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
+                  WorkspaceConversionUtils.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
               return currentWorkspace;
             })
         .collect(Collectors.toList());
@@ -184,7 +186,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
       }
     }
-    workspaceResponse.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    workspaceResponse.setWorkspace(
+        WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
 
     return workspaceResponse;
   }
@@ -391,17 +394,38 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   @Transactional
-  public Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to) {
+  public Workspace saveAndCloneCohortsConceptSetsAndDataSets(Workspace from, Workspace to) {
     // Save the workspace first to allocate an ID.
     Workspace saved = workspaceDao.save(to);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(saved.getCdrVersion());
     boolean cdrVersionChanged =
         from.getCdrVersion().getCdrVersionId() != to.getCdrVersion().getCdrVersionId();
+    Map<Long, Long> fromCohortIdToToCohortId = new HashMap<>();
     for (Cohort fromCohort : from.getCohorts()) {
-      cohortCloningService.cloneCohortAndReviews(fromCohort, to);
+      fromCohortIdToToCohortId.put(
+          fromCohort.getCohortId(),
+          cohortCloningService.cloneCohortAndReviews(fromCohort, to).getCohortId());
     }
-    for (ConceptSet conceptSet : conceptSetService.getConceptSets(from)) {
-      conceptSetService.cloneConceptSetAndConceptIds(conceptSet, to, cdrVersionChanged);
+    Map<Long, Long> fromConceptSetIdToToConceptSetId = new HashMap<>();
+    for (ConceptSet fromConceptSet : conceptSetService.getConceptSets(from)) {
+      fromConceptSetIdToToConceptSetId.put(
+          fromConceptSet.getConceptSetId(),
+          conceptSetService
+              .cloneConceptSetAndConceptIds(fromConceptSet, to, cdrVersionChanged)
+              .getConceptSetId());
+    }
+    for (DataSet dataSet : dataSetService.getDataSets(from)) {
+      dataSetService.cloneDataSetToWorkspace(
+          dataSet,
+          to,
+          fromCohortIdToToCohortId.entrySet().stream()
+              .filter(cohortIdEntry -> dataSet.getCohortIds().contains(cohortIdEntry.getKey()))
+              .map(Entry::getValue)
+              .collect(Collectors.toSet()),
+          fromConceptSetIdToToConceptSetId.entrySet().stream()
+              .filter(conceptSetId -> dataSet.getConceptSetIds().contains(conceptSetId.getKey()))
+              .map(Entry::getValue)
+              .collect(Collectors.toSet()));
     }
     return saved;
   }
@@ -475,7 +499,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       } else {
-        userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
+        userRoles.add(WorkspaceConversionUtils.toApiUserRole(user, entry.getValue()));
       }
     }
     return userRoles.stream()
@@ -530,7 +554,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                   try {
                     enforceWorkspaceAccessLevel(
                         workspace.getWorkspaceNamespace(),
-                        workspace.getName(),
+                        workspace.getFirecloudName(),
                         WorkspaceAccessLevel.READER);
                   } catch (ForbiddenException | NotFoundException e) {
                     return true;

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="srubenst" id="db.changelog-104-dataset-name-unique-in-workspace">
+    <dropUniqueConstraint tableName="data_set"
+                          uniqueColumns="name"
+                          constraintName="name"/>
+    <addUniqueConstraint tableName="data_set"
+                         columnNames="name, workspace_id"
+                         constraintName="data_set_unique_name_per_workspace"/>
+  </changeSet>
+</databaseChangeLog>

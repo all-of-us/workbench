@@ -29,6 +29,7 @@ import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,7 +43,7 @@ import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
-import org.pmiops.workbench.db.model.DataSetValues;
+import org.pmiops.workbench.db.model.DataSetValue;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -147,7 +148,7 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER);
     final long workspaceId =
         workspaceService.get(workspaceNamespace, workspaceFirecloudName).getWorkspaceId();
-    final ImmutableList<DataSetValues> dataSetValuesList =
+    final ImmutableList<DataSetValue> dataSetValueList =
         dataSetRequest.getDomainValuePairs().stream()
             .map(this::getDataSetValuesFromDomainValueSet)
             .collect(toImmutableList());
@@ -160,7 +161,7 @@ public class DataSetController implements DataSetApiDelegate {
               workspaceId,
               dataSetRequest.getCohortIds(),
               dataSetRequest.getConceptSetIds(),
-              dataSetValuesList,
+              dataSetValueList,
               dataSetRequest.getPrePackagedConceptSet(),
               userProvider.get().getUserId(),
               now);
@@ -170,8 +171,8 @@ public class DataSetController implements DataSetApiDelegate {
     }
   }
 
-  private DataSetValues getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
-    return new DataSetValues(
+  private DataSetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
+    return new DataSetValue(
         CommonStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
         domainValuePair.getValue());
   }
@@ -213,7 +214,7 @@ public class DataSetController implements DataSetApiDelegate {
               StreamSupport.stream(
                       conceptSetDao
                           .findAll(
-                              dataSet.getConceptSetId().stream()
+                              dataSet.getConceptSetIds().stream()
                                   .filter(Objects::nonNull)
                                   .collect(Collectors.toList()))
                           .spliterator(),
@@ -221,7 +222,7 @@ public class DataSetController implements DataSetApiDelegate {
                   .map(conceptSet -> toClientConceptSet(conceptSet))
                   .collect(Collectors.toList()));
           result.setCohorts(
-              StreamSupport.stream(cohortDao.findAll(dataSet.getCohortSetId()).spliterator(), false)
+              StreamSupport.stream(cohortDao.findAll(dataSet.getCohortIds()).spliterator(), false)
                   .map(CohortsController.TO_CLIENT_COHORT)
                   .collect(Collectors.toList()));
           result.setDomainValuePairs(
@@ -246,7 +247,7 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   // TODO(jaycarlton): move into helper methods in one or both of these classes
-  private static final Function<DataSetValues, DomainValuePair> TO_CLIENT_DOMAIN_VALUE =
+  private static final Function<DataSetValue, DomainValuePair> TO_CLIENT_DOMAIN_VALUE =
       dataSetValue -> {
         DomainValuePair domainValuePair = new DomainValuePair();
         domainValuePair.setValue(dataSetValue.getValue());
@@ -254,11 +255,16 @@ public class DataSetController implements DataSetApiDelegate {
         return domainValuePair;
       };
 
+  @VisibleForTesting
+  public String generateRandomEightCharacterQualifier() {
+    return RandomStringUtils.randomNumeric(8);
+  }
+
   public ResponseEntity<DataSetCodeResponse> generateCode(
       String workspaceNamespace,
       String workspaceId,
       String kernelTypeEnumString,
-      DataSetRequest dataSet) {
+      DataSetRequest dataSetRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
@@ -267,16 +273,18 @@ public class DataSetController implements DataSetApiDelegate {
     // TODO(jaycarlton): return better error information form this function for common validation
     // scenarios
     final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain =
-        dataSetService.generateQueryJobConfigurationsByDomainName(dataSet);
+        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
 
     if (bigQueryJobConfigsByDomain.isEmpty()) {
       log.warning("Empty query map generated for this DataSetRequest");
     }
 
+    String qualifier = generateRandomEightCharacterQualifier();
+
     final ImmutableList<String> codeCells =
         ImmutableList.copyOf(
             dataSetService.generateCodeCells(
-                kernelTypeEnum, dataSet.getName(), bigQueryJobConfigsByDomain));
+                kernelTypeEnum, dataSetRequest.getName(), qualifier, bigQueryJobConfigsByDomain));
     final String generatedCode = String.join("\n\n", codeCells);
 
     return ResponseEntity.ok(
@@ -478,10 +486,14 @@ public class DataSetController implements DataSetApiDelegate {
     Map<String, QueryJobConfiguration> queriesByDomain =
         dataSetService.generateQueryJobConfigurationsByDomainName(
             dataSetExportRequest.getDataSetRequest());
+
+    String qualifier = generateRandomEightCharacterQualifier();
+
     List<String> queriesAsStrings =
         dataSetService.generateCodeCells(
             dataSetExportRequest.getKernelType(),
             dataSetExportRequest.getDataSetRequest().getName(),
+            qualifier,
             queriesByDomain);
 
     if (dataSetExportRequest.getNewNotebook()) {
@@ -534,9 +546,9 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     List<org.pmiops.workbench.db.model.DataSet> dbDataSetList = new ArrayList<>();
     if (markDataSetRequest.getResourceType().equalsIgnoreCase(COHORT)) {
-      dbDataSetList = dataSetDao.findDataSetsByCohortSetId(markDataSetRequest.getId());
+      dbDataSetList = dataSetDao.findDataSetsByCohortIds(markDataSetRequest.getId());
     } else if (markDataSetRequest.getResourceType().equalsIgnoreCase(CONCEPT_SET)) {
-      dbDataSetList = dataSetDao.findDataSetsByConceptSetId(markDataSetRequest.getId());
+      dbDataSetList = dataSetDao.findDataSetsByConceptSetIds(markDataSetRequest.getId());
     }
     dbDataSetList =
         dbDataSetList.stream()
@@ -579,8 +591,8 @@ public class DataSetController implements DataSetApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbDataSet.setLastModifiedTime(now);
     dbDataSet.setIncludesAllParticipants(request.getIncludesAllParticipants());
-    dbDataSet.setCohortSetId(request.getCohortIds());
-    dbDataSet.setConceptSetId(request.getConceptSetIds());
+    dbDataSet.setCohortIds(request.getCohortIds());
+    dbDataSet.setConceptSetIds(request.getConceptSetIds());
     dbDataSet.setDescription(request.getDescription());
     dbDataSet.setName(request.getName());
     dbDataSet.setPrePackagedConceptSetEnum(request.getPrePackagedConceptSet());
@@ -617,9 +629,9 @@ public class DataSetController implements DataSetApiDelegate {
     List<org.pmiops.workbench.db.model.DataSet> dbDataSets =
         new ArrayList<org.pmiops.workbench.db.model.DataSet>();
     if (resourceType.equals(COHORT)) {
-      dbDataSets = dataSetDao.findDataSetsByCohortSetId(id);
+      dbDataSets = dataSetDao.findDataSetsByCohortIds(id);
     } else if (resourceType.equals(CONCEPT_SET)) {
-      dbDataSets = dataSetDao.findDataSetsByConceptSetId(id);
+      dbDataSets = dataSetDao.findDataSetsByConceptSetIds(id);
     }
     DataSetListResponse dataSetResponse =
         new DataSetListResponse()

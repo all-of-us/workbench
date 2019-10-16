@@ -15,9 +15,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.transaction.Transactional;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -28,7 +30,8 @@ import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.DataSet;
-import org.pmiops.workbench.db.model.DataSetValues;
+import org.pmiops.workbench.db.model.DataSetValue;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -163,7 +166,7 @@ public class DataSetServiceImpl implements DataSetService {
       long workspaceId,
       List<Long> cohortIdList,
       List<Long> conceptIdList,
-      List<DataSetValues> values,
+      List<DataSetValue> values,
       PrePackagedConceptSetEnum prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime) {
@@ -176,8 +179,8 @@ public class DataSetServiceImpl implements DataSetService {
     dataSetModel.setInvalid(false);
     dataSetModel.setCreatorId(creatorId);
     dataSetModel.setCreationTime(creationTime);
-    dataSetModel.setCohortSetId(cohortIdList);
-    dataSetModel.setConceptSetId(conceptIdList);
+    dataSetModel.setCohortIds(cohortIdList);
+    dataSetModel.setConceptSetIds(conceptIdList);
     dataSetModel.setValues(values);
     dataSetModel.setPrePackagedConceptSetEnum(prePackagedConceptSetEnum);
 
@@ -198,7 +201,7 @@ public class DataSetServiceImpl implements DataSetService {
           .put(Domain.OBSERVATION, "observation")
           .put(Domain.PERSON, "person")
           .put(Domain.PROCEDURE, "procedure")
-          .put(Domain.SURVEY, "survey")
+          .put(Domain.SURVEY, "answer")
           .put(Domain.VISIT, "visit")
           .build();
 
@@ -505,6 +508,7 @@ public class DataSetServiceImpl implements DataSetService {
   public List<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,
       String dataSetName,
+      String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap) {
     String prerequisites;
     switch (kernelTypeEnum) {
@@ -530,8 +534,31 @@ public class DataSetServiceImpl implements DataSetService {
                         entry.getValue(),
                         Domain.fromValue(entry.getKey()),
                         dataSetName,
+                        qualifier,
                         kernelTypeEnum))
         .collect(Collectors.toList());
+  }
+
+  @Override
+  @Transactional
+  public DataSet cloneDataSetToWorkspace(
+      DataSet fromDataSet, Workspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds) {
+    DataSet toDataSet = new DataSet(fromDataSet);
+    toDataSet.setWorkspaceId(toWorkspace.getWorkspaceId());
+    toDataSet.setCreatorId(toWorkspace.getCreator().getUserId());
+    toDataSet.setLastModifiedTime(toWorkspace.getLastModifiedTime());
+    toDataSet.setCreationTime(toWorkspace.getCreationTime());
+
+    toDataSet.setConceptSetIds(new ArrayList<>(conceptSetIds));
+    toDataSet.setCohortIds(new ArrayList<>(conceptSetIds));
+    return dataSetDao.save(toDataSet);
+  }
+
+  @Override
+  public List<DataSet> getDataSets(Workspace workspace) {
+    // Allows for fetching data sets for a workspace once its collection is no longer
+    // bound to a session.
+    return dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
   }
 
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {
@@ -608,12 +635,21 @@ public class DataSetServiceImpl implements DataSetService {
   private static String generateNotebookUserCode(
       QueryJobConfiguration queryJobConfiguration,
       Domain domain,
-      String prefix,
+      String dataSetName,
+      String qualifier,
       KernelTypeEnum kernelTypeEnum) {
 
     // Define [namespace]_sql, [namespace]_query_config, and [namespace]_df variables
-    String namespace =
-        prefix.toLowerCase().replaceAll(" ", "_") + "_" + domain.toString().toLowerCase() + "_";
+    String domainAsString = domain.toString().toLowerCase();
+    String namespace = "dataset_" + qualifier + "_" + domainAsString + "_";
+    // Comments in R and Python have the same syntax
+    String descriptiveComment =
+        new StringBuilder("# This query represents dataset \"")
+            .append(dataSetName)
+            .append("\" for domain \"")
+            .append(domainAsString)
+            .append("\"")
+            .toString();
     String sqlSection;
     String namedParamsSection;
     String dataFrameSection;
@@ -678,7 +714,9 @@ public class DataSetServiceImpl implements DataSetService {
         throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
     }
 
-    return sqlSection
+    return descriptiveComment
+        + "\n"
+        + sqlSection
         + "\n\n"
         + namedParamsSection
         + "\n\n"

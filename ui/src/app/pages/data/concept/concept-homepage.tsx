@@ -4,8 +4,9 @@ import * as React from 'react';
 import {AlertClose, AlertDanger} from 'app/components/alert';
 import {Clickable} from 'app/components/buttons';
 import {SlidingFabReact} from 'app/components/buttons';
-import {WorkspaceCardBase} from 'app/components/card';
+import {DomainCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
@@ -99,7 +100,7 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
     ({conceptDomainInfo, standardConceptsOnly, browseInDomain}) => {
       const conceptCount = standardConceptsOnly ?
           conceptDomainInfo.standardConceptCount : conceptDomainInfo.allConceptCount;
-      return <WorkspaceCardBase style={{minWidth: '11rem'}} data-test-id='domain-box'>
+      return <DomainCardBase style={{minWidth: '11rem'}} data-test-id='domain-box'>
         <Clickable style={styles.domainBoxHeader}
              onClick={browseInDomain}
              data-test-id='domain-box-name'>{conceptDomainInfo.name}</Clickable>
@@ -109,12 +110,12 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
         </div>
         <Clickable style={styles.domainBoxLink}
                    onClick={browseInDomain}>Browse Domain</Clickable>
-      </WorkspaceCardBase>;
+      </DomainCardBase>;
     };
 
 const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: Function}> =
     ({survey, browseSurvey}) => {
-      return <WorkspaceCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
+      return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
         <div style={styles.domainBoxHeader} data-test-id='survey-box-name'>{survey.name}</div>
         <div style={styles.conceptText}>
           <span style={{fontSize: 30}}>{survey.questionCount}</span> survey questions with
@@ -125,7 +126,7 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
         </div>
         <Clickable style={{...styles.domainBoxLink}} onClick={browseSurvey}>Browse
           Survey</Clickable>
-      </WorkspaceCardBase>;
+      </DomainCardBase>;
     };
 
 interface Props {
@@ -415,9 +416,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
         conceptsToAdd, selectedConceptDomainMap} = this.state;
 
       return <FadeBox>
-        <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
+        <FlexRow style={{justifyContent: 'flex-start'}}>
           {conceptDomainCounts.map((domain) => {
-            return <div style={{display: 'flex', flexDirection: 'column'}} key={domain.name}>
+            return <FlexColumn key={domain.name}>
               <Clickable style={styles.domainHeaderLink}
                          onClick={() => this.selectDomain(domain)}
                          disabled={this.domainLoading(domain)}
@@ -425,22 +426,21 @@ export const ConceptHomepage = withCurrentWorkspace()(
                 <div style={{fontSize: '16px'}}>{domain.name}</div>
                 {this.domainLoading(domain) ?
                     <Spinner style={{height: '15px', width: '15px'}}/> :
-                    <div style={{display: 'flex', flexDirection: 'row',
-                      justifyContent: 'space-between'}}>
+                    <FlexRow style={{justifyContent: 'space-between'}}>
                       <div>{domain.conceptCount}</div>
                       {(selectedConceptDomainMap[domain.domain] > 0) &&
                       <div style={styles.selectedConceptsCount} data-test-id='selectedConcepts'>
                         {selectedConceptDomainMap[domain.domain]}
                       </div>}
-                    </div>
+                    </FlexRow>
                 }
               </Clickable>
               {domain === selectedDomain && <hr data-test-id='active-domain'
                                                 key={selectedDomain.domain}
                                                 style={styles.domainHeaderSelected}/>}
-            </div>;
+            </FlexColumn>;
           })}
-        </div>
+        </FlexRow>
         <div style={styles.conceptCounts}>
           Showing top {concepts.length} of {selectedDomain.conceptCount} {selectedDomain.name}
         </div>

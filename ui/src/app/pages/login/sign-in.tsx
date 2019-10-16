@@ -11,6 +11,7 @@ import {AccountCreation} from './account-creation/account-creation';
 
 import {Profile} from 'generated/fetch';
 
+import {FlexColumn} from 'app/components/flex';
 import * as React from 'react';
 import {AccountCreationSurvey} from './account-creation/account-creation-survey';
 
@@ -28,19 +29,24 @@ interface SignInState {
 
 const styles = {
   template: (windowSize, images) => {
+    // Lower bounds to prevent the small and large images from covering the
+    // creation controls, respectively.
+    const bgWidthMinPx = 900;
+    const bgWidthSmallLimitPx = 1600;
+
     return {
       backgroundImage: calculateImage(),
       backgroundColor: colors.light,
       backgroundRepeat: 'no-repeat',
       width: '100%',
       minHeight: '100vh',
-      backgroundSize: windowSize.width <= 900 ? '0% 0%' : 'contain',
+      backgroundSize: windowSize.width <= bgWidthMinPx ? '0% 0%' : 'contain',
       backgroundPosition: calculateBackgroundPosition()
     };
 
     function calculateImage() {
       let imageUrl = 'url(\'' + images.backgroundImgSrc + '\')';
-      if (windowSize.width > 900 && windowSize.width <= 1300) {
+      if (windowSize.width > bgWidthMinPx && windowSize.width <= bgWidthSmallLimitPx) {
         imageUrl = 'url(\'' + images.smallerBackgroundImgSrc + '\')';
       }
       return imageUrl;
@@ -48,7 +54,7 @@ const styles = {
 
     function calculateBackgroundPosition() {
       let position = 'bottom right -1rem';
-      if (windowSize.width > 900 && windowSize.width <= 1300) {
+      if (windowSize.width > bgWidthMinPx && windowSize.width <= bgWidthSmallLimitPx) {
         position = 'bottom right';
       }
       return position;
@@ -154,7 +160,7 @@ export const SignInReact = withWindowSize()(
 
     render() {
       return <div style={styles.signedInContainer}>
-        <div style={{width: '100%', display: 'flex', flexDirection: 'column'}}>
+        <FlexColumn style={{width: '100%'}}>
           <div data-test-id='template'
                style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
             <img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
@@ -163,7 +169,7 @@ export const SignInReact = withWindowSize()(
               {this.nextDirective(this.state.currentStep)}
             </div>
           </div>
-        </div>
+        </FlexColumn>
       </div>;
     }
   });

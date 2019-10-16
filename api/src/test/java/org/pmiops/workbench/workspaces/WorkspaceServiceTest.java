@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -51,16 +52,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WorkspaceServiceTest {
   @TestConfiguration
-  @Import({WorkspaceMapper.class})
   static class Configuration {}
 
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private UserDao userDao;
   @Autowired private UserRecentWorkspaceDao userRecentWorkspaceDao;
-  @Autowired private WorkspaceMapper workspaceMapper;
 
   @Mock private CohortCloningService mockCohortCloningService;
   @Mock private ConceptSetService mockConceptSetService;
+  @Mock private DataSetService mockDataSetService;
   @Mock private Provider<User> mockUserProvider;
   @Mock private FireCloudService mockFireCloudService;
   @Mock private Clock mockClock;
@@ -83,12 +83,12 @@ public class WorkspaceServiceTest {
             mockClock,
             mockCohortCloningService,
             mockConceptSetService,
+            mockDataSetService,
             mockFireCloudService,
             userDao,
             mockUserProvider,
             userRecentWorkspaceDao,
-            workspaceDao,
-            workspaceMapper);
+            workspaceDao);
 
     mockWorkspaceResponses.clear();
     mockWorkspaces.clear();
