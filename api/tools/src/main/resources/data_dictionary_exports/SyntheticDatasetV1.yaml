@@ -2,14 +2,14 @@ meta_data:
   -
     id: '1dsvJV8B7EXQj5EWa2XG-KAhs-l7FsQnyJSSFMstLF2U'
     name: 'All of Us Registered Tier CDR Data Dictionary'
-    version: 1858
+    version: 1882
     created_time: 2019-01-15 18:38:57
-    modified_time: 2019-10-11 15:45:55
-    last_modifying_user_display_name: 'Caroline Taylor'
+    modified_time: 2019-10-16 15:29:52
+    last_modifying_user_display_name: 'Alpha Parrott'
     cdr_version: 'Synthetic Dataset v1'
 
 transformations:
-  - 
+  -
     available_fields:
       - 
         field_name:  'person_id'
@@ -20,6 +20,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'gender_concept_id'
@@ -45,6 +50,11 @@ transformations:
         data_provenance:  'PPI'
         source_ppi_module:  'Consent Process'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'month_of_birth'
@@ -55,6 +65,11 @@ transformations:
         data_provenance:  'PPI'
         source_ppi_module:  'Consent Process'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'day_of_birth'
@@ -65,6 +80,11 @@ transformations:
         data_provenance:  'PPI'
         source_ppi_module:  'Consent Process'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'birth_datetime'
@@ -75,6 +95,11 @@ transformations:
         data_provenance:  'PPI'
         source_ppi_module:  'Consent Process'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'race_concept_id'
@@ -115,6 +140,11 @@ transformations:
         data_provenance:  'PPI'
         source_ppi_module:  'Consent Process'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'provider_id'
@@ -125,6 +155,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'care_site_id'
@@ -135,6 +170,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'person_source_value'
@@ -145,6 +185,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'gender_source_value'
@@ -245,6 +290,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'person_id'
@@ -255,6 +305,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'condition_concept_id'
@@ -280,6 +335,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'condition_start_datetime'
@@ -290,6 +350,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'condition_end_date'
@@ -300,6 +365,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'condition_end_datetime'
@@ -310,6 +380,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'condition_type_concept_id'
@@ -335,6 +410,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'provider_id'
@@ -345,6 +425,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_occurrence_id'
@@ -355,6 +440,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'condition_source_value'
@@ -380,6 +470,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'condition_status_source_value'
@@ -390,6 +485,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'condition_status_concept_id'
@@ -400,6 +500,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_occurrence_id'
@@ -410,6 +515,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'person_id'
@@ -420,6 +530,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_concept_id'
@@ -445,6 +560,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_start_datetime'
@@ -455,6 +575,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_end_date'
@@ -465,6 +590,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_end_datetime'
@@ -475,6 +605,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_type_concept_id'
@@ -500,6 +635,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'care_site_id'
@@ -510,6 +650,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_source_value'
@@ -535,6 +680,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'admitting_source_concept_id'
@@ -560,6 +710,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'discharge_to_concept_id'
@@ -585,6 +740,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'preceding_visit_occurrence_id'
@@ -595,6 +755,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'drug_exposure_id'
@@ -605,6 +770,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'person_id'
@@ -615,6 +785,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'drug_concept_id'
@@ -640,6 +815,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'drug_exposure_start_datetime'
@@ -650,6 +830,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'drug_exposure_end_date'
@@ -660,6 +845,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'drug_exposure_end_datetime'
@@ -670,6 +860,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'verbatim_end_date'
@@ -680,6 +875,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'drug_type_concept_id'
@@ -735,6 +935,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'days_supply'
@@ -745,6 +950,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'sig'
@@ -755,6 +965,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'route_concept_id'
@@ -780,6 +995,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'provider_id'
@@ -790,6 +1010,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_occurrence_id'
@@ -800,6 +1025,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_detail_id'
@@ -810,6 +1040,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'drug_source_value'
@@ -835,6 +1070,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'route_source_value'
@@ -845,6 +1085,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'dose_unit_source_value'
@@ -855,6 +1100,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'measurement_id'
@@ -865,6 +1115,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'person_id'
@@ -875,6 +1130,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'measurement_concept_id'
@@ -900,6 +1160,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'measurement_datetime'
@@ -910,6 +1175,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'measurement_type_concept_id'
@@ -950,6 +1220,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'value_as_concept_id'
@@ -990,6 +1265,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'range_high'
@@ -1000,6 +1280,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'provider_id'
@@ -1010,6 +1295,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_occurrence_id'
@@ -1020,6 +1310,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_detail_id'
@@ -1030,6 +1325,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'measurement_source_value'
@@ -1055,6 +1355,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'unit_source_value'
@@ -1080,6 +1385,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'procedure_occurrence_id'
@@ -1090,6 +1400,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'person_id'
@@ -1100,6 +1415,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'procedure_concept_id'
@@ -1125,6 +1445,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'procedure_datetime'
@@ -1135,6 +1460,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'procedure_type_concept_id'
@@ -1175,6 +1505,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'provider_id'
@@ -1185,6 +1520,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_occurrence_id'
@@ -1195,6 +1535,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'procedure_source_value'
@@ -1220,6 +1565,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'qualifier_source_value'
@@ -1230,6 +1580,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'observation_id'
@@ -1240,6 +1595,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'person_id'
@@ -1250,6 +1610,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'observation_concept_id'
@@ -1275,6 +1640,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'All modules/Consent Process/Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'observation_datetime'
@@ -1285,6 +1655,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'All modules/Consent Process/Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'observation_type_concept_id'
@@ -1310,6 +1685,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'All modules/Consent Process/Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'value_as_string'
@@ -1320,6 +1700,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'All modules/Consent Process/Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'value_as_concept_id'
@@ -1345,6 +1730,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'All modules/Consent Process/Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'unit_concept_id'
@@ -1370,6 +1760,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_occurrence_id'
@@ -1380,6 +1775,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_detail_id'
@@ -1390,6 +1790,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'observation_source_value'
@@ -1400,6 +1805,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'All modules/Consent Process/Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'observation_source_concept_id'
@@ -1425,6 +1835,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'All modules/Consent Process/Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'unit_source_value'
@@ -1450,6 +1865,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'All modules/Consent Process/Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'observation_period_id'
@@ -1460,6 +1880,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'person_id'
@@ -1470,6 +1895,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'observation_period_start_date'
@@ -1480,6 +1910,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'All modules/Consent Process/Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'observation_period_end_date'
@@ -1490,6 +1925,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'All modules/Consent Process/Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'period_type_concept_id'
@@ -1500,6 +1940,11 @@ transformations:
         data_provenance:  'EHR/PPI'
         source_ppi_module:  'All modules/Consent Process/Physical Measurements'
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'device_exposure_id'
@@ -1510,6 +1955,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'person_id'
@@ -1520,6 +1970,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'device_concept_id'
@@ -1545,6 +2000,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'device_exposure_start_datetime'
@@ -1555,6 +2015,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'device_exposure_end_date'
@@ -1565,6 +2030,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'device_exposure_end_datetime'
@@ -1575,6 +2045,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'device_type_concept_id'
@@ -1585,6 +2060,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'unique_device_id'
@@ -1595,6 +2075,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'quantity'
@@ -1605,6 +2090,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'provider_id'
@@ -1615,6 +2105,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_occurrence_id'
@@ -1625,6 +2120,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'visit_detail_id'
@@ -1635,6 +2135,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'device_source_value'
@@ -1660,6 +2165,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'person_id'
@@ -1670,6 +2180,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'death_date   '
@@ -1680,6 +2195,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'death_datetime'
@@ -1690,6 +2210,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'death_type_concept_id'
@@ -1715,6 +2240,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'cause_source_value'
@@ -1725,6 +2255,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'cause_source_concept_id'
@@ -1735,6 +2270,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'domain_concept_id_1'
@@ -1745,6 +2285,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'fact_id_1'
@@ -1755,6 +2300,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'domain_concept_id_2'
@@ -1765,6 +2315,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'fact_id_2'
@@ -1775,6 +2330,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'relationship_concept_id'
@@ -1800,6 +2360,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'person_id'
@@ -1810,6 +2375,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'specimen_concept_id'
@@ -1835,6 +2405,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'specimen_date'
@@ -1845,6 +2420,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'specimen_datetime'
@@ -1855,6 +2435,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  True
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'quantity'
@@ -1865,6 +2450,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'unit_concept_id'
@@ -1890,6 +2480,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'disease_status_concept_id'
@@ -1900,6 +2495,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'specimen_source_id'
@@ -1925,6 +2525,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'unit_source_value'
@@ -1935,6 +2540,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'anatomic_site_source_value'
@@ -1945,6 +2555,11 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'disease_status_source_value'
@@ -1955,26 +2570,26 @@ transformations:
         data_provenance:  'EHR'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
-        field_name:  'src_dataset_id'
+        field_name:  'src_id'
         relevant_omop_table:  'condition_occurrence_ext'
         omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier corresponding to the source dataset for that concept (row).'
+        description:  'An identifier delineating whether data was EHR or Program data and, if EHR, representing the recruiting site providing the data with a numeric code.'
         field_type:  'varchar'
         data_provenance:  'AoU Metadata (Internally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
-
-      - 
-        field_name:  'src_hpo_id'
-        relevant_omop_table:  'condition_occurrence_ext'
-        omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier representing the recruiting site from which the data was sourced.'
-        field_type:  'varchar'
-        data_provenance:  'AoU Metadata (Internally generated)'
-        source_ppi_module:  
-        transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  'Value will be a code representing the site contributing the EHR for EHR data and "PPI/PM" for Program data'
 
       - 
         field_name:  'condition_occurrence_id'
@@ -1985,26 +2600,26 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
-        field_name:  'src_dataset_id'
+        field_name:  'src_id'
         relevant_omop_table:  'device_exposure_ext'
         omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier corresponding to the source dataset for that concept (row).'
+        description:  'An identifier delineating whether data was EHR or Program data and, if EHR, representing the recruiting site providing the data with a numeric code.'
         field_type:  'varchar'
         data_provenance:  'AoU Metadata (Internally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
-
-      - 
-        field_name:  'src_hpo_id'
-        relevant_omop_table:  'device_exposure_ext'
-        omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier representing the recruiting site from which the data was sourced.'
-        field_type:  'varchar'
-        data_provenance:  'AoU Metadata (Internally generated)'
-        source_ppi_module:  
-        transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  'Value will be a code representing the site contributing the EHR for EHR data and "PPI/PM" for Program data'
 
       - 
         field_name:  'device_exposure_id'
@@ -2015,26 +2630,26 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
-        field_name:  'src_dataset_id'
+        field_name:  'src_id'
         relevant_omop_table:  'drug_exposure_ext'
         omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier corresponding to the source dataset for that concept (row).'
+        description:  'An identifier delineating whether data was EHR or Program data and, if EHR, representing the recruiting site providing the data with a numeric code.'
         field_type:  'varchar'
         data_provenance:  'AoU Metadata (Internally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
-
-      - 
-        field_name:  'src_hpo_id'
-        relevant_omop_table:  'drug_exposure_ext'
-        omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier representing the recruiting site from which the data was sourced.'
-        field_type:  'varchar'
-        data_provenance:  'AoU Metadata (Internally generated)'
-        source_ppi_module:  
-        transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  'Value will be a code representing the site contributing the EHR for EHR data and "PPI/PM" for Program data'
 
       - 
         field_name:  'drug_exposure_id'
@@ -2045,26 +2660,26 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
-        field_name:  'src_dataset_id'
+        field_name:  'src_id'
         relevant_omop_table:  'measurement_ext'
         omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier corresponding to the source dataset for that concept (row).'
+        description:  'An identifier delineating whether data was EHR or Program data and, if EHR, representing the recruiting site providing the data with a numeric code.'
         field_type:  'varchar'
         data_provenance:  'AoU Metadata (Internally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
-
-      - 
-        field_name:  'src_hpo_id'
-        relevant_omop_table:  'measurement_ext'
-        omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier representing the recruiting site from which the data was sourced.'
-        field_type:  'varchar'
-        data_provenance:  'AoU Metadata (Internally generated)'
-        source_ppi_module:  
-        transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  'Value will be a code representing the site contributing the EHR for EHR data and "PPI/PM" for Program data'
 
       - 
         field_name:  'measurement_id'
@@ -2075,26 +2690,26 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
-        field_name:  'src_dataset_id'
+        field_name:  'src_id'
         relevant_omop_table:  'observation_ext'
         omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier corresponding to the source dataset for that concept (row).'
+        description:  'An identifier delineating whether data was EHR or Program data and, if EHR, representing the recruiting site providing the data with a numeric code.'
         field_type:  'varchar'
         data_provenance:  'AoU Metadata (Internally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
-
-      - 
-        field_name:  'src_hpo_id'
-        relevant_omop_table:  'observation_ext'
-        omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier representing the recruiting site from which the data was sourced.'
-        field_type:  'varchar'
-        data_provenance:  'AoU Metadata (Internally generated)'
-        source_ppi_module:  
-        transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  'Value will be a code representing the site contributing the EHR for EHR data and "PPI/PM" for Program data'
 
       - 
         field_name:  'observation_id'
@@ -2105,26 +2720,26 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
-        field_name:  'src_dataset_id'
+        field_name:  'src_id'
         relevant_omop_table:  'procedure_occurrence_ext'
         omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier corresponding to the source dataset for that concept (row).'
+        description:  'An identifier delineating whether data was EHR or Program data and, if EHR, representing the recruiting site providing the data with a numeric code.'
         field_type:  'varchar'
         data_provenance:  'AoU Metadata (Internally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
-
-      - 
-        field_name:  'src_hpo_id'
-        relevant_omop_table:  'procedure_occurrence_ext'
-        omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier representing the recruiting site from which the data was sourced.'
-        field_type:  'varchar'
-        data_provenance:  'AoU Metadata (Internally generated)'
-        source_ppi_module:  
-        transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  'Value will be a code representing the site contributing the EHR for EHR data and "PPI/PM" for Program data'
 
       - 
         field_name:  'procedure_occurrence_id'
@@ -2135,26 +2750,26 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
-        field_name:  'src_dataset_id'
+        field_name:  'src_id'
         relevant_omop_table:  'visit_occurrence_ext'
         omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier corresponding to the source dataset for that concept (row).'
+        description:  'An identifier delineating whether data was EHR or Program data and, if EHR, representing the recruiting site providing the data with a numeric code.'
         field_type:  'varchar'
         data_provenance:  'AoU Metadata (Internally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
-
-      - 
-        field_name:  'src_hpo_id'
-        relevant_omop_table:  'visit_occurrence_ext'
-        omop_cdm_standard_or_custom_field:  'Custom All of Us Metadata Table'
-        description:  'The identifier representing the recruiting site from which the data was sourced.'
-        field_type:  'varchar'
-        data_provenance:  'AoU Metadata (Internally generated)'
-        source_ppi_module:  
-        transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  'Value will be a code representing the site contributing the EHR for EHR data and "PPI/PM" for Program data'
 
       - 
         field_name:  'visit_occurrence_id'
@@ -2165,6 +2780,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'cdm_source_name'
@@ -2175,6 +2795,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'cdm_source_abbreviation'
@@ -2185,6 +2810,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'cdm_holder'
@@ -2195,6 +2825,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'source_description'
@@ -2205,6 +2840,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'source_documentation_reference'
@@ -2215,6 +2855,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'cdm_etl_reference'
@@ -2225,6 +2870,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'source_release_date'
@@ -2235,6 +2885,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'cdm_release_date'
@@ -2245,6 +2900,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'cdm_version'
@@ -2255,6 +2915,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'vocabulary_version'
@@ -2265,6 +2930,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'attribute_definition_id'
@@ -2275,6 +2945,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'attribute_name'
@@ -2285,6 +2960,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'attribute_description'
@@ -2295,6 +2975,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'attribute_type_concept_id'
@@ -2305,6 +2990,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'attribute_syntax'
@@ -2315,6 +3005,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'concept_id'
@@ -2325,6 +3020,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'concept_name'
@@ -2335,6 +3035,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'domain_id'
@@ -2345,6 +3050,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'vocabulary_id'
@@ -2355,6 +3065,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'concept_class_id'
@@ -2455,6 +3170,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'descendant_concept_id'
@@ -2465,6 +3185,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'min_levels_of_separation'
@@ -2475,6 +3200,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'max_levels_of_separation'
@@ -2485,6 +3215,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'concept_class_id'
@@ -2495,6 +3230,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'concept_class_name'
@@ -2520,6 +3260,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'concept_id_1'
@@ -2530,6 +3275,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'concept_id_2'
@@ -2540,6 +3290,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'relationship_id'
@@ -2550,6 +3305,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'valid_start_date'
@@ -2605,6 +3365,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'concept_synonym_name'
@@ -2615,6 +3380,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'language_concept_id'
@@ -2625,6 +3395,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'domain_id'
@@ -2635,6 +3410,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'domain_name'
@@ -2660,6 +3440,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'drug_concept_id'
@@ -2685,6 +3470,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'amount_value'
@@ -2695,6 +3485,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'amount_unit_concept_id'
@@ -2705,6 +3500,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'numerator_value'
@@ -2715,6 +3515,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'numerator_unit_concept_id'
@@ -2725,6 +3530,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'denominator_value'
@@ -2735,6 +3545,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'denominator_unit_concept_id'
@@ -2745,6 +3560,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'box_size'
@@ -2755,6 +3575,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'valid_start_date'
@@ -2810,6 +3635,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'relationship_name'
@@ -2820,6 +3650,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'is_hierarchical'
@@ -2860,6 +3695,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'relationship_concept_id'
@@ -2885,6 +3725,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'vocabulary_name'
@@ -2895,6 +3740,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'vocabulary_reference'
@@ -2905,6 +3755,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'vocabulary_version'
@@ -2915,6 +3770,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'vocabulary_concept_id'
@@ -2925,6 +3785,11 @@ transformations:
         data_provenance:  'OMOP CDM Metadata (Externally generated)'
         source_ppi_module:  
         transformed_by_registered_tier_privacy_methods:  
+        transformation_applied_(registered_tier):  
+        transformed_by_privacy_methodology_(controlled_tier):  
+        transformation_applied_(controlled_tier):  
+        data_cleaning_rule_(cdr_clean):  
+        additional_notes:  
 
       - 
         field_name:  'person_id'
