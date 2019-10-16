@@ -39,6 +39,11 @@ jobs:
           working_directory: ~/workbench/api
           command: ./project.rb validate-swagger --project-prop verboseTestLogging=yes
       - run:
+          # Lint before tests because it's much faster
+          name: Java linting
+          working_directory: ~/workbench/api
+          command: ./gradlew spotlessCheck
+      - run:
           name: Integration tests compile
           working_directory: ~/workbench/api
           command: ./project.rb gradle compileBigQuery compileIntegration
@@ -46,11 +51,6 @@ jobs:
           name: Unit tests
           working_directory: ~/workbench/api
           command: ./project.rb test
-      - run:
-          # Lint last; it's more important to surface test failures early.
-          name: Java linting
-          working_directory: ~/workbench/api
-          command: ./gradlew spotlessCheck
       - save_cache:
           paths:
             - ~/.gradle
