@@ -242,14 +242,25 @@ export const Popup = fp.flow(
   }
 });
 
-export class PopupTrigger extends React.Component {
+interface PopupTriggerProps {
+  children: any;
+  closeOnClick?: boolean;
+  content: any;
+  closeOnClickOutside?: boolean;
+  onOpen?: () => void;
+  onClose?: () => void;
+  side?: string;
+}
+
+export class PopupTrigger extends React.Component<PopupTriggerProps> {
   static readonly defaultProps = {
     closeOnClick: false,
+    closeOnClickOutside: true,
     onOpen: () => {},
     onClose: () => {}
   };
 
-  props: any;
+  props: PopupTriggerProps;
   state: any;
   id: string;
 
@@ -287,7 +298,7 @@ export class PopupTrigger extends React.Component {
       })}
       {open && <Popup
           target={this.id}
-          handleClickOutside={() => this.close()}
+          handleClickOutside={this.props.closeOnClickOutside ? () => this.close() : () => {}}
           outsideClickIgnoreClass={this.id}
           onClick={closeOnClick ? () => this.close() : undefined}
           {...props}

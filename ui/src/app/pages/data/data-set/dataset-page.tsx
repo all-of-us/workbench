@@ -8,7 +8,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
-import {TooltipTrigger} from 'app/components/popups';
+import {Popup, PopupPortal, PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
@@ -29,7 +29,7 @@ import {
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
-import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -50,6 +50,7 @@ import {
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
+import {DataDictionaryEntry} from "../../../../generated/fetch/api";
 
 export const styles = {
   selectBoxHeader: {
@@ -210,16 +211,101 @@ const Subheader = (props) => {
   return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
 };
 
-export const ValueListItem: React.FunctionComponent <
-  {domainValue: DomainValue, onChange: Function, checked: boolean}> =
-  ({domainValue, onChange, checked}) => {
-    return <div style={{display: 'flex', height: '1.2rem', marginLeft: '0.55rem'}}>
-      <input type='checkbox' value={domainValue.value} onChange={() => onChange()}
-             style={styles.valueListItemCheckboxStyling} checked={checked}/>
-      <div style={{lineHeight: '1.5rem', wordWrap: 'break-word', color: colors.primary}}>
-        {domainValue.value}</div>
+interface DataDictionaryPopupProps {
+  dataDictionaryEntry: DataDictionaryEntry;
+  onClose: () => void;
+}
+
+const DataDictionaryPopup: React.FunctionComponent<DataDictionaryPopupProps> = ({dataDictionaryEntry, onClose}) => {
+  return <div>
+    <FlexRow style={{justifyContent: 'space-between'}}>
+      {dataDictionaryEntry ? <div>{dataDictionaryEntry.name}</div>: <Spinner/>}
+      <ClrIcon style={{
+        color: colors.accent,
+        cursor: 'pointer'
+      }} shape='cross' onClick={() => onClose()} class='is-solid'/>
+    </FlexRow>
+  </div>;
+}
+
+interface ValueListItemProps {
+  checked: boolean;
+  domain: Domain;
+  domainValue: DomainValue;
+  onChange: Function;
+}
+
+interface ValueListItemState {
+  dataDictionaryEntry: DataDictionaryEntry;
+  showDataDictionaryEntry: boolean;
+}
+
+
+
+export class ValueListItem extends React.Component<
+  ValueListItemProps, ValueListItemState> {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      dataDictionaryEntry: undefined,
+      showDataDictionaryEntry: false
+    };
+  }
+
+  fetchDataDictionaryEntry() {
+    const {domain, domainValue} = this.props;
+
+    dataSetApi().getDataDictionaryEntry(
+      parseInt(currentWorkspaceStore.getValue().cdrVersionId),
+      domain.toString(),
+      domainValue.value).then(dataDictionaryEntry => {
+        this.setState({dataDictionaryEntry});
+      });
+  }
+
+  showDataDictionaryEntry() {
+    this.setState({showDataDictionaryEntry: true});
+
+    if (this.state.dataDictionaryEntry === undefined) {
+      this.fetchDataDictionaryEntry();
+    }
+  }
+
+  render() {
+    const {checked, domainValue, onChange} = this.props;
+
+    return <div style={{
+      ...styles.listItem,
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingLeft: '10px',
+      paddingRight: '10px'
+    }}>
+      <FlexRow style={{alignItems: 'center'}}>
+        <input type='checkbox' value={domainValue.value} onChange={() => onChange()}
+               style={{...styles.listItemCheckbox, marginTop: 3, marginLeft: 0, marginRight: 0}} checked={checked}/>
+        <div style={{lineHeight: '1.5rem', paddingLeft: 10, wordWrap: 'break-word', color: colors.primary}}>
+          {domainValue.value}</div>
+      </FlexRow>
+      <PopupTrigger
+        side='bottom'
+        closeOnClickOutside={false}
+        content={
+          this.state.showDataDictionaryEntry &&
+          <DataDictionaryPopup dataDictionaryEntry={this.state.dataDictionaryEntry}
+                               onClose={() => {this.setState({showDataDictionaryEntry: false}); }}/>}>
+        <Clickable onClick={() => this.showDataDictionaryEntry()}>
+          <ClrIcon style={{
+            color: colors.accent,
+            marginLeft: 'auto',
+            cursor: 'pointer'
+          }} shape='info-standard' class='is-solid'/>
+        </Clickable>
+      </PopupTrigger>
     </div>;
   };
+}
 
 const plusLink = (dataTestId: string, path: string, disable?: boolean) => {
   return <TooltipTrigger data-test-id='plus-icon-tooltip' disabled={!disable}
@@ -781,7 +867,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                         </Subheader>
                         {valueSet.values.items.map(domainValue =>
                           <ValueListItem data-test-id='value-list-items'
-                            key={domainValue.value} domainValue={domainValue}
+                            key={domainValue.value} domain={valueSet.domain} domainValue={domainValue}
                             onChange={() => this.selectDomainValue(valueSet.domain, domainValue)}
                             checked={fp.some({domain: valueSet.domain, value: domainValue.value},
                               selectedDomainValuePairs)}/>
