@@ -494,7 +494,7 @@ if [[ "$tables" == *"_ext" ]]; then
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on po.procedure_concept_id = c.concept_id
     join \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence_ext\` pm on po.procedure_occurrence_id = pm.procedure_occurrence_id
     where c.vocabulary_id != 'PPI'
-    and pm.src_id=(select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence_ext\` where src_id like '%EHR%')) as r
+    and pm.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence_ext\` where src_id like '%EHR%')) as r
     where d.concept_id = 10"
 
     # Set participant counts for Drug domain
@@ -506,7 +506,7 @@ if [[ "$tables" == *"_ext" ]]; then
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on de.drug_concept_id = c.concept_id
     join \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` md on de.drug_exposure_id = pm.drug_exposure_id
     where c.vocabulary_id != 'PPI'
-    and md.src_id=(select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` where src_id like '%EHR%')) as r
+    and md.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` where src_id like '%EHR%')) as r
     where d.concept_id = 13"
 else
     # Set participant counts for Condition domain
