@@ -585,30 +585,20 @@ workbench test service account against Firecloud dev. It retrieves required auth
 scopes of `email`, `profile`, and `cloud-billing`.
 
 ```Shell
-# From the "api" directory.
-auth_token=`~/go/bin/oauth2l header --json ./sa-key.json email profile cloud-billing`
-# verify this works (on test only) with
-echo $auth_token
+# From the "api" directory, use `oauth2l` to retrieve an authorization header: 
+`~/go/bin/oauth2l header --json ./sa-key.json email profile cloud-billing`
 ```
 
 Now we'll demonstrate calling Firecloud's [profile/billing API](https://api.firecloud.org/#!/Profile/billing)
 with the service account credentials.
 ```Shell
-# call the API
-url_prefix="firecloud-orchestration.dsde-dev.broadinstitute.org"
-output_file=~/billing_projects_per_user.json
+# call Firecloud Billing API, format the JSON output and view in less 
 
-curl -X GET -H "${auth_token}" \
+curl -X GET -H "`~/go/bin/oauth2l header --json ./sa-key.json email profile cloud-billing`" \
     -H "Content-Type: application/json" \
-    "https://${url_prefix}/api/profile/billing" \
-    > $output_file
-
-# check that it worked
-head $output_file
+    "https://firecloud-orchestration.dsde-dev.broadinstitute.org/api/profile/billing" \
+    | jq | less
 
 # If you get 401 errors, you may need to clear your token cache.
 oauth2l reset
-
-# clear the $auth_token variable
-auth_token=
 ```
