@@ -38,8 +38,8 @@ export const NotebookResourceCard = fp.flow(
     };
   }
 
-  get resourceType(): string {
-    return 'Notebook';
+  get resourceType(): ResourceType {
+    return ResourceType.NOTEBOOK;
   }
 
   get displayName(): string {
