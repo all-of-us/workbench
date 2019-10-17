@@ -84,12 +84,6 @@ export const styles = reactStyles({
     fontSize: 18, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
     fontWeight: 600, marginTop: '2rem', width: '33%'
   },
-  singleCard: {
-    width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
-    borderRadius: '5px', backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-    border: 'none', marginTop: '1rem'
-  },
   welcomeMessageIcon: {
     height: '2.25rem', width: '2.75rem'
   },
@@ -141,7 +135,13 @@ export const styles = reactStyles({
   bottomLinksToDelete: {
     color: colors.white, fontSize: '0.7rem', height: '1rem',
     marginLeft: '2.5rem', fontWeight: 400
-  }
+  },
+  singleCardToDelete: {
+    width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
+    borderRadius: '5px', backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
+    border: 'none', marginTop: '1rem', padding: '1rem'
+  },
 });
 
 export const Homepage = withUserProfile()(class extends React.Component<
@@ -472,7 +472,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
       return <React.Fragment>
         <div style={styles.backgroundImageToDelete}>
           <div style={{display: 'flex', justifyContent: 'center'}}>
-            <div style={styles.singleCard}>
+            <div style={styles.singleCardToDelete}>
               {accessTasksLoaded ?
                 (accessTasksRemaining ?
                     (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}

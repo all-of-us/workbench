@@ -111,6 +111,7 @@
     <include file="changelog/db.changelog-101-billing-project-garbage-collection.xml"/>
     <include file="changelog/db.changelog-102-user-recent-workspace.xml"/>
     <include file="changelog/db.changelog-103-data-dictionary.xml"/>
+    <include file="changelog/db.changelog-104-dataset-name-unique-in-workspace.xml"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`

@@ -34,6 +34,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -93,7 +94,6 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -204,7 +204,7 @@ public class DataSetControllerTest {
 
   @Autowired WorkspaceService workspaceService;
 
-  @Autowired WorkspaceMapper workspaceMapper;
+  @Autowired WorkspaceAuditAdapterService workspaceAuditAdapterService;
 
   @TestConfiguration
   @Import({
@@ -213,7 +213,6 @@ public class DataSetControllerTest {
     TestBigQueryCdrSchemaConfig.class,
     UserService.class,
     WorkspacesController.class,
-    WorkspaceMapper.class,
     WorkspaceServiceImpl.class
   })
   @MockBean({
@@ -233,7 +232,8 @@ public class DataSetControllerTest {
     DirectoryService.class,
     NotebooksService.class,
     CohortQueryBuilder.class,
-    UserRecentResourceService.class
+    UserRecentResourceService.class,
+    WorkspaceAuditAdapterService.class
   })
   static class Configuration {
     @Bean
@@ -295,7 +295,6 @@ public class DataSetControllerTest {
         new WorkspacesController(
             billingProjectBufferService,
             workspaceService,
-            workspaceMapper,
             cdrVersionDao,
             userDao,
             userProvider,
@@ -304,7 +303,8 @@ public class DataSetControllerTest {
             CLOCK,
             notebooksService,
             userService,
-            workbenchConfigProvider);
+            workbenchConfigProvider,
+            workspaceAuditAdapterService);
     CohortsController cohortsController =
         new CohortsController(
             workspaceService,

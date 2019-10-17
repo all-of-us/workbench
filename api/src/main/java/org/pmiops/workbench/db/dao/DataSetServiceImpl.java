@@ -15,9 +15,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -28,7 +31,8 @@ import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.DataSet;
-import org.pmiops.workbench.db.model.DataSetValues;
+import org.pmiops.workbench.db.model.DataSetValue;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -163,7 +167,7 @@ public class DataSetServiceImpl implements DataSetService {
       long workspaceId,
       List<Long> cohortIdList,
       List<Long> conceptIdList,
-      List<DataSetValues> values,
+      List<DataSetValue> values,
       PrePackagedConceptSetEnum prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime) {
@@ -176,8 +180,8 @@ public class DataSetServiceImpl implements DataSetService {
     dataSetModel.setInvalid(false);
     dataSetModel.setCreatorId(creatorId);
     dataSetModel.setCreationTime(creationTime);
-    dataSetModel.setCohortSetId(cohortIdList);
-    dataSetModel.setConceptSetId(conceptIdList);
+    dataSetModel.setCohortIds(cohortIdList);
+    dataSetModel.setConceptSetIds(conceptIdList);
     dataSetModel.setValues(values);
     dataSetModel.setPrePackagedConceptSetEnum(prePackagedConceptSetEnum);
 
@@ -536,6 +540,28 @@ public class DataSetServiceImpl implements DataSetService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  @Transactional
+  public DataSet cloneDataSetToWorkspace(
+      DataSet fromDataSet, Workspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds) {
+    DataSet toDataSet = new DataSet(fromDataSet);
+    toDataSet.setWorkspaceId(toWorkspace.getWorkspaceId());
+    toDataSet.setCreatorId(toWorkspace.getCreator().getUserId());
+    toDataSet.setLastModifiedTime(toWorkspace.getLastModifiedTime());
+    toDataSet.setCreationTime(toWorkspace.getCreationTime());
+
+    toDataSet.setConceptSetIds(new ArrayList<>(conceptSetIds));
+    toDataSet.setCohortIds(new ArrayList<>(conceptSetIds));
+    return dataSetDao.save(toDataSet);
+  }
+
+  @Override
+  public List<DataSet> getDataSets(Workspace workspace) {
+    // Allows for fetching data sets for a workspace once its collection is no longer
+    // bound to a session.
+    return dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+  }
+
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {
     Optional<CdrBigQuerySchemaConfig.ColumnConfig> conceptColumn =
         config.columns.stream().filter(column -> type.equals(column.domainConcept)).findFirst();
@@ -561,11 +587,11 @@ public class DataSetServiceImpl implements DataSetService {
             .collect(Collectors.toList()));
 
     final String domainName = domainMaybe.get().toString();
-    final String domainTitleCase = toTitleCase(domainName);
+    final String domainFirstCharacterCapitalized = capitalizeFirstCharacterOnly(domainName);
 
     final ImmutableMap<String, QueryParameterValue> queryParameterValuesByDomain =
         ImmutableMap.of(
-            "pDomain", QueryParameterValue.string(domainTitleCase),
+            "pDomain", QueryParameterValue.string(domainFirstCharacterCapitalized),
             "pValuesList",
                 QueryParameterValue.array(
                     valuesUppercaseBuilder.build().toArray(new String[0]), String.class));
@@ -595,16 +621,9 @@ public class DataSetServiceImpl implements DataSetService {
   // Capitalizes the first letter of a string and lowers the remaining ones.
   // Assumes a single word, so you'd get "A tale of two cities" instead of
   // "A Tale Of Two Cities"
-  private static String toTitleCase(String name) {
-    if (name.isEmpty()) {
-      return name;
-    } else if (name.length() == 1) {
-      return name.toUpperCase();
-    } else {
-      return String.format(
-          "%s%s",
-          Character.toString(name.charAt(0)).toUpperCase(), name.substring(1).toLowerCase());
-    }
+  @VisibleForTesting
+  public static String capitalizeFirstCharacterOnly(String text) {
+    return StringUtils.capitalize(text.toLowerCase());
   }
 
   private static String generateNotebookUserCode(

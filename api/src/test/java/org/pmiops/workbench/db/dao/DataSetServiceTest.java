@@ -247,4 +247,34 @@ public class DataSetServiceTest {
             Domain.PERSON, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.isPresent()).isFalse();
   }
+
+  @Test
+  public void testcapitalizeFirstCharacterOnly_uppercaseWord() {
+    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("QWERTY")).isEqualTo("Qwerty");
+  }
+
+  @Test
+  public void testcapitalizeFirstCharacterOnly_mixedCaseString() {
+    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("aLl YouR baSE"))
+        .isEqualTo("All your base");
+  }
+
+  @Test
+  public void testcapitalizeFirstCharacterOnly_singleLetterStrings() {
+    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("a")).isEqualTo("A");
+    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("B")).isEqualTo("B");
+  }
+
+  @Test
+  public void testcapitalizeFirstCharacterOnly_emptyString() {
+    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("")).isEqualTo("");
+  }
+
+  @Test
+  public void testCapitalizeFirstCharacterOnly_emoji() {
+    assertThat(DataSetServiceImpl.capitalizeFirstCharacterOnly("\uD83D\uDCAF"))
+        .isEqualTo("\uD83D\uDCAF");
+    assertThat((DataSetServiceImpl.capitalizeFirstCharacterOnly("マリオに感謝しますが、私たちの王女は別の城にいます")))
+        .isEqualTo("マリオに感謝しますが、私たちの王女は別の城にいます");
+  }
 }

@@ -345,7 +345,6 @@ export interface WorkspaceEditState {
   loading: boolean;
   showUnderservedPopulationDetails: boolean;
   showStigmatizationDetails: boolean;
-  reviewRequestedHasSelection: boolean;  // false initially, set to true once the user has chosen (either Yes or No)
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
@@ -387,7 +386,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         loading: false,
         showUnderservedPopulationDetails: false,
         showStigmatizationDetails: false,
-        reviewRequestedHasSelection: false,
       };
     }
 
@@ -404,24 +402,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               '' : this.props.workspace.researchPurpose.diseaseOfFocus}
         }});
         if (this.isMode(WorkspaceEditMode.Duplicate)) {
-          this.setState({workspace: {
-            ...this.props.workspace,
-              // Replace potential nulls with empty string or empty array
-            researchPurpose: {
-              ...this.props.workspace.researchPurpose,
-              populationDetails: !this.props.workspace.researchPurpose.populationDetails ?
-                [] : this.props.workspace.researchPurpose.populationDetails,
-              diseaseOfFocus: !this.props.workspace.researchPurpose.diseaseOfFocus ?
-                '' : this.props.workspace.researchPurpose.diseaseOfFocus}
-          }});
-          if (this.isMode(WorkspaceEditMode.Duplicate)) {
-            this.setState({workspace: {
-              ...this.props.workspace,
-              // This is the only field which is not automatically handled/differentiated
-              // on the API level.
-              name: 'Duplicate of ' + this.props.workspace.name
-            }});
-          }
+          // This is the only field which is not automatically handled/differentiated
+          // on the API level.
+          this.setState(fp.set(['workspace', 'name'], 'Duplicate of ' + this.props.workspace.name));
+          // if the original workspace was reviewed, it's unlikely that we need a re-review
+          this.updateResearchPurpose('reviewRequested', false);
         }
       }
 
@@ -514,8 +499,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         this.isEmpty(rp, 'reasonForAllOfUs') ||
         !this.categoryIsSelected ||
         this.noSpecificPopulationSelected ||
-        this.noDiseaseOfFocusSpecified ||
-        !this.state.reviewRequestedHasSelection;
+        this.noDiseaseOfFocusSpecified;
     }
 
     updateResearchPurpose(category, value) {
@@ -783,7 +767,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </div>
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Request a review of your research purpose for potential
-                                      stigmatization of research participants' required>
+                                      stigmatization of research participants'>
           <Link onClick={() => this.setState({showStigmatizationDetails:
               !this.state.showStigmatizationDetails})} style={{marginTop: '0.5rem'}}>
             More info on stigmatization
@@ -825,18 +809,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <RadioButton name='reviewRequested'
                          onChange={() => {
                            this.updateResearchPurpose('reviewRequested', true);
-                           this.setState({reviewRequestedHasSelection: true});
                          }}
-                         checked={this.state.reviewRequestedHasSelection &&
-                         this.state.workspace.researchPurpose.reviewRequested}/>
+                         checked={this.state.workspace.researchPurpose.reviewRequested}/>
             <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>Yes</label>
             <RadioButton name='reviewRequested'
                          onChange={() => {
                            this.updateResearchPurpose('reviewRequested', false);
-                           this.setState({reviewRequestedHasSelection: true});
                          }}
-                         checked={this.state.reviewRequestedHasSelection &&
-                         !this.state.workspace.researchPurpose.reviewRequested}/>
+                         checked={!this.state.workspace.researchPurpose.reviewRequested}/>
             <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>No</label>
           </div>
         </WorkspaceEditSection>
@@ -857,7 +837,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               { !this.categoryIsSelected && <li>Research focus</li>}
               { this.noSpecificPopulationSelected && <li>Population of study</li>}
               { this.noDiseaseOfFocusSpecified && <li>Disease of focus</li>}
-              { !this.state.reviewRequestedHasSelection && <li>Research purpose review choice</li>}
             </ul>]} disabled={!this.disableButton}>
               <Button type='primary' onClick={() => this.saveWorkspace()}
                       disabled={this.disableButton || this.state.loading}>

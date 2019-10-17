@@ -560,8 +560,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     errorMessage = () => {
-      const {data, error} = this.state;
-      if ((data && data.length) || (!data && !error)) {
+      const {data, error, loading} = this.state;
+      if (loading || (data && data.length) || (!data && !error)) {
         return false;
       }
       let message: string;
@@ -637,7 +637,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           <div style={styles.description}>
             {cohort.description}
           </div>
-          {!loading && <DataTable
+          <DataTable
             style={styles.table}
             value={data}
             first={start}
@@ -645,11 +645,11 @@ export const ParticipantsTable = withCurrentWorkspace()(
             sortOrder={sortOrder}
             onSort={this.onSort}
             lazy
-            paginator
+            paginator={data && data.length > 0}
             onPage={this.onPage}
             alwaysShowPaginator={false}
-            paginatorTemplate={data && data.length ? paginatorTemplate : ''}
-            currentPageReportTemplate={data && data.length ? pageReportTemplate : ''}
+            paginatorTemplate={paginatorTemplate}
+            currentPageReportTemplate={pageReportTemplate}
             rows={rows}
             totalRecords={total}
             onRowClick={this.onRowClick}
@@ -657,7 +657,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             scrollHeight='calc(100vh - 350px)'
             footer={this.errorMessage()}>
             {columns}
-          </DataTable>}
+          </DataTable>
         </React.Fragment>}
         {loading && <SpinnerOverlay />}
         <HelpSidebar location='reviewParticipants' />

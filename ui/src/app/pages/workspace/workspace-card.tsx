@@ -70,7 +70,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
   onShare,
   onDelete
 }) => {
-  const wsPathPrefix = 'recentWorkspaces/' + workspace.namespace + '/' + workspace.id;
+  const wsPathPrefix = 'workspaces/' + workspace.namespace + '/' + workspace.id;
 
   return <PopupTrigger
     side='bottom'
@@ -275,12 +275,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
             >
               {accessLevel}
             </div>
-            <div
-              style={{
-                fontSize: 12,
-                lineHeight: 17
-              }}
-            >
+            <div style={{fontSize: 12}}>
               Last Changed: {displayDate(workspace.lastModifiedTime)}
             </div>
           </FlexColumn>

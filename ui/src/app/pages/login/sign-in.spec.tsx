@@ -16,7 +16,7 @@ describe('SignInReact', () => {
     props = {
       onInit: () => {},
       signIn: signIn,
-      windowSize: {width: 1400, height: 0}
+      windowSize: {width: 1700, height: 0}
     } as SignInProps;
   });
 
@@ -28,7 +28,7 @@ describe('SignInReact', () => {
     expect(wrapper.exists('[data-test-id="login"]')).toBeTruthy();
   });
 
-  it('should display small background image when window width is between 900 and 1300', () => {
+  it('should display small background image when window width is moderately sized', () => {
     props.windowSize.width = 999;
     const wrapper = component();
     const templateImage = wrapper.find('[data-test-id="template"]');
@@ -52,7 +52,7 @@ describe('SignInReact', () => {
     expect(wrapper.exists('[data-test-id="invitationKey"]')).toBeTruthy();
   });
 
-  it('should display invitation key with small image when width is between 900 and 1300 ', () => {
+  it('should display invitation key with small image when width is moderately sized ', () => {
     props.windowSize.width = 999;
     const wrapper = component();
     const createAccountButton = wrapper.find(Button).find({type: 'secondary'});
