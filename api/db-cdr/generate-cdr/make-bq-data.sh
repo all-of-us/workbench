@@ -462,7 +462,7 @@ where d.domain_id = c.domain_id"
 
 # domain_info contains counts for all EHR specific domains (Condition, Measurement, Procedure and Drug Exposure
 # We're using *_ext tables to limit the count of people that have EHR specific data. This a an effort to exclude PPI related data.
-# PPI specific data is counted in the survey_module table.
+# PPI specific data is counted in the survey_module table. The only time the *_ext tables should be absent is in the synthetic datasets.
 if [[ "$tables" == *"_ext" ]]; then
     # Set participant counts for Condition domain
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
