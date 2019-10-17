@@ -88,7 +88,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
             Edit
           </MenuItem>
         </TooltipTrigger>
-        <TooltipTrigger content={<div data-test-id="workspace-share-disabled-tooltip">Requires Owner Permission</div>}
+        <TooltipTrigger content={<div data-test-id='workspace-share-disabled-tooltip'>Requires Owner Permission</div>}
                         disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
           <MenuItem icon='pencil' onClick={onShare} disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
             Share
