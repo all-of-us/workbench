@@ -637,7 +637,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
           <div style={styles.description}>
             {cohort.description}
           </div>
-          {!loading && <DataTable
+          <DataTable
             style={styles.table}
             value={data}
             first={start}
@@ -657,7 +657,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             scrollHeight='calc(100vh - 350px)'
             footer={this.errorMessage()}>
             {columns}
-          </DataTable>}
+          </DataTable>
         </React.Fragment>}
         {loading && <SpinnerOverlay />}
         <HelpSidebar location='reviewParticipants' />
