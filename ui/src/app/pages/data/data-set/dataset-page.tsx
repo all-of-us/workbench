@@ -217,14 +217,25 @@ interface DataDictionaryPopupProps {
 }
 
 const DataDictionaryPopup: React.FunctionComponent<DataDictionaryPopupProps> = ({dataDictionaryEntry, onClose}) => {
-  return <div>
-    <FlexRow style={{justifyContent: 'space-between'}}>
-      {dataDictionaryEntry ? <div>{dataDictionaryEntry.fieldName}</div>: <Spinner/>}
+  return <div style={{width: '10rem'}}>
+    <FlexRow style={{justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${colors.dark}`}}>
+      {dataDictionaryEntry ? <div>{dataDictionaryEntry.fieldName}</div> : null}
       <ClrIcon style={{
         color: colors.accent,
-        cursor: 'pointer'
-      }} shape='cross' onClick={() => onClose()} class='is-solid'/>
+        cursor: 'pointer',
+        size: '18px'
+      }} shape='times' onClick={() => onClose()} class='is-solid'/>
     </FlexRow>
+    {dataDictionaryEntry ? <FlexColumn style={{height: '4rem', overflowY: 'scroll'}}>
+      <div>Description</div>
+      <div>{dataDictionaryEntry.description}</div>
+      <div>Relevant OMOP Table</div>
+      <div>{dataDictionaryEntry.relevantOmopTable}</div>
+      <div>Type</div>
+      <div>{dataDictionaryEntry.fieldType}</div>
+      <div>Data Provenance</div>
+      <div>{dataDictionaryEntry.dataProvenance}{dataDictionaryEntry.dataProvenance.includes('PPI') ? `: ${dataDictionaryEntry.sourcePpiModule}` : null}</div>
+    </FlexColumn> : <Spinner/>}
   </div>;
 }
 
@@ -289,12 +300,13 @@ export class ValueListItem extends React.Component<
           {domainValue.value}</div>
       </FlexRow>
       <PopupTrigger
-        side='bottom'
+        side='bottom-left'
         closeOnClickOutside={false}
+        managedByParentComponent={true}
         content={
           this.state.showDataDictionaryEntry &&
           <DataDictionaryPopup dataDictionaryEntry={this.state.dataDictionaryEntry}
-                               onClose={() => {this.setState({showDataDictionaryEntry: false}); }}/>}>
+                               onClose={() => this.setState({showDataDictionaryEntry: false})}/>}>
         <Clickable onClick={() => this.showDataDictionaryEntry()}>
           <ClrIcon style={{
             color: colors.accent,
