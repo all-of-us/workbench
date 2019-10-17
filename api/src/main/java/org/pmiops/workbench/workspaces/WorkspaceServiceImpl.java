@@ -574,6 +574,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
+  @Transactional
   public UserRecentWorkspace updateRecentWorkspaces(
       Workspace workspace, long userId, Timestamp lastAccessDate) {
     Optional<UserRecentWorkspace> maybeRecentWorkspace =
