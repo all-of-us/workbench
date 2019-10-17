@@ -9,26 +9,13 @@ import {
 } from 'generated/fetch';
 
 export enum ResourceType {
-  NOTEBOOK = 'notebook',
-  COHORT = 'cohort',
-  COHORT_REVIEW = 'cohortReview',
-  CONCEPT_SET = 'conceptSet',
-  DATA_SET = 'dataset',
-  INVALID = 'invalid',
-  WORKSPACE = 'workspace'
-}
-
-const ResourceTypeDisplayNames = new Map()
-  .set(ResourceType.NOTEBOOK, 'Notebook')
-  .set(ResourceType.COHORT, 'Cohort')
-  .set(ResourceType.COHORT_REVIEW, 'Cohort Review')
-  .set(ResourceType.CONCEPT_SET, 'Concept Set')
-  .set(ResourceType.DATA_SET, 'Dataset')
-  .set(ResourceType.INVALID, 'Invalid')
-  .set(ResourceType.WORKSPACE, 'Workspace');
-
-export function getResourceTypeDisplayName(resourceType: ResourceType) {
-  return ResourceTypeDisplayNames.get(resourceType);
+  NOTEBOOK = 'Notebook',
+  COHORT = 'Cohort',
+  COHORT_REVIEW = 'Cohort Review',
+  CONCEPT_SET = 'Concept Set',
+  DATA_SET = 'Dataset',
+  INVALID = 'Invalid',
+  WORKSPACE = 'Workspace'
 }
 
 export function convertToResources(list: FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[]

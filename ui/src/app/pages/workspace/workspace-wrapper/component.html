@@ -18,7 +18,7 @@
                        [userRoles]="userRoles"
                        [userEmail]="username"></app-workspace-share>
   <app-confirm-delete-modal *ngIf="confirmDeleting"
-                            [resourceType]="'workspace'"
+                            [resourceType]="resourceType"
                             [resourceName]="workspace.name"
                             [receiveDelete]="receiveDelete"
                             [closeFunction]="closeConfirmDelete"></app-confirm-delete-modal>

@@ -9,7 +9,7 @@ import {ConceptSet, FileDetail, Workspace} from 'generated/fetch';
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { navigate } from 'app/utils/navigation';
-import {getResourceTypeDisplayName, ResourceType} from 'app/utils/resourceActions';
+import {ResourceType} from 'app/utils/resourceActions';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 enum RequestState { UNSENT, ERROR, SUCCESS }
@@ -82,10 +82,10 @@ class CopyModal extends React.Component<Props, State> {
       this.props.onCopy(response);
     }).catch((response) => {
       const errorMsg = response.status === 409 ?
-        `${getResourceTypeDisplayName(resourceType)} with the same ` +
+        `${resourceType} with the same ` +
         `name already exists in the targeted workspace.` :
         response.status === 404 ?
-          `${getResourceTypeDisplayName(resourceType)} not found in the ` +
+          `${resourceType} not found in the ` +
             `original workspace.` :
           'An error occurred while copying. Please try again.';
 
@@ -148,14 +148,14 @@ class CopyModal extends React.Component<Props, State> {
                 disabled={this.state.destination === null || this.state.loading}
                 onClick={() => this.save()}
                 data-test-id='copy-button'>
-          Copy {getResourceTypeDisplayName(resourceType)}
+          Copy {resourceType}
         </Button>
       );
     } else if (this.state.requestState === RequestState.SUCCESS) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
                 onClick={() => this.goToDestinationWorkspace()}>
-          Go to Copied {getResourceTypeDisplayName(resourceType)}
+          Go to Copied {resourceType}
         </Button>
       );
     }
@@ -190,7 +190,7 @@ class CopyModal extends React.Component<Props, State> {
       <div> Successfully copied
         <b style={boldStyle}> {fromResourceName} </b> to
         <b style={boldStyle}> {this.state.destination.name} </b>.
-        Do you want to view the copied {getResourceTypeDisplayName(resourceType)}?</div>
+        Do you want to view the copied {resourceType}?</div>
     );
   }
 }
