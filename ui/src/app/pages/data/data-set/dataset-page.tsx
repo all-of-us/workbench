@@ -219,7 +219,7 @@ interface DataDictionaryPopupProps {
 const DataDictionaryPopup: React.FunctionComponent<DataDictionaryPopupProps> = ({dataDictionaryEntry, onClose}) => {
   return <div>
     <FlexRow style={{justifyContent: 'space-between'}}>
-      {dataDictionaryEntry ? <div>{dataDictionaryEntry.name}</div>: <Spinner/>}
+      {dataDictionaryEntry ? <div>{dataDictionaryEntry.fieldName}</div>: <Spinner/>}
       <ClrIcon style={{
         color: colors.accent,
         cursor: 'pointer'
