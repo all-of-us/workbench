@@ -9,7 +9,7 @@ import {ConceptSet, FileDetail, Workspace} from 'generated/fetch';
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { navigate } from 'app/utils/navigation';
-import {ResourceType, ResourceTypeDisplayNames} from 'app/utils/resourceActions';
+import {getResourceTypeDisplayName, ResourceType} from 'app/utils/resourceActions';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 enum RequestState { UNSENT, ERROR, SUCCESS }
@@ -57,10 +57,6 @@ class CopyModal extends React.Component<Props, State> {
     };
   }
 
-  get resourceTypeDisplayName(): any {
-    return ResourceTypeDisplayNames.get(this.props.resourceType);
-  }
-
   componentDidMount() {
     workspacesApi().getWorkspaces()
       .then((response) => {
@@ -75,7 +71,7 @@ class CopyModal extends React.Component<Props, State> {
 
   save() {
     this.setState({ loading: true });
-    const {saveFunction} = this.props;
+    const {saveFunction, resourceType} = this.props;
 
     saveFunction({
       toWorkspaceName: this.state.destination.id,
@@ -86,10 +82,10 @@ class CopyModal extends React.Component<Props, State> {
       this.props.onCopy(response);
     }).catch((response) => {
       const errorMsg = response.status === 409 ?
-        `${this.resourceTypeDisplayName} with the same ` +
+        `${getResourceTypeDisplayName(resourceType)} with the same ` +
         `name already exists in the targeted workspace.` :
         response.status === 404 ?
-          `${this.resourceTypeDisplayName} not found in the ` +
+          `${getResourceTypeDisplayName(resourceType)} not found in the ` +
             `original workspace.` :
           'An error occurred while copying. Please try again.';
 
@@ -144,6 +140,7 @@ class CopyModal extends React.Component<Props, State> {
   }
 
   renderActionButton() {
+    const {resourceType} = this.props;
     if (this.state.requestState === RequestState.UNSENT ||
       this.state.requestState === RequestState.ERROR) {
       return (
@@ -151,14 +148,14 @@ class CopyModal extends React.Component<Props, State> {
                 disabled={this.state.destination === null || this.state.loading}
                 onClick={() => this.save()}
                 data-test-id='copy-button'>
-          Copy {this.resourceTypeDisplayName}
+          Copy {getResourceTypeDisplayName(resourceType)}
         </Button>
       );
     } else if (this.state.requestState === RequestState.SUCCESS) {
       return (
         <Button style={{ marginLeft: '0.5rem' }}
                 onClick={() => this.goToDestinationWorkspace()}>
-          Go to Copied {this.resourceTypeDisplayName}
+          Go to Copied {getResourceTypeDisplayName(resourceType)}
         </Button>
       );
     }
@@ -188,12 +185,12 @@ class CopyModal extends React.Component<Props, State> {
   }
 
   renderSuccessBody() {
-    const {fromResourceName} = this.props;
+    const {fromResourceName, resourceType} = this.props;
     return (
       <div> Successfully copied
         <b style={boldStyle}> {fromResourceName} </b> to
         <b style={boldStyle}> {this.state.destination.name} </b>.
-        Do you want to view the copied {this.resourceTypeDisplayName}?</div>
+        Do you want to view the copied {getResourceTypeDisplayName(resourceType)}?</div>
     );
   }
 }

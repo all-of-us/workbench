@@ -18,7 +18,7 @@ export enum ResourceType {
   WORKSPACE = 'workspace'
 }
 
-export const ResourceTypeDisplayNames = new Map()
+const ResourceTypeDisplayNames = new Map()
   .set(ResourceType.NOTEBOOK, 'Notebook')
   .set(ResourceType.COHORT, 'Cohort')
   .set(ResourceType.COHORT_REVIEW, 'Cohort Review')
@@ -26,6 +26,10 @@ export const ResourceTypeDisplayNames = new Map()
   .set(ResourceType.DATA_SET, 'Dataset')
   .set(ResourceType.INVALID, 'Invalid')
   .set(ResourceType.WORKSPACE, 'Workspace');
+
+export function getResourceTypeDisplayName(resourceType: ResourceType) {
+  return ResourceTypeDisplayNames.get(resourceType);
+}
 
 export function convertToResources(list: FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[]
   | DataSet[], workspaceNamespace: string, workspaceId: string,

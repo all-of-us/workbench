@@ -9,7 +9,7 @@ import {TextModal} from 'app/components/text-modal';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {navigate, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
-import {ResourceType, ResourceTypeDisplayNames} from 'app/utils/resourceActions';
+import {getResourceTypeDisplayName, ResourceType} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {CopyModal} from 'app/components/copy-modal';
@@ -129,10 +129,6 @@ export class ResourceCard extends React.Component<Props, State> {
     } else {
       return ResourceType.INVALID;
     }
-  }
-
-  get resourceTypeDisplayName(): string {
-    return ResourceTypeDisplayNames.get(this.resourceType);
   }
 
   get isCohortReview(): boolean {
@@ -433,7 +429,7 @@ export class ResourceCard extends React.Component<Props, State> {
             Last Modified: {this.displayDate}</div>
           <div style={{...styles.resourceType, ...resourceTypeStyles[this.resourceType]}}
                data-test-id='card-type'>
-            {this.resourceTypeDisplayName}</div>
+            {getResourceTypeDisplayName(this.resourceType)}</div>
         </div>
       </ResourceCardBase>
 
@@ -487,14 +483,14 @@ export class ResourceCard extends React.Component<Props, State> {
         <ModalTitle>WARNING</ModalTitle>
         <ModalBody>
           <div style={{paddingBottom: '1rem'}}>
-            The {this.resourceTypeDisplayName} <b>{fp.startCase(this.displayName)}&nbsp;</b>
+            The {getResourceTypeDisplayName(this.resourceType)} <b>{fp.startCase(this.displayName)}&nbsp;</b>
             is referenced by the following datasets:
             <b>
               &nbsp;
               {fp.join(', ' ,
                 this.state.dataSetByResourceIdList.map((data) => data.name))}
             </b>.
-            Deleting the {this.resourceTypeDisplayName}
+            Deleting the {getResourceTypeDisplayName(this.resourceType)}
             <b>{fp.startCase(this.displayName)} </b> will make these datasets unavailable for use.
             Are you sure you want to delete <b>{fp.startCase(this.displayName)}</b> ?
           </div>
