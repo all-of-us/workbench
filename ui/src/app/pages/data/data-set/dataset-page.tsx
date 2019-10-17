@@ -57,7 +57,7 @@ export const styles = {
     fontSize: '16px',
     color: colors.primary,
     textTransform: 'uppercase'
-  },
+  } as React.CSSProperties,
   dataDictionarySubheader: {
     fontSize: '13px',
     fontWeight: 600,
