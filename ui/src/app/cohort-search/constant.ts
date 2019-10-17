@@ -155,4 +155,4 @@ export const ENCOUNTERS_MAP = {
   '9201': 'Inpatient Visit',
   '9202': 'Outpatient Visit',
   '9203': 'Emergency Room Visit',
-}
+};
