@@ -4,8 +4,10 @@ import com.google.cloud.bigquery.QueryJobConfiguration;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.pmiops.workbench.db.model.DataSet;
-import org.pmiops.workbench.db.model.DataSetValues;
+import org.pmiops.workbench.db.model.DataSetValue;
+import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
@@ -20,7 +22,7 @@ public interface DataSetService {
       long workspaceId,
       List<Long> cohortIdList,
       List<Long> conceptIdList,
-      List<DataSetValues> values,
+      List<DataSetValue> values,
       PrePackagedConceptSetEnum prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime);
@@ -31,5 +33,11 @@ public interface DataSetService {
   List<String> generateCodeCells(
       KernelTypeEnum kernelTypeEnum,
       String dataSetName,
+      String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);
+
+  DataSet cloneDataSetToWorkspace(
+      DataSet fromDataSet, Workspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds);
+
+  List<DataSet> getDataSets(Workspace workspace);
 }

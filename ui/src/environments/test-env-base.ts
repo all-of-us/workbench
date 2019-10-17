@@ -16,5 +16,6 @@ export const testEnvironmentBase = {
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
   enableHomepageRestyle: true,
-  enableProfileCapsFeatures: true
+  enableProfileCapsFeatures: true,
+  enableAccountPages: true
 };

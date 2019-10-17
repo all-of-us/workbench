@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import {Button, Clickable} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ResourceCardMenu} from 'app/components/resources';
 import {TextModal} from 'app/components/text-modal';
 import colors from 'app/styles/colors';
@@ -75,7 +76,7 @@ const resourceTypeStyles = reactStyles({
   conceptSet: {
     backgroundColor: colors.resourceCardHighlights.conceptSet
   },
-  dataSet: {
+  dataset: {
     backgroundColor: colors.resourceCardHighlights.dataSet
   }
 });
@@ -401,8 +402,8 @@ export class ResourceCard extends React.Component<Props, State> {
       }
       <ResourceCardBase style={styles.card}
                         data-test-id='card'>
-        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
-          <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
+        <FlexColumn style={{alignItems: 'flex-start'}}>
+          <FlexRow style={{alignItems: 'flex-start'}}>
             <ResourceCardMenu resourceType={this.resourceType}
                               onCopyConceptSet={() => this.setState({copyingConceptSet: true})}
                               canDelete={this.ownerPermission}
@@ -420,9 +421,9 @@ export class ResourceCard extends React.Component<Props, State> {
                  }}>{this.displayName}
               </a>
             </Clickable>
-          </div>
+          </FlexRow>
           <div style={styles.cardDescription}>{this.description}</div>
-        </div>
+        </FlexColumn>
         <div style={styles.cardFooter}>
           <div style={styles.lastModified} data-test-id='last-modified'>
             Last Modified: {this.displayDate}</div>
@@ -463,7 +464,7 @@ export class ResourceCard extends React.Component<Props, State> {
       {this.state.renaming && this.isDataSet &&
         <RenameModal
           onRename={(newName, newDescription) => this.receiveDataSetRename(newName, newDescription)}
-          type='Data Set'
+          type='Dataset'
           onCancel={() => this.cancelRename()}
           oldDescription ={this.props.resourceCard.dataSet.description}
           oldName={this.props.resourceCard.dataSet.name}
@@ -483,14 +484,14 @@ export class ResourceCard extends React.Component<Props, State> {
         <ModalBody>
           <div style={{paddingBottom: '1rem'}}>
             The {this.resourceType} <b>{fp.startCase(this.displayName)}&nbsp;</b>
-            is referenced by the following Data Sets:
+            is referenced by the following datasets:
             <b>
               &nbsp;
               {fp.join(', ' ,
                 this.state.dataSetByResourceIdList.map((data) => data.name))}
             </b>.
             Deleting the {this.resourceType} <b>{fp.startCase(this.displayName)} </b>
-            will make these Data Sets unavailable for use. Are you sure you want to delete
+            will make these datasets unavailable for use. Are you sure you want to delete
             <b>{fp.startCase(this.displayName)}</b> ?
           </div>
           <div style={{float: 'right'}}>

@@ -39,10 +39,17 @@ public class BigQueryService {
   private static final Logger logger = Logger.getLogger(BigQueryService.class.getName());
 
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @Autowired private BigQuery defaultBigQuery;
 
   @VisibleForTesting
   protected BigQuery getBigQueryService() {
     CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    if (cdrVersion == null) {
+      return defaultBigQuery;
+    }
+    // If a query is being executed in the context of a CDR, it must be run within that project as
+    // well. By default, the query would run in the Workbench App Engine project, which would
+    // violate VPC-SC restrictions.
     return BigQueryOptions.newBuilder()
         .setProjectId(cdrVersion.getBigqueryProject())
         .build()
@@ -73,7 +80,7 @@ public class BigQueryService {
         throw new ServerUnavailableException(
             "BigQuery was temporarily unavailable, try again later", e);
       } else if (e.getCode() == HttpServletResponse.SC_FORBIDDEN) {
-        throw new ForbiddenException("Access to the CDR is denied", e);
+        throw new ForbiddenException("BigQuery access denied", e);
       } else {
         throw new ServerErrorException(
             String.format(

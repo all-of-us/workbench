@@ -35,6 +35,7 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -59,7 +60,6 @@ import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.PageFilterRequest;
-import org.pmiops.workbench.model.PageRequest;
 import org.pmiops.workbench.model.ParticipantChartData;
 import org.pmiops.workbench.model.ParticipantChartDataListResponse;
 import org.pmiops.workbench.model.ParticipantData;
@@ -73,7 +73,6 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
-import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -92,7 +91,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @TestConfiguration
   @Import({
     WorkspaceServiceImpl.class,
-    WorkspaceMapper.class,
     CohortReviewServiceImpl.class,
     CohortReviewController.class,
     BigQueryTestService.class,
@@ -105,7 +103,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     FireCloudService.class,
     UserRecentResourceService.class,
     CohortFactory.class,
-    ConceptSetService.class
+    ConceptSetService.class,
+    DataSetService.class
   })
   static class Configuration {
     @Bean
@@ -144,6 +143,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Autowired private CohortDao cohortDao;
 
   @Autowired private CohortReviewDao cohortReviewDao;
+
+  @Autowired private DataSetService dataSetService;
 
   @Autowired private WorkspaceDao workspaceDao;
 
@@ -395,9 +396,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getParticipantConditionsSorting() throws Exception {
-    PageRequest expectedPageRequest =
-        new PageRequest().page(0).pageSize(25).sortOrder(SortOrder.ASC).sortColumn("startDate");
-
     PageFilterRequest testFilter = new PageFilterRequest().domain(DomainType.CONDITION);
 
     // no sort order or column
@@ -407,33 +405,21 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
-    assertResponse(
-        response,
-        expectedPageRequest,
-        Arrays.asList(expectedCondition1(), expectedCondition2()),
-        2);
+    assertResponse(response, Arrays.asList(expectedCondition1(), expectedCondition2()), 2);
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
-    expectedPageRequest.sortOrder(SortOrder.DESC);
     response =
         controller
             .getParticipantData(
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
-    assertResponse(
-        response,
-        expectedPageRequest,
-        Arrays.asList(expectedCondition2(), expectedCondition1()),
-        2);
+    assertResponse(response, Arrays.asList(expectedCondition2(), expectedCondition1()), 2);
   }
 
   @Test
   public void getParticipantConditionsPagination() throws Exception {
-    PageRequest expectedPageRequest =
-        new PageRequest().page(0).pageSize(1).sortOrder(SortOrder.ASC).sortColumn("startDate");
-
     stubMockFirecloudGetWorkspace();
 
     PageFilterRequest testFilter =
@@ -446,24 +432,20 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition1()), 2);
+    assertResponse(response, Arrays.asList(expectedCondition1()), 2);
 
     // page 2 should have 1 item
     testFilter.page(1);
-    expectedPageRequest.page(1);
     response =
         controller
             .getParticipantData(
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedCondition2()), 2);
+    assertResponse(response, Arrays.asList(expectedCondition2()), 2);
   }
 
   @Test
   public void getParticipantAllEventsPagination() throws Exception {
-    PageRequest expectedPageRequest =
-        new PageRequest().page(0).pageSize(1).sortOrder(SortOrder.ASC).sortColumn("startDate");
-
     PageFilterRequest testFilter =
         new PageFilterRequest().domain(DomainType.ALL_EVENTS).page(0).pageSize(1);
 
@@ -474,25 +456,21 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedAllEvents1()), 2);
+    assertResponse(response, Arrays.asList(expectedAllEvents1()), 2);
 
     // page 2 should have 1 item
     testFilter.page(1);
-    expectedPageRequest.page(1);
     response =
         controller
             .getParticipantData(
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
-    assertResponse(response, expectedPageRequest, Arrays.asList(expectedAllEvents2()), 2);
+    assertResponse(response, Arrays.asList(expectedAllEvents2()), 2);
   }
 
   @Test
   public void getParticipantAllEventsSorting() throws Exception {
-    PageRequest expectedPageRequest =
-        new PageRequest().page(0).pageSize(25).sortOrder(SortOrder.ASC).sortColumn("startDate");
-
     PageFilterRequest testFilter = new PageFilterRequest().domain(DomainType.ALL_EVENTS);
 
     // no sort order or column
@@ -502,26 +480,17 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
-    assertResponse(
-        response,
-        expectedPageRequest,
-        Arrays.asList(expectedAllEvents1(), expectedAllEvents2()),
-        2);
+    assertResponse(response, Arrays.asList(expectedAllEvents1(), expectedAllEvents2()), 2);
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
-    expectedPageRequest.sortOrder(SortOrder.DESC);
     response =
         controller
             .getParticipantData(
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
-    assertResponse(
-        response,
-        expectedPageRequest,
-        Arrays.asList(expectedAllEvents2(), expectedAllEvents1()),
-        2);
+    assertResponse(response, Arrays.asList(expectedAllEvents2(), expectedAllEvents1()), 2);
   }
 
   @Test
@@ -551,13 +520,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .standardName("SNOMED")
             .standardVocabulary("SNOMED")
             .startDate("2008-08-01");
-    ParticipantChartData expectedData3 =
-        new ParticipantChartData()
-            .ageAtEvent(21)
-            .rank(1)
-            .standardName("name")
-            .standardVocabulary("CPT4")
-            .startDate("2001-12-03");
     assertThat(response.getItems().size()).isEqualTo(2);
     assertThat(expectedData1).isIn(response.getItems());
     assertThat(expectedData2).isIn(response.getItems());
@@ -700,13 +662,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   private void assertResponse(
-      ParticipantDataListResponse response,
-      PageRequest expectedPageRequest,
-      List<ParticipantData> expectedData,
-      int totalCount) {
+      ParticipantDataListResponse response, List<ParticipantData> expectedData, int totalCount) {
     List<ParticipantData> data = response.getItems();
     assertThat(response.getCount()).isEqualTo(totalCount);
-    assertThat(response.getPageRequest()).isEqualTo(expectedPageRequest);
     assertThat(data.size()).isEqualTo(expectedData.size());
     int i = 0;
     for (ParticipantData actualData : data) {

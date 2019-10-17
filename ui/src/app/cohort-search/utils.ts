@@ -1,3 +1,4 @@
+import {TitleCasePipe} from '@angular/common';
 import {
   CriteriaSubType,
   CriteriaType,
@@ -32,7 +33,11 @@ export function nameDisplay(parameter): string {
   if (parameter.type === CriteriaType.AGE || parameter.type === CriteriaType.DECEASED) {
     return '';
   } else {
-    return stripHtml(parameter.name);
+    let name = stripHtml(parameter.name);
+    if (parameter.type === CriteriaType.ETHNICITY || parameter.type === CriteriaType.RACE) {
+      name = new TitleCasePipe().transform(name);
+    }
+    return name;
   }
 }
 
@@ -257,7 +262,7 @@ export function parseCohortDefinition(json: string) {
 
 export function mapRequest(sr: any) {
   const grpFilter = (role: string) => sr[role].reduce((acc, grp) => {
-    if (grp.status === 'active') {
+    if (grp.status === 'active' && hasActiveItems(grp)) {
       acc.push(mapGroup(grp));
     }
     return acc;
@@ -318,6 +323,27 @@ export function mapParameter(sp: any) {
     param.value = code;
   }
   return param;
+}
+
+export function hasActiveItems(group: any) {
+  return group.items.some(it => it.status === 'active');
+}
+
+export function getTypeAndStandard(searchParameters: Array<any>, type: DomainType) {
+  switch (type) {
+    case DomainType.PERSON:
+      const _type = searchParameters[0].type === CriteriaType.DECEASED
+        ? CriteriaType.AGE : searchParameters[0].type;
+      return {type: _type, standard: false};
+    case DomainType.PHYSICALMEASUREMENT:
+      return {type: searchParameters[0].type, standard: false};
+    case DomainType.SURVEY:
+      return {type: searchParameters[0].type, standard: false};
+    case DomainType.VISIT:
+      return {type: searchParameters[0].type, standard: true};
+    default:
+      return {type: null, standard: null};
+  }
 }
 
 export function sanitizeNumericalInput(input: string) {

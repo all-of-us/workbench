@@ -181,6 +181,7 @@ buildscript {    // Configuration for building
     OPENCENSUS_VERSION = '0.23.0'
     HIBERNATE_VERSION = '5.2.10.Final'
     SPRINGFOX_VERSION = '2.6.1'
+    KOTLIN_VERSION = '1.3.50'
   }
 
   repositories {
@@ -194,14 +195,18 @@ buildscript {    // Configuration for building
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
     classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.12.0'
     classpath 'io.swagger:swagger-codegen:2.2.3'
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VERSION"
+    classpath "org.jetbrains.kotlin:kotlin-noarg:$KOTLIN_VERSION"
     classpath 'org.owasp:dependency-check-gradle:5.1.0'
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
+    classpath 'net.ltgt.gradle:gradle-apt-plugin:0.21'
   }
 }
 
 ext['hibernate.version'] = HIBERNATE_VERSION
 
 apply plugin: 'java'
+apply plugin: 'kotlin'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'war'
@@ -210,6 +215,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'org.hidetake.swagger.generator'
 apply plugin: 'org.owasp.dependencycheck'
 apply plugin: 'com.diffplug.gradle.spotless'
+apply plugin: 'net.ltgt.apt-idea'
 
 spotless {
   java {
@@ -220,6 +226,10 @@ spotless {
       exclude 'src/generated/**'
       exclude 'build/**'
     }
+  }
+
+  kotlin {
+    ktlint()
   }
 }
 
@@ -311,6 +321,10 @@ repositories {   // repositories for Jar's you access in your code
   jcenter()
 }
 
+ext {
+  mapstructVersion = '1.3.1.Final'
+}
+
 dependencies {
 
   // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
@@ -348,6 +362,8 @@ dependencies {
   compile "com.fasterxml.jackson.core:jackson-annotations:${JACKSON_VERSION}"
   compile "com.fasterxml.jackson.core:jackson-core:${JACKSON_VERSION}"
   compile "com.fasterxml.jackson.core:jackson-databind:${JACKSON_VERSION}"
+  compile "com.fasterxml.jackson.module:jackson-module-kotlin:${JACKSON_VERSION}"
+  compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${JACKSON_VERSION}"
 
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev20190806-1.30.3'
   compile 'com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0'
@@ -373,6 +389,10 @@ dependencies {
   compile 'com.github.rholder:guava-retrying:2.0.0'
   compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
 
+  implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+  annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+  testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
   // Elasticsearch client
   compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:${ELASTICSEARCH_VERSION}"
   compile "org.elasticsearch:elasticsearch:${ELASTICSEARCH_VERSION}"
@@ -381,7 +401,7 @@ dependencies {
   compile 'org.json:json:20160810'
 
   compile 'com.github.fge:json-patch:1.9'
-
+  compile 'com.google.cloud:google-cloud-logging:1.90.0'
   toolsCompile 'commons-cli:commons-cli:1.4'
 
   testCompile 'junit:junit:4.12'
@@ -405,6 +425,7 @@ dependencies {
   generatedCompile "com.google.code.gson:gson:${GSON_VERSION}"
   generatedCompile "joda-time:joda-time:${JODA_VERSION}"
   generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:${JACKSON_VERSION}"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${KOTLIN_VERSION}"
 }
 
 swaggerSources {
@@ -636,5 +657,25 @@ task updateCdrVersions(type: JavaExec) {
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
+  }
+}
+
+task loadDataDictionary(type: JavaExec) {
+  classpath sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.LoadDataDictionary"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+compileKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+}
+compileTestKotlin {
+  kotlinOptions {
+    jvmTarget = "1.8"
   }
 }

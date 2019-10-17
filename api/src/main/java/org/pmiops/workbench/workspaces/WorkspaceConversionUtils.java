@@ -3,19 +3,22 @@ package org.pmiops.workbench.workspaces;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.springframework.stereotype.Service;
 
-@Service
-public class WorkspaceMapper {
+public class WorkspaceConversionUtils {
 
-  public WorkspaceAccessLevel toApiWorkspaceAccessLevel(String firecloudAccessLevel) {
+  public static WorkspaceAccessLevel toApiWorkspaceAccessLevel(String firecloudAccessLevel) {
     if (firecloudAccessLevel.equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
       return WorkspaceAccessLevel.OWNER;
     } else {
@@ -23,7 +26,7 @@ public class WorkspaceMapper {
     }
   }
 
-  public Workspace toApiWorkspace(org.pmiops.workbench.db.model.Workspace workspace) {
+  public static Workspace toApiWorkspace(org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
 
@@ -48,7 +51,7 @@ public class WorkspaceMapper {
     return result;
   }
 
-  public Workspace toApiWorkspace(
+  public static Workspace toApiWorkspace(
       org.pmiops.workbench.db.model.Workspace workspace,
       org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
@@ -78,7 +81,7 @@ public class WorkspaceMapper {
     return result;
   }
 
-  public org.pmiops.workbench.db.model.Workspace toDbWorkspace(Workspace workspace) {
+  public static org.pmiops.workbench.db.model.Workspace toDbWorkspace(Workspace workspace) {
     org.pmiops.workbench.db.model.Workspace result = new org.pmiops.workbench.db.model.Workspace();
 
     if (workspace.getDataAccessLevel() != null) {
@@ -99,7 +102,7 @@ public class WorkspaceMapper {
     return result;
   }
 
-  public UserRole toApiUserRole(
+  public static UserRole toApiUserRole(
       org.pmiops.workbench.db.model.User user, WorkspaceAccessEntry aclEntry) {
     UserRole result = new UserRole();
     result.setEmail(user.getEmail());
@@ -138,7 +141,7 @@ public class WorkspaceMapper {
     dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
   }
 
-  private final ResearchPurpose createResearchPurpose(
+  private static ResearchPurpose createResearchPurpose(
       org.pmiops.workbench.db.model.Workspace workspace) {
     ResearchPurpose researchPurpose =
         new ResearchPurpose()
@@ -166,5 +169,29 @@ public class WorkspaceMapper {
       researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
     }
     return researchPurpose;
+  }
+
+  public static RecentWorkspace buildRecentWorkspace(
+      UserRecentWorkspace userRecentWorkspace,
+      org.pmiops.workbench.db.model.Workspace dbWorkspace,
+      WorkspaceAccessLevel accessLevel) {
+    return new RecentWorkspace()
+        .workspace(toApiWorkspace(dbWorkspace))
+        .accessedTime(userRecentWorkspace.getLastAccessDate().toString())
+        .accessLevel(accessLevel);
+  }
+
+  public static List<RecentWorkspace> buildRecentWorkspaceList(
+      List<UserRecentWorkspace> userRecentWorkspaces,
+      Map<Long, org.pmiops.workbench.db.model.Workspace> dbWorkspacesByWorkspaceId,
+      Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsByWorkspaceId) {
+    return userRecentWorkspaces.stream()
+        .map(
+            userRecentWorkspace ->
+                buildRecentWorkspace(
+                    userRecentWorkspace,
+                    dbWorkspacesByWorkspaceId.get(userRecentWorkspace.getWorkspaceId()),
+                    workspaceAccessLevelsByWorkspaceId.get(userRecentWorkspace.getWorkspaceId())))
+        .collect(Collectors.toList());
   }
 }

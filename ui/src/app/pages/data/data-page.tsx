@@ -67,14 +67,14 @@ const styles = {
 
 enum Tabs {
   SHOWALL = 'SHOW ALL',
-  DATASETS = 'DATA SETS',
+  DATASETS = 'DATASETS',
   COHORTS = 'COHORTS',
   COHORTREVIEWS = 'COHORT REVIEWS',
   CONCEPTSETS = 'CONCEPT SETS'
 }
 
 const descriptions = {
-  datasets: `A data set is a table containing data about a Cohort that can
+  datasets: `A dataset is a table containing data about a Cohort that can
   be exported for analysis. `,
   cohorts: `A cohort is a group of participants based on specific criteria.`,
 };
@@ -224,7 +224,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
             </CardButton>
           </TooltipTrigger>
           <TooltipTrigger content={!writePermission &&
-          `Write permission required to create data sets`} side='top'>
+          `Write permission required to create datasets`} side='top'>
             <CardButton
               style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
               disabled={!writePermission}
@@ -232,7 +232,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
                 navigate(['workspaces', namespace, id, 'data', 'data-sets']);
               }}>
               <div style={styles.cardHeader}>
-                <h2 style={styles.cardHeaderText(!writePermission)}>Data Sets</h2>
+                <h2 style={styles.cardHeaderText(!writePermission)}>Datasets</h2>
                 <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
               </div>
               <div style={styles.cardText}>

@@ -4,6 +4,7 @@ import {
   DataSetCodeResponse,
   DataSetExportRequest,
   DataSetListResponse,
+  DataSetPreviewRequest,
   DataSetPreviewResponse,
   DataSetRequest,
   EmptyResponse,
@@ -15,8 +16,8 @@ export class DataSetApiStub extends DataSetApi {
     return [
       {
         id: 0,
-        name: 'Stub Data Set',
-        description: 'Stub Data Set',
+        name: 'Stub Dataset',
+        description: 'Stub Dataset',
         includesAllParticipants: false,
         workspaceId: 0,
         lastModifiedTime: 10000,
@@ -56,11 +57,13 @@ export class DataSetApiStub extends DataSetApi {
     });
   }
 
-  previewQuery(workspaceNamespace: string,
-    workspaceId: string, dataSet: DataSetRequest): Promise<DataSetPreviewResponse> {
+  previewDataSetByDomain(workspaceNamespace: string,
+    workspaceId: string, dataSetPreviewRequest: DataSetPreviewRequest): Promise<DataSetPreviewResponse> {
     return Promise.resolve({
-      domainValue: [
-        {domain: 'CONDITION', values: [{value: 'Value1'}, {value: 'Value2'}]}
+      domain: dataSetPreviewRequest.domain,
+      values: [
+        {value: 'Value1', queryValue: ['blah']},
+        {value: 'Value2', queryValue: ['blah2']}
       ]
     });
   }

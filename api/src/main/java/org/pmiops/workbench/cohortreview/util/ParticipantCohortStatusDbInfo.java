@@ -1,10 +1,10 @@
 package org.pmiops.workbench.cohortreview.util;
 
 import java.sql.Date;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Filter;
@@ -14,36 +14,30 @@ import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 public enum ParticipantCohortStatusDbInfo {
-  PARTICIPANT_ID(
-      FilterColumns.PARTICIPANTID.name(),
-      "participant_id",
-      ParticipantCohortStatusDbInfo::buildLongSql),
-  STATUS(FilterColumns.STATUS.name(), "status", ParticipantCohortStatusDbInfo::buildLongSql),
-  GENDER(
-      FilterColumns.GENDER.name(),
-      "gender_concept_id",
-      ParticipantCohortStatusDbInfo::buildLongSql),
-  BIRTH_DATE(
-      FilterColumns.BIRTHDATE.name(), "birth_date", ParticipantCohortStatusDbInfo::buildDateSql),
-  RACE(FilterColumns.RACE.name(), "race_concept_id", ParticipantCohortStatusDbInfo::buildLongSql),
-  ETHNICITY(
-      FilterColumns.ETHNICITY.name(),
-      "ethnicity_concept_id",
-      ParticipantCohortStatusDbInfo::buildLongSql),
-  DECEASED(FilterColumns.DECEASED.name(), "deceased", ParticipantCohortStatusDbInfo::buildLongSql);
+  PARTICIPANT_ID(FilterColumns.PARTICIPANTID, "participant_id", Long::new),
+  STATUS(FilterColumns.STATUS, "status", ParticipantCohortStatusDbInfo::parseShort),
+  GENDER(FilterColumns.GENDER, "gender_concept_id", Long::new),
+  BIRTH_DATE(FilterColumns.BIRTHDATE, "birth_date", ParticipantCohortStatusDbInfo::parseDate),
+  RACE(FilterColumns.RACE, "race_concept_id", Long::new),
+  ETHNICITY(FilterColumns.ETHNICITY, "ethnicity_concept_id", Long::new),
+  DECEASED(FilterColumns.DECEASED, "deceased", Long::new);
 
-  private final String name;
+  private final FilterColumns name;
   private final String dbName;
-  private final BiFunction<Filter, MapSqlParameterSource, String> function;
+  private final Function<String, Object> function;
+  private static final String DEFAULT_SQL = "%s %s :%s\n";
+  private static final String IN_SQL = "%s %s (:%s)\n";
+  private static final String BETWEEN_SQL = "%s %s :%s and :%s\n";
+  private static final String LIKE_SQL = DEFAULT_SQL;
 
-  private ParticipantCohortStatusDbInfo(
-      String name, String dbName, BiFunction<Filter, MapSqlParameterSource, String> function) {
+  ParticipantCohortStatusDbInfo(
+      FilterColumns name, String dbName, Function<String, Object> function) {
     this.name = name;
     this.dbName = dbName;
     this.function = function;
   }
 
-  public String getName() {
+  public FilterColumns getName() {
     return this.name;
   }
 
@@ -51,39 +45,83 @@ public enum ParticipantCohortStatusDbInfo {
     return this.dbName;
   }
 
-  public BiFunction<Filter, MapSqlParameterSource, String> getFunction() {
+  public Function<String, Object> getFunction() {
     return function;
   }
 
-  public static ParticipantCohortStatusDbInfo fromName(String name) {
+  public static Object applyFunction(String name, String value) {
     for (ParticipantCohortStatusDbInfo column : values()) {
-      if (column.name.equals(name)) {
-        return column;
+      if (column.name.equals(FilterColumns.fromValue(name))) {
+        return column.function.apply(value);
       }
     }
     return null;
   }
 
-  private static String buildLongSql(Filter filter, MapSqlParameterSource parameters) {
+  public static String getDbName(String name) {
+    for (ParticipantCohortStatusDbInfo column : values()) {
+      if (column.name.equals(FilterColumns.fromValue(name))) {
+        return column.dbName;
+      }
+    }
+    return null;
+  }
+
+  public static String buildSql(Filter filter, MapSqlParameterSource parameters) {
+    String filterSql;
+    String name = filter.getProperty().name();
     validateFilterSize(filter);
     try {
-      if (filter.getOperator().equals(Operator.IN)) {
-        parameters.addValue(
-            filter.getProperty().toString(),
-            filter.getValues().stream()
-                .map(
-                    v ->
-                        filter.getProperty().name().equals(STATUS.getName())
-                            ? new Long(CohortStatus.valueOf(v).ordinal())
-                            : new Long(v))
-                .collect(Collectors.toList()));
-      } else {
-        String wildcard = (filter.getOperator().equals(Operator.LIKE) ? "%" : "");
-        parameters.addValue(
-            filter.getProperty().toString(),
-            filter.getProperty().name().equals(STATUS.getName())
-                ? new Long(CohortStatus.valueOf(filter.getValues().get(0)).ordinal()) + wildcard
-                : new Long(filter.getValues().get(0)) + wildcard);
+      switch (filter.getOperator()) {
+        case IN:
+          filterSql =
+              String.format(
+                  IN_SQL,
+                  getDbName(filter.getProperty().name()),
+                  OperatorUtils.getSqlOperator(filter.getOperator()),
+                  filter.getProperty().toString());
+          parameters.addValue(
+              filter.getProperty().toString(),
+              filter.getValues().stream()
+                  .map(v -> applyFunction(name, v))
+                  .collect(Collectors.toList()));
+          break;
+        case LIKE:
+          filterSql =
+              String.format(
+                  LIKE_SQL,
+                  getDbName(filter.getProperty().name()),
+                  OperatorUtils.getSqlOperator(filter.getOperator()),
+                  filter.getProperty().toString());
+          parameters.addValue(
+              filter.getProperty().toString(),
+              applyFunction(name, filter.getValues().get(0)) + "%");
+          break;
+        case BETWEEN:
+          filterSql =
+              String.format(
+                  BETWEEN_SQL,
+                  getDbName(filter.getProperty().name()),
+                  OperatorUtils.getSqlOperator(filter.getOperator()),
+                  filter.getProperty().toString() + "1",
+                  filter.getProperty().toString() + "2");
+          parameters.addValue(
+              filter.getProperty().toString() + "1",
+              applyFunction(name, filter.getValues().get(0)));
+          parameters.addValue(
+              filter.getProperty().toString() + "2",
+              applyFunction(name, filter.getValues().get(1)));
+          break;
+        default:
+          filterSql =
+              String.format(
+                  DEFAULT_SQL,
+                  getDbName(filter.getProperty().name()),
+                  OperatorUtils.getSqlOperator(filter.getOperator()),
+                  filter.getProperty().toString());
+          parameters.addValue(
+              filter.getProperty().toString(), applyFunction(name, filter.getValues().get(0)));
+          break;
       }
     } catch (Exception ex) {
       throw new BadRequestException(
@@ -91,74 +129,8 @@ public enum ParticipantCohortStatusDbInfo {
               "Bad Request: Problems parsing %s: " + ex.getMessage(),
               filter.getProperty().toString()));
     }
-    return buildSqlString(filter);
-  }
 
-  private static String buildStringSql(Filter filter, MapSqlParameterSource parameters) {
-    validateFilterSize(filter);
-    try {
-      if (filter.getOperator().equals(Operator.IN)) {
-        parameters.addValue(
-            filter.getProperty().toString(),
-            filter.getValues().stream().map(v -> new String(v)).collect(Collectors.toList()));
-      } else {
-        String wildcard = (filter.getOperator().equals(Operator.LIKE) ? "%" : "");
-        parameters.addValue(filter.getProperty().toString(), filter.getValues().get(0) + wildcard);
-      }
-    } catch (Exception ex) {
-      throw new BadRequestException(
-          String.format(
-              "Bad Request: Problems parsing %s: " + ex.getMessage(),
-              filter.getProperty().toString()));
-    }
-    return buildSqlString(filter);
-  }
-
-  private static String buildDateSql(Filter filter, MapSqlParameterSource parameters) {
-    validateFilterSize(filter);
-    if (filter.getOperator().equals(Operator.IN)) {
-      parameters.addValue(
-          filter.getProperty().toString(),
-          filter.getValues().stream()
-              .map(v -> parseDate(filter.getProperty().toString(), v))
-              .collect(Collectors.toList()));
-    } else {
-      if (filter.getOperator().equals(Operator.EQUAL)) {
-        parameters.addValue(
-            filter.getProperty().toString(),
-            parseDate(filter.getProperty().toString(), filter.getValues().get(0)));
-      } else {
-        parameters.addValue(filter.getProperty().toString(), filter.getValues().get(0) + "%");
-      }
-    }
-    return buildSqlString(filter);
-  }
-
-  private static String buildSqlString(Filter filter) {
-    if (filter.getProperty().equals(FilterColumns.BIRTHDATE)
-        && filter.getOperator().equals(Operator.LIKE)) {
-      return "cast("
-          + fromName(filter.getProperty().name()).getDbName()
-          + " as char)"
-          + " "
-          + OperatorUtils.getSqlOperator(filter.getOperator())
-          + " :"
-          + filter.getProperty().toString()
-          + "\n";
-    } else if (filter.getOperator().equals(Operator.IN)) {
-      return fromName(filter.getProperty().name()).getDbName()
-          + " "
-          + OperatorUtils.getSqlOperator(filter.getOperator())
-          + " (:"
-          + filter.getProperty().toString()
-          + ")\n";
-    }
-    return fromName(filter.getProperty().name()).getDbName()
-        + " "
-        + OperatorUtils.getSqlOperator(filter.getOperator())
-        + " :"
-        + filter.getProperty().toString()
-        + "\n";
+    return filterSql;
   }
 
   private static void validateFilterSize(Filter filter) {
@@ -166,7 +138,15 @@ public enum ParticipantCohortStatusDbInfo {
       throw new BadRequestException(
           String.format("Bad Request: property %s is empty.", filter.getProperty().name()));
     }
-    if (!filter.getOperator().equals(Operator.IN) && filter.getValues().size() > 1) {
+    if (filter.getOperator().equals(Operator.BETWEEN) && filter.getValues().size() != 2) {
+      throw new BadRequestException(
+          String.format(
+              "Bad Request: property %s using operator %s must have 2 values.",
+              filter.getProperty().name(), filter.getOperator().name()));
+    }
+    if (!filter.getOperator().equals(Operator.IN)
+        && !filter.getOperator().equals(Operator.BETWEEN)
+        && filter.getValues().size() > 1) {
       throw new BadRequestException(
           String.format(
               "Bad Request: property %s using operator %s must have a single value.",
@@ -174,13 +154,15 @@ public enum ParticipantCohortStatusDbInfo {
     }
   }
 
-  private static Date parseDate(String property, String dateString) {
+  private static Object parseShort(String v) {
+    return StorageEnums.cohortStatusToStorage(CohortStatus.valueOf(v));
+  }
+
+  private static Object parseDate(String v) {
     try {
-      DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-      return new Date(df.parse(dateString).getTime());
+      return new Date(new SimpleDateFormat("yyyy-MM-dd").parse(v).getTime());
     } catch (Exception ex) {
-      throw new BadRequestException(
-          String.format("Bad Request: Problems parsing %s: " + ex.getMessage(), property));
+      throw new BadRequestException(String.format(ex.getMessage()));
     }
   }
 }

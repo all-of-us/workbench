@@ -10,6 +10,7 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.io.FileReader;
@@ -33,6 +34,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -47,10 +49,12 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl;
@@ -73,6 +77,7 @@ import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
+import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
@@ -89,7 +94,6 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.utils.TestMockFactory;
-import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -172,7 +176,11 @@ public class DataSetControllerTest {
 
   @Autowired ConceptSetDao conceptSetDao;
 
+  @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
+
   @Autowired DataSetDao dataSetDao;
+
+  @Mock DataSetMapper dataSetMapper;
 
   @Autowired DataSetService dataSetService;
 
@@ -196,7 +204,7 @@ public class DataSetControllerTest {
 
   @Autowired WorkspaceService workspaceService;
 
-  @Autowired WorkspaceMapper workspaceMapper;
+  @Autowired WorkspaceAuditAdapterService workspaceAuditAdapterService;
 
   @TestConfiguration
   @Import({
@@ -205,7 +213,6 @@ public class DataSetControllerTest {
     TestBigQueryCdrSchemaConfig.class,
     UserService.class,
     WorkspacesController.class,
-    WorkspaceMapper.class,
     WorkspaceServiceImpl.class
   })
   @MockBean({
@@ -220,11 +227,13 @@ public class DataSetControllerTest {
     ConceptBigQueryService.class,
     ConceptSetService.class,
     DataSetService.class,
+    DataSetMapper.class,
     FireCloudService.class,
     DirectoryService.class,
     NotebooksService.class,
     CohortQueryBuilder.class,
-    UserRecentResourceService.class
+    UserRecentResourceService.class,
+    WorkspaceAuditAdapterService.class
   })
   static class Configuration {
     @Bean
@@ -266,23 +275,26 @@ public class DataSetControllerTest {
             cohortQueryBuilder,
             dataSetDao);
     dataSetController =
-        new DataSetController(
-            bigQueryService,
-            CLOCK,
-            cohortDao,
-            conceptDao,
-            conceptSetDao,
-            dataSetDao,
-            dataSetService,
-            fireCloudService,
-            notebooksService,
-            userProvider,
-            workspaceService);
+        spy(
+            new DataSetController(
+                bigQueryService,
+                CLOCK,
+                cdrVersionDao,
+                cohortDao,
+                conceptDao,
+                conceptSetDao,
+                dataDictionaryEntryDao,
+                dataSetDao,
+                dataSetMapper,
+                dataSetService,
+                fireCloudService,
+                notebooksService,
+                userProvider,
+                workspaceService));
     WorkspacesController workspacesController =
         new WorkspacesController(
             billingProjectBufferService,
             workspaceService,
-            workspaceMapper,
             cdrVersionDao,
             userDao,
             userProvider,
@@ -291,7 +303,8 @@ public class DataSetControllerTest {
             CLOCK,
             notebooksService,
             userService,
-            workbenchConfigProvider);
+            workbenchConfigProvider,
+            workspaceAuditAdapterService);
     CohortsController cohortsController =
         new CohortsController(
             workspaceService,
@@ -485,6 +498,7 @@ public class DataSetControllerTest {
               returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
               return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
             });
+    when(dataSetController.generateRandomEightCharacterQualifier()).thenReturn("00000000");
   }
 
   private DataSetRequest buildEmptyDataSetRequest() {
@@ -562,6 +576,18 @@ public class DataSetControllerTest {
     doReturn(tableResultMock).when(bigQueryService).executeQuery(any());
   }
 
+  @Test
+  public void testAddFieldValuesFromBigQueryToPreviewListWorksWithNullValues() {
+    DataSetPreviewValueList dataSetPreviewValueList = new DataSetPreviewValueList();
+    List<DataSetPreviewValueList> valuePreviewList = ImmutableList.of(dataSetPreviewValueList);
+    List<FieldValue> fieldValueListRows =
+        ImmutableList.of(FieldValue.of(FieldValue.Attribute.PRIMITIVE, null));
+    FieldValueList fieldValueList = FieldValueList.of(fieldValueListRows);
+    dataSetController.addFieldValuesFromBigQueryToPreviewList(valuePreviewList, fieldValueList);
+    assertThat(valuePreviewList.get(0).getQueryValue().get(0))
+        .isEqualTo(DataSetController.EMPTY_CELL_MARKER);
+  }
+
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoCohort() {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
@@ -614,10 +640,13 @@ public class DataSetControllerTest {
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
+    String prefix = "dataset_00000000_condition_";
     assertThat(response.getCode())
         .isEqualTo(
             "import pandas\n\n"
-                + "blah_condition_sql = \"\"\"SELECT PERSON_ID FROM `"
+                + "# This query represents dataset \"blah\" for domain \"condition\"\n"
+                + prefix
+                + "sql = \"\"\"SELECT PERSON_ID FROM `"
                 + TEST_CDR_TABLE
                 + ".condition_occurrence` c_occurrence WHERE \n"
                 + "(condition_concept_id IN (123) OR \n"
@@ -626,7 +655,8 @@ public class DataSetControllerTest {
                 + TEST_CDR_TABLE
                 + ".person` person))\"\"\"\n"
                 + "\n"
-                + "blah_condition_query_config = {\n"
+                + prefix
+                + "query_config = {\n"
                 + "  'query': {\n"
                 + "  'parameterMode': 'NAMED',\n"
                 + "  'queryParameters': [\n\n"
@@ -636,10 +666,16 @@ public class DataSetControllerTest {
                 + "\n"
                 + "\n"
                 + "\n"
-                + "blah_condition_df = pandas.read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)"
+                + prefix
+                + "df = pandas.read_gbq("
+                + prefix
+                + "sql, dialect=\"standard\", configuration="
+                + prefix
+                + "query_config)"
                 + "\n"
                 + "\n"
-                + "blah_condition_df.head(5)");
+                + prefix
+                + "df.head(5)");
   }
 
   @Test
@@ -661,12 +697,15 @@ public class DataSetControllerTest {
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.R.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
+    String prefix = "dataset_00000000_condition_";
     assertThat(response.getCode())
         .isEqualTo(
             "if(! \"reticulate\" %in% installed.packages()) { install.packages(\"reticulate\") }\n"
                 + "library(reticulate)\n"
                 + "pd <- reticulate::import(\"pandas\")\n\n"
-                + "blah_condition_sql <- \"SELECT PERSON_ID FROM `"
+                + "# This query represents dataset \"blah\" for domain \"condition\"\n"
+                + prefix
+                + "sql <- \"SELECT PERSON_ID FROM `"
                 + TEST_CDR_TABLE
                 + ".condition_occurrence` c_occurrence WHERE \n"
                 + "(condition_concept_id IN (123) OR \n"
@@ -675,7 +714,8 @@ public class DataSetControllerTest {
                 + TEST_CDR_TABLE
                 + ".person` person))\"\n"
                 + "\n"
-                + "blah_condition_query_config <- list(\n"
+                + prefix
+                + "query_config <- list(\n"
                 + "  query = list(\n"
                 + "    parameterMode = 'NAMED',\n"
                 + "    queryParameters = list(\n\n"
@@ -683,10 +723,17 @@ public class DataSetControllerTest {
                 + "  )\n"
                 + ")\n"
                 + "\n"
-                + "blah_condition_df <- pd$read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)"
+                + prefix
+                + "df <- pd$read_gbq("
+                + prefix
+                + "sql, dialect=\"standard\", configuration="
+                + prefix
+                + "query_config)"
                 + "\n"
                 + "\n"
-                + "head(blah_condition_df, 5)");
+                + "head("
+                + prefix
+                + "df, 5)");
   }
 
   @Test
@@ -714,8 +761,8 @@ public class DataSetControllerTest {
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(2)).executeQuery(any());
-    assertThat(response.getCode()).contains("blah_condition_df");
-    assertThat(response.getCode()).contains("blah_drug_df");
+    assertThat(response.getCode()).contains("condition_df");
+    assertThat(response.getCode()).contains("drug_df");
   }
 
   @Test
@@ -737,7 +784,7 @@ public class DataSetControllerTest {
                 workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
-    assertThat(response.getCode()).contains("blah_observation_df");
+    assertThat(response.getCode()).contains("observation_df");
     assertThat(response.getCode()).contains("ds_survey");
   }
 
@@ -801,7 +848,7 @@ public class DataSetControllerTest {
     */
     assertThat(response.getCode())
         .contains(
-            "blah_person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person");
+            "person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person");
     // For demographic unlike other domains WHERE should be followed by person.person_id rather than
     // concept_id
     assertThat(response.getCode().contains("WHERE person.PERSON_ID"));

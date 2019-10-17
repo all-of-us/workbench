@@ -143,7 +143,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       prePackagedConceptSet: this.props.prePackagedConceptSet
     };
     try {
-      // If data set exist it is an update
+      // If dataset exist it is an update
       if (this.props.dataSet) {
         const updateReq = {
           ...request,
@@ -255,7 +255,7 @@ class NewDataSetModal extends React.Component<Props, State> {
           {missingDataSetInfo &&
           <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
           }
-          <TextInput type='text' autoFocus placeholder='Data Set Name'
+          <TextInput type='text' autoFocus placeholder='Dataset Name'
                      value={name} data-test-id='data-set-name-input'
                      onChange={v => this.setState({
                        name: v, conflictDataSetName: false

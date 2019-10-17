@@ -1,3 +1,4 @@
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import colors from 'app/styles/colors';
 import * as React from 'react';
 
@@ -17,22 +18,22 @@ export const PaddedTableCell = ({left, content, leftWidth = '50%', rightWidth = 
 
 export const TwoColPaddedTable = ({style = {}, header = false, headerLeft = '',
   headerRight = '', cellWidth = {left: '50%', right: '50%'}, contentLeft, contentRight}) => {
-  return <div style={{display: 'flex', flexDirection: 'column', ...style}}>
+  return <FlexColumn style={{...style}}>
     {header &&
-      <div style={{display: 'flex', flexDirection: 'row', height: '100%'}}>
+      <FlexRow style={{height: '100%'}}>
         <PaddedTableCell left={true} leftWidth={cellWidth.left}
                          content={<strong>{headerLeft}</strong>}/>
         <PaddedTableCell left={false} rightWidth={cellWidth.right}
                          content={<strong>{headerRight}</strong>}/>
-      </div>}
+      </FlexRow>}
     {contentLeft.map((c, i) =>
-      <div style={{display: 'flex', flexDirection: 'row'}}>
+      <FlexRow>
         <PaddedTableCell key={i + '_l'} left={true} content={c}
                          leftWidth={cellWidth.left}/>
         {contentRight.length >= i + 1 &&
         <PaddedTableCell key={i + '_r'} left={false} content={contentRight[i]}
                          rightWidth={cellWidth.right}/>}
-      </div>
+      </FlexRow>
     )}
-  </div>;
+  </FlexColumn>;
 };

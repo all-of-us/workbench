@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import {AlertDanger} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
 import {RadioButton, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
@@ -19,7 +20,6 @@ import {
   UpdateConceptSetRequest
 } from 'generated/fetch';
 import {validate} from 'validate.js';
-
 
 const styles = reactStyles({
   label: {
@@ -105,7 +105,7 @@ export const ConceptAddModal = withCurrentWorkspace()
     const conceptIds = fp.map(selected => selected.conceptId, selectedConceptsInDomain);
 
     // This is added temporary until users can create concept sets of Domain PERSON,
-    // in the meantime there will be default Demogrpahics Concept Set on DATA SET PAGE
+    // in the meantime there will be default Demogrpahics Concept Set on DATASET PAGE
 
     if (name === 'Demographics') {
       this.setState({
@@ -173,7 +173,7 @@ export const ConceptAddModal = withCurrentWorkspace()
           </div> :
       <ModalBody>
         <ModalBody>
-          <div style={{display: 'flex', flexDirection: 'row'}}>
+          <FlexRow>
             <TooltipTrigger content={
               <div>No concept sets in domain '{selectedDomain.name}'</div>}
                             disabled={conceptSets.length > 0}>
@@ -196,7 +196,7 @@ export const ConceptAddModal = withCurrentWorkspace()
                          onChange={() => {this.setState({addingToExistingSet: false}); }}/>
               <label style={styles.label}>Create new set</label>
             </div>
-          </div>
+          </FlexRow>
         </ModalBody>
         {addingToExistingSet ? (
             <ModalBody data-test-id='add-to-existing'>

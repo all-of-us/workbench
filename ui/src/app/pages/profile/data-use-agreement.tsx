@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
+import {FlexColumn} from 'app/components/flex';
 import {
   BolderHeader,
   styles as headerStyles
@@ -361,8 +362,7 @@ export const DataUseAgreement = withUserProfile()(
       return <div style={styles.dataUseAgreementPage}>
         <DataUseAgreementText/>
         <div style={{height: '1rem'}}/>
-        <div style={{
-          display: 'flex', flexDirection: 'column', borderRadius: '1rem',
+        <FlexColumn style={{borderRadius: '1rem',
           backgroundColor: colorWithWhiteness(colors.primary, 0.8),
           padding: '1rem', alignItems: 'flex-start', position: 'relative'
         }}>
@@ -414,7 +414,7 @@ export const DataUseAgreement = withUserProfile()(
               disabled={errors || submitting} data-test-id='submit-dua-button'
               onClick={() => this.submitDataUseAgreement()}>Submit</Button>
           </TooltipTrigger>
-        </div>
+        </FlexColumn>
       </div>; }
   });
 

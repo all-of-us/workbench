@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -57,8 +58,8 @@ const actionCards = [
        participants row-level data and add notes and annotations.`,
     action: 'review'
   }, {
-    title: 'Create a Data Set',
-    description: `Create an analysis ready data set that can be exported to notebooks.`,
+    title: 'Create a Dataset',
+    description: `Create an analysis ready dataset that can be exported to notebooks.`,
     action: 'dataSet'
   },
 ];
@@ -116,6 +117,7 @@ const CohortActions = withCurrentWorkspace()(
           url += 'data/data-sets';
           break;
         case 'newCohort':
+          currentCohortStore.next(undefined);
           url += `data/cohorts/build`;
       }
       navigateByUrl(url);
@@ -140,12 +142,12 @@ const CohortActions = withCurrentWorkspace()(
           <div style={styles.cardArea}>
             {actionCards.map((card, i) => {
               return <ActionCardBase key={i} style={styles.card}>
-                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
-                  <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
+                <FlexColumn style={{alignItems: 'flex-start'}}>
+                  <FlexRow style={{alignItems: 'flex-start'}}>
                     <div style={styles.cardName}>{card.title}</div>
-                  </div>
+                  </FlexRow>
                   <div style={styles.cardDescription}>{card.description}</div>
-                </div>
+                </FlexColumn>
                 <div>
                   <Button
                     type='primary'

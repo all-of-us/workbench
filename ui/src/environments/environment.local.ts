@@ -1,6 +1,7 @@
 import {Environment} from 'environments/environment-type';
 import {testEnvironmentBase} from 'environments/test-env-base';
 
+// This file is used for a local UI server pointed at a local API server
 export const environment: Environment = {
   displayTag: 'Local->Local',
   shouldShowDisplayTag: true,
