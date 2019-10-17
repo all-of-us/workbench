@@ -22,7 +22,7 @@ To manually test updates to this script locally:
   ```
 
 - Ensure the change is picked up by your API server and point a local UI to it
-- Open your local Workbench UI: top-right dropdown -> settings -> reset notebook server
+- Open your local Workbench UI, go to the workspace 'About' tab, and click 'Reset notebook server'.
 - Wait for the notebook cluster to be created.
   - Cluster creation will fail with 500s if the user script is not accessible to your pet SA,
     this should be granted by the registered tier group on the bucket ACL [cloud console UI](
