@@ -21,10 +21,10 @@ describe('WorkspaceCard', () => {
   const reload = jest.fn();
   const updateCache = jest.fn();
 
-  const component = () => {
+  const component = (accessLevel: WorkspaceAccessLevel) => {
     return mount(
       <WorkspaceCard
-       accessLevel={WorkspaceAccessLevel.OWNER}
+       accessLevel={accessLevel}
        reload={reload}
        userEmail={'engle.r.fish@broadinstitute.org'}
        workspace={workspaceStubs[0]}
@@ -34,7 +34,8 @@ describe('WorkspaceCard', () => {
   };
 
   beforeEach(() => {
-    registerApiClient(ProfileApi, new ProfileApiStub());
+    profileApi = new ProfileApiStub();
+    registerApiClient(ProfileApi, profileApi);
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
 
     // mocking because we don't have access to the angular service
@@ -48,15 +49,22 @@ describe('WorkspaceCard', () => {
   });
 
   it('fetches user roles before opening the share dialog', async() => {
-    const wrapper = component();
+    const wrapper = component(WorkspaceAccessLevel.OWNER);
     await waitOneTickAndUpdate(wrapper);
     const userRolesSpy = jest.spyOn(workspacesApi(), 'getFirecloudWorkspaceUserRoles');
 
+    expect(wrapper.exists('[data-test-id="workspace-share-modal"]')).toBeFalsy();
+
     // Click the snowman menu
     wrapper.find('[data-test-id="workspace-card-menu"]').first().simulate('click');
-    // Click the share menu item
-    wrapper.find('[data-test-id="Share-menu-item"]').first()
-      .simulate('click');
+
+    // Disabled tooltip should not show on hover.
+    const shareEl = wrapper.find('[data-test-id="Share-menu-item"]').first();
+    shareEl.simulate('mouseenter');
+    expect(wrapper.exists('[data-test-id="workspace-share-disabled-tooltip"]')).toBeFalsy();
+
+    // Click should open the share modal.
+    shareEl.simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
     // We should have called the userRoles API before opening the share modal.
@@ -65,5 +73,28 @@ describe('WorkspaceCard', () => {
     // The share modal should have been opened w/ the correct props.
     const shareModal = wrapper.find('[data-test-id="workspace-share-modal"]').first();
     expect(shareModal.prop('userRoles')).toEqual(userRolesStub);
+
   });
+
+  it('disables sharing for non-owners', async() => {
+    const wrapper = component(WorkspaceAccessLevel.WRITER);
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.exists('[data-test-id="workspace-share-modal"]')).toBeFalsy();
+
+    // Click the snowman menu.
+    wrapper.find('[data-test-id="workspace-card-menu"]').first().simulate('click');
+    const shareEl = wrapper.find('[data-test-id="Share-menu-item"]').first();
+
+    // Hover should show the disabled tooltip.
+    shareEl.simulate('mouseenter');
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.exists('[data-test-id="workspace-share-disabled-tooltip"]')).toBeTruthy();
+
+    // The share modal should not open on click.
+    shareEl.simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.exists('[data-test-id="workspace-share-modal"]')).toBeFalsy();
+  });
+
 });
