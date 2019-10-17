@@ -4,7 +4,7 @@ import * as React from 'react';
 import {AlertClose, AlertDanger, AlertWarning} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
 import {baseStyles, ResourceCardBase} from 'app/components/card';
-import {FlexColumn, FlexDivider, FlexRow} from 'app/components/flex';
+import {FlexColumn, FlexRow, FlexSpacer} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
@@ -301,7 +301,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
             </FlexColumn>
             {!this.allTasksCompleted() &&
             <div style={styles.cardDescription}>{card.description}</div>}
-            <FlexDivider/>
+            <FlexSpacer/>
             {this.taskCompletionList[i] ?
               <Button disabled={true} data-test-id='completed-button'
                       style={{backgroundColor: colors.success,

@@ -32,6 +32,6 @@ export const FlexRowWrap = (props) => {
   </FlexRow>;
 };
 
-export const FlexDivider = (props) => {
+export const FlexSpacer = (props) => {
   return <div style={{display: 'flex', flex: 1, ...props.style}}/>;
 };
