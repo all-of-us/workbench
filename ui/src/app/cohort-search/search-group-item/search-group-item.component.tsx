@@ -1,8 +1,9 @@
 import {Component, Input} from '@angular/core';
 import * as React from 'react';
 
+import {ENCOUNTERS_MAP, MODIFIERS_TEXT} from 'app/cohort-search/constant';
 import {initExisting, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {attributeDisplay, domainToTitle, getTypeAndStandard, mapGroupItem, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
+import {domainToTitle, getTypeAndStandard, mapGroupItem} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
@@ -10,7 +11,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {DomainType, SearchRequest} from 'generated/fetch';
+import {DomainType, Modifier, ModifierType, SearchRequest} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import Timeout = NodeJS.Timeout;
@@ -56,6 +57,20 @@ const itemStyles = `
   }
 `;
 
+function modifiersDisplay(mod: Modifier) {
+  const {name, operands, operator} = mod;
+  switch (name) {
+    case ModifierType.AGEATEVENT:
+      return <span><b>{MODIFIERS_TEXT[name].name}</b> {MODIFIERS_TEXT[name].operators[operator]} {operands.join(' and ')}</span>;
+    case ModifierType.ENCOUNTERS:
+      return <span><b>{MODIFIERS_TEXT[name].name}</b> {ENCOUNTERS_MAP[operands[0]]}</span>;
+    case ModifierType.EVENTDATE:
+      return <span><b>{MODIFIERS_TEXT[name].name}</b> {MODIFIERS_TEXT[name].operators[operator]} {operands.join(' and ')}</span>;
+    case ModifierType.NUMOFOCCURRENCES:
+      return <span><b>{MODIFIERS_TEXT[name].name}</b> {operands[0]} Or More</span>;
+  }
+}
+
 export class SearchGroupItemName extends React.Component<{editItem: Function, item: any}> {
   op: any;
   constructor(props: any) {
@@ -64,21 +79,27 @@ export class SearchGroupItemName extends React.Component<{editItem: Function, it
   }
 
   render() {
-    const {editItem, item: {searchParameters, type}} = this.props;
+    const {editItem, item: {modifiers, searchParameters, type}} = this.props;
     const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
     const showCode = [DomainType.CONDITION, DomainType.DRUG, DomainType.MEASUREMENT, DomainType.PROCEDURE].includes(type);
     return <React.Fragment>
       <span style={{paddingRight: '10px'}}
         onClick={() => editItem()}
-        onMouseEnter={(e) => this.op.toggle(e)}
-        onMouseLeave={(e) => this.op.toggle(e)}>
+        onMouseEnter={(e) => this.op.show(e)}
+        onMouseLeave={() => this.op.hide()}>
         <span className='item-title' style={styles.codeText}>Contains {domainToTitle(type)} {codeDisplay}</span>
       </span>
-      <OverlayPanel ref={(el) => this.op = el} appendTo={document.body} style={{maxWidth: '15rem'}}>
+      <OverlayPanel ref={(el) => this.op = el} appendTo={document.body} style={{maxWidth: '30%'}}>
         <h3 style={{margin: 0}}>{domainToTitle(type)}</h3>
         {searchParameters.map((param, p) => {
           return <div key={p}>{showCode && <b>{param.code}</b>} {param.name}</div>;
         })}
+        {!!modifiers.length && <React.Fragment>
+          <h3>Modifiers</h3>
+          {modifiers.map((mod, m) => {
+            return <div key={m}>{modifiersDisplay(mod)}</div>;
+          })}
+        </React.Fragment>}
       </OverlayPanel>
     </React.Fragment>;
   }
@@ -195,12 +216,8 @@ export class SearchGroupItem extends React.Component<Props, State> {
     const selections = searchParameters.map(sp => sp.parameterId);
     selectionsStore.next(selections);
     const domain = _item.type;
-    let isStandard;
-    if ([DomainType.CONDITION, DomainType.PROCEDURE].includes(domain)) {
-      isStandard = item.searchParameters[0].isStandard;
-    }
     const {type, standard} = getTypeAndStandard(searchParameters, domain);
-    const context = {item: _item, domain, type, isStandard, role, groupId, itemId: id, fullTree, standard};
+    const context = {item: _item, domain, type, role, groupId, itemId: id, fullTree, standard};
     wizardStore.next(context);
   }
 

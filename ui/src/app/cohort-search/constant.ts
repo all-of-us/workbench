@@ -1,4 +1,4 @@
-import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
+import {AttrName, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
 
 export const LIST_PROGRAM_TYPES = [
   {
@@ -119,3 +119,40 @@ export const PREDEFINED_ATTRIBUTES = {
     }
   ],
 };
+
+export const MODIFIERS_TEXT = {
+  [ModifierType.AGEATEVENT]: {
+    name: 'Age At Event',
+    operators: {
+      [Operator.BETWEEN]: 'Between',
+      [Operator.GREATERTHANOREQUALTO]: 'Greater Than or Equal To',
+      [Operator.LESSTHANOREQUALTO]: 'Less Than or Equal To',
+    }
+  },
+  [ModifierType.ENCOUNTERS]: {
+    name: 'During Visit Type',
+    operators: {
+      [Operator.IN]: ''
+    }
+  },
+  [ModifierType.EVENTDATE]: {
+    name: 'Event Date',
+    operators: {
+      [Operator.BETWEEN]: 'Is Between',
+      [Operator.GREATERTHANOREQUALTO]: 'Is On or After',
+      [Operator.LESSTHANOREQUALTO]: 'Is On or Before',
+    }
+  },
+  [ModifierType.NUMOFOCCURRENCES]: {
+    name: 'Has Occurrences',
+    operators: {
+      [Operator.GREATERTHANOREQUALTO]: 'N or More',
+    }
+  },
+};
+
+export const ENCOUNTERS_MAP = {
+  '9201': 'Inpatient Visit',
+  '9202': 'Outpatient Visit',
+  '9203': 'Emergency Room Visit',
+}
