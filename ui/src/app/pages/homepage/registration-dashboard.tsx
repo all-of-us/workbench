@@ -15,12 +15,6 @@ import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
-  registrationPage: {
-    display: 'flex', flexDirection: 'column',
-    // Assign relative positioning so the spinner's absolute positioning anchors
-    // it within the registration box.
-    position: 'relative',
-  },
   mainHeader: {
     color: colors.primary, fontSize: '18px', fontWeight: 600,
     letterSpacing: 'normal', marginTop: '-0.25rem'
@@ -257,8 +251,9 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
 
     const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
 
-    return <div style={styles.registrationPage}
-                data-test-id='registration-dashboard'>
+    // Assign relative positioning so the spinner's absolute positioning anchors
+    // it within the registration box.
+    return <FlexColumn style={{position: 'relative'}} data-test-id='registration-dashboard'>
       {bypassInProgress && <SpinnerOverlay />}
       {environment.enableHomepageRestyle && <div style={styles.mainHeader}>Getting Started</div>}
       {!environment.enableHomepageRestyle &&
@@ -344,6 +339,6 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
         <Button style={{marginLeft: '0.5rem'}}
                 onClick={() => window.location.reload()}>Get Started</Button>
       </div>}
-    </div>;
+    </FlexColumn>;
   }
 }
