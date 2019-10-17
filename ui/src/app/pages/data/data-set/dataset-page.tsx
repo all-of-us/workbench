@@ -8,7 +8,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
-import {Popup, PopupPortal, PopupTrigger, TooltipTrigger} from 'app/components/popups';
+import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
@@ -36,6 +36,7 @@ import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {
   Cohort,
   ConceptSet,
+  DataDictionaryEntry,
   DataSet,
   DataSetPreviewRequest,
   DataSetPreviewValueList,
@@ -50,9 +51,24 @@ import {
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
-import {DataDictionaryEntry} from "../../../../generated/fetch/api";
 
 export const styles = {
+  dataDictionaryHeader: {
+    fontSize: '16px',
+    color: colors.primary,
+    textTransform: 'uppercase'
+  },
+  dataDictionarySubheader: {
+    fontSize: '13px',
+    fontWeight: 600,
+    color: colors.primary,
+    paddingTop: '0.5rem'
+  },
+  dataDictionaryText: {
+    color: colors.primary,
+    fontSize: '13px',
+    lineHeight: '20px'
+  },
   selectBoxHeader: {
     fontSize: '16px',
     height: '2rem',
@@ -217,27 +233,36 @@ interface DataDictionaryPopupProps {
 }
 
 const DataDictionaryPopup: React.FunctionComponent<DataDictionaryPopupProps> = ({dataDictionaryEntry, onClose}) => {
-  return <div style={{width: '10rem'}}>
-    <FlexRow style={{justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${colors.dark}`}}>
-      {dataDictionaryEntry ? <div>{dataDictionaryEntry.fieldName}</div> : null}
+  return <div style={{width: '17rem'}}>
+    <FlexRow style={{
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderBottom: `1px solid ${colorWithWhiteness(colors.dark, 0.6)}`,
+      height: '46px',
+      padding: '0.5rem'}}>
+      {dataDictionaryEntry ?
+        <div style={styles.dataDictionaryHeader}>{dataDictionaryEntry.fieldName}</div> : <div/>}
       <ClrIcon style={{
         color: colors.accent,
         cursor: 'pointer',
-        size: '18px'
+        height: '29px',
+        width: '29px'
       }} shape='times' onClick={() => onClose()} class='is-solid'/>
     </FlexRow>
-    {dataDictionaryEntry ? <FlexColumn style={{height: '4rem', overflowY: 'scroll'}}>
-      <div>Description</div>
-      <div>{dataDictionaryEntry.description}</div>
-      <div>Relevant OMOP Table</div>
-      <div>{dataDictionaryEntry.relevantOmopTable}</div>
-      <div>Type</div>
-      <div>{dataDictionaryEntry.fieldType}</div>
-      <div>Data Provenance</div>
-      <div>{dataDictionaryEntry.dataProvenance}{dataDictionaryEntry.dataProvenance.includes('PPI') ? `: ${dataDictionaryEntry.sourcePpiModule}` : null}</div>
-    </FlexColumn> : <Spinner/>}
+    {dataDictionaryEntry ? <FlexColumn style={{height: '6.5rem', overflowY: 'scroll', padding: '0.5rem'}}>
+      <div style={{...styles.dataDictionarySubheader, paddingTop: 0}}>Description</div>
+      <div style={styles.dataDictionaryText}>{dataDictionaryEntry.description}</div>
+      <div style={styles.dataDictionarySubheader}>Relevant OMOP Table</div>
+      <div style={styles.dataDictionaryText}>{dataDictionaryEntry.relevantOmopTable}</div>
+      <div style={styles.dataDictionarySubheader}>Type</div>
+      <div style={styles.dataDictionaryText}>{dataDictionaryEntry.fieldType}</div>
+      <div style={styles.dataDictionarySubheader}>Data Provenance</div>
+      <div style={styles.dataDictionaryText}>
+        {dataDictionaryEntry.dataProvenance}{dataDictionaryEntry.dataProvenance.includes('PPI') ?
+        `: ${dataDictionaryEntry.sourcePpiModule}` : null}</div>
+    </FlexColumn> : <div style={{display: 'flex', justifyContent: 'center'}}><Spinner/></div>}
   </div>;
-}
+};
 
 interface ValueListItemProps {
   checked: boolean;
@@ -268,7 +293,7 @@ export class ValueListItem extends React.Component<
     const {domain, domainValue} = this.props;
 
     dataSetApi().getDataDictionaryEntry(
-      parseInt(currentWorkspaceStore.getValue().cdrVersionId),
+      parseInt(currentWorkspaceStore.getValue().cdrVersionId, 10),
       domain.toString(),
       domainValue.value).then(dataDictionaryEntry => {
         this.setState({dataDictionaryEntry});
@@ -276,7 +301,7 @@ export class ValueListItem extends React.Component<
   }
 
   showDataDictionaryEntry() {
-    this.setState({showDataDictionaryEntry: true});
+    this.setState({showDataDictionaryEntry: !this.state.showDataDictionaryEntry});
 
     if (this.state.dataDictionaryEntry === undefined) {
       this.fetchDataDictionaryEntry();
@@ -316,7 +341,7 @@ export class ValueListItem extends React.Component<
         </Clickable>
       </PopupTrigger>
     </div>;
-  };
+  }
 }
 
 const plusLink = (dataTestId: string, path: string, disable?: boolean) => {
