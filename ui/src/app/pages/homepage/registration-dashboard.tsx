@@ -4,7 +4,7 @@ import * as React from 'react';
 import {AlertClose, AlertDanger, AlertWarning} from 'app/components/alert';
 import {Button} from 'app/components/buttons';
 import {baseStyles, ResourceCardBase} from 'app/components/card';
-import {FlexColumn, FlexRow} from 'app/components/flex';
+import {FlexColumn, FlexDivider, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
@@ -16,19 +16,19 @@ import {AccessModule, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
   registrationPage: {
-    display: 'flex', flexDirection: 'column', paddingTop: '3%', paddingLeft: '3%',
+    display: 'flex', flexDirection: 'column',
     // Assign relative positioning so the spinner's absolute positioning anchors
     // it within the registration box.
     position: 'relative',
   },
   mainHeader: {
-    color: colors.primary, fontSize: 28, fontWeight: 400,
-    letterSpacing: 'normal', marginBottom: '0.2rem'
+    color: colors.primary, fontSize: '18px', fontWeight: 600,
+    letterSpacing: 'normal', marginTop: '-0.25rem'
   },
   cardStyle: {
     boxShadow: '0 0 2px 0 rgba(0,0,0,0.12), 0 3px 2px 0 rgba(0,0,0,0.12)',
     padding: '0.75rem', minHeight: '305px', maxHeight: '305px', maxWidth: '250px',
-    minWidth: '250px', justifyContent: 'space-between', backgroundColor: colors.white
+    minWidth: '250px', justifyContent: 'flex-start', backgroundColor: colors.white
   },
   cardHeader: {
     color: colors.primary, fontSize: '16px', lineHeight: '19px', fontWeight: 600,
@@ -260,15 +260,12 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     return <div style={styles.registrationPage}
                 data-test-id='registration-dashboard'>
       {bypassInProgress && <SpinnerOverlay />}
-      <div style={styles.mainHeader}>Researcher Workbench</div>
-      <div style={{...styles.mainHeader, fontSize: '18px', marginTop: '0.25rem'}}>
-        <ClrIcon shape='warning-standard' class='is-solid'
-                 style={{color: colors.warning, marginRight: '0.3rem'}}/>
-        In order to get access to data and tools please complete the following steps:
-      </div>
+      {environment.enableHomepageRestyle && <div style={styles.mainHeader}>Getting Started</div>}
+      {!environment.enableHomepageRestyle &&
+        <div style={{...styles.mainHeader, color: colors.white}}>Getting Started</div>}
       {canUnsafeSelfBypass &&
         <div data-test-id='self-bypass'
-             style={{...baseStyles.card, ...styles.warningModal, marginTop: '0.5rem'}}>
+             style={{...baseStyles.card, ...styles.warningModal, margin: '0.85rem 0 0'}}>
           {bypassActionComplete &&
             <span>Bypass action is complete. Reload the page to continue.</span>}
           {!bypassActionComplete && <span>
@@ -287,12 +284,12 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       }
       {!betaAccessGranted &&
         <div data-test-id='beta-access-warning'
-             style={{...baseStyles.card, ...styles.warningModal}}>
+             style={{...baseStyles.card, ...styles.warningModal, margin: '1rem 0 0'}}>
           <ClrIcon shape='warning-standard' class='is-solid'
                    style={styles.warningIcon}/>
           You have not been granted beta access. Please contact support@researchallofus.org.
         </div>}
-      <FlexRow>
+      <FlexRow style={{marginTop: '0.85rem'}}>
         {getRegistrationTasks().map((card, i) => {
           return <ResourceCardBase key={i} data-test-id={'registration-task-' + i.toString()}
             style={this.isEnabled(i) ? styles.cardStyle : {...styles.cardStyle,
@@ -304,6 +301,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
             </FlexColumn>
             {!this.allTasksCompleted() &&
             <div style={styles.cardDescription}>{card.description}</div>}
+            <FlexDivider/>
             {this.taskCompletionList[i] ?
               <Button disabled={true} data-test-id='completed-button'
                       style={{backgroundColor: colors.success,
@@ -340,7 +338,8 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
         <AlertClose onClick={() => this.setState({trainingWarningOpen: false})}/>
       </AlertWarning>}
       {(this.allTasksCompleted() && betaAccessGranted) &&
-      <div style={{...baseStyles.card, ...styles.warningModal}} data-test-id='success-message'>
+      <div style={{...baseStyles.card, ...styles.warningModal, marginRight: 0}}
+           data-test-id='success-message'>
         You successfully completed all the required steps to access the Researcher Workbench.
         <Button style={{marginLeft: '0.5rem'}}
                 onClick={() => window.location.reload()}>Get Started</Button>
