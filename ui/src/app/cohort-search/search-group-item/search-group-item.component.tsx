@@ -63,47 +63,22 @@ export class SearchGroupItemName extends React.Component<{editItem: Function, it
     this.state = {};
   }
 
-  get itemTitleDisplay() {
-    const {item: {type}} = this.props;
-    return `${domainToTitle(type)} ${this.pluralizedCode}`;
-  }
-
-  get pluralizedCode() {
-    const {item: {searchParameters}} = this.props;
-    return searchParameters.length > 1 ? 'Codes' : 'Code';
-  }
-
-  get selectionsDisplay() {
-    const {item: {searchParameters, type}} = this.props;
-    const formatter = (param) => {
-      let funcs = [typeDisplay, attributeDisplay];
-      if (type === DomainType.PERSON) {
-        funcs = [typeDisplay, nameDisplay, attributeDisplay];
-      } else if (type === DomainType.PHYSICALMEASUREMENT
-        || type === DomainType.VISIT
-        || type === DomainType.DRUG
-        || type === DomainType.MEASUREMENT
-        || type === DomainType.SURVEY) {
-        funcs = [nameDisplay];
-      }
-      return funcs.map(f => f(param)).join(' ').trim();
-    };
-    const sep = type === DomainType[DomainType.PERSON] ? '; ' : ', ';
-    return searchParameters.map(formatter).join(sep);
-  }
-
   render() {
-    const {editItem} = this.props;
+    const {editItem, item: {searchParameters, type}} = this.props;
+    const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
+    const showCode = [DomainType.CONDITION, DomainType.DRUG, DomainType.MEASUREMENT, DomainType.PROCEDURE].includes(type);
     return <React.Fragment>
       <span style={{paddingRight: '10px'}}
         onClick={() => editItem()}
         onMouseEnter={(e) => this.op.toggle(e)}
         onMouseLeave={(e) => this.op.toggle(e)}>
-        <span className='item-title' style={styles.codeText}>Contains {this.itemTitleDisplay}</span>
+        <span className='item-title' style={styles.codeText}>Contains {domainToTitle(type)} {codeDisplay}</span>
       </span>
       <OverlayPanel ref={(el) => this.op = el} appendTo={document.body} style={{maxWidth: '15rem'}}>
-        <h3 style={{margin: 0}}>{this.itemTitleDisplay}</h3>
-        {this.selectionsDisplay}
+        <h3 style={{margin: 0}}>{domainToTitle(type)}</h3>
+        {searchParameters.map((param, p) => {
+          return <div key={p}>{showCode && <b>{param.code}</b>} {param.name}</div>;
+        })}
       </OverlayPanel>
     </React.Fragment>;
   }
