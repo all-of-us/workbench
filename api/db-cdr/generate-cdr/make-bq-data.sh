@@ -460,7 +460,7 @@ and (c.count_value > 0 or c.source_count_value > 0)
 group by c.domain_id) c
 where d.domain_id = c.domain_id"
 
-if [[ "$tables" == *"_mapping_"* ]]; then
+if [[ "$tables" == *"_ext" ]]; then
     # Set participant counts for Condition domain
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.domain_info\` d
@@ -468,9 +468,9 @@ if [[ "$tables" == *"_mapping_"* ]]; then
     (select count(distinct person_id) as count
     from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` co
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on co.condition_concept_id = c.concept_id
-    join \`$BQ_PROJECT.$BQ_DATASET._mapping_condition_occurrence\` mc on co.condition_occurrence_id = mc.condition_occurrence_id
+    join \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence_ext\` mc on co.condition_occurrence_id = mc.condition_occurrence_id
     where c.vocabulary_id != 'PPI'
-    and mc.src_dataset_id=(select distinct src_dataset_id from \`$BQ_PROJECT.$BQ_DATASET._mapping_condition_occurrence\` where src_dataset_id like '%ehr%')) as r
+    and mc.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence_ext\` where src_id like '%EHR%')) as r
     where d.concept_id = 19"
 
     # Set participant counts for Measurement domain
@@ -480,9 +480,9 @@ if [[ "$tables" == *"_mapping_"* ]]; then
     (select count(distinct person_id) as count
     from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on m.measurement_concept_id = c.concept_id
-    join \`$BQ_PROJECT.$BQ_DATASET._mapping_measurement\` mm on m.measurement_id = mm.measurement_id
+    join \`$BQ_PROJECT.$BQ_DATASET.measurement_ext\` mm on m.measurement_id = mm.measurement_id
     where c.vocabulary_id != 'PPI'
-    and mm.src_dataset_id=(select distinct src_dataset_id from \`$BQ_PROJECT.$BQ_DATASET._mapping_measurement\` where src_dataset_id like '%ehr%')) as r
+    and mm.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.measurement_ext\` where src_id like '%EHR%')) as r
     where d.concept_id = 21"
 
     # Set participant counts for Procedure domain
@@ -492,9 +492,9 @@ if [[ "$tables" == *"_mapping_"* ]]; then
     (select count(distinct person_id) as count
     from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on po.procedure_concept_id = c.concept_id
-    join \`$BQ_PROJECT.$BQ_DATASET._mapping_procedure_occurrence\` pm on po.procedure_occurrence_id = pm.procedure_occurrence_id
+    join \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence_ext\` pm on po.procedure_occurrence_id = pm.procedure_occurrence_id
     where c.vocabulary_id != 'PPI'
-    and pm.src_dataset_id=(select distinct src_dataset_id from \`$BQ_PROJECT.$BQ_DATASET._mapping_procedure_occurrence\` where src_dataset_id like '%ehr%')) as r
+    and pm.src_id=(select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence_ext\` where src_id like '%EHR%')) as r
     where d.concept_id = 10"
 
     # Set participant counts for Drug domain
@@ -504,9 +504,9 @@ if [[ "$tables" == *"_mapping_"* ]]; then
     (select count(distinct person_id) as count
     from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` de
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on de.drug_concept_id = c.concept_id
-    join \`$BQ_PROJECT.$BQ_DATASET._mapping_drug_exposure\` md on de.drug_exposure_id = pm.drug_exposure_id
+    join \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` md on de.drug_exposure_id = pm.drug_exposure_id
     where c.vocabulary_id != 'PPI'
-    and md.src_dataset_id=(select distinct src_dataset_id from \`$BQ_PROJECT.$BQ_DATASET._mapping_drug_exposure\` where src_dataset_id like '%ehr%')) as r
+    and md.src_id=(select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` where src_id like '%EHR%')) as r
     where d.concept_id = 13"
 else
     # Set participant counts for Condition domain
