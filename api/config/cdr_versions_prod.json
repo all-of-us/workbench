@@ -1,8 +1,9 @@
 [
   {
     "cdrVersionId": 1,
-    "name": "Synthetic Dataset v1",
+    "name": "Synthetic Dataset v1 (Legacy)",
     "dataAccessLevel": 1,
+    "archivalStatus": 1,
     "bigqueryProject": "all-of-us-ehr-dev",
     "bigqueryDataset": "synthetic_cdr20180606",
     "creationTime": "2017-12-26 00:00:00Z",
@@ -12,8 +13,9 @@
   },
   {
     "cdrVersionId": 2,
-    "name": "All of Us Dataset v1",
+    "name": "All of Us Dataset v1 (Legacy)",
     "dataAccessLevel": 1,
+    "archivalStatus": 1,
     "bigqueryProject": "aou-res-curation-output-prod",
     "bigqueryDataset": "R2018Q4R1",
     "creationTime": "2018-11-13 15:09:27Z",
@@ -23,10 +25,22 @@
   },
   {
     "cdrVersionId": 3,
+    "name": "All of Us Dataset v2 (Legacy)",
+    "dataAccessLevel": 1,
+    "archivalStatus": 1,
+    "bigqueryProject": "aou-res-curation-output-prod",
+    "bigqueryDataset": "R2019Q2R1",
+    "creationTime": "2019-06-25 00:00:00Z",
+    "releaseNumber": 2,
+    "numParticipants": 191037,
+    "cdrDbName": "r_2019q2_2"
+  },
+  {
+    "cdrVersionId": 4,
     "isDefault": true,
     "name": "All of Us Dataset v2",
     "dataAccessLevel": 1,
-    "bigqueryProject": "aou-res-curation-output-prod",
+    "bigqueryProject": "fc-aou-cdr-prod",
     "bigqueryDataset": "R2019Q2R1",
     "creationTime": "2019-06-25 00:00:00Z",
     "releaseNumber": 2,

@@ -13,15 +13,16 @@ export enum ResourceType {
   COHORT = 'cohort',
   COHORT_REVIEW = 'cohortReview',
   CONCEPT_SET = 'conceptSet',
-  DATA_SET = 'dataSet',
+  DATA_SET = 'dataset',
   INVALID = 'invalid'
 }
 
 export const ResourceTypeDisplayNames = new Map()
   .set(ResourceType.NOTEBOOK, 'notebook')
   .set(ResourceType.COHORT, 'cohort')
+  .set(ResourceType.COHORT_REVIEW, 'cohort review')
   .set(ResourceType.CONCEPT_SET, 'concept set')
-  .set(ResourceType.DATA_SET, 'data set');
+  .set(ResourceType.DATA_SET, 'dataset');
 
 export function convertToResources(list: FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[]
   | DataSet[], workspaceNamespace: string, workspaceId: string,

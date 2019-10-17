@@ -1,9 +1,15 @@
 package org.pmiops.workbench.api;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -14,6 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -22,15 +29,21 @@ import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.dataset.DataSetMapper;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.model.DataSetValues;
+import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DataSetValue;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -40,14 +53,16 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetListResponse;
-import org.pmiops.workbench.model.DataSetPreviewList;
+import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -72,34 +87,37 @@ public class DataSetController implements DataSetApiDelegate {
   private final WorkspaceService workspaceService;
 
   private static int NO_OF_PREVIEW_ROWS = 20;
-  private static int PREVIEW_RETRY_LIMIT = 2;
   // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
   private static long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000l;
   private static String CONCEPT_SET = "conceptSet";
   private static String COHORT = "cohort";
 
+  private static final String DATE_FORMAT_STRING = "yyyy/MM/dd HH:mm:ss";
+  public static final String EMPTY_CELL_MARKER = "";
+
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
-  @Autowired private final CohortDao cohortDao;
-
-  @Autowired private ConceptDao conceptDao;
-
-  @Autowired private ConceptSetDao conceptSetDao;
-
-  @Autowired private DataSetDao dataSetDao;
-
-  @Autowired private FireCloudService fireCloudService;
-
-  @Autowired private NotebooksService notebooksService;
+  private final CdrVersionDao cdrVersionDao;
+  private final CohortDao cohortDao;
+  private final ConceptDao conceptDao;
+  private final ConceptSetDao conceptSetDao;
+  private final DataDictionaryEntryDao dataDictionaryEntryDao;
+  private final DataSetDao dataSetDao;
+  private final DataSetMapper dataSetMapper;
+  private final FireCloudService fireCloudService;
+  private final NotebooksService notebooksService;
 
   @Autowired
   DataSetController(
       BigQueryService bigQueryService,
       Clock clock,
+      CdrVersionDao cdrVersionDao,
       CohortDao cohortDao,
       ConceptDao conceptDao,
       ConceptSetDao conceptSetDao,
+      DataDictionaryEntryDao dataDictionaryEntryDao,
       DataSetDao dataSetDao,
+      DataSetMapper dataSetMapper,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
       NotebooksService notebooksService,
@@ -107,10 +125,13 @@ public class DataSetController implements DataSetApiDelegate {
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
+    this.cdrVersionDao = cdrVersionDao;
     this.cohortDao = cohortDao;
     this.conceptDao = conceptDao;
     this.conceptSetDao = conceptSetDao;
+    this.dataDictionaryEntryDao = dataDictionaryEntryDao;
     this.dataSetDao = dataSetDao;
+    this.dataSetMapper = dataSetMapper;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
     this.notebooksService = notebooksService;
@@ -120,46 +141,27 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DataSet> createDataSet(
-      String workspaceNamespace, String workspaceId, DataSetRequest dataSetRequest) {
-    boolean includesAllParticipants =
-        Optional.of(dataSetRequest.getIncludesAllParticipants()).orElse(false);
-    if (Strings.isNullOrEmpty(dataSetRequest.getName())) {
-      throw new BadRequestException("Missing name");
-    } else if (dataSetRequest.getConceptSetIds() == null
-        || (dataSetRequest.getConceptSetIds().size() == 0
-            && dataSetRequest.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.NONE))) {
-      throw new BadRequestException("Missing concept set ids");
-    } else if ((dataSetRequest.getCohortIds() == null || dataSetRequest.getCohortIds().size() == 0)
-        && !includesAllParticipants) {
-      throw new BadRequestException("Missing cohort ids");
-    } else if (dataSetRequest.getValues() == null || dataSetRequest.getValues().size() == 0) {
-      throw new BadRequestException("Missing values");
-    }
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      String workspaceNamespace, String workspaceFirecloudName, DataSetRequest dataSetRequest) {
+    validateDataSetCreateRequest(dataSetRequest);
+    final Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    long wId = workspaceService.get(workspaceNamespace, workspaceId).getWorkspaceId();
-    List<DataSetValues> dataSetValuesList =
-        dataSetRequest.getValues().stream()
-            .map(
-                (domainValueSet) -> {
-                  DataSetValues dataSetValues =
-                      new DataSetValues(
-                          domainValueSet.getDomain().name(), domainValueSet.getValue());
-                  dataSetValues.setDomainEnum(domainValueSet.getDomain());
-                  return dataSetValues;
-                })
-            .collect(Collectors.toList());
+        workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER);
+    final long workspaceId =
+        workspaceService.get(workspaceNamespace, workspaceFirecloudName).getWorkspaceId();
+    final ImmutableList<DataSetValue> dataSetValueList =
+        dataSetRequest.getDomainValuePairs().stream()
+            .map(this::getDataSetValuesFromDomainValueSet)
+            .collect(toImmutableList());
     try {
       org.pmiops.workbench.db.model.DataSet savedDataSet =
           dataSetService.saveDataSet(
               dataSetRequest.getName(),
               dataSetRequest.getIncludesAllParticipants(),
               dataSetRequest.getDescription(),
-              wId,
+              workspaceId,
               dataSetRequest.getCohortIds(),
               dataSetRequest.getConceptSetIds(),
-              dataSetValuesList,
+              dataSetValueList,
               dataSetRequest.getPrePackagedConceptSet(),
               userProvider.get().getUserId(),
               now);
@@ -169,11 +171,35 @@ public class DataSetController implements DataSetApiDelegate {
     }
   }
 
+  private DataSetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
+    return new DataSetValue(
+        CommonStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
+        domainValuePair.getValue());
+  }
+
+  private void validateDataSetCreateRequest(DataSetRequest dataSetRequest) {
+    boolean includesAllParticipants =
+        Optional.ofNullable(dataSetRequest.getIncludesAllParticipants()).orElse(false);
+    if (Strings.isNullOrEmpty(dataSetRequest.getName())) {
+      throw new BadRequestException("Missing name");
+    } else if (dataSetRequest.getConceptSetIds() == null
+        || (dataSetRequest.getConceptSetIds().isEmpty()
+            && dataSetRequest.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.NONE))) {
+      throw new BadRequestException("Missing concept set ids");
+    } else if ((dataSetRequest.getCohortIds() == null || dataSetRequest.getCohortIds().isEmpty())
+        && !includesAllParticipants) {
+      throw new BadRequestException("Missing cohort ids");
+    } else if (dataSetRequest.getDomainValuePairs() == null
+        || dataSetRequest.getDomainValuePairs().isEmpty()) {
+      throw new BadRequestException("Missing values");
+    }
+  }
+
   private final Function<org.pmiops.workbench.db.model.DataSet, DataSet> TO_CLIENT_DATA_SET =
       new Function<org.pmiops.workbench.db.model.DataSet, DataSet>() {
         @Override
         public DataSet apply(org.pmiops.workbench.db.model.DataSet dataSet) {
-          DataSet result =
+          final DataSet result =
               new DataSet()
                   .name(dataSet.getName())
                   .includesAllParticipants(dataSet.getIncludesAllParticipants())
@@ -188,18 +214,18 @@ public class DataSetController implements DataSetApiDelegate {
               StreamSupport.stream(
                       conceptSetDao
                           .findAll(
-                              dataSet.getConceptSetId().stream()
-                                  .filter((concept) -> concept != null)
+                              dataSet.getConceptSetIds().stream()
+                                  .filter(Objects::nonNull)
                                   .collect(Collectors.toList()))
                           .spliterator(),
                       false)
                   .map(conceptSet -> toClientConceptSet(conceptSet))
                   .collect(Collectors.toList()));
           result.setCohorts(
-              StreamSupport.stream(cohortDao.findAll(dataSet.getCohortSetId()).spliterator(), false)
+              StreamSupport.stream(cohortDao.findAll(dataSet.getCohortIds()).spliterator(), false)
                   .map(CohortsController.TO_CLIENT_COHORT)
                   .collect(Collectors.toList()));
-          result.setValues(
+          result.setDomainValuePairs(
               dataSet.getValues().stream()
                   .map(TO_CLIENT_DOMAIN_VALUE)
                   .collect(Collectors.toList()));
@@ -220,156 +246,186 @@ public class DataSetController implements DataSetApiDelegate {
     return result;
   }
 
-  static final Function<DataSetValues, DomainValuePair> TO_CLIENT_DOMAIN_VALUE =
-      new Function<DataSetValues, DomainValuePair>() {
-        @Override
-        public DomainValuePair apply(DataSetValues dataSetValue) {
-          DomainValuePair domainValuePair = new DomainValuePair();
-          domainValuePair.setValue(dataSetValue.getValue());
-          domainValuePair.setDomain(dataSetValue.getDomainEnum());
-          return domainValuePair;
-        }
+  // TODO(jaycarlton): move into helper methods in one or both of these classes
+  private static final Function<DataSetValue, DomainValuePair> TO_CLIENT_DOMAIN_VALUE =
+      dataSetValue -> {
+        DomainValuePair domainValuePair = new DomainValuePair();
+        domainValuePair.setValue(dataSetValue.getValue());
+        domainValuePair.setDomain(dataSetValue.getDomainEnum());
+        return domainValuePair;
       };
+
+  @VisibleForTesting
+  public String generateRandomEightCharacterQualifier() {
+    return RandomStringUtils.randomNumeric(8);
+  }
 
   public ResponseEntity<DataSetCodeResponse> generateCode(
       String workspaceNamespace,
       String workspaceId,
-      String kernelTypeEnum,
-      DataSetRequest dataSet) {
+      String kernelTypeEnumString,
+      DataSetRequest dataSetRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    KernelTypeEnum kernelType = KernelTypeEnum.fromValue(kernelTypeEnum);
+    final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
 
     // Generate query per domain for the selected concept set, cohort and values
-    Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
+    // TODO(jaycarlton): return better error information form this function for common validation
+    // scenarios
+    final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain =
+        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
+
+    if (bigQueryJobConfigsByDomain.isEmpty()) {
+      log.warning("Empty query map generated for this DataSetRequest");
+    }
+
+    String qualifier = generateRandomEightCharacterQualifier();
+
+    final ImmutableList<String> codeCells =
+        ImmutableList.copyOf(
+            dataSetService.generateCodeCells(
+                kernelTypeEnum, dataSetRequest.getName(), qualifier, bigQueryJobConfigsByDomain));
+    final String generatedCode = String.join("\n\n", codeCells);
 
     return ResponseEntity.ok(
-        new DataSetCodeResponse()
-            .code(
-                dataSetService
-                    .generateCodeCellPerDomainFromQueryAndKernelType(
-                        kernelType, dataSet.getName(), bigQueryJobConfig)
-                    .stream()
-                    .collect(Collectors.joining("\n\n")))
-            .kernelType(kernelType));
+        new DataSetCodeResponse().code(generatedCode).kernelType(kernelTypeEnum));
+  }
+
+  // TODO (srubenst): Delete this method and make generate query take the composite parts.
+  private DataSetRequest generateDataSetRequestFromPreviewRequest(
+      DataSetPreviewRequest dataSetPreviewRequest) {
+    return new DataSetRequest()
+        .name("Does not matter")
+        .conceptSetIds(dataSetPreviewRequest.getConceptSetIds())
+        .cohortIds(dataSetPreviewRequest.getCohortIds())
+        .prePackagedConceptSet(dataSetPreviewRequest.getPrePackagedConceptSet())
+        .includesAllParticipants(dataSetPreviewRequest.getIncludesAllParticipants())
+        .domainValuePairs(
+            dataSetPreviewRequest.getValues().stream()
+                .map(
+                    value ->
+                        new DomainValuePair()
+                            .domain(dataSetPreviewRequest.getDomain())
+                            .value(value))
+                .collect(Collectors.toList()));
   }
 
   @Override
-  public ResponseEntity<DataSetPreviewResponse> previewQuery(
-      String workspaceNamespace, String workspaceId, DataSetRequest dataSet) {
+  public ResponseEntity<DataSetPreviewResponse> previewDataSetByDomain(
+      String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DataSetPreviewResponse previewQueryResponse = new DataSetPreviewResponse();
-    Map<String, QueryJobConfiguration> bigQueryJobConfig = dataSetService.generateQuery(dataSet);
-    bigQueryJobConfig.forEach(
-        (domain, queryJobConfiguration) -> {
-          int retry = 0, rowsRequested = NO_OF_PREVIEW_ROWS;
-          List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
-          String originalQuery = queryJobConfiguration.getQuery();
-          do {
-            try {
-              String query = originalQuery.concat(" LIMIT " + rowsRequested);
+    DataSetRequest dataSetRequest = generateDataSetRequestFromPreviewRequest(dataSetPreviewRequest);
+    Map<String, QueryJobConfiguration> bigQueryJobConfig =
+        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
 
-              queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
+    if (bigQueryJobConfig.size() > 1) {
+      throw new BadRequestException(
+          "There should never be a preview request with more than one domain");
+    }
+    List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
+    QueryJobConfiguration queryJobConfiguration =
+        bigQueryJobConfig.get(dataSetPreviewRequest.getDomain().toString());
 
-              /* Google appengine has a 60 second timeout, we want to make sure this endpoint completes
-               * before that limit is exceeded, or we get a 500 error with the following type:
-               * com.google.apphosting.runtime.HardDeadlineExceededError
-               * See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
-               */
-              TableResult queryResponse =
-                  bigQueryService.executeQuery(
-                      bigQueryService.filterBigQueryConfig(queryJobConfiguration),
-                      APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC / PREVIEW_RETRY_LIMIT + 1);
-              queryResponse
-                  .getSchema()
-                  .getFields()
-                  .forEach(
-                      fields -> {
-                        valuePreviewList.add(new DataSetPreviewValueList().value(fields.getName()));
-                      });
+    String originalQuery = queryJobConfiguration.getQuery();
+    TableResult queryResponse;
+    try {
+      String query = originalQuery.concat(" LIMIT " + NO_OF_PREVIEW_ROWS);
 
-              queryResponse
-                  .getValues()
-                  .forEach(
-                      fieldValueList -> {
-                        IntStream.range(0, fieldValueList.size())
-                            .forEach(
-                                columnNumber -> {
-                                  try {
-                                    valuePreviewList
-                                        .get(columnNumber)
-                                        .addQueryValueItem(
-                                            fieldValueList.get(columnNumber).getValue().toString());
-                                  } catch (NullPointerException ex) {
-                                    log.severe(
-                                        String.format(
-                                            "Null pointer exception while retriving value for query: Column %s ",
-                                            columnNumber));
-                                    valuePreviewList.get(columnNumber).addQueryValueItem("");
-                                  }
-                                });
-                      });
-              queryResponse
-                  .getSchema()
-                  .getFields()
-                  .forEach(
-                      fields -> {
-                        DataSetPreviewValueList previewValue =
-                            valuePreviewList.stream()
-                                .filter(
-                                    preview ->
-                                        preview.getValue().equalsIgnoreCase(fields.getName()))
-                                .findFirst()
-                                .get();
-                        if (fields.getType() == LegacySQLTypeName.TIMESTAMP) {
-                          List<String> queryValues = new ArrayList<String>();
-                          DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                          previewValue
-                              .getQueryValue()
-                              .forEach(
-                                  value -> {
-                                    try {
-                                      Double fieldValue = Double.parseDouble(value);
-                                      queryValues.add(
-                                          dateFormat.format(new Date(fieldValue.longValue())));
-                                    } catch (NumberFormatException ex) {
-                                      queryValues.add("");
-                                    }
-                                  });
-                          previewValue.setQueryValue(queryValues);
-                        }
-                      });
-              break;
-            } catch (Exception ex) {
-              if ((ex.getCause() != null
-                  && ex.getCause().getMessage() != null
-                  && ex.getCause().getMessage().contains("Read timed out"))) {
-                rowsRequested = (rowsRequested / 2);
-                if (rowsRequested == 0) {
-                  throw new GatewayTimeoutException(
-                      "Timeout while querying the CDR to pull preview information.");
-                }
-                retry++;
-              } else {
-                throw ex;
-              }
-            }
-          } while (retry < PREVIEW_RETRY_LIMIT);
+      queryJobConfiguration = queryJobConfiguration.toBuilder().setQuery(query).build();
 
-          if (retry == PREVIEW_RETRY_LIMIT) {
-            throw new GatewayTimeoutException(
-                "Timeout while querying the CDR to pull preview information.");
-          }
+      /* Google appengine has a 60 second timeout, we want to make sure this endpoint completes
+       * before that limit is exceeded, or we get a 500 error with the following type:
+       * com.google.apphosting.runtime.HardDeadlineExceededError
+       * See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
+       */
+      queryResponse =
+          bigQueryService.executeQuery(
+              bigQueryService.filterBigQueryConfig(queryJobConfiguration),
+              APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC);
+    } catch (Exception ex) {
+      if ((ex.getCause() != null
+          && ex.getCause().getMessage() != null
+          && ex.getCause().getMessage().contains("Read timed out"))) {
+        throw new GatewayTimeoutException(
+            "Timeout while querying the CDR to pull preview information.");
+      } else {
+        throw ex;
+      }
+    }
 
-          Collections.sort(
-              valuePreviewList,
-              Comparator.comparing(item -> dataSet.getValues().indexOf(item.getValue())));
+    valuePreviewList.addAll(
+        queryResponse.getSchema().getFields().stream()
+            .map(fields -> new DataSetPreviewValueList().value(fields.getName()))
+            .collect(Collectors.toList()));
 
-          previewQueryResponse.addDomainValueItem(
-              new DataSetPreviewList().domain(domain).values(valuePreviewList));
-        });
+    queryResponse
+        .getValues()
+        .forEach(
+            fieldValueList -> {
+              addFieldValuesFromBigQueryToPreviewList(valuePreviewList, fieldValueList);
+            });
+
+    queryResponse
+        .getSchema()
+        .getFields()
+        .forEach(
+            fields -> {
+              formatTimestampValues(valuePreviewList, fields);
+            });
+
+    Collections.sort(
+        valuePreviewList,
+        Comparator.comparing(item -> dataSetPreviewRequest.getValues().indexOf(item.getValue())));
+
+    previewQueryResponse.setDomain(dataSetPreviewRequest.getDomain());
+    previewQueryResponse.setValues(valuePreviewList);
     return ResponseEntity.ok(previewQueryResponse);
+  }
+
+  @VisibleForTesting
+  public void addFieldValuesFromBigQueryToPreviewList(
+      List<DataSetPreviewValueList> valuePreviewList, FieldValueList fieldValueList) {
+    IntStream.range(0, fieldValueList.size())
+        .forEach(
+            columnNumber -> {
+              valuePreviewList
+                  .get(columnNumber)
+                  .addQueryValueItem(
+                      Optional.ofNullable(fieldValueList.get(columnNumber).getValue())
+                          .map(Object::toString)
+                          .orElse(EMPTY_CELL_MARKER));
+            });
+  }
+
+  // Iterates through all values associated with a specific field, and converts all timestamps
+  // to a timestamp formatted string.
+  private void formatTimestampValues(List<DataSetPreviewValueList> valuePreviewList, Field field) {
+    DataSetPreviewValueList previewValue =
+        valuePreviewList.stream()
+            .filter(preview -> preview.getValue().equalsIgnoreCase(field.getName()))
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new IllegalStateException(
+                        "Value should be present when it is not in dataset preview request"));
+    if (field.getType() == LegacySQLTypeName.TIMESTAMP) {
+      List<String> queryValues = new ArrayList<>();
+      DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
+      previewValue
+          .getQueryValue()
+          .forEach(
+              value -> {
+                if (!value.equals(EMPTY_CELL_MARKER)) {
+                  Double fieldValue = Double.parseDouble(value);
+                  queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
+                } else {
+                  queryValues.add(value);
+                }
+              });
+      previewValue.setQueryValue(queryValues);
+    }
   }
 
   @Override
@@ -427,13 +483,18 @@ public class DataSetController implements DataSetApiDelegate {
       }
     }
 
-    Map<String, QueryJobConfiguration> queryList =
-        dataSetService.generateQuery(dataSetExportRequest.getDataSetRequest());
+    Map<String, QueryJobConfiguration> queriesByDomain =
+        dataSetService.generateQueryJobConfigurationsByDomainName(
+            dataSetExportRequest.getDataSetRequest());
+
+    String qualifier = generateRandomEightCharacterQualifier();
+
     List<String> queriesAsStrings =
-        dataSetService.generateCodeCellPerDomainFromQueryAndKernelType(
+        dataSetService.generateCodeCells(
             dataSetExportRequest.getKernelType(),
             dataSetExportRequest.getDataSetRequest().getName(),
-            queryList);
+            qualifier,
+            queriesByDomain);
 
     if (dataSetExportRequest.getNewNotebook()) {
       notebookFile =
@@ -485,9 +546,9 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     List<org.pmiops.workbench.db.model.DataSet> dbDataSetList = new ArrayList<>();
     if (markDataSetRequest.getResourceType().equalsIgnoreCase(COHORT)) {
-      dbDataSetList = dataSetDao.findDataSetsByCohortSetId(markDataSetRequest.getId());
+      dbDataSetList = dataSetDao.findDataSetsByCohortIds(markDataSetRequest.getId());
     } else if (markDataSetRequest.getResourceType().equalsIgnoreCase(CONCEPT_SET)) {
-      dbDataSetList = dataSetDao.findDataSetsByConceptSetId(markDataSetRequest.getId());
+      dbDataSetList = dataSetDao.findDataSetsByConceptSetIds(markDataSetRequest.getId());
     }
     dbDataSetList =
         dbDataSetList.stream()
@@ -530,21 +591,14 @@ public class DataSetController implements DataSetApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbDataSet.setLastModifiedTime(now);
     dbDataSet.setIncludesAllParticipants(request.getIncludesAllParticipants());
-    dbDataSet.setCohortSetId(request.getCohortIds());
-    dbDataSet.setConceptSetId(request.getConceptSetIds());
+    dbDataSet.setCohortIds(request.getCohortIds());
+    dbDataSet.setConceptSetIds(request.getConceptSetIds());
     dbDataSet.setDescription(request.getDescription());
     dbDataSet.setName(request.getName());
     dbDataSet.setPrePackagedConceptSetEnum(request.getPrePackagedConceptSet());
     dbDataSet.setValues(
-        request.getValues().stream()
-            .map(
-                (domainValueSet) -> {
-                  DataSetValues dataSetValues =
-                      new DataSetValues(
-                          domainValueSet.getDomain().name(), domainValueSet.getValue());
-                  dataSetValues.setDomainEnum(domainValueSet.getDomain());
-                  return dataSetValues;
-                })
+        request.getDomainValuePairs().stream()
+            .map(this::getDataSetValuesFromDomainValueSet)
             .collect(Collectors.toList()));
     try {
       dbDataSet = dataSetDao.save(dbDataSet);
@@ -575,19 +629,42 @@ public class DataSetController implements DataSetApiDelegate {
     List<org.pmiops.workbench.db.model.DataSet> dbDataSets =
         new ArrayList<org.pmiops.workbench.db.model.DataSet>();
     if (resourceType.equals(COHORT)) {
-      dbDataSets = dataSetDao.findDataSetsByCohortSetId(id);
+      dbDataSets = dataSetDao.findDataSetsByCohortIds(id);
     } else if (resourceType.equals(CONCEPT_SET)) {
-      dbDataSets = dataSetDao.findDataSetsByConceptSetId(id);
+      dbDataSets = dataSetDao.findDataSetsByConceptSetIds(id);
     }
     DataSetListResponse dataSetResponse =
         new DataSetListResponse()
-            .items(
-                dbDataSets.stream()
-                    .map(dbDataSet -> TO_CLIENT_DATA_SET.apply(dbDataSet))
-                    .collect(Collectors.toList()));
+            .items(dbDataSets.stream().map(TO_CLIENT_DATA_SET).collect(Collectors.toList()));
     return ResponseEntity.ok(dataSetResponse);
   }
 
+  @Override
+  public ResponseEntity<DataDictionaryEntry> getDataDictionaryEntry(
+      Long cdrVersionId, String domain, String domainValue) {
+    CdrVersion cdrVersion = cdrVersionDao.findByCdrVersionId(cdrVersionId);
+    if (cdrVersion == null) {
+      throw new BadRequestException("Invalid CDR Version");
+    }
+
+    String omopTable = conceptSetDao.DOMAIN_TO_TABLE_NAME.get(Domain.fromValue(domain));
+    if (omopTable == null) {
+      throw new BadRequestException("Invalid Domain");
+    }
+
+    Optional<org.pmiops.workbench.db.model.DataDictionaryEntry> dataDictionaryEntry =
+        dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
+            omopTable, domainValue, cdrVersion);
+
+    if (!dataDictionaryEntry.isPresent()) {
+      throw new NotFoundException();
+    }
+
+    return ResponseEntity.ok(dataSetMapper.toApi(dataDictionaryEntry.get()));
+  }
+
+  // TODO(jaycarlton) create a class that knows about code cells and their properties,
+  // then give it a toJson() method to replace this one.
   private JSONObject createNotebookCodeCellWithString(String cellInformation) {
     return new JSONObject()
         .put("cell_type", "code")
@@ -602,7 +679,7 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceId,
       Long dataSetId,
       WorkspaceAccessLevel workspaceAccessLevel) {
-    Workspace workspace =
+    final Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, workspaceAccessLevel);
 

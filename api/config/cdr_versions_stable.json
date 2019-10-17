@@ -1,8 +1,9 @@
 [
   {
     "cdrVersionId": 1,
-    "name": "Synthetic Dataset v1",
+    "name": "Synthetic Dataset v1 (Legacy)",
     "dataAccessLevel": 1,
+    "archivalStatus": 1,
     "bigqueryProject": "all-of-us-ehr-dev",
     "bigqueryDataset": "synthetic_cdr20180606",
     "creationTime": "2017-12-26 00:00:00Z",
@@ -13,9 +14,9 @@
   },
   {
     "cdrVersionId": 2,
-    "isDefault": true,
-    "name": "Synthetic Dataset v2",
+    "name": "Synthetic Dataset v2 (Legacy)",
     "dataAccessLevel": 1,
+    "archivalStatus": 1,
     "bigqueryProject": "all-of-us-ehr-dev",
     "bigqueryDataset": "synthetic_cdr20180606",
     "creationTime": "2017-12-26 00:00:00Z",
@@ -23,5 +24,31 @@
     "numParticipants": 946237,
     "cdrDbName": "synth_r_2019q3_2",
     "elasticIndexBaseName": "synth_r_2019q1_1"
+  },
+  {
+    "cdrVersionId": 3,
+    "name": "Synthetic Dataset v1",
+    "dataAccessLevel": 1,
+    "bigqueryProject": "fc-aou-cdr-synth-stable",
+    "bigqueryDataset": "synthetic_cdr20180606",
+    "creationTime": "2017-12-26 00:00:00Z",
+    "releaseNumber": 1,
+    "numParticipants": 946237,
+    "cdrDbName": "synth_r_2019q3_2",
+    "elasticIndexBaseName": "synth_r_2019q1_1"
+  },
+  {
+    "cdrVersionId": 4,
+    "isDefault": true,
+    "name": "Synthetic Dataset v2",
+    "dataAccessLevel": 1,
+    "bigqueryProject": "fc-aou-cdr-synth-stable",
+    "bigqueryDataset": "synthetic_cdr20180606",
+    "creationTime": "2017-12-26 00:00:00Z",
+    "releaseNumber": 1,
+    "numParticipants": 946237,
+    "cdrDbName": "synth_r_2019q3_2",
+    "elasticIndexBaseName": "synth_r_2019q1_1"
   }
+
 ]

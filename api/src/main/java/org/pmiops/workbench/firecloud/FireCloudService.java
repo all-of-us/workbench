@@ -46,10 +46,24 @@ public interface FireCloudService {
   void addUserToBillingProject(String email, String projectName);
 
   /**
-   * Removes the specified user from the specified billing project. Only used for errored billing
-   * projects
+   * Removes the specified user from the specified billing project.
+   *
+   * <p>Only used for errored billing projects
    */
   void removeUserFromBillingProject(String email, String projectName);
+
+  /** Adds the specified user as an owner to the specified billing project. */
+  void addOwnerToBillingProject(String ownerEmail, String projectName);
+
+  /**
+   * Removes the specified user as an owner from the specified billing project. Since FireCloud
+   * users cannot remove themselves, we need to supply the credential of a different user which will
+   * retain ownership to make the call
+   *
+   * <p>Only used for billing project garbage collection
+   */
+  void removeOwnerFromBillingProject(
+      String projectName, String ownerEmailToRemove, String callerAccessToken);
 
   /** Creates a new FC workspace. */
   void createWorkspace(String projectName, String workspaceName);
@@ -64,9 +78,13 @@ public interface FireCloudService {
   WorkspaceACLUpdateResponseList updateWorkspaceACL(
       String projectName, String workspaceName, List<WorkspaceACLUpdate> aclUpdates);
 
+  /**
+   * Requested field options specified here:
+   * https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#heading=h.xgjl2srtytjt
+   */
   WorkspaceResponse getWorkspace(String projectName, String workspaceName);
 
-  List<WorkspaceResponse> getWorkspaces();
+  List<WorkspaceResponse> getWorkspaces(List<String> fields);
 
   void deleteWorkspace(String projectName, String workspaceName);
 

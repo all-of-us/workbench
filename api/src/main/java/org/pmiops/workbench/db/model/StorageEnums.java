@@ -6,7 +6,6 @@ import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBuf
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ReviewStatus;
@@ -52,22 +51,6 @@ public final class StorageEnums {
     return CLIENT_TO_STORAGE_AUTHORITY.get(authority);
   }
 
-  private static final BiMap<BillingProjectStatus, Short> CLIENT_TO_STORAGE_BILLING_PROJECT_STATUS =
-      ImmutableBiMap.<BillingProjectStatus, Short>builder()
-          .put(BillingProjectStatus.NONE, (short) 0)
-          .put(BillingProjectStatus.PENDING, (short) 1)
-          .put(BillingProjectStatus.READY, (short) 2)
-          .put(BillingProjectStatus.ERROR, (short) 3)
-          .build();
-
-  public static BillingProjectStatus billingProjectStatusFromStorage(Short s) {
-    return CLIENT_TO_STORAGE_BILLING_PROJECT_STATUS.inverse().get(s);
-  }
-
-  public static Short billingProjectStatusToStorage(BillingProjectStatus s) {
-    return CLIENT_TO_STORAGE_BILLING_PROJECT_STATUS.get(s);
-  }
-
   private static final BiMap<BillingProjectBufferStatus, Short>
       CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS =
           ImmutableBiMap.<BillingProjectBufferStatus, Short>builder()
@@ -76,6 +59,7 @@ public final class StorageEnums {
               .put(BillingProjectBufferStatus.AVAILABLE, (short) 2)
               .put(BillingProjectBufferStatus.ASSIGNING, (short) 3)
               .put(BillingProjectBufferStatus.ASSIGNED, (short) 4)
+              .put(BillingProjectBufferStatus.GARBAGE_COLLECTED, (short) 5)
               .build();
 
   public static BillingProjectBufferStatus billingProjectBufferStatusFromStorage(Short s) {

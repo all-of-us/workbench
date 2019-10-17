@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {wizardStore} from 'app/cohort-search/search-state.service';
-import {mapParameter} from 'app/cohort-search/utils';
+import {domainToTitle, mapParameter} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {DatePicker} from 'app/components/inputs';
@@ -8,6 +8,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -330,6 +331,7 @@ export const ListModifierPage = withCurrentWorkspace()(
 
     selectChange = (sel: any, index: number) => {
       const {formState} = this.state;
+      this.trackEvent(formState[index].label);
       const {name} = formState[index];
       if (name === ModifierType.ENCOUNTERS) {
         formState[index].values = [sel];
@@ -381,13 +383,13 @@ export const ListModifierPage = withCurrentWorkspace()(
     }
 
     calculate = () => {
-      // TODO update when new api call is ready, currently this will always fail
+      const {
+        wizard: {domain, item: {modifiers, searchParameters}, role},
+        workspace: {cdrVersionId}
+      } = this.props;
+      this.trackEvent('Calculate');
       try {
         this.setState({loading: true, count: null, error: false});
-        const {
-          wizard: {domain, item: {modifiers, searchParameters}, role},
-          workspace: {cdrVersionId}
-        } = this.props;
         const request = {
           includes: [],
           excludes: [],
@@ -407,6 +409,15 @@ export const ListModifierPage = withCurrentWorkspace()(
         // TODO this is not catching errors. Need to try again with the new api call
         this.setState({loading: false, error: true});
       }
+    }
+
+    trackEvent = (label: string) => {
+      const {wizard: {domain}} = this.props;
+      triggerEvent(
+        'Cohort Builder Search',
+        'Click',
+        `Modifiers - ${label} - ${domainToTitle(domain)} - Cohort Builder Search`
+      );
     }
 
     validateValues() {
@@ -481,7 +492,7 @@ export const ListModifierPage = withCurrentWorkspace()(
         {error && <div style={styles.error}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
             shape='exclamation-triangle' size='22'/>
-          Sorry, the request cannot be completed.
+          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
         </div>}
         {!!errors.size && <div style={styles.errors}>
           {Array.from(errors).map((err, e) => <div key={e} style={styles.errorItem}>

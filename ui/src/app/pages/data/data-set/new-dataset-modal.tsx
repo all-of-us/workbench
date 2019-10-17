@@ -20,6 +20,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
+import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {
   DataSet,
   DataSetRequest,
@@ -36,7 +37,7 @@ interface Props {
   prePackagedConceptSet: PrePackagedConceptSetEnum;
   selectedConceptSetIds: number[];
   selectedCohortIds: number[];
-  selectedValues: DomainValuePair[];
+  selectedDomainValuePairs: DomainValuePair[];
   workspaceNamespace: string;
   workspaceId: string;
 }
@@ -113,12 +114,12 @@ class NewDataSetModal extends React.Component<Props, State> {
   async updateDataSet() {
     const {dataSet, workspaceNamespace, workspaceId} = this.props;
     const {name} = this.state;
-    const request = {
+    const request: DataSetRequest = {
       name: name,
       includesAllParticipants: dataSet.includesAllParticipants,
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
-      values: this.props.selectedValues,
+      domainValuePairs: this.props.selectedDomainValuePairs,
       etag: dataSet.etag
     };
     await dataSetApi().updateDataSet(workspaceNamespace, workspaceId, dataSet.id, request);
@@ -132,17 +133,17 @@ class NewDataSetModal extends React.Component<Props, State> {
     }
     this.setState({conflictDataSetName: false, missingDataSetInfo: false, loading: true});
     const {name} = this.state;
-    const request = {
+    const request: DataSetRequest = {
       name: name,
       description: '',
       includesAllParticipants: this.props.includesAllParticipants,
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
-      values: this.props.selectedValues,
+      domainValuePairs: this.props.selectedDomainValuePairs,
       prePackagedConceptSet: this.props.prePackagedConceptSet
     };
     try {
-      // If data set exist it is an update
+      // If dataset exist it is an update
       if (this.props.dataSet) {
         const updateReq = {
           ...request,
@@ -163,11 +164,13 @@ class NewDataSetModal extends React.Component<Props, State> {
             newNotebook: this.state.newNotebook
           });
         // Open notebook in a new tab and return back to the Data tab
-        const notebookUrl = '/workspaces/' + workspaceNamespace + '/' + workspaceId +
-            '/notebooks/' + appendNotebookFileSuffix(encodeURIComponent(this.state.notebookName));
-        window.open(notebookUrl, '_blank');
+        const notebookUrl = `/workspaces/${workspaceNamespace}/${workspaceId}` +
+            `/notebooks/preview/${appendNotebookFileSuffix(
+              encodeURIComponentStrict(this.state.notebookName))}`;
+        navigateByUrl(notebookUrl);
+      } else {
+        window.history.back();
       }
-      window.history.back();
     } catch (e) {
       if (e.status === 409) {
         this.setState({conflictDataSetName: true, loading: false});
@@ -187,7 +190,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       name: 'dataSet',
       conceptSetIds: this.props.selectedConceptSetIds,
       cohortIds: this.props.selectedCohortIds,
-      values: this.props.selectedValues,
+      domainValuePairs: this.props.selectedDomainValuePairs,
       includesAllParticipants: this.props.includesAllParticipants,
       prePackagedConceptSet: this.props.prePackagedConceptSet
     };
@@ -252,7 +255,7 @@ class NewDataSetModal extends React.Component<Props, State> {
           {missingDataSetInfo &&
           <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
           }
-          <TextInput type='text' autoFocus placeholder='Data Set Name'
+          <TextInput type='text' autoFocus placeholder='Dataset Name'
                      value={name} data-test-id='data-set-name-input'
                      onChange={v => this.setState({
                        name: v, conflictDataSetName: false

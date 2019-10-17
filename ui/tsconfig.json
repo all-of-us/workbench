@@ -21,6 +21,7 @@
     ],
     "module": "es2015",
     "baseUrl": "./",
-    "jsx": "react"
+    "jsx": "react",
+    "resolveJsonModule": true
   }
 }

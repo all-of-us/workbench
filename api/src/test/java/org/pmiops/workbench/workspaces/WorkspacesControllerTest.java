@@ -5,11 +5,11 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -42,7 +42,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONArray;
@@ -57,6 +56,7 @@ import org.pmiops.workbench.api.CohortReviewController;
 import org.pmiops.workbench.api.CohortsController;
 import org.pmiops.workbench.api.ConceptSetsController;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -71,8 +71,11 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.DataSetService;
+import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
@@ -93,6 +96,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AnnotationType;
+import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
@@ -106,13 +110,14 @@ import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
-import org.pmiops.workbench.model.PageFilterType;
+import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
-import org.pmiops.workbench.model.ParticipantCohortStatuses;
+import org.pmiops.workbench.model.RecentWorkspace;
+import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
@@ -126,6 +131,7 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -150,9 +156,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspacesControllerTest {
 
-  private static final Instant NOW = Instant.now();
-  private static final long NOW_TIME = Timestamp.from(NOW).getTime();
-  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+  private static final Timestamp NOW = Timestamp.from(Instant.now());
+  private static final long NOW_TIME = NOW.getTime();
+  private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
   private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
@@ -203,7 +209,8 @@ public class WorkspacesControllerTest {
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_3 =
       makeConcept(CLIENT_CONCEPT_3);
 
-  @Autowired BillingProjectBufferService billingProjectBufferService;
+  @Autowired private BillingProjectBufferService billingProjectBufferService;
+  @Autowired private WorkspaceAuditAdapterService mockWorkspaceAuditAdapterService;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
 
@@ -213,28 +220,30 @@ public class WorkspacesControllerTest {
     NotebooksServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
-    WorkspaceMapper.class,
     CohortsController.class,
     CohortFactoryImpl.class,
     CohortCloningService.class,
     CohortReviewController.class,
     CohortAnnotationDefinitionController.class,
     CohortReviewServiceImpl.class,
+    DataSetServiceImpl.class,
     ReviewQueryBuilder.class,
     ConceptSetService.class,
     ConceptSetsController.class
   })
   @MockBean({
     BillingProjectBufferService.class,
-    ConceptBigQueryService.class,
-    FireCloudService.class,
     CohortMaterializationService.class,
+    ConceptBigQueryService.class,
+    CdrBigQuerySchemaConfigService.class,
+    FireCloudService.class,
     CloudStorageService.class,
     BigQueryService.class,
     CohortQueryBuilder.class,
     UserService.class,
     UserRecentResourceService.class,
-    ConceptService.class
+    ConceptService.class,
+    WorkspaceAuditAdapterService.class
   })
   static class Configuration {
 
@@ -246,9 +255,9 @@ public class WorkspacesControllerTest {
     @Bean
     GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
       Map<String, Map<Long, String>> concepts = new HashMap<>();
-      concepts.put(ParticipantCohortStatusColumns.RACE.name(), new HashMap<>());
-      concepts.put(ParticipantCohortStatusColumns.GENDER.name(), new HashMap<>());
-      concepts.put(ParticipantCohortStatusColumns.ETHNICITY.name(), new HashMap<>());
+      concepts.put(FilterColumns.RACE.name(), new HashMap<>());
+      concepts.put(FilterColumns.GENDER.name(), new HashMap<>());
+      concepts.put(FilterColumns.ETHNICITY.name(), new HashMap<>());
       return new GenderRaceEthnicityConcept(concepts);
     }
 
@@ -262,7 +271,6 @@ public class WorkspacesControllerTest {
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-      workbenchConfig.featureFlags.useBillingProjectBuffer = false;
       return workbenchConfig;
     }
   }
@@ -279,6 +287,7 @@ public class WorkspacesControllerTest {
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortsController cohortsController;
   @Autowired ConceptSetsController conceptSetsController;
+  @Autowired DataSetService dataSetService;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
@@ -286,9 +295,13 @@ public class WorkspacesControllerTest {
 
   private CdrVersion cdrVersion;
   private String cdrVersionId;
+  private String archivedCdrVersionId;
+
+  private TestMockFactory testMockFactory;
 
   @Before
   public void setUp() {
+    testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
     cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
@@ -298,72 +311,56 @@ public class WorkspacesControllerTest {
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
+    CdrVersion archivedCdrVersion = new CdrVersion();
+    archivedCdrVersion.setName("archived");
+    archivedCdrVersion.setCdrDbName("");
+    archivedCdrVersion.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
+    archivedCdrVersion = cdrVersionDao.save(archivedCdrVersion);
+    archivedCdrVersionId = Long.toString(archivedCdrVersion.getCdrVersionId());
+
     conceptDao.save(CONCEPT_1);
     conceptDao.save(CONCEPT_2);
     conceptDao.save(CONCEPT_3);
 
-    CLOCK.setInstant(NOW);
+    CLOCK.setInstant(NOW.toInstant());
 
     WorkbenchConfig testConfig = new WorkbenchConfig();
     testConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
     testConfig.firecloud.registeredDomainName = "allUsers";
     testConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-    testConfig.featureFlags.useBillingProjectBuffer = false;
     when(configProvider.get()).thenReturn(testConfig);
 
-    cohortReviewController.setConfigProvider(configProvider);
     workspacesController.setWorkbenchConfigProvider(configProvider);
     fcWorkspaceAcl = createWorkspaceACL();
-
-    doAnswer(
-            invocation -> {
-              BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
-              doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
-              return entry;
-            })
-        .when(billingProjectBufferService)
-        .assignBillingProject(any());
-
-    doAnswer(
-            invocation -> {
-              String capturedWorkspaceName = (String) invocation.getArguments()[1];
-              String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
-              org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-                  new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-              fcResponse.setWorkspace(
-                  createFcWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null));
-              fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-              doReturn(fcResponse)
-                  .when(fireCloudService)
-                  .getWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName);
-              return null;
-            })
-        .when(fireCloudService)
-        .createWorkspace(anyString(), anyString());
+    testMockFactory.stubBufferBillingProject(billingProjectBufferService);
+    testMockFactory.stubCreateFcWorkspace(fireCloudService);
   }
 
   private User createUser(String email) {
     User user = new User();
     user.setEmail(email);
-    user.setFreeTierBillingProjectName("TestBillingProject1");
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     return userDao.save(user);
   }
 
   private WorkspaceACL createWorkspaceACL() {
+    return createWorkspaceACLWithPermission(WorkspaceAccessLevel.OWNER);
+  }
+
+  private WorkspaceACL createWorkspaceACL(JSONObject acl) {
+    return new Gson().fromJson(new JSONObject().put("acl", acl).toString(), WorkspaceACL.class);
+  }
+
+  private WorkspaceACL createWorkspaceACLWithPermission(WorkspaceAccessLevel permission) {
     return createWorkspaceACL(
         new JSONObject()
             .put(
                 currentUser.getEmail(),
                 new JSONObject()
-                    .put("accessLevel", "OWNER")
+                    .put("accessLevel", permission.toString())
                     .put("canCompute", true)
                     .put("canShare", true)));
-  }
-
-  private WorkspaceACL createWorkspaceACL(JSONObject acl) {
-    return new Gson().fromJson(new JSONObject().put("acl", acl).toString(), WorkspaceACL.class);
   }
 
   private JSONObject createDemoCriteria() {
@@ -388,18 +385,6 @@ public class WorkspacesControllerTest {
     return blob;
   }
 
-  private org.pmiops.workbench.firecloud.model.Workspace createFcWorkspace(
-      String ns, String name, String creator) {
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        new org.pmiops.workbench.firecloud.model.Workspace();
-    fcWorkspace.setNamespace(ns);
-    fcWorkspace.setWorkspaceId(ns);
-    fcWorkspace.setName(name);
-    fcWorkspace.setCreatedBy(creator);
-    fcWorkspace.setBucketName(BUCKET_NAME);
-    return fcWorkspace;
-  }
-
   private void stubFcUpdateWorkspaceACL() {
     when(fireCloudService.updateWorkspaceACL(anyString(), anyString(), anyList()))
         .thenReturn(new WorkspaceACLUpdateResponseList());
@@ -413,6 +398,11 @@ public class WorkspacesControllerTest {
     when(fireCloudService.getWorkspaceAcl(anyString(), anyString())).thenReturn(acl);
   }
 
+  private void stubFcGetWorkspaceACLForWorkspace(
+      String workspaceNamespace, String workspaceId, WorkspaceACL acl) {
+    when(fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId)).thenReturn(acl);
+  }
+
   private void stubFcGetGroup() {
     ManagedGroupWithMembers testGrp = new ManagedGroupWithMembers();
     testGrp.setGroupEmail("test@firecloud.org");
@@ -421,7 +411,7 @@ public class WorkspacesControllerTest {
 
   private void stubGetWorkspace(
       String ns, String name, String creator, WorkspaceAccessLevel access) {
-    stubGetWorkspace(createFcWorkspace(ns, name, creator), access);
+    stubGetWorkspace(testMockFactory.createFcWorkspace(ns, name, creator), access);
   }
 
   private void stubGetWorkspace(
@@ -433,9 +423,9 @@ public class WorkspacesControllerTest {
     doReturn(fcResponse)
         .when(fireCloudService)
         .getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName());
-    List<WorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces();
+    List<WorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces(any());
     workspaceResponses.add(fcResponse);
-    doReturn(workspaceResponses).when(fireCloudService).getWorkspaces();
+    doReturn(workspaceResponses).when(fireCloudService).getWorkspaces(any());
   }
 
   private void stubBigQueryCohortCalls() {
@@ -532,12 +522,14 @@ public class WorkspacesControllerTest {
   public void getWorkspaces() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
+    verify(mockWorkspaceAuditAdapterService).fireCreateAction(any(Workspace.class), anyLong());
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setWorkspace(
+        testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
   }
@@ -614,13 +606,21 @@ public class WorkspacesControllerTest {
     assertThat(uniqueIds.size()).isEqualTo(1);
   }
 
+  @Test(expected = FailedPreconditionException.class)
+  public void testCreateWorkspace_archivedCdrVersionThrows() throws Exception {
+    Workspace workspace = createWorkspace();
+    workspace.setCdrVersionId(archivedCdrVersionId);
+    workspacesController.createWorkspace(workspace).getBody();
+  }
+
   @Test
   public void testDeleteWorkspace() throws Exception {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
-
+    verify(mockWorkspaceAuditAdapterService)
+        .fireDeleteAction(any(org.pmiops.workbench.db.model.Workspace.class));
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");
@@ -651,7 +651,7 @@ public class WorkspacesControllerTest {
   public void testUpdateWorkspace() throws Exception {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
-
+    stubFcGetWorkspaceACL();
     ws.setName("updated-name");
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     request.setWorkspace(ws);
@@ -672,6 +672,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspaceResearchPurpose() throws Exception {
+    stubFcGetWorkspaceACL();
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -719,15 +720,17 @@ public class WorkspacesControllerTest {
     ws.setName("updated-name");
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     request.setWorkspace(ws);
+    stubFcGetWorkspaceACL(createWorkspaceACLWithPermission(WorkspaceAccessLevel.READER));
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
-
+    stubFcGetWorkspaceACL(createWorkspaceACLWithPermission(WorkspaceAccessLevel.WRITER));
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
   }
 
   @Test(expected = ConflictException.class)
   public void testUpdateWorkspaceStaleThrows() throws Exception {
+    stubFcGetWorkspaceACL();
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
@@ -741,6 +744,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspaceInvalidEtagsThrow() throws Exception {
+    stubFcGetWorkspaceACL();
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -822,7 +826,6 @@ public class WorkspacesControllerTest {
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
-    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
     writerUser.setDisabled(false);
 
     writerUser = userDao.save(writerUser);
@@ -877,6 +880,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspaceWithCohortsAndConceptSets() throws Exception {
+    stubFcGetWorkspaceACL();
     Long participantId = 1L;
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
     Workspace workspace = createWorkspace();
@@ -916,8 +920,7 @@ public class WorkspacesControllerTest {
             .createParticipantCohortAnnotation(
                 workspace.getNamespace(),
                 workspace.getId(),
-                c1.getId(),
-                cdrVersion.getCdrVersionId(),
+                cr1.getCohortReviewId(),
                 participantId,
                 new ParticipantCohortAnnotation()
                     .cohortAnnotationDefinitionId(
@@ -942,8 +945,7 @@ public class WorkspacesControllerTest {
             .createParticipantCohortAnnotation(
                 workspace.getNamespace(),
                 workspace.getId(),
-                c1.getId(),
-                cdrVersion.getCdrVersionId(),
+                cr1.getCohortReviewId(),
                 participantId,
                 new ParticipantCohortAnnotation()
                     .cohortAnnotationDefinitionId(
@@ -980,15 +982,14 @@ public class WorkspacesControllerTest {
             .createParticipantCohortAnnotation(
                 workspace.getNamespace(),
                 workspace.getId(),
-                c2.getId(),
-                cdrVersion.getCdrVersionId(),
+                cr2.getCohortReviewId(),
                 participantId,
                 new ParticipantCohortAnnotation()
                     .cohortAnnotationDefinitionId(
                         cad2EnumResponse.getCohortAnnotationDefinitionId())
                     .annotationValueEnum("value")
                     .participantId(participantId)
-                    .cohortReviewId(cr1.getCohortReviewId()))
+                    .cohortReviewId(cr2.getCohortReviewId()))
             .getBody();
     CohortAnnotationDefinition cad2BooleanResponse =
         cohortAnnotationDefinitionController
@@ -1006,15 +1007,14 @@ public class WorkspacesControllerTest {
             .createParticipantCohortAnnotation(
                 workspace.getNamespace(),
                 workspace.getId(),
-                c2.getId(),
-                cdrVersion.getCdrVersionId(),
+                cr2.getCohortReviewId(),
                 participantId,
                 new ParticipantCohortAnnotation()
                     .cohortAnnotationDefinitionId(
                         cad2BooleanResponse.getCohortAnnotationDefinitionId())
                     .annotationValueBoolean(Boolean.TRUE)
                     .participantId(participantId)
-                    .cohortReviewId(cr1.getCohortReviewId()))
+                    .cohortReviewId(cr2.getCohortReviewId()))
             .getBody();
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
@@ -1094,8 +1094,7 @@ public class WorkspacesControllerTest {
                 cloned.getId(),
                 cohortsByName.get("c1").getId(),
                 cdrVersion.getCdrVersionId(),
-                new ParticipantCohortStatuses()
-                    .pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES))
+                new PageFilterRequest())
             .getBody();
     assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
     assertThat(gotCr1.getParticipantCohortStatuses()).isEqualTo(cr1.getParticipantCohortStatuses());
@@ -1113,11 +1112,7 @@ public class WorkspacesControllerTest {
     ParticipantCohortAnnotationListResponse clonedPca1List =
         cohortReviewController
             .getParticipantCohortAnnotations(
-                cloned.getNamespace(),
-                cloned.getId(),
-                cohortsByName.get("c1").getId(),
-                cdrVersion.getCdrVersionId(),
-                participantId)
+                cloned.getNamespace(), cloned.getId(), gotCr1.getCohortReviewId(), participantId)
             .getBody();
     assertParticipantCohortAnnotation(
         clonedPca1List,
@@ -1133,8 +1128,7 @@ public class WorkspacesControllerTest {
                 cloned.getId(),
                 cohortsByName.get("c2").getId(),
                 cdrVersion.getCdrVersionId(),
-                new ParticipantCohortStatuses()
-                    .pageFilterType(PageFilterType.PARTICIPANTCOHORTSTATUSES))
+                new PageFilterRequest())
             .getBody();
     assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
     assertThat(gotCr2.getParticipantCohortStatuses()).isEqualTo(cr2.getParticipantCohortStatuses());
@@ -1152,11 +1146,7 @@ public class WorkspacesControllerTest {
     ParticipantCohortAnnotationListResponse clonedPca2List =
         cohortReviewController
             .getParticipantCohortAnnotations(
-                cloned.getNamespace(),
-                cloned.getId(),
-                cohortsByName.get("c2").getId(),
-                cdrVersion.getCdrVersionId(),
-                participantId)
+                cloned.getNamespace(), cloned.getId(), gotCr2.getCohortReviewId(), participantId)
             .getBody();
     assertParticipantCohortAnnotation(
         clonedPca2List,
@@ -1188,14 +1178,13 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspaceWithConceptSetNewCdrVersionNewConceptSetCount() throws Exception {
+    stubFcGetWorkspaceACL();
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     CdrVersion cdrVersion2 = new CdrVersion();
     cdrVersion2.setName("2");
-    // set the db name to be empty since test cases currently
-    // run in the workbench schema only.
     cdrVersion2.setCdrDbName("");
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
@@ -1327,18 +1316,18 @@ public class WorkspacesControllerTest {
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        createFcWorkspace(
+        testMockFactory.createFcWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName("bucket2");
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     String f1 = NotebooksService.withNotebookExtension("notebooks/f1");
     String f2 = NotebooksService.withNotebookExtension("notebooks/f2 with spaces");
-    String f3 = "notebooks/f3.vcf";
+    String f3 = "foo/f3.vcf";
     // Note: mockBlob cannot be inlined into thenReturn() due to Mockito nuances.
     List<Blob> blobs =
         ImmutableList.of(
             mockBlob(BUCKET_NAME, f1), mockBlob(BUCKET_NAME, f2), mockBlob(BUCKET_NAME, f3));
-    when(cloudStorageService.getBlobList(BUCKET_NAME, "notebooks")).thenReturn(blobs);
+    when(cloudStorageService.getBlobList(BUCKET_NAME)).thenReturn(blobs);
     mockBillingProjectBuffer("cloned-ns");
     workspacesController
         .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
@@ -1346,8 +1335,7 @@ public class WorkspacesControllerTest {
         .getWorkspace();
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f1), BlobId.of("bucket2", f1));
     verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f2), BlobId.of("bucket2", f2));
-    verify(cloudStorageService, never())
-        .copyBlob(BlobId.of(BUCKET_NAME, f3), BlobId.of("bucket2", f3));
+    verify(cloudStorageService).copyBlob(BlobId.of(BUCKET_NAME, f3), BlobId.of("bucket2", f3));
   }
 
   @Test
@@ -1358,7 +1346,6 @@ public class WorkspacesControllerTest {
     User cloner = new User();
     cloner.setEmail("cloner@gmail.com");
     cloner.setUserId(456L);
-    cloner.setFreeTierBillingProjectName("TestBillingProject1");
     cloner.setDisabled(false);
     currentUser = userDao.save(cloner);
 
@@ -1443,6 +1430,28 @@ public class WorkspacesControllerTest {
         new CloneWorkspaceRequest().workspace(modWorkspace));
   }
 
+  @Test(expected = FailedPreconditionException.class)
+  public void testCloneWorkspaceArchivedCdrVersionThrows() throws Exception {
+    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+
+    Workspace modWorkspace =
+        new Workspace()
+            .name("cloned")
+            .namespace("cloned-ns")
+            .researchPurpose(workspace.getResearchPurpose())
+            .cdrVersionId(archivedCdrVersionId);
+    stubGetWorkspace(
+        modWorkspace.getNamespace(),
+        modWorkspace.getName(),
+        "cloner@gmail.com",
+        WorkspaceAccessLevel.OWNER);
+    mockBillingProjectBuffer("cloned-ns");
+    workspacesController.cloneWorkspace(
+        workspace.getNamespace(),
+        workspace.getId(),
+        new CloneWorkspaceRequest().workspace(modWorkspace));
+  }
+
   @Test
   public void testCloneWorkspaceIncludeUserRoles() throws Exception {
     stubFcGetGroup();
@@ -1499,7 +1508,7 @@ public class WorkspacesControllerTest {
 
     when(fireCloudService.getWorkspaceAcl("cloned-ns", "cloned"))
         .thenReturn(workspaceAclsFromCloned);
-    when(fireCloudService.getWorkspaceAcl("namespace", "name"))
+    when(fireCloudService.getWorkspaceAcl(workspace.getNamespace(), workspace.getName()))
         .thenReturn(workspaceAclsFromOriginal);
 
     currentUser = cloner;
@@ -1557,7 +1566,6 @@ public class WorkspacesControllerTest {
     User cloner = new User();
     cloner.setEmail("cloner@gmail.com");
     cloner.setUserId(456L);
-    cloner.setFreeTierBillingProjectName("TestBillingProject1");
     cloner.setDisabled(false);
     currentUser = userDao.save(cloner);
 
@@ -1590,15 +1598,14 @@ public class WorkspacesControllerTest {
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        createFcWorkspace(
+        testMockFactory.createFcWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName("bucket2");
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     Blob bigNotebook =
         mockBlob(BUCKET_NAME, NotebooksService.withNotebookExtension("notebooks/nb"));
     when(bigNotebook.getSize()).thenReturn(5_000_000_000L); // 5 GB.
-    when(cloudStorageService.getBlobList(BUCKET_NAME, "notebooks"))
-        .thenReturn(ImmutableList.of(bigNotebook));
+    when(cloudStorageService.getBlobList(BUCKET_NAME)).thenReturn(ImmutableList.of(bigNotebook));
     mockBillingProjectBuffer("cloned-ns");
     workspacesController
         .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
@@ -1612,14 +1619,12 @@ public class WorkspacesControllerTest {
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
-    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
     writerUser.setDisabled(false);
 
     writerUser = userDao.save(writerUser);
     User readerUser = new User();
     readerUser.setEmail("readerfriend@gmail.com");
     readerUser.setUserId(125L);
-    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
     readerUser.setDisabled(false);
     readerUser = userDao.save(readerUser);
 
@@ -1762,7 +1767,6 @@ public class WorkspacesControllerTest {
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
-    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
     writerUser.setDisabled(false);
 
     writerUser = userDao.save(writerUser);
@@ -1797,13 +1801,11 @@ public class WorkspacesControllerTest {
     User writerUser = new User();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
-    writerUser.setFreeTierBillingProjectName("TestBillingProject2");
     writerUser.setDisabled(false);
     writerUser = userDao.save(writerUser);
     User readerUser = new User();
     readerUser.setEmail("readerfriend@gmail.com");
     readerUser.setUserId(125L);
-    readerUser.setFreeTierBillingProjectName("TestBillingProject3");
     readerUser.setDisabled(false);
     readerUser = userDao.save(readerUser);
 
@@ -1945,7 +1947,7 @@ public class WorkspacesControllerTest {
     when(mockBlob2.getName()).thenReturn("notebooks/mockFile.text");
     when(mockBlob3.getName())
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/two words"));
-    when(cloudStorageService.getBlobList("bucket", "notebooks"))
+    when(cloudStorageService.getBlobListForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
 
     // Will return 1 entry as only python files in notebook folder are return
@@ -1972,7 +1974,7 @@ public class WorkspacesControllerTest {
     when(mockBlob1.getName())
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
     when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
-    when(cloudStorageService.getBlobList("bucket", "notebooks"))
+    when(cloudStorageService.getBlobListForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
 
     List<String> gotNames =
@@ -1996,7 +1998,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testEmptyFireCloudWorkspaces() throws Exception {
-    when(fireCloudService.getWorkspaces())
+    when(fireCloudService.getWorkspaces(any()))
         .thenReturn(new ArrayList<org.pmiops.workbench.firecloud.model.WorkspaceResponse>());
     try {
       ResponseEntity<org.pmiops.workbench.model.WorkspaceResponseListResponse> response =
@@ -2009,6 +2011,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testRenameNotebookInWorkspace() throws Exception {
+    stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2026,13 +2029,14 @@ public class WorkspacesControllerTest {
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
     verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
+        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
 
   @Test
   public void testRenameNotebookWoExtension() throws Exception {
+    stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2050,13 +2054,14 @@ public class WorkspacesControllerTest {
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
     verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
+        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
 
   @Test
   public void copyNotebook() {
+    stubFcGetWorkspaceACL();
     Workspace fromWorkspace = createWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
@@ -2087,11 +2092,12 @@ public class WorkspacesControllerTest {
 
     verify(userRecentResourceService)
         .updateNotebookEntry(
-            2l, 1l, "gs://workspace-bucket/notebooks/" + expectedNotebookName, Timestamp.from(NOW));
+            2l, 1l, "gs://workspace-bucket/notebooks/" + expectedNotebookName, NOW);
   }
 
   @Test
   public void copyNotebook_onlyAppendsSuffixIfNeeded() {
+    stubFcGetWorkspaceACL();
     Workspace fromWorkspace = createWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
@@ -2122,6 +2128,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ForbiddenException.class)
   public void copyNotebook_onlyHasReadPermissionsToDestination() {
+    stubFcGetWorkspaceACL(createWorkspaceACLWithPermission(WorkspaceAccessLevel.READER));
     Workspace fromWorkspace = createWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
@@ -2157,6 +2164,10 @@ public class WorkspacesControllerTest {
         fromWorkspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.NO_ACCESS);
+    stubFcGetWorkspaceACLForWorkspace(
+        fromWorkspace.getNamespace(),
+        fromWorkspace.getName(),
+        createWorkspaceACLWithPermission(WorkspaceAccessLevel.NO_ACCESS));
     String fromNotebookName = "origin";
 
     Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
@@ -2166,6 +2177,10 @@ public class WorkspacesControllerTest {
         toWorkspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.WRITER);
+    stubFcGetWorkspaceACLForWorkspace(
+        toWorkspace.getNamespace(),
+        toWorkspace.getName(),
+        createWorkspaceACLWithPermission(WorkspaceAccessLevel.WRITER));
     String newNotebookName = "new";
 
     CopyRequest copyNotebookRequest =
@@ -2183,6 +2198,7 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ConflictException.class)
   public void copyNotebook_alreadyExists() {
+    stubFcGetWorkspaceACL();
     Workspace fromWorkspace = createWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
@@ -2212,6 +2228,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneNotebook() throws Exception {
+    stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2224,7 +2241,7 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService)
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, Timestamp.from(NOW));
+        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
   }
 
   @Test
@@ -2278,9 +2295,10 @@ public class WorkspacesControllerTest {
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setWorkspace(
+        testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
 
     assertThat(workspacesController.getPublishedWorkspaces().getBody().getItems().size())
         .isEqualTo(1);
@@ -2298,9 +2316,10 @@ public class WorkspacesControllerTest {
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setWorkspace(
+        testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
   }
@@ -2317,9 +2336,10 @@ public class WorkspacesControllerTest {
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setWorkspace(
+        testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(1);
   }
@@ -2336,9 +2356,10 @@ public class WorkspacesControllerTest {
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-    fcResponse.setWorkspace(createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
+    fcResponse.setWorkspace(
+        testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
-    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces();
+    doReturn(Collections.singletonList(fcResponse)).when(fireCloudService).getWorkspaces(any());
 
     assertThat(workspacesController.getWorkspaces().getBody().getItems().size()).isEqualTo(0);
   }
@@ -2388,7 +2409,8 @@ public class WorkspacesControllerTest {
     final String testNotebook = NotebooksService.withNotebookExtension("test-notebook");
 
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        createFcWorkspace(testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
+        testMockFactory.createFcWorkspace(
+            testWorkspaceNamespace, testWorkspaceName, LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName(BUCKET_NAME);
     stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     stubFcGetWorkspaceACL(acl);
@@ -2535,5 +2557,21 @@ public class WorkspacesControllerTest {
 
     final NotebookLockingMetadataResponse expectedResponse = new NotebookLockingMetadataResponse();
     assertNotebookLockingMetadata(gcsMetadata, expectedResponse, fcWorkspaceAcl);
+  }
+
+  @Test
+  public void getUserRecentWorkspaces() {
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    stubFcGetWorkspaceACL();
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceService.get(workspace.getNamespace(), workspace.getId());
+    workspaceService.updateRecentWorkspaces(dbWorkspace, currentUser.getUserId(), NOW);
+    ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
+        workspacesController.getUserRecentWorkspaces();
+    RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
+    assertThat(recentWorkspace.getWorkspace().getNamespace())
+        .isEqualTo(dbWorkspace.getWorkspaceNamespace());
+    assertThat(recentWorkspace.getWorkspace().getName()).isEqualTo(dbWorkspace.getName());
   }
 }

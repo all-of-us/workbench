@@ -1,7 +1,9 @@
 define([
+  'jquery',
   'base/js/namespace',
+  'base/js/events',
   'nbextensions/snippets_menu/main'
-], (Jupyter, snippets_menu) => {
+], ($, Jupyter, events, snippets_menu) => {
   // Jupyter UI extension to customize the "Snippets Menu" extension with AoU
   // specific code snippets. See
   // https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/snippets_menu/readme.html
@@ -9,30 +11,79 @@ define([
     const pyMenu = {{PY_MENU_JSON}};
     const rMenu = {{R_MENU_JSON}};
 
-    const kernelName = Jupyter.notebook.session.kernel_model.name;
+    const handleKernel = (kernelName) => {
+      // Show the menu which is relevant to the current kernel. Show both as a fallback.
+      let customMenus = [pyMenu, rMenu];
+      if (kernelName.startsWith("python")) {
+        customMenus = [pyMenu];
+      } else if (kernelName === "ir") {
+        customMenus = [rMenu];
+      }
 
-    // Show the menu which is relevant to the current kernel. Show both as a fallback.
-    let customMenus = [pyMenu, rMenu];
-    if (kernelName.startsWith("python")) {
-      customMenus = [pyMenu];
-    } else if (kernelName === "ir") {
-      customMenus = [rMenu];
+      // Avoid mutating the original default_menus to reduce side-effects.
+      snippets_menu.options['menus'] = [...snippets_menu.default_menus];
+      const menus = snippets_menu.options['menus'];
+      menus[0] = {
+         ...menus[0],
+         'sub-menu': [...customMenus, ...menus[0]['sub-menu']]
+      };
+
+      // Include custom menu content from the nbconfigurator UI extension, if any.
+      // We primarily expect this to be used for manual testing of
+      // workbench-snippets code, so prefix it to differentiate from the menus
+      // installed by this extension.
+      const snippetsConfig = Jupyter.notebook.config.data.snippets || {};
+      if (snippetsConfig.include_custom_menu) {
+        const customExtMenu = JSON.parse(snippetsConfig.custom_menu_content);
+        customExtMenu['name'] = '[Custom] ' + customExtMenu['name'];
+        menus[0] = {
+           ...menus[0],
+           'sub-menu': [customExtMenu, ...menus[0]['sub-menu']]
+        };
+      }
+    };
+
+    // By default, code is inserted into the currently selected cell.
+    if (!Jupyter.notebook.config.data.snippets) {
+      Jupyter.notebook.config.data.snippets = {};
     }
-    snippets_menu.options['menus'] = snippets_menu.default_menus;
-    snippets_menu.options['menus'][0]['sub-menu'].splice(0, 0, ...customMenus);
+    Jupyter.notebook.config.data.snippets['insert_as_new_cell'] = true;
 
-    // Include custom menu content from the nbconfigurator UI extension, if any.
-    // We primarily expect this to be used for manual testing of
-    // workbench-snippets code, so prefix it to differentiate from the menus
-    // installed by this extension.
-    const snippetsConfig = Jupyter.notebook.config.data.snippets || {};
-    if (snippetsConfig.include_custom_menu) {
-      const customExtMenu = JSON.parse(snippetsConfig.custom_menu_content);
-      customExtMenu['name'] = '[Custom] ' + customExtMenu['name'];
-      snippets_menu.options['menus'][0]['sub-menu'].splice(0, 0, customExtMenu);
+    // Session may be null at this point, e.g. for large notebooks, while the
+    // Jupyter UI is still doing initial rendering.
+    if (Jupyter.notebook.session && Jupyter.notebook.session.kernel_model) {
+      handleKernel(Jupyter.notebook.session.kernel_model.name);
+      console.log('loaded AoU snippets on initial load');
+    } else {
+      // Initialize the menu with an empty kernel name for now, resulting in
+      // rendering of both language menus. Once the notebook loads we'll try to
+      // re-render the menu with only the proper language.
+      console.log('session data not yet available, listening for notebook load');
+      handleKernel(/* kernelName */ "");
+
+      events.on('notebook_loaded.Notebook', () => {
+        // We can't avoid the initial Snippets menu insertion, so remove it here
+        // and render again. The snippets menu unfortunately does not attach any
+        // classes/IDs for selection so we use the display text. This is brittle
+        // so we ensure robust fallback behavior.
+        const snippetsEl = $('.dropdown:contains("Snippets")');
+        if (snippetsEl.length != 1) {
+          console.error(
+              'failed to locate snippets menu element, snippets are either ' +
+              'not being shown, or both language AoU snippet menus are being ' +
+              'shown');
+          return;
+        }
+        snippetsEl.remove();
+
+        // Kernel name should now be available.
+        handleKernel(Jupyter.notebook.session.kernel_model.name);
+        snippets_menu.menu_setup(
+            snippets_menu.options.menus, snippets_menu.options.sibling, /* insertBeforeSibling */ false);
+        console.log('loaded AoU snippets on event');
+      });
     }
-
-    console.log('loaded custom AoU snippet-menus');
+    console.log('loaded custom AoU snippet-menus extension');
   };
 
   return {

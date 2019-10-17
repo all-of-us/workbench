@@ -1,7 +1,8 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {autocompleteStore, ppiQuestions, scrollStore, subtreePathStore, subtreeSelectedStore} from 'app/cohort-search/search-state.service';
-import {highlightMatches, stripHtml} from 'app/cohort-search/utils';
+import {domainToTitle, highlightMatches, stripHtml, subTypeToTitle} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
@@ -35,6 +36,9 @@ export class NodeComponent implements OnInit, OnDestroy {
         if (this.selected) {
           setTimeout(() => scrollStore.next(this.node.id));
         }
+        if (this.error && id !== undefined) {
+          subtreeSelectedStore.next(undefined);
+        }
       }));
 
       this.subscription.add(autocompleteStore.subscribe(searchTerms => {
@@ -64,6 +68,10 @@ export class NodeComponent implements OnInit, OnDestroy {
   }
 
   loadChildren(event) {
+    // TODO remove condition to only track SURVEY domain for 'Phase 2' of CB Google Analytics
+    if (this.node.domainId === DomainType.SURVEY) {
+      this.trackEvent();
+    }
     if (!event || (this.node.id !== 0 && !!this.children)) { return; }
     this.loading = true;
     const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
@@ -114,6 +122,7 @@ export class NodeComponent implements OnInit, OnDestroy {
       console.error(error);
       this.error = true;
       this.loading = false;
+      subtreeSelectedStore.next(undefined);
     }
   }
 
@@ -138,6 +147,18 @@ export class NodeComponent implements OnInit, OnDestroy {
 
   toggleExpanded() {
     this.expanded = !this.expanded;
+  }
+
+  trackEvent() {
+    const {domainId, name, parentId, subtype} = this.node;
+    if (parentId === 0 && this.expanded) {
+      const formattedName = domainId === DomainType.SURVEY ? name : subTypeToTitle(subtype);
+      triggerEvent(
+        'Cohort Builder Search',
+        'Click',
+        `${domainToTitle(domainId)} - ${formattedName} - Expand`
+      );
+    }
   }
 
   isMatch(name: string) {

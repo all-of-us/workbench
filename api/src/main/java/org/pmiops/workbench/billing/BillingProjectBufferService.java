@@ -20,6 +20,7 @@ import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,13 +64,13 @@ public class BillingProjectBufferService {
 
     final String projectName = createBillingProjectName();
 
-    fireCloudService.createAllOfUsBillingProject(projectName);
     BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
     entry.setFireCloudProjectName(projectName);
     entry.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
     entry.setStatusEnum(CREATING, this::getCurrentTimestamp);
-
     billingProjectBufferEntryDao.save(entry);
+
+    fireCloudService.createAllOfUsBillingProject(projectName);
   }
 
   public void syncBillingProjectStatus() {
@@ -99,11 +100,22 @@ public class BillingProjectBufferService {
             entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
             break;
           case CREATING:
+          case ADDINGTOPERIMETER:
           default:
             break;
         }
+      } catch (NotFoundException e) {
+        log.log(
+            Level.WARNING,
+            "Get BillingProjectStatus call failed for "
+                + entry.getFireCloudProjectName()
+                + ". Project not found.",
+            e);
       } catch (WorkbenchException e) {
-        log.log(Level.WARNING, "Get BillingProject status call failed", e);
+        log.log(
+            Level.WARNING,
+            "Get BillingProjectStatus call failed for " + entry.getFireCloudProjectName(),
+            e);
       }
 
       billingProjectBufferEntryDao.save(entry);
@@ -128,6 +140,11 @@ public class BillingProjectBufferService {
                         .toEpochMilli())))
         .forEach(
             entry -> {
+              log.warning(
+                  "CleanBillingBuffer: Setting status of "
+                      + entry.getFireCloudProjectName()
+                      + " to ERROR from "
+                      + entry.getStatusEnum());
               entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
               billingProjectBufferEntryDao.save(entry);
             });

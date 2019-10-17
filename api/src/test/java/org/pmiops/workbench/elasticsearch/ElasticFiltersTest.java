@@ -234,8 +234,12 @@ public class ElasticFiltersTest {
   private static final QueryBuilder nonNestedQuery(QueryBuilder... inners) {
     BoolQueryBuilder innerBuilder = QueryBuilders.boolQuery();
     for (QueryBuilder in : inners) {
-      BoolQueryBuilder b = QueryBuilders.boolQuery().filter(in);
-      innerBuilder.should(b);
+      if (in.toString().contains("is_deceased") && in.toString().contains("birth_datetime")) {
+        innerBuilder.should(in);
+      } else {
+        BoolQueryBuilder b = QueryBuilders.boolQuery().filter(in);
+        innerBuilder.should(b);
+      }
     }
     return QueryBuilders.boolQuery().filter(innerBuilder);
   }
@@ -313,6 +317,59 @@ public class ElasticFiltersTest {
             singleNestedQuery(
                 QueryBuilders.termsQuery(
                     "events.source_concept_id", ImmutableList.of("771", "772", "773"))));
+  }
+
+  @Test
+  public void testICD9AndSnomedQuery() {
+    QueryBuilder resp =
+        ElasticFilters.fromCohortSearch(
+            cbCriteriaDao,
+            new SearchRequest()
+                .addIncludesItem(
+                    new SearchGroup()
+                        .addItemsItem(
+                            new SearchGroupItem()
+                                .addSearchParametersItem(
+                                    new SearchParameter()
+                                        .value("001")
+                                        .conceptId(771L)
+                                        .domain(DomainType.CONDITION.toString())
+                                        .type(CriteriaType.ICD9CM.toString())
+                                        .group(false)
+                                        .ancestorData(false)
+                                        .standard(false))
+                                .addSearchParametersItem(
+                                    new SearchParameter()
+                                        .conceptId(477L)
+                                        .domain(DomainType.CONDITION.toString())
+                                        .type(CriteriaType.SNOMED.toString())
+                                        .group(false)
+                                        .ancestorData(false)
+                                        .standard(true)))));
+
+    BoolQueryBuilder source = QueryBuilders.boolQuery();
+    source.filter(QueryBuilders.termsQuery("events.source_concept_id", ImmutableList.of("771")));
+    BoolQueryBuilder standard = QueryBuilders.boolQuery();
+    standard.filter(QueryBuilders.termsQuery("events.concept_id", ImmutableList.of("477")));
+    QueryBuilder expected =
+        QueryBuilders.boolQuery()
+            .filter(
+                QueryBuilders.boolQuery()
+                    .should(
+                        QueryBuilders.functionScoreQuery(
+                                QueryBuilders.nestedQuery(
+                                    "events",
+                                    QueryBuilders.constantScoreQuery(source),
+                                    ScoreMode.Total))
+                            .setMinScore(1))
+                    .should(
+                        QueryBuilders.functionScoreQuery(
+                                QueryBuilders.nestedQuery(
+                                    "events",
+                                    QueryBuilders.constantScoreQuery(standard),
+                                    ScoreMode.Total))
+                            .setMinScore(1)));
+    assertThat(resp).isEqualTo(expected);
   }
 
   @Test
@@ -729,6 +786,26 @@ public class ElasticFiltersTest {
   }
 
   @Test
+  public void testDeceasedQuery() {
+    SearchParameter deceasedParam =
+        new SearchParameter()
+            .domain(DomainType.PERSON.toString())
+            .type(CriteriaType.DECEASED.toString())
+            .standard(true)
+            .ancestorData(false)
+            .group(false);
+    QueryBuilder resp =
+        ElasticFilters.fromCohortSearch(
+            cbCriteriaDao,
+            new SearchRequest()
+                .addIncludesItem(
+                    new SearchGroup()
+                        .addItemsItem(
+                            new SearchGroupItem().addSearchParametersItem(deceasedParam))));
+    assertThat(resp).isEqualTo(nonNestedQuery(QueryBuilders.termQuery("is_deceased", true)));
+  }
+
+  @Test
   public void testPregnancyQuery() {
     String conceptId = "903120";
     String operand = "12345";
@@ -839,13 +916,15 @@ public class ElasticFiltersTest {
                 .addIncludesItem(
                     new SearchGroup()
                         .addItemsItem(new SearchGroupItem().addSearchParametersItem(ethParam))));
-    assertThat(resp)
-        .isEqualTo(
-            nonNestedQuery(
+    BoolQueryBuilder ageBuilder =
+        QueryBuilders.boolQuery()
+            .filter(QueryBuilders.termQuery("is_deceased", false))
+            .filter(
                 QueryBuilders.rangeQuery("birth_datetime")
                     .gt(left)
                     .lte(right)
-                    .format("yyyy-MM-dd")));
+                    .format("yyyy-MM-dd"));
+    assertThat(resp).isEqualTo(nonNestedQuery(ageBuilder));
   }
 
   @Test
@@ -884,10 +963,19 @@ public class ElasticFiltersTest {
                         .addItemsItem(
                             new SearchGroupItem()
                                 .searchParameters(Arrays.asList(ageParam, ethParam)))));
+
+    BoolQueryBuilder ageBuilder =
+        QueryBuilders.boolQuery()
+            .filter(QueryBuilders.termQuery("is_deceased", false))
+            .filter(
+                QueryBuilders.rangeQuery("birth_datetime")
+                    .gt(left)
+                    .lte(right)
+                    .format("yyyy-MM-dd"));
     assertThat(resp)
         .isEqualTo(
             nonNestedQuery(
-                QueryBuilders.rangeQuery("birth_datetime").gt(left).lte(right).format("yyyy-MM-dd"),
+                ageBuilder,
                 QueryBuilders.termsQuery("ethnicity_concept_id", ImmutableList.of(conceptId))));
   }
 

@@ -5,7 +5,6 @@
     "clusterMaxAgeDays": 7,
     "clusterIdleMaxAgeDays": 3,
     "debugEndpoints": false,
-    "enforceRegistered": true,
     "leoBaseUrl": "https:\/\/leonardo.dsde-dev.broadinstitute.org",
     "registeredDomainName": "all-of-us-registered-test",
     "registeredDomainGroup": "GROUP_all-of-us-registered-test@dev.test.firecloud.org",
@@ -19,7 +18,11 @@
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0",
     "retryCount": 2,
     "bufferCapacity": 2,
-    "defaultFreeCreditsLimit": 300.0
+    "defaultFreeCreditsLimit": 300.0,
+    "garbageCollectionUserCapacity": 1000,
+    "garbageCollectionUsers": [
+      "aou-rw-gc-test-1@all-of-us-workbench-test.iam.gserviceaccount.com"
+    ]
   },
   "auth": {
     "serviceAccountApiUsers": [
@@ -70,10 +73,9 @@
     "unsafeAllowSelfBypass": true
   },
   "featureFlags": {
-    "enableLeoWelder": true,
-    "useBillingProjectBuffer": true,
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
-    "enableVpcServicePerimeter": true
+    "enableVpcServicePerimeter": true,
+    "enableNewAccountCreation": true
   }
 }

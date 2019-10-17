@@ -13,6 +13,7 @@ import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortStore, currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {Cohort, TemporalTime} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
@@ -99,7 +100,8 @@ const styles = reactStyles({
 
 interface Props {
   searchRequest: any;
-  update: number;
+  updateCount: number;
+  updateSaving: Function;
 }
 
 interface State {
@@ -148,11 +150,10 @@ export const ListOverview = withCurrentWorkspace()(
       if (currentCohortStore.getValue()) {
         this.setState({cohort: currentCohortStore.getValue()});
       }
-      this.getTotalCount();
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (this.props.update > prevProps.update && !this.definitionErrors) {
+      if (this.props.updateCount > prevProps.updateCount && !this.definitionErrors) {
         this.setState({loading: true, apiError: false});
         this.getTotalCount();
       }
@@ -165,15 +166,19 @@ export const ListOverview = withCurrentWorkspace()(
         this.setState({apiCallCheck: localCheck});
         const {cdrVersionId} = currentWorkspaceStore.getValue();
         const request = mapRequest(searchRequest);
-        cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
-          if (localCheck === this.state.apiCallCheck) {
-            this.setState({
-              chartData: response.items,
-              total: response.items.reduce((sum, data) => sum + data.count, 0),
-              loading: false
-            });
-          }
-        });
+        if (request.includes.length > 0) {
+          cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
+            if (localCheck === this.state.apiCallCheck) {
+              this.setState({
+                chartData: response.items,
+                total: response.items.reduce((sum, data) => sum + data.count, 0),
+                loading: false
+              });
+            }
+          });
+        } else {
+          this.setState({chartData: [], total: 0, loading: false});
+        }
       } catch (error) {
         console.error(error);
         this.setState({apiError: true, loading: false});
@@ -218,9 +223,11 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     saveCohort() {
+      triggerEvent('Click icon', 'Click', 'Icon - Save - Cohort Builder');
+      this.props.updateSaving(true);
       const {cohort} = this.state;
       cohort.criteria = this.criteria;
-      this.setState({cohort, saving: true, saveError: false});
+      this.setState({saving: true, saveError: false});
       const {ns, wsid} = urlParamsStore.getValue();
       const cid = cohort.id;
       cohortsApi().updateCohort(ns, wsid, cid, cohort).then(() => {
@@ -233,6 +240,8 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     submit() {
+      triggerEvent('Click icon', 'Click', 'Icon - Save As - Cohort Builder');
+      this.props.updateSaving(true);
       this.setState({saving: true, saveError: false});
       const {ns, wsid} = urlParamsStore.getValue();
       const {name, description} = this.state;
@@ -249,6 +258,7 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     delete = () => {
+      triggerEvent('Click icon', 'Click', 'Icon - Delete - Cohort Builder');
       const {ns, wsid} = urlParamsStore.getValue();
       const {cohort} = this.state;
       cohortsApi().deleteCohort(ns, wsid, cohort.id).then(() => {
@@ -258,8 +268,14 @@ export const ListOverview = withCurrentWorkspace()(
       });
     }
 
-    cancel = () => {
+    cancelDelete = () => {
       this.setState({deleting: false});
+    }
+
+    cancelSave = () => {
+      this.props.updateSaving(false);
+      this.setState({saveModalOpen: false, name: undefined, description: undefined,
+        saveError: false, nameTouched: false});
     }
 
     navigateTo(action: string) {
@@ -268,9 +284,11 @@ export const ListOverview = withCurrentWorkspace()(
       let url = `/workspaces/${ns}/${wsid}/`;
       switch (action) {
         case 'notebook':
+          triggerEvent('Click icon', 'Click', 'Icon - Export - Cohort Builder');
           url += 'notebooks';
           break;
         case 'review':
+          triggerEvent('Click icon', 'Click', 'Icon - Review - Cohort Builder');
           url += `data/cohorts/${cohort.id}/review`;
           break;
       }
@@ -278,6 +296,7 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     toggleChartMode() {
+      triggerEvent('Graphs', 'Click', 'Graphs - Flip - Gender Age Race - Cohort Builder');
       const {stackChart} = this.state;
       this.setState({stackChart: !stackChart});
     }
@@ -287,6 +306,7 @@ export const ListOverview = withCurrentWorkspace()(
         nameTouched, saving, saveError, stackChart, total} = this.state;
       const disableIcon = loading || !cohort ;
       const invalid = nameTouched && !name;
+      const showTotal = total !== undefined && total !== null;
       const items = [
         {label: 'Save', command: () => this.saveCohort(),
           disabled: cohort && cohort.criteria === this.criteria},
@@ -338,12 +358,12 @@ export const ListOverview = withCurrentWorkspace()(
                   <ClrIcon style={{color: '#F57600'}} shape='warning-standard' size={18} />
                 </TooltipTrigger>
               </span>
-              : loading ? <Spinner size={18} /> : <span>{total.toLocaleString()}</span>}
+              : loading ? <Spinner size={18} /> : <span>{showTotal && total.toLocaleString()}</span>}
             </h2>
           </div>
           {apiError && !this.definitionErrors && <div style={styles.totalError}>
             <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
-            Sorry, the request cannot be completed.
+            Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
           </div>}
           {!!total && !this.definitionErrors && !loading && !!chartData &&
             <div style={styles.cardContainer}>
@@ -351,7 +371,11 @@ export const ListOverview = withCurrentWorkspace()(
                 <div style={styles.cardHeader}>
                   Results by Gender
                 </div>
-                <div style={{padding: '0.5rem 0.75rem'}}>
+                <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
+                  'Graphs',
+                  'Hover',
+                  'Graphs - Gender - Cohort Builder'
+                )}>
                   {!!chartData.length && <GenderChart data={chartData} />}
                 </div>
               </div>
@@ -362,7 +386,11 @@ export const ListOverview = withCurrentWorkspace()(
                     className={stackChart ? 'is-info' : ''}
                     onClick={() => this.toggleChartMode()} />
                 </div>
-                <div style={{padding: '0.5rem 0.75rem'}}>
+                <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
+                  'Graphs',
+                  'Hover',
+                  'Graphs - Gender Age Race - Cohort Builder'
+                )}>
                   {!!chartData.length &&
                     <ComboChart mode={stackChart ? 'stacked' : 'normalized'} data={chartData} />}
                 </div>
@@ -385,17 +413,15 @@ export const ListOverview = withCurrentWorkspace()(
               onChange={(v) => this.setState({description: v})}/>
           </ModalBody>
           <ModalFooter>
-            <Button style={{color: colors.primary}} type='link' onClick={() => this.setState({
-              saveModalOpen: false, name: undefined, description: undefined, saveError: false,
-              nameTouched: false
-            })} disabled={saving}>Cancel</Button>
+            <Button style={{color: colors.primary}} type='link' onClick={() => this.cancelSave()}
+              disabled={saving}>Cancel</Button>
             <Button type='primary' disabled={!name || saving} onClick={() => this.submit()}>
               {saving && <Spinner style={{marginRight: '0.25rem'}} size={18} />}
                Save
             </Button>
           </ModalFooter>
         </Modal>}
-        {deleting && <ConfirmDeleteModal closeFunction={this.cancel}
+        {deleting && <ConfirmDeleteModal closeFunction={this.cancelDelete}
           resourceType='cohort'
           receiveDelete={this.delete}
           resourceName={cohort.name} />}
@@ -410,9 +436,10 @@ export const ListOverview = withCurrentWorkspace()(
 })
 export class OverviewComponent extends ReactWrapperBase {
   @Input('searchRequest') searchRequest: Props['searchRequest'];
-  @Input('update') update: Props['update'];
+  @Input('updateCount') updateCount: Props['updateCount'];
+  @Input('updateSaving') updateSaving: Props['updateSaving'];
 
   constructor() {
-    super(ListOverview, ['searchRequest', 'update']);
+    super(ListOverview, ['searchRequest', 'updateCount', 'updateSaving']);
   }
 }

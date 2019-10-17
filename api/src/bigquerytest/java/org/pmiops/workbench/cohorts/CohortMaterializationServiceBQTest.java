@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.api.BigQueryBaseTest;
-import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.api.BigQueryTestService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
@@ -68,7 +68,7 @@ import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
 @Import({
-  BigQueryService.class,
+  BigQueryTestService.class,
   CohortQueryBuilder.class,
   CohortQueryBuilder.class,
   FieldSetQueryBuilder.class,

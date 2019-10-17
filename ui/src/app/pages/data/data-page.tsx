@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import {CardButton, TabButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {ResourceCard} from 'app/components/resource-card';
@@ -66,14 +67,14 @@ const styles = {
 
 enum Tabs {
   SHOWALL = 'SHOW ALL',
-  DATASETS = 'DATA SETS',
+  DATASETS = 'DATASETS',
   COHORTS = 'COHORTS',
   COHORTREVIEWS = 'COHORT REVIEWS',
   CONCEPTSETS = 'CONCEPT SETS'
 }
 
 const descriptions = {
-  datasets: `A data set is a table containing data about a Cohort that can
+  datasets: `A dataset is a table containing data about a Cohort that can
   be exported for analysis. `,
   cohorts: `A cohort is a group of participants based on specific criteria.`,
 };
@@ -223,7 +224,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
             </CardButton>
           </TooltipTrigger>
           <TooltipTrigger content={!writePermission &&
-          `Write permission required to create data sets`} side='top'>
+          `Write permission required to create datasets`} side='top'>
             <CardButton
               style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
               disabled={!writePermission}
@@ -231,7 +232,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
                 navigate(['workspaces', namespace, id, 'data', 'data-sets']);
               }}>
               <div style={styles.cardHeader}>
-                <h2 style={styles.cardHeaderText(!writePermission)}>Data Sets</h2>
+                <h2 style={styles.cardHeaderText(!writePermission)}>Datasets</h2>
                 <ClrIcon shape='plus-circle' class='is-solid' size={18} style={{marginTop: 5}}/>
               </div>
               <div style={styles.cardText}>
@@ -286,12 +287,11 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         }}>
         </div>
         <div style={{
-          marginBottom: '1rem',
           display: 'flex',
           flexWrap: 'wrap',
           position: 'relative',
           minHeight: 247,
-          padding: '0 0.5rem'
+          padding: '0 0.5rem 1rem'
         }}>
           {filteredList.map((resource: RecentResource, index: number) => {
             return <div key={index}> {this.createResourceCard(resource)} </div>;
@@ -300,12 +300,13 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           {isLoading && <SpinnerOverlay></SpinnerOverlay>}
         </div>
       </FadeBox>
+      <HelpSidebar location='data' />
     </React.Fragment>;
   }
 });
 
 @Component({
-  template: '<div #root></div>'
+  template: '<div #root style="position: relative; margin-right: 45px;"></div>'
 })
 export class DataPageComponent extends ReactWrapperBase {
   constructor() {

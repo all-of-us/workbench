@@ -2,7 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
@@ -13,7 +13,8 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,30 +23,29 @@ import org.springframework.transaction.annotation.Transactional;
 @Import({LiquibaseAutoConfiguration.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class CohortAnnotationDefinitionDaoTest {
 
   private static long COHORT_ID = 1;
-
   @Autowired CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
+  private CohortAnnotationDefinition cohortAnnotationDefinition;
 
-  @Autowired JdbcTemplate jdbcTemplate;
-
-  @Test
-  public void save_NoEnumValues() throws Exception {
-    CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
-
-    cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
-
-    String sql =
-        "select count(*) from cohort_annotation_definition where cohort_annotation_definition_id = ?";
-    final Object[] sqlParams = {cohortAnnotationDefinition.getCohortAnnotationDefinitionId()};
-    final Integer expectedCount = new Integer("1");
-
-    assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
+  @Before
+  public void setUp() {
+    cohortAnnotationDefinition =
+        cohortAnnotationDefinitionDao.save(createCohortAnnotationDefinition());
   }
 
   @Test
-  public void save_WithEnumValues() throws Exception {
+  public void saveNoEnumValues() throws Exception {
+    assertEquals(
+        cohortAnnotationDefinition,
+        cohortAnnotationDefinitionDao.findOne(
+            cohortAnnotationDefinition.getCohortAnnotationDefinitionId()));
+  }
+
+  @Test
+  public void saveWithEnumValues() throws Exception {
     CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
     CohortAnnotationEnumValue enumValue1 =
         new CohortAnnotationEnumValue()
@@ -68,48 +68,28 @@ public class CohortAnnotationDefinitionDaoTest {
 
     cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
-    String sql =
-        "select count(*) from cohort_annotation_definition where cohort_annotation_definition_id = ?";
-    Object[] sqlParams = {cohortAnnotationDefinition.getCohortAnnotationDefinitionId()};
-    Integer expectedCount = new Integer("1");
-
-    assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
-
-    sql =
-        "select count(*) from cohort_annotation_enum_value where cohort_annotation_definition_id = ?";
-    sqlParams = new Object[] {cohortAnnotationDefinition.getCohortAnnotationDefinitionId()};
-    expectedCount = new Integer("3");
-
-    assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
-
-    List<CohortAnnotationDefinition> cad =
-        cohortAnnotationDefinitionDao.findByCohortId(cohortAnnotationDefinition.getCohortId());
-    assertEquals(cohortAnnotationDefinition, cad.get(0));
+    CohortAnnotationDefinition cad =
+        cohortAnnotationDefinitionDao.findOne(
+            cohortAnnotationDefinition.getCohortAnnotationDefinitionId());
+    assertEquals(cohortAnnotationDefinition, cad);
+    assertEquals(cohortAnnotationDefinition.getEnumValues(), cad.getEnumValues());
   }
 
   @Test
   public void findByCohortIdAndColumnName() throws Exception {
-    CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
-
-    cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
-
-    CohortAnnotationDefinition expectedAnnotationDefinition =
+    assertEquals(
+        cohortAnnotationDefinition,
         cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(
-            cohortAnnotationDefinition.getCohortId(), cohortAnnotationDefinition.getColumnName());
-
-    assertEquals(expectedAnnotationDefinition, cohortAnnotationDefinition);
+            cohortAnnotationDefinition.getCohortId(), cohortAnnotationDefinition.getColumnName()));
   }
 
   @Test
   public void findByCohortIdOrderByEnumValuesAsc() throws Exception {
-    CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
-
-    cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
-
-    List<CohortAnnotationDefinition> expectedDBList =
-        cohortAnnotationDefinitionDao.findByCohortId(cohortAnnotationDefinition.getCohortId());
-
-    assertEquals(expectedDBList.get(0), cohortAnnotationDefinition);
+    assertEquals(
+        cohortAnnotationDefinition,
+        cohortAnnotationDefinitionDao
+            .findByCohortId(cohortAnnotationDefinition.getCohortId())
+            .get(0));
   }
 
   private CohortAnnotationDefinition createCohortAnnotationDefinition() {

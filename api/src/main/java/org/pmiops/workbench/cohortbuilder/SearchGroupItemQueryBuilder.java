@@ -41,6 +41,9 @@ import org.pmiops.workbench.utils.OperatorUtils;
 /** SearchGroupItemQueryBuilder builds BigQuery queries for search group items. */
 public final class SearchGroupItemQueryBuilder {
 
+  private static final int STANDARD = 1;
+  private static final int SOURCE = 0;
+
   // sql parts to help construct BigQuery sql statements
   private static final String OR = " or\n";
   private static final String AND = " and ";
@@ -50,14 +53,15 @@ public final class SearchGroupItemQueryBuilder {
       "select distinct person_id, entry_date, concept_id\n"
           + "from `${projectId}.${dataSetId}.cb_search_all_events`\n"
           + "where ";
-  private static final String STANDARD_SQL = "is_standard = %s\n" + "and ";
-  private static final String CONCEPT_ID_IN = "(concept_id in unnest(%s))\n";
-  private static final String VALUE_AS_NUMBER = "(concept_id = %s and value_as_number %s %s)\n";
+  private static final String STANDARD_SQL = "(is_standard = %s and concept_id in unnest(%s))\n";
+  private static final String SOURCE_SQL = STANDARD_SQL;
+  private static final String VALUE_AS_NUMBER =
+      "(is_standard = %s and concept_id = %s and value_as_number %s %s)\n";
   private static final String VALUE_AS_CONCEPT_ID =
-      "(concept_id = %s and value_as_concept_id %s unnest(%s))\n";
+      "(is_standard = %s and concept_id = %s and value_as_concept_id %s unnest(%s))\n";
   private static final String VALUE_SOURCE_CONCEPT_ID =
-      "(concept_id = %s and value_source_concept_id %s unnest(%s))\n";
-  private static final String BP_SQL = "(concept_id in unnest(%s)";
+      "(is_standard = %s and concept_id = %s and value_source_concept_id %s unnest(%s))\n";
+  private static final String BP_SQL = "(is_standard = %s and concept_id in unnest(%s)";
   private static final String SYSTOLIC_SQL = " and systolic %s %s";
   private static final String DIASTOLIC_SQL = " and diastolic %s %s";
 
@@ -145,21 +149,32 @@ public final class SearchGroupItemQueryBuilder {
       Map<String, QueryParameterValue> queryParams,
       SearchGroupItem searchGroupItem,
       TemporalMention mention) {
-    Set<Long> childConceptIds = new HashSet<>();
-    boolean isStandard = false;
+    Set<Long> standardChildConceptIds = new HashSet<>();
+    Set<Long> sourceChildConceptIds = new HashSet<>();
     List<String> queryParts = new ArrayList<>();
 
     // When building sql for demographics - we query against the person table
     if (DomainType.PERSON.toString().equals(searchGroupItem.getType())) {
       return buildDemoSql(queryParams, searchGroupItem);
     }
+    boolean standard = false;
+    boolean source = false;
     // Otherwise build sql against flat denormalized search table
     for (SearchParameter param : searchGroupItem.getSearchParameters()) {
       if (param.getAttributes().isEmpty()) {
-        childConceptIds.addAll(childConceptIds(criteriaLookup, ImmutableList.of(param)));
-        // make sure we only add the concept ids sql template once
-        if (!queryParts.contains(CONCEPT_ID_IN)) {
-          queryParts.add(CONCEPT_ID_IN);
+        if (param.getStandard()) {
+          // make sure we only add the standard concept ids sql template once
+          if (!standard) {
+            queryParts.add(STANDARD_SQL);
+            standard = true;
+          }
+          standardChildConceptIds.addAll(childConceptIds(criteriaLookup, ImmutableList.of(param)));
+        } else {
+          if (!source) {
+            queryParts.add(SOURCE_SQL);
+            source = true;
+          }
+          sourceChildConceptIds.addAll(childConceptIds(criteriaLookup, ImmutableList.of(param)));
         }
       } else {
         StringBuilder bpSql = new StringBuilder(BP_SQL);
@@ -178,30 +193,21 @@ public final class SearchGroupItemQueryBuilder {
           }
         }
         if (!bpConceptIds.isEmpty()) {
+          String standardParam =
+              addQueryParameterValue(
+                  queryParams, QueryParameterValue.int64(param.getStandard() ? 1 : 0));
           // if blood pressure we need to add named parameters for concept ids
           QueryParameterValue cids =
               QueryParameterValue.array(bpConceptIds.stream().toArray(Long[]::new), Long.class);
           String conceptIdsParam = addQueryParameterValue(queryParams, cids);
-          queryParts.add(String.format(bpSql.toString(), conceptIdsParam) + ")\n");
+          queryParts.add(String.format(bpSql.toString(), standardParam, conceptIdsParam) + ")\n");
         }
       }
-      // all search parameters in the search group item have the same source/standard flag
-      isStandard = param.getStandard();
     }
-    // create the source/standard flag named parameter
-    String standardParam =
-        addQueryParameterValue(queryParams, QueryParameterValue.int64(isStandard ? 1 : 0));
-    // need to add standard flat to the sql statement
-    String queryPartsSql = String.format(STANDARD_SQL, standardParam);
+    addParamValueAndFormat(queryParams, standardChildConceptIds, queryParts, STANDARD);
+    addParamValueAndFormat(queryParams, sourceChildConceptIds, queryParts, SOURCE);
     // need to OR all query parts together since they exist in the same search group item
-    queryPartsSql = queryPartsSql + "(" + String.join(OR, queryParts) + ")\n";
-    if (!childConceptIds.isEmpty()) {
-      // if we have concept ids that are non bp then add named parameters
-      QueryParameterValue cids =
-          QueryParameterValue.array(childConceptIds.stream().toArray(Long[]::new), Long.class);
-      String conceptIdsParam = addQueryParameterValue(queryParams, cids);
-      queryPartsSql = String.format(queryPartsSql, conceptIdsParam);
-    }
+    String queryPartsSql = "(" + String.join(OR, queryParts) + ")\n";
     // format the base sql with all query parts
     String baseSql = BASE_SQL + queryPartsSql;
     // build modifier sql if modifiers exists
@@ -374,10 +380,14 @@ public final class SearchGroupItemQueryBuilder {
       Map<String, QueryParameterValue> queryParams,
       SearchParameter parameter,
       Attribute attribute) {
+    String standardParam =
+        addQueryParameterValue(
+            queryParams, QueryParameterValue.int64(parameter.getStandard() ? 1 : 0));
     String conceptIdParam =
         addQueryParameterValue(queryParams, QueryParameterValue.int64(parameter.getConceptId()));
     return String.format(
         VALUE_AS_NUMBER,
+        standardParam,
         conceptIdParam,
         OperatorUtils.getSqlOperator(attribute.getOperator()),
         getOperandsExpression(queryParams, attribute));
@@ -388,19 +398,23 @@ public final class SearchGroupItemQueryBuilder {
       Map<String, QueryParameterValue> queryParams,
       SearchParameter parameter,
       Attribute attribute) {
+    String standardParam =
+        addQueryParameterValue(
+            queryParams, QueryParameterValue.int64(parameter.getStandard() ? 1 : 0));
+    String conceptIdParam =
+        addQueryParameterValue(queryParams, QueryParameterValue.int64(parameter.getConceptId()));
     String operandsParam =
         addQueryParameterValue(
             queryParams,
             QueryParameterValue.array(
                 attribute.getOperands().stream().map(s -> Long.parseLong(s)).toArray(Long[]::new),
                 Long.class));
-    String conceptIdParam =
-        addQueryParameterValue(queryParams, QueryParameterValue.int64(parameter.getConceptId()));
     // if the search parameter is ppi/survey then we need to use different column.
     return String.format(
         (DomainType.SURVEY.toString().equals(parameter.getDomain())
             ? VALUE_SOURCE_CONCEPT_ID
             : VALUE_AS_CONCEPT_ID),
+        standardParam,
         conceptIdParam,
         OperatorUtils.getSqlOperator(attribute.getOperator()),
         operandsParam);
@@ -522,6 +536,28 @@ public final class SearchGroupItemQueryBuilder {
               + "\n");
     }
     return modifierSql.toString();
+  }
+
+  /** Add source or standard concept ids and set params * */
+  private static void addParamValueAndFormat(
+      Map<String, QueryParameterValue> queryParams,
+      Set<Long> childConceptIds,
+      List<String> queryParts,
+      int standardOrSource) {
+    if (!childConceptIds.isEmpty()) {
+      String standardParam =
+          addQueryParameterValue(queryParams, QueryParameterValue.int64(standardOrSource));
+      QueryParameterValue cids =
+          QueryParameterValue.array(childConceptIds.stream().toArray(Long[]::new), Long.class);
+      String conceptIdsParam = addQueryParameterValue(queryParams, cids);
+      for (int i = 0; i < queryParts.size(); i++) {
+        String part = queryParts.get(i);
+        if (part.equals(STANDARD_SQL)) {
+          queryParts.set(i, String.format(part, standardParam, conceptIdsParam));
+          break;
+        }
+      }
+    }
   }
 
   /** Helper method to return a modifier. */

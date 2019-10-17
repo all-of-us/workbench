@@ -1,6 +1,6 @@
 .cohort-search-wrapper {
-  padding: 1rem;
-  margin-bottom: 1rem;
+  padding: 1rem 1rem 2rem;
+  margin-right: 45px;
   position: relative;
 }
 .cohort-name {
@@ -10,4 +10,10 @@
 .root-spinner {
   left: 50%;
   top: 50%;
+}
+:host::ng-deep .modal-dialog {
+  width: 20rem;
+}
+.modal-title {
+  color: #262262;
 }

@@ -107,7 +107,7 @@ describe('NotebookRedirectComponent', () => {
         blockingNotebooksStub.release();
       });
 
-    serverConfigStore.next({useBillingProjectBuffer: false, gsuiteDomain: 'x'});
+    serverConfigStore.next({gsuiteDomain: 'x'});
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
@@ -373,7 +373,7 @@ describe('NotebookRedirectComponent', () => {
         blockingNotebooksStub.release();
       });
 
-    serverConfigStore.next({useBillingProjectBuffer: false, gsuiteDomain: 'x'});
+    serverConfigStore.next({gsuiteDomain: 'x'});
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,

@@ -9,6 +9,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {summarizeErrors} from 'app/utils';
+import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 
 
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
@@ -87,7 +88,7 @@ class ExportDataSetModal extends React.Component<
       name: dataSet.name,
       conceptSetIds: dataSet.conceptSets.map(cs => cs.id),
       cohortIds: dataSet.cohorts.map(c => c.id),
-      values: dataSet.values,
+      domainValuePairs: dataSet.domainValuePairs,
       includesAllParticipants: dataSet.includesAllParticipants,
     };
     dataSetApi().generateCode(
@@ -110,13 +111,13 @@ class ExportDataSetModal extends React.Component<
   async exportDataSet() {
     this.setState({loading: true});
     const {dataSet, workspaceNamespace, workspaceFirecloudName} = this.props;
-    const request = {
+    const request: DataSetRequest = {
       name: dataSet.name,
       includesAllParticipants: dataSet.includesAllParticipants,
       description: dataSet.description,
       conceptSetIds: dataSet.conceptSets.map(cs => cs.id),
       cohortIds: dataSet.cohorts.map(c => c.id),
-      values: dataSet.values
+      domainValuePairs: dataSet.domainValuePairs
     };
     await dataSetApi().exportToNotebook(
       workspaceNamespace, workspaceFirecloudName,
@@ -127,9 +128,9 @@ class ExportDataSetModal extends React.Component<
         kernelType: this.state.kernelType
       });
     // Open notebook in a new tab and close the modal
-    const notebookUrl = '/workspaces/' + workspaceNamespace + '/' + workspaceFirecloudName +
-        '/notebooks/' + appendNotebookFileSuffix(encodeURIComponent(this.state.notebookName));
-    window.open(notebookUrl, '_blank');
+    const notebookUrl = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}/notebooks/
+      preview/${appendNotebookFileSuffix(encodeURIComponentStrict(this.state.notebookName))}`;
+    navigateByUrl(notebookUrl);
     this.props.closeFunction();
   }
 

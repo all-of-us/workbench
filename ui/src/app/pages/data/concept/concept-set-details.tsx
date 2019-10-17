@@ -8,6 +8,8 @@ import {SlidingFabReact} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
 import {CopyModal} from 'app/components/copy-modal';
+import {FlexColumn, FlexRow} from 'app/components/flex';
+import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon, SnowmanIcon} from 'app/components/icons';
 import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -247,93 +249,95 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
         presence: {allowEmpty: false}
       }});
 
-      return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
-        {loading ? <SpinnerOverlay/> :
-        <div style={{display: 'flex', flexDirection: 'column'}}>
-          <div style={styles.conceptSetHeader}>
-            <div style={{display: 'flex', flexDirection: 'row'}}>
-              <ConceptSetMenu canDelete={workspace.accessLevel === WorkspaceAccessLevel.OWNER}
-                              canEdit={WorkspacePermissionsUtil.canWrite(workspace.accessLevel)}
-                              onDelete={() => this.setState({deleting: true})}
-                              onEdit={() => this.setState({editing: true})}
-                              onCopy={() => this.setState({copying: true})}/>
-              <div style={styles.conceptSetMetadataWrapper}>
-              {editing ?
-                <div style={{display: 'flex', flexDirection: 'column'}}>
-                  <TextInput value={editName} disabled={editSaving}
-                             id='edit-name'
-                             style={{marginBottom: '0.5rem'}} data-test-id='edit-name'
-                             onChange={v => this.setState({editName: v})}/>
-                  {errors && <ValidationError>
-                    {summarizeErrors( errors && errors.editName)}
-                  </ValidationError>}
-                  <TextArea value={editDescription} disabled={editSaving}
-                            style={{marginBottom: '0.5rem'}} data-test-id='edit-description'
-                            onChange={v => this.setState({editDescription: v})}/>
-                  <div style={{marginBottom: '0.5rem'}}>
-                    <Button type='primary' style={{marginRight: '0.5rem'}}
-                            data-test-id='save-edit-concept-set'
-                            disabled={editSaving || errors}
-                            onClick={() => this.submitEdits()}>Save</Button>
-                    <Button type='secondary' disabled={editSaving}
-                            data-test-id='cancel-edit-concept-set'
-                            onClick={() => this.setState({
-                              editing: false,
-                              editName: conceptSet.name,
-                              editDescription: conceptSet.description
-                            })}>Cancel</Button>
+      return <React.Fragment>
+        <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
+          {loading ? <SpinnerOverlay/> :
+          <FlexColumn>
+            <div style={styles.conceptSetHeader}>
+              <FlexRow>
+                <ConceptSetMenu canDelete={workspace.accessLevel === WorkspaceAccessLevel.OWNER}
+                                canEdit={WorkspacePermissionsUtil.canWrite(workspace.accessLevel)}
+                                onDelete={() => this.setState({deleting: true})}
+                                onEdit={() => this.setState({editing: true})}
+                                onCopy={() => this.setState({copying: true})}/>
+                <div style={styles.conceptSetMetadataWrapper}>
+                {editing ?
+                  <FlexColumn>
+                    <TextInput value={editName} disabled={editSaving}
+                               id='edit-name'
+                               style={{marginBottom: '0.5rem'}} data-test-id='edit-name'
+                               onChange={v => this.setState({editName: v})}/>
+                    {errors && <ValidationError>
+                      {summarizeErrors( errors && errors.editName)}
+                    </ValidationError>}
+                    <TextArea value={editDescription} disabled={editSaving}
+                              style={{marginBottom: '0.5rem'}} data-test-id='edit-description'
+                              onChange={v => this.setState({editDescription: v})}/>
+                    <div style={{marginBottom: '0.5rem'}}>
+                      <Button type='primary' style={{marginRight: '0.5rem'}}
+                              data-test-id='save-edit-concept-set'
+                              disabled={editSaving || errors}
+                              onClick={() => this.submitEdits()}>Save</Button>
+                      <Button type='secondary' disabled={editSaving}
+                              data-test-id='cancel-edit-concept-set'
+                              onClick={() => this.setState({
+                                editing: false,
+                                editName: conceptSet.name,
+                                editDescription: conceptSet.description
+                              })}>Cancel</Button>
+                    </div>
+                  </FlexColumn> :
+                  <React.Fragment>
+                    <div style={styles.conceptSetTitle} data-test-id='concept-set-title'>
+                      {conceptSet.name}
+                      <Clickable disabled={!WorkspacePermissionsUtil
+                                  .canWrite(workspace.accessLevel)}
+                                 data-test-id='edit-concept-set'
+                                 onClick={() => this.setState({editing: true})}>
+                        <EditComponentReact enableHoverEffect={true}
+                                            disabled={
+                                              !WorkspacePermissionsUtil.canWrite(
+                                                workspace.accessLevel
+                                              )
+                                            }
+                                            style={{marginTop: '0.1rem'}}/>
+                      </Clickable>
+                    </div>
+                    <div style={{marginBottom: '1.5rem', color: colors.primary}}
+                         data-test-id='concept-set-description'>
+                      {conceptSet.description}</div>
+                  </React.Fragment>}
+                  <div style={styles.conceptSetData}>
+                      <div data-test-id='participant-count'>
+                        Participant Count: {conceptSet.participantCount}</div>
+                      <div style={{marginLeft: '2rem'}} data-test-id='concept-set-domain'>
+                          Domain: {fp.capitalize(conceptSet.domain.toString())}</div>
                   </div>
-                </div> :
-                <React.Fragment>
-                  <div style={styles.conceptSetTitle} data-test-id='concept-set-title'>
-                    {conceptSet.name}
-                    <Clickable disabled={!WorkspacePermissionsUtil.canWrite(workspace.accessLevel)}
-                               data-test-id='edit-concept-set'
-                               onClick={() => this.setState({editing: true})}>
-                      <EditComponentReact enableHoverEffect={true}
-                                          disabled={
-                                            !WorkspacePermissionsUtil.canWrite(
-                                              workspace.accessLevel
-                                            )
-                                          }
-                                          style={{marginTop: '0.1rem'}}/>
-                    </Clickable>
-                  </div>
-                  <div style={{marginBottom: '1.5rem', color: colors.primary}}
-                       data-test-id='concept-set-description'>
-                    {conceptSet.description}</div>
-                </React.Fragment>}
-                <div style={styles.conceptSetData}>
-                    <div data-test-id='participant-count'>
-                      Participant Count: {conceptSet.participantCount}</div>
-                    <div style={{marginLeft: '2rem'}} data-test-id='concept-set-domain'>
-                        Domain: {fp.capitalize(conceptSet.domain.toString())}</div>
                 </div>
-              </div>
+              </FlexRow>
+              <FlexColumn>
+                <Button type='secondaryLight' style={styles.buttonBoxes}
+                        onClick={() => this.addToConceptSet()}>
+                  <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
+                </Button>
+              </FlexColumn>
             </div>
-            <div style={{display: 'flex', flexDirection: 'column'}}>
-              <Button type='secondaryLight' style={styles.buttonBoxes}
-                      onClick={() => this.addToConceptSet()}>
-                <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
-              </Button>
-            </div>
-          </div>
-          {!!conceptSet.concepts ?
-          <ConceptTable concepts={conceptSet.concepts} loading={loading}
-                        reactKey={conceptSet.domain.toString()}
-                        onSelectConcepts={this.onSelectConcepts.bind(this)}
-                        placeholderValue={'No Concepts Found'}
-                        selectedConcepts={selectedConcepts} nextPage={(page) => {}}/> :
-          <Button type='secondaryLight' data-test-id='add-concepts'
-                  style={{...styles.buttonBoxes, marginLeft: '0.5rem', maxWidth: '22%'}}
-                  onClick={() => navigateByUrl('workspaces/' + ns + '/' +
-                    wsid + '/data/concepts' + conceptSet.survey ? ('?survey=' + conceptSet.survey) :
-                      ('?domain=' + conceptSet.domain))}>
-            <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
-          </Button>}
-          {WorkspacePermissionsUtil.canWrite(workspace.accessLevel) &&
-              this.selectedConceptsCount > 0 &&
-              <SlidingFabReact submitFunction={() => this.setState({removingConcepts: true})}
+            {!!conceptSet.concepts ?
+            <ConceptTable concepts={conceptSet.concepts} loading={loading}
+                          reactKey={conceptSet.domain.toString()}
+                          onSelectConcepts={this.onSelectConcepts.bind(this)}
+                          placeholderValue={'No Concepts Found'}
+                          selectedConcepts={selectedConcepts} nextPage={(page) => {}}/> :
+            <Button type='secondaryLight' data-test-id='add-concepts'
+                    style={{...styles.buttonBoxes, marginLeft: '0.5rem', maxWidth: '22%'}}
+                    onClick={() => navigateByUrl('workspaces/' + ns + '/' +
+                      wsid + '/data/concepts' + conceptSet.survey ?
+                        ('?survey=' + conceptSet.survey) : ('?domain=' + conceptSet.domain))}>
+              <ClrIcon shape='search' style={{marginRight: '0.3rem'}}/>Add concepts to set
+            </Button>}
+            {WorkspacePermissionsUtil.canWrite(workspace.accessLevel) &&
+                this.selectedConceptsCount > 0 &&
+                <SlidingFabReact submitFunction={() => this.setState({removingConcepts: true})}
                                iconShape='trash' expanded='Remove from set'
                                tooltip={this.conceptSetConceptsCount === this.selectedConceptsCount}
                                tooltipContent={
@@ -341,48 +345,50 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                                disable={!WorkspacePermissionsUtil.canWrite(workspace.accessLevel) ||
                                  this.selectedConceptsCount === 0 ||
                                this.conceptSetConceptsCount === this.selectedConceptsCount}/>}
-        </div>}
-        {!loading && deleting &&
-        <ConfirmDeleteModal closeFunction={() => this.setState({deleting: false})}
-                            receiveDelete={() => this.onDeleteConceptSet()}
-                            resourceName={conceptSet.name}
-                            resourceType={ResourceType.CONCEPT_SET}/>}
-        {error && <Modal>
-            <ModalTitle>Error: {errorMessage}</ModalTitle>
+          </FlexColumn>}
+          {!loading && deleting &&
+          <ConfirmDeleteModal closeFunction={() => this.setState({deleting: false})}
+                              receiveDelete={() => this.onDeleteConceptSet()}
+                              resourceName={conceptSet.name}
+                              resourceType={ResourceType.CONCEPT_SET}/>}
+          {error && <Modal>
+              <ModalTitle>Error: {errorMessage}</ModalTitle>
+              <ModalFooter>
+                  <Button type='secondary'
+                          onClick={() =>
+                            this.setState({error: false})}>Close</Button>
+              </ModalFooter>
+          </Modal>}
+          {removingConcepts && <Modal>
+            <ModalTitle>Are you sure you want to remove {this.selectedConceptsCount}
+            {this.selectedConceptsCount > 1 ? ' concepts' : ' concept'} from this set?</ModalTitle>
             <ModalFooter>
-                <Button type='secondary'
-                        onClick={() =>
-                          this.setState({error: false})}>Close</Button>
+                <Button type='secondary' style={{marginRight: '0.5rem'}} disabled={removeSubmitting}
+                        onClick={() => this.setState({removingConcepts: false})}>
+                    Cancel</Button>
+                <Button type='primary' onClick={() => this.onRemoveConcepts()}
+                        disabled={removeSubmitting} data-test-id='confirm-remove-concept'>
+                    Remove concepts</Button>
             </ModalFooter>
-        </Modal>}
-        {removingConcepts && <Modal>
-          <ModalTitle>Are you sure you want to remove {this.selectedConceptsCount}
-          {this.selectedConceptsCount > 1 ? ' concepts' : ' concept'} from this set?</ModalTitle>
-          <ModalFooter>
-              <Button type='secondary' style={{marginRight: '0.5rem'}} disabled={removeSubmitting}
-                      onClick={() => this.setState({removingConcepts: false})}>
-                  Cancel</Button>
-              <Button type='primary' onClick={() => this.onRemoveConcepts()}
-                      disabled={removeSubmitting} data-test-id='confirm-remove-concept'>
-                  Remove concepts</Button>
-          </ModalFooter>
-        </Modal>}
-        {copying && <CopyModal
-          fromWorkspaceNamespace={workspace.namespace}
-          fromWorkspaceName={workspace.id}
-          fromResourceName={conceptSet.name}
-          resourceType={ResourceType.CONCEPT_SET}
-          onClose={() => this.setState({copying: false})}
-          onCopy={() => this.onCopy()}
-          saveFunction={(copyRequest: CopyRequest) => this.copyConceptSet(copyRequest)}/>
-        }
-      </FadeBox>;
+          </Modal>}
+          {copying && <CopyModal
+            fromWorkspaceNamespace={workspace.namespace}
+            fromWorkspaceName={workspace.id}
+            fromResourceName={conceptSet.name}
+            resourceType={ResourceType.CONCEPT_SET}
+            onClose={() => this.setState({copying: false})}
+            onCopy={() => this.onCopy()}
+            saveFunction={(copyRequest: CopyRequest) => this.copyConceptSet(copyRequest)}/>
+          }
+        </FadeBox>
+        <HelpSidebar location='conceptSets' />
+      </React.Fragment>;
     }
   });
 
 
 @Component({
-  template: '<div #root></div>'
+  template: '<div #root style="position: relative; margin-right: 45px;"></div>'
 })
 export class ConceptSetDetailsComponent extends ReactWrapperBase {
   constructor() {

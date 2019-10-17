@@ -12,7 +12,7 @@ handlers:
     Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
     X-XSS-Protection: 1
     X-Content-Type-Options: "nosniff"
-    Content-Security-Policy-Report-Only: "default-src 'none'; report-uri /content-security-report"
+    Content-Security-Policy: "default-src 'none'; report-uri /content-security-report"
 - url: /.*
   static_files: dist/index.html
   upload: dist/index.html
@@ -21,20 +21,14 @@ handlers:
     Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
     X-XSS-Protection: 1
     X-Content-Type-Options: "nosniff"
-    # The script-src sha-256 hash whitelists the inline Google Analytics script
-    # found in index.html. If that Javascript is updated, we need to
-    # simultaneously update this hash. The new hash can be computed online, e.g.
-    # https://report-uri.com/home/hash or will be included in the console error
-    # output if you fail to update this. Failing to update this causes Google
-    # Analytics setup to fail, and may break the app entirely.
-    # Note: Once we're fully on React and have finer grained control over asset
-    # deployment, this inline script and hash could be removed in favor of
-    # adding this to another included JS file.
+    # unsafe-inline is unfortunately required as the Incapsula WAF injects a
+    # script onto the page when we're serving in production, for which we'd be
+    # unable to precompute a hash.
     Content-Security-Policy-Report-Only: "
       default-src 'none';
       script-src
         'self'
-        'sha256-WRcvuKF/fyz1ZMEquk5/ItKxTEyg/UFUSfLnSSG5Dcc='
+        'unsafe-inline'
         https://apis.google.com
         https://*.googleapis.com
         https://static.zdassets.com
@@ -62,8 +56,10 @@ handlers:
         https://api.stable.fake-research-aou.org
         https://api.workbench.researchallofus.org
         https://leonardo.dsde-dev.broadinstitute.org
+        https://leonardo.dsde-perf.broadinstitute.org
         https://notebooks.firecloud.org
         https://firecloud-orchestration.dsde-dev.broadinstitute.org
+        https://firecloud-orchestration.dsde-perf.broadinstitute.org
         https://api.firecloud.org
         https://*.googleapis.com
         https://*.zdassets.com

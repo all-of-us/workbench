@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.model.ArchivalStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -65,6 +66,11 @@ public class UpdateCdrVersions {
                   "Input JSON contains duplicated CDR version ID %d", v.getCdrVersionId()));
         }
         if (v.getIsDefault()) {
+          if (ArchivalStatus.LIVE != v.getArchivalStatusEnum()) {
+            throw new IllegalArgumentException(
+                String.format(
+                    "Archived CDR version cannot also be the default", v.getCdrVersionId()));
+          }
           defaultIds.add(v.getCdrVersionId());
         }
       }

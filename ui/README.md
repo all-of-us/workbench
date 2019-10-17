@@ -25,3 +25,7 @@ To run UI unit tests:
 or to run tests headless:
 
 `yarn install && yarn test --browsers=ChromeHeadless`
+
+To regenerate TypeScript APIs after you've changed them in Swagger:
+
+`yarn codegen`

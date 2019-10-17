@@ -1,8 +1,14 @@
 import {
-  DataAccessLevel, FileDetail, ResearchPurposeReviewRequest, ShareWorkspaceRequest,
+  DataAccessLevel,
+  FileDetail,
+  RecentWorkspace,
+  RecentWorkspaceResponse,
+  ResearchPurposeReviewRequest,
+  ShareWorkspaceRequest,
   UserRole,
   Workspace,
-  WorkspaceAccessLevel, WorkspaceListResponse,
+  WorkspaceAccessLevel,
+  WorkspaceListResponse,
   WorkspaceResponseListResponse,
   WorkspacesApi,
   WorkspaceUserRolesResponse
@@ -21,12 +27,12 @@ export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_PERMISSION = WorkspaceAccessLevel.OWNER;
 }
 
-export const workspaceStubs = [
-  {
-    name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
-    id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-    namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+function buildWorkspaceStub(suffix): Workspace {
+  return {
+    name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + suffix,
+    id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + suffix,
+    namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + suffix,
+    cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID + suffix,
     creationTime: new Date().getTime(),
     lastModifiedTime: new Date().getTime(),
     researchPurpose: {
@@ -50,8 +56,29 @@ export const workspaceStubs = [
     },
     published: false,
     dataAccessLevel: DataAccessLevel.Registered
-  }
-];
+  };
+}
+
+export function buildWorkspaceStubs(suffixes: string[]): Workspace[] {
+  return suffixes.map(suffix => buildWorkspaceStub(suffix));
+}
+
+function buildRecentWorkspaceStub(suffix: string): RecentWorkspace {
+  const workspaceStub = buildWorkspaceStub(suffix);
+  return {
+    workspace: workspaceStub,
+    accessLevel: WorkspaceAccessLevel.OWNER,
+    accessedTime: 'now'
+  };
+}
+
+export function buildRecentWorkspaceResponseStub(suffixes: string[]): RecentWorkspaceResponse {
+  return suffixes.map(suffix => buildRecentWorkspaceStub(suffix));
+}
+
+export const workspaceStubs = buildWorkspaceStubs(['']);
+
+export const recentWorkspaceStubs = buildRecentWorkspaceResponseStub(['']);
 
 export const userRolesStub = [
   {
@@ -84,6 +111,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   workspaceAccess: Map<string, WorkspaceAccessLevel>;
   notebookList: FileDetail[];
   workspaceUserRoles: Map< string, UserRole[]>;
+  recentWorkspaces: RecentWorkspaceResponse;
 
   constructor(workspaces?: Workspace[], workspaceUserRoles?: UserRole[]) {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
@@ -93,6 +121,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
     this.workspaceUserRoles = new Map<string, UserRole[]>();
     this.workspaceUserRoles
       .set(this.workspaces[0].id, fp.defaultTo(userRolesStub, workspaceUserRoles));
+    this.recentWorkspaces = recentWorkspaceStubs;
   }
 
   static stubNotebookList(): FileDetail[] {
@@ -224,4 +253,15 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
+  getUserRecentWorkspaces(options?: any): Promise<RecentWorkspaceResponse> {
+    return new Promise<RecentWorkspaceResponse>(resolve => {
+      resolve(recentWorkspaceStubs);
+    });
+  }
+
+  updateRecentWorkspaces(workspaceNamespace: string, workspaceId: string, options?: any): Promise<RecentWorkspaceResponse> {
+    return new Promise<RecentWorkspaceResponse>(resolve => {
+      resolve(recentWorkspaceStubs);
+    });
+  }
 }

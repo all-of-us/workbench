@@ -1,8 +1,10 @@
 package org.pmiops.workbench.workspaces;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
@@ -48,7 +50,7 @@ public interface WorkspaceService {
       Map<String, WorkspaceAccessLevel> userRoleMap,
       String registeredUsersGroup);
 
-  Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to);
+  Workspace saveAndCloneCohortsConceptSetsAndDataSets(Workspace from, Workspace to);
 
   WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId);
 
@@ -67,4 +69,13 @@ public interface WorkspaceService {
       WorkspaceAccessLevel updatedAccess, WorkspaceACLUpdate currentUpdate);
 
   Workspace setPublished(Workspace workspace, String publishedWorkspaceGroup, boolean publish);
+
+  List<UserRecentWorkspace> getRecentWorkspaces();
+
+  UserRecentWorkspace updateRecentWorkspaces(
+      Workspace workspace, long userId, Timestamp lastAccessDate);
+
+  UserRecentWorkspace updateRecentWorkspaces(Workspace workspace);
+
+  boolean maybeDeleteRecentWorkspace(long workspaceId);
 }

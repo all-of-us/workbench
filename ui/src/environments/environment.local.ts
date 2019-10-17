@@ -1,6 +1,7 @@
 import {Environment} from 'environments/environment-type';
 import {testEnvironmentBase} from 'environments/test-env-base';
 
+// This file is used for a local UI server pointed at a local API server
 export const environment: Environment = {
   displayTag: 'Local->Local',
   shouldShowDisplayTag: true,
@@ -14,5 +15,10 @@ export const environment: Environment = {
   gaUserAgentDimension: 'dimension1',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
-  enableJupyterLab: true,
+  inactivityTimeoutSeconds: 99999999999,
+  inactivityWarningBeforeSeconds: 5 * 60,
+  enableHomepageRestyle: true,
+  enablePublishedWorkspaces: true,
+  enableAccountPages: true,
+  enableProfileCapsFeatures: true,
 };

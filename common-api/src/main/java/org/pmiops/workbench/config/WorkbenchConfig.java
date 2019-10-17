@@ -52,6 +52,9 @@ public class WorkbenchConfig {
     public String accountId;
     public String exportBigQueryTable;
     public Double defaultFreeCreditsLimit;
+    public Integer garbageCollectionUserCapacity;
+    // A list of GCP service accounts for billing project garbage collection
+    public ArrayList<String> garbageCollectionUsers;
   }
 
   public static class FireCloudConfig {
@@ -61,7 +64,6 @@ public class WorkbenchConfig {
     public Integer clusterIdleMaxAgeDays;
     public String registeredDomainName;
     public String registeredDomainGroup;
-    public boolean enforceRegistered;
     public String leoBaseUrl;
     // This value specifies the information we hand to Terra as our AppId header.
     // It is primarily used for metrics gathering information.
@@ -143,10 +145,6 @@ public class WorkbenchConfig {
   }
 
   public static class FeatureFlagsConfig {
-    // When changing this flag in an environment, all clusters should also be deleted
-    // simultaneously. Failure to do this may result in cluster creation failures.
-    public boolean enableLeoWelder = false;
-    public boolean useBillingProjectBuffer = false;
     // Allows a user to delete their own account. This is used for testing purposes so that
     // We can clean up after ourselves. This should never go to prod.
     public boolean unsafeAllowDeleteUser;
@@ -156,5 +154,8 @@ public class WorkbenchConfig {
     // Whether or not AoU should request Terra to create GCP projects inside a VPC
     // security perimeter.
     public boolean enableVpcServicePerimeter;
+    // Flag to indicate whether to enable the new Create Account flow
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
+    public boolean enableNewAccountCreation;
   }
 }

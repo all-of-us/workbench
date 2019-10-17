@@ -13,9 +13,14 @@ export const environment: Environment = {
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   trainingUrl: 'https://aou.nnlm.gov',
+  inactivityTimeoutSeconds: 30 * 60,
+  inactivityWarningBeforeSeconds: 5 * 60,
   // Use care when changing these flags in prod!
   //
   // See environment-type.ts for more details on transient flags, including
   // exit criteria and Jira ticket links.
-  enableJupyterLab: false,
+  enableHomepageRestyle: false,
+  enablePublishedWorkspaces: false,
+  enableAccountPages: false,
+  enableProfileCapsFeatures: false,
 };

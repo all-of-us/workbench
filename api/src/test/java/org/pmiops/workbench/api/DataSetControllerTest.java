@@ -1,14 +1,7 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
@@ -17,14 +10,19 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.io.FileReader;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONArray;
@@ -36,6 +34,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -50,20 +49,25 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceACL;
+import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Cohort;
@@ -73,6 +77,7 @@ import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
+import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
@@ -88,7 +93,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
-import org.pmiops.workbench.workspaces.WorkspaceMapper;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -100,11 +105,15 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+// TODO(jaycarlton): many of the tests here are testing DataSetServiceImpl more than
+//   DataSetControllerImpl, so move those tests and setup stuff into DataSetServiceTest
+//   and mock out DataSetService here.
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
@@ -117,7 +126,6 @@ public class DataSetControllerTest {
   private static final String CONCEPT_SET_ONE_NAME = "concept set";
   private static final String CONCEPT_SET_TWO_NAME = "concept set two";
   private static final String CONCEPT_SET_SURVEY_NAME = "concept survey set";
-  private static final String WORKSPACE_NAMESPACE = "ns";
   private static final String WORKSPACE_NAME = "name";
   private static final String WORKSPACE_BUCKET_NAME = "fc://bucket-hash";
   private static final String USER_EMAIL = "bob@gmail.com";
@@ -135,9 +143,12 @@ public class DataSetControllerTest {
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+  private static User currentUser;
 
-  String cohortCriteria;
-  SearchRequest searchRequest;
+  private String cohortCriteria;
+  private SearchRequest searchRequest;
+  private TestMockFactory testMockFactory;
+  private Workspace workspace;
 
   @Autowired BillingProjectBufferService billingProjectBufferService;
 
@@ -165,7 +176,11 @@ public class DataSetControllerTest {
 
   @Autowired ConceptSetDao conceptSetDao;
 
+  @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
+
   @Autowired DataSetDao dataSetDao;
+
+  @Mock DataSetMapper dataSetMapper;
 
   @Autowired DataSetService dataSetService;
 
@@ -189,7 +204,7 @@ public class DataSetControllerTest {
 
   @Autowired WorkspaceService workspaceService;
 
-  @Autowired WorkspaceMapper workspaceMapper;
+  @Autowired WorkspaceAuditAdapterService workspaceAuditAdapterService;
 
   @TestConfiguration
   @Import({
@@ -198,7 +213,6 @@ public class DataSetControllerTest {
     TestBigQueryCdrSchemaConfig.class,
     UserService.class,
     WorkspacesController.class,
-    WorkspaceMapper.class,
     WorkspaceServiceImpl.class
   })
   @MockBean({
@@ -213,11 +227,13 @@ public class DataSetControllerTest {
     ConceptBigQueryService.class,
     ConceptSetService.class,
     DataSetService.class,
+    DataSetMapper.class,
     FireCloudService.class,
     DirectoryService.class,
     NotebooksService.class,
     CohortQueryBuilder.class,
-    UserRecentResourceService.class
+    UserRecentResourceService.class,
+    WorkspaceAuditAdapterService.class
   })
   static class Configuration {
     @Bean
@@ -231,10 +247,15 @@ public class DataSetControllerTest {
     }
 
     @Bean
+    @Scope("prototype")
+    User user() {
+      return currentUser;
+    }
+
+    @Bean
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-      workbenchConfig.featureFlags.useBillingProjectBuffer = false;
       return workbenchConfig;
     }
   }
@@ -243,6 +264,7 @@ public class DataSetControllerTest {
 
   @Before
   public void setUp() throws Exception {
+    testMockFactory = new TestMockFactory();
     dataSetService =
         new DataSetServiceImpl(
             bigQueryService,
@@ -251,25 +273,28 @@ public class DataSetControllerTest {
             conceptBigQueryService,
             conceptSetDao,
             cohortQueryBuilder,
-            workbenchConfigProvider);
+            dataSetDao);
     dataSetController =
-        new DataSetController(
-            bigQueryService,
-            CLOCK,
-            cohortDao,
-            conceptDao,
-            conceptSetDao,
-            dataSetDao,
-            dataSetService,
-            fireCloudService,
-            notebooksService,
-            userProvider,
-            workspaceService);
+        spy(
+            new DataSetController(
+                bigQueryService,
+                CLOCK,
+                cdrVersionDao,
+                cohortDao,
+                conceptDao,
+                conceptSetDao,
+                dataDictionaryEntryDao,
+                dataSetDao,
+                dataSetMapper,
+                dataSetService,
+                fireCloudService,
+                notebooksService,
+                userProvider,
+                workspaceService));
     WorkspacesController workspacesController =
         new WorkspacesController(
             billingProjectBufferService,
             workspaceService,
-            workspaceMapper,
             cdrVersionDao,
             userDao,
             userProvider,
@@ -278,7 +303,8 @@ public class DataSetControllerTest {
             CLOCK,
             notebooksService,
             userService,
-            workbenchConfigProvider);
+            workbenchConfigProvider,
+            workspaceAuditAdapterService);
     CohortsController cohortsController =
         new CohortsController(
             workspaceService,
@@ -301,6 +327,15 @@ public class DataSetControllerTest {
             userRecentResourceService,
             userProvider,
             CLOCK);
+    doAnswer(
+            invocation -> {
+              BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
+              doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
+              return entry;
+            })
+        .when(billingProjectBufferService)
+        .assignBillingProject(any());
+    testMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     Gson gson = new Gson();
     CdrBigQuerySchemaConfig cdrBigQuerySchemaConfig =
@@ -314,6 +349,7 @@ public class DataSetControllerTest {
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
+    currentUser = user;
     when(userProvider.get()).thenReturn(user);
 
     CdrVersion cdrVersion = new CdrVersion();
@@ -323,27 +359,32 @@ public class DataSetControllerTest {
     cdrVersion.setCdrDbName("");
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
-    Workspace workspace = new Workspace();
+    workspace = new Workspace();
     workspace.setName(WORKSPACE_NAME);
-    workspace.setNamespace(WORKSPACE_NAMESPACE);
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
-    stubGetWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    workspacesController.createWorkspace(workspace);
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+    stubGetWorkspace(
+        workspace.getNamespace(), workspace.getName(), USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    stubGetWorkspaceAcl(
+        workspace.getNamespace(), WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
     searchRequest = SearchRequests.males();
 
     cohortCriteria = new Gson().toJson(searchRequest);
 
     Cohort cohort = new Cohort().name(COHORT_ONE_NAME).criteria(cohortCriteria);
-    cohort = cohortsController.createCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, cohort).getBody();
+    cohort =
+        cohortsController.createCohort(workspace.getNamespace(), WORKSPACE_NAME, cohort).getBody();
     COHORT_ONE_ID = cohort.getId();
 
     Cohort cohortTwo = new Cohort().name(COHORT_TWO_NAME).criteria(cohortCriteria);
     cohortTwo =
-        cohortsController.createCohort(WORKSPACE_NAMESPACE, WORKSPACE_NAME, cohortTwo).getBody();
+        cohortsController
+            .createCohort(workspace.getNamespace(), WORKSPACE_NAME, cohortTwo)
+            .getBody();
     COHORT_TWO_ID = cohortTwo.getId();
 
     List<Concept> conceptList = new ArrayList<>();
@@ -359,7 +400,7 @@ public class DataSetControllerTest {
             .domainId("Condition")
             .countValue(123L)
             .prevalence(0.2F)
-            .conceptSynonyms(new ArrayList<String>()));
+            .conceptSynonyms(Collections.emptyList()));
 
     ConceptSet conceptSet =
         new ConceptSet()
@@ -371,14 +412,11 @@ public class DataSetControllerTest {
     CreateConceptSetRequest conceptSetRequest =
         new CreateConceptSetRequest()
             .conceptSet(conceptSet)
-            .addedIds(
-                conceptList.stream()
-                    .map(concept -> concept.getConceptId())
-                    .collect(Collectors.toList()));
+            .addedIds(conceptList.stream().map(Concept::getConceptId).collect(Collectors.toList()));
 
     conceptSet =
         conceptSetsController
-            .createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSetRequest)
+            .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSetRequest)
             .getBody();
     CONCEPT_SET_ONE_ID = conceptSet.getId();
 
@@ -414,7 +452,7 @@ public class DataSetControllerTest {
 
     conceptSurveySet =
         conceptSetsController
-            .createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSetRequest1)
+            .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSetRequest1)
             .getBody();
     CONCEPT_SET_SURVEY_ID = conceptSurveySet.getId();
 
@@ -435,7 +473,7 @@ public class DataSetControllerTest {
 
     conceptSetTwo =
         conceptSetsController
-            .createConceptSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, conceptSetTwoRequest)
+            .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSetTwoRequest)
             .getBody();
     CONCEPT_SET_TWO_ID = conceptSetTwo.getId();
 
@@ -460,13 +498,14 @@ public class DataSetControllerTest {
               returnSql = returnSql.replace("${dataSetId}", TEST_CDR_DATA_SET_ID);
               return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
             });
+    when(dataSetController.generateRandomEightCharacterQualifier()).thenReturn("00000000");
   }
 
-  private DataSetRequest buildEmptyDataSet() {
+  private DataSetRequest buildEmptyDataSetRequest() {
     return new DataSetRequest()
         .conceptSetIds(new ArrayList<>())
         .cohortIds(new ArrayList<>())
-        .values(new ArrayList<>())
+        .domainValuePairs(new ArrayList<>())
         .name("blah")
         .prePackagedConceptSet(PrePackagedConceptSetEnum.NONE);
   }
@@ -486,9 +525,26 @@ public class DataSetControllerTest {
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
   }
 
+  private void stubGetWorkspaceAcl(
+      String ns, String name, String creator, WorkspaceAccessLevel access) {
+    WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
+    WorkspaceAccessEntry accessLevelEntry =
+        new WorkspaceAccessEntry().accessLevel(access.toString());
+    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry =
+        ImmutableMap.of(creator, accessLevelEntry);
+    workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
+    when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);
+  }
+
   private List<DomainValuePair> mockDomainValuePair() {
     List<DomainValuePair> domainValues = new ArrayList<>();
     domainValues.add(new DomainValuePair().domain(Domain.CONDITION).value("PERSON_ID"));
+    return domainValues;
+  }
+
+  private List<DomainValuePair> mockDomainValuePairWithPerson() {
+    List<DomainValuePair> domainValues = new ArrayList<>();
+    domainValues.add(new DomainValuePair().domain(Domain.PERSON).value("PERSON_ID"));
     return domainValues;
   }
 
@@ -520,45 +576,58 @@ public class DataSetControllerTest {
     doReturn(tableResultMock).when(bigQueryService).executeQuery(any());
   }
 
+  @Test
+  public void testAddFieldValuesFromBigQueryToPreviewListWorksWithNullValues() {
+    DataSetPreviewValueList dataSetPreviewValueList = new DataSetPreviewValueList();
+    List<DataSetPreviewValueList> valuePreviewList = ImmutableList.of(dataSetPreviewValueList);
+    List<FieldValue> fieldValueListRows =
+        ImmutableList.of(FieldValue.of(FieldValue.Attribute.PRIMITIVE, null));
+    FieldValueList fieldValueList = FieldValueList.of(fieldValueListRows);
+    dataSetController.addFieldValuesFromBigQueryToPreviewList(valuePreviewList, fieldValueList);
+    assertThat(valuePreviewList.get(0).getQueryValue().get(0))
+        .isEqualTo(DataSetController.EMPTY_CELL_MARKER);
+  }
+
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoCohort() {
-    DataSetRequest dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
     dataSetController.generateCode(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
+        workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
   }
 
   @Test(expected = BadRequestException.class)
   public void testGetQueryFailsWithNoConceptSet() {
-    DataSetRequest dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
 
     dataSetController.generateCode(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
+        workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
   }
 
   @Test
   public void testGetQueryDropsQueriesWithNoValue() {
-    DataSetRequest dataSet = buildEmptyDataSet();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+    final DataSetRequest dataSet =
+        buildEmptyDataSetRequest()
+            .addCohortIdsItem(COHORT_ONE_ID)
+            .addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
 
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
     assertThat(response.getCode()).isEmpty();
   }
 
   @Test
   public void testGetPythonQuery() {
-    DataSetRequest dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValues = mockDomainValuePair();
-    dataSet.setValues(domainValues);
+    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
+    dataSet.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -568,22 +637,26 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
+    String prefix = "dataset_00000000_condition_";
     assertThat(response.getCode())
         .isEqualTo(
             "import pandas\n\n"
-                + "blah_condition_sql = \"\"\"SELECT PERSON_ID FROM `"
+                + "# This query represents dataset \"blah\" for domain \"condition\"\n"
+                + prefix
+                + "sql = \"\"\"SELECT PERSON_ID FROM `"
                 + TEST_CDR_TABLE
                 + ".condition_occurrence` c_occurrence WHERE \n"
                 + "(condition_concept_id IN (123) OR \n"
                 + "condition_source_concept_id IN (123)) \n"
-                + "AND (PERSON_ID IN (SELECT * FROM person_id from `"
+                + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
                 + ".person` person))\"\"\"\n"
                 + "\n"
-                + "blah_condition_query_config = {\n"
+                + prefix
+                + "query_config = {\n"
                 + "  'query': {\n"
                 + "  'parameterMode': 'NAMED',\n"
                 + "  'queryParameters': [\n\n"
@@ -593,19 +666,25 @@ public class DataSetControllerTest {
                 + "\n"
                 + "\n"
                 + "\n"
-                + "blah_condition_df = pandas.read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)"
+                + prefix
+                + "df = pandas.read_gbq("
+                + prefix
+                + "sql, dialect=\"standard\", configuration="
+                + prefix
+                + "query_config)"
                 + "\n"
                 + "\n"
-                + "blah_condition_df.head(5)");
+                + prefix
+                + "df.head(5)");
   }
 
   @Test
   public void testGetRQuery() {
-    DataSetRequest dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValues = mockDomainValuePair();
-    dataSet.setValues(domainValues);
+    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
+    dataSet.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -614,24 +693,29 @@ public class DataSetControllerTest {
 
     DataSetCodeResponse response =
         dataSetController
-            .generateCode(WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.R.toString(), dataSet)
+            .generateCode(
+                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.R.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
+    String prefix = "dataset_00000000_condition_";
     assertThat(response.getCode())
         .isEqualTo(
-            "install.packages(\"reticulate\")\n"
+            "if(! \"reticulate\" %in% installed.packages()) { install.packages(\"reticulate\") }\n"
                 + "library(reticulate)\n"
                 + "pd <- reticulate::import(\"pandas\")\n\n"
-                + "blah_condition_sql <- \"SELECT PERSON_ID FROM `"
+                + "# This query represents dataset \"blah\" for domain \"condition\"\n"
+                + prefix
+                + "sql <- \"SELECT PERSON_ID FROM `"
                 + TEST_CDR_TABLE
                 + ".condition_occurrence` c_occurrence WHERE \n"
                 + "(condition_concept_id IN (123) OR \n"
                 + "condition_source_concept_id IN (123)) \n"
-                + "AND (PERSON_ID IN (SELECT * FROM person_id from `"
+                + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
                 + ".person` person))\"\n"
                 + "\n"
-                + "blah_condition_query_config <- list(\n"
+                + prefix
+                + "query_config <- list(\n"
                 + "  query = list(\n"
                 + "    parameterMode = 'NAMED',\n"
                 + "    queryParameters = list(\n\n"
@@ -639,24 +723,31 @@ public class DataSetControllerTest {
                 + "  )\n"
                 + ")\n"
                 + "\n"
-                + "blah_condition_df <- pd$read_gbq(blah_condition_sql, dialect=\"standard\", configuration=blah_condition_query_config)"
+                + prefix
+                + "df <- pd$read_gbq("
+                + prefix
+                + "sql, dialect=\"standard\", configuration="
+                + prefix
+                + "query_config)"
                 + "\n"
                 + "\n"
-                + "head(blah_condition_df, 5)");
+                + "head("
+                + prefix
+                + "df, 5)");
   }
 
   @Test
   public void testGetQueryTwoDomains() {
-    DataSetRequest dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_TWO_ID);
-    List<DomainValuePair> domainValues = mockDomainValuePair();
+    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
     DomainValuePair drugDomainValue = new DomainValuePair();
     drugDomainValue.setDomain(Domain.DRUG);
     drugDomainValue.setValue("PERSON_ID");
-    domainValues.add(drugDomainValue);
-    dataSet.setValues(domainValues);
+    domainValuePairs.add(drugDomainValue);
+    dataSet.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -667,20 +758,20 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(2)).executeQuery(any());
-    assertThat(response.getCode()).contains("blah_condition_df");
-    assertThat(response.getCode()).contains("blah_drug_df");
+    assertThat(response.getCode()).contains("condition_df");
+    assertThat(response.getCode()).contains("drug_df");
   }
 
   @Test
   public void testGetQuerySurveyDomains() {
-    DataSetRequest dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_SURVEY_ID);
-    List<DomainValuePair> domainValues = mockSurveyDomainValuePair();
-    dataSet.setValues(domainValues);
+    List<DomainValuePair> domainValuePairs = mockSurveyDomainValuePair();
+    dataSet.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".ds_survey`");
@@ -690,21 +781,21 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
     verify(bigQueryService, times(1)).executeQuery(any());
-    assertThat(response.getCode()).contains("blah_observation_df");
+    assertThat(response.getCode()).contains("observation_df");
     assertThat(response.getCode()).contains("ds_survey");
   }
 
   @Test
   public void testGetQueryTwoCohorts() {
-    DataSetRequest dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addCohortIdsItem(COHORT_TWO_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
     List<DomainValuePair> domainValuePairList = mockDomainValuePair();
-    dataSet.setValues(domainValuePairList);
+    dataSet.setDomainValuePairs(domainValuePairList);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -714,16 +805,60 @@ public class DataSetControllerTest {
     DataSetCodeResponse response =
         dataSetController
             .generateCode(
-                WORKSPACE_NAMESPACE, WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
             .getBody();
     assertThat(response.getCode()).contains("UNION DISTINCT");
+  }
+
+  @Test
+  public void testGetQueryDemographic() {
+    DataSetRequest dataSet = buildEmptyDataSetRequest();
+    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
+    dataSet = dataSet.addCohortIdsItem(COHORT_TWO_ID);
+    dataSet.setPrePackagedConceptSet(PrePackagedConceptSetEnum.DEMOGRAPHICS);
+    List<DomainValuePair> domainValuePairs = new ArrayList<>();
+    domainValuePairs.add(new DomainValuePair().domain(Domain.PERSON).value("GENDER"));
+    dataSet.setDomainValuePairs(domainValuePairs);
+
+    ArrayList<String> tables = new ArrayList<>();
+    tables.add("FROM `" + TEST_CDR_TABLE + ".person` person");
+
+    mockLinkingTableQuery(tables);
+
+    DataSetCodeResponse response =
+        dataSetController
+            .generateCode(
+                workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+            .getBody();
+    /* this should produces the following query
+       import pandas
+
+       blah_person_sql = """SELECT PERSON_ID FROM `all-of-us-ehr-dev.synthetic_cdr20180606.person` person
+       WHERE person.PERSON_ID IN (SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person`
+       person UNION DISTINCT SELECT * FROM person_id from `all-of-us-ehr-dev.synthetic_cdr20180606.person` person)"""
+
+       blah_person_query_config = {
+         'query': {
+         'parameterMode': 'NAMED',
+         'queryParameters': [
+
+           ]
+         }
+       }
+    */
+    assertThat(response.getCode())
+        .contains(
+            "person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person");
+    // For demographic unlike other domains WHERE should be followed by person.person_id rather than
+    // concept_id
+    assertThat(response.getCode().contains("WHERE person.PERSON_ID"));
   }
 
   @Rule public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void createDataSetMissingArguments() {
-    DataSetRequest dataSet = buildEmptyDataSet().name(null);
+    DataSetRequest dataSet = buildEmptyDataSetRequest().name(null);
 
     List<Long> cohortIds = new ArrayList<>();
     cohortIds.add(1l);
@@ -738,14 +873,14 @@ public class DataSetControllerTest {
 
     valuePairList.add(domainValue);
 
-    dataSet.setValues(valuePairList);
+    dataSet.setDomainValuePairs(valuePairList);
     dataSet.setConceptSetIds(conceptIds);
     dataSet.setCohortIds(cohortIds);
 
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing name");
 
-    dataSetController.createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
+    dataSetController.createDataSet(workspace.getNamespace(), WORKSPACE_NAME, dataSet);
 
     dataSet.setName("dataSet");
     dataSet.setCohortIds(null);
@@ -753,7 +888,7 @@ public class DataSetControllerTest {
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing cohort ids");
 
-    dataSetController.createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
+    dataSetController.createDataSet(workspace.getNamespace(), WORKSPACE_NAME, dataSet);
 
     dataSet.setCohortIds(cohortIds);
     dataSet.setConceptSetIds(null);
@@ -761,24 +896,24 @@ public class DataSetControllerTest {
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing concept set ids");
 
-    dataSetController.createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
+    dataSetController.createDataSet(workspace.getNamespace(), WORKSPACE_NAME, dataSet);
 
     dataSet.setConceptSetIds(conceptIds);
-    dataSet.setValues(null);
+    dataSet.setDomainValuePairs(null);
 
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing values");
 
-    dataSetController.createDataSet(WORKSPACE_NAMESPACE, WORKSPACE_NAME, dataSet);
+    dataSetController.createDataSet(workspace.getNamespace(), WORKSPACE_NAME, dataSet);
   }
 
   @Test
   public void exportToNewNotebook() {
-    DataSetRequest dataSet = buildEmptyDataSet().name("blah");
+    DataSetRequest dataSet = buildEmptyDataSetRequest().name("blah");
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValues = mockDomainValuePair();
-    dataSet.setValues(domainValues);
+    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
+    dataSet.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -793,7 +928,7 @@ public class DataSetControllerTest {
             .notebookName(notebookName)
             .kernelType(KernelTypeEnum.PYTHON);
 
-    dataSetController.exportToNotebook(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request).getBody();
+    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
     verify(notebooksService, never()).getNotebookContents(any(), any());
     // I tried to have this verify against the actual expected contents of the json object, but
     // java equivalence didn't handle it well.
@@ -803,11 +938,11 @@ public class DataSetControllerTest {
 
   @Test
   public void exportToExistingNotebook() {
-    DataSetRequest dataSet = buildEmptyDataSet();
+    DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
     dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValues = mockDomainValuePair();
-    dataSet.setValues(domainValues);
+    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
+    dataSet.setDomainValuePairs(domainValuePairs);
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");
@@ -830,11 +965,28 @@ public class DataSetControllerTest {
             .newNotebook(false)
             .notebookName(notebookName);
 
-    dataSetController.exportToNotebook(WORKSPACE_NAMESPACE, WORKSPACE_NAME, request).getBody();
+    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
     verify(notebooksService, times(1)).getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName);
     // I tried to have this verify against the actual expected contents of the json object, but
     // java equivalence didn't handle it well.
     verify(notebooksService, times(1))
         .saveNotebook(eq(WORKSPACE_BUCKET_NAME), eq(notebookName), any(JSONObject.class));
+  }
+
+  @Test
+  public void testGetQueryPersonDomainNoConceptSets() {
+    DataSetRequest dataSetRequest = buildEmptyDataSetRequest();
+    dataSetRequest = dataSetRequest.addCohortIdsItem(COHORT_ONE_ID);
+    List<DomainValuePair> domainValuePairs = mockDomainValuePairWithPerson();
+    dataSetRequest.setDomainValuePairs(domainValuePairs);
+
+    ArrayList<String> tables = new ArrayList<>();
+    tables.add("FROM `" + TEST_CDR_TABLE + ".person` person");
+
+    mockLinkingTableQuery(tables);
+
+    final Map<String, QueryJobConfiguration> result =
+        dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
+    assertThat(result).isNotEmpty();
   }
 }

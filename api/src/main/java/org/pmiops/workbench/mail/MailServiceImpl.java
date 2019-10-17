@@ -1,6 +1,6 @@
 package org.pmiops.workbench.mail;
 
-import com.google.api.services.admin.directory.model.User;
+import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import java.io.IOException;

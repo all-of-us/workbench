@@ -15,8 +15,11 @@ import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.Address;
 import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DemographicSurvey;
+import org.pmiops.workbench.db.model.InstitutionalAffiliation;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -25,7 +28,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
@@ -199,7 +201,6 @@ public class UserService {
     user.setEmail(email);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
-    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.NONE);
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -221,6 +222,30 @@ public class UserService {
       String currentPosition,
       String organization,
       String areaOfResearch) {
+    return createUser(
+        givenName,
+        familyName,
+        email,
+        contactEmail,
+        currentPosition,
+        organization,
+        areaOfResearch,
+        null,
+        null,
+        null);
+  }
+
+  public User createUser(
+      String givenName,
+      String familyName,
+      String email,
+      String contactEmail,
+      String currentPosition,
+      String organization,
+      String areaOfResearch,
+      Address address,
+      DemographicSurvey demographicSurvey,
+      List<InstitutionalAffiliation> institutionalAffiliations) {
     User user = new User();
     user.setCreationNonce(Math.abs(random.nextLong()));
     user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
@@ -234,7 +259,21 @@ public class UserService {
     user.setDisabled(false);
     user.setAboutYou(null);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
-    user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.NONE);
+    user.setAddress(address);
+    user.setDemographicSurvey(demographicSurvey);
+    // For existing user that do not have address
+    if (address != null) {
+      address.setUser(user);
+    }
+    if (demographicSurvey != null) demographicSurvey.setUser(user);
+    if (institutionalAffiliations != null) {
+      final User u = user;
+      institutionalAffiliations.forEach(
+          affiliation -> {
+            affiliation.setUser(u);
+            u.addInstitutionalAffiliation(affiliation);
+          });
+    }
     try {
       userDao.save(user);
     } catch (DataIntegrityViolationException e) {
@@ -344,15 +383,6 @@ public class UserService {
         });
   }
 
-  public User setFreeTierBillingProjectNameAndStatus(String name, BillingProjectStatus status) {
-    return updateUserWithRetries(
-        (user) -> {
-          user.setFreeTierBillingProjectName(name);
-          user.setFreeTierBillingProjectStatusEnum(status);
-          return user;
-        });
-  }
-
   public User setDisabledStatus(Long userId, boolean disabled) {
     User user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(
@@ -400,18 +430,10 @@ public class UserService {
 
   /** Find users matching the user's name or email */
   public List<User> findUsersBySearchString(String term, Sort sort) {
-    List<Short> dataAccessLevels;
-    if (configProvider.get().firecloud.enforceRegistered) {
-      dataAccessLevels =
-          Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
-              .map(CommonStorageEnums::dataAccessLevelToStorage)
-              .collect(Collectors.toList());
-    } else {
-      dataAccessLevels =
-          Stream.of(DataAccessLevel.values())
-              .map(CommonStorageEnums::dataAccessLevelToStorage)
-              .collect(Collectors.toList());
-    }
+    List<Short> dataAccessLevels =
+        Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
+            .map(CommonStorageEnums::dataAccessLevelToStorage)
+            .collect(Collectors.toList());
     return userDao.findUsersByDataAccessLevelsAndSearchString(dataAccessLevels, term, sort);
   }
 

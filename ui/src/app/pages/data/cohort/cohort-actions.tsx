@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -48,15 +49,17 @@ const styles = reactStyles({
 
 const actionCards = [
   {
+    title: 'Create another Cohort',
+    description: `Create another cohort for your analysis.`,
+    action: 'newCohort'
+  }, {
     title: 'Create Review Sets',
     description: `The review set feature allows you to select a subset of your cohort to review
        participants row-level data and add notes and annotations.`,
     action: 'review'
-  },
-  {
-    title: 'Create a Data Set',
-    description: `Here, you can build and preview a dataset for one or more cohorts by
-       selecting the desired concept sets and values for the cohorts.`,
+  }, {
+    title: 'Create a Dataset',
+    description: `Create an analysis ready dataset that can be exported to notebooks.`,
     action: 'dataSet'
   },
 ];
@@ -113,6 +116,9 @@ const CohortActions = withCurrentWorkspace()(
         case 'dataSet':
           url += 'data/data-sets';
           break;
+        case 'newCohort':
+          currentCohortStore.next(undefined);
+          url += `data/cohorts/build`;
       }
       navigateByUrl(url);
     }
@@ -130,18 +136,18 @@ const CohortActions = withCurrentWorkspace()(
                onClick={() => this.navigateTo('cohort')}>
                 {cohort.name}
              </a>
-             has been saved and can now be used in analysis and concept sets.
+             has been saved.
           </div>
           <h3 style={{...styles.cohortsHeader, marginTop: '1.5rem'}}>What Next?</h3>
           <div style={styles.cardArea}>
             {actionCards.map((card, i) => {
               return <ActionCardBase key={i} style={styles.card}>
-                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
-                  <div style={{display: 'flex', flexDirection: 'row', alignItems: 'flex-start'}}>
+                <FlexColumn style={{alignItems: 'flex-start'}}>
+                  <FlexRow style={{alignItems: 'flex-start'}}>
                     <div style={styles.cardName}>{card.title}</div>
-                  </div>
+                  </FlexRow>
                   <div style={styles.cardDescription}>{card.description}</div>
-                </div>
+                </FlexColumn>
                 <div>
                   <Button
                     type='primary'

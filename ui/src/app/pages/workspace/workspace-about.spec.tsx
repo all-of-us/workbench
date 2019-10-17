@@ -12,7 +12,7 @@ import {cdrVersionStore, currentWorkspaceStore, serverConfigStore, userProfileSt
 import {userRolesStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
-import {cdrVersions, CdrVersionsStubVariables} from '../../../testing/stubs/cdr-versions-api-stub';
+import {CdrVersionsStubVariables, cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
@@ -44,14 +44,12 @@ describe('WorkspaceAbout', () => {
     currentWorkspaceStore.next(workspace);
     serverConfigStore.next({
       enableDataUseAgreement: true,
-      enforceRegistered: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
-      useBillingProjectBuffer: true,
       enableEraCommons: true,
     });
-    cdrVersionStore.next(cdrVersions);
+    cdrVersionStore.next(cdrVersionListResponse);
   });
 
   it('should render', () => {

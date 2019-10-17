@@ -46,7 +46,6 @@ public class FireCloudIntegrationTest {
   @Mock private BillingApi billingApi;
   @Mock private WorkspacesApi workspacesApi;
   @Mock private GroupsApi allOfUsGroupsApi;
-  @Mock private GroupsApi endUserGroupsApi;
   @Mock private WorkspacesApi workspaceAclsApi;
   @Mock private StaticNotebooksApi staticNotebooksApi;
   @Mock private ProfileApi profileApi;

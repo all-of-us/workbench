@@ -3,9 +3,9 @@ package org.pmiops.workbench.mail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.google.api.services.admin.directory.model.User;
-import com.google.api.services.admin.directory.model.UserEmail;
-import com.google.api.services.admin.directory.model.UserName;
+import com.google.api.services.directory.model.User;
+import com.google.api.services.directory.model.UserEmail;
+import com.google.api.services.directory.model.UserName;
 import javax.mail.MessagingException;
 import org.junit.Before;
 import org.junit.Rule;

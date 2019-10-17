@@ -1,11 +1,9 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import {
-  ReactWrapperBase,
   withCurrentCohort,
   withCurrentConceptSet,
   withCurrentWorkspace,
@@ -13,6 +11,8 @@ import {
   withUrlParams
 } from 'app/utils';
 import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {Cohort, ConceptSet} from 'generated/fetch';
 
 const styles = {
   firstLink: {
@@ -27,75 +27,99 @@ const styles = {
   }
 };
 
+class BreadcrumbData {
+  label: string;
+  url: string;
+
+  constructor(label: string, url: string) {
+    this.label = label;
+    this.url = url;
+  }
+}
+
 // Generates a trail of breadcrumbs based on currently loaded data.
-export const getTrail = (type: BreadcrumbType, data): {label: string, url: string}[] => {
-  const {workspace, cohort, conceptSet, urlParams: {ns, wsid, cid, csid, pid, nbName}} = data;
+export const getTrail = (
+  type: BreadcrumbType,
+  workspace: WorkspaceData,
+  cohort: Cohort,
+  conceptSet: ConceptSet,
+  urlParams: any
+): Array<BreadcrumbData> => {
+  const {ns, wsid, cid, csid, pid, nbName} = urlParams;
   const prefix = `/workspaces/${ns}/${wsid}`;
   switch (type) {
     case BreadcrumbType.Workspaces:
       return [
-        {label: 'Workspaces', url: '/workspaces'}
+        new BreadcrumbData('Workspaces', '/workspaces')
       ];
     case BreadcrumbType.Workspace:
       return [
-        ...getTrail(BreadcrumbType.Workspaces, data),
-        {label: workspace ? workspace.name : '...', url: `${prefix}/data`}
+        ...getTrail(BreadcrumbType.Workspaces, workspace, cohort, conceptSet, urlParams),
+        new BreadcrumbData(workspace ? workspace.name : '...', `${prefix}/data`)
       ];
     case BreadcrumbType.WorkspaceEdit:
       return [
-        ...getTrail(BreadcrumbType.Workspace, data),
-        {label: 'Edit Workspace', url: `${prefix}/edit`}
+        ...getTrail(BreadcrumbType.Workspace, workspace, cohort, conceptSet, urlParams),
+        new BreadcrumbData('Edit Workspace', `${prefix}/edit`)
       ];
     case BreadcrumbType.WorkspaceDuplicate:
       return [
-        ...getTrail(BreadcrumbType.Workspace, data),
-        {label: 'Duplicate Workspace', url: `${prefix}/duplicate`}
+        ...getTrail(BreadcrumbType.Workspace, workspace, cohort, conceptSet, urlParams),
+        new BreadcrumbData('Duplicate Workspace', `${prefix}/duplicate`)
       ];
     case BreadcrumbType.Notebook:
       return [
-        ...getTrail(BreadcrumbType.Workspace, data),
-        {label: 'Notebooks', url: `${prefix}/notebooks`},
-        {
-          label: nbName && dropNotebookFileSuffix(decodeURIComponent(nbName)),
-          url: `${prefix}/notebooks/${nbName}`
-        }
+        ...getTrail(BreadcrumbType.Workspace, workspace, cohort, conceptSet, urlParams),
+        new BreadcrumbData('Notebooks', `${prefix}/notebooks`),
+        new BreadcrumbData(
+          nbName && dropNotebookFileSuffix(decodeURIComponent(nbName)),
+          `${prefix}/notebooks/${nbName}`
+        )
       ];
     case BreadcrumbType.ConceptSet:
       return [
-        ...getTrail(BreadcrumbType.Data, data),
-        {label: conceptSet ? conceptSet.name : '...', url: `${prefix}/data/concepts/sets/${csid}`}
+        ...getTrail(BreadcrumbType.Data, workspace, cohort, conceptSet, urlParams),
+        new BreadcrumbData(
+          conceptSet
+            ? conceptSet.name
+            : '...', `${prefix}/data/concepts/sets/${csid}`
+        )
       ];
     case BreadcrumbType.Cohort:
       return [
-        ...getTrail(BreadcrumbType.Data, data),
-        {label: cohort ? cohort.name : '...',
-          url: `${prefix}/data/cohorts/${cid}/review/participants`}
+        ...getTrail(BreadcrumbType.Data, workspace, cohort, conceptSet, urlParams),
+        new BreadcrumbData(
+          cohort ? cohort.name : '...',
+          `${prefix}/data/cohorts/${cid}/review/participants`
+        )
       ];
     case BreadcrumbType.Participant:
       return [
-        ...getTrail(BreadcrumbType.Cohort, data),
-        {label: `Participant ${pid}`,
-          url: `${prefix}/data/cohorts/${cid}/review/participants/${pid}`}
+        ...getTrail(BreadcrumbType.Cohort, workspace, cohort, conceptSet, urlParams),
+        new BreadcrumbData(
+          `Participant ${pid}`,
+          `${prefix}/data/cohorts/${cid}/review/participants/${pid}`
+        )
       ];
     case BreadcrumbType.CohortAdd:
       return [
-        ...getTrail(BreadcrumbType.Data, data),
-        {label: 'Build Cohort Criteria', url: `${prefix}/data/cohorts/build`}
+        ...getTrail(BreadcrumbType.Data, workspace, cohort, conceptSet, urlParams),
+        new BreadcrumbData('Build Cohort Criteria', `${prefix}/data/cohorts/build`)
       ];
     case BreadcrumbType.SearchConcepts:
       return [
-        ...getTrail(BreadcrumbType.Data, data),
-        {label: 'Search Concepts', url: `${prefix}/data/concepts`}
+        ...getTrail(BreadcrumbType.Data, workspace, cohort, conceptSet, urlParams),
+        new BreadcrumbData('Search Concepts', `${prefix}/data/concepts`)
       ];
     case BreadcrumbType.Dataset:
       return [
-        ...getTrail(BreadcrumbType.Data, data),
-        {label: 'Dataset', url: `${prefix}/data/datasets`}
+        ...getTrail(BreadcrumbType.Data, workspace, cohort, conceptSet, urlParams),
+        new BreadcrumbData('Dataset', `${prefix}/data/datasets`)
       ];
     case BreadcrumbType.Data:
       return [
-        ...getTrail(BreadcrumbType.Workspaces, data),
-        {label: workspace ? workspace.name : '...', url: `${prefix}/data`}
+        ...getTrail(BreadcrumbType.Workspaces, workspace, cohort, conceptSet, urlParams),
+        new BreadcrumbData(workspace ? workspace.name : '...', `${prefix}/data`)
       ];
     default: return [];
   }
@@ -111,42 +135,65 @@ const BreadcrumbLink = ({href, ...props}) => {
   />;
 };
 
-const Breadcrumb = fp.flow(
+interface Props {
+  workspace: WorkspaceData;
+  cohort: Cohort;
+  conceptSet: ConceptSet;
+  urlParams: any;
+  routeConfigData: any;
+}
+
+export const Breadcrumb = fp.flow(
   withCurrentWorkspace(),
   withCurrentCohort(),
   withCurrentConceptSet(),
   withUrlParams(),
   withRouteConfigData()
-)(({workspace, cohort, conceptSet, urlParams, routeConfigData}) => {
-  const trail = getTrail(
-    routeConfigData.breadcrumb,
-    {urlParams, workspace, conceptSet, cohort}
-  );
-  const first = fp.dropRight(1, trail);
-  const last = fp.last(trail);
-  return <div style={{marginLeft: '3.25rem', display: 'inline-block'}}>
-    {first.map(({label, url}, i) => {
-      return <React.Fragment key={i}>
-        <BreadcrumbLink href={url} style={styles.firstLink}>
-          {label}
-        </BreadcrumbLink>
-        <span style={{color: colors.primary}}> &gt; </span>
-      </React.Fragment>;
-    })}
-    {last && <div>
-      <BreadcrumbLink href={last.url} style={styles.lastLink}>
-        {last.label}
-      </BreadcrumbLink>
-    </div>}
-  </div>;
-});
+)(
+  class extends React.Component<Props> {
+    constructor(props) {
+      super(props);
+    }
 
-@Component({
-  selector: 'app-breadcrumb',
-  template: '<div #root></div>'
-})
-export class BreadcrumbComponent extends ReactWrapperBase {
-  constructor() {
-    super(Breadcrumb, []);
+    trail(): Array<BreadcrumbData> {
+      return getTrail(
+        this.props.routeConfigData.breadcrumb,
+        this.props.workspace,
+        this.props.cohort,
+        this.props.conceptSet,
+        this.props.urlParams
+      );
+    }
+
+    first(): Array<BreadcrumbData> {
+      return fp.dropRight(1, this.trail());
+    }
+
+    last(): BreadcrumbData {
+      return fp.last(this.trail());
+    }
+
+    render() {
+      return <div style={{
+        marginLeft: '3.25rem',
+        display: 'inline-block',
+      }}>
+        {this.first().map(({label, url}, i) => {
+          return <React.Fragment key={i}>
+            <BreadcrumbLink href={url} style={styles.firstLink}>
+              {label}
+            </BreadcrumbLink>
+            <span style={{
+              color: colors.primary
+            }}> &gt; </span>
+          </React.Fragment>;
+        })}
+        {this.last() && <div>
+          <BreadcrumbLink href={this.last().url} style={styles.lastLink}>
+            {this.last().label}
+          </BreadcrumbLink>
+        </div>}
+      </div>;
+    }
   }
-}
+);

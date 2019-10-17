@@ -27,7 +27,7 @@ DRY_RUN_CMD = %W{echo [DRY_RUN]}
 
 def make_gae_vars(min, max)
   {
-    "GAE_MIN_INSTANCES" => min.to_s,
+    "GAE_MIN_IDLE_INSTANCES" => min.to_s,
     "GAE_MAX_INSTANCES" => max.to_s
   }
 end
@@ -50,7 +50,7 @@ ENVIRONMENTS = {
     :config_json => "config_test.json",
     :cdr_versions_json => "cdr_versions_test.json",
     :featured_workspaces_json => "featured_workspaces_test.json",
-    :gae_vars => make_gae_vars(10, 10)
+    :gae_vars => TEST_GAE_VARS
   },
   "all-of-us-rw-staging" => {
     :api_endpoint_host => "api-dot-all-of-us-rw-staging.appspot.com",
@@ -66,7 +66,7 @@ ENVIRONMENTS = {
     :config_json => "config_perf.json",
     :cdr_versions_json => "cdr_versions_perf.json",
     :featured_workspaces_json => "featured_workspaces_perf.json",
-    :gae_vars => TEST_GAE_VARS
+    :gae_vars => make_gae_vars(20, 20)
   },
   "all-of-us-rw-stable" => {
     :api_endpoint_host => "api-dot-all-of-us-rw-stable.appspot.com",
@@ -82,7 +82,7 @@ ENVIRONMENTS = {
     :config_json => "config_prod.json",
     :cdr_versions_json => "cdr_versions_prod.json",
     :featured_workspaces_json => "featured_workspaces_prod.json",
-    :gae_vars => make_gae_vars(10, 64)
+    :gae_vars => make_gae_vars(1, 64)
   }
 }
 
@@ -198,23 +198,26 @@ def dev_up()
   init_new_cdr_db %W{--cdr-db-name cdr}
 
   common.status "Updating CDR versions..."
-  common.run_inline %W{docker-compose run update-cdr-versions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
+  common.run_inline %W{docker-compose run api-scripts ./gradlew updateCdrVersions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
 
   common.status "Updating workbench configuration..."
   common.run_inline %W{
-    docker-compose run update-config
-    -Pconfig_key=main -Pconfig_file=config/config_local.json
+    docker-compose run api-scripts
+    ./gradlew loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json
   }
   common.status "Updating CDR schema configuration..."
   common.run_inline %W{
-    docker-compose run update-config
-    -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
+    docker-compose run api-scripts
+    ./gradlew loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
   }
   common.status "Updating featured workspaces..."
   common.run_inline %W{
-    docker-compose run update-config
-    -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
+    docker-compose run api-scripts
+    ./gradlew loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
   }
+
+  common.status "Loading Data Dictionary..."
+  common.run_inline %W{docker-compose run api-scripts ./gradlew loadDataDictionary -PappArgs=false}
 
   run_api()
 end
@@ -1343,7 +1346,7 @@ def update_cdr_versions_local(cmd_name, *args)
   versions_file = 'config/cdr_versions_local.json'
   app_args = ["-PappArgs=['/w/api/" + versions_file + "',false]"]
   common = Common.new
-  common.run_inline %W{docker-compose run update-cdr-versions} + app_args
+  common.run_inline %W{docker-compose run api-scripts ./gradlew updateCdrVersions} + app_args
 end
 
 Common.register_command({
@@ -1456,7 +1459,8 @@ def deploy_gcs_artifacts(cmd_name, args)
     run_inline_or_log(op.opts.dry_run, %W{
       gsutil cp
       setup_notebook_cluster.sh
-      playground-extension.js
+      activity-checker-extension.js
+      aou-download-policy-extension.js
       generated/aou-snippets-menu.js
       gs://#{gcc.project}-cluster-resources/
     })
@@ -1680,6 +1684,8 @@ def deploy(cmd_name, args)
     load_config(ctx.project, op.opts.dry_run)
     versions_file = get_cdr_versions_file(ctx.project)
     update_cdr_versions_for_project("config/#{versions_file}", op.opts.dry_run)
+
+    common.run_inline %W{gradle loadDataDictionary -PappArgs=#{op.opts.dry_run ? true : false}}
 
     common.status "Pushing GCS artifacts..."
     dry_flag = op.opts.dry_run ? %W{--dry-run} : []

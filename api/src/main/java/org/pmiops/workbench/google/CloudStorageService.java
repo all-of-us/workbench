@@ -18,7 +18,9 @@ public interface CloudStorageService {
 
   String getImageUrl(String image_name);
 
-  List<Blob> getBlobList(String bucketName, String directory);
+  List<Blob> getBlobList(String bucketName);
+
+  List<Blob> getBlobListForPrefix(String bucketName, String directory);
 
   Set<BlobId> blobsExist(List<BlobId> id);
 
@@ -37,6 +39,9 @@ public interface CloudStorageService {
   GoogleCredential getCloudResourceManagerAdminCredentials() throws IOException;
 
   GoogleCredential getDefaultServiceAccountCredentials() throws IOException;
+
+  GoogleCredential getGarbageCollectionServiceAccountCredentials(String garbageCollectionEmail)
+      throws IOException;
 
   JSONObject getFileAsJson(String bucketName, String fileName);
 

@@ -9,10 +9,11 @@ import {EditComponentReact} from 'app/icons/edit';
 import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
 import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-mode-modal';
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
+import {INACTIVITY_CONFIG} from 'app/pages/signed-in/component';
 import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {debouncer, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -100,18 +101,32 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     componentDidMount(): void {
-      workspacesApi().readOnlyNotebook(this.props.urlParams.ns,
-        this.props.urlParams.wsid, this.props.urlParams.nbName)
-        .then(html => {
-          this.setState({html: html.html});
+      const {ns, wsid, nbName} = this.props.urlParams;
+
+      workspacesApi().readOnlyNotebook(ns, wsid, nbName).then(html => {
+        this.setState({html: html.html});
+        this.loadNotebookActivityTracker();
+      });
+
+      workspacesApi().getNotebookLockingMetadata(ns, wsid, nbName).then((resp) => {
+        this.setState({
+          lastLockedBy: resp.lastLockedBy,
+          lockExpirationTime: resp.lockExpirationTime
         });
-      workspacesApi().getNotebookLockingMetadata(this.props.urlParams.ns,
-        this.props.urlParams.wsid, this.props.urlParams.nbName).then((resp) => {
-          this.setState({
-            lastLockedBy: resp.lastLockedBy,
-            lockExpirationTime: resp.lockExpirationTime
-          });
+      });
+    }
+
+    loadNotebookActivityTracker() {
+      const frame = document.getElementById('notebook-frame') as HTMLFrameElement;
+      frame.addEventListener('load', () => {
+        const signalUserActivity = debouncer(() => {
+          frame.contentWindow.parent.postMessage(INACTIVITY_CONFIG.MESSAGE_KEY, '*');
+        }, 1000);
+
+        INACTIVITY_CONFIG.TRACKED_EVENTS.forEach(eventName => {
+          window.addEventListener(eventName, () => signalUserActivity.invoke(), false);
         });
+      });
     }
 
     private runCluster(onClusterReady: Function): void {
@@ -269,7 +284,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
           </div>
           <div style={styles.previewDiv}>
             {html ?
-              (<iframe style={styles.previewFrame} srcDoc={html}/>) :
+              (<iframe id='notebook-frame' style={styles.previewFrame} srcDoc={html}/>) :
               (<SpinnerOverlay/>)}
           </div>
           {showPlaygroundModeModal &&

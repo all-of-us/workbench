@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -22,9 +23,7 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
-import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
-import org.pmiops.workbench.model.PageRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -110,6 +109,18 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
+  public CohortReview findCohortReview(Long cohortReviewId) {
+    CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortReviewId(cohortReviewId);
+
+    if (cohortReview == null) {
+      throw new NotFoundException(
+          String.format(
+              "Not Found: Cohort Review does not exist for cohortReviewId: %s", cohortReviewId));
+    }
+    return cohortReview;
+  }
+
+  @Override
   public CohortReview findCohortReview(String ns, String firecloudName, Long cohortReviewId) {
     CohortReview cohortReview =
         cohortReviewDao.findByNamespaceAndFirecloudNameAndCohortReviewId(
@@ -172,15 +183,13 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     return participantCohortStatus;
   }
 
-  @Override
-  public List<ParticipantCohortStatus> findAll(
-      Long cohortReviewId, List<Filter> filterList, PageRequest pageRequest) {
-    return participantCohortStatusDao.findAll(cohortReviewId, filterList, pageRequest);
+  public List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
+    return participantCohortStatusDao.findAll(cohortReviewId, pageRequest);
   }
 
   @Override
-  public Long findCount(Long cohortReviewId, List<Filter> filterList, PageRequest pageRequest) {
-    return participantCohortStatusDao.findCount(cohortReviewId, filterList, pageRequest);
+  public Long findCount(Long cohortReviewId, PageRequest pageRequest) {
+    return participantCohortStatusDao.findCount(cohortReviewId, pageRequest);
   }
 
   @Override

@@ -7,9 +7,12 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 export const WINDOW_REF = 'window-ref';
+import {colorWithWhiteness} from 'app/styles/colors';
 import {
+  cdrVersionStore,
   currentCohortStore,
   currentConceptSetStore,
   currentWorkspaceStore,
@@ -285,6 +288,37 @@ export const connectBehaviorSubject = <T extends {}>(subject: BehaviorSubject<T>
   };
 };
 
+export const connectReplaySubject = <T extends {}>(subject: ReplaySubject<T>, name: string) => {
+  return (WrappedComponent) => {
+    class Wrapper extends React.Component<any, {value: T}> {
+      static displayName = 'connectReplaySubject()';
+      private subscription;
+
+      constructor(props) {
+        super(props);
+        this.state = {value: null};
+      }
+
+      componentDidMount() {
+        this.subscription = subject.subscribe(v => this.setState({value: v}));
+      }
+
+      componentWillUnmount() {
+        this.subscription.unsubscribe();
+      }
+
+      render() {
+        const {value} = this.state;
+        // Since ReplaySubject may not have an initial value, only render the
+        // connected value once the value is available.
+        return value && <WrappedComponent {...{[name]: value}} {...this.props}/>;
+      }
+    }
+
+    return Wrapper;
+  };
+};
+
 // HOC that provides a 'workspace' prop with current WorkspaceData
 export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
@@ -315,6 +349,14 @@ export const withRouteConfigData = () => {
   return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
 };
 
+// HOC that provides a 'cdrVersionListResponse' prop with the CDR version
+// information. Rendering of the connected component is blocked on initial load
+// of the CDR versions. This should only affect initial page loads, this HOC can
+// be included last (if multiple HOCs are in use) to minimize this impact.
+export const withCdrVersions = () => {
+  return connectReplaySubject(cdrVersionStore, 'cdrVersionListResponse');
+};
+
 // Temporary method for converting generated/models/Domain to generated/models/fetch/Domain
 export function generateDomain(domain: FetchDomain): Domain {
   const d = fp.capitalize(FetchDomain[domain]);
@@ -341,6 +383,14 @@ export function formatRecentResourceDisplayDate(time: string): string {
   return date.toDateString().split(' ').slice(1).join(' ');
 }
 
+export function formatDomainString(domainString: string): string {
+  return fp.capitalize(domainString);
+}
+
+export function formatDomain(domain: FetchDomain): string {
+  return formatDomainString(domain.toString());
+}
+
 // Given a value and an array, return a new array with the value appended.
 export const append = fp.curry((value, arr) => fp.concat(arr, [value]));
 
@@ -352,4 +402,93 @@ export const toggleIncludes = fp.curry((value, arr) => {
 
 export function sliceByHalfLength(obj) {
   return Math.ceil(obj.length / 2);
+}
+
+// Returns a function which will execute `action` at most once every `sensitivityMs` milliseconds
+// if the returned function has been invoked within the last `sensitivityMs` milliseconds
+// Example : debouncing user activity events to change rate of invocation from 1000/s to 1/s
+export function debouncer(action, sensitivityMs) {
+  let t = Date.now();
+
+  const timer = setInterval(() => {
+    if (Date.now() - t < sensitivityMs) {
+      action();
+    }
+  }, sensitivityMs);
+
+  return {
+    invoke: () => {
+      t = Date.now();
+    },
+    getTimer: () => timer
+  };
+}
+
+// Starts a timer which will invoke `f` after `timeoutInSeconds` has passed
+// Calling the returned function will reset the timer to zero
+// Example : Call a logout function after 30 seconds of the returned function not being invoked
+export function resettableTimeout(f, timeoutInSeconds) {
+  let timeout;
+  return {
+    reset: () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(f, timeoutInSeconds);
+    },
+    getTimer: () => timeout
+  };
+}
+
+export function highlightSearchTerm(searchTerm: string, stringToHighlight: string, highlightColor: string) {
+  if (searchTerm.length < 3) {
+    return stringToHighlight;
+  }
+  const words: string[] = [];
+  const matchString = new RegExp(searchTerm.trim(), 'i');
+  const matches = stringToHighlight.match(new RegExp(matchString, 'gi'));
+  const splits = stringToHighlight.split(new RegExp(matchString, 'gi'));
+  if (matches) {
+    for (let i = 0; i < matches.length; i++) {
+      words.push(splits[i], matches[i]);
+    }
+    words.push(splits[splits.length - 1]);
+  } else {
+    words.push(splits[0]);
+  }
+  return words.map((word, w) => <span key={w}
+    style={matchString.test(word.toLowerCase()) ? {
+      color: colorWithWhiteness(highlightColor, -0.4),
+      backgroundColor: colorWithWhiteness(highlightColor, 0.7),
+      display: 'inline-block'
+    } : {}}>
+      {word}
+    </span>);
+}
+
+/*
+ * A method to run an api call with a specified number of retries and exponential backoff.
+ * This method will only error
+ * Parameters:
+ *    apiCall: Lambda that will run an API call, in the form of () => apiClient.apiCall(args)
+ *    maxRetries: The amount of retries the system will take before erroring
+ *    defaultWaitTime: How long the base exponential backoff is, in milliseconds
+ *      For example, if 1000 is passed in, it will wait 1s for the first retry,
+ *      2s for the second, etc.
+ */
+export async function apiCallWithGatewayTimeoutRetries<T>(
+  apiCall: () => Promise<T>, maxRetries = 3, initialWaitTime = 1000): Promise<T> {
+  return apiCallWithGatewayTimeoutRetriesAndRetryCount(apiCall, maxRetries, 1, initialWaitTime);
+}
+
+async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
+  apiCall: () => Promise<T>, maxRetries = 3, retryCount = 1, initialWaitTime = 1000): Promise<T> {
+  try {
+    return await apiCall();
+  } catch (ex) {
+    if (ex.status !== 504 || retryCount > maxRetries) {
+      throw ex;
+    }
+    await new Promise(resolve => setTimeout(resolve, initialWaitTime * Math.pow(2, retryCount)));
+    return await apiCallWithGatewayTimeoutRetriesAndRetryCount(
+      apiCall, maxRetries, retryCount + 1, initialWaitTime);
+  }
 }

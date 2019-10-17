@@ -65,6 +65,13 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     }));
     this.subscriptions.push(urlParamsStore
       .map(({ns, wsid}) => ({ns, wsid}))
+      .subscribe(({ns, wsid}) => {
+        if (ns !== null && wsid !== null) {
+          workspacesApi().updateRecentWorkspaces(ns, wsid);
+        }
+      }));
+    this.subscriptions.push(urlParamsStore
+      .map(({ns, wsid}) => ({ns, wsid}))
       .distinctUntilChanged(fp.isEqual)
       .switchMap(({ns, wsid}) => {
         // Clear the workspace/access level during the transition to ensure we

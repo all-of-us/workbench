@@ -4,10 +4,12 @@ import {domainToTitle} from 'app/cohort-search/utils';
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
+import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, DomainType} from 'generated/fetch';
 import * as React from 'react';
@@ -38,7 +40,8 @@ const styles = reactStyles({
   },
   drugsText: {
     fontSize: '12px',
-    marginTop: '0.25rem'
+    marginTop: '0.25rem',
+    lineHeight: '0.75rem'
   },
   attrIcon: {
     marginRight: '0.5rem',
@@ -71,7 +74,7 @@ const styles = reactStyles({
   treeIcon: {
     color: colors.accent,
     cursor: 'pointer',
-    fontSize: '1.15rem'
+    fontSize: '1.15rem',
   },
   listContainer: {
     width: '99%',
@@ -148,6 +151,7 @@ interface State {
   results: string;
   sourceMatch: any;
   ingredients: any;
+  hoverId: string;
 }
 
 export const ListSearch = withCurrentWorkspace()(
@@ -160,13 +164,16 @@ export const ListSearch = withCurrentWorkspace()(
         loading: false,
         results: 'all',
         sourceMatch: undefined,
-        ingredients: {}
+        ingredients: {},
+        hoverId: undefined
       };
     }
 
     handleInput = (event: any) => {
       const {key, target: {value}} = event;
       if (key === 'Enter') {
+        const {wizard: {domain}} = this.props;
+        triggerEvent(`Cohort Builder Search - ${domainToTitle(domain)}`, 'Search', value);
         this.getResults(value);
       }
     }
@@ -176,14 +183,10 @@ export const ListSearch = withCurrentWorkspace()(
       try {
         this.setState({data: null, error: false, loading: true, results: 'all'});
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
-        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(
-          +cdrVersionId, domain, value
-        );
+        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim());
         const data = resp.items;
         if (data.length && this.checkSource) {
-          sourceMatch = data.find(
-            item => item.code.toLowerCase() === value.toLowerCase() && !item.isStandard
-          );
+          sourceMatch = data.find(item => item.code.toLowerCase() === value.trim().toLowerCase() && !item.isStandard);
         }
         this.setState({data});
       } catch (err) {
@@ -197,10 +200,9 @@ export const ListSearch = withCurrentWorkspace()(
       try {
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
         const {sourceMatch} = this.state;
+        this.trackEvent('Standard Vocab Hyperlink');
         this.setState({data: null, error: false, loading: true, results: 'standard'});
-        const resp = await cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(
-          +cdrVersionId, domain, sourceMatch.conceptId
-        );
+        const resp = await cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(+cdrVersionId, domain, sourceMatch.conceptId);
         this.setState({data: resp.items});
       } catch (err) {
         this.setState({error: true});
@@ -222,9 +224,6 @@ export const ListSearch = withCurrentWorkspace()(
           const groups = [...groupSelectionsStore.getValue(), row.id];
           groupSelectionsStore.next(groups);
         }
-        if (this.checkSource && !selections.length) {
-          wizard.isStandard = row.isStandard;
-        }
         wizard.item.searchParameters.push({parameterId, ...row, attributes: []});
         selections = [parameterId, ...selections];
         selectionsStore.next(selections);
@@ -237,6 +236,7 @@ export const ListSearch = withCurrentWorkspace()(
     }
 
     showHierarchy = (row: any) => {
+      this.trackEvent('More Info');
       this.props.hierarchy(row);
     }
 
@@ -257,12 +257,7 @@ export const ListSearch = withCurrentWorkspace()(
           cohortBuilderApi()
             .getDrugIngredientByConceptId(+cdrVersionId, row.conceptId)
             .then(resp => {
-              ingredients[row.id] = {
-                open: true,
-                loading: false,
-                error: false,
-                items: resp.items
-              };
+              ingredients[row.id] = {open: true, loading: false, error: false, items: resp.items};
               this.setState({ingredients});
             });
         } catch (error) {
@@ -283,35 +278,36 @@ export const ListSearch = withCurrentWorkspace()(
       return `param${row.conceptId ? (row.conceptId + row.code) : row.id}`;
     }
 
-    renderRow(row: any, child: boolean) {
-      const {wizard: {isStandard}} = this.props;
-      const {ingredients} = this.state;
+    trackEvent = (label: string) => {
+      const {wizard: {domain}} = this.props;
+      triggerEvent('Cohort Builder Search', 'Click', `${label} - ${domainToTitle(domain)} - Cohort Builder Search`);
+    }
+
+    onNameHover(el: HTMLDivElement, id: string) {
+      if (el.offsetWidth < el.scrollWidth) {
+        this.setState({hoverId: id});
+      }
+    }
+
+    renderRow(row: any, child: boolean, elementId: string) {
+      const {hoverId, ingredients} = this.state;
       const attributes = row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
+      const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
       const selected = !attributes && !brand && this.isSelected(row);
       const unselected = !attributes && !brand && !this.isSelected(row);
       const open = ingredients[row.id] && ingredients[row.id].open;
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
-      const disabled = this.checkSource && isStandard !== undefined
-        && row.isStandard !== isStandard;
       const columnStyle = child ?
         {...styles.columnBody, paddingLeft: '1.25rem'} : styles.columnBody;
       return <tr>
         <td style={columnStyle}>
           {row.selectable && <div style={{...styles.selectDiv}}>
             {attributes &&
-              <ClrIcon style={styles.attrIcon}
-                shape='slider' dir='right' size='20'
-                onClick={() => this.launchAttributes(row)}/>
+              <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => this.launchAttributes(row)}/>
             }
-            {selected &&
-              <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>
-            }
-            {unselected &&
-              <ClrIcon style={disabled ? styles.disabledIcon : styles.selectIcon}
-                shape='plus-circle' size='16'
-                onClick={() => this.selectItem(row)}/>
-            }
+            {selected && <ClrIcon style={styles.selectedIcon} shape='check-circle' size='20'/>}
+            {unselected && <ClrIcon style={styles.selectIcon} shape='plus-circle' size='16' onClick={() => this.selectItem(row)}/>}
             {brand && !loadingIngredients &&
               <ClrIcon style={styles.brandIcon}
                 shape={'angle ' + (open ? 'down' : 'right')} size='20'
@@ -319,26 +315,27 @@ export const ListSearch = withCurrentWorkspace()(
             }
             {loadingIngredients && <Spinner size={16}/>}
           </div>}
-          <div style={styles.nameDiv}>{row.name}{brand && <span> (BRAND NAME)</span>}</div>
+          <TooltipTrigger disabled={hoverId !== elementId} content={<div>{displayName}</div>}>
+            <div style={styles.nameDiv}
+              onMouseOver={(e) => this.onNameHover(e.target as HTMLDivElement, elementId)}
+              onMouseOut={() => this.setState({hoverId: undefined})}>
+              {displayName}
+            </div>
+          </TooltipTrigger>
         </td>
         <td style={styles.columnBody}>{row.code}</td>
         <td style={styles.columnBody}>{!brand && row.type}</td>
         <td style={styles.columnBody}>{row.count > -1 && row.count.toLocaleString()}</td>
-        <td style={{...styles.columnBody, padding: '0.2rem'}}>
-          {row.hasHierarchy &&
-            <i className='pi pi-sitemap'
-              style={styles.treeIcon}
-              onClick={() => this.showHierarchy(row)}/>
-          }
+        <td style={{...styles.columnBody, textAlign: 'center'}}>
+          {row.hasHierarchy && <i className='pi pi-sitemap' style={styles.treeIcon} onClick={() => this.showHierarchy(row)}/>}
         </td>
       </tr>;
     }
 
     render() {
-      const {wizard: {domain, isStandard}} = this.props;
+      const {wizard: {domain}} = this.props;
       const {data, error, ingredients, loading, results, sourceMatch} = this.state;
-      const listStyle = domain === DomainType.DRUG ? {...styles.listContainer, marginTop: '3.75rem'}
-        : styles.listContainer;
+      const listStyle = domain === DomainType.DRUG ? {...styles.listContainer, marginTop: '4.25rem'} : styles.listContainer;
       return <div style={{overflow: 'auto'}}>
         <div style={styles.searchContainer}>
           <div style={styles.searchBar}>
@@ -348,51 +345,35 @@ export const ListSearch = withCurrentWorkspace()(
               onKeyPress={this.handleInput} />
           </div>
           {domain === DomainType.DRUG && <div style={styles.drugsText}>
-            Your search may bring back brand name drugs. You must select ingredients to include them
-             in your cohort.
+            Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria.
           </div>}
         </div>
         {!loading && data && <div style={listStyle}>
           {results === 'all' && sourceMatch && <div style={{marginBottom: '0.75rem'}}>
-            There are {sourceMatch.count.toLocaleString()} participants with source code
-            &nbsp;{sourceMatch.code}. For more results, browse
-            &nbsp;<Clickable style={styles.vocabLink}
-              onClick={() => this.getStandardResults()}>
-              Standard Vocabulary
-            </Clickable>.
+            There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}. For more results, browse
+            &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.getStandardResults()}>Standard Vocabulary</Clickable>.
           </div>}
           {results === 'standard' && <div style={{marginBottom: '0.75rem'}}>
             {!!data.length && <span>
-              There are {data[0].count.toLocaleString()} participants for the standard version of
-               the code you searched.
+              There are {data[0].count.toLocaleString()} participants for the standard version of the code you searched.
             </span>}
             {!data.length && <span>
               There are no standard matches for source code {sourceMatch.code}.
             </span>}
             &nbsp;<Clickable style={styles.vocabLink}
+              onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
               onClick={() => this.getResults(sourceMatch.code)}>
               Return to source code
             </Clickable>.
-          </div>}
-          {isStandard !== undefined && <div style={{...styles.error, margin: '-0.5rem 0 0.5rem'}}>
-            <div style={{float: 'left', height: '1.5rem'}}>
-              <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-                shape='exclamation-triangle' size='22'/>
-            </div>
-            You have added a {isStandard ? 'standard' : 'source'} code. To add a
-            {isStandard ? ' source' : ' standard'} code to your cohort, add new criteria
-              once you've clicked the FINISH button below.
           </div>}
           {!!data.length && <table className='p-datatable' style={styles.table}>
             <thead className='p-datatable-thead'>
               <tr>
                 <th style={styles.columnHeader}>Name</th>
-                <th style={{...styles.columnHeader, width: '10%'}}>Code</th>
+                <th style={{...styles.columnHeader, width: '20%'}}>Code</th>
                 <th style={{...styles.columnHeader, width: '10%'}}>Vocab</th>
-                <th style={{...styles.columnHeader, width: '10%'}}>Count</th>
-                <th style={{...styles.columnHeader, padding: '0.2rem 0.5rem', width: '7%'}}>
-                  More Info
-                </th>
+                <th style={{...styles.columnHeader, width: '8%'}}>Count</th>
+                <th style={{...styles.columnHeader, textAlign: 'center', width: '12%'}}>View Hierarchy</th>
               </tr>
             </thead>
             <tbody className='p-datatable-tbody'>
@@ -400,16 +381,15 @@ export const ListSearch = withCurrentWorkspace()(
                 const open = ingredients[row.id] && ingredients[row.id].open;
                 const err = ingredients[row.id] && ingredients[row.id].error;
                 return <React.Fragment key={r}>
-                  {this.renderRow(row, false)}
+                  {this.renderRow(row, false, r)}
                   {open && !err && ingredients[row.id].items.map((item, i) => {
-                    return <React.Fragment key={i}>{this.renderRow(item, true)}</React.Fragment>;
+                    return <React.Fragment key={i}>{this.renderRow(item, true, `${r}.${i}`)}</React.Fragment>;
                   })}
                   {open && err && <tr>
-                    <td colSpan={4}>
+                    <td colSpan={5}>
                       <div style={{...styles.error, marginTop: 0}}>
-                        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-                          shape='exclamation-triangle' size='22'/>
-                        Sorry, the request cannot be completed.
+                        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
+                        Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
                       </div>
                     </td>
                   </tr>}
@@ -420,12 +400,10 @@ export const ListSearch = withCurrentWorkspace()(
           {results === 'all' && !data.length && <div>No results found</div>}
         </div>}
         {loading && <SpinnerOverlay/>}
-        {error && <div style={styles.error}>
-          <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
-            shape='exclamation-triangle' size='22'/>
-          Sorry, the request cannot be completed.
-          {results === 'standard' && <Clickable style={styles.vocabLink}
-            onClick={() => this.getResults(sourceMatch.code)}>
+        {error && <div style={{...styles.error, ...(domain === DomainType.DRUG ? {marginTop: '3.75rem'} : {})}}>
+          <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
+          Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
+          {results === 'standard' && <Clickable style={styles.vocabLink} onClick={() => this.getResults(sourceMatch.code)}>
             &nbsp;Return to source code.
           </Clickable>}
         </div>}

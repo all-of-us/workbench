@@ -19,11 +19,9 @@ describe('AdminUser', () => {
   beforeEach(() => {
     serverConfigStore.next({
       enableDataUseAgreement: true,
-      enforceRegistered: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
-      useBillingProjectBuffer: true,
       enableEraCommons: true,
     });
     props = {

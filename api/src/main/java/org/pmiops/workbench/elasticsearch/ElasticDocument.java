@@ -28,7 +28,8 @@ public class ElasticDocument {
     FLOAT,
     DATE,
     NESTED,
-    TEXT;
+    TEXT,
+    BOOLEAN;
 
     String lower() {
       return this.name().toLowerCase();
@@ -86,6 +87,7 @@ public class ElasticDocument {
           .put("measurement_concept_ids", esType(ElasticType.KEYWORD))
           .put("measurement_source_concept_ids", esType(ElasticType.KEYWORD))
           .put("visit_concept_ids", esType(ElasticType.KEYWORD))
+          .put("is_deceased", esType(ElasticType.BOOLEAN))
           .put("events", NESTED_FOREIGN_SCHEMA)
           .build();
 

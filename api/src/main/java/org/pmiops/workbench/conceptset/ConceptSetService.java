@@ -1,5 +1,6 @@
 package org.pmiops.workbench.conceptset;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -33,14 +34,17 @@ public class ConceptSetService {
     c.setLastModifiedTime(targetWorkspace.getLastModifiedTime());
     c.setCreationTime(targetWorkspace.getCreationTime());
     c.setVersion(1);
-    ConceptSet saved = conceptSetDao.save(c);
-    conceptSetDao.bulkCopyConceptIds(conceptSet.getConceptSetId(), saved.getConceptSetId());
-    return saved;
+    return conceptSetDao.save(c);
   }
 
   public List<ConceptSet> getConceptSets(Workspace workspace) {
     // Allows for fetching concept sets for a workspace once its collection is no longer
     // bound to a session.
     return conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+  }
+
+  @VisibleForTesting
+  public void setConceptSetDao(ConceptSetDao conceptSetDao) {
+    this.conceptSetDao = conceptSetDao;
   }
 }

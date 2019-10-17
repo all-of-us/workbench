@@ -20,10 +20,11 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
-import {BreadcrumbComponent} from 'app/components/breadcrumb';
 import {BugReportComponent} from 'app/components/bug-report';
 import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
+import {TextModalComponent} from 'app/components/text-modal';
 import {SignedInComponent} from 'app/pages/signed-in/component';
+import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
 import {CdrVersionsApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 
@@ -37,10 +38,11 @@ describe('SignedInComponent', () => {
         ClarityModule.forRoot()
       ],
       declarations: [
-        BreadcrumbComponent,
         BugReportComponent,
         SignedInComponent,
-        RoutingSpinnerComponent
+        RoutingSpinnerComponent,
+        TextModalComponent,
+        NavBarComponent
       ],
       providers: [
         {provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub()},
@@ -67,5 +69,6 @@ describe('SignedInComponent', () => {
   it('should render', fakeAsync(() => {
     updateAndTick(fixture);
     expect(fixture).toBeTruthy();
+    fixture.destroy();
   }));
 });

@@ -1,3 +1,4 @@
+import {TitleCasePipe} from '@angular/common';
 import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule, Routes} from '@angular/router';
@@ -7,6 +8,7 @@ import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 
 /* Components */
+import {HelpSidebarComponent} from 'app/components/help-sidebar';
 import {AttributesPageComponent} from './attributes-page/attributes-page.component';
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {DemographicsComponent} from './demographics/demographics.component';
@@ -29,12 +31,14 @@ import {TreeComponent} from './tree/tree.component';
 import {BreadcrumbType} from 'app/utils/navigation';
 
 /* Other Objects */
+import {CanDeactivateGuard} from 'app/guards/can-deactivate-guard.service';
 import {SafeHtmlPipe} from './safe-html.pipe';
 
 
 const routes: Routes = [{
   path: '',
   component: CohortSearchComponent,
+  canDeactivate: [CanDeactivateGuard],
   data: {
     title: 'Build Cohort Criteria',
     breadcrumb: BreadcrumbType.CohortAdd
@@ -60,6 +64,7 @@ const routes: Routes = [{
     CohortSearchComponent,
     GenderChartComponent,
     DemographicsComponent,
+    HelpSidebarComponent,
     ModalComponent,
     ModifierPageComponent,
     NodeComponent,
@@ -76,5 +81,6 @@ const routes: Routes = [{
     SafeHtmlPipe,
     SearchGroupSelectComponent,
   ],
+  providers: [TitleCasePipe]
 })
 export class CohortSearchModule {}

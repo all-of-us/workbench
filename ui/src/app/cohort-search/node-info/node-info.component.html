@@ -5,10 +5,10 @@
     type="button"
     class="btn btn-sm btn-link selection-button"
     [class.pm]="isPM"
-    [disabled]="(isSelected && !hasAttributes) || isDisabled"
+    [disabled]="isSelected && !hasAttributes"
     (click)="select($event)">
     <clr-icon *ngIf="isSelected && !hasAttributes" shape="check-circle" size="20" class="selection-icon"></clr-icon>
-    <clr-icon *ngIf="!isSelected && !hasAttributes" shape="plus-circle" size="20" class="selection-icon" [class.not-selectable]="isDisabled"></clr-icon>
+    <clr-icon *ngIf="!isSelected && !hasAttributes" shape="plus-circle" size="20" class="selection-icon"></clr-icon>
     <clr-icon *ngIf="hasAttributes" shape="slider" dir="right" size="20" class="is-solid"></clr-icon>
   </button>
 

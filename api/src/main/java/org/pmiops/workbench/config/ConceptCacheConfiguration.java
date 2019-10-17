@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.Concept;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
+import org.pmiops.workbench.model.FilterColumns;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,9 +27,7 @@ public class ConceptCacheConfiguration {
 
   public static final List<String> GENDER_RACE_ETHNICITY_TYPES =
       ImmutableList.of(
-          ParticipantCohortStatusColumns.ETHNICITY.name(),
-          ParticipantCohortStatusColumns.GENDER.name(),
-          ParticipantCohortStatusColumns.RACE.name());
+          FilterColumns.ETHNICITY.name(), FilterColumns.GENDER.name(), FilterColumns.RACE.name());
 
   private static final Map<String, Class<?>> CONCEPT_MAP = new HashMap<>();
 

@@ -9,14 +9,18 @@ import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
@@ -27,21 +31,26 @@ import org.pmiops.workbench.cdr.model.DomainVocabularyInfo.DomainVocabularyInfoI
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.DataSetService;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.WorkspaceACL;
+import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.DomainValue;
+import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.VocabularyCount;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.workspaces.WorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +59,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -216,20 +227,33 @@ public class ConceptsControllerTest {
           .allConceptCount(2)
           .standardConceptCount(1);
 
+  private static final String WORKSPACE_NAMESPACE = "ns";
+  private static final String WORKSPACE_NAME = "name";
+  private static final String USER_EMAIL = "bob@gmail.com";
+  private static User currentUser;
+
   @TestConfiguration
-  @Import({WorkspaceServiceImpl.class, WorkspaceMapper.class})
+  @Import({WorkspaceServiceImpl.class})
   @MockBean({
     BigQueryService.class,
     FireCloudService.class,
     CohortCloningService.class,
     ConceptSetService.class,
     ConceptBigQueryService.class,
-    Clock.class
+    Clock.class,
+    DataSetService.class
   })
-  static class Configuration {}
+  static class Configuration {
+    @Bean
+    @Scope("prototype")
+    User user() {
+      return currentUser;
+    }
+  }
 
   @Autowired private BigQueryService bigQueryService;
   @Autowired private ConceptDao conceptDao;
+  @Autowired private DataSetService dataSetService;
   @Autowired private WorkspaceService workspaceService;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -237,6 +261,8 @@ public class ConceptsControllerTest {
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private DomainVocabularyInfoDao domainVocabularyInfoDao;
   @Autowired FireCloudService fireCloudService;
+  @Autowired UserDao userDao;
+  @Mock Provider<User> userProvider;
   @Autowired SurveyModuleDao surveyModuleDao;
 
   @PersistenceContext private EntityManager entityManager;
@@ -260,6 +286,15 @@ public class ConceptsControllerTest {
             conceptDao,
             surveyModuleDao);
 
+    User user = new User();
+    user.setEmail(USER_EMAIL);
+    user.setUserId(123L);
+    user.setDisabled(false);
+    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+    user = userDao.save(user);
+    currentUser = user;
+    when(userProvider.get()).thenReturn(user);
+
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
@@ -277,7 +312,9 @@ public class ConceptsControllerTest {
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
-    when(fireCloudService.getWorkspace("ns", "name")).thenReturn(fcResponse);
+    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)).thenReturn(fcResponse);
+    stubGetWorkspaceAcl(
+        WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.WRITER);
   }
 
   @Test
@@ -919,5 +956,16 @@ public class ConceptsControllerTest {
     assertThat(response.getBody().getItems()).isEqualTo(ImmutableList.copyOf(expectedConcepts));
     assertThat(response.getBody().getDomainCounts()).isNull();
     assertThat(response.getBody().getVocabularyCounts()).isNull();
+  }
+
+  private void stubGetWorkspaceAcl(
+      String ns, String name, String creator, WorkspaceAccessLevel access) {
+    WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
+    WorkspaceAccessEntry accessLevelEntry =
+        new WorkspaceAccessEntry().accessLevel(access.toString());
+    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry =
+        ImmutableMap.of(creator, accessLevelEntry);
+    workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
+    when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);
   }
 }

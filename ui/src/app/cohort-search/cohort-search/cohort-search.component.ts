@@ -9,7 +9,7 @@ import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import {Observable} from 'rxjs/Observable';
 
 import {idsInUse, initExisting, searchRequestStore} from 'app/cohort-search/search-state.service';
-import {parseCohortDefinition} from 'app/cohort-search/utils';
+import {mapRequest, parseCohortDefinition} from 'app/cohort-search/utils';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {SearchRequest} from 'generated/fetch';
 
@@ -19,14 +19,12 @@ const ONE_REM = 24;  // value in pixels
 @Component({
   selector: 'app-cohort-search',
   templateUrl: './cohort-search.component.html',
-  styleUrls: ['./cohort-search.component.css'],
+  styleUrls: ['./cohort-search.component.css', '../../styles/buttons.css'],
 })
 export class CohortSearchComponent implements OnInit, OnDestroy {
 
   @ViewChild('wrapper') wrapper;
 
-  includeSize: number;
-  tempLength = {};
   private subscription;
   loading = false;
   count: number;
@@ -35,6 +33,10 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   criteria = {includes: [], excludes: []};
   triggerUpdate = 0;
   cohort: any;
+  resolve: Function;
+  modalPromise: Promise<boolean> | null = null;
+  modalOpen = false;
+  saving = false;
 
   ngOnInit() {
     this.subscription = Observable.combineLatest(
@@ -55,11 +57,12 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
               searchRequestStore.next(parseCohortDefinition(cohort.criteria));
             }
           });
+      } else {
+        this.cohort = {criteria: '{"includes":[],"excludes":[]}'};
       }
     });
 
     searchRequestStore.subscribe(sr => {
-      this.includeSize = sr.includes.length;
       this.criteria = sr;
       this.overview = sr.includes.length || sr.excludes.length;
     });
@@ -73,8 +76,20 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
     searchRequestStore.next({includes: [], excludes: []} as SearchRequest);
   }
 
-  getTempObj(e) {
-    this.tempLength = e;
+  canDeactivate(): Promise<boolean> | boolean {
+    const criteria = JSON.stringify(mapRequest(this.criteria));
+    return criteria === this.cohort.criteria || this.saving || this.showWarningModal();
+  }
+
+  async showWarningModal() {
+    this.modalPromise = new Promise<boolean>((resolve => this.resolve = resolve));
+    this.modalOpen = true;
+    return await this.modalPromise;
+  }
+
+  getModalResponse(res: boolean) {
+    this.modalOpen = false;
+    this.resolve(res);
   }
 
   @HostListener('window:resize')
@@ -91,5 +106,9 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
 
   updateRequest = () => {
     this.triggerUpdate++;
+  }
+
+  updateSaving = (flag: boolean) => {
+    this.saving = flag;
   }
 }

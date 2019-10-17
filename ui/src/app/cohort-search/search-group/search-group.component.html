@@ -24,7 +24,7 @@
   <div class="card-block" *ngIf="temporal">
     <clr-dropdown>
       <button type="button" class="btn time-selection-button" clrDropdownTrigger>
-        <span>{{formatStatus(mention)}}</span>
+        <span>{{formatOption(mention)}}</span>
         <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
@@ -34,7 +34,7 @@
           class="dropdown-item"
           type="button"
           (click)="getMentionTitle(mention)"
-          clrDropdownItem>{{formatStatus(mention)}}</button>
+          clrDropdownItem>{{formatOption(mention)}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
     <span class="of-text"> of </span>
@@ -88,33 +88,13 @@
           </clr-dropdown>
           <div class="dropdown-divider"></div>
           <h4 class="dropdown-header">Domains</h4>
-          <clr-dropdown *ngFor="let criteria of domainTypes">
             <button
-              *ngIf="!criteria.children"
+              *ngFor="let criteria of domainTypes"
               [id]="criteria.domain"
               class="dropdown-item"
               type="button"
               (click)="launchWizard(criteria)"
               clrDropdownItem>{{criteria.name}}</button>
-            <ng-container *ngIf="criteria.children">
-              <button
-                [id]="criteria.domain + '-' + index"
-                class="dropdown-item"
-                type="button"
-                clrDropdownTrigger>{{criteria.name}}</button>
-              <ng-template [(clrIfOpen)]="demoOpen || demoMenuHover">
-                <clr-dropdown-menu [id]="'demo-menu-' + index">
-                  <button
-                    *ngFor="let child of criteria.children"
-                    [id]="child.subtype"
-                    class="dropdown-item"
-                    type="button"
-                    (click)="launchWizard(child)"
-                    clrDropdownItem>{{child.name}}</button>
-                </clr-dropdown-menu>
-              </ng-template>
-            </ng-container>
-          </clr-dropdown>
         </clr-dropdown-menu>
       </clr-dropdown>
     </ng-template>
@@ -123,14 +103,13 @@
         Add Criteria <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
-        <ng-container *ngFor="let criteria of domainTypes">
-          <button *ngIf="criteria.name !== 'Demographics'"
-            [id]="criteria.domain"
-            class="dropdown-item"
-            type="button"
-            (click)="launchWizard(criteria)"
-            clrDropdownItem>{{criteria.name}}</button>
-        </ng-container>
+        <button
+          *ngFor="let criteria of domainTypes"
+          [id]="criteria.domain"
+          class="dropdown-item"
+          type="button"
+          (click)="launchWizard(criteria)"
+          clrDropdownItem>{{criteria.name}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
   </div>
@@ -140,7 +119,7 @@
     <div class="temporal-sub-card-header">
       <clr-dropdown>
         <button type="button" class="btn time-selection-button" clrDropdownTrigger>
-          <span>{{formatStatus(time)}}</span>
+          <span>{{formatOption(time)}}</span>
            <clr-icon shape="caret down"></clr-icon>
         </button>
         <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
@@ -150,7 +129,7 @@
             class="dropdown-item"
             type="button"
             (click)="getTimeTitle(timeName)"
-            clrDropdownItem>{{formatStatus(timeName)}}</button>
+            clrDropdownItem>{{formatOption(timeName)}}</button>
         </clr-dropdown-menu>
       </clr-dropdown>
       <form [formGroup]="timeForm" class="form-padding">
@@ -178,14 +157,12 @@
           Add Criteria <clr-icon shape="caret down"></clr-icon>
         </button>
         <clr-dropdown-menu clrPosition="bottom-left" *clrIfOpen>
-          <ng-container *ngFor="let criteria of domainTypes">
-            <button *ngIf="criteria.name !== 'Demographics'"
-                    [id]="criteria.domain"
-                    class="dropdown-item"
-                    type="button"
-                    (click)="launchWizard(criteria, 1)"
-                    clrDropdownItem>{{criteria.name}}</button>
-          </ng-container>
+          <button *ngFor="let criteria of domainTypes"
+            [id]="criteria.domain"
+            class="dropdown-item"
+            type="button"
+            (click)="launchWizard(criteria, 1)"
+            clrDropdownItem>{{criteria.name}}</button>
         </clr-dropdown-menu>
       </clr-dropdown>
     </div>
@@ -276,7 +253,7 @@
 </div>
 
 <popper-content #errorPopper>
-  <p *ngIf="error && !temporal" [style.margin]="'0'">Sorry, the request cannot be completed.</p>
+  <p *ngIf="error && !temporal" [style.margin]="'0'">Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.</p>
   <p *ngIf="temporal && temporalError" [style.margin]="'0'">
     Please complete criteria selections before saving temporal relationship.
   </p>

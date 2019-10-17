@@ -103,6 +103,15 @@
     <include file="changelog/db.changelog-93-annotation-version.xml"/>
     <include file="changelog/db.changelog-94-dataset-add-prepackaged-conceptsets-addDefaultValue.xml"/>
     <include file="changelog/db.changelog-95-free-credits.xml"/>
+    <include file="changelog/db.changelog-96-drop-free-tier-billing.xml"/>
+    <include file="changelog/db.changelog-97-cdr-archival-status.xml"/>
+    <include file="changelog/db.changelog-98-add-demographic-survey.xml"/>
+    <include file="changelog/db.changelog-99-add-address.xml"/>
+    <include file="changelog/db.changelog-100-update-institution-affiliations.xml"/>
+    <include file="changelog/db.changelog-101-billing-project-garbage-collection.xml"/>
+    <include file="changelog/db.changelog-102-user-recent-workspace.xml"/>
+    <include file="changelog/db.changelog-103-data-dictionary.xml"/>
+    <include file="changelog/db.changelog-104-dataset-name-unique-in-workspace.xml"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`

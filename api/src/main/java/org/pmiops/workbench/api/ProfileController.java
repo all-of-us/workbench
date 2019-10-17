@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,7 +29,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
@@ -42,11 +40,14 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.ContactEmailTakenResponse;
 import org.pmiops.workbench.model.CreateAccountRequest;
+import org.pmiops.workbench.model.DemographicSurvey;
+import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.InstitutionalAffiliation;
@@ -108,9 +109,62 @@ public class ProfileController implements ProfileApiDelegate {
                 InstitutionalAffiliation institutionalAffiliation) {
               org.pmiops.workbench.db.model.InstitutionalAffiliation result =
                   new org.pmiops.workbench.db.model.InstitutionalAffiliation();
-              result.setRole(institutionalAffiliation.getRole());
-              result.setInstitution(institutionalAffiliation.getInstitution());
+              if (institutionalAffiliation.getInstitution() != null) {
+                result.setInstitution(institutionalAffiliation.getInstitution());
+              }
+              if (institutionalAffiliation.getNonAcademicAffiliation() != null) {
+                result.setNonAcademicAffiliationnEnum(
+                    institutionalAffiliation.getNonAcademicAffiliation());
+              }
 
+              result.setRole(institutionalAffiliation.getRole());
+              result.setOther(institutionalAffiliation.getOther());
+
+              return result;
+            }
+          };
+
+  private static final Function<Address, org.pmiops.workbench.db.model.Address>
+      FROM_CLIENT_ADDRESS =
+          new Function<Address, org.pmiops.workbench.db.model.Address>() {
+            @Override
+            public org.pmiops.workbench.db.model.Address apply(Address address) {
+              org.pmiops.workbench.db.model.Address result =
+                  new org.pmiops.workbench.db.model.Address();
+              result.setStreetAddress1(address.getStreetAddress1());
+              result.setStreetAddress2(address.getStreetAddress2());
+              result.setCity(address.getCity());
+              result.setState(address.getState());
+              result.setZipCode(address.getZipCode());
+              result.setCountry(address.getCountry());
+              return result;
+            }
+          };
+
+  private static final Function<DemographicSurvey, org.pmiops.workbench.db.model.DemographicSurvey>
+      FROM_CLIENT_DEMOGRAPHIC_SURVEY =
+          new Function<DemographicSurvey, org.pmiops.workbench.db.model.DemographicSurvey>() {
+            @Override
+            public org.pmiops.workbench.db.model.DemographicSurvey apply(
+                DemographicSurvey demographicSurvey) {
+              org.pmiops.workbench.db.model.DemographicSurvey result =
+                  new org.pmiops.workbench.db.model.DemographicSurvey();
+              if (demographicSurvey.getRace() != null)
+                result.setRaceEnum(demographicSurvey.getRace());
+              if (demographicSurvey.getEthnicity() != null)
+                result.setEthnicityEnum(demographicSurvey.getEthnicity());
+              if (demographicSurvey.getDisability() != null)
+                result.setDisabilityEnum(
+                    demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
+              if (demographicSurvey.getEducation() != null)
+                result.setEducationEnum(demographicSurvey.getEducation());
+              if (demographicSurvey.getGender() != null)
+                result.setGenderEnum(demographicSurvey.getGender());
+              if (demographicSurvey.getDisability() != null)
+                result.setDisabilityEnum(
+                    demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
+              if (demographicSurvey.getYearOfBirth() != null)
+                result.setYear_of_birth(demographicSurvey.getYearOfBirth().intValue());
               return result;
             }
           };
@@ -201,9 +255,16 @@ public class ProfileController implements ProfileApiDelegate {
   private void validateProfileFields(Profile profile) {
     validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
     validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
-    validateStringLength(profile.getCurrentPosition(), "Current Position", 255, 1);
-    validateStringLength(profile.getOrganization(), "Organization", 255, 1);
-    validateStringLength(profile.getAreaOfResearch(), "Current Research", 3000, 1);
+    if (!workbenchConfigProvider.get().featureFlags.enableNewAccountCreation) {
+      validateStringLength(profile.getCurrentPosition(), "Current Position", 255, 1);
+      validateStringLength(profile.getOrganization(), "Organization", 255, 1);
+      validateStringLength(profile.getAreaOfResearch(), "Current Research", 3000, 1);
+    } else {
+      validateStringLength(profile.getAddress().getStreetAddress1(), "Street Address 1", 255, 5);
+      validateStringLength(profile.getAddress().getCity(), "City", 3000, 1);
+      validateStringLength(profile.getAddress().getState(), "State", 3000, 1);
+      validateStringLength(profile.getAddress().getCountry(), "Country", 3000, 2);
+    }
   }
 
   private User saveUserWithConflictHandling(User user) {
@@ -296,15 +357,6 @@ public class ProfileController implements ProfileApiDelegate {
       fireCloudService.registerUser(
           user.getContactEmail(), user.getGivenName(), user.getFamilyName());
 
-      // TODO(calbach): After the next DB wipe, switch this null check to
-      // instead use the freeTierBillingProjectStatus.
-      if (!workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer
-          && user.getFreeTierBillingProjectName() == null) {
-        String billingProjectName = createFirecloudBillingProject(user);
-        user.setFreeTierBillingProjectName(billingProjectName);
-        user.setFreeTierBillingProjectStatusEnum(BillingProjectStatus.PENDING);
-      }
-
       user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
       // If the user is logged in, then we know that they have followed the account creation
       // instructions sent to
@@ -313,97 +365,7 @@ public class ProfileController implements ProfileApiDelegate {
       return saveUserWithConflictHandling(user);
     }
 
-    // everything after this if block is code that will be deleted when useBillingProjectBuffer is
-    // turned on permanently.
-    if (workbenchConfigProvider.get().featureFlags.useBillingProjectBuffer) {
-      return user;
-    }
-
-    // Free tier billing project setup is complete; nothing to do.
-    if (BillingProjectStatus.READY.equals(user.getFreeTierBillingProjectStatusEnum())) {
-      return user;
-    }
-
-    // On subsequent sign-ins to the first, attempt to complete the setup of the FC billing project
-    // and mark the Workbench's project setup as completed. FC project creation is asynchronous, so
-    // first confirm whether Firecloud claims the project setup is complete.
-    BillingProjectStatus status;
-    try {
-      String billingProjectName = user.getFreeTierBillingProjectName();
-      status =
-          fireCloudService.getBillingProjectMemberships().stream()
-              .filter(m -> m.getProjectName() != null)
-              .filter(m -> m.getCreationStatus() != null)
-              .filter(m -> fcToWorkbenchBillingMap.containsKey(m.getCreationStatus()))
-              .filter(m -> billingProjectName.equals(m.getProjectName()))
-              .map(m -> fcToWorkbenchBillingMap.get(m.getCreationStatus()))
-              // Should be at most one matching billing project; though we're not asserting this.
-              .findFirst()
-              .orElse(BillingProjectStatus.NONE);
-    } catch (WorkbenchException e) {
-      log.log(Level.WARNING, "failed to retrieve billing projects, continuing", e);
-      return user;
-    }
-    switch (status) {
-      case NONE:
-      case PENDING:
-        log.log(Level.INFO, "free tier project is still initializing, continuing");
-        return user;
-
-      case ERROR:
-        int retries = Optional.ofNullable(user.getBillingProjectRetries()).orElse(0);
-        if (retries < workbenchConfigProvider.get().billing.retryCount) {
-          this.userService.setBillingRetryCount(retries + 1);
-          log.log(
-              Level.INFO,
-              String.format(
-                  "Billing project %s failed to be created, retrying.",
-                  user.getFreeTierBillingProjectName()));
-          try {
-            fireCloudService.removeUserFromBillingProject(
-                user.getEmail(), user.getFreeTierBillingProjectName());
-          } catch (WorkbenchException e) {
-            log.log(Level.INFO, "Failed to remove user from errored billing project");
-          }
-          String billingProjectName = createFirecloudBillingProject(user);
-          return this.userService.setFreeTierBillingProjectNameAndStatus(
-              billingProjectName, BillingProjectStatus.PENDING);
-        } else {
-          String billingProjectName = user.getFreeTierBillingProjectName();
-          log.log(
-              Level.SEVERE,
-              String.format("free tier project %s failed to be created", billingProjectName));
-          return userService.setFreeTierBillingProjectNameAndStatus(billingProjectName, status);
-        }
-      case READY:
-        log.log(Level.INFO, "free tier project initialized");
-        break;
-
-      default:
-        log.log(Level.SEVERE, String.format("unrecognized status '%s'", status));
-        return user;
-    }
-
-    String billingProjectName = user.getFreeTierBillingProjectName();
-    try {
-      this.leonardoNotebooksClient.createCluster(
-          billingProjectName, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME);
-      log.log(
-          Level.INFO,
-          String.format(
-              "created cluster %s/%s",
-              billingProjectName, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
-    } catch (ConflictException e) {
-      log.log(
-          Level.INFO,
-          String.format(
-              "Cluster %s/%s already exists",
-              billingProjectName, LeonardoNotebooksClient.DEFAULT_CLUSTER_NAME));
-    } catch (GatewayTimeoutException e) {
-      log.log(Level.WARNING, "Socket Timeout creating cluster.");
-    }
-    return userService.setFreeTierBillingProjectNameAndStatus(
-        billingProjectName, BillingProjectStatus.READY);
+    return user;
   }
 
   private ResponseEntity<Profile> getProfileResponse(User user) {
@@ -445,7 +407,17 @@ public class ProfileController implements ProfileApiDelegate {
           "Username should be at least 3 characters and not more than 64 characters");
     request.getProfile().setUsername(request.getProfile().getUsername().toLowerCase());
     validateProfileFields(request.getProfile());
-    com.google.api.services.admin.directory.model.User googleUser =
+    // This check will be removed once enableNewAccountCreation flag is turned on.
+    if (request.getProfile().getAddress() == null) {
+      request.getProfile().setAddress(new Address());
+    }
+    if (request.getProfile().getDemographicSurvey() == null) {
+      request.getProfile().setDemographicSurvey(new DemographicSurvey());
+    }
+    if (request.getProfile().getInstitutionalAffiliations() == null) {
+      request.getProfile().setInstitutionalAffiliations(new ArrayList<InstitutionalAffiliation>());
+    }
+    com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
             request.getProfile().getGivenName(),
             request.getProfile().getFamilyName(),
@@ -463,6 +435,7 @@ public class ProfileController implements ProfileApiDelegate {
     // It's possible for the profile information to become out of sync with the user's Google
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
+
     User user =
         userService.createUser(
             request.getProfile().getGivenName(),
@@ -471,7 +444,12 @@ public class ProfileController implements ProfileApiDelegate {
             request.getProfile().getContactEmail(),
             request.getProfile().getCurrentPosition(),
             request.getProfile().getOrganization(),
-            request.getProfile().getAreaOfResearch());
+            request.getProfile().getAreaOfResearch(),
+            FROM_CLIENT_ADDRESS.apply(request.getProfile().getAddress()),
+            FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(request.getProfile().getDemographicSurvey()),
+            request.getProfile().getInstitutionalAffiliations().stream()
+                .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
+                .collect(Collectors.toList()));
 
     try {
       mailServiceProvider
@@ -577,8 +555,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> updateContactEmail(
       UpdateContactEmailRequest updateContactEmailRequest) {
     String username = updateContactEmailRequest.getUsername().toLowerCase();
-    com.google.api.services.admin.directory.model.User googleUser =
-        directoryService.getUser(username);
+    com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
     checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
     if (!userNeverLoggedIn(googleUser, user)) {
@@ -598,8 +575,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
     String username = resendRequest.getUsername().toLowerCase();
-    com.google.api.services.admin.directory.model.User googleUser =
-        directoryService.getUser(username);
+    com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
     checkUserCreationNonce(user, resendRequest.getCreationNonce());
     if (!userNeverLoggedIn(googleUser, user)) {
@@ -609,12 +585,12 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private boolean userNeverLoggedIn(
-      com.google.api.services.admin.directory.model.User googleUser, User user) {
+      com.google.api.services.directory.model.User googleUser, User user) {
     return user.getFirstSignInTime() == null && googleUser.getChangePasswordAtNextLogin();
   }
 
   private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, User user) {
-    com.google.api.services.admin.directory.model.User googleUser =
+    com.google.api.services.directory.model.User googleUser =
         directoryService.resetUserPassword(username);
     try {
       mailServiceProvider
@@ -672,10 +648,9 @@ public class ProfileController implements ProfileApiDelegate {
     if (newAffiliations.size() == 0) {
       shouldAdd = true;
     }
-    Long userId = user.getUserId();
     for (org.pmiops.workbench.db.model.InstitutionalAffiliation affiliation : newAffiliations) {
       affiliation.setOrderIndex(i);
-      affiliation.setUserId(userId);
+      affiliation.setUser(user);
       if (oldAffilations.hasNext()) {
         org.pmiops.workbench.db.model.InstitutionalAffiliation oldAffilation =
             oldAffilations.next();

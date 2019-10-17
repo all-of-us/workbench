@@ -18,12 +18,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 
@@ -60,8 +60,6 @@ public class User {
   private String phoneNumber;
   private String currentPosition;
   private String organization;
-  private String freeTierBillingProjectName;
-  private Short freeTierBillingProjectStatus;
   private Double freeTierCreditsLimitOverride = null;
   private Timestamp firstSignInTime;
   private Set<Short> authorities = new HashSet<>();
@@ -98,6 +96,8 @@ public class User {
   private Timestamp idVerificationBypassTime;
   private Timestamp twoFactorAuthCompletionTime;
   private Timestamp twoFactorAuthBypassTime;
+  private DemographicSurvey demographicSurvey;
+  private Address address;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -211,24 +211,6 @@ public class User {
     this.organization = organization;
   }
 
-  @Column(name = "free_tier_billing_project_name")
-  public String getFreeTierBillingProjectName() {
-    return freeTierBillingProjectName;
-  }
-
-  public void setFreeTierBillingProjectName(String freeTierBillingProjectName) {
-    this.freeTierBillingProjectName = freeTierBillingProjectName;
-  }
-
-  @Column(name = "free_tier_billing_project_status")
-  public Short getFreeTierBillingProjectStatus() {
-    return freeTierBillingProjectStatus;
-  }
-
-  public void setFreeTierBillingProjectStatus(Short freeTierBillingProjectStatus) {
-    this.freeTierBillingProjectStatus = freeTierBillingProjectStatus;
-  }
-
   @Column(name = "free_tier_credits_limit_override")
   public Double getFreeTierCreditsLimitOverride() {
     return freeTierCreditsLimitOverride;
@@ -236,17 +218,6 @@ public class User {
 
   public void setFreeTierCreditsLimitOverride(Double freeTierCreditsLimitOverride) {
     this.freeTierCreditsLimitOverride = freeTierCreditsLimitOverride;
-  }
-
-  @Transient
-  public BillingProjectStatus getFreeTierBillingProjectStatusEnum() {
-    return StorageEnums.billingProjectStatusFromStorage(getFreeTierBillingProjectStatus());
-  }
-
-  public void setFreeTierBillingProjectStatusEnum(
-      BillingProjectStatus freeTierBillingProjectStatus) {
-    setFreeTierBillingProjectStatus(
-        StorageEnums.billingProjectStatusToStorage(freeTierBillingProjectStatus));
   }
 
   @Column(name = "first_sign_in_time")
@@ -371,8 +342,8 @@ public class User {
 
   @OneToMany(
       fetch = FetchType.EAGER,
-      mappedBy = "userId",
       orphanRemoval = true,
+      mappedBy = "user",
       cascade = CascadeType.ALL)
   @OrderColumn(name = "order_index")
   public List<InstitutionalAffiliation> getInstitutionalAffiliations() {
@@ -597,5 +568,31 @@ public class User {
 
   public void setTwoFactorAuthBypassTime(Timestamp twoFactorAuthBypassTime) {
     this.twoFactorAuthBypassTime = twoFactorAuthBypassTime;
+  }
+
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  public DemographicSurvey getDemographicSurvey() {
+    return demographicSurvey;
+  }
+
+  public void setDemographicSurvey(DemographicSurvey demographicSurvey) {
+    this.demographicSurvey = demographicSurvey;
+  }
+
+  @OneToOne(
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY,
+      mappedBy = "user")
+  public Address getAddress() {
+    return address;
+  }
+
+  public void setAddress(Address address) {
+    this.address = address;
   }
 }

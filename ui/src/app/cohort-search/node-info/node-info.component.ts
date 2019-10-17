@@ -161,9 +161,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
           name: modifiedName
         };
         const wizard = wizardStore.getValue();
-        if (!selections.length && this.checkStandard) {
-          wizard.isStandard = param.isStandard;
-        }
         wizard.item.searchParameters.push(param);
         selections = [this.paramId, ...selections];
         selectionsStore.next(selections);
@@ -210,15 +207,5 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
       this.node.subtype === CriteriaSubType.PREG ||
       this.node.subtype === CriteriaSubType.HRIRR ||
       this.node.subtype === CriteriaSubType.HRNOIRR;
-  }
-
-  get checkStandard() {
-    return this.node.domainId === DomainType.CONDITION
-      || this.node.domainId === DomainType.PROCEDURE;
-  }
-
-  get isDisabled() {
-    const standard = wizardStore.getValue().isStandard;
-    return this.checkStandard && standard !== undefined && this.node.isStandard !== standard;
   }
 }

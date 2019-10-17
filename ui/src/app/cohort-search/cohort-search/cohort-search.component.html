@@ -15,7 +15,7 @@
 
         <div class="col-xl-6 col-lg-12" id="list-exclude-groups">
           <app-list-search-group-list
-            *ngIf="includeSize > 0"
+            *ngIf="overview"
             [role]="'excludes'"
             [groups]="criteria.excludes"
             [updateRequest]="updateRequest">
@@ -24,11 +24,27 @@
       </div>
     </div>
     <div class="col-xl-4 col-lg-12" id="list-charts">
-      <app-list-overview *ngIf="overview" [searchRequest]="criteria" [update]="triggerUpdate"></app-list-overview>
+      <app-list-overview
+        *ngIf="overview"
+        [searchRequest]="criteria"
+        [updateCount]="triggerUpdate"
+        [updateSaving]="updateSaving"></app-list-overview>
     </div>
     <div *ngIf="loading" class="spinner root-spinner">
       Loading...
     </div>
   </div>
+  <app-help-sidebar location="cohortBuilder"></app-help-sidebar>
 </div>
 <app-list-modal></app-list-modal>
+<clr-modal [(clrModalOpen)]="modalOpen" [clrModalClosable]="false">
+  <h3 class="modal-title">Warning! </h3>
+  <div class="modal-body">
+    Your cohort has not been saved. If you’d like to save your cohort criteria, please click CANCEL
+    and {{cohort && cohort.id ? 'use Save or Save As' : 'click CREATE COHORT'}} to save your criteria.
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-link" (click)="getModalResponse(false)">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="getModalResponse(true)">Discard Changes</button>
+  </div>
+</clr-modal>

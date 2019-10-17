@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.BigQueryException;
+import com.google.cloud.bigquery.BigQueryOptions;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValue;
@@ -9,6 +10,7 @@ import com.google.cloud.bigquery.JobInfo;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableId;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,9 +38,23 @@ public class BigQueryService {
 
   private static final Logger logger = Logger.getLogger(BigQueryService.class.getName());
 
-  @Autowired private BigQuery bigquery;
-
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
+  @Autowired private BigQuery defaultBigQuery;
+
+  @VisibleForTesting
+  protected BigQuery getBigQueryService() {
+    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    if (cdrVersion == null) {
+      return defaultBigQuery;
+    }
+    // If a query is being executed in the context of a CDR, it must be run within that project as
+    // well. By default, the query would run in the Workbench App Engine project, which would
+    // violate VPC-SC restrictions.
+    return BigQueryOptions.newBuilder()
+        .setProjectId(cdrVersion.getBigqueryProject())
+        .build()
+        .getService();
+  }
 
   /** Execute the provided query using bigquery. */
   public TableResult executeQuery(QueryJobConfiguration query) {
@@ -54,7 +70,7 @@ public class BigQueryService {
           new Object[] {query.getQuery(), query.getNamedParameters()});
     }
     try {
-      return bigquery
+      return getBigQueryService()
           .create(JobInfo.of(query))
           .getQueryResults(BigQuery.QueryResultsOption.maxWaitTime(waitTime));
     } catch (InterruptedException e) {
@@ -64,7 +80,7 @@ public class BigQueryService {
         throw new ServerUnavailableException(
             "BigQuery was temporarily unavailable, try again later", e);
       } else if (e.getCode() == HttpServletResponse.SC_FORBIDDEN) {
-        throw new ForbiddenException("Access to the CDR is denied", e);
+        throw new ForbiddenException("BigQuery access denied", e);
       } else {
         throw new ServerErrorException(
             String.format(
@@ -151,6 +167,6 @@ public class BigQueryService {
     TableId tableId =
         TableId.of(cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset(), tableName);
 
-    return bigquery.getTable(tableId).getDefinition().getSchema().getFields();
+    return getBigQueryService().getTable(tableId).getDefinition().getSchema().getFields();
   }
 }

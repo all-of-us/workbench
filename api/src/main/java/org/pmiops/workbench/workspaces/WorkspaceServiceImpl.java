@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -12,18 +13,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -54,15 +62,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class WorkspaceServiceImpl implements WorkspaceService {
 
   private static final String FC_OWNER_ROLE = "OWNER";
+  protected static final int RECENT_WORKSPACE_COUNT = 4;
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
   // Note: Cannot use an @Autowired constructor with this version of Spring
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
   private CohortCloningService cohortCloningService;
   private ConceptSetService conceptSetService;
+  private DataSetService dataSetService;
   private UserDao userDao;
+  private Provider<User> userProvider;
+  private UserRecentWorkspaceDao userRecentWorkspaceDao;
   private WorkspaceDao workspaceDao;
-  private WorkspaceMapper workspaceMapper;
 
   private FireCloudService fireCloudService;
   private Clock clock;
@@ -72,17 +83,21 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       Clock clock,
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
+      DataSetService dataSetService,
       FireCloudService fireCloudService,
       UserDao userDao,
-      WorkspaceDao workspaceDao,
-      WorkspaceMapper workspaceMapper) {
+      Provider<User> userProvider,
+      UserRecentWorkspaceDao userRecentWorkspaceDao,
+      WorkspaceDao workspaceDao) {
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
+    this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
+    this.userProvider = userProvider;
     this.userDao = userDao;
+    this.userRecentWorkspaceDao = userRecentWorkspaceDao;
     this.workspaceDao = workspaceDao;
-    this.workspaceMapper = workspaceMapper;
   }
 
   /**
@@ -128,7 +143,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces() {
     Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
-        getFirecloudWorkspaces();
+        getFirecloudWorkspaces(ImmutableList.of("accessLevel", "workspace.workspaceId"));
     List<Workspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
 
     return dbWorkspaces.stream()
@@ -140,9 +155,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               String fcWorkspaceAccessLevel =
                   fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
               WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace));
+              currentWorkspace.setWorkspace(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace));
               currentWorkspace.setAccessLevel(
-                  workspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
+                  WorkspaceConversionUtils.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
               return currentWorkspace;
             })
         .collect(Collectors.toList());
@@ -171,14 +186,17 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
       }
     }
-    workspaceResponse.setWorkspace(workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
+    workspaceResponse.setWorkspace(
+        WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
 
     return workspaceResponse;
   }
 
   private Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse>
-      getFirecloudWorkspaces() {
-    return fireCloudService.getWorkspaces().stream()
+      getFirecloudWorkspaces(List<String> fields) {
+    // fields must include at least "workspace.workspaceId", otherwise
+    // the map creation will fail
+    return fireCloudService.getWorkspaces(fields).stream()
         .collect(
             Collectors.toMap(
                 fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
@@ -376,17 +394,38 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   @Transactional
-  public Workspace saveAndCloneCohortsAndConceptSets(Workspace from, Workspace to) {
+  public Workspace saveAndCloneCohortsConceptSetsAndDataSets(Workspace from, Workspace to) {
     // Save the workspace first to allocate an ID.
     Workspace saved = workspaceDao.save(to);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(saved.getCdrVersion());
     boolean cdrVersionChanged =
         from.getCdrVersion().getCdrVersionId() != to.getCdrVersion().getCdrVersionId();
+    Map<Long, Long> fromCohortIdToToCohortId = new HashMap<>();
     for (Cohort fromCohort : from.getCohorts()) {
-      cohortCloningService.cloneCohortAndReviews(fromCohort, to);
+      fromCohortIdToToCohortId.put(
+          fromCohort.getCohortId(),
+          cohortCloningService.cloneCohortAndReviews(fromCohort, to).getCohortId());
     }
-    for (ConceptSet conceptSet : conceptSetService.getConceptSets(from)) {
-      conceptSetService.cloneConceptSetAndConceptIds(conceptSet, to, cdrVersionChanged);
+    Map<Long, Long> fromConceptSetIdToToConceptSetId = new HashMap<>();
+    for (ConceptSet fromConceptSet : conceptSetService.getConceptSets(from)) {
+      fromConceptSetIdToToConceptSetId.put(
+          fromConceptSet.getConceptSetId(),
+          conceptSetService
+              .cloneConceptSetAndConceptIds(fromConceptSet, to, cdrVersionChanged)
+              .getConceptSetId());
+    }
+    for (DataSet dataSet : dataSetService.getDataSets(from)) {
+      dataSetService.cloneDataSetToWorkspace(
+          dataSet,
+          to,
+          fromCohortIdToToCohortId.entrySet().stream()
+              .filter(cohortIdEntry -> dataSet.getCohortIds().contains(cohortIdEntry.getKey()))
+              .map(Entry::getValue)
+              .collect(Collectors.toSet()),
+          fromConceptSetIdToToConceptSetId.entrySet().stream()
+              .filter(conceptSetId -> dataSet.getConceptSetIds().contains(conceptSetId.getKey()))
+              .map(Entry::getValue)
+              .collect(Collectors.toSet()));
     }
     return saved;
   }
@@ -394,8 +433,16 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public WorkspaceAccessLevel getWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId) {
-    String userAccess =
-        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
+    WorkspaceACL workspaceACL = fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId);
+    WorkspaceAccessEntry workspaceAccessEntry =
+        Optional.of(workspaceACL.getAcl().get(userProvider.get().getEmail()))
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "Workspace %s/%s not found", workspaceNamespace, workspaceId)));
+    final String userAccess = workspaceAccessEntry.getAccessLevel();
+
     if (userAccess.equals(PROJECT_OWNER_ACCESS_LEVEL)) {
       return WorkspaceAccessLevel.OWNER;
     }
@@ -452,7 +499,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       } else {
-        userRoles.add(workspaceMapper.toApiUserRole(user, entry.getValue()));
+        userRoles.add(WorkspaceConversionUtils.toApiUserRole(user, entry.getValue()));
       }
     }
     return userRoles.stream()
@@ -481,5 +528,99 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
 
     return this.saveWithLastModified(workspace);
+  }
+
+  @Override
+  @Transactional
+  public List<UserRecentWorkspace> getRecentWorkspaces() {
+    long userId = userProvider.get().getUserId();
+    List<UserRecentWorkspace> userRecentWorkspaces =
+        userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
+    return pruneInaccessibleRecentWorkspaces(userRecentWorkspaces);
+  }
+
+  private List<UserRecentWorkspace> pruneInaccessibleRecentWorkspaces(
+      List<UserRecentWorkspace> recentWorkspaces) {
+    List<Workspace> dbWorkspaces =
+        workspaceDao.findAllByWorkspaceIdIn(
+            recentWorkspaces.stream()
+                .map(UserRecentWorkspace::getWorkspaceId)
+                .collect(Collectors.toList()));
+
+    Set<Long> idsToDelete =
+        dbWorkspaces.stream()
+            .filter(
+                workspace -> {
+                  try {
+                    enforceWorkspaceAccessLevel(
+                        workspace.getWorkspaceNamespace(),
+                        workspace.getFirecloudName(),
+                        WorkspaceAccessLevel.READER);
+                  } catch (ForbiddenException | NotFoundException e) {
+                    return true;
+                  }
+                  return false;
+                })
+            .map(Workspace::getWorkspaceId)
+            .collect(Collectors.toSet());
+
+    if (!idsToDelete.isEmpty()) {
+      userRecentWorkspaceDao.deleteByWorkspaceIdIn(idsToDelete);
+    }
+
+    return recentWorkspaces.stream()
+        .filter(recentWorkspace -> !idsToDelete.contains(recentWorkspace.getWorkspaceId()))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public UserRecentWorkspace updateRecentWorkspaces(
+      Workspace workspace, long userId, Timestamp lastAccessDate) {
+    Optional<UserRecentWorkspace> maybeRecentWorkspace =
+        userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspace.getWorkspaceId(), userId);
+    final UserRecentWorkspace matchingRecentWorkspace =
+        maybeRecentWorkspace
+            .map(
+                recentWorkspace -> {
+                  recentWorkspace.setLastAccessDate(lastAccessDate);
+                  return recentWorkspace;
+                })
+            .orElseGet(
+                () -> new UserRecentWorkspace(workspace.getWorkspaceId(), userId, lastAccessDate));
+    userRecentWorkspaceDao.save(matchingRecentWorkspace);
+    handleWorkspaceLimit(userId);
+    return matchingRecentWorkspace;
+  }
+
+  @Override
+  public UserRecentWorkspace updateRecentWorkspaces(Workspace workspace) {
+    return updateRecentWorkspaces(
+        workspace, userProvider.get().getUserId(), new Timestamp(clock.instant().toEpochMilli()));
+  }
+
+  private void handleWorkspaceLimit(long userId) {
+    List<UserRecentWorkspace> userRecentWorkspaces =
+        userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
+
+    ArrayList<Long> idsToDelete = new ArrayList<>();
+    while (userRecentWorkspaces.size() > RECENT_WORKSPACE_COUNT) {
+      idsToDelete.add(userRecentWorkspaces.get(userRecentWorkspaces.size() - 1).getId());
+      userRecentWorkspaces.remove(userRecentWorkspaces.size() - 1);
+    }
+    userRecentWorkspaceDao.deleteByWorkspaceIdIn(idsToDelete);
+  }
+
+  @Override
+  /** Returns true if anything was deleted from user_recent_workspaces, false if nothing was */
+  public boolean maybeDeleteRecentWorkspace(long workspaceId) {
+    long userId = userProvider.get().getUserId();
+    Optional<UserRecentWorkspace> maybeRecentWorkspace =
+        userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
+    if (maybeRecentWorkspace.isPresent()) {
+      userRecentWorkspaceDao.delete(maybeRecentWorkspace.get());
+      return true;
+    } else {
+      return false;
+    }
   }
 }

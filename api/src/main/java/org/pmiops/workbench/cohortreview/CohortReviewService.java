@@ -1,15 +1,14 @@
 package org.pmiops.workbench.cohortreview;
 
 import java.util.List;
+import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
-import org.pmiops.workbench.model.PageRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 public interface CohortReviewService {
@@ -47,6 +46,14 @@ public interface CohortReviewService {
    * @return
    */
   CohortReview findCohortReview(Long cohortId, Long cdrVersionId);
+
+  /**
+   * Find the {@link CohortReview} for the specified cohortReviewId.
+   *
+   * @param cohortReviewId
+   * @return
+   */
+  CohortReview findCohortReview(Long cohortReviewId);
 
   /**
    * Find the {@link CohortReview} for the specified ns, firecloudName and cohortReviewId
@@ -114,22 +121,19 @@ public interface CohortReviewService {
    * paging.
    *
    * @param cohortReviewId
-   * @param filtersList
    * @param pageRequest
    * @return
    */
-  List<ParticipantCohortStatus> findAll(
-      Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest);
+  List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest);
 
   /**
    * Find count for the specified cohortReviewId, filtering and paging.
    *
    * @param cohortReviewId
-   * @param filtersList
    * @param pageRequest
    * @return
    */
-  Long findCount(Long cohortReviewId, List<Filter> filtersList, PageRequest pageRequest);
+  Long findCount(Long cohortReviewId, PageRequest pageRequest);
 
   /**
    * Save the specified {@link ParticipantCohortAnnotation}.

@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
@@ -24,6 +25,9 @@ public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
   Workspace findByWorkspaceNamespaceAndNameAndActiveStatus(
       String workspaceNamespace, String name, short activeStatus);
 
+  @Query("SELECT distinct w.workspaceNamespace, w from Workspace w")
+  Set<String> findAllWorkspaceNamespaces();
+
   @Query(
       "SELECT w FROM Workspace w LEFT JOIN FETCH w.cohorts c LEFT JOIN FETCH c.cohortReviews"
           + " WHERE w.workspaceNamespace = (:ns) AND w.firecloudName = (:fcName)"
@@ -36,6 +40,8 @@ public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
   List<Workspace> findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
 
   List<Workspace> findAllByFirecloudUuidIn(Collection<String> firecloudUuids);
+
+  List<Workspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
 
   @Query(
       "SELECT distinct w.workspaceNamespace, u from Workspace w INNER JOIN User u ON w.creator = u.userId")

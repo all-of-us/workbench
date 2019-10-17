@@ -11,6 +11,10 @@ import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspac
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect/component';
+import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
+import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
+import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
+import {TablePage} from './pages/data/cohort-review/table-page';
 import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
@@ -155,7 +159,7 @@ const routes: Routes = [
                     path: 'data-sets',
                     component: DataSetPageComponent,
                     data: {
-                      title: 'Data Set Page',
+                      title: 'Dataset Page',
                       breadcrumb: BreadcrumbType.Dataset
                     }
                   },
@@ -163,7 +167,7 @@ const routes: Routes = [
                     path: 'data-sets/:dataSetId',
                     component: DataSetPageComponent,
                     data: {
-                      title: 'Edit Data Set',
+                      title: 'Edit Dataset',
                       breadcrumb: BreadcrumbType.Dataset
                     }
                   }, {
@@ -183,10 +187,38 @@ const routes: Routes = [
                       },
                       {
                         path: ':cid/review',
-                        loadChildren: './cohort-review/cohort-review.module#CohortReviewModule',
-                        data: {
-                          title: 'Cohort',
-                        },
+                        children: [
+                          {
+                            path: '',
+                            component: CohortReviewComponent,
+                            data: {
+                              title: 'Review Cohort Participants',
+                              breadcrumb: BreadcrumbType.Cohort
+                            }
+                          }, {
+                            path: 'participants',
+                            component: TablePage,
+                            data: {
+                              title: 'Review Cohort Participants',
+                              breadcrumb: BreadcrumbType.Cohort
+                            }
+                          }, {
+                            path: 'cohort-description',
+                            component: QueryReportComponent,
+                            data: {
+                              title: 'Review Cohort Description',
+                              breadcrumb: BreadcrumbType.Cohort
+                            }
+                          }, {
+                            path: 'participants/:pid',
+                            component: DetailPageComponent,
+                            data: {
+                              title: 'Participant Detail',
+                              breadcrumb: BreadcrumbType.Participant,
+                              shouldReuse: true
+                            }
+                          }
+                        ],
                       }
                     ]
                   },

@@ -39,7 +39,7 @@ import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.DemoChartInfoListResponse;
 import org.pmiops.workbench.model.DomainType;
-import org.pmiops.workbench.model.ParticipantCohortStatusColumns;
+import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchParameter;
@@ -75,10 +75,8 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
    */
   private static final Function<CBCriteria, org.pmiops.workbench.model.Criteria>
       TO_CLIENT_CBCRITERIA =
-          new Function<CBCriteria, org.pmiops.workbench.model.Criteria>() {
-            @Override
-            public org.pmiops.workbench.model.Criteria apply(CBCriteria cbCriteria) {
-              return new org.pmiops.workbench.model.Criteria()
+          cbCriteria ->
+              new org.pmiops.workbench.model.Criteria()
                   .id(cbCriteria.getId())
                   .parentId(cbCriteria.getParentId())
                   .type(cbCriteria.getType())
@@ -102,8 +100,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
                   .hasHierarchy(cbCriteria.getHierarchy())
                   .isStandard(cbCriteria.getStandard())
                   .value(cbCriteria.getValue());
-            }
-          };
 
   /**
    * Converter function from backend representation (used with Hibernate) to client representation
@@ -111,18 +107,13 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
    */
   private static final Function<CBCriteriaAttribute, org.pmiops.workbench.model.CriteriaAttribute>
       TO_CLIENT_CBCRITERIA_ATTRIBUTE =
-          new Function<CBCriteriaAttribute, org.pmiops.workbench.model.CriteriaAttribute>() {
-            @Override
-            public org.pmiops.workbench.model.CriteriaAttribute apply(
-                CBCriteriaAttribute cbCriteria) {
-              return new org.pmiops.workbench.model.CriteriaAttribute()
+          cbCriteria ->
+              new org.pmiops.workbench.model.CriteriaAttribute()
                   .id(cbCriteria.getId())
                   .valueAsConceptId(cbCriteria.getValueAsConceptId())
                   .conceptName(cbCriteria.getConceptName())
                   .type(cbCriteria.getType())
                   .estCount(cbCriteria.getEstCount());
-            }
-          };
 
   @Autowired
   CohortBuilderController(
@@ -294,6 +285,9 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   public ResponseEntity<DemoChartInfoListResponse> getDemoChartInfo(
       Long cdrVersionId, SearchRequest request) {
     DemoChartInfoListResponse response = new DemoChartInfoListResponse();
+    if (request.getIncludes().isEmpty()) {
+      return ResponseEntity.ok(response);
+    }
     CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
     cdrVersionService.setCdrVersion(cdrVersion);
     if (configProvider.get().elasticsearch.enableElasticsearchBackend
@@ -365,15 +359,15 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     Map<String, Map<Long, String>> concepts =
         genderRaceEthnicityConceptProvider.get().getConcepts();
     List<ConceptIdName> genderList =
-        concepts.get(ParticipantCohortStatusColumns.GENDER.name()).entrySet().stream()
+        concepts.get(FilterColumns.GENDER.name()).entrySet().stream()
             .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
             .collect(Collectors.toList());
     List<ConceptIdName> raceList =
-        concepts.get(ParticipantCohortStatusColumns.RACE.name()).entrySet().stream()
+        concepts.get(FilterColumns.RACE.name()).entrySet().stream()
             .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
             .collect(Collectors.toList());
     List<ConceptIdName> ethnicityList =
-        concepts.get(ParticipantCohortStatusColumns.ETHNICITY.name()).entrySet().stream()
+        concepts.get(FilterColumns.ETHNICITY.name()).entrySet().stream()
             .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
             .collect(Collectors.toList());
 
@@ -401,11 +395,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             .flatMap(sgi -> sgi.getSearchParameters().stream())
             .collect(Collectors.toList());
     return allGroups.stream().anyMatch(sg -> sg.getTemporal())
-        || allParams.stream()
-            .anyMatch(
-                sp ->
-                    CriteriaSubType.BP.toString().equals(sp.getSubtype())
-                        || CriteriaType.DECEASED.toString().equals(sp.getType()));
+        || allParams.stream().anyMatch(sp -> CriteriaSubType.BP.toString().equals(sp.getSubtype()));
   }
 
   private String modifyTermMatch(String term) {

@@ -2,9 +2,10 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConfigResponse} from 'generated';
-import {Cohort, ConceptSet, Profile} from 'generated/fetch';
+import {CdrVersionListResponse, Cohort, ConceptSet, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 export const NavStore = {
   navigate: undefined,
@@ -18,14 +19,26 @@ export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
 export const serverConfigStore = new BehaviorSubject<ConfigResponse>(undefined);
-export const cdrVersionStore = new BehaviorSubject<any>(undefined);
 export const userProfileStore =
   new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
     profile: {} as Profile,
     reload: () => {},
     updateCache: (profile) => {},
   });
+export const signInStore =
+  new BehaviorSubject<{
+    signOut: Function,
+    profileImage: string,
+  }>({
+    signOut: () => {},
+    profileImage: {} as string,
+  });
 
+// Use ReplaySubject over BehaviorSubject as this store does not have a legal
+// initial value and should not be accessed synchronously. The other stores
+// which meet this criteria should likely follow this same pattern, though a
+// broader redesign of these value stores is also probably in order.
+export const cdrVersionStore = new ReplaySubject<CdrVersionListResponse>(1);
 
 /**
  * Slightly stricter variant of Angular's DefaultRouteReuseStrategy. This
@@ -77,6 +90,11 @@ export const navigateAndPreventDefaultIfNoKeysPressed = (e: React.MouseEvent, ur
     e.preventDefault();
     navigateByUrl(url);
   }
+};
+
+export const navigateSignOut = () => {
+  window.location.assign(`https://www.google.com/accounts/Logout?continue=` +
+    `https://appengine.google.com/_ah/logout?continue=${window.location.origin}/login`);
 };
 
 export enum BreadcrumbType {

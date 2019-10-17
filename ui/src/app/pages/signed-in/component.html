@@ -1,38 +1,19 @@
-<div class="page-container">
-  <div class="header-container">
-    <div #sidenavToggleElement class="sidenav-toggle" [ngClass]="{'rotate': sidenavToggle}">
-      <clr-icon shape="bars" (click)="sidenavToggle = !sidenavToggle"
-          style="width: 1.5rem; height: 1.5rem; fill: #216FB4"></clr-icon>
-    </div>
-    <div>
-      <img [src]="headerImg" class="header-image" routerLink="/">
-      <div *ngIf="shouldShowDisplayTag" class="display-tag">
-        {{ displayTag }}
-      </div>
-    </div>
-    <app-breadcrumb></app-breadcrumb>
-  </div>
-  <div style="display: flex; align-items: center;">
-    <div class="error" style="margin-bottom: 0.5rem; margin-right: 1rem;" *ngIf="errorHandlingService.profileLoadError">
-      Error loading profile.
-      <clr-icon style="margin-left: 1rem;" shape="times" (click)="errorHandlingService.profileLoadError = false"></clr-icon>
-    </div>
-    <clr-dropdown style="margin-right: 1rem; margin-bottom: 0.5rem;">
-      <div style="display: flex; justify-content: space-around; align-items: center" clrDropdownTrigger>
-        <img [src]="profileImage" style="border-radius: 100px; height: 42px; width: 42px">
-        <h6 style="padding: 0.5rem;">
-          {{givenName}} {{familyName}}
-        </h6>
-        <clr-icon shape="caret down" style="width: 0.5rem; height: 0.5rem"></clr-icon>
-      </div>
-      <clr-dropdown-menu clrPosition="bottom-right" *clrIfOpen>
-        <a routerLink="/profile" clrDropdownItem>Profile</a>
-        <div class="dropdown-divider"></div>
-        <a href="javascript:;" (click)="signOut()" clrDropdownItem>Sign Out</a>
-      </clr-dropdown-menu>
-    </clr-dropdown>
-  </div>
-</div>
+<app-nav-bar
+  [hasAccessModuleAdmin]="hasAccessModuleAdmin"
+  [hasDataAccess]="hasDataAccess"
+  [headerImg]="headerImg"
+  [displayTag]="displayTag"
+  [shouldShowDisplayTag]="shouldShowDisplayTag"
+  [givenName]="givenName"
+  [familyName]="familyName"
+  [aouAccountEmailAddress]="aouAccountEmailAddress"
+  [contactEmailAddress]="contactEmailAddress"
+  [homeActive]="homeActive"
+  [workspacesActive]="workspacesActive"
+  [libraryActive]="libraryActive"
+  [profileActive]="profileActive"
+  [userAdminActive]="userAdminActive"
+></app-nav-bar>
 
 <clr-alert
     *ngIf="zendeskLoadError"
@@ -48,43 +29,6 @@
 
 <div class="content-container">
   <div class="background-image"></div>
-  <nav #sidenav class="sidenav" [ngClass]="{'sidenavHidden': !sidenavToggle}">
-    <section class="sidenav-content">
-      <button class="btn btn-primary nav-link"
-          [class.active]="homeActive"
-          routerLink="/"
-          (click)="sidenavToggle = false">Home</button>
-      <button class="btn btn-primary nav-link"
-              routerLink="/library"
-              (click)="sidenavToggle = false">Workspace Library</button>
-      <a class="btn btn-primary nav-link"
-          [href]="publicUiUrl" target="_blank">Browse Data</a>
-      <button class="btn btn-primary nav-link"
-          [class.active]="createWorkspaceActive"
-          routerLink="/workspaces/build"
-          [disabled]="hasDataAccess ? null : true"
-          (click)="sidenavToggle = false">Create Workspace</button>
-      <button class="btn btn-primary nav-link"
-          [class.active]="workspacesActive"
-          routerLink="/workspaces"
-          [disabled]="hasDataAccess ? null : true"
-          (click)="sidenavToggle = false">My Workspaces</button>
-      <button class="btn btn-primary nav-link"
-          [class.active]="reviewWorkspaceActive"
-          *ngIf="hasReviewResearchPurpose"
-          routerLink="/admin/review-workspace"
-          (click)="sidenavToggle = false">Review Workspaces</button>
-      <button class="btn btn-primary nav-link"
-          [class.active]="userAdminActive"
-          *ngIf="hasAccessModuleAdmin"
-          routerLink="/admin/user"
-          (click)="sidenavToggle = false">User Admin</button>
-      <button class="btn btn-primary nav-link help-desk-item"
-          (click)="openZendesk(); sidenavToggle = false;">Contact Support</button>
-      <button class="btn btn-primary nav-link hub-forum-item"
-          (click)="openHubForum(); sidenavToggle = false;">Hub Forum</button>
-    </section>
-  </nav>
   <div class="app-container" [class.minimize-chrome]="minimizeChrome">
     <!--
       Angular's builtin Router module will attach specific views here
@@ -93,4 +37,10 @@
     <router-outlet></router-outlet>
     <app-routing-spinner></app-routing-spinner>
   </div>
+
+  <app-text-modal *ngIf="showInactivityModal"
+              [title]="'Your session is about to expire'"
+              [body]="inactivityModalText"
+              [buttonText]="'Extend Session'"
+              [closeFunction]="closeInactivityModal"></app-text-modal>
 </div>

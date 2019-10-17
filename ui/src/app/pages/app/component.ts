@@ -11,7 +11,12 @@ import {
 
 import {ServerConfigService} from 'app/services/server-config.service';
 import {cookiesEnabled} from 'app/utils';
-import {queryParamsStore, routeConfigDataStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
+import {
+  queryParamsStore,
+  routeConfigDataStore,
+  serverConfigStore,
+  urlParamsStore
+} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';

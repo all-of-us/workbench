@@ -2,12 +2,13 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {cdrVersionStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {Button, Link} from 'app/components/buttons';
+import {FlexColumn} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
@@ -16,15 +17,17 @@ import {ResetClusterButton} from 'app/pages/analysis/reset-cluster-button';
 import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withUrlParams, withUserProfile} from 'app/utils';
-import {Authority, CdrVersion, Profile, UserRole, WorkspaceAccessLevel} from 'generated/fetch';
+import {reactStyles, ReactWrapperBase, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
+import {Authority, CdrVersion, CdrVersionListResponse, Profile, UserRole, WorkspaceAccessLevel} from 'generated/fetch';
 
+interface WorkspaceProps {
+  profileState: {profile: Profile, reload: Function, updateCache: Function};
+  cdrVersionListResponse: CdrVersionListResponse;
+}
 
 interface WorkspaceState {
   sharing: boolean;
   cdrVersion: CdrVersion;
-  useBillingProjectBuffer: boolean;
-  freeTierBillingProject: string;
   workspace: WorkspaceData;
   workspaceUserRoles: UserRole[];
   googleBucketModalOpen: boolean;
@@ -85,17 +88,14 @@ const WorkspaceInfoTooltipText = () => {
   </div>;
 };
 
-export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
-(class extends React.Component<
-  {profileState: {profile: Profile, reload: Function, updateCache: Function}}, WorkspaceState> {
+export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCdrVersions())
+(class extends React.Component<WorkspaceProps, WorkspaceState> {
 
   constructor(props) {
     super(props);
     this.state = {
       sharing: false,
       cdrVersion: undefined,
-      useBillingProjectBuffer: undefined,
-      freeTierBillingProject: undefined,
       workspace: undefined,
       workspaceUserRoles: [],
       googleBucketModalOpen: false,
@@ -104,15 +104,11 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
   }
 
   async componentDidMount() {
-    const {profileState: {profile}} = this.props;
-    this.setState({
-      useBillingProjectBuffer: serverConfigStore.getValue().useBillingProjectBuffer,
-      freeTierBillingProject: profile.freeTierBillingProjectName
-    });
     this.setVisits();
     await this.reloadWorkspace(currentWorkspaceStore.getValue());
     this.loadUserRoles();
-    this.setCdrVersion();
+    const cdrs = this.props.cdrVersionListResponse.items;
+    this.setState({cdrVersion: cdrs.find(v => v.cdrVersionId === this.state.workspace.cdrVersionId)});
   }
 
   async setVisits() {
@@ -120,11 +116,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
     if (!profile.pageVisits.some(v => v.page === pageId)) {
       await profileApi().updatePageVisits({ page: pageId});
     }
-  }
-
-  setCdrVersion() {
-    this.setState({cdrVersion: cdrVersionStore.getValue().
-      find(v => v.cdrVersionId === this.state.workspace.cdrVersionId)});
   }
 
   async reloadWorkspace(workspace: WorkspaceData) {
@@ -170,14 +161,9 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
   }
 
   workspaceClusterBillingProjectId(): string {
-    const {useBillingProjectBuffer, freeTierBillingProject, workspace} = this.state;
-    if (useBillingProjectBuffer === undefined) {
-      // The server config hasn't loaded yet, we don't yet know which billing
-      // project should be used for clusters.
+    const {workspace} = this.state;
+    if (workspace === undefined) {
       return null;
-    }
-    if (!useBillingProjectBuffer) {
-      return freeTierBillingProject;
     }
     if ([WorkspaceAccessLevel.WRITER, WorkspaceAccessLevel.OWNER].includes(workspace.accessLevel)) {
       return workspace.namespace;
@@ -213,7 +199,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
     const {cdrVersion, workspace, workspaceUserRoles, googleBucketModalOpen,
       sharing, publishing} = this.state;
     return <div style={styles.mainPage}>
-      <div style={{display: 'flex', flexDirection: 'column', margin: '1rem', width: '98%'}}>
+      <FlexColumn style={{margin: '1rem', width: '98%'}}>
         <ResearchPurpose data-test-id='researchPurpose'/>
         {profile.authorities.includes(Authority.FEATUREDWORKSPACEADMIN) &&
         <div style={{display: 'flex', justifyContent: 'flex-end'}}>
@@ -222,7 +208,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
             <Button onClick={() => this.publishUnpublishWorkspace(true)}
                     disabled={publishing} style={{marginLeft: '0.5rem'}}>Publish</Button>
         </div>}
-      </div>
+      </FlexColumn>
       <div style={styles.rightSidebar}>
         <div style={styles.shareHeader}>
           <h3 style={{marginTop: 0}}>Collaborators:</h3>
@@ -272,12 +258,12 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams())
         </div>
       </div>
       {googleBucketModalOpen && <Modal>
-        <ModalTitle>Note</ModalTitle>
-        <ModalBody>
-            It is All of Us data use policy that researchers should not make copies of or download
-            individual-level data (including taking screenshots or other means of viewing
+        <ModalTitle>Policy Reminder</ModalTitle>
+        <ModalBody style={{color: colors.primary}}>
+            It is <i>All of Us</i> data use policy that researchers should not make copies of or
+            download individual-level data (including taking screenshots or other means of viewing
             individual-level data) outside of the <i>All of Us</i> research environment without
-            approval from All of Us Resource Access Board (RAB).<br/>
+            approval from <i>All of Us</i> Resource Access Board (RAB).<br/><br/>
             Notebooks should rarely be downloaded directly from Google Cloud Console, as output
             cells in Notebooks may contain sensitive individual level data.
         </ModalBody>

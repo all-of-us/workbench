@@ -14,5 +14,10 @@ export const environment: Environment = {
   trainingUrl: 'https://aoudev.nnlm.gov',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'https://shibboleth.dsde-perf.broadinstitute.org',
-  enableJupyterLab: false,
+  inactivityTimeoutSeconds: 30 * 60,
+  inactivityWarningBeforeSeconds: 5 * 60,
+  enableHomepageRestyle: false,
+  enablePublishedWorkspaces: false,
+  enableAccountPages: false,
+  enableProfileCapsFeatures: false,
 };

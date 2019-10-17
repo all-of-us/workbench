@@ -5,17 +5,23 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import org.pmiops.workbench.model.NonAcademicAffiliation;
 
 @Entity
 @Table(name = "institutional_affiliation")
 public class InstitutionalAffiliation {
 
   private long institutionalAffiliationId;
-  private long userId;
+  private User user;
   private int orderIndex;
   private String institution;
   private String role;
+  private Short nonAcademicAffiliation;
+  private String other;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,13 +34,14 @@ public class InstitutionalAffiliation {
     this.institutionalAffiliationId = institutionalAffiliationId;
   }
 
-  @Column(name = "user_id")
-  public long getUserId() {
-    return userId;
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  public User getUser() {
+    return user;
   }
 
-  public void setUserId(long userId) {
-    this.userId = userId;
+  public void setUser(User user) {
+    this.user = user;
   }
 
   @Column(name = "order_index")
@@ -62,5 +69,33 @@ public class InstitutionalAffiliation {
 
   public void setRole(String role) {
     this.role = role;
+  }
+
+  @Column(name = "non_academic_affiliation")
+  public Short getNonAcademicAffiliation() {
+    return nonAcademicAffiliation;
+  }
+
+  public void setNonAcademicAffiliation(Short nonAcademicAffiliation) {
+    this.nonAcademicAffiliation = nonAcademicAffiliation;
+  }
+
+  @Transient
+  public NonAcademicAffiliation getNonAcademicAffiliationEnum() {
+    return DemographicSurveyEnum.nonAcademicAffiliationFromStorage(this.nonAcademicAffiliation);
+  }
+
+  public void setNonAcademicAffiliationnEnum(NonAcademicAffiliation affiliation) {
+    this.nonAcademicAffiliation =
+        DemographicSurveyEnum.nonAcademicAffiliationToStorage(affiliation);
+  }
+
+  @Column(name = "other")
+  public String getOther() {
+    return other;
+  }
+
+  public void setOther(String other) {
+    this.other = other;
   }
 }

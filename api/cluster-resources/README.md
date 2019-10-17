@@ -8,11 +8,10 @@ https://github.com/DataBiosphere/leonardo/blob/cfdbff2448b9cff73ad658ba028d1feaf
 
 To manually test updates to this script locally:
 
-- Push the script to GCS (username-suffixed) and make it publicly readable:
+- Push the script to GCS (username-suffixed):
 
   ```
-  api$ gsutil cp cluster-resources/setup_notebook_cluster.sh "gs://all-of-us-workbench-test-cluster-resources/setup_notebook_cluster-${USER}.sh" &&
-    gsutil acl ch -u AllUsers:R "gs://all-of-us-workbench-test-cluster-resources/setup_notebook_cluster-${USER}.sh"
+  api$ gsutil cp cluster-resources/setup_notebook_cluster.sh "gs://all-of-us-workbench-test-cluster-resources/setup_notebook_cluster-${USER}.sh""
   ```
 
 - (**Disclaimer**: local code change, do not submit) Temporarily update your
@@ -22,11 +21,11 @@ To manually test updates to this script locally:
   api$ sed -i "s,setup_notebook_cluster\.sh,setup_notebook_cluster-${USER}.sh," src/main/java/org/pmiops/workbench/notebooks/LeonardoNotebooksClientImpl.java
   ```
 
-- Restart your dev API server and point a local UI to it
+- Ensure the change is picked up by your API server and point a local UI to it
 - Open your local Workbench UI: top-right dropdown -> settings -> reset notebook server
 - Wait for the notebook cluster to be created.
-  - Cluster creation will fail with 500s if the user script is not accessible,
-    ensure your script is publicly readable via [cloud console UI](
+  - Cluster creation will fail with 500s if the user script is not accessible to your pet SA,
+    this should be granted by the registered tier group on the bucket ACL [cloud console UI](
     https://console.cloud.google.com/storage/browser/all-of-us-workbench-test-cluster-resources?project=all-of-us-workbench-test)
 - Revert changes to `config/config_local.json`
 
@@ -49,14 +48,19 @@ docker run -i -t -u 0 --entrypoint "" us.gcr.io/broad-dsp-gcr-public/leonardo-ju
 
 This can be used to quickly test command lines or reproduce bugs.
 
-# playground-extension.js
-
-Jupyter UI extension for playground mode. Passed via GCS at cluster creation time.
-
-## Local testing
+# Local Jupyter extension testing
 
 Tweak the above instructions for testing the user script to push a modified
 extension and modify the cluster controller to use it.
+
+Alternatively, on a live version of a Leo cluster, use Chrome local overrides to
+plug in your locally modified Javascript.
+
+- Follow these instructions to setup local overrides: https://developers.google.com/web/updates/2018/01/devtools#overrides
+- Search the scripts tab to find the extension Javascript and save an override
+- Find the path to that override on disk
+- Copy your local Javascript to this path to push updates
+- Reload the browser, ensuring devtools are open and "enable local overrides" is on
 
 # Snippets Menu
 
@@ -100,7 +104,7 @@ source. This process takes as inputs the templated extension
 
 ## Local testing
 
-See instructions for playground-extension.js above.
+See instructions for local extension testing above.
 
 To test the menu contents JSON alone:
 

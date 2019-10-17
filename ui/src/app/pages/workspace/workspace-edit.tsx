@@ -2,6 +2,7 @@ import {Location} from '@angular/common';
 import {Component} from '@angular/core';
 import {Button, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {CheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -9,11 +10,11 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {TwoColPaddedTable} from 'app/components/tables';
-import {cdrVersionsApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
-import {currentWorkspaceStore, navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
-import {CdrVersion, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
+import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCdrVersions, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
+import {currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
+import {ArchivalStatus, CdrVersion, CdrVersionListResponse, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -35,7 +36,7 @@ export const ResearchPurposeItems = [
     shortDescription: 'Methods development/validation study',
     longDescription: <div>The primary purpose of the use of <i>All of Us</i> data is to develop
     and/or validate specific methods/tools for analyzing or interpreting data (e.g. statistical
-    methods for describing data trends, developing more powerful methods to detec
+    methods for describing data trends, developing more powerful methods to detect
     gene-environment or other types of interactions in genome-wide association studies).</div>
   }, {
     shortName: 'controlSet',
@@ -101,12 +102,6 @@ export const toolTipText = {
     publicly available <i>All of Us</i> website (https://www.researchallofus.org/) to inform our
     participants and other stakeholders about what kind of research their data is being used
     for.</div>,
-  reviewRequest: <div>If you are concerned that your research may be stigmatizing to a particular
-    group of research participants, you may request a review of your research purpose by
-    the <i>All of Us</i> Resource Access Board (RAB). The RAB will provide feedback regarding
-    potential for stigmatizing specific groups of participants and, if needed, guidance for
-    modifying your research purpose/scope. Even if you request a review, you will be able to
-    create a Workspace and proceed with your research.</div>
 };
 
 export const researchPurposeQuestions = [
@@ -264,7 +259,7 @@ const styles = reactStyles({
 
 export const WorkspaceEditSection = (props) => {
   return <div key={props.header} style={{marginBottom: '0.5rem'}}>
-    <div style={{display: 'flex', flexDirection: 'row', marginBottom: (props.largeHeader ? 12 : 0),
+    <FlexRow style={{marginBottom: (props.largeHeader ? 12 : 0),
       marginTop: (props.largeHeader ? 12 : 24)}}>
       <div style={{...styles.header,
         fontSize: (props.largeHeader ? 20 : 16)}}>
@@ -278,7 +273,7 @@ export const WorkspaceEditSection = (props) => {
         <InfoIcon style={{...styles.infoIcon,  marginTop: '0.2rem'}}/>
       </TooltipTrigger>
       }
-    </div>
+    </FlexRow>
     {props.subHeader && <div style={{...styles.header, color: colors.primary, fontSize: 14}}>
       {props.subHeader}
     </div>
@@ -296,7 +291,7 @@ export const WorkspaceCategory = (props) => {
   return <div style={...fp.merge(styles.categoryRow, props.style)}>
     <CheckBox style={styles.checkBoxStyle} checked={!!props.value}
       onChange={e => props.onChange(e)}/>
-    <div style={{display: 'flex', flexDirection: 'column', marginTop: '-0.2rem'}}>
+    <FlexColumn style={{marginTop: '-0.2rem'}}>
       <label style={styles.shortDescription}>
         {props.shortDescription}
       </label>
@@ -306,7 +301,7 @@ export const WorkspaceCategory = (props) => {
         </label>
         {props.children}
       </div>
-    </div>
+    </FlexColumn>
   </div>;
 };
 
@@ -335,6 +330,7 @@ function getDiseaseNames(keyword) {
 
 export interface WorkspaceEditProps {
   routeConfigData: any;
+  cdrVersionListResponse: CdrVersionListResponse;
   workspace: Workspace;
   cancel: Function;
 }
@@ -351,7 +347,7 @@ export interface WorkspaceEditState {
   showStigmatizationDetails: boolean;
 }
 
-export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace())(
+export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     constructor(props: WorkspaceEditProps) {
       super(props);
@@ -360,7 +356,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         workspace: {
           name: '',
           dataAccessLevel: DataAccessLevel.Registered,
-          namespace: userProfileStore.getValue().profile.freeTierBillingProjectName,
           cdrVersionId: '',
           researchPurpose: {
             ancestry: false,
@@ -394,7 +389,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       };
     }
 
-    componentDidMount() {
+    async componentDidMount() {
       if (!this.isMode(WorkspaceEditMode.Create)) {
         this.setState({workspace : {
           ...this.props.workspace,
@@ -407,16 +402,38 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               '' : this.props.workspace.researchPurpose.diseaseOfFocus}
         }});
         if (this.isMode(WorkspaceEditMode.Duplicate)) {
-          this.setState({workspace: {
-            ...this.props.workspace,
-            // These are the only fields which are not automatically handled/differentiated
-            // on the API level.
-            name: 'Duplicate of ' + this.props.workspace.name,
-            namespace: userProfileStore.getValue().profile.freeTierBillingProjectName
-          }});
+          // This is the only field which is not automatically handled/differentiated
+          // on the API level.
+          this.setState(fp.set(['workspace', 'name'], 'Duplicate of ' + this.props.workspace.name));
+          // if the original workspace was reviewed, it's unlikely that we need a re-review
+          this.updateResearchPurpose('reviewRequested', false);
         }
       }
-      this.setCdrVersions();
+
+      const cdrResp = this.props.cdrVersionListResponse;
+      const liveCdrVersions = cdrResp.items.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
+      if (liveCdrVersions.length === 0) {
+        throw Error('no live CDR versions were found');
+      }
+      if (this.isMode(WorkspaceEditMode.Edit)) {
+        // In edit mode, you cannot modify the CDR version, therefore it's fine
+        // to show archived CDRs in the drop-down so that it accurately displays
+        // the current value.
+        this.setState({cdrVersionItems: cdrResp.items.slice()});
+      } else {
+        // In create/clone, disallow selection of archived versions by omitting
+        // them. The server will also reject archived CDRs.
+        this.setState({cdrVersionItems: liveCdrVersions});
+      }
+
+      const selectedCdrIsLive = liveCdrVersions.some(cdr => cdr.cdrVersionId === this.state.workspace.cdrVersionId);
+      if (this.isMode(WorkspaceEditMode.Create) || (
+        this.isMode(WorkspaceEditMode.Duplicate) && !selectedCdrIsLive)) {
+        // We preselect the default CDR version when a new workspace is being
+        // created (via create or duplicate) with one exception: cloning a
+        // workspace which references a non-default, non-archived CDR version.
+        this.setState(fp.set(['workspace', 'cdrVersionId'], cdrResp.defaultCdrVersionId));
+      }
     }
 
     makeDiseaseInput() {
@@ -433,18 +450,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             'diseaseOfFocus'
           ], disease))}/>
       );
-    }
-
-    async setCdrVersions() {
-      try {
-        const cdrVersions = await cdrVersionsApi().getCdrVersions();
-        this.setState({cdrVersionItems: cdrVersions.items});
-        if (this.isMode(WorkspaceEditMode.Create)) {
-          this.setState(fp.set(['workspace', 'cdrVersionId'], cdrVersions.defaultCdrVersionId));
-        }
-      } catch (exception) {
-        console.log(exception);
-      }
     }
 
     renderHeader() {
@@ -601,7 +606,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           }}/>}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                               section={{marginTop: '24px'}} largeHeader required>
-          <div style={{display: 'flex', flexDirection: 'row'}}>
+          <FlexRow>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
               value = {this.state.workspace.name}
               onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
@@ -627,16 +632,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <TooltipTrigger content={toolTipText.cdrSelect}>
               <InfoIcon style={{...styles.infoIcon, marginTop: '0.5rem'}}/>
             </TooltipTrigger>
-          </div>
+          </FlexRow>
         </WorkspaceEditSection>
         {this.isMode(WorkspaceEditMode.Duplicate) &&
-        <div style={{display: 'flex', flexDirection: 'row'}}>
+        <FlexRow>
           <CheckBox
                  style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '1.2rem'}}
           onChange={v => this.setState({cloneUserRole: v})}/>
           <WorkspaceEditSection header='Copy Original workspace Collaborators'
             description='Share cloned workspace with same collaborators'/>
-        </div>
+        </FlexRow>
         }
         <WorkspaceEditSection header='Billing Account' subHeader='National Institutes of Health'
             tooltip={toolTipText.billingAccount}/>
@@ -651,8 +656,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             }/>
         <WorkspaceEditSection header={researchPurposeQuestions[0].header}
             description={researchPurposeQuestions[0].description} required>
-          <div style={{display: 'flex', flexDirection: 'row'}}>
-            <div style={{display: 'flex', flexDirection: 'column', flex: '1 1 0'}}>
+          <FlexRow>
+            <FlexColumn style={{flex: '1 1 0'}}>
               {ResearchPurposeItems.slice(0, sliceByHalfLength(ResearchPurposeItems))
                 .map((rp, i) =>
                   <WorkspaceCategory shortDescription={rp.shortDescription} key={i}
@@ -661,8 +666,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     onChange={v => this.updateResearchPurpose(rp.shortName, v)}
                     children={rp.shortName === 'diseaseFocusedResearch' ?
                       this.makeDiseaseInput() : undefined} />)}
-            </div>
-            <div style={{display: 'flex', flexDirection: 'column', flex: '1 1 0'}}>
+            </FlexColumn>
+            <FlexColumn style={{flex: '1 1 0'}}>
               {ResearchPurposeItems.slice(sliceByHalfLength(ResearchPurposeItems))
                 .map((rp, i) =>
                   <WorkspaceCategory shortDescription={rp.shortDescription}
@@ -675,8 +680,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                         disabled={!this.state.workspace.researchPurpose.otherPurpose}
                         style={{marginTop: '0.5rem'}}/> : undefined}/>
                 )}
-            </div>
-          </div>
+            </FlexColumn>
+          </FlexRow>
         </WorkspaceEditSection>
         <WorkspaceEditSection
           header={researchPurposeQuestions[1].header}
@@ -731,17 +736,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <strong>If "Yes": </strong> Please specify the demographic category or categories of the
             population(s) that you are interested in exploring in your study.
             Select as many as applicable.
-            <div style={{display: 'flex', flexDirection: 'row', flex: '1 1 0',
-              marginTop: '0.5rem'}}>
-              <div style={{display: 'flex', flexDirection: 'column'}}>
+            <FlexRow style={{flex: '1 1 0', marginTop: '0.5rem'}}>
+              <FlexColumn>
                 {specificPopulations.slice(0, sliceByHalfLength(specificPopulations) + 1).map(i =>
                   <LabeledCheckBox label={i.label} key={i.label}
                                    value={this.specificPopulationSelected(i.object)}
                                    onChange={v => this.updateSpecificPopulation(i.object, v)}
                                    disabled={!this.state.workspace.researchPurpose.population}/>
                 )}
-              </div>
-              <div style={{display: 'flex', flexDirection: 'column'}}>
+              </FlexColumn>
+              <FlexColumn>
                 {specificPopulations.slice(sliceByHalfLength(specificPopulations) + 1).map(i =>
                   <LabeledCheckBox label={i.label} key={i.label}
                                    value={this.specificPopulationSelected(i.object)}
@@ -758,13 +762,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                              this.state.workspace.researchPurpose.populationDetails)}
                            onChange={v => this.setState(fp.set(
                              ['workspace', 'researchPurpose', 'otherPopulationDetails'], v))}/>
-              </div>
-            </div>
+              </FlexColumn>
+            </FlexRow>
           </div>
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Request a review of your research purpose for potential
-                                      stigmatization of research participants'
-                              tooltip={toolTipText.reviewRequest}>
+                                      stigmatization of research participants'>
           <Link onClick={() => this.setState({showStigmatizationDetails:
               !this.state.showStigmatizationDetails})} style={{marginTop: '0.5rem'}}>
             More info on stigmatization
@@ -788,24 +791,37 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                  contentRight={specificPopulations.map(sp => sp.ubrDescription)}/>
             </div>
           }
-          <div style={{display: 'flex', flexDirection: 'row',
-            paddingBottom: '14.4px', paddingTop: '0.3rem'}}>
-            <CheckBox style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '0.3rem'}}
-              onChange={v => this.setState(
-                fp.set(['workspace', 'researchPurpose', 'reviewRequested' ], v))}
-              checked={this.state.workspace.researchPurpose.reviewRequested}/>
+          <FlexRow style={{paddingTop: '0.3rem'}}>
             <label style={styles.text}>
-              I am concerned about potential
-              <a href='/definitions/stigmatization' target='_blank'> stigmatization </a>
-              of research participants. I would like the <i>All of Us</i> Resource Access Board
-              (RAB) to review my research purpose.
-              (This will not prevent you from creating a workspace and proceeding.)
+              <div>
+              If you are concerned that your research may result in <a href='/definitions/stigmatization' target='_blank'>
+              stigmatization of research participants</a>,
+              please request review of your research purpose by the All of Us  Resource Access Board (RAB). The RAB
+              will provide feedback regarding the potential for stigmatizing specific groups of participants, and if
+              needed, guidance for modifying your research purpose/scope. Even if you request a review, you will be
+              able to continue creating the Workspace and proceed with your research, while RAB reviews your research
+              purpose.
+              </div>
+              <div style={{marginTop: '0.5rem'}}>Would you like to request a review of your research purpose?</div>
             </label>
+          </FlexRow>
+          <div>
+            <RadioButton name='reviewRequested'
+                         onChange={() => {
+                           this.updateResearchPurpose('reviewRequested', true);
+                         }}
+                         checked={this.state.workspace.researchPurpose.reviewRequested}/>
+            <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>Yes</label>
+            <RadioButton name='reviewRequested'
+                         onChange={() => {
+                           this.updateResearchPurpose('reviewRequested', false);
+                         }}
+                         checked={!this.state.workspace.researchPurpose.reviewRequested}/>
+            <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>No</label>
           </div>
         </WorkspaceEditSection>
         <div>
-          <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem',
-            marginBottom: '1rem'}}>
+          <FlexRow style={{marginTop: '1rem', marginBottom: '1rem'}}>
             <Button type='secondary' style={{marginRight: '1rem'}}
                     onClick = {() => this.props.cancel()}>
               Cancel
@@ -827,7 +843,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 {this.renderButtonText()}
               </Button>
             </TooltipTrigger>
-          </div>
+          </FlexRow>
         </div>
         {this.state.workspaceCreationError &&
         <Modal>

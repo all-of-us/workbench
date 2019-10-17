@@ -4,6 +4,7 @@ import * as React from 'react';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {
   DataSetApi,
+  DataSetRequest,
   KernelTypeEnum,
   PrePackagedConceptSetEnum,
   WorkspacesApi} from 'generated/fetch';
@@ -24,7 +25,7 @@ const createNewDataSetModal = () => {
     includesAllParticipants={false}
     selectedConceptSetIds={[]}
     selectedCohortIds={[]}
-    selectedValues={[]}
+    selectedDomainValuePairs={[]}
     workspaceNamespace={workspaceNamespace}
     workspaceId={workspaceId}
     dataSet={dataSet}
@@ -72,7 +73,7 @@ describe('NewDataSetModal', () => {
     const wrapper = mount(createNewDataSetModal());
     const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-    const nameStub = 'Data Set Name';
+    const nameStub = 'Dataset Name';
 
     wrapper.find('[data-test-id="data-set-name-input"]')
       .first().simulate('change', {target: {value: nameStub}});
@@ -87,7 +88,7 @@ describe('NewDataSetModal', () => {
       description: '',
       conceptSetIds: [],
       cohortIds: [],
-      values: [],
+      domainValuePairs: [],
       prePackagedConceptSet: PrePackagedConceptSetEnum.NONE
     });
     expect(exportSpy).not.toHaveBeenCalled();
@@ -97,7 +98,7 @@ describe('NewDataSetModal', () => {
     const wrapper = mount(createNewDataSetModal());
     const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-    const nameStub = 'Data Set Name';
+    const nameStub = 'Dataset Name';
 
     wrapper.find('[data-test-id="data-set-name-input"]')
       .first().simulate('change', {target: {value: nameStub}});
@@ -112,15 +113,15 @@ describe('NewDataSetModal', () => {
     const wrapper = mount(createNewDataSetModal());
     const createSpy = jest.spyOn(dataSetApi(), 'createDataSet');
     const exportSpy = jest.spyOn(dataSetApi(), 'exportToNotebook');
-    const nameStub = 'Data Set Name';
+    const nameStub = 'Dataset Name';
     const notebookNameStub = 'Notebook Name';
-    const dataSetRequestStub = {
+    const dataSetRequestStub: DataSetRequest = {
       name: nameStub,
       includesAllParticipants: false,
       description: '',
       conceptSetIds: [],
       cohortIds: [],
-      values: [],
+      domainValuePairs: [],
       prePackagedConceptSet: PrePackagedConceptSetEnum.NONE
     };
 
@@ -140,8 +141,8 @@ describe('NewDataSetModal', () => {
       kernelType: KernelTypeEnum.Python
     });
   });
-  it ('should have default dataSet name if data set is passed as props', () => {
-    const name = 'Update Data Set';
+  it ('should have default dataSet name if dataset is passed as props', () => {
+    const name = 'Update Dataset';
     dataSet = {...dataSet, name: name, description: 'dataset'};
     const wrapper = mount(createNewDataSetModal());
     const dataSetName  =

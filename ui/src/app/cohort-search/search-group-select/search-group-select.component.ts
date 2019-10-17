@@ -1,10 +1,9 @@
 import {AfterViewInit, Component, Input} from '@angular/core';
-
 import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {wizardStore} from 'app/cohort-search/search-state.service';
-import {generateId} from 'app/cohort-search/utils';
-
-import {SearchRequest} from 'generated';
+import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
+import {triggerEvent} from 'app/utils/analytics';
+import {DomainType, SearchRequest} from 'generated/fetch';
 
 @Component({
   selector: 'app-search-group-select',
@@ -18,9 +17,9 @@ export class SearchGroupSelectComponent implements AfterViewInit {
   readonly domainTypes = LIST_DOMAIN_TYPES;
   readonly programTypes = LIST_PROGRAM_TYPES;
   position = 'bottom-left';
-
   demoOpen = false;
   demoMenuHover = false;
+  category: string;
 
   ngAfterViewInit(): void {
     /* Open nested menu on hover */
@@ -39,12 +38,18 @@ export class SearchGroupSelectComponent implements AfterViewInit {
   }
 
   launchWizard(criteria: any) {
+    const {domain, type, standard} = criteria;
+    const category = `${this.role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
+    // If domain is PERSON, list the type as well as the domain in the label
+    const label = domainToTitle(domain) +
+      (domain === DomainType.PERSON ? ' - ' + typeToTitle(type) : '') +
+      ' - Cohort Builder';
+    triggerEvent(category, 'Click', `${category} - ${label}`);
     const fullTree = criteria.fullTree || false;
     const role = this.role;
     let context: any;
     const itemId = generateId('items');
     const groupId = null;
-    const {domain, type, standard} = criteria;
     const item = this.initItem(itemId, domain, fullTree);
     context = {item, domain, type, standard, role, groupId, itemId, fullTree};
     wizardStore.next(context);
@@ -65,6 +70,8 @@ export class SearchGroupSelectComponent implements AfterViewInit {
   }
 
   setMenuPosition() {
+    const category = `${this.role === 'includes' ? 'Add' : 'Excludes'} Criteria`;
+    triggerEvent(category, 'Click', `${category} Dropdown - Cohort Builder`);
     const dropdown = document.getElementById(this.role + '-button').getBoundingClientRect();
     this.position = (window.innerHeight - dropdown.bottom < 315) ? 'top-left' : 'bottom-left';
   }

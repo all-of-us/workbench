@@ -60,4 +60,10 @@
     <description> Find and alert users that have exceeded their free tier billing usage</description>
     <schedule>every 3 hours</schedule>
   </cron>
+  <cron>
+    <url>/v1/cron/billingProjectGarbageCollection</url>
+    <target>api</target>
+    <description>Find billing projects associated with deleted workspaces and transfer ownership to Garbage Collection Service Accounts</description>
+    <schedule>every 24 hours</schedule>
+  </cron>
 </cronentries>

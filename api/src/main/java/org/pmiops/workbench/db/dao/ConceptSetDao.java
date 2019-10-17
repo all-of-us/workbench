@@ -5,10 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.model.Domain;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 public interface ConceptSetDao extends CrudRepository<ConceptSet, Long> {
 
@@ -32,17 +29,6 @@ public interface ConceptSetDao extends CrudRepository<ConceptSet, Long> {
 
   /** Returns the concept set in the workspace with the specified name, or null if there is none. */
   ConceptSet findConceptSetByNameAndWorkspaceId(String name, long workspaceId);
-
-  @Modifying
-  @Query(
-      value =
-          "INSERT INTO concept_set_concept_id(concept_set_id, concept_id) "
-              + " SELECT (:toCsId), concept_id "
-              + " FROM concept_set_concept_id "
-              + " WHERE concept_set_id = (:fromCsId)",
-      nativeQuery = true)
-  void bulkCopyConceptIds(
-      @Param("fromCsId") long fromConceptSetId, @Param("toCsId") long toConceptSetId);
 
   List<ConceptSet> findAllByConceptSetIdIn(Collection<Long> conceptSetIds);
 }

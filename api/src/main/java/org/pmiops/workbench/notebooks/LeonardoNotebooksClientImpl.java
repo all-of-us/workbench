@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
+
   private static final String CLUSTER_LABEL_AOU = "all-of-us";
   private static final String CLUSTER_LABEL_CREATED_BY = "created-by";
 
@@ -65,10 +66,9 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
     Map<String, String> nbExtensions = new HashMap<>();
     nbExtensions.put("aou-snippets-menu", gcsPrefix + "/aou-snippets-menu.js");
-    if (!config.featureFlags.enableLeoWelder) {
-      // Enabling Welder automatically installs a Leo-maintained playground extension.
-      nbExtensions.put("aou-playground-extension", gcsPrefix + "/playground-extension.js");
-    }
+    nbExtensions.put("aou-download-extension", gcsPrefix + "/aou-download-policy-extension.js");
+    nbExtensions.put(
+        "aou-activity-checker-extension", gcsPrefix + "/activity-checker-extension.js");
 
     return new ClusterRequest()
         .labels(ImmutableMap.of(CLUSTER_LABEL_AOU, "true", CLUSTER_LABEL_CREATED_BY, userEmail))
@@ -81,7 +81,11 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                 .serverExtensions(ImmutableMap.of("jupyterlab", "jupyterlab"))
                 .combinedExtensions(ImmutableMap.<String, String>of())
                 .labExtensions(ImmutableMap.<String, String>of()))
-        .enableWelder(config.featureFlags.enableLeoWelder)
+        // Matches Terra UI's scopes, see RW-3531 for rationale.
+        .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
+        .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
+        .addScopesItem("https://www.googleapis.com/auth/userinfo.profile")
+        .enableWelder(true)
         .machineConfig(
             new MachineConfig()
                 .masterDiskSize(
@@ -126,7 +130,6 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   @Override
   public void localize(String googleProject, String clusterName, Map<String, String> fileList) {
-    boolean enableLeoWelder = workbenchConfigProvider.get().featureFlags.enableLeoWelder;
     Localize welderReq =
         new Localize()
             .entries(
@@ -140,11 +143,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     NotebooksApi notebooksApi = notebooksApiProvider.get();
     retryHandler.run(
         (context) -> {
-          if (enableLeoWelder) {
-            notebooksApi.welderLocalize(googleProject, clusterName, welderReq);
-          } else {
-            notebooksApi.proxyLocalize(googleProject, clusterName, fileList, /* async */ false);
-          }
+          notebooksApi.welderLocalize(googleProject, clusterName, welderReq);
           return null;
         });
   }

@@ -126,12 +126,11 @@ paths:
           schema:
             $ref: "#/definitions/CohortReview"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/cohortReviewId'
       - $ref: '#/parameters/participantId'
     get:
       tags:
@@ -162,12 +161,11 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantCohortStatus"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/charts/{domain}:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/charts/{domain}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/cohortReviewId'
       - $ref: '#/parameters/participantId'
     get:
       tags:
@@ -191,12 +189,11 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantChartDataListResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/charts/{domain}:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/charts/{domain}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/cohortReviewId'
     get:
       tags:
         - cohortReview
@@ -219,12 +216,11 @@ paths:
           schema:
             $ref: "#/definitions/CohortChartDataListResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/cohortReviewId'
       - $ref: '#/parameters/participantId'
     post:
       tags:
@@ -256,12 +252,11 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantCohortAnnotationListResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/data:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/data:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/cohortReviewId'
       - $ref: '#/parameters/participantId'
     post:
       tags:
@@ -285,12 +280,11 @@ paths:
           schema:
             $ref: "#/definitions/ParticipantDataListResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants/{participantId}/annotations/{annotationId}:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/cohortReviewId'
       - $ref: '#/parameters/participantId'
       - in: path
         name: annotationId
@@ -328,12 +322,11 @@ paths:
           schema:
             $ref: '#/definitions/EmptyResponse'
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/vocabularies:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/vocabularies:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-      - $ref: '#/parameters/cohortId'
-      - $ref: '#/parameters/cdrVersionId'
+      - $ref: '#/parameters/cohortReviewId'
     get:
       tags:
         - cohortReview
@@ -512,12 +505,10 @@ definitions:
         type: string
 
   PageFilterRequest:
-    discriminator: pageFilterType
     required:
       - page
       - pageSize
       - sortOrder
-      - pageFilterType # required for inheritance to work
     properties:
       page:
         type: integer
@@ -527,41 +518,20 @@ definitions:
         description: page size of results (default is 25)
       sortOrder:
         $ref: "#/definitions/SortOrder"
-      pageFilterType:
-        $ref: "#/definitions/PageFilterType"
+      sortColumn:
+        $ref: "#/definitions/FilterColumns"
+        description: Column upon which to sort (default is 'participantId')
       filters:
         $ref: "#/definitions/FilterList"
+      domain:
+        $ref: "#/definitions/DomainType"
+        description: Different domain types in omop
 
-  ParticipantCohortStatuses:
-    allOf:
-      - $ref: '#/definitions/PageFilterRequest'
-      - properties: # extra properties
-          sortColumn:
-            $ref: "#/definitions/ParticipantCohortStatusColumns"
-            description: Column upon which to sort (default is 'participantId')
-
-  ReviewFilter:
-    allOf:
-      - $ref: '#/definitions/PageFilterRequest'
-      - properties: # extra properties
-          sortColumn:
-            $ref: "#/definitions/ReviewColumns"
-            description: Column upon which to sort (default is 'itemDate')
-          domain:
-            $ref: "#/definitions/DomainType"
-            description: Different domain types in omop
-
-  ParticipantCohortStatusColumns:
+  FilterColumns:
     type: string
-    enum: [PARTICIPANTID, STATUS, GENDER, BIRTHDATE, RACE, ETHNICITY, DECEASED]
-
-  ReviewColumns:
-    type: string
-    enum: [startDate, endDate, domain, standardVocabulary, standardName, sourceValue, sourceVocabulary, sourceName, ageAtEvent, signature]
-
-  PageFilterType:
-    type: string
-    enum: [ParticipantCohortStatuses, ReviewFilter]
+    enum: [PARTICIPANTID, STATUS, GENDER, BIRTHDATE, RACE, ETHNICITY, DECEASED, START_DATE, STANDARD_CODE, STANDARD_VOCAB, STANDARD_NAME, STANDARD_CONCEPT_ID,
+           SOURCE_CODE, SOURCE_VOCAB, SOURCE_NAME, SOURCE_CONCEPT_ID, DOMAIN, AGE_AT_EVENT, NUM_OF_MENTIONS, FIRST_MENTION, LAST_MENTION, VISIT_TYPE,
+           ROUTE, DOSE, STRENGTH, VAL_AS_NUMBER, UNIT, REF_RANGE, SURVEY_NAME, QUESTION, ANSWER]
 
   DomainType:
     type: string
@@ -582,14 +552,13 @@ definitions:
           $ref: "#/definitions/Filter"
 
   Filter:
-    type: object
     required:
       - property
       - operator
       - values
     properties:
       property:
-        $ref: "#/definitions/ParticipantCohortStatusColumns"
+        $ref: "#/definitions/FilterColumns"
       operator:
         $ref: "#/definitions/Operator"
       values:
@@ -753,8 +722,6 @@ definitions:
         type: integer
         format: int64
         description: the total count of items.
-      pageRequest:
-        $ref: "#/definitions/PageRequest"
 
   ModifyParticipantCohortAnnotationRequest:
     type: object
@@ -779,26 +746,6 @@ definitions:
     type: string
     description: possible values indicating whether review has been created
     enum: [NONE, CREATED]
-
-  PageRequest:
-    type: object
-    required:
-      - page
-      - pageSize
-      - sortOrder
-      - sortColumn
-    properties:
-      page:
-        type: integer
-        description: the page
-      pageSize:
-        type: integer
-        description: the page size.
-      sortOrder:
-        $ref: "#/definitions/SortOrder"
-      sortColumn:
-        type: string
-        description: sort column
 
   CohortChartData:
     type: object
@@ -845,14 +792,15 @@ definitions:
         description: the rank of the data
 
   ParticipantData:
-    discriminator: domainType
     required:
       - itemDate
-      - domainType # required for inheritance to work
     properties:
       itemDate:
         type: string
         description: The date of the event
+      domain:
+        type: string
+        description: the domain of this data.
       standardName:
         type: string
         description: The standard name of this data
@@ -867,227 +815,60 @@ definitions:
         type: integer
         format: int64
         description: The source concept id
-      domainType:
-        $ref: "#/definitions/DomainType"
-
-  Condition:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-      - properties: # extra properties
-          standardVocabulary:
-            type: string
-            description: The standard vocabulary of this data
-          standardCode:
-            type: string
-            description: The standard code of this data
-          sourceVocabulary:
-            type: string
-            description: The source vocabulary type of this data
-          sourceName:
-            type: string
-            description: The source name of this data
-          sourceCode:
-            type: string
-            description: The source code of this data
-          visitType:
-            type: string
-            description: The visit type of this data
-
-  Survey:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-      - properties: # extra properties
-          survey:
-            type: string
-            description: The name of this survey
-          question:
-            type: string
-            description: a question in this survey
-          answer:
-            type: string
-            description: an answer in this survey
-
-  Procedure:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-      - properties: # extra properties
-          standardVocabulary:
-            type: string
-            description: The standard vocabulary of this data
-          standardCode:
-            type: string
-            description: The standard code of this data
-          sourceVocabulary:
-            type: string
-            description: The source vocabulary type of this data
-          sourceName:
-            type: string
-            description: The source name of this data
-          sourceCode:
-            type: string
-            description: The source code of this data
-          visitType:
-            type: string
-            description: The visit type of this data
-
-  Observation:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-      - properties: # extra properties
-          standardVocabulary:
-            type: string
-            description: The standard vocabulary type of this data
-          standardName:
-            type: string
-            description: The standard name of this data
-          standardCode:
-            type: string
-            description: The standard code of this data
-          sourceVocabulary:
-            type: string
-            description: The source vocabulary type of this data
-          sourceName:
-            type: string
-            description: The source name of this data
-          sourceCode:
-            type: string
-            description: The source code of this data
-          ageAtEvent:
-            type: integer
-            description: The age at event for the participant
-          visitType:
-            type: string
-            description: The visit type of this data
-
-  Drug:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-      - properties: # extra properties
-          numMentions:
-            type: string
-            description: The number of mentions of this data
-          firstMention:
-            type: string
-            description: The date of first mention of this data
-          lastMention:
-            type: string
-            description: The date of last mention of this data
-          dose:
-            type: string
-            description: The quantity of this data
-          strength:
-            type: string
-            description: The strength of this data
-          route:
-            type: string
-            description: The route of this data
-          visitType:
-            type: string
-            description: The visit type of this data
-
-  AllEvents:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-      - properties: # extra properties
-          domain:
-            type: string
-            description: the domain of this data.
-          standardVocabulary:
-            type: string
-            description: The standard vocabulary of this data
-          standardCode:
-            type: string
-            description: The standard code of this data
-          sourceVocabulary:
-            type: string
-            description: The source vocabulary type of this data
-          sourceName:
-            type: string
-            description: The source name of this data.
-          sourceCode:
-            type: string
-            description: The source code of this data
-          value:
-            type: string
-            description: The source value of this data
-          numMentions:
-            type: string
-            description: The number of mentions of this data
-          firstMention:
-            type: string
-            description: The date of first mention of this data
-          lastMention:
-            type: string
-            description: The date of last mention of this data
-          visitType:
-            type: string
-            description: The visit type of this data
-          unit:
-            type: string
-            description: The unit of this data
-          strength:
-            type: string
-            description: The strength of this data
-          dose:
-            type: string
-            description: The dose of this data
-          route:
-            type: string
-            description: The route of this data
-          refRange:
-            type: string
-            description: The reference range of this data
-
-  Lab:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-      - properties: # extra properties
-          value:
-            type: string
-            description: The source value of this data
-          unit:
-            type: string
-            description: The unit of this data
-          refRange:
-            type: string
-            description: The reference range of this data
-          visitType:
-            type: string
-            description: The visit type of this data
-
-  Vital:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-      - properties: # extra properties
-          value:
-            type: string
-            description: The source value of this data
-          unit:
-            type: string
-            description: The unit of this data
-          refRange:
-            type: string
-            description: The reference range of this data
-          visitType:
-            type: string
-            description: The visit type of this data
-
-  PhysicalMeasurement:
-    allOf:
-      - $ref: '#/definitions/ParticipantData'
-      - properties: # extra properties
-          standardVocabulary:
-            type: string
-            description: The standard vocabulary of this data
-          standardCode:
-            type: string
-            description: The standard code of this data
-          value:
-            type: string
-            description: The source value of this data
-          unit:
-            type: string
-            description: The unit of this data
+      sourceVocabulary:
+        type: string
+        description: The source vocabulary type of this data
+      standardVocabulary:
+        type: string
+        description: The standard vocabulary of this data
+      sourceName:
+        type: string
+        description: The source name of this data
+      sourceCode:
+        type: string
+        description: The source code of this data
+      standardCode:
+        type: string
+        description: The standard code of this data
+      value:
+        type: string
+        description: The source value of this data
+      visitType:
+        type: string
+        description: The visit type of this data
+      numMentions:
+        type: string
+        description: The number of mentions of this data
+      firstMention:
+        type: string
+        description: The date of first mention of this data
+      lastMention:
+        type: string
+        description: The date of last mention of this data
+      unit:
+        type: string
+        description: The unit of this data
+      dose:
+        type: string
+        description: The quantity of this data
+      strength:
+        type: string
+        description: The strength of this data
+      route:
+        type: string
+        description: The route of this data
+      refRange:
+        type: string
+        description: The reference range of this data
+      survey:
+        type: string
+        description: The name of this survey
+      question:
+        type: string
+        description: a question in this survey
+      answer:
+        type: string
+        description: an answer in this survey
 
   AnnotationType:
     type: string

@@ -10,6 +10,7 @@ import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
 import {InterceptedHttp} from './factory/InterceptedHttp';
+import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {CdrVersionStorageService} from './services/cdr-version-storage.service';
 import {ErrorHandlingService} from './services/error-handling.service';
 import {ErrorReporterService} from './services/error-reporter.service';
@@ -21,7 +22,6 @@ import {StatusCheckService} from './services/status-check.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
-import {BreadcrumbComponent} from './components/breadcrumb';
 import {BugReportComponent} from './components/bug-report';
 import {ErrorHandlerComponent} from './components/error-handler/component';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
@@ -30,6 +30,11 @@ import {AdminUserComponent} from './pages/admin/admin-user';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
 import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect/component';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
+import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
+import {CreateReviewModalComponent} from './pages/data/cohort-review/create-review-modal';
+import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
+import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
+import {TablePage} from './pages/data/cohort-review/table-page';
 import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
@@ -60,16 +65,18 @@ import {
   ConfigService,
   Configuration,
 } from 'generated';
-
 import {Configuration as FetchConfiguration} from 'generated/fetch';
-
-import {DataPageComponent} from 'app/pages/data/data-page';
-import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {
   ApiModule as LeoApiModule,
   Configuration as LeoConfiguration,
 } from 'notebooks-generated';
-import {InteractiveNotebookComponent} from './pages/analysis/interactive-notebook';
+
+import {TextModalComponent} from 'app/components/text-modal';
+import {InteractiveNotebookComponent} from 'app/pages/analysis/interactive-notebook';
+import {DataPageComponent} from 'app/pages/data/data-page';
+import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
+import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
+
 
 
 // Unfortunately stackdriver-errors-js doesn't properly declare dependencies, so
@@ -125,15 +132,17 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AdminReviewWorkspaceComponent,
     AdminUserComponent,
     AppComponent,
-    BreadcrumbComponent,
     BugReportComponent,
     CohortActionsComponent,
+    CohortReviewComponent,
     ConceptSetActionsComponent,
     ConceptSetDetailsComponent,
     ConceptHomepageComponent,
+    CreateReviewModalComponent,
     DataPageComponent,
     DataSetPageComponent,
     DataUseAgreementComponent,
+    DetailPageComponent,
     ErrorHandlerComponent,
     InitialErrorComponent,
     InteractiveNotebookComponent,
@@ -141,10 +150,14 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     NotebookRedirectComponent,
     PageTemplateSignedOutComponent,
     ProfilePageComponent,
+    QueryReportComponent,
     RoutingSpinnerComponent,
     SignedInComponent,
+    NavBarComponent,
     SignInComponent,
     StigmatizationPageComponent,
+    TablePage,
+    TextModalComponent,
     WorkspaceAboutComponent,
     WorkspaceEditComponent,
     WorkspaceLibraryComponent,
@@ -200,7 +213,8 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
       useValue: window
     },
     WorkbenchRouteReuseStrategy,
-    {provide: RouteReuseStrategy, useExisting: WorkbenchRouteReuseStrategy}
+    {provide: RouteReuseStrategy, useExisting: WorkbenchRouteReuseStrategy},
+    CanDeactivateGuard
   ],
   // This specifies the top-level components, to load first.
   bootstrap: [AppComponent, ErrorHandlerComponent, InitialErrorComponent]

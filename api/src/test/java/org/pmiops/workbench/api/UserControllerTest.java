@@ -97,34 +97,20 @@ public class UserControllerTest {
   @Before
   public void setUp() {
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
-    config.firecloud.enforceRegistered = false;
     config.featureFlags = new FeatureFlagsConfig();
-    config.featureFlags.useBillingProjectBuffer = false;
 
     saveFamily();
   }
 
   @Test(expected = ForbiddenException.class)
-  public void testEnforceRegisteredUnregistered() {
-    config.firecloud.enforceRegistered = true;
+  public void testUnregistered() {
     when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(false);
     userController.user("Robinson", null, null, null).getBody();
   }
 
   @Test
-  public void testEnforceRegistered() {
-    config.firecloud.enforceRegistered = true;
-    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
-    User john = userDao.findUserByEmail("john@lis.org");
-
-    UserResponse response = userController.user("Robinson", null, null, null).getBody();
-    // Test data contains a single registered user, John Robinson.
-    assertThat(response.getUsers()).hasSize(1);
-    assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getEmail());
-  }
-
-  @Test
   public void testUserSearch() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     User john = userDao.findUserByEmail("john@lis.org");
 
     UserResponse response = userController.user("John", null, null, null).getBody();
@@ -134,6 +120,7 @@ public class UserControllerTest {
 
   @Test
   public void testUserPartialStringSearch() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     List<User> allUsers = Lists.newArrayList(userDao.findAll());
 
     UserResponse response = userController.user("obin", null, null, null).getBody();
@@ -145,12 +132,14 @@ public class UserControllerTest {
 
   @Test
   public void testUserEmptyResponse() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     UserResponse response = userController.user("", null, null, null).getBody();
     assertThat(response.getUsers()).hasSize(0);
   }
 
   @Test
   public void testUserNoUsersResponse() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     UserResponse response = userController.user("Smith", null, null, null).getBody();
     assertThat(response.getUsers()).hasSize(0);
   }
@@ -181,6 +170,7 @@ public class UserControllerTest {
 
   @Test
   public void testUserPageSize() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     int size = 1;
     UserResponse robinsons_0 =
         userController.user("Robinson", PaginationToken.of(0).toBase64(), size, null).getBody();
@@ -207,6 +197,7 @@ public class UserControllerTest {
 
   @Test
   public void testUserPagedResponses() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     UserResponse robinsons_0_1 =
         userController.user("Robinson", PaginationToken.of(0).toBase64(), 2, null).getBody();
     UserResponse robinsons_2_3 =
@@ -227,6 +218,7 @@ public class UserControllerTest {
 
   @Test
   public void testUserSort() {
+    when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
     UserResponse robinsonsAsc = userController.user("Robinson", null, null, "asc").getBody();
     UserResponse robinsonsDesc = userController.user("Robinson", null, null, "desc").getBody();
 
@@ -250,12 +242,13 @@ public class UserControllerTest {
    */
 
   private void saveFamily() {
+    saveUser("jill@lis.org", "Jill", "Robinson", false);
     saveUser("john@lis.org", "John", "Robinson", true);
-    saveUser("judy@lis.org", "Judy", "Robinson", false);
-    saveUser("maureen@lis.org", "Mauren", "Robinson", false);
-    saveUser("penny@lis.org", "Penny", "Robinson", false);
-    saveUser("will@lis.org", "Will", "Robinson", false);
-    saveUserNotInFirecloud("bob@lis.org", "Bob", "Robinson", false);
+    saveUser("judy@lis.org", "Judy", "Robinson", true);
+    saveUser("maureen@lis.org", "Mauren", "Robinson", true);
+    saveUser("penny@lis.org", "Penny", "Robinson", true);
+    saveUser("will@lis.org", "Will", "Robinson", true);
+    saveUserNotInFirecloud("bob@lis.org", "Bob", "Robinson", true);
   }
 
   @SuppressWarnings("SameParameterValue")

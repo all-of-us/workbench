@@ -41,10 +41,18 @@ export interface Environment {
   // Example value: https://aousupporthelp.zendesk.com/hc/
   zendeskHelpCenterUrl: string;
 
-  // Transient client-side flags.
-  //
-  // Whether users should be able to use JupyterLab as an option.
-  // See RW-1966 for details.
-  // Exit criteria: remove flag for Athens release.
-  enableJupyterLab: boolean;
+  inactivityTimeoutSeconds: number;
+  inactivityWarningBeforeSeconds: number;
+  // Add transient client-side flags below here
+  // homepage restyling changes ; excludes DUA
+  // See RW-3275
+  // Exit criteria: once the epic is completed and fully reviewed
+  enableHomepageRestyle: boolean;
+  // Whether users should be able to see the Published Workspaces
+  // tab in the Workspace Library.
+  enablePublishedWorkspaces: boolean;
+  // Enable create account pages as per CAPS requirement
+  enableAccountPages: boolean;
+  // Profile changes for CAPS requirements in RW-3441.
+  enableProfileCapsFeatures: boolean;
 }

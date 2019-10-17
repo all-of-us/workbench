@@ -11,8 +11,6 @@ import org.pmiops.workbench.notebooks.model.StorageLink;
  * for internal use.
  */
 public interface LeonardoNotebooksClient {
-  String DEFAULT_CLUSTER_NAME = "all-of-us";
-
   /**
    * Creates a notebooks cluster owned by the current authenticated user.
    *

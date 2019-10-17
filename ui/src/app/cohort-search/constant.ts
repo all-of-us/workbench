@@ -2,6 +2,14 @@ import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
 
 export const LIST_PROGRAM_TYPES = [
   {
+    name: 'Demographics', domain: DomainType.PERSON, children: [
+      {name: 'Current Age/Deceased', domain: DomainType.PERSON, type: CriteriaType.AGE},
+      {name: 'Gender', domain: DomainType.PERSON, type: CriteriaType.GENDER},
+      {name: 'Race', domain: DomainType.PERSON, type: CriteriaType.RACE},
+      {name: 'Ethnicity', domain: DomainType.PERSON, type: CriteriaType.ETHNICITY},
+    ]
+  },
+  {
     name: 'Surveys',
     domain: DomainType.SURVEY,
     type: CriteriaType.PPI,
@@ -17,25 +25,11 @@ export const LIST_PROGRAM_TYPES = [
 ];
 
 export const LIST_DOMAIN_TYPES = [
-  {
-    name: 'Demographics', domain: DomainType.PERSON, children: [
-      {name: 'Current Age/Deceased', domain: DomainType.PERSON, type: CriteriaType.AGE},
-      {name: 'Gender', domain: DomainType.PERSON, type: CriteriaType.GENDER},
-      {name: 'Race', domain: DomainType.PERSON, type: CriteriaType.RACE},
-      {name: 'Ethnicity', domain: DomainType.PERSON, type: CriteriaType.ETHNICITY},
-    ]
-  },
   {name: 'Conditions', domain: DomainType.CONDITION},
   {name: 'Procedures', domain: DomainType.PROCEDURE},
   {name: 'Drugs', domain: DomainType.DRUG},
   {name: 'Measurements', domain: DomainType.MEASUREMENT},
-  {
-    name: 'Visits',
-    domain: DomainType.VISIT,
-    type: CriteriaType.VISIT,
-    standard: true,
-    fullTree: true
-  }
+  {name: 'Visits', domain: DomainType.VISIT, type: CriteriaType.VISIT, standard: true, fullTree: true}
 ];
 
 export const PM_UNITS = {
