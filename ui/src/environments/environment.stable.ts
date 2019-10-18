@@ -10,6 +10,7 @@ export const environment: Environment = {
   debug: false,
   gaId: 'UA-112406425-3',
   gaUserAgentDimension: 'dimension1',
+  gaLoggedInDimension: 'dimension2',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   trainingUrl: 'https://aoudev.nnlm.gov',
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',

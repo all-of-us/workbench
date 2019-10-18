@@ -8,6 +8,7 @@ export const testEnvironmentBase = {
   publicUiUrl: 'https://aou-db-test.appspot.com',
   gaId: 'UA-112406425-1',
   gaUserAgentDimension: 'dimension2',
+  gaLoggedInDimension: 'dimension3',
   trainingUrl: 'https://aoudev.nnlm.gov',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
