@@ -157,9 +157,14 @@ task generateMoodleClient {
   }
 }
 
-task generate_local_appengine_web_xml(type: Exec) {
+task generate_appengine_web_xml(type: Exec) {
   executable "ruby"
   args "libproject/generate_appengine_web_xml.rb"
+}
+
+task generate_appengine_cron_yaml(type: Exec) {
+  executable "ruby"
+  args = ["libproject/generate_appengine_cron_yaml.rb", System.getenv("WORKBENCH_ENV")]
 }
 
 configurations {
@@ -311,7 +316,8 @@ classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
 
 war.dependsOn compileGeneratedJava
-war.dependsOn generate_local_appengine_web_xml
+war.dependsOn generate_appengine_web_xml
+war.dependsOn generate_appengine_cron_yaml
 
 clean.doFirst {
   delete("${projectDir}/$swaggerTargetFolder")
@@ -528,13 +534,14 @@ task startCronEmulator(dependsOn: ':appengine-cron-emulator:jar') {
             .directory(projectDir)
             .command("java", "-jar",
                     project(":appengine-cron-emulator").jar.archivePath.getPath(),
-                    "$projectDir/src/main/webapp/WEB-INF/cron.xml"
+                    "$projectDir/src/main/webapp/WEB-INF/cron.yaml"
             ).start()
 
     println "Started Cron Emulator"
   }
 }
 
+startCronEmulator.dependsOn generate_appengine_cron_yaml
 appengineRun.dependsOn startCronEmulator
 appengineStart.dependsOn startCronEmulator
 
