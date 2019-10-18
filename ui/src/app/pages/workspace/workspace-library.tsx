@@ -205,9 +205,6 @@ export const WorkspaceLibrary = withUserProfile()
       </div>
       <div style={{padding: '1rem', width: '100%'}}>
         <Header style={{textTransform: 'uppercase'}}>Researcher Workbench Workspace Library</Header>
-        <div style={{color: colors.primary, fontSize: 16, marginTop: '1rem'}}>
-          Search through featured and public workspaces.
-        </div>
         <FlexColumn style={{marginTop: '2rem'}}>
           <FlexRow>
             <ClrIcon shape={currentTab.icon} style={styles.iconStyling}
