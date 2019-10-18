@@ -62,6 +62,7 @@ import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -189,7 +190,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Autowired
   ProfileController(
-      ProfileService profileService,
+      @Qualifier("f") ProfileService profileService,
       Provider<User> userProvider,
       Provider<UserAuthentication> userAuthenticationProvider,
       UserDao userDao,
