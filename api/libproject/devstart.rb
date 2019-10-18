@@ -1582,8 +1582,8 @@ end
 
 def load_config(project, dry_run = false)
   config_json = must_get_env_value(project, :config_json)
-  featured_workspaces_config = must_get_env_value(project, :featured_workspaces_config)
-  unless config_json and featured_workspaces_config
+  featured_workspaces_json = must_get_env_value(project, :featured_workspaces_json)
+  unless config_json and featured_workspaces_json
     raise("unknown project #{project}, expected one of #{configs.keys}")
   end
 
@@ -1591,7 +1591,7 @@ def load_config(project, dry_run = false)
   common.status "Loading #{config_json} into database..."
   run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=main -Pconfig_file=config/#{config_json}})
   run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json})
-  run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/#{featured_workspaces_config}})
+  run_inline_or_log(dry_run, %W{gradle loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/#{featured_workspaces_json}})
 end
 
 def with_cloud_proxy_and_db(gcc, service_account = nil, key_file = nil)
