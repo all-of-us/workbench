@@ -40,6 +40,11 @@ const styles = reactStyles({
     padding: 0,
     fontSize: '12px',
     fontWeight: 600
+  },
+  parameter: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
   }
 });
 
@@ -75,7 +80,6 @@ export class SearchGroupItemName extends React.Component<{editItem: Function, it
   op: any;
   constructor(props: any) {
     super(props);
-    this.state = {};
   }
 
   render() {
@@ -91,14 +95,10 @@ export class SearchGroupItemName extends React.Component<{editItem: Function, it
       </span>
       <OverlayPanel ref={(el) => this.op = el} appendTo={document.body} style={{maxWidth: '30%'}}>
         <h3 style={{margin: 0}}>{domainToTitle(type)}</h3>
-        {searchParameters.map((param, p) => {
-          return <div key={p}>{showCode && <b>{param.code}</b>} {param.name}</div>;
-        })}
+        {searchParameters.map((param, p) => <div key={p} style={styles.parameter}>{showCode && <b>{param.code}</b>} {param.name}</div>)}
         {!!modifiers.length && <React.Fragment>
           <h3>Modifiers</h3>
-          {modifiers.map((mod, m) => {
-            return <div key={m}>{modifiersDisplay(mod)}</div>;
-          })}
+          {modifiers.map((mod, m) => <div key={m}>{modifiersDisplay(mod)}</div>)}
         </React.Fragment>}
       </OverlayPanel>
     </React.Fragment>;
