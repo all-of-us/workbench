@@ -13,6 +13,7 @@ export const environment: Environment = {
   debug: true,
   gaId: 'UA-112406425-5',
   gaUserAgentDimension: 'dimension1',
+  gaLoggedInDimension: 'dimension2',
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   inactivityTimeoutSeconds: 99999999999,

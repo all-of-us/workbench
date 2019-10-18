@@ -11,6 +11,7 @@ import {
 
 import {ServerConfigService} from 'app/services/server-config.service';
 import {cookiesEnabled} from 'app/utils';
+import {initializeAnalytics} from 'app/utils/analytics';
 import {
   queryParamsStore,
   routeConfigDataStore,
@@ -20,8 +21,6 @@ import {
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
-
-declare let gtag: Function;
 
 export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 
@@ -96,7 +95,7 @@ export class AppComponent implements OnInit {
       }
     });
 
-    this.setGTagManager();
+    initializeAnalytics();
   }
 
   getLeafRoute(route = this.activatedRoute) {
@@ -118,23 +117,6 @@ export class AppComponent implements OnInit {
         });
       }
     }
-  }
-
-  /**
-   * Setting the Google Analytics ID here.
-   * This first injects Google's gtag script via iife, then secondarily defines
-   * the global gtag function.
-   */
-  private setGTagManager() {
-    gtag('config', environment.gaId, {
-      custom_map: {
-        [environment.gaUserAgentDimension]: 'user_agent'
-      }
-    });
-    // There is some interpolation issues here that cause some useragents to be too long
-    // limit is 150. Slicing to 100 pretty much guarantees that even with the encoding
-    // it comes in under this limit -US 2/27/18
-    gtag('set', 'user_agent', window.navigator.userAgent.slice(0, 100));
   }
 
   private checkBrowserSupport() {

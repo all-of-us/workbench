@@ -1,2 +1,0 @@
-1570565534
-drug_exposure:TEST FIELD 4:A:B:C:D:E:false

@@ -564,18 +564,40 @@ These are easiest if you need to authenticate as one of your researcher accounts
 
 This approach is required if you want to issue a request to a backend as a service account. This may be necessary in some cases as the Workbench service is an owner on all AoU billing projects.
 
-This approach requires [oauth2l](https://github.com/google/oauth2l) to be installed:
-```
-(For macs: `brew install go`)
+This approach requires [oauth2l](https://github.com/google/oauth2l) to be installed (and `brew install go` on MacOS):
+
+```Shell
 go get github.com/google/oauth2l
 go install github.com/google/oauth2l
 ```
 
-The following shows how to make an authenticated backend request as the shared  workbench test service account against Firecloud dev (assumes you have run dev-up at least once):
-
+To obtain the service account credentials, run
+```Shell
+cd api
+gcloud auth login <user>@pmi-ops.org # for test environment
+gcloud config set account <user>@pmi-ops.org # also works if logged in.
+gcloud auth list # confirm it's what you expect
+./project.rb get-test-service-creds # the dev-up command should also include this step.
 ```
-# From the "api" directory.
-curl -X GET -H "$(~/go/bin/oauth2l header --json build/exploded-api/WEB-INF/sa-key.json userinfo.email userinfo.profile cloud-billing)" -H "Content-Type: application/json" https://firecloud-orchestration.dsde-dev.broadinstitute.org/api/profile/billing
+You should see a file `sa-key.json` in the current directory
+The following shows how to make an authenticated backend request as the shared
+workbench test service account against Firecloud dev. It retrieves required authorizaiton
+scopes of `email`, `profile`, and `cloud-billing`.
+
+```Shell
+# From the "api" directory, use `oauth2l` to retrieve an authorization header: 
+`~/go/bin/oauth2l header --json ./sa-key.json email profile cloud-billing`
+```
+
+Now we'll demonstrate calling Firecloud's [profile/billing API](https://api.firecloud.org/#!/Profile/billing)
+with the service account credentials.
+```Shell
+# call Firecloud Billing API, format the JSON output and view in less 
+
+curl -X GET -H "`~/go/bin/oauth2l header --json ./sa-key.json email profile cloud-billing`" \
+    -H "Content-Type: application/json" \
+    "https://firecloud-orchestration.dsde-dev.broadinstitute.org/api/profile/billing" \
+    | jq | less
 
 # If you get 401 errors, you may need to clear your token cache.
 oauth2l reset

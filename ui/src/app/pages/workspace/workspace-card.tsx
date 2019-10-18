@@ -69,7 +69,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
   onShare,
   onDelete
 }) => {
-  const wsPathPrefix = 'recentWorkspaces/' + workspace.namespace + '/' + workspace.id;
+  const wsPathPrefix = 'workspaces/' + workspace.namespace + '/' + workspace.id;
 
   return <PopupTrigger
     side='bottom'
@@ -81,21 +81,21 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
           Duplicate
         </MenuItem>
         <TooltipTrigger content={<div>Requires Write Permission</div>}
-                        disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}>
+                        disabled={WorkspacePermissionsUtil.canWrite(accessLevel)}>
           <MenuItem icon='pencil'
                     onClick={() => {navigate([wsPathPrefix, 'edit']); }}
                     disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}>
             Edit
           </MenuItem>
         </TooltipTrigger>
-        <TooltipTrigger content={<div>Requires Owner Permission</div>}
-                        disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+        <TooltipTrigger content={<div data-test-id='workspace-share-disabled-tooltip'>Requires Owner Permission</div>}
+                        disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
           <MenuItem icon='pencil' onClick={onShare} disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
             Share
           </MenuItem>
         </TooltipTrigger>
         <TooltipTrigger content={<div>Requires Owner Permission</div>}
-                        disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+                        disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
           <MenuItem icon='trash' onClick={onDelete} disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
             Delete
           </MenuItem>

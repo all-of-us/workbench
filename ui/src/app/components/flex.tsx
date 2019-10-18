@@ -31,3 +31,9 @@ export const FlexRowWrap = (props) => {
     {props.children}
   </FlexRow>;
 };
+
+// FlexSpacer will take up as much space as is reasonable. For example:
+// [FlexElement1] [FlexElement2] [-------------FlexSpacer-------------] [FlexElement3]
+export const FlexSpacer = (props) => {
+  return <div style={{display: 'flex', flex: 1, ...props.style}}/>;
+};

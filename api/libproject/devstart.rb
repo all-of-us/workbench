@@ -82,7 +82,7 @@ ENVIRONMENTS = {
     :config_json => "config_prod.json",
     :cdr_versions_json => "cdr_versions_prod.json",
     :featured_workspaces_json => "featured_workspaces_prod.json",
-    :gae_vars => make_gae_vars(1, 64)
+    :gae_vars => make_gae_vars(8, 64)
   }
 }
 
@@ -215,9 +215,6 @@ def dev_up()
     docker-compose run api-scripts
     ./gradlew loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
   }
-
-  common.status "Loading Data Dictionary..."
-  common.run_inline %W{docker-compose run api-scripts ./gradlew loadDataDictionary}
 
   run_api()
 end
