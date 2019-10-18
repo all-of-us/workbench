@@ -358,12 +358,12 @@ Description of arguments these scripts take are as follows.
 * Note cdr-version can be '' to make dataset named cdr
 
 #### The next 2 scripts are used to generate cloud cdr database instances. Generate cdr count data using deidentified cdr release.
-`./project.rb generate-private-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606 --workbench-project all-of-us-workbench-test --cdr-version synth_r_2019q3_1 --bucket all-of-us-workbench-private-cloudsql`
+`./project.rb generate-private-cdr-counts --bq-project all-of-us-ehr-dev --bq-dataset synthetic_cdr20180606 --workbench-project all-of-us-workbench-test --cdr-version synth_r_2019q3_1 --bucket all-of-us-workbench-private-cloudsql/synthetic_cdr20180606`
 ##### Result is
 * Generates csv.gz files in the specified bucket. These files will be used in the next step
 
 #### Generate cloudsql databases from a bucket using *.csv.gz files
-`./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database synth_r_2019q3_1 --bucket all-of-us-workbench-private-cloudsql/synth_r_2019q3_1`
+`./project.rb generate-cloudsql-db --project all-of-us-workbench-test --instance workbenchmaindb --database synth_r_2019q3_1 --bucket all-of-us-workbench-private-cloudsql/synthetic_cdr20180606/synth_r_2019q3_1`
 ##### Result is
 * Databases are live on cloudsql.
 
