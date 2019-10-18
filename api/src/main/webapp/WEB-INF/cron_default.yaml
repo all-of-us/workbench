@@ -1,0 +1,56 @@
+cron:
+- description: 'daily BigQuery audit job'
+  url: /v1/cron/auditBigQuery
+  schedule: every 24 hours
+  timezone: UTC
+  target: api
+- description: 'Periodic notebook cluster checks'
+  url: /v1/cron/checkClusters
+  schedule: every 3 hours
+  timezone: UTC
+  target: api
+- description: 'Daily sync of compliance training status (via Moodle API)'
+  url: /v1/cron/bulkSyncComplianceTrainingStatus
+  schedule: every 24 hours
+  timezone: UTC
+  target: api
+- description: 'Daily sync of eRA Commons linkage status (via FireCloud API)'
+  url: /v1/cron/bulkSyncEraCommonsStatus
+  schedule: every 24 hours
+  timezone: UTC
+  target: api
+- description: 'Daily sync of 2FA set up status (via Google Directory Service)'
+  url: /v1/cron/bulkSyncTwoFactorAuthStatus
+  schedule: every 24 hours
+  timezone: UTC
+  target: api
+- description: 'Daily audit of gcp resources that users have access to'
+  url: /v1/cron/bulkAuditProjectAccess
+  schedule: every 24 hours
+  timezone: UTC
+  target: api
+- description: 'If the AoU Billing Project buffer is not full, create a firecloud billing project and add one'
+  url: /v1/cron/bufferBillingProject
+  schedule: every 1 minutes
+  timezone: UTC
+  target: api
+- description: 'Fetch a BillingProjectBufferEntry that is in the CREATING state and check its status on Firecloud'
+  url: /v1/cron/syncBillingProjectStatus
+  schedule: every 1 minutes
+  timezone: UTC
+  target: api
+- description: 'Find BillingProjectBufferEntries that have failed during the creation or assignment step and set their statuses to ERROR'
+  url: /v1/cron/cleanBillingBuffer
+  schedule: every 24 hours
+  timezone: UTC
+  target: api
+- description: 'Find and alert users that have exceeded their free tier billing usage'
+  url: /v1/cron/checkFreeTierBillingUsage
+  schedule: every 3 hours
+  timezone: UTC
+  target: api
+- description: 'Find billing projects associated with deleted workspaces and transfer ownership to Garbage Collection Service Accounts'
+  url: /v1/cron/billingProjectGarbageCollection
+  schedule: every 24 hours
+  timezone: UTC
+  target: api
