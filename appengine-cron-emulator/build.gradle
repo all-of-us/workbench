@@ -11,10 +11,12 @@ repositories {
     mavenCentral()
 }
 
+def JACKSON_VERSION = '2.9.9'
+
 dependencies {
     compile group: 'com.squareup.okhttp', name: 'okhttp', version: '2.7.5'
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.9'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.9'
+    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: "${JACKSON_VERSION}"
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "${JACKSON_VERSION}"
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
