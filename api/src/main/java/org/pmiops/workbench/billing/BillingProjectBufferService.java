@@ -111,11 +111,13 @@ public class BillingProjectBufferService {
                 + entry.getFireCloudProjectName()
                 + ". Project not found.",
             e);
+        entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
       } catch (WorkbenchException e) {
         log.log(
             Level.WARNING,
             "Get BillingProjectStatus call failed for " + entry.getFireCloudProjectName(),
             e);
+        entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
       }
 
       billingProjectBufferEntryDao.save(entry);
