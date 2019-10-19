@@ -1,9 +1,7 @@
-import {Clickable, Link} from 'app/components/buttons';
+import {Link} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {CheckBox} from 'app/components/inputs';
-import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
+import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {toggleIncludes} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import {Concept} from 'generated/fetch/api';
 import * as fp from 'lodash/fp';
@@ -105,7 +103,6 @@ interface State {
   first: number;
   pageLoading: boolean;
   selectedConcepts: Concept[];
-  selectedVocabularies: string[];
   totalRecords: number;
   pageConcepts: Concept[];
   pageNumber: number;
@@ -113,21 +110,16 @@ interface State {
 
 export class ConceptTable extends React.Component<Props, State> {
 
-  private dt: DataTable;
-  private filterImageSrc: string;
-
   constructor(props) {
     super(props);
     this.state = {
       selectedConcepts: props.selectedConcepts,
-      selectedVocabularies: [],
       pageLoading: false,
       first: 0,
       totalRecords: props.concepts.length,
       pageNumber: 0,
       pageConcepts: props.concepts.slice(0, 10)
     };
-    this.filterImageSrc = 'filter';
   }
 
   componentDidUpdate(prevProps) {
@@ -147,21 +139,8 @@ export class ConceptTable extends React.Component<Props, State> {
     return fp.uniq(vocabularyIds);
   }
 
-  filterByVocabulary(vocabulary) {
-    const selectedVocabularies =
-        toggleIncludes(vocabulary, this.state.selectedVocabularies) as unknown as string[];
-    this.filterImageSrc = selectedVocabularies.length > 0 ? 'filtered' : 'filter';
-    this.dt.filter(selectedVocabularies, 'vocabularyId', 'in');
-    this.setState({selectedVocabularies: selectedVocabularies});
-  }
-
   componentWillReceiveProps(nextProps) {
-    // The purpose of this is to reset the filter on vocabulary on change of domain/concepts
     if ((nextProps.concepts !==  this.props.concepts)) {
-      if (this.state.selectedVocabularies) {
-        this.dt.filter([], 'vocabularyId', 'in');
-        this.setState({selectedVocabularies : []});
-      }
       if (nextProps.concepts !== this.props.concepts && nextProps.concepts.length > 0 ) {
         this.setState({totalRecords: nextProps.concepts.length});
 
@@ -226,28 +205,10 @@ export class ConceptTable extends React.Component<Props, State> {
   }
 
   render() {
-    const {pageConcepts, pageLoading, selectedConcepts, selectedVocabularies} = this.state;
+    const {pageConcepts, pageLoading, selectedConcepts} = this.state;
     const {placeholderValue, loading, reactKey} = this.props;
-    const vocabularyFilter = <PopupTrigger
-        side='bottom'
-        content={
-          this.distinctVocabulary().map((vocabulary, i) => {
-            return <div key={i}>
-              <CheckBox style={{marginLeft: '0.2rem', marginRight: '0.3rem'}}
-                        checked={fp.includes(vocabulary, selectedVocabularies)}
-                        onChange={(checked) => this.filterByVocabulary(vocabulary)}>
-              </CheckBox>
-              <label style={{marginRight: '0.2rem'}}>{vocabulary}</label></div>;
-          })}>
-      <Clickable
-          data-test-id='workspace-menu-button'
-          hover={{opacity: 1}}>
-        <img style={{width: '15%', marginLeft: '-2.5rem'}}
-             src={'/assets/icons/' + this.filterImageSrc + '.svg'}/>
-      </Clickable>
-    </PopupTrigger>;
     return <div data-test-id='conceptTable' key={reactKey}>
-      <DataTable emptyMessage={loading ? '' : placeholderValue} ref={(el) => this.dt = el}
+      <DataTable emptyMessage={loading ? '' : placeholderValue}
                  value={pageConcepts} scrollable={true}
                  selection={selectedConcepts} style={{minWidth: 1100}}
                  totalRecords={this.state.totalRecords}
@@ -265,10 +226,7 @@ export class ConceptTable extends React.Component<Props, State> {
       <Column bodyStyle={styles.colStyle} field='conceptName' header='Name'
               data-test-id='conceptName'/>
       <Column bodyStyle={styles.colStyle} field='conceptCode' header='Code'/>
-      <Column field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle}
-              filter={true} headerStyle={{display: 'flex', textAlign: 'center',
-                paddingTop: '0.6rem', paddingLeft: '5rem'}}
-              filterElement={vocabularyFilter} />
+      <Column field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle} />
       <Column style={styles.colStyle} field='countValue' header='Count'/>
     </DataTable>
     </div>;
