@@ -370,7 +370,7 @@ paths:
         201:
           description: Successful Request
           schema:
-            $ref: '#/definitions/Workspace'
+            $ref: '#/definitions/FirecloudWorkspace'
         403:
           description: Unable to create bucket for workspace
         409:
@@ -999,7 +999,7 @@ definitions:
         type: string
         description: User's email
 
-  Workspace:
+  FirecloudWorkspace:
     description: ''
     required:
       - namespace
@@ -1098,7 +1098,7 @@ definitions:
       catalog:
         type: boolean
       workspace:
-        $ref: '#/definitions/Workspace'
+        $ref: '#/definitions/FirecloudWorkspace'
       workspaceSubmissionStats:
         $ref: '#/definitions/WorkspaceSubmissionStats'
       owners:
