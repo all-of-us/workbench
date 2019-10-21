@@ -540,8 +540,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   private List<UserRecentWorkspace> pruneInaccessibleRecentWorkspaces(
-      List<UserRecentWorkspace> recentWorkspaces,
-      long userId) {
+      List<UserRecentWorkspace> recentWorkspaces, long userId) {
     List<Workspace> dbWorkspaces =
         workspaceDao.findAllByWorkspaceIdIn(
             recentWorkspaces.stream()

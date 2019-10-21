@@ -282,7 +282,8 @@ public class WorkspaceServiceTest {
               Timestamp.from(NOW.minusSeconds(mockWorkspaces.size() - workspace.getWorkspaceId())));
         });
     long OTHER_USER_ID = 2L;
-    workspaceService.updateRecentWorkspaces(mockWorkspaces.get(0), OTHER_USER_ID, Timestamp.from(NOW));
+    workspaceService.updateRecentWorkspaces(
+        mockWorkspaces.get(0), OTHER_USER_ID, Timestamp.from(NOW));
     List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(4);
     List<Long> actualIds =
@@ -305,7 +306,8 @@ public class WorkspaceServiceTest {
     doReturn(OTHER_USER_ID).when(mockUser).getUserId();
     List<UserRecentWorkspace> otherRecentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(otherRecentWorkspaces.size()).isEqualTo(1);
-    assertThat(otherRecentWorkspaces.get(0).getWorkspaceId()).isEqualTo(mockWorkspaces.get(0).getWorkspaceId());
+    assertThat(otherRecentWorkspaces.get(0).getWorkspaceId())
+        .isEqualTo(mockWorkspaces.get(0).getWorkspaceId());
   }
 
   @Test
