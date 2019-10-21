@@ -9,12 +9,15 @@ require 'fileutils'
 
 env = ARGV[0]
 
-cron_dir = "src/main/webapp/WEB-INF"
-to_cron_path = ->(suffix) { "#{cron_dir}/cron_#{suffix}.yaml" }
+CRON_DIR = "src/main/webapp/WEB-INF"
 
-path = to_cron_path.call("default")
-if File.file?(to_cron_path.call(env))
-  path = to_cron_path.call(env)
+def to_cron_path(suffix)
+  return "#{CRON_DIR}/cron_#{suffix}.yaml"
 end
 
-FileUtils.cp(path, "#{cron_dir}/cron.yaml")
+from_path = to_cron_path("default")
+if File.file?(to_cron_path(env))
+  from_path = to_cron_path(env)
+end
+
+FileUtils.cp(from_path, "#{CRON_DIR}/cron.yaml")
