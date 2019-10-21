@@ -44,7 +44,7 @@
               <clr-icon size="24" shape="close"></clr-icon>
             </button>
           </div>
-          <div class="content" *ngIf="open">
+          <div class="content left" *ngIf="open">
             <ng-container [ngSwitch]="wizard.domain">
               <crit-list-demographics *ngSwitchCase="domainType[domainType.PERSON]"></crit-list-demographics>
               <ng-container *ngSwitchDefault>

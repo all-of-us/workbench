@@ -124,6 +124,11 @@ button.tab.active {
 .content {
   flex: 1;
   overflow: auto;
+  height: 100%;
+}
+
+.demographics .content.left {
+  padding-bottom: 3.25rem;
 }
 
 .footer {
@@ -186,7 +191,7 @@ button.tab.active {
   background-color: white;
 }
 .demographics .panel-right.selected {
-  height: 40vh;
+  height: calc(100% - 5.5rem);
   min-height: 10rem;
 }
 
