@@ -12,7 +12,6 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
-import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
@@ -77,10 +76,7 @@ public class BillingAlertsService {
 
     final Map<String, Workspace> workspacesIndexedByProject =
         // don't record cost for OLD or MIGRATED workspaces - only NEW
-        workspaceDao
-            .findAllByBillingMigrationStatus(
-                StorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.NEW))
-            .stream()
+        workspaceDao.findAllByBillingMigrationStatus(BillingMigrationStatus.NEW).stream()
             .collect(Collectors.toMap(Workspace::getWorkspaceNamespace, Function.identity()));
 
     final QueryJobConfiguration queryConfig =
