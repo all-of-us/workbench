@@ -1,7 +1,12 @@
 package org.pmiops.workbench.audit;
 
 import java.util.Optional;
+import org.elasticsearch.common.Strings;
 
+// This value class presents an Immutables-style builder
+// and access pattern. All consturction must happen via the
+// builder, and any missing required fields will generate an
+// IllegalArgumentException. There are no public mutators on the fields.
 public class ActionAuditEventImpl implements ActionAuditEvent {
 
   private final long timestamp;
@@ -183,6 +188,8 @@ public class ActionAuditEventImpl implements ActionAuditEvent {
         throw new IllegalArgumentException("Missing required field actionType");
       } else if (targetType == null) {
         throw new IllegalArgumentException("Missing required field targetType");
+      } else if (Strings.isNullOrEmpty(actionId)) {
+        throw new IllegalArgumentException("Missing required field actionId");
       }
     }
 

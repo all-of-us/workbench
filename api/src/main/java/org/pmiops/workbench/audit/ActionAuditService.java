@@ -8,7 +8,4 @@ public interface ActionAuditService {
 
   void send(Collection<ActionAuditEvent> events);
 
-  static String newActionId() {
-    return UUID.randomUUID().toString();
-  }
 }

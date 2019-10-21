@@ -41,7 +41,7 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
   @Override
   public void fireCreateAction(Workspace createdWorkspace, long dbWorkspaceId) {
     try {
-      final String actionId = ActionAuditService.newActionId();
+      final String actionId = ActionAuditEvent.newActionId();
       final long userId = userProvider.get().getUserId();
       final String userEmail = userProvider.get().getEmail();
       final Map<String, String> propertyValues =
@@ -81,7 +81,7 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
   @Override
   public void fireDeleteAction(org.pmiops.workbench.db.model.Workspace dbWorkspace) {
     try {
-      final String actionId = ActionAuditService.newActionId();
+      final String actionId = ActionAuditEvent.newActionId();
       final long userId = userProvider.get().getUserId();
       final String userEmail = userProvider.get().getEmail();
       final long timestamp = clock.millis();
@@ -111,7 +111,7 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
       // ActionTypes: DUPLICATE_FROM and DUPLICATE_TO. The latter action generates many events
       // (similar to how CREATE is handled) for all the properties. I'm not (currently) filtering
       // out values that are the same.
-      final String actionId = ActionAuditService.newActionId();
+      final String actionId = ActionAuditEvent.newActionId();
       final long userId = userProvider.get().getUserId();
       final String userEmail = userProvider.get().getEmail();
       final long timestamp = clock.millis();
@@ -168,7 +168,7 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
         return;
       }
 
-      final String actionId = ActionAuditService.newActionId();
+      final String actionId = ActionAuditEvent.newActionId();
       final long sharingUserId = userProvider.get().getUserId();
       final String userEmail = userProvider.get().getEmail();
       final long timestamp = clock.millis();

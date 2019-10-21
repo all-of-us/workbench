@@ -47,7 +47,9 @@ public class ActionAuditServiceImpl implements ActionAuditService {
     try {
       ImmutableList<LogEntry> logEntries =
           events.stream().map(this::auditEventToLogEntry).collect(ImmutableList.toImmutableList());
-      cloudLogging.write(logEntries);
+      if (!logEntries.isEmpty()) {
+        cloudLogging.write(logEntries);
+      }
     } catch (RuntimeException e) {
       serviceLogger.log(
           Level.SEVERE, e, () -> "Exception encountered writing log entries to Cloud Logging.");

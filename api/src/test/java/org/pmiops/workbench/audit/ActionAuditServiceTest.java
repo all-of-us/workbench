@@ -1,8 +1,11 @@
 package org.pmiops.workbench.audit;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import com.google.cloud.logging.LogEntry;
 import com.google.cloud.logging.Logging;
@@ -12,6 +15,7 @@ import com.google.cloud.logging.Payload.Type;
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Provider;
@@ -52,7 +56,7 @@ public class ActionAuditServiceTest {
     doReturn(workbenchConfig).when(mockConfigProvider).get();
 
     actionAuditService = new ActionAuditServiceImpl(mockConfigProvider, mockLogging);
-    final String actionId = ActionAuditService.newActionId();
+    final String actionId = ActionAuditEvent.newActionId();
 
     // ordinarily events sharing an action would have more things in common than this,
     // but the schema doesn't require it
@@ -64,6 +68,7 @@ public class ActionAuditServiceTest {
             .setAgentType(AgentType.USER)
             .setAgentId(AGENT_ID_1)
             .setActionId(actionId)
+            .setActionType(ActionType.EDIT)
             .setTargetProperty("foot")
             .setPreviousValue("bare")
             .setNewValue("shod")
@@ -78,6 +83,7 @@ public class ActionAuditServiceTest {
             .setAgentType(AgentType.USER)
             .setAgentId(AGENT_ID_2)
             .setActionId(actionId)
+            .setActionType(ActionType.EDIT)
             .setTargetProperty("height")
             .setPreviousValue("yay high")
             .setNewValue("about that tall")
@@ -147,5 +153,11 @@ public class ActionAuditServiceTest {
   @Test
   public void testNullPayloadDoesNotThrow() {
     actionAuditService.send((Collection<ActionAuditEvent>) null);
+  }
+
+  @Test
+  public void testSendWithEmptyCollectionDoesNotCallCloudLoggingApi() {
+    actionAuditService.send(Collections.emptySet());
+    verify(mockLogging, never()).write(anyList());
   }
 }

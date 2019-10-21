@@ -1,8 +1,10 @@
 package org.pmiops.workbench.audit;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ActionAuditEvent {
+
   long timestamp();
 
   String actionId();
@@ -24,4 +26,8 @@ public interface ActionAuditEvent {
   Optional<String> previousValue();
 
   Optional<String> newValue();
+
+  static String newActionId() {
+    return UUID.randomUUID().toString();
+  }
 }
