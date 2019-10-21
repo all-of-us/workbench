@@ -1,4 +1,5 @@
 import {
+  DataDictionaryEntry,
   DataSet,
   DataSetApi,
   DataSetCodeResponse,
@@ -73,6 +74,15 @@ export class DataSetApiStub extends DataSetApi {
     workspaceId: string): Promise<DataSetListResponse> {
     return new Promise<DataSetListResponse>(resolve => {
       resolve({items: DataSetApiStub.stubDataSets()});
+    });
+  }
+
+  getDataDictionaryEntry(cdrVersionId: number, domain: string, domainValue: string): Promise<DataDictionaryEntry> {
+    return Promise.resolve({
+      description: 'datadictionary description',
+      relevantOmopTable: 'condition_occurrence',
+      fieldType: 'bigint',
+      dataProvenance: 'Blah'
     });
   }
 }

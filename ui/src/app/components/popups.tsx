@@ -67,7 +67,7 @@ export const withDynamicPosition = () => WrappedComponent => {
       this.animation = requestAnimationFrame(() => this.reposition());
       const newDimensions = {
         element: fp.pick(['width', 'height'], this.element.current.getBoundingClientRect()),
-        target: fp.pick(['top', 'top-left', 'top-right', 'bottom', 'bottom-left', 'bottom-right', 'left', 'right'],
+        target: fp.pick(['top', 'bottom', 'left', 'right'],
           document.getElementById(target).getBoundingClientRect()),
         viewport: {width: window.innerWidth, height: window.innerHeight}
       };
@@ -100,11 +100,7 @@ export const computePopupPosition = ({side, viewport, target, element, gap}) => 
     )(((target.top + target.bottom) / 2) - (element.height / 2));
     return switchCase(s,
       ['top', () => ({top: target.top - element.height - gap, left})],
-      ['top-left', () => ({top: target.top - element.height - gap, left: target.left - element.width})],
-      ['top-right', () => ({top: target.top - element.height - gap, left: target.right})],
       ['bottom', () => ({top: target.bottom + gap, left})],
-      ['bottom-left', () => ({top: target.bottom + gap, left: target.left - element.width})],
-      ['bottom-right', () => ({top: target.bottom + gap, left: target.right})],
       ['left', () => ({left: target.left - element.width - gap, top})],
       ['right', () => ({left: target.right + gap, top})]
     );
@@ -113,11 +109,7 @@ export const computePopupPosition = ({side, viewport, target, element, gap}) => 
   const maybeFlip = d => {
     return switchCase(d,
       ['top', () => position.top < 0 ? 'bottom' : 'top'],
-      ['top-left', () => position.top < 0 ? 'bottom-left' : 'top-left'],
-      ['top-right', () => position.top < 0 ? 'bottom-right' : 'top-right'],
       ['bottom', () => position.top + element.height >= viewport.height ? 'top' : 'bottom'],
-      ['bottom-left', () => position.top + element.height >= viewport.height ? 'top-left' : 'bottom-left'],
-      ['bottom-right', () => position.top + element.height >= viewport.height ? 'top-right' : 'bottom-right'],
       ['left', () => position.left < 0 ? 'right' : 'left'],
       ['right', () => position.left + element.width >= viewport.width ? 'left' : 'right']
     );
@@ -151,11 +143,7 @@ export const Tooltip = withDynamicPosition()(class TooltipComponent extends Reac
       );
       return switchCase(finalSide,
         ['top', () => ({bottom: 0, left, transform: 'rotate(180deg)'})],
-        ['top-left', () => ({bottom: 0, right: 0, transform: 'rotate(180deg)'})],
-        ['top-right', () => ({bottom: 0, left: 0, transform: 'rotate(180deg)'})],
         ['bottom', () => ({top: 0, left})],
-        ['bottom-left', () => ({top: 0, right: 0})],
-        ['bottom-right', () => ({top: 0, left: 0})],
         ['left', () => ({right: 0, top, transform: 'rotate(90deg)'})],
         ['right', () => ({left: 0, top, transform: 'rotate(270deg)'})]
       );
@@ -240,7 +228,9 @@ export const Popup = fp.flow(
       },
       onClick
     } = this.props;
+
     const {position} = computePopupPosition({side, target, element, viewport, gap: 10});
+
     return <PopupPortal>
       <div
         onClick={onClick}
@@ -258,8 +248,6 @@ interface PopupTriggerProps {
   children: any;
   closeOnClick?: boolean;
   content: any;
-  closeOnClickOutside?: boolean;
-  managedByParentComponent?: boolean;
   onOpen?: () => void;
   onClose?: () => void;
   side?: string;
@@ -268,10 +256,8 @@ interface PopupTriggerProps {
 export class PopupTrigger extends React.Component<PopupTriggerProps> {
   static readonly defaultProps = {
     closeOnClick: false,
-    closeOnClickOutside: true,
-    managedByParentComponent: false,
     onOpen: () => {},
-    onClose: () => {}
+    onClose: () => {},
   };
 
   props: any;
@@ -290,7 +276,7 @@ export class PopupTrigger extends React.Component<PopupTriggerProps> {
   }
 
   render() {
-    const {children, content, managedByParentComponent, onOpen, onClose, closeOnClick, ...props} = this.props;
+    const {children, content, onOpen, onClose, closeOnClick, ...props} = this.props;
     const {open} = this.state;
     const child = React.Children.only(children);
     return <React.Fragment>
@@ -310,9 +296,9 @@ export class PopupTrigger extends React.Component<PopupTriggerProps> {
           this.setState({open: !open});
         }
       })}
-      {(managedByParentComponent || open) && <Popup
+      {open && <Popup
           target={this.id}
-          handleClickOutside={this.props.closeOnClickOutside ? () => this.close() : () => {}}
+          handleClickOutside={() => this.close()}
           outsideClickIgnoreClass={this.id}
           onClick={closeOnClick ? () => this.close() : () => {}}
           {...props}

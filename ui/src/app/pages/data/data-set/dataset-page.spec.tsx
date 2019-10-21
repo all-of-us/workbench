@@ -23,7 +23,7 @@ import {
   WorkspaceStubVariables
 } from 'testing/stubs/workspaces-api-stub';
 
-describe('DataSet', () => {
+describe('DataSetPage', () => {
   beforeEach(() => {
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(ConceptsApi, new ConceptsApiStub());
@@ -37,28 +37,28 @@ describe('DataSet', () => {
   });
 
   it('should render', async() => {
-    const wrapper = mount(<DataSetPage />, {attachTo: document.getElementById('root')});
+    const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
   });
 
   it ('should display all concepts sets in workspace', async() => {
-    const wrapper = mount(<DataSetPage />, {attachTo: document.getElementById('root')});
+    const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="concept-set-list-item"]').length)
       .toBe(ConceptSetsApiStub.stubConceptSets().length);
   });
 
   it('should display all cohorts in workspace', async() => {
-    const wrapper = mount(<DataSetPage />, {attachTo: document.getElementById('root')});
+    const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="cohort-list-item"]').length)
       .toBe(exampleCohortStubs.length);
   });
 
   it('should display values based on Domain of Concept selected in workspace', async() => {
-    const wrapper = mount(<DataSetPage />, {attachTo: document.getElementById('root')});
+    const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
@@ -80,7 +80,7 @@ describe('DataSet', () => {
 
   it('should enable save button and preview button once cohorts, concepts and values are selected',
     async() => {
-      const wrapper = mount(<DataSetPage />, {attachTo: document.getElementById('root')});
+      const wrapper = mount(<DataSetPage />);
       await waitOneTickAndUpdate(wrapper);
       await waitOneTickAndUpdate(wrapper);
 
@@ -102,12 +102,16 @@ describe('DataSet', () => {
         .find('input').first().simulate('change');
 
       await waitOneTickAndUpdate(wrapper);
+      await waitOneTickAndUpdate(wrapper);
 
       wrapper.find('[data-test-id="value-list-items"]').find('input').first()
         .simulate('change');
 
+      await waitOneTickAndUpdate(wrapper);
+
       // Buttons should now be enabled
       const buttons = wrapper.find(Button);
+      await waitOneTickAndUpdate(wrapper);
       expect(buttons.find('[data-test-id="save-button"]').first().prop('disabled'))
         .toBeFalsy();
       expect(wrapper.find(Clickable).find('[data-test-id="preview-button"]').first()
@@ -116,7 +120,7 @@ describe('DataSet', () => {
 
   it('should display preview data table once preview button is clicked', async() => {
     const spy = jest.spyOn(dataSetApi(), 'previewDataSetByDomain');
-    const wrapper = mount(<DataSetPage />, {attachTo: document.getElementById('root')});
+    const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
 
@@ -148,7 +152,7 @@ describe('DataSet', () => {
 
 
   it('should check that the Cohorts and Concept Sets "+" links go to their pages.', async() => {
-    const wrapper = mount(<DataSetPage />, {attachTo: document.getElementById('root')});
+    const wrapper = mount(<DataSetPage />);
     const pathPrefix = 'workspaces/' + workspaceDataStub.namespace + '/' + workspaceDataStub.id + '/data';
 
     // Mock out navigateByUrl
@@ -167,7 +171,7 @@ describe('DataSet', () => {
   it(' dataSet should show tooltip and disable SAVE button if user has READER access', async() => {
     const readWorkspace = {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.READER};
     currentWorkspaceStore.next(readWorkspace);
-    const wrapper = mount(<DataSetPage />, {attachTo: document.getElementById('root')});
+    const wrapper = mount(<DataSetPage />);
     const isTooltipDisable =
         wrapper.find({'data-test-id': 'save-tooltip'}).first().props().disabled;
     const isSaveButtonDisable =
@@ -179,12 +183,33 @@ describe('DataSet', () => {
   it(' dataSet should disable cohort/concept PLUS ICON if user has READER access', async() => {
     const readWorkspace = {...workspaceStubs[0], accessLevel: WorkspaceAccessLevel.READER};
     currentWorkspaceStore.next(readWorkspace);
-    const wrapper = mount(<DataSetPage />, {attachTo: document.getElementById('root')});
+    const wrapper = mount(<DataSetPage />);
     const plusIconTooltip = wrapper.find({'data-test-id': 'plus-icon-tooltip'});
     const cohortplusIcon = wrapper.find({'data-test-id': 'cohorts-link'});
     const conceptSetplusIcon = wrapper.find({'data-test-id': 'concept-sets-link'});
     expect(plusIconTooltip.first().props().disabled).toBeFalsy();
     expect(cohortplusIcon.first().props().disabled).toBeTruthy();
     expect(conceptSetplusIcon.first().props().disabled).toBeTruthy();
+  });
+
+  it('should call load data dictionary when carot is expanded', async() => {
+    const spy = jest.spyOn(dataSetApi(), 'getDataDictionaryEntry');
+    const wrapper = mount(<DataSetPage />);
+    await waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    // Select one cohort , concept and value
+    wrapper.find('[data-test-id="cohort-list-item"]').first()
+      .find('input').first().simulate('change');
+    wrapper.update();
+
+    wrapper.find('[data-test-id="concept-set-list-item"]').first()
+      .find('input').first().simulate('change');
+
+    await waitOneTickAndUpdate(wrapper);
+    wrapper.find('[data-test-id="value-list-expander"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });

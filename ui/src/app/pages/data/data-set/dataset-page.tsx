@@ -229,27 +229,11 @@ const Subheader = (props) => {
 
 interface DataDictionaryPopupProps {
   dataDictionaryEntry: DataDictionaryEntry;
-  onClose: () => void;
 }
 
-const DataDictionaryPopup: React.FunctionComponent<DataDictionaryPopupProps> = ({dataDictionaryEntry, onClose}) => {
-  return <div style={{width: '17rem'}}>
-    <FlexRow style={{
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      borderBottom: `1px solid ${colorWithWhiteness(colors.dark, 0.6)}`,
-      height: '46px',
-      padding: '0.5rem'}}>
-      {dataDictionaryEntry ?
-        <div style={styles.dataDictionaryHeader}>{dataDictionaryEntry.fieldName}</div> : <div/>}
-      <ClrIcon style={{
-        color: colors.accent,
-        cursor: 'pointer',
-        height: '29px',
-        width: '29px'
-      }} shape='times' onClick={() => onClose()} class='is-solid'/>
-    </FlexRow>
-    {dataDictionaryEntry ? <FlexColumn style={{height: '6.5rem', overflowY: 'scroll', padding: '0.5rem'}}>
+const DataDictionaryPopup: React.FunctionComponent<DataDictionaryPopupProps> = ({dataDictionaryEntry}) => {
+  return <div style={{width: '100%', borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.6)}`}}>
+    {dataDictionaryEntry ? <FlexColumn style={{padding: '0.5rem'}}>
       <div style={{...styles.dataDictionarySubheader, paddingTop: 0}}>Description</div>
       <div style={styles.dataDictionaryText}>{dataDictionaryEntry.description}</div>
       <div style={styles.dataDictionarySubheader}>Relevant OMOP Table</div>
@@ -260,7 +244,8 @@ const DataDictionaryPopup: React.FunctionComponent<DataDictionaryPopupProps> = (
       <div style={styles.dataDictionaryText}>
         {dataDictionaryEntry.dataProvenance}{dataDictionaryEntry.dataProvenance.includes('PPI') ?
         `: ${dataDictionaryEntry.sourcePpiModule}` : null}</div>
-    </FlexColumn> : <div style={{display: 'flex', justifyContent: 'center'}}><Spinner/></div>}
+    </FlexColumn> : <div style={{display: 'flex', justifyContent: 'center'}}>
+      <Spinner style={{height: 36, width: 36, margin: '0.5rem'}}/></div>}
   </div>;
 };
 
@@ -310,36 +295,31 @@ export class ValueListItem extends React.Component<
 
   render() {
     const {checked, domainValue, onChange} = this.props;
+    const {dataDictionaryEntry, showDataDictionaryEntry} = this.state;
 
     return <div style={{
       ...styles.listItem,
+      height: 'auto',
       justifyContent: 'space-between',
       alignItems: 'center',
       paddingLeft: '10px',
       paddingRight: '10px'
     }}>
-      <FlexRow style={{alignItems: 'center'}}>
+      <FlexRow style={{width: '100%'}}>
         <input type='checkbox' value={domainValue.value} onChange={() => onChange()}
-               style={{...styles.listItemCheckbox, marginTop: 3, marginLeft: 0, marginRight: 0}} checked={checked}/>
-        <div style={{lineHeight: '1.5rem', paddingLeft: 10, wordWrap: 'break-word', color: colors.primary}}>
-          {domainValue.value}</div>
+               style={{...styles.listItemCheckbox, marginTop: 11, marginLeft: 0, marginRight: 0}} checked={checked}/>
+        <div style={{width: '100%'}}>
+          <FlexRow style={{justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
+            <div style={{lineHeight: '1.5rem', paddingLeft: 10, wordWrap: 'break-word', color: colors.primary}}>
+              {domainValue.value}</div>
+            <Clickable onClick={() => this.showDataDictionaryEntry()} data-test-id='value-list-expander'>
+              <ClrIcon shape='angle' style={{transform: showDataDictionaryEntry ? 'rotate(180deg)' : 'rotate(90deg)',
+                color: colors.accent, height: 18, width: 18}} />
+            </Clickable>
+          </FlexRow>
+          {showDataDictionaryEntry && <DataDictionaryPopup dataDictionaryEntry={dataDictionaryEntry}/>}
+        </div>
       </FlexRow>
-      <PopupTrigger
-        side='bottom-left'
-        closeOnClickOutside={false}
-        managedByParentComponent={true}
-        content={
-          this.state.showDataDictionaryEntry &&
-          <DataDictionaryPopup dataDictionaryEntry={this.state.dataDictionaryEntry}
-                               onClose={() => this.setState({showDataDictionaryEntry: false})}/>}>
-        <Clickable onClick={() => this.showDataDictionaryEntry()}>
-          <ClrIcon style={{
-            color: colors.accent,
-            marginLeft: 'auto',
-            cursor: 'pointer'
-          }} shape='info-standard' class='is-solid'/>
-        </Clickable>
-      </PopupTrigger>
     </div>;
   }
 }
