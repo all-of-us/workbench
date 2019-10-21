@@ -62,6 +62,8 @@ public class WorkbenchConfig {
     public String baseUrl;
     public Integer clusterMaxAgeDays;
     public Integer clusterIdleMaxAgeDays;
+    public String clusterDefaultMachineType;
+    public Integer clusterDefaultDiskSizeGb;
     public String registeredDomainName;
     public String registeredDomainGroup;
     public String leoBaseUrl;

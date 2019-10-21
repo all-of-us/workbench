@@ -3,6 +3,8 @@
     "baseUrl": "https:\/\/firecloud-orchestration.dsde-perf.broadinstitute.org",
     "clusterMaxAgeDays": 7,
     "clusterIdleMaxAgeDays": 3,
+    "clusterDefaultMachineType": "n1-standard-2",
+    "clusterDefaultDiskSizeGb": 50,
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/leonardo.dsde-perf.broadinstitute.org",
     "registeredDomainName": "all-of-us-registered-perf",
