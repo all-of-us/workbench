@@ -159,12 +159,9 @@ public class WorkbenchConfig {
     // Flag to indicate whether to enable the new Create Account flow
     // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
     public boolean enableNewAccountCreation;
-    public String monitoredResourceName;
-    public String logName;
   }
 
   public static class ActionAuditConfig {
-    public String monitoredResourceName;
     public String logName;
   }
 }

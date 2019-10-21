@@ -16,7 +16,7 @@ public class ActionAuditEventImpl implements ActionAuditEvent {
   private final Optional<String> previousValueMaybe;
   private final Optional<String> newValueMaybe;
 
-  public ActionAuditEventImpl(
+  private ActionAuditEventImpl(
       long timestamp,
       AgentType agentType,
       long agentId,
@@ -172,7 +172,22 @@ public class ActionAuditEventImpl implements ActionAuditEvent {
       return this;
     }
 
+    private void validateRequiredFields() throws IllegalArgumentException {
+      if (timestamp <= 0L) {
+        throw new IllegalArgumentException("Missing required field timestamp");
+      } else if (agentType == null) {
+        throw new IllegalArgumentException("Missing required field agentType");
+      } else if (agentId <= 0) {
+        throw new IllegalArgumentException("Missing required field agentId");
+      } else if (actionType == null) {
+        throw new IllegalArgumentException("Missing required field actionType");
+      } else if (targetType == null) {
+        throw new IllegalArgumentException("Missing required field targetType");
+      }
+    }
+
     public ActionAuditEventImpl build() {
+      validateRequiredFields();
       return new ActionAuditEventImpl(
           timestamp,
           agentType,
