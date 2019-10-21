@@ -258,6 +258,7 @@ interface ValueListItemProps {
 
 interface ValueListItemState {
   dataDictionaryEntry: DataDictionaryEntry;
+  dataDictionaryEntryError: boolean;
   showDataDictionaryEntry: boolean;
 }
 
@@ -270,7 +271,8 @@ export class ValueListItem extends React.Component<
     super(props);
     this.state = {
       dataDictionaryEntry: undefined,
-      showDataDictionaryEntry: false
+      dataDictionaryEntryError: false,
+      showDataDictionaryEntry: false,
     };
   }
 
@@ -282,7 +284,9 @@ export class ValueListItem extends React.Component<
       domain.toString(),
       domainValue.value).then(dataDictionaryEntry => {
         this.setState({dataDictionaryEntry});
-      });
+      }).catch(e => {
+        this.setState({dataDictionaryEntryError: true});
+    });
   }
 
   showDataDictionaryEntry() {
@@ -295,7 +299,7 @@ export class ValueListItem extends React.Component<
 
   render() {
     const {checked, domainValue, onChange} = this.props;
-    const {dataDictionaryEntry, showDataDictionaryEntry} = this.state;
+    const {dataDictionaryEntry, dataDictionaryEntryError, showDataDictionaryEntry} = this.state;
 
     return <div style={{
       ...styles.listItem,
@@ -318,6 +322,7 @@ export class ValueListItem extends React.Component<
             </Clickable>
           </FlexRow>
           {showDataDictionaryEntry && <DataDictionaryDescription dataDictionaryEntry={dataDictionaryEntry}/>}
+          {dataDictionaryEntryError && <div>Data Dictionary Entry not found.</div>}
         </div>
       </FlexRow>
     </div>;
