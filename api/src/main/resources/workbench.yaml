@@ -2156,6 +2156,9 @@ definitions:
         description: |
           Stackdriver API key for error reporting, scoped to a particular
           domain. If unset, Stackdriver error reporting should be disabled.
+      enableComplianceTraining:
+        type: boolean
+        description: Feature flag for enabling compliance training in registration steps
       enableDataUseAgreement:
         type: boolean
         description: Feature flag for enabling data use agreement
