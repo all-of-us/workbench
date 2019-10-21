@@ -16,14 +16,15 @@ public class ActionAuditEventTest {
 
   @Test
   public void testMinimumRequiredPropertiesDoesNotthrow() {
-    final ActionAuditEvent event = ActionAuditEventImpl.builder()
-        .setActionType(ActionType.BYPASS)
-        .setAgentType(AgentType.ADMINISTRATOR)
-        .setAgentId(222L)
-        .setTimestamp(11001001L)
-        .setActionId(ActionAuditEvent.newActionId())
-        .setTargetType(TargetType.USER)
-        .build();
+    final ActionAuditEvent event =
+        ActionAuditEventImpl.builder()
+            .setActionType(ActionType.BYPASS)
+            .setAgentType(AgentType.ADMINISTRATOR)
+            .setAgentId(222L)
+            .setTimestamp(11001001L)
+            .setActionId(ActionAuditEvent.newActionId())
+            .setTargetType(TargetType.USER)
+            .build();
     assertThat(event.targetType()).isEqualTo(TargetType.USER);
     assertThat(event.targetProperty().isPresent()).isFalse();
     assertThat(event.previousValue().isPresent()).isFalse();
