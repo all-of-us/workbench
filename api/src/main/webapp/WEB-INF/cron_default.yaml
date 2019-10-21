@@ -41,7 +41,7 @@ cron:
   target: api
 - description: 'Find BillingProjectBufferEntries that have failed during the creation or assignment step and set their statuses to ERROR'
   url: /v1/cron/cleanBillingBuffer
-  schedule: every 24 hours
+  schedule: every 1 hours
   timezone: UTC
   target: api
 - description: 'Find and alert users that have exceeded their free tier billing usage'
