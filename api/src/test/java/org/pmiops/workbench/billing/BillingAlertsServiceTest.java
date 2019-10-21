@@ -112,7 +112,7 @@ public class BillingAlertsServiceTest {
     billingAlertsService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
 
-    assertSingleWorkspaceTestDbState(user, workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
   }
 
   @Test
@@ -127,7 +127,7 @@ public class BillingAlertsServiceTest {
     billingAlertsService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
 
-    assertSingleWorkspaceTestDbState(user, workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
   }
 
   @Test
@@ -142,7 +142,7 @@ public class BillingAlertsServiceTest {
     billingAlertsService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
 
-    assertSingleWorkspaceTestDbState(user, workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
   }
 
   @Test
@@ -155,7 +155,7 @@ public class BillingAlertsServiceTest {
     billingAlertsService.checkFreeTierBillingUsage();
     verifyZeroInteractions(notificationService);
 
-    assertSingleWorkspaceTestDbState(user, workspace.getWorkspaceId(), BillingStatus.ACTIVE);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE);
   }
 
   @Test
@@ -169,7 +169,7 @@ public class BillingAlertsServiceTest {
     billingAlertsService.checkFreeTierBillingUsage();
     verifyZeroInteractions(notificationService);
 
-    assertSingleWorkspaceTestDbState(user, workspace.getWorkspaceId(), BillingStatus.ACTIVE);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE);
   }
 
   @Test
@@ -182,7 +182,7 @@ public class BillingAlertsServiceTest {
     billingAlertsService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
 
-    assertSingleWorkspaceTestDbState(user, workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
 
     user.setFreeTierCreditsLimitOverride(1000.0);
     userDao.save(user);
@@ -190,7 +190,7 @@ public class BillingAlertsServiceTest {
     billingAlertsService.checkFreeTierBillingUsage();
     verifyZeroInteractions(notificationService);
 
-    assertSingleWorkspaceTestDbState(user, workspace.getWorkspaceId(), BillingStatus.ACTIVE);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE);
   }
 
   // the relevant portion of the BigQuery response for this test:
@@ -301,7 +301,7 @@ public class BillingAlertsServiceTest {
 
     billingAlertsService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
-    assertSingleWorkspaceTestDbState(user, workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
 
     Timestamp t0 = workspaceFreeTierUsageDao.findAll().iterator().next().getLastUpdateTime();
 
@@ -351,14 +351,14 @@ public class BillingAlertsServiceTest {
   }
 
   private void assertSingleWorkspaceTestDbState(
-      User user, long workspaceId, BillingStatus billingStatus) {
-    // retrieve from DB again to reflect update after cron
-    Workspace workspace = workspaceDao.findOne(workspaceId);
+      User user, Workspace workspaceForQuerying, BillingStatus billingStatus) {
+
+    final Workspace workspace = workspaceDao.findOne(workspaceForQuerying.getWorkspaceId());
     assertThat(workspace.getBillingStatus()).isEqualTo(billingStatus);
     assertThat(workspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(1);
-    WorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
+    final WorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
     assertThat(dbEntry.getUserId()).isEqualTo(user.getUserId());
     assertThat(dbEntry.getWorkspaceId()).isEqualTo(workspace.getWorkspaceId());
     assertThat(dbEntry.getCost()).isCloseTo(SINGLE_WORKSPACE_TEST_COST, withinPercentage(0.001));

@@ -44,10 +44,9 @@ public class BillingAlertsService {
   }
 
   public void checkFreeTierBillingUsage() {
+    final Map<Workspace, Double> workspaceCosts = getFreeTierWorkspaceCosts();
 
-    Map<Workspace, Double> workspaceCosts = getFreeTierWorkspaceCosts();
-
-    Set<User> expiredCreditsUsers =
+    final Set<User> expiredCreditsUsers =
         workspaceCosts.entrySet().stream()
             .collect(
                 Collectors.groupingBy(
