@@ -7,7 +7,7 @@
 # particular cron for a given environment.
 require 'fileutils'
 
-env = ARGV[0]
+aou_env = ARGV[0]
 
 CRON_DIR = "src/main/webapp/WEB-INF"
 
@@ -16,8 +16,8 @@ def to_cron_path(suffix)
 end
 
 from_path = to_cron_path("default")
-if File.file?(to_cron_path(env))
-  from_path = to_cron_path(env)
+if File.file?(to_cron_path(aou_env))
+  from_path = to_cron_path(aou_env)
 end
 
 FileUtils.cp(from_path, "#{CRON_DIR}/cron.yaml")
