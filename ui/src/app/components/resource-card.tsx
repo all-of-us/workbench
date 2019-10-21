@@ -70,13 +70,13 @@ const styles = reactStyles({
 });
 
 const resourceTypeStyles = reactStyles({
-  cohortReview: {
+  'Cohort Review': {
     backgroundColor: colors.resourceCardHighlights.cohortReview
   },
-  conceptSet: {
+  'Concept Set': {
     backgroundColor: colors.resourceCardHighlights.conceptSet
   },
-  dataset: {
+  'Dataset': {
     backgroundColor: colors.resourceCardHighlights.dataSet
   }
 });
