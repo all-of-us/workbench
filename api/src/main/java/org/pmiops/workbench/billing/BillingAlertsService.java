@@ -2,6 +2,7 @@ package org.pmiops.workbench.billing;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Streams;
+import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -87,12 +88,15 @@ public class BillingAlertsService {
             .build();
 
     return Streams.stream(bigQueryService.executeQuery(queryConfig).getValues())
-        .filter(
-            tableRow -> workspacesIndexedByProject.containsKey(tableRow.get("id").getStringValue()))
+        .map(
+            tableRow ->
+                new AbstractMap.SimpleImmutableEntry<>(
+                    tableRow.get("id").getStringValue(), tableRow.get("cost").getDoubleValue()))
+        .filter(kvp -> workspacesIndexedByProject.containsKey(kvp.getKey()))
         .collect(
             Collectors.groupingBy(
-                tableRow -> workspacesIndexedByProject.get(tableRow.get("id").getStringValue()),
-                Collectors.summingDouble(tableRow -> tableRow.get("cost").getDoubleValue())));
+                kvp -> workspacesIndexedByProject.get(kvp.getKey()),
+                Collectors.summingDouble(Entry::getValue)));
   }
 
   private Double getUserFreeTierLimit(User user) {
