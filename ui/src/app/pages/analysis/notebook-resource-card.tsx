@@ -16,6 +16,7 @@ import * as React from 'react';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: RecentResource;
+  existingNameList: string[];
   onUpdate: Function;
 }
 
@@ -160,7 +161,7 @@ export const NotebookResourceCard = fp.flow(
         fromWorkspaceNamespace={this.props.resource.workspaceNamespace}
         fromWorkspaceName={this.props.resource.workspaceFirecloudName}
         fromResourceName={dropNotebookFileSuffix(this.props.resource.notebook.name)}
-        resourceType={ResourceType.NOTEBOOK}
+        resourceType={this.resourceType}
         onClose={() => this.setState({showCopyNotebookModal: false})}
         onCopy={() => this.props.onUpdate()}
         saveFunction={(copyRequest: CopyRequest) => this.copyNotebook(copyRequest)}/>
@@ -172,7 +173,8 @@ export const NotebookResourceCard = fp.flow(
                    onCancel={() => this.setState({showRenameModal: false})}
                    hideDescription={true}
                    oldName={this.props.resource.notebook.name}
-                   nameFormat={(name) => this.fullNotebookName(name)}/>
+                   nameFormat={(name) => this.fullNotebookName(name)}
+                   existingNames={this.props.existingNameList}/>
       }
 
       <ResourceCardTemplate
