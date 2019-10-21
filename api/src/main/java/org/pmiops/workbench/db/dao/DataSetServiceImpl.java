@@ -551,7 +551,7 @@ public class DataSetServiceImpl implements DataSetService {
     toDataSet.setCreationTime(toWorkspace.getCreationTime());
 
     toDataSet.setConceptSetIds(new ArrayList<>(conceptSetIds));
-    toDataSet.setCohortIds(new ArrayList<>(conceptSetIds));
+    toDataSet.setCohortIds(new ArrayList<>(cohortIds));
     return dataSetDao.save(toDataSet);
   }
 

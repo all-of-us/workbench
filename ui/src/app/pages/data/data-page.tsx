@@ -9,7 +9,6 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {ResourceCard} from 'app/components/resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
 import {cohortReviewApi, cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -158,15 +157,15 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       return this.state.existingConceptSetName;
     } else if (resource.cohort) {
       return this.state.existingCohortName;
+    } else if (resource.cohortReview) {
+      return this.state.existingCohortReviewName;
+    } else {
+      return [];
     }
-    return [];
   }
 
   createResourceCard(resource: RecentResource) {
-    if (resource.notebook) {
-      return <NotebookResourceCard resource={resource}
-                                   onUpdate={() => this.loadResources()}/>;
-    } else if (resource.cohort) {
+    if (resource.cohort) {
       return <CohortResourceCard resource={resource}
                                  existingNameList={this.getExistingNameList(resource)}
                                  onUpdate={() => this.loadResources()}/>;

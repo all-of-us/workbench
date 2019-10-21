@@ -70,13 +70,13 @@ const styles = reactStyles({
 });
 
 const resourceTypeStyles = reactStyles({
-  cohortReview: {
+  'Cohort Review': {
     backgroundColor: colors.resourceCardHighlights.cohortReview
   },
-  conceptSet: {
+  'Concept Set': {
     backgroundColor: colors.resourceCardHighlights.conceptSet
   },
-  dataset: {
+  'Dataset': {
     backgroundColor: colors.resourceCardHighlights.dataSet
   }
 });
@@ -429,7 +429,7 @@ export class ResourceCard extends React.Component<Props, State> {
             Last Modified: {this.displayDate}</div>
           <div style={{...styles.resourceType, ...resourceTypeStyles[this.resourceType]}}
                data-test-id='card-type'>
-            {fp.startCase(fp.camelCase(this.resourceType.toString()))}</div>
+            {this.resourceType}</div>
         </div>
       </ResourceCardBase>
 
@@ -490,9 +490,9 @@ export class ResourceCard extends React.Component<Props, State> {
               {fp.join(', ' ,
                 this.state.dataSetByResourceIdList.map((data) => data.name))}
             </b>.
-            Deleting the {this.resourceType} <b>{fp.startCase(this.displayName)} </b>
-            will make these datasets unavailable for use. Are you sure you want to delete
-            <b>{fp.startCase(this.displayName)}</b> ?
+            Deleting the {this.resourceType}
+            <b>{fp.startCase(this.displayName)} </b> will make these datasets unavailable for use.
+            Are you sure you want to delete <b>{fp.startCase(this.displayName)}</b> ?
           </div>
           <div style={{float: 'right'}}>
             <Button type='secondary' style={{ marginRight: '2rem'}} onClick={() => {

@@ -20,7 +20,6 @@ import {
   ReactWrapperBase,
   withUserProfile
 } from 'app/utils';
-
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import * as React from 'react';
 import RSelect from 'react-select';

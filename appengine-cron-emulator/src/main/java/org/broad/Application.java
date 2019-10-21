@@ -1,6 +1,7 @@
 package org.broad;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -44,9 +45,9 @@ public class Application {
     ScheduledExecutorService scheduledExecutorService = Executors
         .newSingleThreadScheduledExecutor();
 
-    String cronXmlPath = args[0];
-    String xml = new String(Files.readAllBytes(Paths.get(cronXmlPath)));
-    CronEntries cronEntries = new XmlMapper().readValue(xml, CronEntries.class);
+    String cronYamlPath = args[0];
+    String xml = new String(Files.readAllBytes(Paths.get(cronYamlPath)));
+    CronEntries cronEntries = new ObjectMapper(new YAMLFactory()).readValue(xml, CronEntries.class);
 
     for (Cron cron : cronEntries.cron) {
       Schedule schedule = parseCronSchedule(cron.schedule);
