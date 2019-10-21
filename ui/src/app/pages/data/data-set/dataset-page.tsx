@@ -879,7 +879,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       </div>
                     </div>
                   </BoxHeader>
-                  <div style={{height: '9rem', overflowY: 'auto'}}>
+                  <div style={{height: valueSets.length > 0 ? '7.625rem' : '9rem', overflowY: 'auto'}}>
                     {valuesLoading && <Spinner style={{position: 'relative',
                       top: '2rem', left: 'calc(50% - 36px)'}}/>}
                     {valueSets.map(valueSet =>
@@ -897,6 +897,16 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       </div>)
                     }
                   </div>
+                  {valueSets.length > 0 && <FlexRow style={{
+                    width: '100%', height: '1.375rem', backgroundColor: colorWithWhiteness(colors.dark, 0.9),
+                    color: colors.primary, paddingLeft: '0.4rem', fontSize: '13px', lineHeight: '16px',
+                    alignItems: 'center'}}>
+                    <a href={'https://aousupporthelp.zendesk.com/hc/en-us/articles/' +
+                    '360033200232-Data-Dictionary-for-Registered-Tier-CDR'} target='_blank'
+                       style={{color: colors.accent}}>
+                      Learn more
+                    </a>&nbsp;in the data dictionary
+                  </FlexRow>}
                 </div>
               </div>
             </div>
