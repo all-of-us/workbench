@@ -3,6 +3,7 @@
  */
 import {Injectable, NgZone} from '@angular/core';
 import {ServerConfigService} from 'app/services/server-config.service';
+import {setLoggedInState} from 'app/utils/analytics';
 import {signInStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
@@ -72,6 +73,7 @@ export class SignInService {
       if (isSignedIn) {
         this.clearIdToken();
       }
+      setLoggedInState(isSignedIn);
     });
     gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
       this.zone.run(() => {

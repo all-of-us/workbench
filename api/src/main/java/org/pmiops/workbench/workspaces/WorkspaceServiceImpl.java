@@ -396,8 +396,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Transactional
   public Workspace saveAndCloneCohortsConceptSetsAndDataSets(Workspace from, Workspace to) {
     // Save the workspace first to allocate an ID.
-    Workspace saved = workspaceDao.save(to);
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(saved.getCdrVersion());
+    to = workspaceDao.save(to);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(to.getCdrVersion());
     boolean cdrVersionChanged =
         from.getCdrVersion().getCdrVersionId() != to.getCdrVersion().getCdrVersionId();
     Map<Long, Long> fromCohortIdToToCohortId = new HashMap<>();
@@ -427,7 +427,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
               .map(Entry::getValue)
               .collect(Collectors.toSet()));
     }
-    return saved;
+    return to;
   }
 
   @Override
