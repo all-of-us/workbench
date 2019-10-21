@@ -5,15 +5,15 @@ import * as fp from 'lodash/fp';
 import {WorkspaceShareComponent} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
-  currentWorkspaceStore, navigate, routeConfigDataStore, urlParamsStore,
+  currentWorkspaceStore,
+  navigate,
+  routeConfigDataStore,
+  urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
+import {ResourceType} from 'app/utils/resourceActions';
 
-import {
-  UserRole,
-  Workspace,
-  WorkspaceAccessLevel,
-} from 'generated/fetch';
+import {UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
 @Component({
   styleUrls: ['../../../styles/buttons.css',
@@ -34,6 +34,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   confirmDeleting = false;
   username: string;
   menuDataLoading = false;
+  resourceType: ResourceType = ResourceType.WORKSPACE;
   userRoles?: UserRole[];
 
   bugReportOpen: boolean;

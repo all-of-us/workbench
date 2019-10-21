@@ -15,6 +15,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentCohortStore, currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {ResourceType} from 'app/utils/resourceActions';
 import {Cohort, TemporalTime} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
 import * as React from 'react';
@@ -422,7 +423,7 @@ export const ListOverview = withCurrentWorkspace()(
           </ModalFooter>
         </Modal>}
         {deleting && <ConfirmDeleteModal closeFunction={this.cancelDelete}
-          resourceType='cohort'
+          resourceType={ResourceType.COHORT}
           receiveDelete={this.delete}
           resourceName={cohort.name} />}
       </React.Fragment>;

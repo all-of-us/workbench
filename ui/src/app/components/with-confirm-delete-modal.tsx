@@ -1,16 +1,17 @@
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
+import {ResourceType} from 'app/utils/resourceActions';
 import * as React from 'react';
 
 interface State {
   show: boolean;
   displayName: string;
-  resourceType: string;
+  resourceType: ResourceType;
   receiveDelete: () => Promise<void>;
 }
 
 export interface WithConfirmDeleteModalProps {
   showConfirmDeleteModal: (displayName: string,
-                           resourceType: string,
+                           resourceType: ResourceType,
                            receiveDelete: () => Promise<void>) => void;
 }
 
@@ -24,7 +25,7 @@ export const withConfirmDeleteModal = () => {
         this.state = {
           show: false,
           displayName: 'Name',
-          resourceType: 'Type',
+          resourceType: null,
           receiveDelete: null
         };
       }
