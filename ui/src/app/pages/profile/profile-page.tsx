@@ -287,14 +287,14 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
             completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick  } />
 
-          <ProfileRegistrationStepStatus
+          {serverConfigStore.getValue().enableComplianceTraining && <ProfileRegistrationStepStatus
             title='Access Training'
             wasBypassed={!!profile.complianceTrainingBypassTime}
             incompleteButtonText='Access Training'
             completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
             completionTimestamp={getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile)}
             isComplete={!!(getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
-            completeStep={getRegistrationTasksMap()['complianceTraining'].onClick} />
+            completeStep={getRegistrationTasksMap()['complianceTraining'].onClick} />}
 
           {serverConfigStore.getValue().enableEraCommons && <ProfileRegistrationStepStatus
             title='eRA Commons Account'
