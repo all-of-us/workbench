@@ -231,7 +231,7 @@ interface DataDictionaryPopupProps {
   dataDictionaryEntry: DataDictionaryEntry;
 }
 
-const DataDictionaryPopup: React.FunctionComponent<DataDictionaryPopupProps> = ({dataDictionaryEntry}) => {
+const DataDictionaryDescription: React.FunctionComponent<DataDictionaryPopupProps> = ({dataDictionaryEntry}) => {
   return <div style={{width: '100%', borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.6)}`}}>
     {dataDictionaryEntry ? <FlexColumn style={{padding: '0.5rem'}}>
       <div style={{...styles.dataDictionarySubheader, paddingTop: 0}}>Description</div>
@@ -317,7 +317,7 @@ export class ValueListItem extends React.Component<
                 color: colors.accent, height: 18, width: 18}} />
             </Clickable>
           </FlexRow>
-          {showDataDictionaryEntry && <DataDictionaryPopup dataDictionaryEntry={dataDictionaryEntry}/>}
+          {showDataDictionaryEntry && <DataDictionaryDescription dataDictionaryEntry={dataDictionaryEntry}/>}
         </div>
       </FlexRow>
     </div>;
