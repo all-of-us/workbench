@@ -25,7 +25,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.pmiops.workbench.audit.adapters.ProfileAuditAdapterService;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
@@ -103,7 +102,6 @@ public class ProfileControllerTest {
   @Mock private ComplianceService complianceTrainingService;
   @Mock private MailService mailService;
   @Mock private UserService userService;
-  @Mock private ProfileAuditAdapterService mockProfileAuditAdapterService;
 
   private ProfileController profileController;
   private ProfileController cloudProfileController;
@@ -169,8 +167,7 @@ public class ProfileControllerTest {
             leonardoNotebooksClient,
             Providers.of(config),
             environment,
-            Providers.of(mailService),
-            mockProfileAuditAdapterService);
+            Providers.of(mailService));
     this.cloudProfileController =
         new ProfileController(
             profileService,
@@ -185,8 +182,7 @@ public class ProfileControllerTest {
             leonardoNotebooksClient,
             Providers.of(config),
             cloudEnvironment,
-            Providers.of(mailService),
-            mockProfileAuditAdapterService);
+            Providers.of(mailService));
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
@@ -570,8 +566,7 @@ public class ProfileControllerTest {
             leonardoNotebooksClient,
             Providers.of(config),
             environment,
-            Providers.of(mailService),
-            mockProfileAuditAdapterService);
+            Providers.of(mailService));
     profileController.bypassAccessRequirement(
         profile.getUserId(),
         new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
