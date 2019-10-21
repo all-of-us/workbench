@@ -39,8 +39,8 @@ export const nameValidationFormat = (existingNames, type) =>
     ({
       presence: {allowEmpty: false},
       format: {
-        pattern: /^[^#[\]*?:;@$%+=\\,/]*$/,
-        message: 'can\'t contain these characters: \r \r  @ # $ % * + = ? , [ ] : ; / \\ '
+        pattern: /^[^@#$%*+=?,[\]:;/\\]*$/,
+        message: 'can\'t contain these characters: @ # $ % * + = ? , [ ] : ; / \\ '
       },
       exclusion: {
         within: existingNames,
