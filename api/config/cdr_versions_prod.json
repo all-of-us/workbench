@@ -53,7 +53,7 @@
     "dataAccessLevel": 1,
     "bigqueryProject": "fc-aou-cdr-prod",
     "bigqueryDataset": "R2019Q4R3",
-    "creationTime": "2019-10-18 00:00:00Z",
+    "creationTime": "2019-10-21 00:00:00Z",
     "releaseNumber": 3,
     "numParticipants": 242299,
     "cdrDbName": "r_2019q4_1"
