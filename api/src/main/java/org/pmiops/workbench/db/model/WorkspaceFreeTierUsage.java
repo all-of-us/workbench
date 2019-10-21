@@ -18,6 +18,12 @@ public class WorkspaceFreeTierUsage {
   private double cost;
   private Timestamp lastUpdateTime;
 
+  public WorkspaceFreeTierUsage(Workspace workspace) {
+    this.userId = workspace.getCreator().getUserId();
+    this.workspaceId = workspace.getWorkspaceId();
+    setLastUpdateTime();
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
@@ -67,23 +73,5 @@ public class WorkspaceFreeTierUsage {
 
   public void setLastUpdateTime() {
     this.lastUpdateTime = new Timestamp(Instant.now().toEpochMilli());
-  }
-
-  public WorkspaceFreeTierUsage() {}
-
-  public WorkspaceFreeTierUsage(long userId, long workspaceId, double cost) {
-    this.userId = userId;
-    this.workspaceId = workspaceId;
-    this.cost = cost;
-    this.setLastUpdateTime();
-  }
-
-  public WorkspaceFreeTierUsage(
-      long id, long userId, long workspaceId, double cost, Timestamp lastUpdateTime) {
-    this.id = id;
-    this.userId = userId;
-    this.workspaceId = workspaceId;
-    this.cost = cost;
-    this.lastUpdateTime = lastUpdateTime;
   }
 }

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.model.BillingStatus;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -44,7 +43,9 @@ public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
 
   List<Workspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
 
-  @Query("UPDATE Workspace SET billingStatus = :status WHERE workspaceId = :id")
-  @Modifying
-  void updateBillingStatus(@Param("id") long workspaceId, @Param("status") BillingStatus status);
+  default void updateBillingStatus(long workspaceId, BillingStatus status) {
+    Workspace toUpdate = findOne(workspaceId);
+    toUpdate.setBillingStatus(status);
+    save(toUpdate);
+  }
 }

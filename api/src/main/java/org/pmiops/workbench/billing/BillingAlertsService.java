@@ -16,7 +16,6 @@ import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
-import org.pmiops.workbench.db.model.WorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.BillingStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,13 +64,12 @@ public class BillingAlertsService {
 
     workspaceCosts.forEach(
         (workspace, cost) -> {
-          User creator = workspace.getCreator();
-          final WorkspaceFreeTierUsage usageEntry =
-              new WorkspaceFreeTierUsage(creator.getUserId(), workspace.getWorkspaceId(), cost);
-          workspaceFreeTierUsageDao.upsert(usageEntry);
+          workspaceFreeTierUsageDao.updateCost(workspace, cost);
 
           BillingStatus status =
-              expiredCreditsUsers.contains(creator) ? BillingStatus.INACTIVE : BillingStatus.ACTIVE;
+              expiredCreditsUsers.contains(workspace.getCreator())
+                  ? BillingStatus.INACTIVE
+                  : BillingStatus.ACTIVE;
           workspaceDao.updateBillingStatus(workspace.getWorkspaceId(), status);
         });
   }
