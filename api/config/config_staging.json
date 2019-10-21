@@ -78,6 +78,6 @@
     "enableNewAccountCreation": false
   },
   "actionAudit": {
-    "logName":"action-audit-test-3"
+    "logName":"workbench-action-audit-staging"
   }
 }

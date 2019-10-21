@@ -76,11 +76,9 @@
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": false // this is busted currently when enabled. Can't escape the Profile edit page
+    "enableNewAccountCreation": true
   },
   "actionAudit": {
-    // we need to have a separate log name for local so it's not mixed with Test env events
-    // Other environments should be fine with matching names.
-    "logName":"action-audit-test-3-local"
+    "logName":"workbench-action-audit-local"
   }
 }
