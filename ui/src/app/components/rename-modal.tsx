@@ -12,6 +12,7 @@ import {
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';
+import {ResourceType} from 'app/utils/resourceActions';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
@@ -24,9 +25,45 @@ const styles = reactStyles({
   }
 });
 
+/* Name validation for resources.
+ *
+ * Notebooks have characters that are disallowed. Specifically, Jupyter only disallows :/\
+ * but Terra disallows a larger list of characters.  Those characters are listed in
+ * `const notebookNameValidator` in this file:
+ * https://github.com/DataBiosphere/terra-ui/blob/dev/src/components/notebook-utils.js#L42
+ *
+ * Other AoU resource types do not have the same name restriction and only block slashes.
+ */
+export const nameValidationFormat = (existingNames, type) =>
+  type === ResourceType.NOTEBOOK ?
+    ({
+      presence: {allowEmpty: false},
+      format: {
+        pattern: /^[^@#$%*+=?,[\]:;/\\]*$/,
+        message: 'can\'t contain these characters: @ # $ % * + = ? , [ ] : ; / \\ '
+      },
+      exclusion: {
+        within: existingNames,
+        message: 'already exists'
+      }
+    })
+  :
+    ({
+      presence: {allowEmpty: false},
+      format: {
+        pattern: /^[^\/]*$/,
+        message: 'can\'t contain a slash'
+      },
+      exclusion: {
+        within: existingNames,
+        message: 'already exists'
+      }
+    });
+
+
 interface Props {
   hideDescription?: boolean;
-  existingNames?: string[];
+  existingNames: string[];
   oldDescription?: string;
   oldName: string;
   onCancel: Function;
@@ -63,17 +100,10 @@ export class RenameModal extends React.Component<Props, States> {
     if (this.props.nameFormat) {
       newName = this.props.nameFormat(newName);
     }
-    const errors = validate({newName: newName}, {newName: {
-      presence: {allowEmpty: false},
-      format: {
-        pattern: /^[^\/]*$/,
-        message: 'can\'t contain a slash'
-      },
-      exclusion: {
-        within: existingNames,
-        message: 'already exists'
-      }
-    }});
+    const errors = validate(
+      {newName: newName},
+      {newName: nameValidationFormat(existingNames, type)}
+      );
     return <Modal loading={saving}>
       <ModalTitle>Enter new name for {oldName}</ModalTitle>
       <ModalBody>

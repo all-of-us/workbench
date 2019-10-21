@@ -67,6 +67,7 @@ export const RecentResources = (fp.flow as any)(
   createResourceCard(resource: RecentResource) {
     if (resource.notebook) {
       return <NotebookResourceCard resource={resource}
+                                   existingNameList={this.getExistingNameList(resource)}
                                    onUpdate={() => this.loadResources()}/>;
     } else if (resource.cohort) {
       return <CohortResourceCard resource={resource}
