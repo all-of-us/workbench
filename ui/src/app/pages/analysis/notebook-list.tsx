@@ -29,13 +29,14 @@ const styles = {
 export const NotebookList = withCurrentWorkspace()(class extends React.Component<{
   workspace: WorkspaceData
 }, {
-  notebooks: FileDetail[],
+  notebookList: FileDetail[],
+  notebookNameList: string[],
   creating: boolean,
   loading: boolean
 }> {
   constructor(props) {
     super(props);
-    this.state = {notebooks: [], creating: false, loading: false};
+    this.state = {notebookList: [], notebookNameList: [], creating: false, loading: false};
   }
 
   componentDidMount() {
@@ -58,8 +59,10 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
     try {
       const {workspace: {namespace, id}} = this.props;
       this.setState({loading: true});
-      const notebooks = await workspacesApi().getNoteBookList(namespace, id);
-      this.setState({notebooks});
+      const notebookList = await workspacesApi().getNoteBookList(namespace, id);
+      this.setState({notebookList});
+      const notebookNameList = notebookList.map(fd => fd.name.slice(0, -6)); // remove '.ipynb'
+      this.setState({notebookNameList});
     } catch (error) {
       console.error(error);
     } finally {
@@ -69,7 +72,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
 
   render() {
     const {workspace, workspace: {namespace, id, accessLevel}} = this.props;
-    const {notebooks, creating, loading} = this.state;
+    const {notebookList, notebookNameList, creating, loading} = this.state;
     // TODO Remove this cast when we switch to fetch types
     const al = accessLevel as unknown as WorkspaceAccessLevel;
     const canWrite = fp.includes(al, [WorkspaceAccessLevel.OWNER, WorkspaceAccessLevel.WRITER]);
@@ -93,9 +96,10 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
           </CardButton>
         </TooltipTrigger>
         <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-          {notebooks.map(notebook => {
+          {notebookList.map(notebook => {
             return <NotebookResourceCard
               resource={convertToResource(notebook, namespace, id, al, ResourceType.NOTEBOOK)}
+              existingNameList={notebookNameList}
               onUpdate={() => this.loadNotebooks()}
             />;
           })}
@@ -104,7 +108,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
       {loading && <SpinnerOverlay />}
       {creating && <NewNotebookModal
         workspace={workspace}
-        existingNotebooks={notebooks}
+        existingNameList={notebookNameList}
         onClose={() => this.setState({creating: false})}
       />}
     </FadeBox>;

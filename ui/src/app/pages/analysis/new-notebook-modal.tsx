@@ -6,16 +6,17 @@ import {styles as headerStyles} from 'app/components/headers';
 import {RadioButton, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
+import {nameValidationFormat} from 'app/components/rename-modal';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
 import {summarizeErrors} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
+import {ResourceType} from 'app/utils/resourceActions';
 
-
-import {FileDetail, Workspace} from 'generated/fetch';
+import {Workspace} from 'generated/fetch';
 
 export class NewNotebookModal extends React.Component<
-  {onClose: Function, workspace: Workspace, existingNotebooks: FileDetail[]},
+  {onClose: Function, workspace: Workspace, existingNameList: string[]},
   {kernel: Kernels, name: string, nameTouched: boolean}
 > {
   constructor(props) {
@@ -36,17 +37,11 @@ export class NewNotebookModal extends React.Component<
   }
 
   render() {
-    const {onClose, existingNotebooks} = this.props;
+    const {onClose, existingNameList} = this.props;
     const {name, kernel, nameTouched} = this.state;
     const errors = validate({name, kernel}, {
       kernel: {presence: {allowEmpty: false}},
-      name: {
-        presence: {allowEmpty: false},
-        exclusion: {
-          within: existingNotebooks.map(fd => fd.name.slice(0, -6)),
-          message: 'already exists'
-        }
-      }
+      name: nameValidationFormat(existingNameList, ResourceType.NOTEBOOK)
     });
     return <Modal onRequestClose={onClose}>
       <ModalTitle>New Notebook</ModalTitle>

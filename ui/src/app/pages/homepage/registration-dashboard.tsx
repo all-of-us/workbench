@@ -110,6 +110,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     description: 'Complete mandatory compliance training courses on how data should be used ' +
       'and handled.',
     buttonText: 'Complete training',
+    featureFlag: serverConfigStore.getValue().enableComplianceTraining,
     completedText: 'Completed',
     completionTimestamp: (profile: Profile) => {
       return profile.complianceTrainingCompletionTime || profile.complianceTrainingBypassTime;

@@ -8,7 +8,7 @@ describe('NewNotebookModal', () => {
     const wrapper = mount(<NewNotebookModal
       onClose={() => {}}
       workspace={{name: 'a'}}
-      existingNotebooks={[]}
+      existingNameList={[]}
     />);
     expect(wrapper.exists()).toBeTruthy();
   });
