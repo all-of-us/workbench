@@ -146,6 +146,8 @@ public class ClusterControllerTest {
     config.server.apiBaseUrl = API_BASE_URL;
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
     config.firecloud.registeredDomainName = "";
+    config.firecloud.clusterDefaultMachineType = "n1-standard-4";
+    config.firecloud.clusterDefaultDiskSizeGb = 50;
     config.access = new WorkbenchConfig.AccessConfig();
     config.access.enableComplianceTraining = true;
     config.featureFlags = new FeatureFlagsConfig();
@@ -267,11 +269,11 @@ public class ClusterControllerTest {
             new UpdateClusterConfigRequest()
                 .userEmail(OTHER_USER_EMAIL)
                 .clusterConfig(
-                    new ClusterConfig().machineType("n1-standard-4").masterDiskSize(100)));
+                    new ClusterConfig().machineType("n1-standard-16").masterDiskSize(100)));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
     User updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
-    assertThat(updatedUser.getClusterConfigDefault().machineType).isEqualTo("n1-standard-4");
+    assertThat(updatedUser.getClusterConfigDefault().machineType).isEqualTo("n1-standard-16");
     assertThat(updatedUser.getClusterConfigDefault().masterDiskSize).isEqualTo(100);
   }
 
@@ -282,7 +284,7 @@ public class ClusterControllerTest {
             new UpdateClusterConfigRequest()
                 .userEmail(OTHER_USER_EMAIL)
                 .clusterConfig(
-                    new ClusterConfig().machineType("n1-standard-4").masterDiskSize(100)));
+                    new ClusterConfig().machineType("n1-standard-16").masterDiskSize(100)));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
     response =
