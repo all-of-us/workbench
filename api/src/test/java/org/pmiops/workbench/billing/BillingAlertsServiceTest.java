@@ -309,7 +309,7 @@ public class BillingAlertsServiceTest {
 
     Map<String, Double> newResults = new HashMap<>();
     newResults.put(SINGLE_WORKSPACE_TEST_PROJECT, SINGLE_WORKSPACE_TEST_COST * 2);
-    doReturn(mockTableResult(newResults)).when(bigQueryService).executeQuery(any());
+    doReturn(mockBQTableResult(newResults)).when(bigQueryService).executeQuery(any());
 
     // we alert again, and the cost field is updated in the DB
 
@@ -332,7 +332,7 @@ public class BillingAlertsServiceTest {
     assertThat(t1).isAfter(t0);
   }
 
-  private TableResult mockTableResult(Map<String, Double> costMap) {
+  private TableResult mockBQTableResult(Map<String, Double> costMap) {
     Field idField = Field.of("id", LegacySQLTypeName.STRING);
     Field costField = Field.of("cost", LegacySQLTypeName.FLOAT);
     Schema s = Schema.of(idField, costField);
