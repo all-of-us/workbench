@@ -272,6 +272,9 @@ public class WorkspaceServiceTest {
 
   @Test
   public void updateRecentWorkspaces_multipleUsers() {
+    long OTHER_USER_ID = 2L;
+    workspaceService.updateRecentWorkspaces(
+        mockWorkspaces.get(0), OTHER_USER_ID, Timestamp.from(NOW));
     mockWorkspaces.forEach(
         workspace -> {
           // Need a new 'now' each time or else we won't have lastAccessDates that are different
@@ -281,11 +284,14 @@ public class WorkspaceServiceTest {
               USER_ID,
               Timestamp.from(NOW.minusSeconds(mockWorkspaces.size() - workspace.getWorkspaceId())));
         });
-    long OTHER_USER_ID = 2L;
-    workspaceService.updateRecentWorkspaces(
-        mockWorkspaces.get(0), OTHER_USER_ID, Timestamp.from(NOW));
     List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
+
     assertThat(recentWorkspaces.size()).isEqualTo(4);
+    recentWorkspaces.forEach(
+        userRecentWorkspace ->
+            assertThat(userRecentWorkspace.getId())
+                .isNotEqualTo(userRecentWorkspace.getWorkspaceId()));
+
     List<Long> actualIds =
         recentWorkspaces.stream()
             .map(UserRecentWorkspace::getWorkspaceId)
