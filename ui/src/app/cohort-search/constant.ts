@@ -120,7 +120,7 @@ export const PREDEFINED_ATTRIBUTES = {
   ],
 };
 
-export const MODIFIERS_TEXT = {
+export const MODIFIERS_MAP = {
   [ModifierType.AGEATEVENT]: {
     name: 'Age At Event',
     operators: {
@@ -149,10 +149,4 @@ export const MODIFIERS_TEXT = {
       [Operator.GREATERTHANOREQUALTO]: 'N or More',
     }
   },
-};
-
-export const ENCOUNTERS_MAP = {
-  '9201': 'Inpatient Visit',
-  '9202': 'Outpatient Visit',
-  '9203': 'Emergency Room Visit',
 };

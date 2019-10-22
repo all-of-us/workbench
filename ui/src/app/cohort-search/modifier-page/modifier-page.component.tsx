@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {wizardStore} from 'app/cohort-search/search-state.service';
+import {encountersStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, mapParameter} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -261,41 +261,41 @@ export const ListModifierPage = withCurrentWorkspace()(
       this.updateInput = fp.debounce(300, () => this.updateMods());
     }
 
-    componentDidMount() {
+    async componentDidMount() {
       const {workspace: {cdrVersionId}} = this.props;
       const {formState} = this.state;
       if (this.addEncounters) {
-        // get options for visit modifier from api
-        cohortBuilderApi()
-        .getCriteriaBy(
-            +cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]
-        )
-        .then(response => {
-          const visitCounts = {};
-          const encounters = {
-            name: ModifierType.ENCOUNTERS,
-            label: 'During Visit Type',
-            type: null,
-            operator: undefined,
-            values: [undefined],
-            options: [{
-              label: 'Any',
-              value: undefined,
-            }]
-          };
-          response.items.forEach(option => {
-            if (option.parentId === 0 && option.count > 0) {
-              encounters.options.push({
-                label: option.name,
-                value: option.conceptId.toString()
-              });
-              visitCounts[option.conceptId] = option.count;
-            }
-          });
-          formState.push(encounters);
-          this.setState({formState, visitCounts});
-          this.getExisting();
+        let encountersOptions = encountersStore.getValue();
+        if (!encountersOptions) {
+          // get options for visit modifier from api
+          const res = await cohortBuilderApi().getCriteriaBy(+cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]);
+          encountersOptions = res.items;
+          encountersStore.next(encountersOptions);
+        }
+        const visitCounts = {};
+        const encounters = {
+          name: ModifierType.ENCOUNTERS,
+          label: 'During Visit Type',
+          type: null,
+          operator: undefined,
+          values: [undefined],
+          options: [{
+            label: 'Any',
+            value: undefined,
+          }]
+        };
+        encountersOptions.forEach(option => {
+          if (option.parentId === 0 && option.count > 0) {
+            encounters.options.push({
+              label: option.name,
+              value: option.conceptId.toString()
+            });
+            visitCounts[option.conceptId] = option.count;
+          }
         });
+        formState.push(encounters);
+        this.setState({formState, visitCounts});
+        this.getExisting();
       } else {
         this.getExisting();
       }
@@ -455,7 +455,7 @@ export const ListModifierPage = withCurrentWorkspace()(
       const {visitCounts} = this.state;
       return <div className='p-clearfix'>
         {opt.label}
-        &nbsp;<span style={styles.count}>{visitCounts[opt.value]}</span>
+        &nbsp;<span style={styles.count}>{visitCounts[opt.value].toLocaleString()}</span>
       </div>;
     }
 
@@ -538,7 +538,7 @@ export const ListModifierPage = withCurrentWorkspace()(
             {!loading && count !== null && <div style={columns.col8}>
               <div style={{color: '#262262'}}>Results</div>
               {!loading && <div>
-                Number Participants: <span style={styles.previewCount}>{count}</span>
+                Number Participants: <span style={styles.previewCount}>{count.toLocaleString()}</span>
               </div>}
             </div>}
           </div>
