@@ -1,8 +1,8 @@
 package org.pmiops.workbench.billing;
 
+import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.common.collect.Streams;
-import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -87,16 +87,16 @@ public class BillingAlertsService {
                     + "` GROUP BY project.id ORDER BY cost desc;")
             .build();
 
-    return Streams.stream(bigQueryService.executeQuery(queryConfig).getValues())
-        .map(
-            tableRow ->
-                new AbstractMap.SimpleImmutableEntry<>(
-                    tableRow.get("id").getStringValue(), tableRow.get("cost").getDoubleValue()))
-        .filter(kvp -> workspacesIndexedByProject.containsKey(kvp.getKey()))
-        .collect(
-            Collectors.groupingBy(
-                kvp -> workspacesIndexedByProject.get(kvp.getKey()),
-                Collectors.summingDouble(Entry::getValue)));
+    final Map<Workspace, Double> workspaceCosts = new HashMap<>();
+    for (FieldValueList tableRow : bigQueryService.executeQuery(queryConfig).getValues()) {
+      final String project = tableRow.get("id").getStringValue();
+      if (workspacesIndexedByProject.containsKey(project)) {
+        workspaceCosts.put(
+            workspacesIndexedByProject.get(project), tableRow.get("cost").getDoubleValue());
+      }
+    }
+
+    return workspaceCosts;
   }
 
   private Double getUserFreeTierLimit(User user) {
