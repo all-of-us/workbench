@@ -19,7 +19,7 @@ import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
-import {profileApi} from 'app/services/swagger-fetch-clients';
+import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {environment} from 'environments/environment';
@@ -158,7 +158,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
     trainingCompleted: boolean,
     twoFactorAuthCompleted: boolean,
     videoOpen: boolean,
-    videoLink: string
+    videoLink: string,
+    userHasWorkspaces: boolean
   }> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
@@ -179,10 +180,12 @@ export const Homepage = withUserProfile()(class extends React.Component<
       twoFactorAuthCompleted: undefined,
       videoOpen: false,
       videoLink: '',
+      userHasWorkspaces: false,
     };
   }
 
   componentDidMount() {
+    this.checkWorkspaces();
     this.validateNihToken();
     this.callProfile();
   }
@@ -283,6 +286,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
     this.setState((state, props) => ({
       quickTour: state.firstVisit && state.accessTasksRemaining === false
     }));
+  }
+
+  async checkWorkspaces() {
+    workspacesApi().getWorkspaces().then(response => {
+      this.setState({
+        userHasWorkspaces: response.items.length > 0
+      });
+    });
   }
 
   openVideo(videoLink: string): void {
@@ -390,8 +401,22 @@ export const Homepage = withUserProfile()(class extends React.Component<
                               <RecentWorkspaces />
                             </FlexColumn>
                             <FlexColumn>
-                              <SmallHeader>Recently Accessed Items</SmallHeader>
-                              <RecentResources/>
+                              {this.state.userHasWorkspaces ? (<React.Fragment>
+                                <SmallHeader>Recently Accessed Items</SmallHeader>
+                                <RecentResources/>
+                              </React.Fragment>) : <div style={{backgroundColor: colors.lightBackground,
+                                color: colors.primary,
+                                borderRadius: 10,
+                                padding: '10px 30px',
+                                margin: '30px 0px'}}>
+                                <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
+                                <ul style={{position: "relative", listStyle: "none", marginLeft: 0, paddingLeft: '1.2em'}}>
+                                  <div style={{position: 'absolute', left: 0}}> → </div> <li> Create a <a>Chrome Profile</a> with your All of Us Researcher workbench Google account. This will
+                                    keep your Workbench browser sessions isolated from your other Google accounts.</li>
+                                  <div style={{position: 'absolute', left: 0}}> → </div> <li> Check out <a>Featured Workspaces</a> from the left hand panel to browse through example workspaces.</li>
+                                  <div style={{position: 'absolute', left: 0}}> → </div> <li> Browse through our <a>support materials</a> and forum topics.</li>
+                                </ul>
+                              </div>}
                             </FlexColumn>
                           </React.Fragment>
                         )
