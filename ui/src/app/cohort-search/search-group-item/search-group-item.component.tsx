@@ -13,7 +13,6 @@ import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {DomainType, Modifier, ModifierType, SearchRequest} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
-import {OverlayPanel} from 'primereact/overlaypanel';
 import Timeout = NodeJS.Timeout;
 
 const styles = reactStyles({
@@ -41,10 +40,27 @@ const styles = reactStyles({
     fontSize: '12px',
     fontWeight: 600
   },
+  caret: {
+    cursor: 'pointer',
+    float: 'right',
+    transition: 'transform 0.2s ease-out',
+  },
+  parameterList: {
+    height: 'auto',
+    overflow: 'hidden',
+    transition: 'max-height 0.4s ease-out'
+  },
   parameter: {
+    fontSize: '12px',
+    color: colors.dark,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap'
+  },
+  viewMore: {
+    color: colors.accent,
+    cursor: 'pointer',
+    fontSize: '12px',
   }
 });
 
@@ -76,35 +92,6 @@ function modifiersDisplay(mod: Modifier) {
   }
 }
 
-export class SearchGroupItemName extends React.Component<{editItem: Function, item: any}> {
-  op: any;
-  constructor(props: any) {
-    super(props);
-  }
-
-  render() {
-    const {editItem, item: {modifiers, searchParameters, type}} = this.props;
-    const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
-    const showCode = [DomainType.CONDITION, DomainType.DRUG, DomainType.MEASUREMENT, DomainType.PROCEDURE].includes(type);
-    return <React.Fragment>
-      <span style={{paddingRight: '10px'}}
-        onClick={() => editItem()}
-        onMouseEnter={(e) => this.op.show(e)}
-        onMouseLeave={() => this.op.hide()}>
-        <span className='item-title' style={styles.codeText}>Contains {domainToTitle(type)} {codeDisplay}</span>
-      </span>
-      <OverlayPanel ref={(el) => this.op = el} appendTo={document.body} style={{maxWidth: '30%'}}>
-        <h3 style={{margin: 0}}>{domainToTitle(type)}</h3>
-        {searchParameters.map((param, p) => <div key={p} style={styles.parameter}>{showCode && <b>{param.code}</b>} {param.name}</div>)}
-        {!!modifiers.length && <React.Fragment>
-          <h3>Modifiers</h3>
-          {modifiers.map((mod, m) => <div key={m}>{modifiersDisplay(mod)}</div>)}
-        </React.Fragment>}
-      </OverlayPanel>
-    </React.Fragment>;
-  }
-}
-
 interface Props {
   role: keyof SearchRequest;
   groupId: string;
@@ -117,15 +104,16 @@ interface State {
   count: number;
   error: boolean;
   loading: boolean;
+  paramMenuOpen: boolean;
   status: string;
   timeout: Timeout;
 }
 
 export class SearchGroupItem extends React.Component<Props, State> {
-  dropdown: any;
+  actionsMenu: any;
   constructor(props: Props) {
     super(props);
-    this.state = {count: null, error: false, loading: true, status: props.item.status, timeout: null};
+    this.state = {count: null, paramMenuOpen: false, error: false, loading: true, status: props.item.status, timeout: null};
   }
 
   componentDidMount(): void {
@@ -222,10 +210,12 @@ export class SearchGroupItem extends React.Component<Props, State> {
   }
 
   render() {
-    const {item} = this.props;
-    const {count, error, loading, status} = this.state;
+    const {item: {modifiers, searchParameters, type}} = this.props;
+    const {count, paramMenuOpen, error, loading, status} = this.state;
+    const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
+    const showCode = [DomainType.CONDITION, DomainType.DRUG, DomainType.MEASUREMENT, DomainType.PROCEDURE].includes(type);
     const showCount = !loading && status !== 'hidden' && count !== null;
-    const items = [
+    const actionItems = [
       {label: 'Edit criteria', command: () => this.launchWizard()},
       {label: 'Suppress criteria from total count', command: () => this.suppress()},
       {label: 'Delete criteria', command: () => this.remove()},
@@ -234,11 +224,13 @@ export class SearchGroupItem extends React.Component<Props, State> {
       <style>{itemStyles}</style>
       {status !== 'deleted' && <div style={{display: 'flex', fontSize: '12px'}}>
         {(status === 'active' || !status) && <div style={styles.lineItem}>
-          <Menu style={styles.menu} appendTo={document.body} model={items} popup={true} ref={el => this.dropdown = el} />
-          <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}} onClick={(event) => this.dropdown.toggle(event)}>
+          <Menu style={styles.menu} appendTo={document.body} model={actionItems} popup={true} ref={el => this.actionsMenu = el} />
+          <Clickable style={{display: 'inline-block', paddingRight: '0.5rem'}} onClick={(event) => this.actionsMenu.toggle(event)}>
             <ClrIcon shape='ellipsis-vertical' />
           </Clickable>
-          <SearchGroupItemName editItem={() => this.launchWizard()} item={item} />
+          <span className='item-title' style={{...styles.codeText, paddingRight: '10px'}} onClick={() => this.launchWizard()}>
+            Contains {domainToTitle(type)} {codeDisplay}
+          </span>
           {status !== 'hidden' && <span style={{...styles.codeText, paddingRight: '10px'}}>|</span>}
           {loading && <span className='spinner spinner-inline'>Loading...</span>}
           {showCount && <span style={styles.codeText}>{count.toLocaleString()}</span>}
@@ -258,7 +250,22 @@ export class SearchGroupItem extends React.Component<Props, State> {
             <Button type='link' style={styles.link} onClick={() => this.enable()}>ENABLE</Button>
           </span>
         </div>}
+        <ClrIcon style={{...styles.caret, ...(paramMenuOpen ? {transform: 'rotate(90deg)'} : {})}}
+                 shape={`caret right`} size={24}
+                 onClick={() => this.setState({paramMenuOpen: !paramMenuOpen})} />
       </div>}
+      <div style={{...styles.parameterList, maxHeight: paramMenuOpen ? '15rem' : 0}}>
+        {searchParameters.slice(0, 5).map((param, p) => <div key={p} style={styles.parameter}>
+          {showCode && <b>{param.code}</b>} {param.name}
+        </div>)}
+        {searchParameters.length > 5 && <span style={styles.viewMore} onClick={() => this.launchWizard()}>
+          View/edit all criteria ({searchParameters.length - 5} more)
+        </span>}
+        {!!modifiers.length && <React.Fragment>
+          <h3 style={{fontSize: '14px', marginTop: '0.25rem'}}>Modifiers</h3>
+          {modifiers.map((mod, m) => <div key={m} style={styles.parameter}>{modifiersDisplay(mod)}</div>)}
+        </React.Fragment>}
+      </div>
     </React.Fragment>;
   }
 }
