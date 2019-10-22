@@ -71,7 +71,9 @@
                   </div>
                   <!-- Modifiers Page -->
                   <div class="panel-left" [class.show]="mode === 'modifiers'">
-                    <crit-list-modifier-page [disabled]="modifiersFlag" [wizard]="wizard"></crit-list-modifier-page>
+                    <crit-list-modifier-page *ngIf="showModifiers"
+                      [disabled]="modifiersFlag"
+                      [wizard]="wizard"></crit-list-modifier-page>
                   </div>
                   <!-- Attributes Page -->
                   <div class="panel-left" [class.show]="mode === 'attributes'">

@@ -138,9 +138,9 @@ export const MODIFIERS_MAP = {
   [ModifierType.EVENTDATE]: {
     name: 'Event Date',
     operators: {
-      [Operator.BETWEEN]: 'Is Between',
-      [Operator.GREATERTHANOREQUALTO]: 'Is On or After',
-      [Operator.LESSTHANOREQUALTO]: 'Is On or Before',
+      [Operator.BETWEEN]: 'Between',
+      [Operator.GREATERTHANOREQUALTO]: 'On or After',
+      [Operator.LESSTHANOREQUALTO]: 'On or Before',
     }
   },
   [ModifierType.NUMOFOCCURRENCES]: {

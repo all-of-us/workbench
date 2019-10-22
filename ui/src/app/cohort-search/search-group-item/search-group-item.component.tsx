@@ -14,6 +14,7 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {CriteriaType, DomainType, Modifier, ModifierType, SearchRequest} from 'generated/fetch';
 import {Menu} from 'primereact/menu';
+import {OverlayPanel} from 'primereact/overlaypanel';
 import Timeout = NodeJS.Timeout;
 
 const styles = reactStyles({
@@ -215,19 +216,30 @@ export const SearchGroupItem = withCurrentWorkspace()(
       wizardStore.next(context);
     }
 
-    modifiersDisplay(mod: Modifier) {
+    parameterDisplay(param: any) {
+      const {domainId} = param;
+      let op: any;
+      const showCode = [DomainType.CONDITION, DomainType.DRUG, DomainType.MEASUREMENT, DomainType.PROCEDURE].includes(domainId);
+      return <React.Fragment>
+        <span style={domainId === DomainType.PERSON ? {textTransform: 'capitalize'} : {}}
+          onMouseEnter={(e) => op.show(e)} onMouseLeave={() => op.hide()}>
+          {showCode && <b>{param.code}</b>} {param.name}
+        </span>
+        <OverlayPanel ref={el => op = el} appendTo={document.body}>{param.name}</OverlayPanel>
+      </React.Fragment>;
+    }
+
+    modifierDisplay(mod: Modifier) {
       const {name, operands, operator} = mod;
       switch (name) {
-        case ModifierType.AGEATEVENT:
-          return <span><b>{MODIFIERS_MAP[name].name}</b> {MODIFIERS_MAP[name].operators[operator]} {operands.join(' and ')}</span>;
         case ModifierType.ENCOUNTERS:
           const {encounters} = this.state;
           const visit = !!encounters ? encounters.find(en => en.conceptId.toString() === operands[0]).name : '';
           return <span><b>{MODIFIERS_MAP[name].name}</b> {visit}</span>;
-        case ModifierType.EVENTDATE:
-          return <span><b>{MODIFIERS_MAP[name].name}</b> {MODIFIERS_MAP[name].operators[operator]} {operands.join(' and ')}</span>;
         case ModifierType.NUMOFOCCURRENCES:
           return <span><b>{MODIFIERS_MAP[name].name}</b> {operands[0]} Or More</span>;
+        default:
+          return <span><b>{MODIFIERS_MAP[name].name}</b> {MODIFIERS_MAP[name].operators[operator]} {operands.join(' and ')}</span>;
       }
     }
 
@@ -235,7 +247,6 @@ export const SearchGroupItem = withCurrentWorkspace()(
       const {item: {modifiers, searchParameters, type}} = this.props;
       const {count, paramListOpen, error, loading, status} = this.state;
       const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
-      const showCode = [DomainType.CONDITION, DomainType.DRUG, DomainType.MEASUREMENT, DomainType.PROCEDURE].includes(type);
       const showCount = !loading && status !== 'hidden' && count !== null;
       const actionItems = [
         {label: 'Edit criteria', command: () => this.launchWizard()},
@@ -278,14 +289,14 @@ export const SearchGroupItem = withCurrentWorkspace()(
         </div>}
         <div style={{...styles.parameterList, maxHeight: paramListOpen ? '15rem' : 0}}>
           {searchParameters.slice(0, 5).map((param, p) => <div key={p} style={styles.parameter}>
-            {showCode && <b>{param.code}</b>} {param.name}
+            {this.parameterDisplay(param)}
           </div>)}
           {searchParameters.length > 5 && <span style={styles.viewMore} onClick={() => this.launchWizard()}>
             View/edit all criteria ({searchParameters.length - 5} more)
           </span>}
-          {!!modifiers && <React.Fragment>
+          {!!modifiers && modifiers.length > 0 && <React.Fragment>
             <h3 style={{fontSize: '14px', marginTop: '0.25rem'}}>Modifiers</h3>
-            {modifiers.map((mod, m) => <div key={m} style={styles.parameter}>{this.modifiersDisplay(mod)}</div>)}
+            {modifiers.map((mod, m) => <div key={m} style={styles.parameter}>{this.modifierDisplay(mod)}</div>)}
           </React.Fragment>}
         </div>
       </React.Fragment>;

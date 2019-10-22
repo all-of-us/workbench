@@ -135,7 +135,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         const paramId = `age-param${this.ageNode.id}`;
         this.selectedNode = {
           ...this.ageNode,
-          name: `${minAge.toString()} - ${maxAge.toString()}`,
+          name: `Age In Range ${minAge.toString()} - ${maxAge.toString()}`,
           parameterId: paramId,
           attributes: [attr],
         };
@@ -252,7 +252,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         const paramId = `age-param${this.ageNode.id}`;
         return {
           ...this.ageNode,
-          name: `${lo} - ${hi}`,
+          name: `Age In Range ${lo} - ${hi}`,
           parameterId: paramId,
           attributes: [attr],
         };
