@@ -36,18 +36,20 @@ public class CohortStatusDemoTest {
       final short storage = (short) ordinal;
       final CohortStatusDemo translated = CohortStatusDemo.fromStorage(storage);
       assertThat(translated.toStorage()).isEqualTo(storage);
-      assertThat(translated.toClientCohortStatus()).isEqualTo(StorageEnums.cohortStatusFromStorage(storage));
+      assertThat(translated.toClientCohortStatus())
+          .isEqualTo(StorageEnums.cohortStatusFromStorage(storage));
     }
   }
 
   @Test
   public void testIsHappy() {
     assertThat(CohortStatusDemo.EXCLUDED.isHappy()).isFalse();
-    assertThat(CohortStatusDemo. INCLUDED.isHappy()).isTrue();
+    assertThat(CohortStatusDemo.INCLUDED.isHappy()).isTrue();
   }
 
   @Test
   public void testDescription() {
-    assertThat(CohortStatusDemo.NEEDS_FURTHER_REVIEW.getDescription()).isEqualTo("One of these days");
+    assertThat(CohortStatusDemo.NEEDS_FURTHER_REVIEW.getDescription())
+        .isEqualTo("One of these days");
   }
 }

@@ -41,11 +41,11 @@ public enum CohortStatusDemo {
 
   private static final BiMap<CohortStatus, CohortStatusDemo> CLIENT_TO_COHORT_STATUS_2 =
       ImmutableBiMap.<CohortStatus, CohortStatusDemo>builder()
-        .put(CohortStatus.EXCLUDED, EXCLUDED)
-        .put(CohortStatus.INCLUDED, INCLUDED)
-        .put(CohortStatus.NEEDS_FURTHER_REVIEW, NEEDS_FURTHER_REVIEW)
-        .put(CohortStatus.NOT_REVIEWED, NOT_REVIEWED)
-        .build();
+          .put(CohortStatus.EXCLUDED, EXCLUDED)
+          .put(CohortStatus.INCLUDED, INCLUDED)
+          .put(CohortStatus.NEEDS_FURTHER_REVIEW, NEEDS_FURTHER_REVIEW)
+          .put(CohortStatus.NOT_REVIEWED, NOT_REVIEWED)
+          .build();
 
   private static final BiMap<CohortStatus, Short> CLIENT_TO_STORAGE =
       ImmutableBiMap.<CohortStatus, Short>builder()
