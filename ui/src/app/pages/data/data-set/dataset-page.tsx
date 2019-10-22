@@ -322,7 +322,7 @@ export class ValueListItem extends React.Component<
             </Clickable>
           </FlexRow>
           {showDataDictionaryEntry && <DataDictionaryDescription dataDictionaryEntry={dataDictionaryEntry}/>}
-          {dataDictionaryEntryError && <div>Data Dictionary Entry not found.</div>}
+          {dataDictionaryEntryError && showDataDictionaryEntry && <div>Data Dictionary Entry not found.</div>}
         </div>
       </FlexRow>
     </div>;
