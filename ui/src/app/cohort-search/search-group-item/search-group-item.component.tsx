@@ -261,7 +261,7 @@ export class SearchGroupItem extends React.Component<Props, State> {
         {searchParameters.length > 5 && <span style={styles.viewMore} onClick={() => this.launchWizard()}>
           View/edit all criteria ({searchParameters.length - 5} more)
         </span>}
-        {!!modifiers.length && <React.Fragment>
+        {!!modifiers && <React.Fragment>
           <h3 style={{fontSize: '14px', marginTop: '0.25rem'}}>Modifiers</h3>
           {modifiers.map((mod, m) => <div key={m} style={styles.parameter}>{modifiersDisplay(mod)}</div>)}
         </React.Fragment>}
