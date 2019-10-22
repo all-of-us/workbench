@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BillingAlertsService {
+public class FreeTierBillingService {
 
   private final BigQueryService bigQueryService;
   private final NotificationService notificationService;
@@ -30,7 +30,7 @@ public class BillingAlertsService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
-  public BillingAlertsService(
+  public FreeTierBillingService(
       BigQueryService bigQueryService,
       NotificationService notificationService,
       WorkspaceDao workspaceDao,
@@ -100,7 +100,14 @@ public class BillingAlertsService {
     return workspaceCosts;
   }
 
-  private Double getUserFreeTierLimit(User user) {
+  // Retrieve the user's total free tier usage from the DB by summing across Workspaces.
+  // This is not live BigQuery data: it is only as recent as the last
+  // checkFreeTierBillingUsage Cron job, recorded as last_update_time in the DB.
+  public Double getUserCachedFreeTierUsage(User user) {
+    return workspaceFreeTierUsageDao.totalCostByUser(user);
+  }
+
+  public Double getUserFreeTierLimit(User user) {
     if (user.getFreeTierCreditsLimitOverride() != null) {
       return user.getFreeTierCreditsLimitOverride();
     }

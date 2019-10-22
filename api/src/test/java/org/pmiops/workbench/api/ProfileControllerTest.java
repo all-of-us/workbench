@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
@@ -98,7 +99,7 @@ public class ProfileControllerTest {
   @Mock private LeonardoNotebooksClient leonardoNotebooksClient;
   @Mock private DirectoryService directoryService;
   @Mock private CloudStorageService cloudStorageService;
-  @Mock private Provider<WorkbenchConfig> configProvider;
+  @Mock private FreeTierBillingService freeTierBillingService;
   @Mock private ComplianceService complianceTrainingService;
   @Mock private MailService mailService;
   @Mock private UserService userService;
@@ -152,7 +153,7 @@ public class ProfileControllerTest {
             Providers.of(config),
             complianceTrainingService,
             directoryService);
-    ProfileService profileService = new ProfileService(userDao);
+    ProfileService profileService = new ProfileService(userDao, freeTierBillingService);
     this.profileController =
         new ProfileController(
             profileService,
@@ -551,7 +552,7 @@ public class ProfileControllerTest {
     userService = spy(userService);
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchConfig config = generateConfig();
-    ProfileService profileService = new ProfileService(userDao);
+    ProfileService profileService = new ProfileService(userDao, freeTierBillingService);
     this.profileController =
         new ProfileController(
             profileService,

@@ -1,7 +1,6 @@
 import {
   AccessBypassRequest,
   AccessModule,
-  BillingProjectStatus,
   DataAccessLevel,
   InvitationVerificationRequest,
   NihToken,
@@ -15,8 +14,6 @@ export class ProfileStubVariables {
   static PROFILE_STUB = <Profile>{
     username: 'testers',
     contactEmail: 'tester@mactesterson.edu><script>alert("hello");</script>',
-    freeTierBillingProjectName: 'all-of-us-free-abcdefg',
-    freeTierBillingProjectStatus: BillingProjectStatus.Ready,
     dataAccessLevel: DataAccessLevel.Registered,
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',

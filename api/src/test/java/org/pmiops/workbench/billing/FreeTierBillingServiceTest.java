@@ -53,11 +53,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
-public class BillingAlertsServiceTest {
+public class FreeTierBillingServiceTest {
 
   @Autowired BigQueryService bigQueryService;
 
-  @Autowired BillingAlertsService billingAlertsService;
+  @Autowired FreeTierBillingService freeTierBillingService;
 
   @Autowired UserDao userDao;
 
@@ -80,7 +80,7 @@ public class BillingAlertsServiceTest {
   private static final double SINGLE_WORKSPACE_TEST_COST = 372.1294129999994;
 
   @TestConfiguration
-  @Import({BillingAlertsService.class})
+  @Import({FreeTierBillingService.class})
   @MockBean({BigQueryService.class, NotificationService.class})
   static class Configuration {
     @Bean
@@ -109,7 +109,7 @@ public class BillingAlertsServiceTest {
     User user = createUser("test@test.com");
     Workspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
@@ -124,7 +124,7 @@ public class BillingAlertsServiceTest {
     userDao.save(user);
     Workspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
@@ -139,7 +139,7 @@ public class BillingAlertsServiceTest {
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     workspaceDao.save(workspace);
 
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
@@ -152,7 +152,7 @@ public class BillingAlertsServiceTest {
     User user = createUser("test@test.com");
     Workspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
     verifyZeroInteractions(notificationService);
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE);
@@ -166,7 +166,7 @@ public class BillingAlertsServiceTest {
     Workspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
     createWorkspace(null, "rumney");
 
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
     verifyZeroInteractions(notificationService);
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE);
@@ -179,7 +179,7 @@ public class BillingAlertsServiceTest {
     User user = createUser("test@test.com");
     Workspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
@@ -187,7 +187,7 @@ public class BillingAlertsServiceTest {
     user.setFreeTierCreditsLimitOverride(1000.0);
     userDao.save(user);
 
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
     verifyZeroInteractions(notificationService);
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE);
@@ -211,7 +211,7 @@ public class BillingAlertsServiceTest {
     User user = createUser("test@test.com");
     Workspace ws1 = createWorkspace(user, "aou-test-f1-26");
     Workspace ws2 = createWorkspace(user, "aou-test-f1-47");
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
 
     Map<Long, Double> expectedCosts = new HashMap<>();
@@ -242,7 +242,7 @@ public class BillingAlertsServiceTest {
     Workspace ws1 = createWorkspace(user1, "aou-test-f1-26");
     User user2 = createUser("more@test.com");
     Workspace ws2 = createWorkspace(user2, "aou-test-f1-47");
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user1), any());
     verify(notificationService).alertUser(eq(user2), any());
 
@@ -272,7 +272,7 @@ public class BillingAlertsServiceTest {
 
     User user = createUser("test@test.com");
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT, BillingMigrationStatus.OLD);
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
 
     verifyZeroInteractions(notificationService);
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(0);
@@ -284,7 +284,7 @@ public class BillingAlertsServiceTest {
 
     User user = createUser("test@test.com");
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT, BillingMigrationStatus.MIGRATED);
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
 
     verifyZeroInteractions(notificationService);
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(0);
@@ -297,7 +297,7 @@ public class BillingAlertsServiceTest {
     User user = createUser("test@test.com");
     Workspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
 
@@ -305,13 +305,13 @@ public class BillingAlertsServiceTest {
 
     // time elapses, and this project incurs additional cost
 
-    Map<String, Double> newResults = new HashMap<>();
-    newResults.put(SINGLE_WORKSPACE_TEST_PROJECT, SINGLE_WORKSPACE_TEST_COST * 2);
-    doReturn(mockBQTableResult(newResults)).when(bigQueryService).executeQuery(any());
+    Map<String, Double> newCosts = new HashMap<>();
+    newCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, SINGLE_WORKSPACE_TEST_COST * 2);
+    doReturn(mockBQTableResult(newCosts)).when(bigQueryService).executeQuery(any());
 
     // we alert again, and the cost field is updated in the DB
 
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService, times(2)).alertUser(eq(user), any());
 
     // retrieve from DB again to reflect update after cron
@@ -328,6 +328,80 @@ public class BillingAlertsServiceTest {
 
     Timestamp t1 = dbEntry.getLastUpdateTime();
     assertThat(t1).isAfter(t0);
+  }
+
+  @Test
+  public void getUserFreeTierLimit_default() {
+    User user = createUser("test@test.com");
+
+    workbenchConfig.billing.defaultFreeCreditsLimit = 1.0;
+    assertThat(freeTierBillingService.getUserFreeTierLimit(user))
+        .isCloseTo(1.0, withinPercentage(0.001));
+
+    workbenchConfig.billing.defaultFreeCreditsLimit = 123.456;
+    assertThat(freeTierBillingService.getUserFreeTierLimit(user))
+        .isCloseTo(123.456, withinPercentage(0.001));
+  }
+
+  @Test
+  public void getUserFreeTierLimit_override() {
+    workbenchConfig.billing.defaultFreeCreditsLimit = 123.456;
+
+    User user = createUser("test@test.com");
+    user.setFreeTierCreditsLimitOverride(100.0);
+    userDao.save(user);
+
+    assertThat(freeTierBillingService.getUserFreeTierLimit(user))
+        .isCloseTo(100.0, withinPercentage(0.001));
+
+    user.setFreeTierCreditsLimitOverride(200.0);
+    userDao.save(user);
+
+    assertThat(freeTierBillingService.getUserFreeTierLimit(user))
+        .isCloseTo(200.0, withinPercentage(0.001));
+  }
+
+  @Test
+  public void getUserCachedFreeTierUsage() {
+    workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
+
+    User user = createUser("test@test.com");
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    // we have not yet had a chance to cache this usage
+    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user)).isNull();
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+
+    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user))
+        .isCloseTo(SINGLE_WORKSPACE_TEST_COST, withinPercentage(0.001));
+
+    createWorkspace(user, "another project");
+    Map<String, Double> newCosts = new HashMap<>();
+    newCosts.put("another project", 100.0);
+    newCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 1000.0);
+    doReturn(mockBQTableResult(newCosts)).when(bigQueryService).executeQuery(any());
+
+    // we have not yet cached the new workspace costs
+    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user))
+        .isCloseTo(SINGLE_WORKSPACE_TEST_COST, withinPercentage(0.001));
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+
+    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user))
+        .isCloseTo(1100.0, withinPercentage(0.001));
+
+    User user2 = createUser("another user");
+    createWorkspace(user2, "project 3");
+    newCosts.put("project 3", 999.9);
+    doReturn(mockBQTableResult(newCosts)).when(bigQueryService).executeQuery(any());
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+
+    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user))
+        .isCloseTo(1100.0, withinPercentage(0.001));
+    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user2))
+        .isCloseTo(999.9, withinPercentage(0.001));
   }
 
   private TableResult mockBQTableResult(Map<String, Double> costMap) {
