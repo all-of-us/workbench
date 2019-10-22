@@ -1,4 +1,6 @@
 import {
+  CloneWorkspaceRequest,
+  CloneWorkspaceResponse,
   DataAccessLevel,
   FileDetail,
   RecentWorkspace,
@@ -9,6 +11,7 @@ import {
   Workspace,
   WorkspaceAccessLevel,
   WorkspaceListResponse,
+  WorkspaceResponse,
   WorkspaceResponseListResponse,
   WorkspacesApi,
   WorkspaceUserRolesResponse
@@ -112,6 +115,7 @@ export class WorkspacesApiStub extends WorkspacesApi {
   notebookList: FileDetail[];
   workspaceUserRoles: Map< string, UserRole[]>;
   recentWorkspaces: RecentWorkspaceResponse;
+  newWorkspaceCount = 0;
 
   constructor(workspaces?: Workspace[], workspaceUserRoles?: UserRole[]) {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
@@ -169,7 +173,6 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-
   getWorkspaces(options?: any): Promise<WorkspaceResponseListResponse> {
     return new Promise<WorkspaceResponseListResponse>(resolve => {
       resolve({
@@ -186,6 +189,32 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
+  createWorkspace(workspace?: Workspace, options?: any): Promise<Workspace> {
+    return new Promise(resolve => {
+      workspace.id = `created-${++this.newWorkspaceCount}`;
+      this.workspaces.push(workspace);
+      this.workspaceAccess.set(workspace.id, WorkspaceAccessLevel.OWNER);
+      resolve(workspace);
+    });
+  }
+
+  cloneWorkspace(workspaceNamespace: string, workspaceId: string, body?: CloneWorkspaceRequest, options?: any): Promise<CloneWorkspaceResponse> {
+    return new Promise(resolve => {
+      const fromWorkspace = this.workspaces.find(w => w.namespace === workspaceNamespace && w.id === workspaceId);
+      if (!fromWorkspace) {
+        throw new Error(`workspace ${workspaceNamespace}/${workspaceId} not found`);
+      }
+      const toWorkspace = {
+        ...fromWorkspace,
+        ...body.workspace,
+        id: `cloned-${++this.newWorkspaceCount}`
+      };
+      this.workspaces.push(toWorkspace);
+      this.workspaceAccess.set(toWorkspace.id, WorkspaceAccessLevel.OWNER);
+      resolve({workspace: toWorkspace});
+    });
+  }
+
   shareWorkspace(workspaceNamespace: string, workspaceId: string,
     body?: ShareWorkspaceRequest, options?: any): Promise<WorkspaceUserRolesResponse> {
     return new Promise<WorkspaceUserRolesResponse>(resolve => {
@@ -193,6 +222,19 @@ export class WorkspacesApiStub extends WorkspacesApi {
       const newItems = fp.defaults([], body.items);
       resolve({
         workspaceEtag: newEtag, items: newItems
+      });
+    });
+  }
+
+  getWorkspace(workspaceNamespace: string, workspaceId: string, options: any = {}): Promise<WorkspaceResponse> {
+    return new Promise(resolve => {
+      const ws = this.workspaces.find(w => w.namespace === workspaceNamespace && w.id === workspaceId);
+      if (!ws) {
+        throw new Error(`workspace ${workspaceNamespace}/${workspaceId} not found`);
+      }
+      resolve({
+        workspace: ws,
+        accessLevel: this.workspaceAccess.get(workspaceId) || WorkspaceAccessLevel.NOACCESS
       });
     });
   }

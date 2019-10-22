@@ -2,6 +2,7 @@ import {ErrorHandler, Injectable} from '@angular/core';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 import {ServerConfigService} from 'app/services/server-config.service';
+import {setStackdriverErrorReporter} from 'app/utils/errors';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated';
 
@@ -26,6 +27,7 @@ export class ErrorReporterService extends ErrorHandler {
         projectId: config.projectId,
       });
       this.stackdriverReporter = r;
+      setStackdriverErrorReporter(r);
     });
   }
 
@@ -56,7 +58,7 @@ export class ErrorReporterService extends ErrorHandler {
       // Note: this does not detect non-200 responses from Stackdriver:
       // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/32
       if (e) {
-        console.log('failed to send error report: ' + e);
+        console.error('failed to send error report: ', e);
       }
     });
   }
