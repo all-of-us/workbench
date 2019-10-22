@@ -72,7 +72,7 @@
   "access": {
     "enableComplianceTraining": true,
     "enableEraCommons": true,
-    "enableDataUseAgreement": true,
+    "enableDataUseAgreement": false,
     "enableBetaAccess": true,
     "unsafeAllowSelfBypass": true
   },
