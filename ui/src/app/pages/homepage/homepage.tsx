@@ -10,7 +10,7 @@ import {
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {Header, SmallHeader} from 'app/components/headers';
+import {Header, LessBoldHeader, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Modal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
@@ -382,10 +382,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
                             <FlexColumn>
                               <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
                                 <FlexRow style={{alignItems: 'center'}}>
-                                  <SmallHeader style={{marginTop: '0px'}}>Workspaces</SmallHeader>
+                                  <LessBoldHeader style={{marginTop: '0px'}}>Workspaces</LessBoldHeader>
                                   <ClrIcon
                                     shape='plus-circle'
-                                    size={21}
+                                    size={30}
                                     className={'is-solid'}
                                     style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
                                     onClick={() => navigate(['workspaces/build'])}
@@ -411,10 +411,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                 margin: '30px 0px'}}>
                                 <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
                                 <ul style={{position: "relative", listStyle: "none", marginLeft: 0, paddingLeft: '1.2em'}}>
-                                  <div style={{position: 'absolute', left: 0}}> → </div> <li> Create a <a>Chrome Profile</a> with your All of Us Researcher workbench Google account. This will
+                                  <div style={{position: 'absolute', left: -2}}> → </div> <li> Create a <a>Chrome Profile</a> with your All of Us Researcher workbench Google account. This will
                                     keep your Workbench browser sessions isolated from your other Google accounts.</li>
-                                  <div style={{position: 'absolute', left: 0}}> → </div> <li> Check out <a>Featured Workspaces</a> from the left hand panel to browse through example workspaces.</li>
-                                  <div style={{position: 'absolute', left: 0}}> → </div> <li> Browse through our <a>support materials</a> and forum topics.</li>
+                                  <div style={{position: 'absolute', left: -2}}> → </div> <li> Check out <a>Featured Workspaces</a> from the left hand panel to browse through example workspaces.</li>
+                                  <div style={{position: 'absolute', left: -2}}> → </div> <li> Browse through our <a>support materials</a> and forum topics.</li>
                                 </ul>
                               </div>}
                             </FlexColumn>

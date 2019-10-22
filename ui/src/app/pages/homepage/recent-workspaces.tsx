@@ -45,7 +45,7 @@ export const RecentWorkspaces = withUserProfile()
     // Needs a min-height so the spinner will render when loading and position: relative so said spinner will center.
     return <React.Fragment>
         {!this.state.loading && this.state.recentWorkspaces.length === 0 ? (
-          <div style={{color: colors.primary}}>
+          <div style={{color: colors.primary, padding: '10px 30px'}}>
             <h2 style={{fontWeight: 600}}>Create your first Workspace</h2>
             <div>As you create your workspaces, this area will store your most recent workspaces.</div>
             <div>To see all workspaces created, click on <b>See all Workspaces</b> to the right.</div>

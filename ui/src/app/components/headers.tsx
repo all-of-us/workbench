@@ -19,6 +19,9 @@ export const styles = {
     fontWeight: 800,
     fontSize: '1rem',
   },
+  lessBold: {
+    fontWeight: 600
+  },
   h4: {
     fontWeight: 300,
     color: colors.primary,
@@ -42,5 +45,6 @@ export const styles = {
 export const BolderHeader = withStyle(styles.h1)('h1');
 export const BoldHeader = withStyle(styles.h2)('h2');
 export const Header = withStyle(styles.h3)('h3');
+export const LessBoldHeader = withStyle({...styles.h3, ...styles.lessBold})('h3');
 export const SmallHeader = withStyle(styles.h4)('h4');
 export const ListPageHeader = withStyle(styles.listPageHeader)('h3');
