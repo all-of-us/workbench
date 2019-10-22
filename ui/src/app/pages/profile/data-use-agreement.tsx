@@ -13,7 +13,7 @@ import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {validate} from 'validate.js';
-import {DataUseAgreementText} from './data-use-agreement-text';
+import {DataUseAgreementContent} from './data-use-agreement-content';
 
 const styles = reactStyles({
   dataUseAgreementPage: {
@@ -194,7 +194,7 @@ export const DataUseAgreement = withUserProfile()(
         }
       });
       return <div style={styles.dataUseAgreementPage}>
-        <DataUseAgreementText/>
+        <DataUseAgreementContent/>
         <div style={{height: '1rem'}}/>
         <FlexColumn style={{borderRadius: '1rem',
           backgroundColor: colorWithWhiteness(colors.primary, 0.8),
