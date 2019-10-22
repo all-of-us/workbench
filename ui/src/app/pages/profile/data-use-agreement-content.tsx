@@ -11,8 +11,8 @@ const AoUTitle = () => {
 {/* NOTE: Make sure to update dataUseAgreementVersion if there is any change to the DUA text. */}
 export const DataUseAgreementContent = () => {
   return <div>
-    <BolderHeader style={{align: 'center'}}><AoUTitle/></BolderHeader>
-    <BoldHeader  style={{align: 'center'}}>Demonstration Project Data Use Agreement</BoldHeader>
+    <BolderHeader style={{display: 'flex', justifyContent: 'center'}}><AoUTitle/></BolderHeader>
+    <BoldHeader  style={{display: 'flex', justifyContent: 'center'}}>Demonstration Project Data Use Agreement</BoldHeader>
     <div>This data use agreement describes how <AoUTitle/> data can and cannot be used for the purposes
       of program-approved demonstration projects.
     </div>
@@ -180,7 +180,7 @@ export const DataUseAgreementContent = () => {
           </li>
         </IndentedUnorderedList>
       </li>
-      <li>NOT represent that the <AoUTitle/> endorses or approves of my research unless such
+      <li><strong>NOT</strong> represent that the <AoUTitle/> endorses or approves of my research unless such
         endorsement is expressly provided.
       </li>
     </IndentedUnorderedList>
