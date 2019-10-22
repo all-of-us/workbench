@@ -271,7 +271,7 @@ export const connectBehaviorSubject = <T extends {}>(subject: BehaviorSubject<T>
       componentDidMount() {
         this.subscription = subject.subscribe(v => {
           this.setState({value: v});
-        });;
+        });
       }
 
       componentWillUnmount() {

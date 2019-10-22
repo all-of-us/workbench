@@ -584,7 +584,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               loading: false,
               workspaceNewAclDelayed: true,
               workspaceNewAclDelayedContinueFn: navigateToWorkspace
-            })
+            });
             return;
           }
         }
@@ -877,7 +877,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             </ul>]} disabled={!this.disableButton}>
               <Button type='primary' onClick={() => this.saveWorkspace()}
                       disabled={this.disableButton || this.state.loading}
-                      data-test-id="workspace-save-btn">
+                      data-test-id='workspace-save-btn'>
                 {this.renderButtonText()}
               </Button>
             </TooltipTrigger>

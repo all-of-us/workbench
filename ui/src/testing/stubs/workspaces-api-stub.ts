@@ -198,7 +198,8 @@ export class WorkspacesApiStub extends WorkspacesApi {
     });
   }
 
-  cloneWorkspace(workspaceNamespace: string, workspaceId: string, body?: CloneWorkspaceRequest, options?: any): Promise<CloneWorkspaceResponse> {
+  cloneWorkspace(workspaceNamespace: string,
+      workspaceId: string, body?: CloneWorkspaceRequest, options?: any): Promise<CloneWorkspaceResponse> {
     return new Promise(resolve => {
       const fromWorkspace = this.workspaces.find(w => w.namespace === workspaceNamespace && w.id === workspaceId);
       if (!fromWorkspace) {
