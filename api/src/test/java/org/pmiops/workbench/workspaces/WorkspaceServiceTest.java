@@ -271,6 +271,52 @@ public class WorkspaceServiceTest {
   }
 
   @Test
+  public void updateRecentWorkspaces_multipleUsers() {
+    long OTHER_USER_ID = 2L;
+    workspaceService.updateRecentWorkspaces(
+        mockWorkspaces.get(0), OTHER_USER_ID, Timestamp.from(NOW));
+    mockWorkspaces.forEach(
+        workspace -> {
+          // Need a new 'now' each time or else we won't have lastAccessDates that are different
+          // from each other
+          workspaceService.updateRecentWorkspaces(
+              workspace,
+              USER_ID,
+              Timestamp.from(NOW.minusSeconds(mockWorkspaces.size() - workspace.getWorkspaceId())));
+        });
+    List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
+
+    assertThat(recentWorkspaces.size()).isEqualTo(4);
+    recentWorkspaces.forEach(
+        userRecentWorkspace ->
+            assertThat(userRecentWorkspace.getId())
+                .isNotEqualTo(userRecentWorkspace.getWorkspaceId()));
+
+    List<Long> actualIds =
+        recentWorkspaces.stream()
+            .map(UserRecentWorkspace::getWorkspaceId)
+            .collect(Collectors.toList());
+    List<Long> expectedIds =
+        mockWorkspaces
+            .subList(
+                mockWorkspaces.size() - WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT,
+                mockWorkspaces.size())
+            .stream()
+            .map(org.pmiops.workbench.db.model.Workspace::getWorkspaceId)
+            .collect(Collectors.toList());
+    assertThat(actualIds).containsAll(expectedIds);
+
+    User mockUser = mock(User.class);
+    doReturn(mockUser).when(mockUserProvider).get();
+    doReturn(DEFAULT_USER_EMAIL).when(mockUser).getEmail();
+    doReturn(OTHER_USER_ID).when(mockUser).getUserId();
+    List<UserRecentWorkspace> otherRecentWorkspaces = workspaceService.getRecentWorkspaces();
+    assertThat(otherRecentWorkspaces.size()).isEqualTo(1);
+    assertThat(otherRecentWorkspaces.get(0).getWorkspaceId())
+        .isEqualTo(mockWorkspaces.get(0).getWorkspaceId());
+  }
+
+  @Test
   public void updateRecentWorkspaces_flipFlop() {
     workspaceService.updateRecentWorkspaces(
         mockWorkspaces.get(0), USER_ID, Timestamp.from(NOW.minusSeconds(4)));
