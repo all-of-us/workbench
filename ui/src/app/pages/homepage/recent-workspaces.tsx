@@ -3,12 +3,10 @@ import * as React from 'react';
 import {Profile, RecentWorkspace} from 'generated/fetch';
 
 import {FlexRow} from 'app/components/flex';
-import {SpinnerOverlay} from 'app/components/spinners';
-import {NewWorkspaceButton} from 'app/pages/workspace/new-workspace-button';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {withUserProfile} from 'app/utils';
-import colors from "app/styles/colors";
 
 interface State {
   loading: boolean;
@@ -59,7 +57,7 @@ export const RecentWorkspaces = withUserProfile()
                   workspace={recentWorkspace.workspace}
                   accessLevel={recentWorkspace.accessLevel}
                   reload={() => this.loadWorkspaces()}
-                />
+                />;
               })
             }
           </FlexRow>

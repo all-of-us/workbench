@@ -9,6 +9,7 @@ import {
   Clickable,
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {CustomBulletList, CustomBulletListItem} from 'app/components/CustomBulletList';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header, LessBoldHeader, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
@@ -20,7 +21,7 @@ import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import colors, {addOpacity, hexToRgb} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {environment} from 'environments/environment';
 import {
@@ -81,8 +82,8 @@ export const styles = reactStyles({
     justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem'
   },
   quickTourLabel: {
-    fontSize: 18, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
-    fontWeight: 600, marginTop: '2rem', width: '33%'
+    fontSize: 22, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
+    fontWeight: 600, marginTop: '1rem', width: '33%'
   },
   welcomeMessageIcon: {
     height: '2.25rem', width: '2.75rem'
@@ -410,12 +411,21 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                 padding: '10px 30px',
                                 margin: '30px 0px'}}>
                                 <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
-                                <ul style={{position: "relative", listStyle: "none", marginLeft: 0, paddingLeft: '1.2em'}}>
-                                  <div style={{position: 'absolute', left: -2}}> → </div> <li> Create a <a>Chrome Profile</a> with your All of Us Researcher workbench Google account. This will
-                                    keep your Workbench browser sessions isolated from your other Google accounts.</li>
-                                  <div style={{position: 'absolute', left: -2}}> → </div> <li> Check out <a>Featured Workspaces</a> from the left hand panel to browse through example workspaces.</li>
-                                  <div style={{position: 'absolute', left: -2}}> → </div> <li> Browse through our <a>support materials</a> and forum topics.</li>
-                                </ul>
+                                <CustomBulletList>
+                                  <CustomBulletListItem>
+                                    Create a <a href='https://support.google.com/chrome/answer/2364824'>Chrome Profile </a>
+                                    with your All of Us Researcher workbench Google account. This will keep your Workbench
+                                    browser sessions isolated from your other Google accounts.
+                                  </CustomBulletListItem>
+                                  <CustomBulletListItem>
+                                    Check out <a onClick={() => navigate(['library'])}> Featured Workspaces </a>
+                                    from the left hand panel to browse through example workspaces.
+                                  </CustomBulletListItem>
+                                  <CustomBulletListItem>
+                                    Browse through our <a href='https://aousupporthelp.zendesk.com/hc/en-us'> support materials </a>
+                                    and forum topics.
+                                  </CustomBulletListItem>
+                                </CustomBulletList>
                               </div>}
                             </FlexColumn>
                           </React.Fragment>
@@ -424,7 +434,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                   <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
             </FlexColumn>
           </FadeBox>
-          <div>
+          <div style={{backgroundColor: addOpacity(hexToRgb(colors.lightBackground), .4).toString()}}>
             <FlexColumn style={{marginLeft: '3%'}}>
               <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
               <FlexRow style={styles.quickTourCardsRow}>
@@ -432,7 +442,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                   return <React.Fragment key={i}>
                     <Clickable onClick={thumbnail.onClick}
                                data-test-id={'quick-tour-resource-' + i}>
-                      <img style={{maxHeight: '7rem', width: '9rem', marginRight: '0.5rem'}}
+                      <img style={{width: '11rem', marginRight: '0.5rem'}}
                            src={thumbnail.src}/>
                     </Clickable>
                   </React.Fragment>;
