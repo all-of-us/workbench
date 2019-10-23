@@ -570,7 +570,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           setTimeout(() => pollTimedOut = true, NEW_ACL_DELAY_POLL_TIMEOUT_MS);
           while (!pollTimedOut) {
             ({workspace, accessLevel} = await workspacesApi().getWorkspace(workspace.namespace, workspace.id));
-            console.log(accessLevel);
             if (accessLevel === WorkspaceAccessLevel.OWNER) {
               break;
             }

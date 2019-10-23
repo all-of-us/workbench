@@ -1,10 +1,10 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
-import {WorkspaceAccessLevel, WorkspacesApi, SpecificPopulationEnum} from 'generated/fetch';
+import {WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {WorkspaceEdit, WorkspaceEditMode, WorkspaceEditProps} from './workspace-edit';
+import {WorkspaceEdit, WorkspaceEditMode, WorkspaceEditSection} from './workspace-edit';
 import {workspaceStubs, WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 
@@ -44,21 +44,21 @@ describe('WorkspaceEdit', () => {
   it('displays workspaces create page', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    expect(wrapper.find(WorkspaceEditSection).first().text()).toContain("Create a new Workspace");
   });
 
   it('displays workspaces duplicate page', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    expect(wrapper.find(WorkspaceEditSection).first().text()).toContain("Duplicate workspace");
   });
 
   it('displays workspaces edit page', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Edit});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper).toBeTruthy();
+    expect(wrapper.find(WorkspaceEditSection).first().text()).toContain("Edit workspace");
   });
 
   it('supports successful duplication', async () => {
