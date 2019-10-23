@@ -38,10 +38,12 @@ import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.UserRecentResource;
 import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
@@ -113,7 +115,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final NotebooksService notebooksService;
   private final UserService userService;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private WorkspaceAuditAdapterService workspaceAuditAdapterService;
+  private final WorkspaceAuditAdapterService workspaceAuditAdapterService;
+  private final UserRecentResourceService userRecentResourceService;
 
   @Autowired
   public WorkspacesController(
@@ -128,7 +131,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       NotebooksService notebooksService,
       UserService userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceAuditAdapterService workspaceAuditAdapterService) {
+      WorkspaceAuditAdapterService workspaceAuditAdapterService,
+      UserRecentResourceService userRecentResourceService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -141,6 +145,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditAdapterService = workspaceAuditAdapterService;
+    this.userRecentResourceService = userRecentResourceService;
   }
 
   @VisibleForTesting
@@ -298,8 +303,22 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     workspaceService.maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
+
+    deleteRecentResourcesForWorkspace(dbWorkspace);
+
     workspaceAuditAdapterService.fireDeleteAction(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
+  }
+
+  private void deleteRecentResourcesForWorkspace(
+      org.pmiops.workbench.db.model.Workspace dbWorkspace) {
+    // workspace might have many notebooks
+    List<FileDetail> notebookDetails = notebooksService.getNotebooks(dbWorkspace.getWorkspaceNamespace(),
+        dbWorkspace.getFirecloudName());
+    for (FileDetail notebookDetail : notebookDetails) {
+      userRecentResourceService.deleteNotebookEntry(dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(),
+          NotebooksService.withNotebookExtension(notebookDetail.getName()));
+    }
   }
 
   @Override

@@ -3,12 +3,15 @@ package org.pmiops.workbench.api;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -37,6 +40,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class UserMetricsController implements UserMetricsApiDelegate {
+
+  private static final Logger logger = Logger.getLogger(UserMetricsController.class.getName());
   private static final int MAX_RECENT_NOTEBOOKS = 8;
   private static final Logger log = Logger.getLogger(UserMetricsController.class.getName());
   private final Provider<User> userProvider;
@@ -175,6 +180,21 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // RW-1298
     // This needs to be refactored to only use namespace and FC ID
     // The purpose of this Map, is to check what is actually still present in FC
+
+    ImmutableMap.Builder<Long, WorkspaceResponse> liveWorkspacesById = new Builder<>();
+    for (long workspaceId : workspaceIdList) {
+      final Workspace workspace = workspaceService.findByWorkspaceId(workspaceId);
+      if (workspace == null) {
+        logger.log(Level.WARNING,
+            String.format("Workspace ID %d still in recent list but not found", workspaceId));
+        continue;
+      }
+      final WorkspaceResponse workspaceResponse = fireCloudService.getWorkspace(
+              workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+//      if (workspaceResponse.getWorkspace())
+      Optional.ofNullable(workspaceResponse).ifPresent(r -> liveWorkspacesById.put(workspaceId, r));
+    }
+
     Map<Long, WorkspaceResponse> workspaceAccessMap =
         workspaceIdList.stream()
             .collect(
