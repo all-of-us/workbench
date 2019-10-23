@@ -11,10 +11,10 @@
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="user_id" type="bigint">
-        <constraints nullable="false"/>
+        <constraints nullable="false" foreignKeyName="fk_free_tier_usage_user_id" references="user(user_id)"/>
       </column>
       <column name="workspace_id" type="bigint">
-        <constraints nullable="false"/>
+        <constraints nullable="false" foreignKeyName="fk_free_tier_usage_workspace_id" references="workspace(workspace_id)"/>
       </column>
       <column name="cost" type="double">
         <constraints nullable="false"/>
@@ -23,18 +23,6 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
-
-    <addForeignKeyConstraint baseColumnNames="user_id"
-      baseTableName="workspace_free_tier_usage"
-      constraintName="fk_free_tier_usage_user_id"
-      referencedColumnNames="user_id"
-      referencedTableName="user" onDelete="CASCADE"/>
-
-    <addForeignKeyConstraint baseColumnNames="workspace_id"
-      baseTableName="workspace_free_tier_usage"
-      constraintName="fk_free_tier_usage_workspace_id"
-      referencedColumnNames="workspace_id"
-      referencedTableName="workspace" onDelete="CASCADE"/>
 
   </changeSet>
 </databaseChangeLog>
