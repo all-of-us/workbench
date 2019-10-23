@@ -40,7 +40,7 @@ public class TestMockFactory {
                   new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
               fcResponse.setWorkspace(fcWorkspace);
               fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-              
+
               doReturn(fcResponse)
                   .when(fireCloudService)
                   .getWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName);

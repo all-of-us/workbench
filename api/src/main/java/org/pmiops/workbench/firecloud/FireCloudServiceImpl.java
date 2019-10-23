@@ -297,8 +297,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     workspaceIngest.setName(workspaceName);
     workspaceIngest.setNamespace(projectName);
     checkAndAddRegistered(workspaceIngest);
-    return retryHandler.run(
-        (context) -> workspacesApi.createWorkspace(workspaceIngest));
+    return retryHandler.run((context) -> workspacesApi.createWorkspace(workspaceIngest));
   }
 
   @Override
