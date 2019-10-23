@@ -33,15 +33,18 @@ public class TestMockFactory {
             invocation -> {
               String capturedWorkspaceName = (String) invocation.getArguments()[1];
               String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
+              org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
+                  createFcWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null);
+
               org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
                   new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
-              fcResponse.setWorkspace(
-                  createFcWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null));
+              fcResponse.setWorkspace(fcWorkspace);
               fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
+              
               doReturn(fcResponse)
                   .when(fireCloudService)
                   .getWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName);
-              return null;
+              return fcWorkspace;
             })
         .when(fireCloudService)
         .createWorkspace(anyString(), anyString());
