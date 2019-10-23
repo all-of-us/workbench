@@ -43,7 +43,6 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.UserRecentResource;
 import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
@@ -313,10 +312,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private void deleteRecentResourcesForWorkspace(
       org.pmiops.workbench.db.model.Workspace dbWorkspace) {
     // workspace might have many notebooks
-    List<FileDetail> notebookDetails = notebooksService.getNotebooks(dbWorkspace.getWorkspaceNamespace(),
-        dbWorkspace.getFirecloudName());
+    List<FileDetail> notebookDetails =
+        notebooksService.getNotebooks(
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     for (FileDetail notebookDetail : notebookDetails) {
-      userRecentResourceService.deleteNotebookEntry(dbWorkspace.getWorkspaceId(), userProvider.get().getUserId(),
+      userRecentResourceService.deleteNotebookEntry(
+          dbWorkspace.getWorkspaceId(),
+          userProvider.get().getUserId(),
           NotebooksService.withNotebookExtension(notebookDetail.getName()));
     }
   }

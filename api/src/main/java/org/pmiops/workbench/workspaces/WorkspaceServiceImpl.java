@@ -498,9 +498,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     try {
       workspace = findByWorkspaceId(workspaceId);
     } catch (NotFoundException e) {
-      logger.log(Level.INFO,
-          String.format("Workspace ID %d from recent workspaces was not found or inactive",
-              workspaceId));
+      logger.log(
+          Level.INFO,
+          String.format(
+              "Workspace ID %d from recent workspaces was not found or inactive", workspaceId));
       return Optional.empty();
     }
     return Optional.of(workspace);

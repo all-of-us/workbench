@@ -3,14 +3,12 @@ package org.pmiops.workbench.api;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -24,7 +22,6 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -187,15 +184,18 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     for (long workspaceId : workspaceIdList) {
       final Optional<Workspace> workspaceMaybe = workspaceService.getWorkspaceMaybe(workspaceId);
       if (!workspaceMaybe.isPresent()) {
-        logger.log(Level.WARNING,
+        logger.log(
+            Level.WARNING,
             String.format("Workspace ID %d still in recent list but not found", workspaceId));
         continue;
       }
       final Workspace workspace = workspaceMaybe.get();
-      final WorkspaceResponse workspaceResponse = fireCloudService.getWorkspace(
+      final WorkspaceResponse workspaceResponse =
+          fireCloudService.getWorkspace(
               workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
 
-      Optional.ofNullable(workspaceResponse).ifPresent(r -> liveWorkspacesByIdBuilder.put(workspaceId, r));
+      Optional.ofNullable(workspaceResponse)
+          .ifPresent(r -> liveWorkspacesByIdBuilder.put(workspaceId, r));
     }
     ImmutableMap<Long, WorkspaceResponse> liveWorkspacesById = liveWorkspacesByIdBuilder.build();
 
