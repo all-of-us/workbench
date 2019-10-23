@@ -235,7 +235,7 @@ export const ListModifierPage = withCurrentWorkspace()(
           }]
         }, {
           name: ModifierType.EVENTDATE,
-          label: 'Shifted Event Date',
+          label: 'Event Date',
           type: 'date',
           operator: undefined,
           values: [undefined, undefined],
@@ -479,8 +479,9 @@ export const ListModifierPage = withCurrentWorkspace()(
 
     render() {
       const {count, error, formState, loading} = this.state;
-      const tooltip = `Dates are consistently shifted within a participant’s record by a time period
-        of up to 364 days backwards. The date shift differs across participants.`;
+      const tooltip = `Dates are consistently shifted within a participant’s record
+      by a time period of up to 364 days backwards to de-identify patient data.
+      The date shift differs across participants.`;
       const {errors, initialState, untouched} = this.validateValues();
       const disableFinish = !!errors.size || untouched || loading;
       this.props.disabled(disableFinish);
