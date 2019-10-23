@@ -65,14 +65,15 @@ echo "Inserting conditions data into cb_search_person"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
  (person_id, gender, race, ethnicity, dob)
-select p.person_id, g.concept_code as gender,
-case when r.concept_name is null then 'Unknown' else r.concept_name end as race,
-case when e.concept_name is null then 'Unknown' else e.concept_name end as ethnicity,
+select p.person_id,
+case when p.gender_concept_id = 0 then 'Unknown' else g.concept_name end as gender,
+case when p.race_concept_id = 0 then 'Unknown' else regexp_replace(r.concept_name, r'^.+:\s', '') end as race,
+case when e.concept_name is null then 'Unknown' else regexp_replace(e.concept_name, r'^.+:\s', '') end as ethnicity,
 birth_datetime as dob
 from \`$BQ_PROJECT.$BQ_DATASET.person\` p
-join \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id and g.vocabulary_id in ('Gender', 'None'))
-left join \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id and r.vocabulary_id = 'Race')
-left join \`$BQ_PROJECT.$BQ_DATASET.concept\` e on (p.ethnicity_concept_id = e.concept_id and e.vocabulary_id = 'Ethnicity')"
+join \`$BQ_PROJECT.$BQ_DATASET.concept\`  g on (p.gender_concept_id = g.concept_id)
+left join \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id)
+left join \`$BQ_PROJECT.$BQ_DATASET.concept\` e on (p.ethnicity_concept_id = e.concept_id)"
 
 ############################################################
 #   insert source condition data into cb_search_all_events   #
