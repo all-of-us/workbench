@@ -22,7 +22,7 @@ describe('AdminUserBypassSpec', () => {
     });
     props = {
       profile: ProfileStubVariables.PROFILE_STUB
-    }
+    };
   });
 
   it('should render', () => {

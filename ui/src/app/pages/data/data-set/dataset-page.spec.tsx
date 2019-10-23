@@ -23,7 +23,7 @@ import {
   WorkspaceStubVariables
 } from 'testing/stubs/workspaces-api-stub';
 
-describe('DataSet', () => {
+describe('DataSetPage', () => {
   beforeEach(() => {
     registerApiClient(CohortsApi, new CohortsApiStub());
     registerApiClient(ConceptsApi, new ConceptsApiStub());
@@ -186,5 +186,26 @@ describe('DataSet', () => {
     expect(plusIconTooltip.first().props().disabled).toBeFalsy();
     expect(cohortplusIcon.first().props().disabled).toBeTruthy();
     expect(conceptSetplusIcon.first().props().disabled).toBeTruthy();
+  });
+
+  it('should call load data dictionary when caret is expanded', async() => {
+    const spy = jest.spyOn(dataSetApi(), 'getDataDictionaryEntry');
+    const wrapper = mount(<DataSetPage />);
+    await waitOneTickAndUpdate(wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    // Select one cohort , concept and value
+    wrapper.find('[data-test-id="cohort-list-item"]').first()
+      .find('input').first().simulate('change');
+    wrapper.update();
+
+    wrapper.find('[data-test-id="concept-set-list-item"]').first()
+      .find('input').first().simulate('change');
+
+    await waitOneTickAndUpdate(wrapper);
+    wrapper.find('[data-test-id="value-list-expander"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });

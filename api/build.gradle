@@ -532,13 +532,14 @@ task startCronEmulator(dependsOn: ':appengine-cron-emulator:jar') {
   doFirst {
     ext.process = new ProcessBuilder()
             .redirectOutput(ProcessBuilder.Redirect.to(new File("cron-emulator.log")))
+            .redirectError(ProcessBuilder.Redirect.to(new File("cron-emulator-err.log")))
             .directory(projectDir)
             .command("java", "-jar",
                     project(":appengine-cron-emulator").jar.archivePath.getPath(),
                     "$projectDir/src/main/webapp/WEB-INF/cron.yaml"
             ).start()
 
-    println "Started Cron Emulator"
+    println "Started Cron Emulator, check cron-emulator-err.log for startup errors (RW-3755)"
   }
 }
 

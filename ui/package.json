@@ -23,6 +23,7 @@
     "coverage": "ng test --source-map=false --watch=false --code-coverage"
   },
   "jest": {
+    "clearMocks": true,
     "setupFiles": [
       "./test-shim.js",
       "./test-setup.js"

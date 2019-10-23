@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DataDictionaryEntry;
@@ -9,4 +10,6 @@ public interface DataDictionaryEntryDao extends CrudRepository<DataDictionaryEnt
 
   Optional<DataDictionaryEntry> findByRelevantOmopTableAndFieldNameAndCdrVersion(
       String relevantOmopTable, String fieldName, CdrVersion cdrVersion);
+
+  List<DataDictionaryEntry> findByFieldNameAndCdrVersion(String fieldName, CdrVersion cdrVersion);
 }
