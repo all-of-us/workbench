@@ -8,6 +8,7 @@ import org.pmiops.workbench.firecloud.model.JWTWrapper;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.NihStatus;
+import org.pmiops.workbench.firecloud.model.Workspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
@@ -66,7 +67,7 @@ public interface FireCloudService {
       String projectName, String ownerEmailToRemove, String callerAccessToken);
 
   /** Creates a new FC workspace. */
-  void createWorkspace(String projectName, String workspaceName);
+  Workspace createWorkspace(String projectName, String workspaceName);
 
   void cloneWorkspace(String fromProject, String fromName, String toProject, String toName);
 

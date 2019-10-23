@@ -365,8 +365,6 @@ paths:
             type: object
             $ref: '#/definitions/WorkspaceIngest'
       responses:
-        200:
-          description: No response was specified
         201:
           description: Successful Request
           schema:
