@@ -61,7 +61,7 @@ ENVIRONMENTS = {
     :config_json => "config_staging.json",
     :cdr_versions_json => "cdr_versions_staging.json",
     :featured_workspaces_json => "featured_workspaces_staging.json",
-    :gae_vars => TEST_GAE_VARS
+    :gae_vars => make_gae_vars(20, 20)
   },
   "all-of-us-rw-perf" => {
     :env_name => "perf",
