@@ -228,7 +228,9 @@ export const Popup = fp.flow(
       },
       onClick
     } = this.props;
+
     const {position} = computePopupPosition({side, target, element, viewport, gap: 10});
+
     return <PopupPortal>
       <div
         onClick={onClick}
@@ -242,11 +244,20 @@ export const Popup = fp.flow(
   }
 });
 
-export class PopupTrigger extends React.Component {
+interface PopupTriggerProps {
+  children: any;
+  closeOnClick?: boolean;
+  content: any;
+  onOpen?: () => void;
+  onClose?: () => void;
+  side?: string;
+}
+
+export class PopupTrigger extends React.Component<PopupTriggerProps> {
   static readonly defaultProps = {
     closeOnClick: false,
     onOpen: () => {},
-    onClose: () => {}
+    onClose: () => {},
   };
 
   props: any;
@@ -289,7 +300,7 @@ export class PopupTrigger extends React.Component {
           target={this.id}
           handleClickOutside={() => this.close()}
           outsideClickIgnoreClass={this.id}
-          onClick={closeOnClick ? () => this.close() : undefined}
+          onClick={closeOnClick ? () => this.close() : () => {}}
           {...props}
       >{content}</Popup>}
     </React.Fragment>;
