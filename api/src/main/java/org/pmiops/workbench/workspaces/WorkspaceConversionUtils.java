@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
@@ -52,8 +51,7 @@ public class WorkspaceConversionUtils {
   }
 
   public static Workspace toApiWorkspace(
-      org.pmiops.workbench.db.model.Workspace workspace,
-      FirecloudWorkspace fcWorkspace) {
+      org.pmiops.workbench.db.model.Workspace workspace, FirecloudWorkspace fcWorkspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     if (workspace.getPopulation()) {
       researchPurpose.setPopulationDetails(new ArrayList<>(workspace.getSpecificPopulationsEnum()));

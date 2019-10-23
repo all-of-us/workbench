@@ -280,9 +280,7 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   private String aouConfigDataUri(
-      FirecloudWorkspace fcWorkspace,
-      CdrVersion cdrVersion,
-      String cdrBillingCloudProject) {
+      FirecloudWorkspace fcWorkspace, CdrVersion cdrVersion, String cdrBillingCloudProject) {
     JSONObject config = new JSONObject();
 
     String host = null;

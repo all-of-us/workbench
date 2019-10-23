@@ -26,7 +26,6 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceRequest;
@@ -103,12 +102,10 @@ public class UserMetricsControllerTest {
     resource3.setUserId(user.getUserId());
     resource3.setWorkspaceId(workspace2.getWorkspaceId());
 
-    FirecloudWorkspace fcWorkspace =
-        new FirecloudWorkspace();
+    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
     fcWorkspace.setNamespace(workspace1.getFirecloudName());
 
-    FirecloudWorkspace fcWorkspace2 =
-        new FirecloudWorkspace();
+    FirecloudWorkspace fcWorkspace2 = new FirecloudWorkspace();
     fcWorkspace.setNamespace(workspace2.getFirecloudName());
 
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();

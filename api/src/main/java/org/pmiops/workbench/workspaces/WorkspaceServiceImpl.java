@@ -39,10 +39,6 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -192,8 +188,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return workspaceResponse;
   }
 
-  private Map<String, FirecloudWorkspaceResponse>
-      getFirecloudWorkspaces(List<String> fields) {
+  private Map<String, FirecloudWorkspaceResponse> getFirecloudWorkspaces(List<String> fields) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
     return fireCloudService.getWorkspaces(fields).stream()

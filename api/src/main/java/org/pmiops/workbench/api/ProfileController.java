@@ -35,7 +35,6 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.CreationStatusEnum;
-import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -81,16 +80,12 @@ public class ProfileController implements ProfileApiDelegate {
           .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
           .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
           .build();
-  private static final Function<
-          FirecloudBillingProjectMembership, BillingProjectMembership>
+  private static final Function<FirecloudBillingProjectMembership, BillingProjectMembership>
       TO_CLIENT_BILLING_PROJECT_MEMBERSHIP =
-          new Function<
-              FirecloudBillingProjectMembership,
-              BillingProjectMembership>() {
+          new Function<FirecloudBillingProjectMembership, BillingProjectMembership>() {
             @Override
             public BillingProjectMembership apply(
-                FirecloudBillingProjectMembership
-                    billingProjectMembership) {
+                FirecloudBillingProjectMembership billingProjectMembership) {
               BillingProjectMembership result = new BillingProjectMembership();
               result.setProjectName(billingProjectMembership.getProjectName());
               result.setRole(billingProjectMembership.getRole());

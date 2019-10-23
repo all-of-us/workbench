@@ -89,10 +89,6 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AnnotationType;
@@ -414,10 +410,8 @@ public class WorkspacesControllerTest {
     stubGetWorkspace(testMockFactory.createFcWorkspace(ns, name, creator), access);
   }
 
-  private void stubGetWorkspace(
-      FirecloudWorkspace fcWorkspace, WorkspaceAccessLevel access) {
-    FirecloudWorkspaceResponse fcResponse =
-        new FirecloudWorkspaceResponse();
+  private void stubGetWorkspace(FirecloudWorkspace fcWorkspace, WorkspaceAccessLevel access) {
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
     doReturn(fcResponse)
@@ -524,8 +518,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(mockWorkspaceAuditAdapterService).fireCreateAction(any(Workspace.class), anyLong());
 
-    FirecloudWorkspaceResponse fcResponse =
-        new FirecloudWorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
         testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
@@ -1937,8 +1930,7 @@ public class WorkspacesControllerTest {
     when(fireCloudService.getWorkspace("project", "workspace"))
         .thenReturn(
             new FirecloudWorkspaceResponse()
-                .workspace(
-                    new FirecloudWorkspace().bucketName("bucket")));
+                .workspace(new FirecloudWorkspace().bucketName("bucket")));
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     Blob mockBlob3 = mock(Blob.class);
@@ -1967,8 +1959,7 @@ public class WorkspacesControllerTest {
     when(fireCloudService.getWorkspace("project", "workspace"))
         .thenReturn(
             new FirecloudWorkspaceResponse()
-                .workspace(
-                    new FirecloudWorkspace().bucketName("bucket")));
+                .workspace(new FirecloudWorkspace().bucketName("bucket")));
     Blob mockBlob1 = mock(Blob.class);
     Blob mockBlob2 = mock(Blob.class);
     when(mockBlob1.getName())
@@ -2293,8 +2284,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
 
-    FirecloudWorkspaceResponse fcResponse =
-        new FirecloudWorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
         testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
@@ -2314,8 +2304,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
 
-    FirecloudWorkspaceResponse fcResponse =
-        new FirecloudWorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
         testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
@@ -2334,8 +2323,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
 
-    FirecloudWorkspaceResponse fcResponse =
-        new FirecloudWorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
         testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
@@ -2354,8 +2342,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspacesController.publishWorkspace(workspace.getNamespace(), workspace.getId());
 
-    FirecloudWorkspaceResponse fcResponse =
-        new FirecloudWorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
         testMockFactory.createFcWorkspace(workspace.getNamespace(), workspace.getName(), null));
     fcResponse.setAccessLevel(WorkspaceAccessLevel.READER.toString());
