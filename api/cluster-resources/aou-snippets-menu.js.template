@@ -8,16 +8,22 @@ define([
   // specific code snippets. See
   // https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/snippets_menu/readme.html
   const load = () => {
-    const pyMenu = {{PY_MENU_JSON}};
-    const rMenu = {{R_MENU_JSON}};
+    const pyMenus = [
+      {{PY_MENU_JSON}},
+      {{PY_DATASET_MENU_JSON}}
+    ];
+    const rMenus = [
+      {{R_MENU_JSON}},
+      {{R_DATASET_MENU_JSON}}
+    ];
 
     const handleKernel = (kernelName) => {
       // Show the menu which is relevant to the current kernel. Show both as a fallback.
-      let customMenus = [pyMenu, rMenu];
+      let customMenus = [...pyMenus, ...rMenus];
       if (kernelName.startsWith("python")) {
-        customMenus = [pyMenu];
+        customMenus = pyMenus;
       } else if (kernelName === "ir") {
-        customMenus = [rMenu];
+        customMenus = rMenus;
       }
 
       // Avoid mutating the original default_menus to reduce side-effects.

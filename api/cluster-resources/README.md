@@ -86,9 +86,9 @@ Prerequisite: Must have `jq` installed (for pretty printing).
 
     ```
     export SNIPPETS_BUILD_DIR="<path to build dir of workbench-snippets repo (no trailing /)>"
-    for lang in py r; do
-      jq '.' "${SNIPPETS_BUILD_DIR}/${lang}_jupyter_snippets_menu_extension_config.json" > \
-        "$(git rev-parse --show-toplevel)/api/cluster-resources/${lang}-snippets-menu.json"
+    for name in py py_dataset r r_dataset; do
+      jq '.' "${SNIPPETS_BUILD_DIR}/${name}_snippets_menu_config.json" > \
+        "$(git rev-parse --show-toplevel)/api/cluster-resources/$(echo ${name} | tr '_' '-')-snippets-menu.json";
     done
     ```
 1. Commit changes and go through normal pull request process.
