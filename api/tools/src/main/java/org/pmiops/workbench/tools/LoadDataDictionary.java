@@ -81,7 +81,7 @@ public class LoadDataDictionary {
             targetEntry = new DataDictionaryEntry();
             targetEntry.setRelevantOmopTable(field.getRelevant_omop_table());
             targetEntry.setFieldName(field.getField_name());
-            targetEntry.setCdrVersion(defaultCdrVersion);
+            targetEntry.setCdrVersion(cdrVersion);
           } else {
             targetEntry = entry.get();
           }
