@@ -7,20 +7,23 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "workspace_free_tier_usage")
 public class WorkspaceFreeTierUsage {
   private long id;
-  private long userId;
-  private long workspaceId;
+  private User user;
+  private Workspace workspace;
   private double cost;
   private Timestamp lastUpdateTime;
 
   public WorkspaceFreeTierUsage(Workspace workspace) {
-    this.userId = workspace.getCreator().getUserId();
-    this.workspaceId = workspace.getWorkspaceId();
+    this.user = workspace.getCreator();
+    this.workspace = workspace;
   }
 
   @Id
@@ -34,22 +37,24 @@ public class WorkspaceFreeTierUsage {
     this.id = id;
   }
 
-  @Column(name = "user_id")
-  public long getUserId() {
-    return userId;
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  public User getUser() {
+    return user;
   }
 
-  public void setUserId(Long userId) {
-    this.userId = userId;
+  public void setUser(User user) {
+    this.user = user;
   }
 
-  @Column(name = "workspace_id")
-  public long getWorkspaceId() {
-    return workspaceId;
+  @OneToOne
+  @JoinColumn(name = "workspace_id")
+  public Workspace getWorkspace() {
+    return workspace;
   }
 
-  public void setWorkspaceId(long workspaceId) {
-    this.workspaceId = workspaceId;
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
   }
 
   @Column(name = "cost")
@@ -65,6 +70,10 @@ public class WorkspaceFreeTierUsage {
   @Column(name = "last_update_time")
   public Timestamp getLastUpdateTime() {
     return lastUpdateTime;
+  }
+
+  private void setLastUpdateTime(Timestamp lastUpdateTime) {
+    this.lastUpdateTime = lastUpdateTime;
   }
 
   private void setLastUpdateTime() {

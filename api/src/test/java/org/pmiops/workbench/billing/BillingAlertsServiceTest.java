@@ -227,9 +227,9 @@ public class BillingAlertsServiceTest {
       assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
       WorkspaceFreeTierUsage usage =
-          workspaceFreeTierUsageDao.findOneByWorkspaceId(ws.getWorkspaceId());
-      assertThat(usage.getUserId()).isEqualTo(user.getUserId());
-      assertThat(usage.getWorkspaceId()).isEqualTo(ws.getWorkspaceId());
+          workspaceFreeTierUsageDao.findOneByWorkspace(ws);
+      assertThat(usage.getUser()).isEqualTo(user);
+      assertThat(usage.getWorkspace()).isEqualTo(ws);
       assertThat(usage.getCost())
           .isCloseTo(expectedCosts.get(ws.getWorkspaceId()), withinPercentage(0.001));
     }
@@ -260,9 +260,9 @@ public class BillingAlertsServiceTest {
       assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
       WorkspaceFreeTierUsage usage =
-          workspaceFreeTierUsageDao.findOneByWorkspaceId(ws.getWorkspaceId());
-      assertThat(usage.getUserId()).isEqualTo(ws.getCreator().getUserId());
-      assertThat(usage.getWorkspaceId()).isEqualTo(ws.getWorkspaceId());
+          workspaceFreeTierUsageDao.findOneByWorkspace(ws);
+      assertThat(usage.getUser()).isEqualTo(ws.getCreator());
+      assertThat(usage.getWorkspace()).isEqualTo(ws);
       assertThat(usage.getCost())
           .isCloseTo(expectedCosts.get(ws.getWorkspaceId()), withinPercentage(0.001));
     }
@@ -323,8 +323,8 @@ public class BillingAlertsServiceTest {
 
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(1);
     WorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
-    assertThat(dbEntry.getUserId()).isEqualTo(user.getUserId());
-    assertThat(dbEntry.getWorkspaceId()).isEqualTo(workspace.getWorkspaceId());
+    assertThat(dbEntry.getUser()).isEqualTo(user);
+    assertThat(dbEntry.getWorkspace()).isEqualTo(workspace);
     assertThat(dbEntry.getCost())
         .isCloseTo(SINGLE_WORKSPACE_TEST_COST * 2, withinPercentage(0.001));
 
@@ -359,8 +359,8 @@ public class BillingAlertsServiceTest {
 
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(1);
     final WorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
-    assertThat(dbEntry.getUserId()).isEqualTo(user.getUserId());
-    assertThat(dbEntry.getWorkspaceId()).isEqualTo(workspace.getWorkspaceId());
+    assertThat(dbEntry.getUser()).isEqualTo(user);
+    assertThat(dbEntry.getWorkspace()).isEqualTo(workspace);
     assertThat(dbEntry.getCost()).isCloseTo(SINGLE_WORKSPACE_TEST_COST, withinPercentage(0.001));
   }
 
