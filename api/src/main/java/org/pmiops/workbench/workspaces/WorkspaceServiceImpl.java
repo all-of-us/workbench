@@ -593,12 +593,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
+  @Transactional
   public UserRecentWorkspace updateRecentWorkspaces(Workspace workspace) {
     return updateRecentWorkspaces(
         workspace, userProvider.get().getUserId(), new Timestamp(clock.instant().toEpochMilli()));
   }
 
-  @Transactional
   private void handleWorkspaceLimit(long userId) {
     List<UserRecentWorkspace> userRecentWorkspaces =
         userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
