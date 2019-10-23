@@ -45,7 +45,8 @@ const styles = reactStyles({
   caret: {
     cursor: 'pointer',
     float: 'right',
-    transition: 'transform 0.2s ease-out',
+    marginTop: '3px',
+    transition: 'transform 0.1s ease-out',
   },
   parameterList: {
     height: 'auto',
@@ -79,6 +80,35 @@ const itemStyles = `
     color: ${colors.accent}!important
   }
 `;
+
+class SearchGroupItemParameter extends React.Component<{parameter: any}, {tooltip: boolean}> {
+  element: HTMLDivElement;
+  overlay: any;
+  constructor(props: any) {
+    super(props);
+    this.state = {tooltip: false};
+  }
+
+  componentDidMount(): void {
+    const {offsetWidth, scrollWidth} = this.element;
+    this.setState({tooltip: scrollWidth > offsetWidth});
+  }
+
+  render() {
+    const {parameter, parameter: {domainId}} = this.props;
+    const {tooltip} = this.state;
+    const showCode = [DomainType.CONDITION, DomainType.DRUG, DomainType.MEASUREMENT, DomainType.PROCEDURE].includes(domainId);
+    return <div ref={el => this.element = el} style={styles.parameter}>
+      <span style={domainId === DomainType.PERSON ? {textTransform: 'capitalize'} : {}}
+            onMouseEnter={(e) => tooltip && this.overlay.show(e)} onMouseLeave={() => tooltip && this.overlay.hide()}>
+        {showCode && <b>{parameter.code}</b>} {parameter.name}
+      </span>
+      {tooltip && <OverlayPanel style={{maxWidth: '30%'}} ref={el => this.overlay = el} appendTo={document.body}>
+        {parameter.name}
+      </OverlayPanel>}
+    </div>;
+  }
+}
 
 interface Props {
   role: keyof SearchRequest;
@@ -216,19 +246,6 @@ export const SearchGroupItem = withCurrentWorkspace()(
       wizardStore.next(context);
     }
 
-    parameterDisplay(param: any) {
-      const {domainId} = param;
-      let op: any;
-      const showCode = [DomainType.CONDITION, DomainType.DRUG, DomainType.MEASUREMENT, DomainType.PROCEDURE].includes(domainId);
-      return <React.Fragment>
-        <span style={domainId === DomainType.PERSON ? {textTransform: 'capitalize'} : {}}
-          onMouseEnter={(e) => op.show(e)} onMouseLeave={() => op.hide()}>
-          {showCode && <b>{param.code}</b>} {param.name}
-        </span>
-        <OverlayPanel ref={el => op = el} appendTo={document.body}>{param.name}</OverlayPanel>
-      </React.Fragment>;
-    }
-
     modifierDisplay(mod: Modifier) {
       const {name, operands, operator} = mod;
       switch (name) {
@@ -284,13 +301,11 @@ export const SearchGroupItem = withCurrentWorkspace()(
             </span>
           </div>}
           <ClrIcon style={{...styles.caret, ...(paramListOpen ? {transform: 'rotate(90deg)'} : {})}}
-                   shape={`caret right`} size={24}
+                   shape={`caret right`} size={18}
                    onClick={() => this.setState({paramListOpen: !paramListOpen})} />
         </div>}
         <div style={{...styles.parameterList, maxHeight: paramListOpen ? '15rem' : 0}}>
-          {searchParameters.slice(0, 5).map((param, p) => <div key={p} style={styles.parameter}>
-            {this.parameterDisplay(param)}
-          </div>)}
+          {searchParameters.slice(0, 5).map((param, p) => <SearchGroupItemParameter key={p} parameter={param} />)}
           {searchParameters.length > 5 && <span style={styles.viewMore} onClick={() => this.launchWizard()}>
             View/edit all criteria ({searchParameters.length - 5} more)
           </span>}
