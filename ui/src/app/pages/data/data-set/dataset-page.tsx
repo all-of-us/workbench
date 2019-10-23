@@ -58,17 +58,20 @@ export const styles = {
     color: colors.primary,
     textTransform: 'uppercase'
   } as React.CSSProperties,
+
   dataDictionarySubheader: {
     fontSize: '13px',
     fontWeight: 600,
     color: colors.primary,
     paddingTop: '0.5rem'
-  },
+  } as React.CSSProperties,
+
   dataDictionaryText: {
     color: colors.primary,
     fontSize: '13px',
     lineHeight: '20px'
-  },
+  } as React.CSSProperties,
+
   selectBoxHeader: {
     fontSize: '16px',
     height: '2rem',
@@ -80,12 +83,13 @@ export const styles = {
     justifyContent: 'space-between',
     flexDirection: 'row'
   } as React.CSSProperties,
+
   listItem: {
     border: `0.5px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
     margin: '.4rem .4rem .4rem .55rem',
     height: '1.5rem',
     display: 'flex'
-  },
+  } as React.CSSProperties,
 
   listItemCheckbox: {
     height: 17,
@@ -94,7 +98,7 @@ export const styles = {
     marginTop: 10,
     marginRight: 10,
     backgroundColor: colors.success
-  },
+  } as React.CSSProperties,
 
   valueListItemCheckboxStyling: {
     height: 17,
@@ -102,7 +106,7 @@ export const styles = {
     marginTop: 10,
     marginRight: 10,
     backgroundColor: colors.success
-  },
+  } as React.CSSProperties,
 
   subheader: {
     fontWeight: 400,
@@ -110,7 +114,7 @@ export const styles = {
     marginTop: '0.5rem',
     paddingLeft: '0.55rem',
     color: colors.primary
-  },
+  } as React.CSSProperties,
 
   previewButtonBox: {
     width: '100%',
@@ -147,7 +151,7 @@ export const styles = {
     paddingRight: '1.5rem',
     justifyContent: 'space-between',
     display: 'flex'
-  },
+  } as React.CSSProperties,
 
   warningMessage: {
     display: 'flex',
@@ -165,19 +169,19 @@ export const styles = {
     width: '5rem',
     display: 'flex',
     alignItems: 'center'
-  },
+  } as React.CSSProperties,
   previewLink: {
     marginTop: '0.5rem',
     height: '1.8rem',
     width: '6.5rem',
     color: colors.secondary
-  },
+  } as React.CSSProperties,
   footer: {
     display: 'block',
     padding: '20px',
     height: '60px',
     width: '100%'
-  },
+  } as React.CSSProperties,
   stickyFooter: {
     backgroundColor: colors.white,
     borderTop: `1px solid ${colors.light}`,
@@ -202,7 +206,7 @@ export const styles = {
       display: 'flex',
       justifyContent: 'center',
       lineHeight: '19px'
-    };
+    } as React.CSSProperties;
   }
 };
 
@@ -289,7 +293,7 @@ export class ValueListItem extends React.Component<
       });
   }
 
-  showDataDictionaryEntry() {
+  toggleDataDictionaryEntry() {
     this.setState({showDataDictionaryEntry: !this.state.showDataDictionaryEntry});
 
     if (this.state.dataDictionaryEntry === undefined) {
@@ -316,7 +320,7 @@ export class ValueListItem extends React.Component<
           <FlexRow style={{justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
             <div style={{lineHeight: '1.5rem', paddingLeft: 10, wordWrap: 'break-word', color: colors.primary}}>
               {domainValue.value}</div>
-            <Clickable onClick={() => this.showDataDictionaryEntry()} data-test-id='value-list-expander'>
+            <Clickable onClick={() => this.toggleDataDictionaryEntry()} data-test-id='value-list-expander'>
               <ClrIcon shape='angle' style={{transform: showDataDictionaryEntry ? 'rotate(180deg)' : 'rotate(90deg)',
                 color: colors.accent, height: 18, width: 18}} />
             </Clickable>

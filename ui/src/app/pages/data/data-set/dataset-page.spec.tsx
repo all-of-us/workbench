@@ -102,16 +102,12 @@ describe('DataSetPage', () => {
         .find('input').first().simulate('change');
 
       await waitOneTickAndUpdate(wrapper);
-      await waitOneTickAndUpdate(wrapper);
 
       wrapper.find('[data-test-id="value-list-items"]').find('input').first()
         .simulate('change');
 
-      await waitOneTickAndUpdate(wrapper);
-
       // Buttons should now be enabled
       const buttons = wrapper.find(Button);
-      await waitOneTickAndUpdate(wrapper);
       expect(buttons.find('[data-test-id="save-button"]').first().prop('disabled'))
         .toBeFalsy();
       expect(wrapper.find(Clickable).find('[data-test-id="preview-button"]').first()
@@ -192,7 +188,7 @@ describe('DataSetPage', () => {
     expect(conceptSetplusIcon.first().props().disabled).toBeTruthy();
   });
 
-  it('should call load data dictionary when carot is expanded', async() => {
+  it('should call load data dictionary when caret is expanded', async() => {
     const spy = jest.spyOn(dataSetApi(), 'getDataDictionaryEntry');
     const wrapper = mount(<DataSetPage />);
     await waitOneTickAndUpdate(wrapper);
