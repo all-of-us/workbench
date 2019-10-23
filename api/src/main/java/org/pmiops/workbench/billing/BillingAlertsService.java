@@ -84,7 +84,8 @@ public class BillingAlertsService {
         QueryJobConfiguration.newBuilder(
                 "SELECT project.id, SUM(cost) cost FROM `"
                     + workbenchConfigProvider.get().billing.exportBigQueryTable
-                    + "` GROUP BY project.id ORDER BY cost desc;")
+                    + "` WHERE project.id IS NOT NULL "
+                    + "GROUP BY project.id ORDER BY cost desc;")
             .build();
 
     final Map<Workspace, Double> workspaceCosts = new HashMap<>();

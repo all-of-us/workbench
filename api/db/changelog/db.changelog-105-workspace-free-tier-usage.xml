@@ -7,7 +7,7 @@
   <changeSet author="thibault" id="changelog-105-workspace-free-tier-usage">
 
     <createTable tableName="workspace_free_tier_usage">
-      <column name="id" type="bigint" autoIncrement="true">
+      <column name="workspace_free_tier_usage_id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="user_id" type="bigint">

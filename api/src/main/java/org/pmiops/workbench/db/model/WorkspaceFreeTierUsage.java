@@ -21,6 +21,8 @@ public class WorkspaceFreeTierUsage {
   private double cost;
   private Timestamp lastUpdateTime;
 
+  public WorkspaceFreeTierUsage() {}
+
   public WorkspaceFreeTierUsage(Workspace workspace) {
     this.user = workspace.getCreator();
     this.workspace = workspace;
@@ -28,7 +30,7 @@ public class WorkspaceFreeTierUsage {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id")
+  @Column(name = "workspace_free_tier_usage_id")
   public long getId() {
     return id;
   }
