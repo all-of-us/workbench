@@ -78,6 +78,18 @@ export const panels = [
     image: '/assets/images/concepts.png'
   },
   {
+    title: 'Datasets',
+    shortTitle: 'Datasets',
+    content: <div>Datasets are analysis-ready tables that can be exported to a Notebook.
+      You can build and preview a dataset for one or more cohorts by selecting the desired
+      concept sets and values for the cohorts.
+      <br/><br/>
+      For example, select your cohort called “diabetes cases” and your concept set called
+      “biometrics” and then the values from the concept set you want to see. Before exporting
+      the dataset, you can preview the resulting data frame that will be sent to the notebook.</div>,
+    image: '/assets/images/concepts.png'
+  },
+  {
     title: 'Notebooks',
     shortTitle: 'Notebooks',
     content: <div>A Notebook is a computational environment where you can analyze data with basic
@@ -160,9 +172,9 @@ const styles = reactStyles({
     display: 'inline-block'
   },
   connector: {
-    border: `2px solid ${notReachedSelectorColor}`,
+    border: `1px solid ${notReachedSelectorColor}`,
     boxSizing: 'border-box',
-    height: '3px',
+    height: '1px',
     width: '107px',
     position: 'relative',
     left: '21.92px',
@@ -246,7 +258,7 @@ const completedStyles = {
   },
   connectorCompleted: {
     ...styles.connector,
-    border: `2px solid ${colors.secondary}`
+    border: `1px solid ${colors.secondary}`
   }
 };
 
@@ -325,7 +337,7 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
           <div style={styles.breadcrumbs}>
             {panels.map((p, i) => {
               return <React.Fragment key={i}>
-                <div style={{width: '128px'}}>
+                <div style={{width: i === panels.length - 1 ? null : '128px'}}>
                   <div style={selected ? completedStyles.circleCompleted : styles.circle}
                        data-test-id={'breadcrumb' + i}
                        onClick={() => this.selectPanel(i)}>
