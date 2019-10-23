@@ -23,7 +23,7 @@ export const panels = [
       allows you to select data types for analysis. The cohorts and concept sets
       you make can then be accessed from “Notebooks,” the analysis environment. <br/><br/>
       For illustration, let's consider research on 'Type 2 diabetes' for this quick tour.</div>,
-    image: '/assets/images/intro.png'
+    image: '/assets/images/quick-tour/homepage.png'
   },
   {
     title: 'Workspaces',
@@ -45,7 +45,7 @@ export const panels = [
       2 Diabetes, for research purpose you could enter: “I will use this Workspace to
       investigate the impact of Geography on use of different medications to treat
       Type 2Diabetes.”</div>,
-    image: '/assets/images/workspaces.png'
+    image: '/assets/images/quick-tour/workspaces.png'
   },
   {
     title: 'Cohorts',
@@ -60,7 +60,7 @@ export const panels = [
       you can go through and manually review the records for each participant and decide if
       you want to include or exclude them from your Cohort and make specific
       annotations/notes to each record.</div>,
-    image: '/assets/images/cohorts.png'
+    image: '/assets/images/quick-tour/cohorts.png'
   },
   {
     title: 'Concepts',
@@ -75,7 +75,7 @@ export const panels = [
       (concepts) from your “diabetes cases” Cohort, you can search for the 3 concepts
       from the “Measurements” domain and call it “biometrics” Concept Set. You can then
       use Notebooks to extract that information from your cohort.</div>,
-    image: '/assets/images/concepts.png'
+    image: '/assets/images/quick-tour/concept-sets.png'
   },
   {
     title: 'Datasets',
@@ -87,7 +87,7 @@ export const panels = [
       For example, select your cohort called “diabetes cases” and your concept set called
       “biometrics” and then the values from the concept set you want to see. Before exporting
       the dataset, you can preview the resulting data frame that will be sent to the notebook.</div>,
-    image: '/assets/images/concepts.png'
+    image: '/assets/images/quick-tour/datasets.png'
   },
   {
     title: 'Notebooks',
@@ -101,7 +101,7 @@ export const panels = [
       to import your “diabetes cases” Cohort and then select your “biometrics” Concept Set, to
       get biometrics data for the participants in your Cohort. You can then analyze the data to
       study correlation between hypertension and diabetes.</div>,
-    image: '/assets/images/notebooks.png'
+    image: '/assets/images/quick-tour/notebooks.png'
   }];
 
 const styles = reactStyles({
