@@ -13,8 +13,9 @@ import {TwoColPaddedTable} from 'app/components/tables';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCdrVersions, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
+import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
-import {ArchivalStatus, CdrVersion, CdrVersionListResponse, DataAccessLevel, SpecificPopulationEnum, Workspace} from 'generated/fetch';
+import {ArchivalStatus, CdrVersion, CdrVersionListResponse, DataAccessLevel, SpecificPopulationEnum, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -188,6 +189,11 @@ export const specificPopulations = [
   }
 ];
 
+// Poll parameters to check Workspace ACLs after creation of a new workspace. See
+// SATURN-104 for details, eventually the root cause should be resolved by fixes
+// to Sam (as part of Postgres migration).
+const NEW_ACL_DELAY_POLL_TIMEOUT_MS = 60 * 1000;
+const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
 
 const styles = reactStyles({
   header: {
@@ -341,6 +347,8 @@ export interface WorkspaceEditState {
   workspaceCreationConflictError: boolean;
   workspaceCreationError: boolean;
   workspaceCreationErrorMessage: string;
+  workspaceNewAclDelayed: boolean;
+  workspaceNewAclDelayedContinueFn: Function;
   cloneUserRole: boolean;
   loading: boolean;
   showUnderservedPopulationDetails: boolean;
@@ -382,6 +390,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         workspaceCreationConflictError: false,
         workspaceCreationError: false,
         workspaceCreationErrorMessage: '',
+        workspaceNewAclDelayed: false,
+        workspaceNewAclDelayedContinueFn: () => {},
         cloneUserRole: false,
         loading: false,
         showUnderservedPopulationDetails: false,
@@ -532,7 +542,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         let workspace = this.state.workspace;
         if (this.isMode(WorkspaceEditMode.Create)) {
           workspace =
-              await workspacesApi().createWorkspace(this.state.workspace);
+            await workspacesApi().createWorkspace(this.state.workspace);
         } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
           const cloneWorkspace = await workspacesApi().cloneWorkspace(
             this.props.workspace.namespace, this.props.workspace.id,
@@ -552,7 +562,33 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               accessLevel: ws.accessLevel
             }));
         }
-        navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+
+        const navigateToWorkspace = () => navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+        if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
+          let accessLevel = null;
+          let pollTimedOut = false;
+          setTimeout(() => pollTimedOut = true, NEW_ACL_DELAY_POLL_TIMEOUT_MS);
+          while (!pollTimedOut) {
+            ({workspace, accessLevel} = await workspacesApi().getWorkspace(workspace.namespace, workspace.id));
+            if (accessLevel === WorkspaceAccessLevel.OWNER) {
+              break;
+            }
+            await new Promise((accept) => setTimeout(accept, NEW_ACL_DELAY_POLL_INTERVAL_MS));
+          }
+          if (accessLevel !== WorkspaceAccessLevel.OWNER) {
+            reportError(new Error(
+              `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
+              ` accessLevel: ${accessLevel}`));
+            this.setState({
+              loading: false,
+              workspaceNewAclDelayed: true,
+              workspaceNewAclDelayedContinueFn: navigateToWorkspace
+            });
+            return;
+          }
+        }
+        navigateToWorkspace();
+
       } catch (error) {
         console.log(error);
         this.setState({loading: false});
@@ -839,7 +875,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               { this.noDiseaseOfFocusSpecified && <li>Disease of focus</li>}
             </ul>]} disabled={!this.disableButton}>
               <Button type='primary' onClick={() => this.saveWorkspace()}
-                      disabled={this.disableButton || this.state.loading}>
+                      disabled={this.disableButton || this.state.loading}
+                      data-test-id='workspace-save-btn'>
                 {this.renderButtonText()}
               </Button>
             </TooltipTrigger>
@@ -877,6 +914,22 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <Button type='secondary' onClick = {() => this.props.cancel()}
                     style={{marginRight: '2rem'}}>Cancel Creation</Button>
             <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
+          </ModalFooter>
+        </Modal>
+        }
+        {this.state.workspaceNewAclDelayed &&
+        <Modal>
+          <ModalTitle>Workspace permissions delay</ModalTitle>
+          <ModalBody>
+            The permissions for this workspace are currently being set up. You can continue to use
+            this workspace as a 'Reader'. Please refresh the workspace page in a few minutes to be
+            able to create Cohorts, Datasets and Notebooks.
+          </ModalBody>
+          <ModalFooter>
+            <Button type='primary' data-test-id='workspace-acl-delay-btn'
+                    onClick={() => this.state.workspaceNewAclDelayedContinueFn()}>
+              Continue
+            </Button>
           </ModalFooter>
         </Modal>
         }
