@@ -179,9 +179,9 @@ public class ClusterControllerTest {
             .createdDate(createdDate);
   }
 
-  private org.pmiops.workbench.firecloud.model.Workspace createFcWorkspace(
+  private FirecloudWorkspace createFcWorkspace(
       String ns, String name, String creator) {
-    return new org.pmiops.workbench.firecloud.model.Workspace()
+    return new FirecloudWorkspace()
         .namespace(ns)
         .name(name)
         .createdBy(creator)
@@ -197,10 +197,10 @@ public class ClusterControllerTest {
     stubGetFcWorkspace(createFcWorkspace(ns, name, creator));
   }
 
-  private void stubGetFcWorkspace(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace)
+  private void stubGetFcWorkspace(FirecloudWorkspace fcWorkspace)
       throws Exception {
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse =
+        new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     when(fireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))

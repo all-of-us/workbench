@@ -165,7 +165,7 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<ClusterLocalizeResponse> localize(
       String projectName, String clusterName, ClusterLocalizeRequest body) {
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
+    FirecloudWorkspace fcWorkspace;
     try {
       fcWorkspace =
           fireCloudService
@@ -280,7 +280,7 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   private String aouConfigDataUri(
-      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+      FirecloudWorkspace fcWorkspace,
       CdrVersion cdrVersion,
       String cdrBillingCloudProject) {
     JSONObject config = new JSONObject();

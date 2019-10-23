@@ -39,10 +39,10 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.WorkspaceACL;
-import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -142,7 +142,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces() {
-    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
+    Map<String, FirecloudWorkspaceResponse> fcWorkspaces =
         getFirecloudWorkspaces(ImmutableList.of("accessLevel", "workspace.workspaceId"));
     List<Workspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
 
@@ -168,8 +168,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     Workspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
 
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
+    FirecloudWorkspaceResponse fcResponse;
+    FirecloudWorkspace fcWorkspace;
 
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
@@ -192,7 +192,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return workspaceResponse;
   }
 
-  private Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse>
+  private Map<String, FirecloudWorkspaceResponse>
       getFirecloudWorkspaces(List<String> fields) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail

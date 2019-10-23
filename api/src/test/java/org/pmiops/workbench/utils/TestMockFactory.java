@@ -16,10 +16,10 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 public class TestMockFactory {
   private static final String BUCKET_NAME = "workspace-bucket";
 
-  public org.pmiops.workbench.firecloud.model.Workspace createFcWorkspace(
+  public FirecloudWorkspace createFcWorkspace(
       String ns, String name, String creator) {
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        new org.pmiops.workbench.firecloud.model.Workspace();
+    FirecloudWorkspace fcWorkspace =
+        new FirecloudWorkspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setWorkspaceId(ns);
     fcWorkspace.setName(name);
@@ -33,8 +33,8 @@ public class TestMockFactory {
             invocation -> {
               String capturedWorkspaceName = (String) invocation.getArguments()[1];
               String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
-              org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-                  new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+              FirecloudWorkspaceResponse fcResponse =
+                  new FirecloudWorkspaceResponse();
               fcResponse.setWorkspace(
                   createFcWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null));
               fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());

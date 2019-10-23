@@ -32,10 +32,10 @@ import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.auth.OAuth;
-import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
-import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
-import org.pmiops.workbench.firecloud.model.NihStatus;
-import org.pmiops.workbench.firecloud.model.SystemStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
+import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudSystemStatus;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 
