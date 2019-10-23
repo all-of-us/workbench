@@ -11,7 +11,6 @@ export default {
   success: '#8BC990',
   // Used for tables
   light: '#E9ECEF',
-  lightestBackground: '#F1F2F6',
   lightBackground: '#E6E4Ed',
   highlight: '#F8C954',
   warning: '#F7981C',
