@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import java.sql.Timestamp;
@@ -23,6 +24,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -181,36 +183,25 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // This needs to be refactored to only use namespace and FC ID
     // The purpose of this Map, is to check what is actually still present in FC
 
-    ImmutableMap.Builder<Long, WorkspaceResponse> liveWorkspacesById = new Builder<>();
+    ImmutableMap.Builder<Long, WorkspaceResponse> liveWorkspacesByIdBuilder = new Builder<>();
     for (long workspaceId : workspaceIdList) {
-      final Workspace workspace = workspaceService.findByWorkspaceId(workspaceId);
-      if (workspace == null) {
+      final Optional<Workspace> workspaceMaybe = workspaceService.getWorkspaceMaybe(workspaceId);
+      if (!workspaceMaybe.isPresent()) {
         logger.log(Level.WARNING,
             String.format("Workspace ID %d still in recent list but not found", workspaceId));
         continue;
       }
+      final Workspace workspace = workspaceMaybe.get();
       final WorkspaceResponse workspaceResponse = fireCloudService.getWorkspace(
               workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-//      if (workspaceResponse.getWorkspace())
-      Optional.ofNullable(workspaceResponse).ifPresent(r -> liveWorkspacesById.put(workspaceId, r));
-    }
 
-    Map<Long, WorkspaceResponse> workspaceAccessMap =
-        workspaceIdList.stream()
-            .collect(
-                Collectors.toMap(
-                    id -> id,
-                    id -> {
-                      Workspace workspace = workspaceService.findByWorkspaceId(id);
-                      WorkspaceResponse workspaceResponse =
-                          fireCloudService.getWorkspace(
-                              workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-                      return workspaceResponse;
-                    }));
+      Optional.ofNullable(workspaceResponse).ifPresent(r -> liveWorkspacesByIdBuilder.put(workspaceId, r));
+    }
+    ImmutableMap<Long, WorkspaceResponse> liveWorkspacesById = liveWorkspacesByIdBuilder.build();
 
     List<UserRecentResource> workspaceFilteredResources =
         userRecentResourceList.stream()
-            .filter(r -> workspaceAccessMap.containsKey(r.getWorkspaceId()))
+            .filter(r -> liveWorkspacesById.containsKey(r.getWorkspaceId()))
             // Drop any invalid notebook resources - parseBlobId will log errors.
             .filter(r -> r.getNotebookName() == null || parseBlobId(r.getNotebookName()) != null)
             .collect(Collectors.toList());
@@ -239,7 +230,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 userRecentResource -> {
                   RecentResource resource = TO_CLIENT.apply(userRecentResource);
                   WorkspaceResponse workspaceDetails =
-                      workspaceAccessMap.get(userRecentResource.getWorkspaceId());
+                      liveWorkspacesById.get(userRecentResource.getWorkspaceId());
                   resource.setPermission(workspaceDetails.getAccessLevel());
                   resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
                   resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());

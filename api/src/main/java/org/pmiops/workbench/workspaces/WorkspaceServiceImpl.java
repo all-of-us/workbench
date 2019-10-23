@@ -60,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService {
+  private static final Logger logger = Logger.getLogger(WorkspaceServiceImpl.class.getName());
 
   private static final String FC_OWNER_ROLE = "OWNER";
   protected static final int RECENT_WORKSPACE_COUNT = 4;
@@ -487,6 +488,22 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       throw new NotFoundException(String.format("Workspace %s not found.", workspaceId));
     }
     return workspace;
+  }
+
+  // Handling the NotFoundException is awkward when calling these methods from other services.
+  // I'd much rather treat this as optional since it's a soft delete anyway.
+  @Override
+  public Optional<Workspace> getWorkspaceMaybe(long workspaceId) {
+    final Workspace workspace;
+    try {
+      workspace = findByWorkspaceId(workspaceId);
+    } catch (NotFoundException e) {
+      logger.log(Level.INFO,
+          String.format("Workspace ID %d from recent workspaces was not found or inactive",
+              workspaceId));
+      return Optional.empty();
+    }
+    return Optional.of(workspace);
   }
 
   @Override
