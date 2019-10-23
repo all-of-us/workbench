@@ -47,7 +47,6 @@ public class LoadDataDictionary {
 
       boolean dryRun = Boolean.parseBoolean(args[0]);
 
-      CdrVersion defaultCdrVersion = cdrVersionDao.findByIsDefault(true);
       ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
       SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
       mapper.setDateFormat(df);
