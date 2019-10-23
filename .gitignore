@@ -6,6 +6,7 @@
 .externalToolBuilders
 .settings
 cron-emulator.log
+cron-emulator-err.log
 /api/?/
 /api/cluster-resources/generated/*
 /api/db/?/
