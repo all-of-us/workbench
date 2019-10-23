@@ -482,26 +482,18 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public Workspace findByWorkspaceId(long workspaceId) {
-    Workspace workspace = getDao().findOne(workspaceId);
-    if (workspace == null
-        || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
-      throw new NotFoundException(String.format("Workspace %s not found.", workspaceId));
-    }
-    return workspace;
+    return getWorkspaceMaybe(workspaceId)
+        .orElseThrow(
+            () -> new NotFoundException(String.format("Workspace %s not found.", workspaceId)));
   }
 
   // Handling the NotFoundException is awkward when calling these methods from other services.
   // I'd much rather treat this as optional since it's a soft delete anyway.
   @Override
   public Optional<Workspace> getWorkspaceMaybe(long workspaceId) {
-    final Workspace workspace;
-    try {
-      workspace = findByWorkspaceId(workspaceId);
-    } catch (NotFoundException e) {
-      logger.log(
-          Level.INFO,
-          String.format(
-              "Workspace ID %d from recent workspaces was not found or inactive", workspaceId));
+    Workspace workspace = getDao().findOne(workspaceId);
+    if (workspace == null
+        || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
       return Optional.empty();
     }
     return Optional.of(workspace);
@@ -617,7 +609,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Transactional
-  private void handleWorkspaceLimit(long userId) {
+  void handleWorkspaceLimit(long userId) {
     List<UserRecentWorkspace> userRecentWorkspaces =
         userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
 
