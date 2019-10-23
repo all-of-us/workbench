@@ -21,7 +21,6 @@ public class WorkspaceFreeTierUsage {
   public WorkspaceFreeTierUsage(Workspace workspace) {
     this.userId = workspace.getCreator().getUserId();
     this.workspaceId = workspace.getWorkspaceId();
-    setLastUpdateTime();
   }
 
   @Id
@@ -60,6 +59,7 @@ public class WorkspaceFreeTierUsage {
 
   public void setCost(double cost) {
     this.cost = cost;
+    setLastUpdateTime();
   }
 
   @Column(name = "last_update_time")
@@ -67,11 +67,7 @@ public class WorkspaceFreeTierUsage {
     return lastUpdateTime;
   }
 
-  public void setLastUpdateTime(Timestamp lastUpdateTime) {
-    this.lastUpdateTime = lastUpdateTime;
-  }
-
-  public void setLastUpdateTime() {
+  private void setLastUpdateTime() {
     this.lastUpdateTime = new Timestamp(Instant.now().toEpochMilli());
   }
 }

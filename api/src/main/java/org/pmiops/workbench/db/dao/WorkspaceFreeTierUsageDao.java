@@ -16,7 +16,6 @@ public interface WorkspaceFreeTierUsageDao extends CrudRepository<WorkspaceFreeT
       usage = new WorkspaceFreeTierUsage(workspace);
     }
     usage.setCost(cost);
-    usage.setLastUpdateTime();
     save(usage);
   }
 }
