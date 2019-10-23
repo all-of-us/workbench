@@ -71,7 +71,7 @@ case when p.race_concept_id = 0 then 'Unknown' else regexp_replace(r.concept_nam
 case when e.concept_name is null then 'Unknown' else regexp_replace(e.concept_name, r'^.+:\s', '') end as ethnicity,
 birth_datetime as dob
 from \`$BQ_PROJECT.$BQ_DATASET.person\` p
-join \`$BQ_PROJECT.$BQ_DATASET.concept\`  g on (p.gender_concept_id = g.concept_id)
+left join \`$BQ_PROJECT.$BQ_DATASET.concept\`  g on (p.gender_concept_id = g.concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id)
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` e on (p.ethnicity_concept_id = e.concept_id)"
 
