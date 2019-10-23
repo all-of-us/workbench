@@ -16,4 +16,5 @@ public class Cron {
 
   public String description;
 
+  public String timezone;
 }
