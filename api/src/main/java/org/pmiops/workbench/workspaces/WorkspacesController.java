@@ -204,11 +204,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private org.pmiops.workbench.firecloud.model.Workspace attemptFirecloudWorkspaceCreation(
       FirecloudWorkspaceId workspaceId) {
-    fireCloudService.createWorkspace(
+    return fireCloudService.createWorkspace(
         workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
-    return fireCloudService
-        .getWorkspace(workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName())
-        .getWorkspace();
   }
 
   @Override
