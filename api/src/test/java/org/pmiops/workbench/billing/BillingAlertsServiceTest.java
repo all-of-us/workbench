@@ -226,8 +226,7 @@ public class BillingAlertsServiceTest {
       assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
       assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
-      WorkspaceFreeTierUsage usage =
-          workspaceFreeTierUsageDao.findOneByWorkspace(ws);
+      WorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(ws);
       assertThat(usage.getUser()).isEqualTo(user);
       assertThat(usage.getWorkspace()).isEqualTo(ws);
       assertThat(usage.getCost())
@@ -259,8 +258,7 @@ public class BillingAlertsServiceTest {
       assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
       assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
-      WorkspaceFreeTierUsage usage =
-          workspaceFreeTierUsageDao.findOneByWorkspace(ws);
+      WorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(ws);
       assertThat(usage.getUser()).isEqualTo(ws.getCreator());
       assertThat(usage.getWorkspace()).isEqualTo(ws);
       assertThat(usage.getCost())
