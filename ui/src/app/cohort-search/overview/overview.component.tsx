@@ -22,6 +22,280 @@ import * as React from 'react';
 
 const COHORT_TYPE = 'AoU_Discover';
 
+// TODO remove before merging
+const PM_STUB = [
+  {
+    gender: 'Female',
+    race: 'Another single population',
+    ageRange: '19-44',
+    count: 4
+  }, {
+    gender: 'Female',
+    race: 'Another single population',
+    ageRange: '45-64',
+    count: 4
+  }, {
+    gender: 'Female',
+    race: 'Another single population',
+    ageRange: '> 65',
+    count: 1
+  }, {
+    gender: 'Female',
+    race: 'Asian',
+    ageRange: '19-44',
+    count: 35
+  }, {
+    gender: 'Female',
+    race: 'Asian',
+    ageRange: '45-64',
+    count: 6
+  }, {
+    gender: 'Female',
+    race: 'Asian',
+    ageRange: '> 65',
+    count: 3
+  }, {
+    gender: 'Female',
+    race: 'Black or African American',
+    ageRange: '19-44',
+    count: 40
+  }, {
+    gender: 'Female',
+    race: 'Black or African American',
+    ageRange: '45-64',
+    count: 38
+  }, {
+    gender: 'Female',
+    race: 'Black or African American',
+    ageRange: '> 65', count: 11
+  }, {
+    gender: 'Female',
+    race: 'I prefer not to answer',
+    ageRange: '19-44',
+    count: 4
+  }, {
+    gender: 'Female',
+    race: 'I prefer not to answer',
+    ageRange: '45-64',
+    count: 3
+  }, {
+    gender: 'Female',
+    race: 'More than one population',
+    ageRange: '19-44',
+    count: 6
+  }, {
+    gender: 'Female',
+    race: 'More than one population',
+    ageRange: '45-64',
+    count: 5
+  }, {
+    gender: 'Female',
+    race: 'More than one population',
+    ageRange: '> 65',
+    count: 2
+  }, {
+    gender: 'Female',
+    race: 'None of these',
+    ageRange: '19-44',
+    count: 3
+  }, {
+    gender: 'Female',
+    race: 'None of these',
+    ageRange: '45-64',
+    count: 1
+  }, {
+    gender: 'Female',
+    race: 'None of these',
+    ageRange: '> 65',
+    count: 2
+  }, {
+    gender: 'Female',
+    race: 'Skip',
+    ageRange: '19-44',
+    count: 5
+  }, {
+    gender: 'Female',
+    race: 'Skip',
+    ageRange: '45-64',
+    count: 1
+  }, {
+    gender: 'Female',
+    race: 'Unknown',
+    ageRange: '19-44',
+    count: 72
+  }, {
+    gender: 'Female',
+    race: 'Unknown',
+    ageRange: '45-64',
+    count: 27
+  }, {
+    gender: 'Female',
+    race: 'Unknown',
+    ageRange: '> 65',
+    count: 2
+  }, {
+    gender: 'Female',
+    race: 'White',
+    ageRange: '19-44',
+    count: 111
+  }, {
+    gender: 'Female',
+    race: 'White',
+    ageRange: '45-64',
+    count: 78
+  }, {
+    gender: 'Female',
+    race: 'White',
+    ageRange: '> 65',
+    count: 61
+  }, {
+    gender: 'Male',
+    race: 'Another single population',
+    ageRange: '> 65',
+    count: 1
+  }, {
+    gender: 'Male',
+    race: 'Asian',
+    ageRange: '> 65',
+    count: 1
+  }, {
+    gender: 'Male',
+    race: 'Black or African American',
+    ageRange: '19-44',
+    count: 16
+  }, {
+    gender: 'Male',
+    race: 'Black or African American',
+    ageRange: '45-64',
+    count: 34
+  }, {
+    gender: 'Male',
+    race: 'Black or African American',
+    ageRange: '> 65',
+    count: 6
+  }, {
+    gender: 'Male',
+    race: 'More than one population',
+    ageRange: '19-44',
+    count: 1
+  }, {
+    gender: 'Male',
+    race: 'None of these',
+    ageRange: '45-64',
+    count: 1
+  }, {
+    gender: 'Male',
+    race: 'None of these',
+    ageRange: '> 65',
+    count: 1
+  }, {
+    gender: 'Male',
+    race: 'Skip',
+    ageRange: '45-64',
+    count: 2
+  }, {
+    gender: 'Male',
+    race: 'Unknown',
+    ageRange: '19-44',
+    count: 11
+  }, {
+    gender: 'Male',
+    race: 'Unknown',
+    ageRange: '45-64',
+    count: 11
+  }, {
+    gender: 'Male',
+    race: 'Unknown',
+    ageRange: '> 65',
+    count: 4
+  }, {
+    gender: 'Male',
+    race: 'White',
+    ageRange: '19-44',
+    count: 11
+  }, {
+    gender: 'Male',
+    race: 'White',
+    ageRange: '45-64',
+    count: 19
+  }, {
+    gender: 'Male',
+    race: 'White',
+    ageRange: '> 65',
+    count: 34
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'Another single population',
+    ageRange: '45-64',
+    count: 1
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'Black or African American',
+    ageRange: '19-44',
+    count: 1
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'Black or African American',
+    ageRange: '45-64',
+    count: 3
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'Black or African American',
+    ageRange: '> 65',
+    count: 1
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'I prefer not to answer',
+    ageRange: '19-44',
+    count: 2
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'None of these',
+    ageRange: '45-64',
+    count: 1
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'Skip',
+    ageRange: '19-44',
+    count: 1
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'Skip',
+    ageRange: '45-64',
+    count: 2
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'Skip',
+    ageRange: '> 65',
+    count: 1
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'Unknown',
+    ageRange: '19-44',
+    count: 1
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'Unknown',
+    ageRange: '> 65',
+    count: 1
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'White',
+    ageRange: '19-44',
+    count: 5
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'White',
+    ageRange: '45-64',
+    count: 1
+  }, {
+    gender: 'Not man only, not woman only, prefer not to answer, or skipped',
+    race: 'White',
+    ageRange: '> 65',
+    count: 2
+  }
+];
+
 const styles = reactStyles({
   overviewHeader: {
     display: 'flex',
@@ -142,7 +416,7 @@ export const ListOverview = withCurrentWorkspace()(
         saveModalOpen: false,
         saving: false,
         showConflictError: false,
-        stackChart: false,
+        stackChart: true,
         total: undefined,
       };
     }
@@ -171,7 +445,7 @@ export const ListOverview = withCurrentWorkspace()(
           cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
             if (localCheck === this.state.apiCallCheck) {
               this.setState({
-                chartData: response.items,
+                chartData: PM_STUB, // TODO switch back to 'chartData: response.items' before merging
                 total: response.items.reduce((sum, data) => sum + data.count, 0),
                 loading: false
               });
