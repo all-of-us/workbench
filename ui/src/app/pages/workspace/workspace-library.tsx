@@ -182,7 +182,6 @@ export const WorkspaceLibrary = withUserProfile()
     try {
       const resp = await featuredWorkspacesConfigApi().getFeaturedWorkspacesConfig();
 
-      // TODO: There is a bug here where the UI thinks we're done loading when 1 request finishes, not both
       this.setState({
         featuredWorkspaces: resp.featuredWorkspacesList,
         pendingWorkspaceRequests: this.state.pendingWorkspaceRequests - 1
