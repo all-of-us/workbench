@@ -44,27 +44,10 @@ const styles = reactStyles({
 });
 
 const libraryTabEnums = {
-  FEATURED_WORKSPACES: {
-    title: 'Featured Workspaces',
-    icon: 'star',
-    filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
-      console.log(publishedWorkspaces);
-      console.log(featuredWorkspaces);
-      console.log(publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
-        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace)));
-      return publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
-        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace));
-    }
-  },
   PUBLISHED_WORKSPACES: {
     title: 'Published Workspaces',
     icon: 'library',
     filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
-      console.log(publishedWorkspaces);
-      console.log(featuredWorkspaces);
-      console.log(publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
-        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace)));
-
       return publishedWorkspaces.filter(ws => !featuredWorkspaces.find(fws =>
         ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace))
     }
@@ -73,11 +56,6 @@ const libraryTabEnums = {
     title: 'Phenotype Library',
     icon: 'star',
     filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
-      console.log(publishedWorkspaces);
-      console.log(featuredWorkspaces);
-      console.log(publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
-        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace)));
-
       return publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
         ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace && fws.category === 'Phenotype Library'))
     }
@@ -86,11 +64,6 @@ const libraryTabEnums = {
     title: 'Tutorial Workspaces',
     icon: 'library',
     filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
-      console.log(publishedWorkspaces);
-      console.log(featuredWorkspaces);
-      console.log(publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
-        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace)));
-
       return publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
         ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace && fws.category === 'Tutorial Workspaces'))
     }
@@ -128,7 +101,6 @@ class State {
   currentTab: CurrentTab;
   errorText: string;
   workspaceList: WorkspacePermissions[];
-  publishedWorkspaces: WorkspacePermissions[];
   featuredWorkspaces: FeaturedWorkspace[];
   workspacesLoading: boolean;
 }
@@ -138,10 +110,9 @@ export const WorkspaceLibrary = withUserProfile()
   constructor(props) {
     super(props);
     this.state = {
-      currentTab: libraryTabEnums.FEATURED_WORKSPACES,
+      currentTab: libraryTabEnums.PHENOTYPE_LIBRARY,
       errorText: '',
       featuredWorkspaces: [],
-      publishedWorkspaces: [],
       workspaceList: [],
       workspacesLoading: true
     };
@@ -154,13 +125,11 @@ export const WorkspaceLibrary = withUserProfile()
   // environment variable.
   libraryTabs = (this.props.enablePublishedWorkspaces || environment.enablePublishedWorkspaces)
     ? [
-      libraryTabEnums.FEATURED_WORKSPACES,
       libraryTabEnums.PUBLISHED_WORKSPACES,
       libraryTabEnums.PHENOTYPE_LIBRARY,
       libraryTabEnums.TUTORIAL_WORKSPACES
     ]
     : [
-      libraryTabEnums.FEATURED_WORKSPACES,
       libraryTabEnums.PHENOTYPE_LIBRARY,
       libraryTabEnums.TUTORIAL_WORKSPACES
     ];
@@ -188,8 +157,7 @@ export const WorkspaceLibrary = withUserProfile()
       workspacesReceived.items.sort(
         (a, b) => a.workspace.name.localeCompare(b.workspace.name));
       this.setState({
-        workspaceList: workspacesReceived.items
-          .map(w => new WorkspacePermissions(w)),
+        workspaceList: workspacesReceived.items.map(w => new WorkspacePermissions(w)),
         workspacesLoading: false
       });
     } catch (e) {
@@ -203,14 +171,6 @@ export const WorkspaceLibrary = withUserProfile()
   async getFeaturedWorkspaces() {
     try {
       const resp = await featuredWorkspacesConfigApi().getFeaturedWorkspacesConfig();
-      const idToNamespace = new Map();
-      resp.featuredWorkspacesList.map(fw => idToNamespace.set(fw.id, fw.namespace));
-      //
-      // this.setState({
-      //   featuredWorkspaces: this.state.workspaceList.filter(ws => idToNamespace.get(ws.workspace.id)
-      //     && idToNamespace.get(ws.workspace.id) === ws.workspace.namespace),
-      //   workspacesLoading: false
-      // });
 
       // TODO: There is a bug here where the UI thinks we're done loading when 1 request finishes, not both
       this.setState({
@@ -228,8 +188,6 @@ export const WorkspaceLibrary = withUserProfile()
     const {
       currentTab,
       errorText,
-      featuredWorkspaces,
-      publishedWorkspaces,
       workspacesLoading
     } = this.state;
     return <FlexRow style={{height: '100%'}}>
@@ -241,7 +199,12 @@ export const WorkspaceLibrary = withUserProfile()
                           onClick={() => this.setState({currentTab: tab})}
                           data-test-id={tab.title}/>
                 {i !== this.libraryTabs.length - 1 &&
-                <hr style={{width: '100%', margin: '0.5rem 0', backgroundColor: colorWithWhiteness(colors.dark, .5), border: '0 none', height: 1}}/>}
+                <hr style={{
+                  width: '100%',
+                  margin: '0.5rem 0',
+                  backgroundColor: colorWithWhiteness(colors.dark, .5),
+                  border: '0 none',
+                  height: 1}}/>}
             </React.Fragment>;
           })}
         </FlexColumn>
