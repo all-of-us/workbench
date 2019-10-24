@@ -55,7 +55,7 @@ class ImmutableCdrVersion(
         result.numParticipants = numParticipants;
         result.cdrDbName = cdrDbName;
         result.elasticIndexBaseName = elasticIndexBaseName;
-        return result; 
+        return result;
     }
 
     // conversion to generated client API type.

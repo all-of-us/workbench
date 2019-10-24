@@ -90,7 +90,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   private CohortBuilderController controller;
 
-  private CdrVersion cdrVersionEntity;
+  private CdrVersion cdrVersion;
 
   @Autowired private BigQueryService bigQueryService;
 
@@ -150,13 +150,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             elasticSearchService,
             configProvider);
 
-    cdrVersionEntity = new CdrVersion();
-    cdrVersionEntity.setCdrVersionId(1L);
-    cdrVersionEntity.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
-    cdrVersionEntity.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);
+    cdrVersion = new CdrVersion();
+    cdrVersion.setCdrVersionId(1L);
+    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+    cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    cdrVersionDao.save(cdrVersionEntity);
+    cdrVersionDao.save(cdrVersion);
   }
 
   private static SearchParameter icd9() {
@@ -510,7 +510,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.CONDITION.toString(), Arrays.asList(demo), new ArrayList<>());
     try {
-      controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertEquals("Bad Request: attribute operator null is not valid.", bre.getMessage());
@@ -518,7 +518,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     attribute.operator(Operator.BETWEEN);
     try {
-      controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertEquals("Bad Request: attribute operands are empty.", bre.getMessage());
@@ -526,7 +526,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     attribute.operands(Arrays.asList("20"));
     try {
-      controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertEquals(
@@ -536,7 +536,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     attribute.operands(Arrays.asList("s", "20"));
     try {
-      controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertEquals("Bad Request: attribute NUM operands must be numeric.", bre.getMessage());
@@ -545,7 +545,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     attribute.operands(Arrays.asList("10", "20"));
     attribute.operator(Operator.EQUAL);
     try {
-      controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertEquals(
@@ -561,7 +561,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(modifier));
     try {
-      controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertEquals("Bad Request: modifier operator null is not valid.", bre.getMessage());
@@ -569,7 +569,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     modifier.operator(Operator.BETWEEN);
     try {
-      controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertEquals("Bad Request: modifier operands are empty.", bre.getMessage());
@@ -577,7 +577,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     modifier.operands(Arrays.asList("20"));
     try {
-      controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertEquals(
@@ -587,7 +587,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     modifier.operands(Arrays.asList("s", "20"));
     try {
-      controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertEquals(
@@ -597,7 +597,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     modifier.operands(Arrays.asList("10", "20"));
     modifier.operator(Operator.EQUAL);
     try {
-      controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertEquals(
@@ -608,7 +608,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     modifier.name(ModifierType.EVENT_DATE);
     modifier.operands(Arrays.asList("10"));
     try {
-      controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertEquals("Bad Request: modifier EVENT_DATE must be a valid date.", bre.getMessage());
@@ -621,7 +621,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.CONDITION.toString(), Arrays.asList(icd9()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -633,7 +633,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     try {
-      controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertEquals(
@@ -642,7 +642,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     icd9SGI.temporalGroup(0);
     try {
-      controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest);
+      controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
       assertEquals(
@@ -684,7 +684,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     // matches icd9SGI in group 0 and icd10SGI in group 1
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -717,7 +717,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     cbCriteriaDao.delete(drugNode1.getId());
     cbCriteriaDao.delete(drugNode2.getId());
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
@@ -772,7 +772,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     cbCriteriaDao.delete(icd9Parent.getId());
     cbCriteriaDao.delete(icd9Child.getId());
   }
@@ -801,7 +801,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -831,7 +831,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     cbCriteriaDao.delete(drugCriteria.getId());
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
@@ -863,7 +863,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     cbCriteriaDao.delete(drugCriteria.getId());
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
@@ -907,7 +907,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     cbCriteriaDao.delete(drugCriteria.getId());
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
@@ -947,7 +947,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     cbCriteriaDao.delete(drugCriteria1.getId());
     cbCriteriaDao.delete(drugCriteria2.getId());
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
@@ -959,7 +959,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(ageModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -968,7 +968,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(visitModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -981,7 +981,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(modifier));
 
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -992,7 +992,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(icd9()),
             Arrays.asList(ageModifier(), occurrencesModifier().operands(Arrays.asList("2"))));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1004,7 +1004,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(icd9(), icd9().conceptId(2L)),
             Arrays.asList(ageModifier(), occurrencesModifier(), eventDateModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1015,7 +1015,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(icd9()),
             Arrays.asList(eventDateModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1026,7 +1026,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(icd9()),
             Arrays.asList(occurrencesModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1035,7 +1035,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.CONDITION.toString(), Arrays.asList(icd9()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1051,7 +1051,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(icd9().group(true).conceptId(2L)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     cbCriteriaDao.delete(criteriaParent.getId());
     cbCriteriaDao.delete(criteriaChild.getId());
   }
@@ -1062,7 +1062,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.PERSON.toString(), Arrays.asList(male()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1071,7 +1071,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.PERSON.toString(), Arrays.asList(race()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1080,7 +1080,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.PERSON.toString(), Arrays.asList(ethnicity()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1089,7 +1089,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.PERSON.toString(), Arrays.asList(deceased()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1106,7 +1106,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequests =
         createSearchRequests(DomainType.PERSON.toString(), Arrays.asList(demo), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequests), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
   }
 
   @Test
@@ -1141,7 +1141,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequests.getIncludes().get(0).addItemsItem(anotherNewSearchGroupItem);
 
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequests), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
   }
 
   @Test
@@ -1158,7 +1158,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequests.getExcludes().add(excludeSearchGroup);
 
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequests), 0);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 0);
   }
 
   @Test
@@ -1174,7 +1174,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(icd9().group(true).conceptId(2L), icd10().conceptId(6L)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
     cbCriteriaDao.delete(criteriaParent.getId());
     cbCriteriaDao.delete(criteriaChild.getId());
   }
@@ -1187,7 +1187,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(procedure().conceptId(4L)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1198,7 +1198,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(snomed().standard(true).conceptId(6L)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1240,7 +1240,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.CONDITION.toString(), Arrays.asList(snomed), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     cbCriteriaDao.delete(criteriaParent.getId());
     cbCriteriaDao.delete(criteriaChild.getId());
   }
@@ -1251,7 +1251,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.VISIT.toString(), Arrays.asList(visit().conceptId(10L)), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -1262,7 +1262,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(visit().conceptId(10L)),
             Arrays.asList(occurrencesModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -1271,7 +1271,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(DomainType.DRUG.toString(), Arrays.asList(drug()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
@@ -1289,7 +1289,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(drug().group(true).conceptId(21600932L)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
     cbCriteriaDao.delete(drugNode1.getId());
     cbCriteriaDao.delete(drugNode2.getId());
@@ -1309,7 +1309,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(drug().group(true).conceptId(21600932L), drug()),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
     cbCriteriaDao.delete(drugNode1.getId());
     cbCriteriaDao.delete(drugNode2.getId());
@@ -1322,7 +1322,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.DRUG.toString(), Arrays.asList(drug()), Arrays.asList(visitModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
@@ -1333,7 +1333,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.DRUG.toString(), Arrays.asList(drug()), Arrays.asList(ageModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
@@ -1345,7 +1345,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(measurement()),
             Arrays.asList(visitModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1361,7 +1361,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.MEASUREMENT.toString(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1373,7 +1373,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1387,7 +1387,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1398,7 +1398,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(measurement()),
             Arrays.asList(ageModifier()));
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1412,7 +1412,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(lab1.getDomain(), Arrays.asList(lab1, lab2, lab3), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -1422,7 +1422,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(icd9.getDomain(), Arrays.asList(icd9, snomed), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1431,7 +1431,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(pm.getType(), Arrays.asList(pm), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1445,7 +1445,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1467,7 +1467,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -1508,7 +1508,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequest.getIncludes().get(0).addItemsItem(heartRateIrrSearchGroupItem);
 
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 3);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 3);
   }
 
   @Test
@@ -1519,7 +1519,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(hrDetail().conceptId(1586218L)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -1536,7 +1536,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             Arrays.asList(hrDetail().conceptId(1586218L).attributes(attributes)),
             new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -1553,7 +1553,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1570,7 +1570,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1587,7 +1587,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1605,7 +1605,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm, pm1), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1622,7 +1622,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
@@ -1633,7 +1633,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 2);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
@@ -1680,7 +1680,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             DomainType.SURVEY.toString(), Arrays.asList(survey()), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
     // Question
     SearchParameter ppiQuestion =
@@ -1688,7 +1688,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequest =
         createSearchRequests(ppiQuestion.getType(), Arrays.asList(ppiQuestion), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
     // value source concept id
     List<Attribute> attributes =
@@ -1700,7 +1700,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             ppiValueAsConceptId.getType(), Arrays.asList(ppiValueAsConceptId), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
     // value as number
     attributes =
@@ -1715,7 +1715,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         createSearchRequests(
             ppiValueAsNumer.getType(), Arrays.asList(ppiValueAsNumer), new ArrayList<>());
     assertParticipants(
-        controller.countParticipants(cdrVersionEntity.getCdrVersionId(), searchRequest), 1);
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
 
     cbCriteriaDao.delete(surveyNode.getId());
     cbCriteriaDao.delete(questionNode.getId());
@@ -1730,7 +1730,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
 
     DemoChartInfoListResponse response =
-        controller.getDemoChartInfo(cdrVersionEntity.getCdrVersionId(), searchRequest).getBody();
+        controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
     assertEquals(2, response.getItems().size());
     assertEquals(
         new DemoChartInfo().gender("MALE").race("Asian").ageRange("45-64").count(1L),

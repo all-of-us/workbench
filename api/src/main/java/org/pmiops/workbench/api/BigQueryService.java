@@ -43,15 +43,15 @@ public class BigQueryService {
 
   @VisibleForTesting
   protected BigQuery getBigQueryService() {
-    CdrVersion cdrVersionEntity = CdrVersionContext.getCdrVersion();
-    if (cdrVersionEntity == null) {
+    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    if (cdrVersion == null) {
       return defaultBigQuery;
     }
     // If a query is being executed in the context of a CDR, it must be run within that project as
     // well. By default, the query would run in the Workbench App Engine project, which would
     // violate VPC-SC restrictions.
     return BigQueryOptions.newBuilder()
-        .setProjectId(cdrVersionEntity.getBigqueryProject())
+        .setProjectId(cdrVersion.getBigqueryProject())
         .build()
         .getService();
   }
@@ -93,13 +93,13 @@ public class BigQueryService {
   }
 
   public QueryJobConfiguration filterBigQueryConfig(QueryJobConfiguration queryJobConfiguration) {
-    CdrVersion cdrVersionEntity = CdrVersionContext.getCdrVersion();
-    if (cdrVersionEntity == null) {
+    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    if (cdrVersion == null) {
       throw new ServerErrorException("No CDR version specified");
     }
     String returnSql =
-        queryJobConfiguration.getQuery().replace("${projectId}", cdrVersionEntity.getBigqueryProject());
-    returnSql = returnSql.replace("${dataSetId}", cdrVersionEntity.getBigqueryDataset());
+        queryJobConfiguration.getQuery().replace("${projectId}", cdrVersion.getBigqueryProject());
+    returnSql = returnSql.replace("${dataSetId}", cdrVersion.getBigqueryDataset());
     return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
   }
 

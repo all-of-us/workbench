@@ -48,10 +48,10 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
-    CdrVersion cdrVersionEntity = new CdrVersion();
-    cdrVersionEntity.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
-    cdrVersionEntity.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+    cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     ConceptService conceptService = new ConceptService(entityManager, conceptDao);
     conceptBigQueryService =

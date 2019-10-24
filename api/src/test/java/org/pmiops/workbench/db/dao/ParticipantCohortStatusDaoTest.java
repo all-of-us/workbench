@@ -46,9 +46,9 @@ public class ParticipantCohortStatusDaoTest {
 
   @Before
   public void onSetup() {
-    CdrVersion cdrVersionEntity = new CdrVersion();
-    cdrVersionEntity.setCdrDbName("");
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersion.setCdrDbName("");
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     ParticipantCohortStatus status1 =
         new ParticipantCohortStatus()

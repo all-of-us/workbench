@@ -122,14 +122,14 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
-    CdrVersion cdrVersionEntity = new CdrVersion();
-    cdrVersionEntity.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
-    cdrVersionEntity.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
-    cdrVersionDao.save(cdrVersionEntity);
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+    cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
+    cdrVersionDao.save(cdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     Workspace workspace = new Workspace();
-    workspace.setCdrVersionEntity(cdrVersionEntity);
+    workspace.setCdrVersionEntity(cdrVersion);
     workspace.setName("name");
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
@@ -150,7 +150,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     cohortDao.save(cohort2);
 
     cohortReview = new CohortReview();
-    cohortReview.setCdrVersionId(cdrVersionEntity.getCdrVersionId());
+    cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
     cohortReview.setCohortId(cohort2.getCohortId());
     cohortReview.setMatchedParticipantCount(3);
     cohortReview.setReviewedCount(2);
