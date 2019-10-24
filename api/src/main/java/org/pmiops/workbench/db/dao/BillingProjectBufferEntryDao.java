@@ -5,7 +5,7 @@ import java.util.List;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
 import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
+import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

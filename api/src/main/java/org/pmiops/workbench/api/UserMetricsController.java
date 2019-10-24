@@ -19,7 +19,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -181,7 +181,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 Collectors.toMap(
                     id -> id,
                     id -> {
-                      Workspace workspace = workspaceService.findByWorkspaceId(id);
+                      DbWorkspace workspace = workspaceService.findByWorkspaceId(id);
                       WorkspaceResponse workspaceResponse =
                           fireCloudService.getWorkspace(
                               workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
@@ -231,7 +231,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   // Retrieves Database workspace ID
   private long getWorkspaceId(String workspaceNamespace, String workspaceId) {
-    Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     return dbWorkspace.getWorkspaceId();
   }
 

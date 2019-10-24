@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.pmiops.workbench.audit.ActionAuditEvent;
 import org.pmiops.workbench.audit.ActionAuditService;
 import org.pmiops.workbench.audit.ActionType;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -35,7 +36,7 @@ public class WorkspaceAuditAdapterServiceTest {
   private WorkspaceAuditAdapterService workspaceAuditAdapterService;
   private Workspace workspace1;
   private User user1;
-  private org.pmiops.workbench.db.model.Workspace dbWorkspace1;
+  private DbWorkspace dbWorkspace1;
 
   @Mock private Provider<User> mockUserProvider;
   @Autowired private ActionAuditService mockActionAuditService;

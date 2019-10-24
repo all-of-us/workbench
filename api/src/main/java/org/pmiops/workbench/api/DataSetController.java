@@ -45,7 +45,7 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DataSetValue;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
@@ -523,7 +523,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSetListResponse> getDataSetsInWorkspace(
       String workspaceNamespace, String workspaceId) {
-    Workspace workspace =
+    DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
@@ -678,7 +678,7 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceId,
       Long dataSetId,
       WorkspaceAccessLevel workspaceAccessLevel) {
-    final Workspace workspace =
+    final DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, workspaceAccessLevel);
 

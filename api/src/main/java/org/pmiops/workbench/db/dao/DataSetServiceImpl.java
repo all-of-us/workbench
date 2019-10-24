@@ -32,7 +32,7 @@ import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.DataSetValue;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -543,7 +543,7 @@ public class DataSetServiceImpl implements DataSetService {
   @Override
   @Transactional
   public DataSet cloneDataSetToWorkspace(
-      DataSet fromDataSet, Workspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds) {
+      DataSet fromDataSet, DbWorkspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds) {
     DataSet toDataSet = new DataSet(fromDataSet);
     toDataSet.setWorkspaceId(toWorkspace.getWorkspaceId());
     toDataSet.setCreatorId(toWorkspace.getCreator().getUserId());
@@ -556,7 +556,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
-  public List<DataSet> getDataSets(Workspace workspace) {
+  public List<DataSet> getDataSets(DbWorkspace workspace) {
     // Allows for fetching data sets for a workspace once its collection is no longer
     // bound to a session.
     return dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());

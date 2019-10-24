@@ -11,6 +11,7 @@ import org.pmiops.workbench.audit.ActionType;
 import org.pmiops.workbench.audit.AgentType;
 import org.pmiops.workbench.audit.TargetType;
 import org.pmiops.workbench.audit.targetproperties.WorkspaceTargetProperty;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
   // has a different signature than for the create action. This makes keeping the properties
   // consistent across actions somewhat challenging.
   @Override
-  public void fireDeleteAction(org.pmiops.workbench.db.model.Workspace dbWorkspace) {
+  public void fireDeleteAction(DbWorkspace dbWorkspace) {
     try {
       final String actionId = ActionAuditService.newActionId();
       final long userId = userProvider.get().getUserId();

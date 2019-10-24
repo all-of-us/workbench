@@ -15,7 +15,7 @@ import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -279,7 +279,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
 
   private void validateMatchingWorkspace(
       String workspaceNamespace, String workspaceName, long workspaceId) {
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceName);
+    DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceName);
     if (workspace.getWorkspaceId() != workspaceId) {
       throw new NotFoundException(
           String.format(

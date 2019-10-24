@@ -51,7 +51,7 @@ import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -105,7 +105,7 @@ public class CohortReviewControllerTest {
   private Cohort cohortWithoutReview;
   private ParticipantCohortStatus participantCohortStatus1;
   private ParticipantCohortStatus participantCohortStatus2;
-  private Workspace workspace;
+  private DbWorkspace workspace;
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
@@ -221,7 +221,7 @@ public class CohortReviewControllerTest {
     cdrVersionDao.save(cdrVersion);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    workspace = new Workspace();
+    workspace = new DbWorkspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     workspace.setName(WORKSPACE_NAME);

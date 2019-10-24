@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -39,7 +39,7 @@ public class CohortReviewDaoTest {
   @Before
   public void setUp() throws Exception {
     Cohort cohort = new Cohort();
-    Workspace workspace = new Workspace();
+    DbWorkspace workspace = new DbWorkspace();
     workspace.setWorkspaceNamespace("namespace");
     workspace.setFirecloudName("firecloudName");
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);

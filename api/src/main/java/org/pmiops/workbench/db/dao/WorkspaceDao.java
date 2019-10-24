@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
+import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.BillingStatus;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -17,40 +17,40 @@ import org.springframework.data.repository.query.Param;
  *
  * <p>Use of @Query is discouraged; if desired, define aliases in WorkspaceService.
  */
-public interface WorkspaceDao extends CrudRepository<Workspace, Long> {
+public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
-  Workspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+  DbWorkspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
       String workspaceNamespace, String firecloudName, short activeStatus);
 
-  Workspace findByWorkspaceNamespaceAndNameAndActiveStatus(
+  DbWorkspace findByWorkspaceNamespaceAndNameAndActiveStatus(
       String workspaceNamespace, String name, short activeStatus);
 
-  @Query("SELECT distinct w.workspaceNamespace, w from Workspace w")
+  @Query("SELECT distinct w.workspaceNamespace, w from DbWorkspace w")
   Set<String> findAllWorkspaceNamespaces();
 
   @Query(
-      "SELECT w FROM Workspace w LEFT JOIN FETCH w.cohorts c LEFT JOIN FETCH c.cohortReviews"
+      "SELECT w FROM DbWorkspace w LEFT JOIN FETCH w.cohorts c LEFT JOIN FETCH c.cohortReviews"
           + " WHERE w.workspaceNamespace = (:ns) AND w.firecloudName = (:fcName)"
           + " AND w.activeStatus = (:status)")
-  Workspace findByFirecloudNameAndActiveStatusWithEagerCohorts(
+  DbWorkspace findByFirecloudNameAndActiveStatusWithEagerCohorts(
       @Param("ns") String workspaceNamespace,
       @Param("fcName") String fcName,
       @Param("status") short status);
 
-  List<Workspace> findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
+  List<DbWorkspace> findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
 
-  List<Workspace> findAllByFirecloudUuidIn(Collection<String> firecloudUuids);
+  List<DbWorkspace> findAllByFirecloudUuidIn(Collection<String> firecloudUuids);
 
-  List<Workspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
+  List<DbWorkspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
 
-  List<Workspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
+  List<DbWorkspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
 
-  default List<Workspace> findAllByBillingMigrationStatus(BillingMigrationStatus status) {
+  default List<DbWorkspace> findAllByBillingMigrationStatus(BillingMigrationStatus status) {
     return findAllByBillingMigrationStatus(StorageEnums.billingMigrationStatusToStorage(status));
   }
 
   default void updateBillingStatus(long workspaceId, BillingStatus status) {
-    Workspace toUpdate = findOne(workspaceId);
+    DbWorkspace toUpdate = findOne(workspaceId);
     toUpdate.setBillingStatus(status);
     save(toUpdate);
   }

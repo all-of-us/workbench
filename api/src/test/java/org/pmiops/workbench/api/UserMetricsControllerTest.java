@@ -24,7 +24,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -58,7 +58,7 @@ public class UserMetricsControllerTest {
   private User user;
   private UserRecentResource resource1;
   private UserRecentResource resource2;
-  private Workspace workspace2;
+  private DbWorkspace workspace2;
 
   @Before
   public void setUp() {
@@ -72,12 +72,12 @@ public class UserMetricsControllerTest {
     cohort.setLastModifiedTime(new Timestamp(clock.millis()));
     cohort.setCreationTime(new Timestamp(clock.millis()));
 
-    Workspace workspace1 = new Workspace();
+    DbWorkspace workspace1 = new DbWorkspace();
     workspace1.setWorkspaceId(1L);
     workspace1.setWorkspaceNamespace("workspaceNamespace1");
     workspace1.setFirecloudName("firecloudname1");
 
-    workspace2 = new Workspace();
+    workspace2 = new DbWorkspace();
     workspace2.setWorkspaceId(2L);
     workspace2.setWorkspaceNamespace("workspaceNamespace2");
     workspace2.setFirecloudName("firecloudName2");

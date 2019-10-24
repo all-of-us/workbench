@@ -7,7 +7,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +25,7 @@ public class CohortCloningService {
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
   @Transactional
-  public Cohort cloneCohortAndReviews(Cohort fromCohort, Workspace targetWorkspace) {
+  public Cohort cloneCohortAndReviews(Cohort fromCohort, DbWorkspace targetWorkspace) {
     final Cohort duplicatedCohort =
         cohortFactory.duplicateCohort(
             fromCohort.getName(), targetWorkspace.getCreator(), targetWorkspace, fromCohort);

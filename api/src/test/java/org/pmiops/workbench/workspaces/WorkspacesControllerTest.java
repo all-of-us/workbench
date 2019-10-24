@@ -82,6 +82,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -620,7 +621,7 @@ public class WorkspacesControllerTest {
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
     verify(mockWorkspaceAuditAdapterService)
-        .fireDeleteAction(any(org.pmiops.workbench.db.model.Workspace.class));
+        .fireDeleteAction(any(DbWorkspace.class));
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");
@@ -2564,7 +2565,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubFcGetWorkspaceACL();
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+    DbWorkspace dbWorkspace =
         workspaceService.get(workspace.getNamespace(), workspace.getId());
     workspaceService.updateRecentWorkspaces(dbWorkspace, currentUser.getUserId(), NOW);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =

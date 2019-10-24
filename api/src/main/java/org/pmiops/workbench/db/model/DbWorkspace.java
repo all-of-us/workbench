@@ -28,7 +28,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 @Entity
 @Table(name = "workspace")
-public class Workspace {
+public class DbWorkspace {
   private String firecloudUuid;
 
   public static class FirecloudWorkspaceId {
@@ -117,7 +117,7 @@ public class Workspace {
   private Short billingAccountType =
       StorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
 
-  public Workspace() {
+  public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
 

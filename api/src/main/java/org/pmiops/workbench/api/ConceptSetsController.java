@@ -22,7 +22,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -137,7 +137,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   @Override
   public ResponseEntity<ConceptSet> createConceptSet(
       String workspaceNamespace, String workspaceId, CreateConceptSetRequest request) {
-    Workspace workspace =
+    DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     if (request.getAddedIds() == null || request.getAddedIds().size() == 0) {
@@ -213,7 +213,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   @Override
   public ResponseEntity<ConceptSetListResponse> getConceptSetsInWorkspace(
       String workspaceNamespace, String workspaceId) {
-    Workspace workspace =
+    DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
@@ -233,7 +233,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   @Override
   public ResponseEntity<ConceptSetListResponse> getSurveyConceptSetsInWorkspace(
       String workspaceNamespace, String workspaceId, String surveyName) {
-    Workspace workspace =
+    DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     short surveyId =
@@ -373,10 +373,10 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     workspaceService.enforceWorkspaceAccessLevel(
         fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
-    Workspace toWorkspace =
+    DbWorkspace toWorkspace =
         workspaceService.get(
             copyRequest.getToWorkspaceNamespace(), copyRequest.getToWorkspaceName());
-    Workspace fromWorkspace = workspaceService.get(fromWorkspaceNamespace, fromWorkspaceId);
+    DbWorkspace fromWorkspace = workspaceService.get(fromWorkspaceNamespace, fromWorkspaceId);
     workspaceService.enforceWorkspaceAccessLevel(
         toWorkspace.getWorkspaceNamespace(),
         toWorkspace.getFirecloudName(),
@@ -434,7 +434,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       String workspaceId,
       Long conceptSetId,
       WorkspaceAccessLevel workspaceAccessLevel) {
-    Workspace workspace =
+    DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, workspaceAccessLevel);
 

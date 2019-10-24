@@ -17,13 +17,13 @@ import javax.persistence.Table;
 public class WorkspaceFreeTierUsage {
   private long id;
   private User user;
-  private Workspace workspace;
+  private DbWorkspace workspace;
   private double cost;
   private Timestamp lastUpdateTime;
 
   public WorkspaceFreeTierUsage() {}
 
-  public WorkspaceFreeTierUsage(Workspace workspace) {
+  public WorkspaceFreeTierUsage(DbWorkspace workspace) {
     this.user = workspace.getCreator();
     this.workspace = workspace;
   }
@@ -51,11 +51,11 @@ public class WorkspaceFreeTierUsage {
 
   @OneToOne
   @JoinColumn(name = "workspace_id")
-  public Workspace getWorkspace() {
+  public DbWorkspace getWorkspace() {
     return workspace;
   }
 
-  public void setWorkspace(Workspace workspace) {
+  public void setWorkspace(DbWorkspace workspace) {
     this.workspace = workspace;
   }
 

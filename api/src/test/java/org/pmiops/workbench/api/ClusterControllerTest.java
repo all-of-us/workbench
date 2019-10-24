@@ -33,7 +33,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -189,7 +189,7 @@ public class ClusterControllerTest {
   }
 
   private void stubGetWorkspace(String ns, String name, String creator) throws Exception {
-    Workspace w = new Workspace();
+    DbWorkspace w = new DbWorkspace();
     w.setWorkspaceNamespace(ns);
     w.setFirecloudName(name);
     w.setCdrVersion(cdrVersion);

@@ -32,7 +32,7 @@ import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentWorkspace;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -115,7 +115,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public Workspace get(String ns, String firecloudName) {
+  public DbWorkspace get(String ns, String firecloudName) {
     return workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
         ns,
         firecloudName,
@@ -144,7 +144,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces() {
     Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
         getFirecloudWorkspaces(ImmutableList.of("accessLevel", "workspace.workspaceId"));
-    List<Workspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
+    List<DbWorkspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
 
     return dbWorkspaces.stream()
         .filter(
@@ -166,7 +166,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Transactional
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
-    Workspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
@@ -221,14 +221,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
    * deleted ws.
    */
   @Override
-  public Workspace getByName(String ns, String name) {
+  public DbWorkspace getByName(String ns, String name) {
     return workspaceDao.findByWorkspaceNamespaceAndNameAndActiveStatus(
         ns, name, StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   @Override
-  public Workspace getRequired(String ns, String firecloudName) {
-    Workspace workspace = get(ns, firecloudName);
+  public DbWorkspace getRequired(String ns, String firecloudName) {
+    DbWorkspace workspace = get(ns, firecloudName);
     if (workspace == null) {
       throw new NotFoundException(String.format("Workspace %s/%s not found.", ns, firecloudName));
     }
@@ -237,8 +237,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   @Transactional
-  public Workspace getRequiredWithCohorts(String ns, String firecloudName) {
-    Workspace workspace =
+  public DbWorkspace getRequiredWithCohorts(String ns, String firecloudName) {
+    DbWorkspace workspace =
         workspaceDao.findByFirecloudNameAndActiveStatusWithEagerCohorts(
             ns,
             firecloudName,
@@ -250,11 +250,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public Workspace saveWithLastModified(Workspace workspace) {
+  public DbWorkspace saveWithLastModified(DbWorkspace workspace) {
     return saveWithLastModified(workspace, new Timestamp(clock.instant().toEpochMilli()));
   }
 
-  private Workspace saveWithLastModified(Workspace workspace, Timestamp ts) {
+  private DbWorkspace saveWithLastModified(DbWorkspace workspace, Timestamp ts) {
     workspace.setLastModifiedTime(ts);
     try {
       return workspaceDao.save(workspace);
@@ -265,13 +265,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public List<Workspace> findForReview() {
+  public List<DbWorkspace> findForReview() {
     return workspaceDao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
   }
 
   @Override
   public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved) {
-    Workspace workspace = getRequired(ns, firecloudName);
+    DbWorkspace workspace = getRequired(ns, firecloudName);
     if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
       throw new BadRequestException(
           String.format("No review requested for workspace %s/%s.", ns, firecloudName));
@@ -311,8 +311,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public Workspace updateWorkspaceAcls(
-      Workspace workspace,
+  public DbWorkspace updateWorkspaceAcls(
+      DbWorkspace workspace,
       Map<String, WorkspaceAccessLevel> updatedAclsMap,
       String registeredUsersGroup) {
     // userRoleMap is a map of the new permissions for ALL users on the ws
@@ -394,7 +394,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   @Transactional
-  public Workspace saveAndCloneCohortsConceptSetsAndDataSets(Workspace from, Workspace to) {
+  public DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to) {
     // Save the workspace first to allocate an ID.
     to = workspaceDao.save(to);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(to.getCdrVersion());
@@ -468,10 +468,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public Workspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+  public DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
     enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, workspaceAccessLevel);
-    Workspace workspace = getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace workspace = getRequired(workspaceNamespace, workspaceId);
     // Because we've already checked that the user has access to the workspace in question,
     // we don't need to check their membership in the authorization domain for the CDR version
     // associated with the workspace.
@@ -480,8 +480,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public Workspace findByWorkspaceId(long workspaceId) {
-    Workspace workspace = getDao().findOne(workspaceId);
+  public DbWorkspace findByWorkspaceId(long workspaceId) {
+    DbWorkspace workspace = getDao().findOne(workspaceId);
     if (workspace == null
         || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
       throw new NotFoundException(String.format("Workspace %s not found.", workspaceId));
@@ -509,8 +509,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public Workspace setPublished(
-      Workspace workspace, String publishedWorkspaceGroup, boolean publish) {
+  public DbWorkspace setPublished(
+      DbWorkspace workspace, String publishedWorkspaceGroup, boolean publish) {
     ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
     WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
     currentUpdate.setEmail(publishedWorkspaceGroup);
@@ -541,7 +541,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   private List<UserRecentWorkspace> pruneInaccessibleRecentWorkspaces(
       List<UserRecentWorkspace> recentWorkspaces, long userId) {
-    List<Workspace> dbWorkspaces =
+    List<DbWorkspace> dbWorkspaces =
         workspaceDao.findAllByWorkspaceIdIn(
             recentWorkspaces.stream()
                 .map(UserRecentWorkspace::getWorkspaceId)
@@ -561,7 +561,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                   }
                   return false;
                 })
-            .map(Workspace::getWorkspaceId)
+            .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toSet());
 
     if (!workspaceIdsToDelete.isEmpty()) {
@@ -575,7 +575,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public UserRecentWorkspace updateRecentWorkspaces(
-      Workspace workspace, long userId, Timestamp lastAccessDate) {
+      DbWorkspace workspace, long userId, Timestamp lastAccessDate) {
     Optional<UserRecentWorkspace> maybeRecentWorkspace =
         userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspace.getWorkspaceId(), userId);
     final UserRecentWorkspace matchingRecentWorkspace =
@@ -593,7 +593,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public UserRecentWorkspace updateRecentWorkspaces(Workspace workspace) {
+  public UserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
     return updateRecentWorkspaces(
         workspace, userProvider.get().getUserId(), new Timestamp(clock.instant().toEpochMilli()));
   }
