@@ -20,7 +20,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
@@ -318,7 +318,7 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersionEntity cdrVersionEntity = workspace.getCdrVersionEntity();
+    CdrVersion cdrVersionEntity = workspace.getCdrVersionEntity();
 
     if (request.getCdrVersionName() != null) {
       cdrVersionEntity = cdrVersionDao.findByName(request.getCdrVersionName());
@@ -380,7 +380,7 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersionEntity cdrVersionEntity = workspace.getCdrVersionEntity();
+    CdrVersion cdrVersionEntity = workspace.getCdrVersionEntity();
 
     if (request.getCdrVersionName() != null) {
       cdrVersionEntity = cdrVersionDao.findByName(request.getCdrVersionName());
@@ -426,7 +426,7 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersionEntity cdrVersionEntity = workspace.getCdrVersionEntity();
+    CdrVersion cdrVersionEntity = workspace.getCdrVersionEntity();
     if (request.getCdrVersionName() != null) {
       cdrVersionEntity = cdrVersionDao.findByName(request.getCdrVersionName());
       if (cdrVersionEntity == null) {

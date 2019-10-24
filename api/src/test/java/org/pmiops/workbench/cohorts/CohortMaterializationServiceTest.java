@@ -30,7 +30,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -118,7 +118,7 @@ public class CohortMaterializationServiceTest {
 
   @Before
   public void setUp() {
-    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    CdrVersion cdrVersionEntity = new CdrVersion();
     cdrVersionEntity.setBigqueryDataset(DATA_SET_ID);
     cdrVersionEntity.setBigqueryProject(PROJECT_ID);
     cdrVersionDao.save(cdrVersionEntity);

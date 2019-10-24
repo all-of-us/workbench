@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class CdrVersionStorageManager {
   }
 
   public List<ImmutableCdrVersion> getByVisibleValues(Set<Short> visibleValues) {
-    final List<CdrVersionEntity> entities = cdrVersionDao
+    final List<CdrVersion> entities = cdrVersionDao
         .findByDataAccessLevelInOrderByCreationTimeDescDataAccessLevelDesc(
         visibleValues);
     return entities.stream()

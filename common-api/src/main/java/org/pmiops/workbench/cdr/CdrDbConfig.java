@@ -12,7 +12,7 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.pmiops.workbench.config.CacheSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +71,7 @@ public class CdrDbConfig {
       // all servers.
       Long defaultId = null;
       Map<Object, Object> cdrVersionDataSourceMap = new HashMap<>();
-      for (CdrVersionEntity cdrVersionEntity : cdrVersionDao.findAll()) {
+      for (CdrVersion cdrVersionEntity : cdrVersionDao.findAll()) {
         int slashIndex = originalDbUrl.lastIndexOf('/');
         String dbUrl =
             originalDbUrl.substring(0, slashIndex + 1)
@@ -134,7 +134,7 @@ public class CdrDbConfig {
 
     @Override
     protected Object determineCurrentLookupKey() {
-      CdrVersionEntity cdrVersionEntity = CdrVersionContext.getCdrVersion();
+      CdrVersion cdrVersionEntity = CdrVersionContext.getCdrVersion();
       if (cdrVersionEntity == null) {
         if (finishedInitialization) {
           throw new ServerErrorException("No CDR version specified!");

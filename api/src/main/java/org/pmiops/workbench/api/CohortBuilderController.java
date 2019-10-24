@@ -28,7 +28,7 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.ConceptIdName;
@@ -190,7 +190,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
    */
   @Override
   public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
-    CdrVersionEntity cdrVersionEntity = cdrVersionDao.findOne(cdrVersionId);
+    CdrVersion cdrVersionEntity = cdrVersionDao.findOne(cdrVersionId);
     cdrVersionService.setCdrVersion(cdrVersionEntity);
     if (configProvider.get().elasticsearch.enableElasticsearchBackend
         && !Strings.isNullOrEmpty(cdrVersionEntity.getElasticIndexBaseName())
@@ -288,7 +288,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (request.getIncludes().isEmpty()) {
       return ResponseEntity.ok(response);
     }
-    CdrVersionEntity cdrVersionEntity = cdrVersionDao.findOne(cdrVersionId);
+    CdrVersion cdrVersionEntity = cdrVersionDao.findOne(cdrVersionId);
     cdrVersionService.setCdrVersion(cdrVersionEntity);
     if (configProvider.get().elasticsearch.enableElasticsearchBackend
         && !Strings.isNullOrEmpty(cdrVersionEntity.getElasticIndexBaseName())

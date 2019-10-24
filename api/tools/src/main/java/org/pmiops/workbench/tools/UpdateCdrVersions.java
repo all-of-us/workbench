@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -50,12 +50,12 @@ public class UpdateCdrVersions {
           new GsonBuilder()
               .registerTypeAdapter(Timestamp.class, new TimestampGsonAdapter())
               .create();
-      List<CdrVersionEntity> cdrVersionEntities =
-          gson.fromJson(cdrVersionsReader, new TypeToken<List<CdrVersionEntity>>() {}.getType());
+      List<CdrVersion> cdrVersionEntities =
+          gson.fromJson(cdrVersionsReader, new TypeToken<List<CdrVersion>>() {}.getType());
 
       Set<Long> ids = new HashSet<>();
       Set<Long> defaultIds = new HashSet<>();
-      for (CdrVersionEntity v : cdrVersionEntities) {
+      for (CdrVersion v : cdrVersionEntities) {
         if (v.getCdrVersionId() == 0) {
           throw new IllegalArgumentException(
               String.format("Input JSON CDR version '%s' is missing an ID", v.getName()));
@@ -81,13 +81,13 @@ public class UpdateCdrVersions {
                 defaultIds.size(), Joiner.on(", ").join(defaultIds)));
       }
 
-      Map<Long, CdrVersionEntity> currentCdrVersions = Maps.newHashMap();
-      for (CdrVersionEntity cdrVersionEntity : cdrVersionDao.findAll()) {
+      Map<Long, CdrVersion> currentCdrVersions = Maps.newHashMap();
+      for (CdrVersion cdrVersionEntity : cdrVersionDao.findAll()) {
         currentCdrVersions.put(cdrVersionEntity.getCdrVersionId(), cdrVersionEntity);
       }
       String dryRunSuffix = dryRun ? " (dry run)" : "";
-      for (CdrVersionEntity cdrVersionEntity : cdrVersionEntities) {
-        CdrVersionEntity existingCdrVersionEntity = currentCdrVersions.remove(cdrVersionEntity.getCdrVersionId());
+      for (CdrVersion cdrVersionEntity : cdrVersionEntities) {
+        CdrVersion existingCdrVersionEntity = currentCdrVersions.remove(cdrVersionEntity.getCdrVersionId());
         if (existingCdrVersionEntity == null) {
           logger.info(
               String.format(
@@ -119,7 +119,7 @@ public class UpdateCdrVersions {
           }
         }
       }
-      for (CdrVersionEntity cdrVersionEntity : currentCdrVersions.values()) {
+      for (CdrVersion cdrVersionEntity : currentCdrVersions.values()) {
         logger.info(
             String.format(
                 "Deleting CDR version %d '%s' no longer in file%s: %s",

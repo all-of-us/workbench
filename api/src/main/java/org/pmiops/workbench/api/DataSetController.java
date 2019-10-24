@@ -41,7 +41,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DataSetValue;
 import org.pmiops.workbench.db.model.User;
@@ -642,7 +642,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataDictionaryEntry> getDataDictionaryEntry(
       Long cdrVersionId, String domain, String domainValue) {
-    CdrVersionEntity cdrVersionEntity = cdrVersionDao.findByCdrVersionId(cdrVersionId);
+    CdrVersion cdrVersionEntity = cdrVersionDao.findByCdrVersionId(cdrVersionId);
     if (cdrVersionEntity == null) {
       throw new BadRequestException("Invalid CDR Version");
     }

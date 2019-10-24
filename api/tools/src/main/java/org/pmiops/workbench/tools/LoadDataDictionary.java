@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DataDictionaryEntry;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -47,7 +47,7 @@ public class LoadDataDictionary {
 
       boolean dryRun = Boolean.parseBoolean(args[0]);
 
-      CdrVersionEntity defaultCdrVersionEntity = cdrVersionDao.findByIsDefault(true);
+      CdrVersion defaultCdrVersionEntity = cdrVersionDao.findByIsDefault(true);
       ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
       SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
       mapper.setDateFormat(df);
@@ -59,7 +59,7 @@ public class LoadDataDictionary {
 
         Timestamp newEntryDefinedTime = dd.getMeta_data()[0].getCreated_time();
 
-        CdrVersionEntity cdrVersionEntity = cdrVersionDao.findByName(dd.getMeta_data()[0].getCdr_version());
+        CdrVersion cdrVersionEntity = cdrVersionDao.findByName(dd.getMeta_data()[0].getCdr_version());
         if (cdrVersionEntity == null) {
           // Skip over Data Dictionaries for CDR Versions not in the current environment
           continue;

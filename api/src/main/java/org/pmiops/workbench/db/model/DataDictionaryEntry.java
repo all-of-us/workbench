@@ -17,7 +17,7 @@ public class DataDictionaryEntry {
 
   // Metadata fields
   private long dataDictionaryEntryId;
-  private CdrVersionEntity cdrVersionEntity;
+  private CdrVersion cdrVersionEntity;
   private Timestamp definedTime;
 
   // Fields copied from the Data Dictionary export
@@ -47,11 +47,11 @@ public class DataDictionaryEntry {
 
   @ManyToOne
   @JoinColumn(name = "cdr_version_id")
-  public CdrVersionEntity getCdrVersion() {
+  public CdrVersion getCdrVersion() {
     return cdrVersionEntity;
   }
 
-  public void setCdrVersionEntity(CdrVersionEntity cdrVersionEntity) {
+  public void setCdrVersionEntity(CdrVersion cdrVersionEntity) {
     this.cdrVersionEntity = cdrVersionEntity;
   }
 

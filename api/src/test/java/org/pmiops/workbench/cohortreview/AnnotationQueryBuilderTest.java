@@ -24,7 +24,7 @@ import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
@@ -102,7 +102,7 @@ public class AnnotationQueryBuilderTest {
 
   @Before
   public void setUp() {
-    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    CdrVersion cdrVersionEntity = new CdrVersion();
     cdrVersionDao.save(cdrVersionEntity);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);
 

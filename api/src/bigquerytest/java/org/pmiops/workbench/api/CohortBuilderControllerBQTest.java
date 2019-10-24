@@ -28,7 +28,7 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -90,7 +90,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   private CohortBuilderController controller;
 
-  private CdrVersionEntity cdrVersionEntity;
+  private CdrVersion cdrVersionEntity;
 
   @Autowired private BigQueryService bigQueryService;
 
@@ -150,7 +150,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             elasticSearchService,
             configProvider);
 
-    cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionEntity = new CdrVersion();
     cdrVersionEntity.setCdrVersionId(1L);
     cdrVersionEntity.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersionEntity.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
@@ -1751,7 +1751,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   protected String getTablePrefix() {
-    CdrVersionEntity cdrVersionEntity = CdrVersionContext.getCdrVersion();
+    CdrVersion cdrVersionEntity = CdrVersionContext.getCdrVersion();
     return cdrVersionEntity.getBigqueryProject() + "." + cdrVersionEntity.getBigqueryDataset();
   }
 

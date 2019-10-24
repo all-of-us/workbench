@@ -81,7 +81,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -293,7 +293,7 @@ public class WorkspacesControllerTest {
   @Autowired ConceptBigQueryService conceptBigQueryService;
   @Mock private Provider<WorkbenchConfig> configProvider;
 
-  private CdrVersionEntity cdrVersionEntity;
+  private CdrVersion cdrVersionEntity;
   private String cdrVersionId;
   private String archivedCdrVersionId;
 
@@ -303,7 +303,7 @@ public class WorkspacesControllerTest {
   public void setUp() {
     testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
-    cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionEntity = new CdrVersion();
     cdrVersionEntity.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
@@ -311,7 +311,7 @@ public class WorkspacesControllerTest {
     cdrVersionEntity = cdrVersionDao.save(cdrVersionEntity);
     cdrVersionId = Long.toString(cdrVersionEntity.getCdrVersionId());
 
-    CdrVersionEntity archivedCdrVersionEntity = new CdrVersionEntity();
+    CdrVersion archivedCdrVersionEntity = new CdrVersion();
     archivedCdrVersionEntity.setName("archived");
     archivedCdrVersionEntity.setCdrDbName("");
     archivedCdrVersionEntity.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
@@ -1183,7 +1183,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    CdrVersionEntity cdrVersionEntity2 = new CdrVersionEntity();
+    CdrVersion cdrVersionEntity2 = new CdrVersion();
     cdrVersionEntity2.setName("2");
     cdrVersionEntity2.setCdrDbName("");
     cdrVersionEntity2 = cdrVersionDao.save(cdrVersionEntity2);
@@ -1376,7 +1376,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspaceCdrVersion() throws Exception {
-    CdrVersionEntity cdrVersionEntity2 = new CdrVersionEntity();
+    CdrVersion cdrVersionEntity2 = new CdrVersion();
     cdrVersionEntity2.setName("2");
     cdrVersionEntity2.setCdrDbName("");
     cdrVersionEntity2 = cdrVersionDao.save(cdrVersionEntity2);

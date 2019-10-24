@@ -20,7 +20,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DataDictionaryEntry;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -85,7 +85,7 @@ public class DataDictionaryTest {
 
   @Before
   public void setUp() {
-    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    CdrVersion cdrVersionEntity = new CdrVersion();
     cdrVersionDao.save(cdrVersionEntity);
 
     DataDictionaryEntry dataDictionaryEntry = new DataDictionaryEntry();
@@ -108,7 +108,7 @@ public class DataDictionaryTest {
     final Domain domain = Domain.DRUG;
     final String domainValue = "FIELD NAME / DOMAIN VALUE";
 
-    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    CdrVersion cdrVersionEntity = new CdrVersion();
     cdrVersionDao.save(cdrVersionEntity);
 
     DataDictionaryEntry dataDictionaryEntry = new DataDictionaryEntry();

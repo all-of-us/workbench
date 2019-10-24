@@ -42,7 +42,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
@@ -99,7 +99,7 @@ public class CohortReviewControllerTest {
 
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";
-  private CdrVersionEntity cdrVersionEntity;
+  private CdrVersion cdrVersionEntity;
   private CohortReview cohortReview;
   private Cohort cohort;
   private Cohort cohortWithoutReview;
@@ -215,7 +215,7 @@ public class CohortReviewControllerTest {
     when(userProvider.get()).thenReturn(user);
     cohortReviewController.setUserProvider(userProvider);
 
-    cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionEntity = new CdrVersion();
     cdrVersionEntity.setBigqueryDataset("dataSetId");
     cdrVersionEntity.setBigqueryProject("projectId");
     cdrVersionDao.save(cdrVersionEntity);

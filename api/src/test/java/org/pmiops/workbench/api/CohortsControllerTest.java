@@ -43,7 +43,7 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -152,7 +152,7 @@ public class CohortsControllerTest {
 
   Workspace workspace;
   Workspace workspace2;
-  CdrVersionEntity cdrVersionEntity;
+  CdrVersion cdrVersionEntity;
   SearchRequest searchRequest;
   String cohortCriteria;
   private TestMockFactory testMockFactory;
@@ -243,7 +243,7 @@ public class CohortsControllerTest {
     cohortsController.setUserProvider(userProvider);
     conceptSetsController.setUserProvider(userProvider);
 
-    cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionEntity = new CdrVersion();
     cdrVersionEntity.setName(CDR_VERSION_NAME);
     cdrVersionDao.save(cdrVersionEntity);
 

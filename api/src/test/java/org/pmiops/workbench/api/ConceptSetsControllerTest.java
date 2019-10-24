@@ -35,7 +35,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -295,7 +295,7 @@ public class ConceptSetsControllerTest {
     currentUser = user;
     when(userProvider.get()).thenReturn(user);
 
-    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    CdrVersion cdrVersionEntity = new CdrVersion();
     cdrVersionEntity.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.

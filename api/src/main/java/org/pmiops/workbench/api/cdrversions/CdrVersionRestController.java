@@ -2,14 +2,12 @@ package org.pmiops.workbench.api.cdrversions;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
-import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.CdrVersionsApiDelegate;
 import org.pmiops.workbench.cdr.ImmutableCdrVersion;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.model.CdrVersionListResponse;

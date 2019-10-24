@@ -20,7 +20,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.User.ClusterConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -177,7 +177,7 @@ public class ClusterController implements ClusterApiDelegate {
               "workspace %s/%s not found or not accessible",
               body.getWorkspaceNamespace(), body.getWorkspaceId()));
     }
-    CdrVersionEntity cdrVersionEntity =
+    CdrVersion cdrVersionEntity =
         workspaceService
             .getRequired(body.getWorkspaceNamespace(), body.getWorkspaceId())
             .getCdrVersionEntity();
@@ -281,7 +281,7 @@ public class ClusterController implements ClusterApiDelegate {
 
   private String aouConfigDataUri(
       org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
-      CdrVersionEntity cdrVersionEntity,
+      CdrVersion cdrVersionEntity,
       String cdrBillingCloudProject) {
     JSONObject config = new JSONObject();
 

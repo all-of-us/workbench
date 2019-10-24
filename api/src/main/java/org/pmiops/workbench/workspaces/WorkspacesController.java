@@ -40,7 +40,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
@@ -168,13 +168,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return sb.toString();
   }
 
-  private CdrVersionEntity setLiveCdrVersionId(
+  private CdrVersion setLiveCdrVersionId(
       org.pmiops.workbench.db.model.Workspace dbWorkspace, String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
       throw new BadRequestException("missing cdrVersionId");
     }
     try {
-      CdrVersionEntity cdrVersionEntity = cdrVersionDao.findOne(Long.parseLong(cdrVersionId));
+      CdrVersion cdrVersionEntity = cdrVersionDao.findOne(Long.parseLong(cdrVersionId));
       if (cdrVersionEntity == null) {
         throw new BadRequestException(
             String.format("CDR version with ID %s not found", cdrVersionId));
@@ -454,7 +454,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setCdrVersionEntity(fromWorkspace.getCdrVersionEntity());
       dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
     } else {
-      CdrVersionEntity reqCdrVersionEntity = setLiveCdrVersionId(dbWorkspace, reqCdrVersionId);
+      CdrVersion reqCdrVersionEntity = setLiveCdrVersionId(dbWorkspace, reqCdrVersionId);
       dbWorkspace.setDataAccessLevelEnum(reqCdrVersionEntity.getDataAccessLevelEnum());
     }
 

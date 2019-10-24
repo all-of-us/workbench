@@ -18,7 +18,7 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
@@ -48,7 +48,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
-    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    CdrVersion cdrVersionEntity = new CdrVersion();
     cdrVersionEntity.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersionEntity.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);

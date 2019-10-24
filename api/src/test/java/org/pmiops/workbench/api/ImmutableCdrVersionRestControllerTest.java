@@ -12,7 +12,7 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ImmutableCdrVersion;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.model.CdrVersionEntity;
+import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -39,14 +39,14 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class ImmutableCdrVersionEntityRestControllerTest {
+public class ImmutableCdrVersionRestControllerTest {
 
   @Autowired private CdrVersionDao cdrVersionDao;
 
   @Autowired private CdrVersionRestController cdrVersionRestController;
 
-  private CdrVersionEntity defaultCdrVersionEntity;
-  private CdrVersionEntity protectedCdrVersionEntity;
+  private CdrVersion defaultCdrVersionEntity;
+  private CdrVersion protectedCdrVersionEntity;
   private User user;
 
   @TestConfiguration
@@ -98,7 +98,7 @@ public class ImmutableCdrVersionEntityRestControllerTest {
     cdrVersionRestController.getCdrVersions();
   }
 
-  private void assertResponse(CdrVersionListResponse response, CdrVersionEntity... versions) {
+  private void assertResponse(CdrVersionListResponse response, CdrVersion... versions) {
     assertThat(response.getItems())
         .containsExactly(
             Arrays.stream(versions)
@@ -109,13 +109,13 @@ public class ImmutableCdrVersionEntityRestControllerTest {
         .isEqualTo(String.valueOf(defaultCdrVersionEntity.getCdrVersionId()));
   }
 
-  private CdrVersionEntity makeCdrVersion(
+  private CdrVersion makeCdrVersion(
       long cdrVersionId,
       boolean isDefault,
       String name,
       long creationTime,
       DataAccessLevel dataAccessLevel) {
-    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    CdrVersion cdrVersionEntity = new CdrVersion();
     cdrVersionEntity.setIsDefault(isDefault);
     cdrVersionEntity.setBigqueryDataset("a");
     cdrVersionEntity.setBigqueryProject("b");
