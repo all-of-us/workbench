@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.Address;
@@ -84,10 +85,12 @@ public class ProfileService {
           };
 
   private final UserDao userDao;
+  private final FreeTierBillingService freeTierBillingService;
 
   @Autowired
-  public ProfileService(UserDao userDao) {
+  public ProfileService(UserDao userDao, FreeTierBillingService freeTierBillingService) {
     this.userDao = userDao;
+    this.freeTierBillingService = freeTierBillingService;
   }
 
   public Profile getProfile(User user) {
@@ -195,6 +198,9 @@ public class ProfileService {
             .map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
             .collect(Collectors.toList()));
     profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
+
+    profile.setFreeTierUsage(freeTierBillingService.getUserCachedFreeTierUsage(user));
+    profile.setFreeTierQuota(freeTierBillingService.getUserFreeTierLimit(user));
 
     return profile;
   }

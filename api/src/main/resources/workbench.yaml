@@ -3413,6 +3413,12 @@ definitions:
         description: Version of the data use agreement that the user last signed.
       address:
         $ref: '#/definitions/Address'
+      freeTierUsage:
+        type: number
+        format: double
+      freeTierQuota:
+        type: number
+        format: double
 
   InstitutionalAffiliation:
     type: object
