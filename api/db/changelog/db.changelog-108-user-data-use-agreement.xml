@@ -22,7 +22,7 @@
       <column name="user_initials" type="varchar(6)">
         <constraints nullable="false"/>
       </column>
-      <column name="user_name_out_of_date" type="tinyint" />
+      <column name="user_name_out_of_date" type="tinyint" defaultValue="0"/>
       <column name="data_use_agreement_signed_version" type="integer">
         <constraints nullable="false"/>
       </column>

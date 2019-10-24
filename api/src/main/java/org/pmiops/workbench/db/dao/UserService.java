@@ -39,6 +39,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * A higher-level service class containing user manipulation and business logic which can't be
@@ -301,6 +302,20 @@ public class UserService {
     dataUseAgreement.setUserInitials(initials);
     dataUseAgreement.setCompletionTime(timestamp);
     return userDataUseAgreementDao.save(dataUseAgreement);
+  }
+
+  @Transactional
+  public void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName) {
+    List<UserDataUseAgreement> dataUseAgreements = userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(userProvider.get().getUserId());
+    dataUseAgreements.forEach(dua -> {
+      if (!dua.getUserGivenName().equalsIgnoreCase(newGivenName) || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)) {
+        dua.setUserNameOutOfDate(true);
+      }
+      else {
+        dua.setUserNameOutOfDate(false);
+      }
+    });
+    userDataUseAgreementDao.save(dataUseAgreements);
   }
 
   public User setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {

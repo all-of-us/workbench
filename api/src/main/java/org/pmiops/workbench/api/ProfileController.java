@@ -626,6 +626,12 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
     validateProfileFields(updatedProfile);
     User user = userProvider.get();
+
+    if(!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
+        || !userProvider.get().getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
+      userService.setDataUseAgreementNameOutOfDate(updatedProfile.getGivenName(), updatedProfile.getFamilyName());
+    }
+
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
     user.setOrganization(updatedProfile.getOrganization());

@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -37,6 +38,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.UserDataUseAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -423,6 +425,21 @@ public class ProfileControllerTest {
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     assertThat(user.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
+  }
+
+  @Test
+  public void updateName_alsoUpdatesDua() throws Exception {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setGivenName("OldGivenName");
+    profile.setFamilyName("OldFamilyName");
+    profileController.updateProfile(profile);
+    profileController.submitDataUseAgreement(1, "OO");
+    profile.setGivenName("NewFamilyName");
+    profile.setFamilyName("NewFamilyName");
+    profileController.updateProfile(profile);
+    List<UserDataUseAgreement> duas = userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(profile.getUserId());
+    assertThat(duas.get(0).isUserNameOutOfDate()).isTrue();
   }
 
   @Test(expected = BadRequestException.class)
