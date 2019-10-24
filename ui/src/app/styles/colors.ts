@@ -11,7 +11,6 @@ export default {
   success: '#8BC990',
   // Used for tables
   light: '#E9ECEF',
-  lightBackground: '#E6E4Ed',
   highlight: '#F8C954',
   warning: '#F7981C',
   danger: '#DB3214',
@@ -34,7 +33,7 @@ export default {
   }
 };
 
-class RGBA {
+class Rgba {
   r: number;
   g: number;
   b: number;
@@ -57,7 +56,7 @@ export const colorWithWhiteness = (color: string, whiteness: number) => {
   return Color(color).mix(Color('white'), whiteness).toString();
 };
 
-export function hexToRgb(hex: string): RGBA {
+export function hexToRgb(hex: string): Rgba {
   // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
   const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
   hex = hex.replace(shorthandRegex, (m, r, g, b) => {
@@ -65,13 +64,14 @@ export function hexToRgb(hex: string): RGBA {
   });
 
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? new RGBA(
+  return result ? new Rgba(
     parseInt(result[1], 16),
     parseInt(result[2], 16),
     parseInt(result[3], 16)) : null;
 }
 
-export function addOpacity(rgba: RGBA, opacity: number) {
+export function addOpacity(color: string, opacity: number) {
+  const rgba = hexToRgb(color);
   rgba.a = opacity;
   return rgba;
 }

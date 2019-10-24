@@ -6,6 +6,6 @@ export const CustomBulletList = ({children}) => {
 
 export const CustomBulletListItem = ({bullet, children}) => {
   return <React.Fragment>
-    <div style={{position: 'absolute', left: -2}}> {bullet} </div> <li> {children} </li>
+    <div style={{position: 'absolute', left: '-.2em'}}> {bullet} </div> <li> {children} </li>
   </React.Fragment>;
 };

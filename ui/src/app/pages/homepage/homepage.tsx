@@ -11,7 +11,7 @@ import {
 import {FadeBox} from 'app/components/containers';
 import {CustomBulletList, CustomBulletListItem} from 'app/components/CustomBulletList';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {Header, LessBoldHeader, SmallHeader} from 'app/components/headers';
+import {Header, SemiBoldHeader, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Modal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
@@ -21,7 +21,7 @@ import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
-import colors, {addOpacity, hexToRgb} from 'app/styles/colors';
+import colors, {addOpacity} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {environment} from 'environments/environment';
 import {
@@ -76,7 +76,7 @@ export const styles = reactStyles({
     color: colors.primary, fontSize: 28, fontWeight: 400, letterSpacing: 'normal'
   },
   pageWrapper: {
-    marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '16px'
+    marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '1.2em'
   },
   quickTourCardsRow: {
     justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem'
@@ -383,7 +383,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                             <FlexColumn>
                               <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
                                 <FlexRow style={{alignItems: 'center'}}>
-                                  <LessBoldHeader style={{marginTop: '0px'}}>Workspaces</LessBoldHeader>
+                                  <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
                                   <ClrIcon
                                     shape='plus-circle'
                                     size={30}
@@ -402,14 +402,19 @@ export const Homepage = withUserProfile()(class extends React.Component<
                               <RecentWorkspaces />
                             </FlexColumn>
                             <FlexColumn>
-                              {this.state.userHasWorkspaces ? (<React.Fragment>
-                                <SmallHeader>Recently Accessed Items</SmallHeader>
-                                <RecentResources/>
-                              </React.Fragment>) : <div style={{backgroundColor: colors.lightBackground,
-                                color: colors.primary,
-                                borderRadius: 10,
-                                padding: '10px 30px',
-                                margin: '30px 0px'}}>
+                              {this.state.userHasWorkspaces ?
+
+                                (<React.Fragment>
+                                  <SmallHeader>Recently Accessed Items</SmallHeader>
+                                  <RecentResources/>
+                                </React.Fragment>) :
+
+                                <div style={{
+                                  backgroundColor: addOpacity(colors.primary, .1).toString(),
+                                  color: colors.primary,
+                                  borderRadius: 10,
+                                  padding: '1em 2em',
+                                  margin: '2em 0em'}}>
                                 <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
                                 <CustomBulletList>
                                   <CustomBulletListItem bullet='→'>
@@ -426,7 +431,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                     and forum topics.
                                   </CustomBulletListItem>
                                 </CustomBulletList>
-                              </div>}
+                                </div>
+                              }
                             </FlexColumn>
                           </React.Fragment>
                         )
@@ -434,7 +440,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                   <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
             </FlexColumn>
           </FadeBox>
-          <div style={{backgroundColor: addOpacity(hexToRgb(colors.lightBackground), .4).toString()}}>
+          <div style={{backgroundColor: addOpacity(colors.light, .4).toString()}}>
             <FlexColumn style={{marginLeft: '3%'}}>
               <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
               <FlexRow style={styles.quickTourCardsRow}>
