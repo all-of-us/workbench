@@ -122,7 +122,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
       }[v] || validate.prettify(v))
     });
 
-    // render a value as US currency: $255.37
+    // render a float value as US currency, rounded to cents: 255.372793 -> $255.37
     const usdElement = (value: number) => {
       value = value || 0.0;
       if (value < 0.0) {
