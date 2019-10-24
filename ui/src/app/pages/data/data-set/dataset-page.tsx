@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Button, Clickable} from 'app/components/buttons';
+import {Button, Clickable, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {HelpSidebar} from 'app/components/help-sidebar';
@@ -27,12 +27,14 @@ import {
   ReactWrapperBase,
   toggleIncludes,
   withCurrentWorkspace,
-  withUrlParams
+  withUrlParams,
+  withUserProfile
 } from 'app/utils';
 import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {openZendeskWidget} from 'app/utils/zendesk';
 import {
   Cohort,
   ConceptSet,
@@ -46,6 +48,7 @@ import {
   DomainValuesResponse,
   ErrorResponse,
   PrePackagedConceptSetEnum,
+  Profile,
   Surveys,
   ValueSet,
 } from 'generated/fetch';
@@ -359,13 +362,17 @@ const BoxHeader = ({text= '', header =  '', subHeader = '', style= {}, ...props}
 
 interface DataSetPreviewInfo {
   isLoading: boolean;
-  errorText: string;
+  errorText: JSX.Element;
   values?: Array<DataSetPreviewValueList>;
 }
 
 interface Props {
   workspace: WorkspaceData;
   urlParams: any;
+  profileState: {
+    profile: Profile,
+    reload: Function
+  };
 }
 
 interface State {
@@ -388,7 +395,7 @@ interface State {
   valuesLoading: boolean;
 }
 
-const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
+const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams())(
   class extends React.Component<Props, State> {
     dt: any;
     constructor(props) {
@@ -655,7 +662,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       const domains = fp.uniq(this.state.selectedDomainValuePairs.map(domainValue => domainValue.domain));
       const newPreviewList: Map<Domain, DataSetPreviewInfo> =
         new Map(domains.map<[Domain, DataSetPreviewInfo]>(domain => [domain, {
-          isLoading: true, errorText: '', values: []}]));
+          isLoading: true, errorText: null, values: []}]));
       this.setState({
         previewList: newPreviewList,
         selectedPreviewDomain: domains[0]
@@ -681,7 +688,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           () => dataSetApi().previewDataSetByDomain(namespace, id, domainRequest));
         newPreviewInformation = {
           isLoading: false,
-          errorText: '',
+          errorText: null,
           values: domainPreviewResponse.values
         };
       } catch (ex) {
@@ -696,24 +703,29 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       this.setState(state => ({previewList: state.previewList.set(domain, newPreviewInformation)}));
     }
 
+    openZendeskWidget() {
+      const {profile} = this.props.profileState;
+      openZendeskWidget(profile.givenName, profile.familyName, profile.username, profile.contactEmail);
+    }
+
     // TODO: Move to using a response based error handling method, rather than a error based one
     generateErrorTextFromPreviewException(exceptionResponse: ErrorResponse,
-      domain: Domain): string {
+      domain: Domain): JSX.Element {
       switch (exceptionResponse.statusCode) {
         case 400:
-          return exceptionResponse.message;
+          return <div>{exceptionResponse.message}</div>;
           break;
         case 404:
-          return exceptionResponse.message;
+          return <div>{exceptionResponse.message}</div>;
           break;
         case 504:
-          return `Query to load data from the All of Us Database timed out for domain:
-                ${domain}. Please either try again or export dataset to a notebook to try
-                there`;
+          return <div>The preview table cannot be loaded because the query took too long to run.
+            Please export this Dataset to a Notebook by clicking the Analyze button.</div>;
           break;
         default:
-          return `An unexpected error has occurred loading domain: ${domain}.
-              Please submit a bug using the contact support button`;
+          return <div>An unexpected error has occurred while running your Dataset query.
+            Please <Link style={{display: 'inline-block'}} onClick={() => this.openZendeskWidget()}>
+              create a bug report</Link> for our team.</div>;
       }
     }
 
