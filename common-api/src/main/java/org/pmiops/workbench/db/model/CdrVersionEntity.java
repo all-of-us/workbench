@@ -15,7 +15,7 @@ import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
 @Table(name = "cdr_version")
-public class CdrVersion {
+public class CdrVersionEntity {
 
   private long cdrVersionId;
   private boolean isDefault;
@@ -177,10 +177,10 @@ public class CdrVersion {
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof CdrVersion)) {
+    if (!(obj instanceof CdrVersionEntity)) {
       return false;
     }
-    CdrVersion that = (CdrVersion) obj;
+    CdrVersionEntity that = (CdrVersionEntity) obj;
     return new EqualsBuilder()
         .append(this.cdrVersionId, that.cdrVersionId)
         .append(this.isDefault, that.isDefault)

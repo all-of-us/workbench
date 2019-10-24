@@ -20,7 +20,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.User;
@@ -318,15 +318,15 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersion cdrVersion = workspace.getCdrVersion();
+    CdrVersionEntity cdrVersionEntity = workspace.getCdrVersionEntity();
 
     if (request.getCdrVersionName() != null) {
-      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
-      if (cdrVersion == null) {
+      cdrVersionEntity = cdrVersionDao.findByName(request.getCdrVersionName());
+      if (cdrVersionEntity == null) {
         throw new NotFoundException(
             String.format("Couldn't find CDR version with name %s", request.getCdrVersionName()));
       }
-      cdrVersionService.setCdrVersion(cdrVersion);
+      cdrVersionService.setCdrVersion(cdrVersionEntity);
     }
     String cohortSpec;
     CohortReview cohortReview = null;
@@ -342,7 +342,7 @@ public class CohortsController implements CohortsApiDelegate {
       }
       cohortReview =
           cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
-              cohort.getCohortId(), cdrVersion.getCdrVersionId());
+              cohort.getCohortId(), cdrVersionEntity.getCdrVersionId());
       cohortSpec = cohort.getCriteria();
     } else if (request.getCohortSpec() != null) {
       cohortSpec = request.getCohortSpec();
@@ -380,15 +380,15 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersion cdrVersion = workspace.getCdrVersion();
+    CdrVersionEntity cdrVersionEntity = workspace.getCdrVersionEntity();
 
     if (request.getCdrVersionName() != null) {
-      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
-      if (cdrVersion == null) {
+      cdrVersionEntity = cdrVersionDao.findByName(request.getCdrVersionName());
+      if (cdrVersionEntity == null) {
         throw new NotFoundException(
             String.format("Couldn't find CDR version with name %s", request.getCdrVersionName()));
       }
-      cdrVersionService.setCdrVersion(cdrVersion);
+      cdrVersionService.setCdrVersion(cdrVersionEntity);
     }
     String cohortSpec;
     CohortReview cohortReview = null;
@@ -404,7 +404,7 @@ public class CohortsController implements CohortsApiDelegate {
       }
       cohortReview =
           cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
-              cohort.getCohortId(), cdrVersion.getCdrVersionId());
+              cohort.getCohortId(), cdrVersionEntity.getCdrVersionId());
       cohortSpec = cohort.getCriteria();
     } else if (request.getCohortSpec() != null) {
       cohortSpec = request.getCohortSpec();
@@ -426,10 +426,10 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersion cdrVersion = workspace.getCdrVersion();
+    CdrVersionEntity cdrVersionEntity = workspace.getCdrVersionEntity();
     if (request.getCdrVersionName() != null) {
-      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
-      if (cdrVersion == null) {
+      cdrVersionEntity = cdrVersionDao.findByName(request.getCdrVersionName());
+      if (cdrVersionEntity == null) {
         throw new NotFoundException(
             String.format("Couldn't find CDR version with name %s", request.getCdrVersionName()));
       }
@@ -445,7 +445,7 @@ public class CohortsController implements CohortsApiDelegate {
     }
     CohortReview cohortReview =
         cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
-            cohort.getCohortId(), cdrVersion.getCdrVersionId());
+            cohort.getCohortId(), cdrVersionEntity.getCdrVersionId());
     if (cohortReview == null) {
       return ResponseEntity.ok(
           new CohortAnnotationsResponse().columns(request.getAnnotationQuery().getColumns()));

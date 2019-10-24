@@ -20,7 +20,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.DataDictionaryEntry;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -85,11 +85,11 @@ public class DataDictionaryTest {
 
   @Before
   public void setUp() {
-    CdrVersion cdrVersion = new CdrVersion();
-    cdrVersionDao.save(cdrVersion);
+    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionDao.save(cdrVersionEntity);
 
     DataDictionaryEntry dataDictionaryEntry = new DataDictionaryEntry();
-    dataDictionaryEntry.setCdrVersion(cdrVersion);
+    dataDictionaryEntry.setCdrVersionEntity(cdrVersionEntity);
     dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
     dataDictionaryEntry.setRelevantOmopTable(ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(Domain.DRUG));
     dataDictionaryEntry.setFieldName("TEST FIELD");
@@ -108,11 +108,11 @@ public class DataDictionaryTest {
     final Domain domain = Domain.DRUG;
     final String domainValue = "FIELD NAME / DOMAIN VALUE";
 
-    CdrVersion cdrVersion = new CdrVersion();
-    cdrVersionDao.save(cdrVersion);
+    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionDao.save(cdrVersionEntity);
 
     DataDictionaryEntry dataDictionaryEntry = new DataDictionaryEntry();
-    dataDictionaryEntry.setCdrVersion(cdrVersion);
+    dataDictionaryEntry.setCdrVersionEntity(cdrVersionEntity);
     dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
     dataDictionaryEntry.setRelevantOmopTable(ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(domain));
     dataDictionaryEntry.setFieldName(domainValue);
@@ -127,7 +127,7 @@ public class DataDictionaryTest {
 
     org.pmiops.workbench.model.DataDictionaryEntry response =
         dataSetController
-            .getDataDictionaryEntry(cdrVersion.getCdrVersionId(), domain.toString(), domainValue)
+            .getDataDictionaryEntry(cdrVersionEntity.getCdrVersionId(), domain.toString(), domainValue)
             .getBody();
 
     assertThat(response.getCdrVersionId().longValue())

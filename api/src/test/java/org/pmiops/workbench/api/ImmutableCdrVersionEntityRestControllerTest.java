@@ -7,10 +7,11 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.api.cdrversions.CdrVersionRestController;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -37,18 +38,18 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class CdrVersionsControllerTest {
+public class ImmutableCdrVersionEntityRestControllerTest {
 
   @Autowired private CdrVersionDao cdrVersionDao;
 
-  @Autowired private CdrVersionsController cdrVersionsController;
+  @Autowired private CdrVersionRestController cdrVersionRestController;
 
-  private CdrVersion defaultCdrVersion;
-  private CdrVersion protectedCdrVersion;
+  private CdrVersionEntity defaultCdrVersionEntity;
+  private CdrVersionEntity protectedCdrVersionEntity;
   private User user;
 
   @TestConfiguration
-  @Import({CdrVersionService.class, CdrVersionsController.class})
+  @Import({CdrVersionService.class, CdrVersionRestController.class})
   @MockBean({FireCloudService.class})
   static class Configuration {
     @Bean
@@ -68,60 +69,61 @@ public class CdrVersionsControllerTest {
   public void setUp() {
     user = new User();
     user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
-    cdrVersionsController.setUserProvider(Providers.of(user));
-    defaultCdrVersion =
+    cdrVersionRestController.setUserProvider(Providers.of(user));
+    defaultCdrVersionEntity =
         makeCdrVersion(
             1L, /* isDefault */ true, "Test Registered CDR", 123L, DataAccessLevel.REGISTERED);
-    protectedCdrVersion =
+    protectedCdrVersionEntity =
         makeCdrVersion(
             2L, /* isDefault */ false, "Test Protected CDR", 456L, DataAccessLevel.PROTECTED);
   }
 
   @Test
   public void testGetCdrVersionsRegistered() {
-    assertResponse(cdrVersionsController.getCdrVersions().getBody(), defaultCdrVersion);
+    assertResponse(cdrVersionRestController.getCdrVersions().getBody(), defaultCdrVersionEntity);
   }
 
   @Test
   public void testGetCdrVersionsProtected() {
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     assertResponse(
-        cdrVersionsController.getCdrVersions().getBody(), protectedCdrVersion, defaultCdrVersion);
+        cdrVersionRestController.getCdrVersions().getBody(), protectedCdrVersionEntity,
+        defaultCdrVersionEntity);
   }
 
   @Test(expected = ForbiddenException.class)
   public void testGetCdrVersionsUnregistered() {
     user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
-    cdrVersionsController.getCdrVersions();
+    cdrVersionRestController.getCdrVersions();
   }
 
-  private void assertResponse(CdrVersionListResponse response, CdrVersion... versions) {
+  private void assertResponse(CdrVersionListResponse response, CdrVersionEntity... versions) {
     assertThat(response.getItems())
         .containsExactly(
-            Arrays.stream(versions).map(CdrVersionsController.TO_CLIENT_CDR_VERSION).toArray())
+            Arrays.stream(versions).map(CdrVersionRestController.TO_CLIENT_CDR_VERSION).toArray())
         .inOrder();
     assertThat(response.getDefaultCdrVersionId())
-        .isEqualTo(String.valueOf(defaultCdrVersion.getCdrVersionId()));
+        .isEqualTo(String.valueOf(defaultCdrVersionEntity.getCdrVersionId()));
   }
 
-  private CdrVersion makeCdrVersion(
+  private CdrVersionEntity makeCdrVersion(
       long cdrVersionId,
       boolean isDefault,
       String name,
       long creationTime,
       DataAccessLevel dataAccessLevel) {
-    CdrVersion cdrVersion = new CdrVersion();
-    cdrVersion.setIsDefault(isDefault);
-    cdrVersion.setBigqueryDataset("a");
-    cdrVersion.setBigqueryProject("b");
-    cdrVersion.setCdrDbName("c");
-    cdrVersion.setCdrVersionId(cdrVersionId);
-    cdrVersion.setCreationTime(new Timestamp(creationTime));
-    cdrVersion.setDataAccessLevelEnum(dataAccessLevel);
-    cdrVersion.setName(name);
-    cdrVersion.setNumParticipants(123);
-    cdrVersion.setReleaseNumber((short) 1);
-    cdrVersionDao.save(cdrVersion);
-    return cdrVersion;
+    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionEntity.setIsDefault(isDefault);
+    cdrVersionEntity.setBigqueryDataset("a");
+    cdrVersionEntity.setBigqueryProject("b");
+    cdrVersionEntity.setCdrDbName("c");
+    cdrVersionEntity.setCdrVersionId(cdrVersionId);
+    cdrVersionEntity.setCreationTime(new Timestamp(creationTime));
+    cdrVersionEntity.setDataAccessLevelEnum(dataAccessLevel);
+    cdrVersionEntity.setName(name);
+    cdrVersionEntity.setNumParticipants(123);
+    cdrVersionEntity.setReleaseNumber((short) 1);
+    cdrVersionDao.save(cdrVersionEntity);
+    return cdrVersionEntity;
   }
 }

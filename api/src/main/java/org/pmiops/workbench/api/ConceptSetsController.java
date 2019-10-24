@@ -381,9 +381,9 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         toWorkspace.getWorkspaceNamespace(),
         toWorkspace.getFirecloudName(),
         WorkspaceAccessLevel.WRITER);
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(toWorkspace.getCdrVersion());
-    if (toWorkspace.getCdrVersion().getCdrVersionId()
-        != fromWorkspace.getCdrVersion().getCdrVersionId()) {
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(toWorkspace.getCdrVersionEntity());
+    if (toWorkspace.getCdrVersionEntity().getCdrVersionId()
+        != fromWorkspace.getCdrVersionEntity().getCdrVersionId()) {
       throw new BadRequestException(
           "Target workspace does not have the same CDR version as current workspace");
     }

@@ -2,17 +2,17 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.List;
 import java.util.Set;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.springframework.data.repository.CrudRepository;
 
-public interface CdrVersionDao extends CrudRepository<CdrVersion, Long> {
+public interface CdrVersionDao extends CrudRepository<CdrVersionEntity, Long> {
 
-  CdrVersion findByCdrVersionId(long id);
+  CdrVersionEntity findByCdrVersionId(long id);
 
-  CdrVersion findByName(String name);
+  CdrVersionEntity findByName(String name);
 
-  CdrVersion findByIsDefault(boolean isDefault);
+  CdrVersionEntity findByIsDefault(boolean isDefault);
 
-  List<CdrVersion> findByDataAccessLevelInOrderByCreationTimeDescDataAccessLevelDesc(
+  List<CdrVersionEntity> findByDataAccessLevelInOrderByCreationTimeDescDataAccessLevelDesc(
       Set<Short> dataAccessLevel);
 }

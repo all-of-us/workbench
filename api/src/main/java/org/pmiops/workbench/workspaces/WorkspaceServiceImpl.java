@@ -397,9 +397,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public Workspace saveAndCloneCohortsConceptSetsAndDataSets(Workspace from, Workspace to) {
     // Save the workspace first to allocate an ID.
     to = workspaceDao.save(to);
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(to.getCdrVersion());
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(to.getCdrVersionEntity());
     boolean cdrVersionChanged =
-        from.getCdrVersion().getCdrVersionId() != to.getCdrVersion().getCdrVersionId();
+        from.getCdrVersionEntity().getCdrVersionId() != to.getCdrVersionEntity().getCdrVersionId();
     Map<Long, Long> fromCohortIdToToCohortId = new HashMap<>();
     for (Cohort fromCohort : from.getCohorts()) {
       fromCohortIdToToCohortId.put(
@@ -475,7 +475,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // Because we've already checked that the user has access to the workspace in question,
     // we don't need to check their membership in the authorization domain for the CDR version
     // associated with the workspace.
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(workspace.getCdrVersion());
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(workspace.getCdrVersionEntity());
     return workspace;
   }
 

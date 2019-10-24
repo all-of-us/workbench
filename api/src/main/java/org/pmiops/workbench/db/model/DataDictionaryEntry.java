@@ -17,7 +17,7 @@ public class DataDictionaryEntry {
 
   // Metadata fields
   private long dataDictionaryEntryId;
-  private CdrVersion cdrVersion;
+  private CdrVersionEntity cdrVersionEntity;
   private Timestamp definedTime;
 
   // Fields copied from the Data Dictionary export
@@ -47,12 +47,12 @@ public class DataDictionaryEntry {
 
   @ManyToOne
   @JoinColumn(name = "cdr_version_id")
-  public CdrVersion getCdrVersion() {
-    return cdrVersion;
+  public CdrVersionEntity getCdrVersion() {
+    return cdrVersionEntity;
   }
 
-  public void setCdrVersion(CdrVersion cdrVersion) {
-    this.cdrVersion = cdrVersion;
+  public void setCdrVersionEntity(CdrVersionEntity cdrVersionEntity) {
+    this.cdrVersionEntity = cdrVersionEntity;
   }
 
   @Column(name = "defined_time")
@@ -143,7 +143,7 @@ public class DataDictionaryEntry {
     if (o == null || getClass() != o.getClass()) return false;
     DataDictionaryEntry that = (DataDictionaryEntry) o;
     return dataDictionaryEntryId == that.dataDictionaryEntryId
-        && Objects.equals(cdrVersion, that.cdrVersion)
+        && Objects.equals(cdrVersionEntity, that.cdrVersionEntity)
         && Objects.equals(definedTime, that.definedTime)
         && Objects.equals(relevantOmopTable, that.relevantOmopTable)
         && Objects.equals(fieldName, that.fieldName)
@@ -161,7 +161,7 @@ public class DataDictionaryEntry {
   public int hashCode() {
     return Objects.hash(
         dataDictionaryEntryId,
-        cdrVersion,
+        cdrVersionEntity,
         definedTime,
         relevantOmopTable,
         fieldName,

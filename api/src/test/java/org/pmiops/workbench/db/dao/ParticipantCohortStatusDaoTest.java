@@ -14,7 +14,7 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -46,9 +46,9 @@ public class ParticipantCohortStatusDaoTest {
 
   @Before
   public void onSetup() {
-    CdrVersion cdrVersion = new CdrVersion();
-    cdrVersion.setCdrDbName("");
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionEntity.setCdrDbName("");
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);
 
     ParticipantCohortStatus status1 =
         new ParticipantCohortStatus()

@@ -62,7 +62,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -352,18 +352,18 @@ public class DataSetControllerTest {
     currentUser = user;
     when(userProvider.get()).thenReturn(user);
 
-    CdrVersion cdrVersion = new CdrVersion();
-    cdrVersion.setName("1");
+    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionEntity.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
-    cdrVersion.setCdrDbName("");
-    cdrVersion = cdrVersionDao.save(cdrVersion);
+    cdrVersionEntity.setCdrDbName("");
+    cdrVersionEntity = cdrVersionDao.save(cdrVersionEntity);
 
     workspace = new Workspace();
     workspace.setName(WORKSPACE_NAME);
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
-    workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    workspace.setCdrVersionId(String.valueOf(cdrVersionEntity.getCdrVersionId()));
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubGetWorkspace(

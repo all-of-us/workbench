@@ -34,7 +34,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -295,19 +295,19 @@ public class ConceptsControllerTest {
     currentUser = user;
     when(userProvider.get()).thenReturn(user);
 
-    CdrVersion cdrVersion = new CdrVersion();
-    cdrVersion.setName("1");
+    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionEntity.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
-    cdrVersion.setCdrDbName("");
-    cdrVersion = cdrVersionDao.save(cdrVersion);
+    cdrVersionEntity.setCdrDbName("");
+    cdrVersionEntity = cdrVersionDao.save(cdrVersionEntity);
 
     Workspace workspace = new Workspace();
     workspace.setWorkspaceId(1L);
     workspace.setName("name");
     workspace.setFirecloudName("name");
     workspace.setWorkspaceNamespace("ns");
-    workspace.setCdrVersion(cdrVersion);
+    workspace.setCdrVersionEntity(cdrVersionEntity);
     workspaceDao.save(workspace);
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();

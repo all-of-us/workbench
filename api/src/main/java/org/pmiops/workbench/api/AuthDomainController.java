@@ -25,7 +25,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
       FireCloudService fireCloudService, UserService userService, UserDao userDao) {
     this.fireCloudService = fireCloudService;
     this.userService = userService;
-    this.userDao = userDao;
+    this.userDao = userDao; // $REFACTOR$ use UserStorageManager
   }
 
   @AuthorityRequired({Authority.DEVELOPER})
@@ -38,6 +38,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<Void> updateUserDisabledStatus(UpdateUserDisabledRequest request) {
+    // $REFACTOR$ make a service and call it (or move body to UserService)
     User user = userDao.findUserByEmail(request.getEmail());
     Boolean previousDisabled = user.getDisabled();
     User updatedUser = userService.setDisabledStatus(user.getUserId(), request.getDisabled());

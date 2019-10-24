@@ -31,7 +31,7 @@ import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -135,7 +135,7 @@ public class ClusterControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired Clock clock;
 
-  private CdrVersion cdrVersion;
+  private CdrVersionEntity cdrVersionEntity;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
   private Cluster testCluster;
 
@@ -158,11 +158,11 @@ public class ClusterControllerTest {
 
     createUser(OTHER_USER_EMAIL);
 
-    cdrVersion = new CdrVersion();
-    cdrVersion.setName("1");
+    cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionEntity.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
-    cdrVersion.setCdrDbName("");
+    cdrVersionEntity.setCdrDbName("");
 
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
     testFcCluster =
@@ -192,7 +192,7 @@ public class ClusterControllerTest {
     Workspace w = new Workspace();
     w.setWorkspaceNamespace(ns);
     w.setFirecloudName(name);
-    w.setCdrVersion(cdrVersion);
+    w.setCdrVersionEntity(cdrVersionEntity);
     when(workspaceService.getRequired(ns, name)).thenReturn(w);
     stubGetFcWorkspace(createFcWorkspace(ns, name, creator));
   }

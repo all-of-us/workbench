@@ -30,7 +30,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -118,14 +118,14 @@ public class CohortMaterializationServiceTest {
 
   @Before
   public void setUp() {
-    CdrVersion cdrVersion = new CdrVersion();
-    cdrVersion.setBigqueryDataset(DATA_SET_ID);
-    cdrVersion.setBigqueryProject(PROJECT_ID);
-    cdrVersionDao.save(cdrVersion);
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionEntity.setBigqueryDataset(DATA_SET_ID);
+    cdrVersionEntity.setBigqueryProject(PROJECT_ID);
+    cdrVersionDao.save(cdrVersionEntity);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);
 
     Workspace workspace = new Workspace();
-    workspace.setCdrVersion(cdrVersion);
+    workspace.setCdrVersionEntity(cdrVersionEntity);
     workspace.setName("name");
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
@@ -146,7 +146,7 @@ public class CohortMaterializationServiceTest {
     cohortDao.save(cohort2);
 
     cohortReview = new CohortReview();
-    cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
+    cohortReview.setCdrVersionId(cdrVersionEntity.getCdrVersionId());
     cohortReview.setCohortId(cohort2.getCohortId());
     cohortReview.setMatchedParticipantCount(3);
     cohortReview.setReviewedCount(2);

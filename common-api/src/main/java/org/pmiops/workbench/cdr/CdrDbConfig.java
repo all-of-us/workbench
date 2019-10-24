@@ -12,7 +12,7 @@ import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.pmiops.workbench.config.CacheSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,11 +71,11 @@ public class CdrDbConfig {
       // all servers.
       Long defaultId = null;
       Map<Object, Object> cdrVersionDataSourceMap = new HashMap<>();
-      for (CdrVersion cdrVersion : cdrVersionDao.findAll()) {
+      for (CdrVersionEntity cdrVersionEntity : cdrVersionDao.findAll()) {
         int slashIndex = originalDbUrl.lastIndexOf('/');
         String dbUrl =
             originalDbUrl.substring(0, slashIndex + 1)
-                + cdrVersion.getCdrDbName()
+                + cdrVersionEntity.getCdrDbName()
                 + "?useSSL=false";
         DataSource dataSource =
             DataSourceBuilder.create()
@@ -108,15 +108,15 @@ public class CdrDbConfig {
               "not using Tomcat pool or initializing pool configuration; "
                   + "this should only happen within tests");
         }
-        cdrVersionDataSourceMap.put(cdrVersion.getCdrVersionId(), dataSource);
-        if (cdrVersion.getIsDefault()) {
+        cdrVersionDataSourceMap.put(cdrVersionEntity.getCdrVersionId(), dataSource);
+        if (cdrVersionEntity.getIsDefault()) {
           if (defaultId != null) {
             throw new ServerErrorException(
                 String.format(
                     "Multiple CDR versions are marked as the default: %d, %d",
-                    defaultId, cdrVersion.getCdrVersionId()));
+                    defaultId, cdrVersionEntity.getCdrVersionId()));
           }
-          defaultId = cdrVersion.getCdrVersionId();
+          defaultId = cdrVersionEntity.getCdrVersionId();
         }
       }
       if (defaultId == null) {
@@ -134,8 +134,8 @@ public class CdrDbConfig {
 
     @Override
     protected Object determineCurrentLookupKey() {
-      CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
-      if (cdrVersion == null) {
+      CdrVersionEntity cdrVersionEntity = CdrVersionContext.getCdrVersion();
+      if (cdrVersionEntity == null) {
         if (finishedInitialization) {
           throw new ServerErrorException("No CDR version specified!");
         }
@@ -146,7 +146,7 @@ public class CdrDbConfig {
         // be called and we will start requiring clients to specify a CDR version.
         return defaultCdrVersionId;
       }
-      return cdrVersion.getCdrVersionId();
+      return cdrVersionEntity.getCdrVersionId();
     }
   }
 

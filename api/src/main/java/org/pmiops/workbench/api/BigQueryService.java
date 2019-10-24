@@ -24,7 +24,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -43,15 +43,15 @@ public class BigQueryService {
 
   @VisibleForTesting
   protected BigQuery getBigQueryService() {
-    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
-    if (cdrVersion == null) {
+    CdrVersionEntity cdrVersionEntity = CdrVersionContext.getCdrVersion();
+    if (cdrVersionEntity == null) {
       return defaultBigQuery;
     }
     // If a query is being executed in the context of a CDR, it must be run within that project as
     // well. By default, the query would run in the Workbench App Engine project, which would
     // violate VPC-SC restrictions.
     return BigQueryOptions.newBuilder()
-        .setProjectId(cdrVersion.getBigqueryProject())
+        .setProjectId(cdrVersionEntity.getBigqueryProject())
         .build()
         .getService();
   }
@@ -93,13 +93,13 @@ public class BigQueryService {
   }
 
   public QueryJobConfiguration filterBigQueryConfig(QueryJobConfiguration queryJobConfiguration) {
-    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
-    if (cdrVersion == null) {
+    CdrVersionEntity cdrVersionEntity = CdrVersionContext.getCdrVersion();
+    if (cdrVersionEntity == null) {
       throw new ServerErrorException("No CDR version specified");
     }
     String returnSql =
-        queryJobConfiguration.getQuery().replace("${projectId}", cdrVersion.getBigqueryProject());
-    returnSql = returnSql.replace("${dataSetId}", cdrVersion.getBigqueryDataset());
+        queryJobConfiguration.getQuery().replace("${projectId}", cdrVersionEntity.getBigqueryProject());
+    returnSql = returnSql.replace("${dataSetId}", cdrVersionEntity.getBigqueryDataset());
     return queryJobConfiguration.toBuilder().setQuery(returnSql).build();
   }
 
@@ -147,7 +147,7 @@ public class BigQueryService {
   }
 
   public FieldList getTableFieldsFromDomain(Domain d) {
-    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    CdrVersionEntity cdrVersionEntity = CdrVersionContext.getCdrVersion();
     String tableName;
     if (Domain.CONDITION.equals(d)) {
       tableName = "ds_condition_occurrence";
@@ -165,7 +165,7 @@ public class BigQueryService {
       throw new BadRequestException("Invalid domain, unable to fetch fields from table");
     }
     TableId tableId =
-        TableId.of(cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset(), tableName);
+        TableId.of(cdrVersionEntity.getBigqueryProject(), cdrVersionEntity.getBigqueryDataset(), tableName);
 
     return getBigQueryService().getTable(tableId).getDefinition().getSchema().getFields();
   }

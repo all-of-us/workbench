@@ -40,7 +40,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -133,7 +133,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private static final Long PARTICIPANT_ID = 102246L;
   private static final Long PARTICIPANT_ID2 = 102247L;
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
-  private CdrVersion cdrVersion;
+  private CdrVersionEntity cdrVersionEntity;
   private Workspace workspace;
 
   @Autowired private CohortReviewController controller;
@@ -192,13 +192,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                     ImmutableMap.of(
                         currentUser.getEmail(), new WorkspaceAccessEntry().accessLevel("OWNER"))));
 
-    cdrVersion = new CdrVersion();
-    cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
-    cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
-    cdrVersionDao.save(cdrVersion);
+    cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionEntity.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
+    cdrVersionEntity.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
+    cdrVersionDao.save(cdrVersionEntity);
 
     workspace = new Workspace();
-    workspace.setCdrVersion(cdrVersion);
+    workspace.setCdrVersionEntity(cdrVersionEntity);
     workspace.setWorkspaceNamespace(NAMESPACE);
     workspace.setFirecloudName(NAME);
     workspaceDao.save(workspace);
@@ -213,7 +213,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     review =
         new CohortReview()
-            .cdrVersionId(cdrVersion.getCdrVersionId())
+            .cdrVersionId(cdrVersionEntity.getCdrVersionId())
             .matchedParticipantCount(212)
             .creationTime(new Timestamp(new Date().getTime()))
             .lastModifiedTime(new Timestamp(new Date().getTime()))
@@ -240,7 +240,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @After
   public void tearDown() {
     workspaceDao.delete(workspace.getWorkspaceId());
-    cdrVersionDao.delete(cdrVersion.getCdrVersionId());
+    cdrVersionDao.delete(cdrVersionEntity.getCdrVersionId());
   }
 
   private static ParticipantData expectedAllEvents1() {
@@ -382,7 +382,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE,
                 NAME,
                 cohortWithoutReview.getCohortId(),
-                cdrVersion.getCdrVersionId(),
+                cdrVersionEntity.getCdrVersionId(),
                 new CreateReviewRequest().size(1))
             .getBody();
 

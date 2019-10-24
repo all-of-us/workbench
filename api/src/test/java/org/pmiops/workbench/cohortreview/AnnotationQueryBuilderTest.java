@@ -24,7 +24,7 @@ import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
@@ -102,12 +102,12 @@ public class AnnotationQueryBuilderTest {
 
   @Before
   public void setUp() {
-    CdrVersion cdrVersion = new CdrVersion();
-    cdrVersionDao.save(cdrVersion);
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+    CdrVersionEntity cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionDao.save(cdrVersionEntity);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);
 
     Workspace workspace = new Workspace();
-    workspace.setCdrVersion(cdrVersion);
+    workspace.setCdrVersionEntity(cdrVersionEntity);
     workspace.setName("name");
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
@@ -120,7 +120,7 @@ public class AnnotationQueryBuilderTest {
     cohortDao.save(cohort);
 
     cohortReview = new CohortReview();
-    cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
+    cohortReview.setCdrVersionId(cdrVersionEntity.getCdrVersionId());
     cohortReview.setCohortId(cohort.getCohortId());
     cohortReview.setMatchedParticipantCount(3);
     cohortReview.setReviewedCount(2);

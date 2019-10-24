@@ -81,7 +81,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -293,7 +293,7 @@ public class WorkspacesControllerTest {
   @Autowired ConceptBigQueryService conceptBigQueryService;
   @Mock private Provider<WorkbenchConfig> configProvider;
 
-  private CdrVersion cdrVersion;
+  private CdrVersionEntity cdrVersionEntity;
   private String cdrVersionId;
   private String archivedCdrVersionId;
 
@@ -303,20 +303,20 @@ public class WorkspacesControllerTest {
   public void setUp() {
     testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
-    cdrVersion = new CdrVersion();
-    cdrVersion.setName("1");
+    cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionEntity.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
-    cdrVersion.setCdrDbName("");
-    cdrVersion = cdrVersionDao.save(cdrVersion);
-    cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
+    cdrVersionEntity.setCdrDbName("");
+    cdrVersionEntity = cdrVersionDao.save(cdrVersionEntity);
+    cdrVersionId = Long.toString(cdrVersionEntity.getCdrVersionId());
 
-    CdrVersion archivedCdrVersion = new CdrVersion();
-    archivedCdrVersion.setName("archived");
-    archivedCdrVersion.setCdrDbName("");
-    archivedCdrVersion.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
-    archivedCdrVersion = cdrVersionDao.save(archivedCdrVersion);
-    archivedCdrVersionId = Long.toString(archivedCdrVersion.getCdrVersionId());
+    CdrVersionEntity archivedCdrVersionEntity = new CdrVersionEntity();
+    archivedCdrVersionEntity.setName("archived");
+    archivedCdrVersionEntity.setCdrDbName("");
+    archivedCdrVersionEntity.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
+    archivedCdrVersionEntity = cdrVersionDao.save(archivedCdrVersionEntity);
+    archivedCdrVersionId = Long.toString(archivedCdrVersionEntity.getCdrVersionId());
 
     conceptDao.save(CONCEPT_1);
     conceptDao.save(CONCEPT_2);
@@ -882,7 +882,7 @@ public class WorkspacesControllerTest {
   public void testCloneWorkspaceWithCohortsAndConceptSets() throws Exception {
     stubFcGetWorkspaceACL();
     Long participantId = 1L;
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -900,7 +900,7 @@ public class WorkspacesControllerTest {
                 workspace.getNamespace(),
                 workspace.getId(),
                 c1.getId(),
-                cdrVersion.getCdrVersionId(),
+                cdrVersionEntity.getCdrVersionId(),
                 reviewReq)
             .getBody();
     CohortAnnotationDefinition cad1EnumResponse =
@@ -962,7 +962,7 @@ public class WorkspacesControllerTest {
                 workspace.getNamespace(),
                 workspace.getId(),
                 c2.getId(),
-                cdrVersion.getCdrVersionId(),
+                cdrVersionEntity.getCdrVersionId(),
                 reviewReq)
             .getBody();
     CohortAnnotationDefinition cad2EnumResponse =
@@ -1093,7 +1093,7 @@ public class WorkspacesControllerTest {
                 cloned.getNamespace(),
                 cloned.getId(),
                 cohortsByName.get("c1").getId(),
-                cdrVersion.getCdrVersionId(),
+                cdrVersionEntity.getCdrVersionId(),
                 new PageFilterRequest())
             .getBody();
     assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
@@ -1127,7 +1127,7 @@ public class WorkspacesControllerTest {
                 cloned.getNamespace(),
                 cloned.getId(),
                 cohortsByName.get("c2").getId(),
-                cdrVersion.getCdrVersionId(),
+                cdrVersionEntity.getCdrVersionId(),
                 new PageFilterRequest())
             .getBody();
     assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
@@ -1179,14 +1179,14 @@ public class WorkspacesControllerTest {
   @Test
   public void testCloneWorkspaceWithConceptSetNewCdrVersionNewConceptSetCount() throws Exception {
     stubFcGetWorkspaceACL();
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    CdrVersion cdrVersion2 = new CdrVersion();
-    cdrVersion2.setName("2");
-    cdrVersion2.setCdrDbName("");
-    cdrVersion2 = cdrVersionDao.save(cdrVersion2);
+    CdrVersionEntity cdrVersionEntity2 = new CdrVersionEntity();
+    cdrVersionEntity2.setName("2");
+    cdrVersionEntity2.setCdrDbName("");
+    cdrVersionEntity2 = cdrVersionDao.save(cdrVersionEntity2);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
             "condition_occurrence",
@@ -1209,7 +1209,7 @@ public class WorkspacesControllerTest {
     Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
-    modWorkspace.setCdrVersionId(String.valueOf(cdrVersion2.getCdrVersionId()));
+    modWorkspace.setCdrVersionId(String.valueOf(cdrVersionEntity2.getCdrVersionId()));
 
     ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
@@ -1376,11 +1376,11 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspaceCdrVersion() throws Exception {
-    CdrVersion cdrVersion2 = new CdrVersion();
-    cdrVersion2.setName("2");
-    cdrVersion2.setCdrDbName("");
-    cdrVersion2 = cdrVersionDao.save(cdrVersion2);
-    String cdrVersionId2 = Long.toString(cdrVersion2.getCdrVersionId());
+    CdrVersionEntity cdrVersionEntity2 = new CdrVersionEntity();
+    cdrVersionEntity2.setName("2");
+    cdrVersionEntity2.setCdrDbName("");
+    cdrVersionEntity2 = cdrVersionDao.save(cdrVersionEntity2);
+    String cdrVersionId2 = Long.toString(cdrVersionEntity2.getCdrVersionId());
 
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 

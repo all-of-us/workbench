@@ -1,4 +1,4 @@
-package org.pmiops.workbench.api;
+package org.pmiops.workbench.api.cdrversions;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
@@ -6,8 +6,10 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.api.CdrVersionsApiDelegate;
+import org.pmiops.workbench.cdr.ImmutableCdrVersion;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.model.CdrVersionListResponse;
@@ -17,30 +19,33 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class CdrVersionsController implements CdrVersionsApiDelegate {
-  private static final Logger log = Logger.getLogger(CdrVersionsController.class.getName());
+public class CdrVersionRestController implements CdrVersionsApiDelegate {
+  private static final Logger log = Logger.getLogger(CdrVersionRestController.class.getName());
 
   @VisibleForTesting
-  static final Function<CdrVersion, org.pmiops.workbench.model.CdrVersion> TO_CLIENT_CDR_VERSION =
-      (CdrVersion cdrVersion) ->
+  public static final Function<CdrVersionEntity, org.pmiops.workbench.model.CdrVersion> TO_CLIENT_CDR_VERSION =
+      (CdrVersionEntity cdrVersionEntity) ->
           new org.pmiops.workbench.model.CdrVersion()
-              .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
-              .creationTime(cdrVersion.getCreationTime().getTime())
-              .dataAccessLevel(cdrVersion.getDataAccessLevelEnum())
-              .archivalStatus(cdrVersion.getArchivalStatusEnum())
-              .name(cdrVersion.getName());
+              .cdrVersionId(String.valueOf(cdrVersionEntity.getCdrVersionId()))
+              .creationTime(cdrVersionEntity.getCreationTime().getTime())
+              .dataAccessLevel(cdrVersionEntity.getDataAccessLevelEnum())
+              .archivalStatus(cdrVersionEntity.getArchivalStatusEnum())
+              .name(cdrVersionEntity.getName());
 
   private final CdrVersionService cdrVersionService;
   private Provider<User> userProvider;
 
   @Autowired
-  CdrVersionsController(CdrVersionService cdrVersionService, Provider<User> userProvider) {
+  CdrVersionRestController(CdrVersionService cdrVersionService, Provider<User> userProvider) {
     this.cdrVersionService = cdrVersionService;
     this.userProvider = userProvider;
   }
+  // $REFACTOR$ create a service and delegate to these methods
 
+  // $REFACTOR$ this method shouldn't be necessary. Set the test up to use a mock or fake
+  // directly provided
   @VisibleForTesting
-  void setUserProvider(Provider<User> userProvider) {
+  public void setUserProvider(Provider<User> userProvider) {
     this.userProvider = userProvider;
   }
 
@@ -49,14 +54,14 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
     // TODO: Consider filtering this based on what is currently instantiated as a data source. Newly
     // added CDR versions will not function until a server restart.
     DataAccessLevel accessLevel = userProvider.get().getDataAccessLevelEnum();
-    List<CdrVersion> cdrVersions = cdrVersionService.findAuthorizedCdrVersions(accessLevel);
-    if (cdrVersions.isEmpty()) {
+    List<ImmutableCdrVersion> cdrVersionEntities = cdrVersionService.findAuthorizedCdrVersions(accessLevel);
+    if (cdrVersionEntities.isEmpty()) {
       throw new ForbiddenException("User does not have access to any CDR versions");
     }
     List<Long> defaultVersions =
-        cdrVersions.stream()
-            .filter(v -> v.getIsDefault())
-            .map(CdrVersion::getCdrVersionId)
+        cdrVersionEntities.stream()
+            .filter(ImmutableCdrVersion::isDefault)
+            .map(ImmutableCdrVersion::getCdrVersionId)
             .collect(Collectors.toList());
     if (defaultVersions.isEmpty()) {
       throw new ForbiddenException("User does not have access to a default CDR version");
@@ -69,7 +74,9 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
     // TODO: consider different default CDR versions for different access levels
     return ResponseEntity.ok(
         new CdrVersionListResponse()
-            .items(cdrVersions.stream().map(TO_CLIENT_CDR_VERSION).collect(Collectors.toList()))
+            .items(cdrVersionEntities.stream()
+                .map(TO_CLIENT_CDR_VERSION)
+                .collect(Collectors.toList()))
             .defaultCdrVersionId(Long.toString(defaultVersions.get(0))));
   }
 }

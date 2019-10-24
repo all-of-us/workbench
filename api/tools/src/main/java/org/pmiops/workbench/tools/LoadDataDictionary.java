@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.DataDictionaryEntry;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -47,7 +47,7 @@ public class LoadDataDictionary {
 
       boolean dryRun = Boolean.parseBoolean(args[0]);
 
-      CdrVersion defaultCdrVersion = cdrVersionDao.findByIsDefault(true);
+      CdrVersionEntity defaultCdrVersionEntity = cdrVersionDao.findByIsDefault(true);
       ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
       SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
       mapper.setDateFormat(df);
@@ -59,8 +59,8 @@ public class LoadDataDictionary {
 
         Timestamp newEntryDefinedTime = dd.getMeta_data()[0].getCreated_time();
 
-        CdrVersion cdrVersion = cdrVersionDao.findByName(dd.getMeta_data()[0].getCdr_version());
-        if (cdrVersion == null) {
+        CdrVersionEntity cdrVersionEntity = cdrVersionDao.findByName(dd.getMeta_data()[0].getCdr_version());
+        if (cdrVersionEntity == null) {
           // Skip over Data Dictionaries for CDR Versions not in the current environment
           continue;
         }
@@ -68,7 +68,7 @@ public class LoadDataDictionary {
         for (AvailableField field : dd.getTransformations()[0].getAvailable_fields()) {
           Optional<DataDictionaryEntry> entry =
               dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
-                  field.getRelevant_omop_table(), field.getField_name(), cdrVersion);
+                  field.getRelevant_omop_table(), field.getField_name(), cdrVersionEntity);
 
           // We are skipping ahead if the defined times match by assuming that the definition has
           // not changed.
@@ -81,7 +81,7 @@ public class LoadDataDictionary {
             targetEntry = new DataDictionaryEntry();
             targetEntry.setRelevantOmopTable(field.getRelevant_omop_table());
             targetEntry.setFieldName(field.getField_name());
-            targetEntry.setCdrVersion(defaultCdrVersion);
+            targetEntry.setCdrVersionEntity(defaultCdrVersionEntity);
           } else {
             targetEntry = entry.get();
           }
@@ -102,7 +102,7 @@ public class LoadDataDictionary {
                     + ", "
                     + targetEntry.getFieldName()
                     + ", "
-                    + cdrVersion.getName()
+                    + cdrVersionEntity.getName()
                     + ")");
           } else {
             dataDictionaryEntryDao.save(targetEntry);

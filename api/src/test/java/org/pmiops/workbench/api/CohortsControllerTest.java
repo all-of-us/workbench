@@ -43,7 +43,7 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -152,7 +152,7 @@ public class CohortsControllerTest {
 
   Workspace workspace;
   Workspace workspace2;
-  CdrVersion cdrVersion;
+  CdrVersionEntity cdrVersionEntity;
   SearchRequest searchRequest;
   String cohortCriteria;
   private TestMockFactory testMockFactory;
@@ -243,9 +243,9 @@ public class CohortsControllerTest {
     cohortsController.setUserProvider(userProvider);
     conceptSetsController.setUserProvider(userProvider);
 
-    cdrVersion = new CdrVersion();
-    cdrVersion.setName(CDR_VERSION_NAME);
-    cdrVersionDao.save(cdrVersion);
+    cdrVersionEntity = new CdrVersionEntity();
+    cdrVersionEntity.setName(CDR_VERSION_NAME);
+    cdrVersionDao.save(cdrVersionEntity);
 
     searchRequest = SearchRequests.males();
     cohortCriteria = new Gson().toJson(searchRequest);
@@ -255,14 +255,14 @@ public class CohortsControllerTest {
     workspace.setNamespace(WORKSPACE_NAMESPACE);
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
-    workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    workspace.setCdrVersionId(String.valueOf(cdrVersionEntity.getCdrVersionId()));
 
     workspace2 = new Workspace();
     workspace2.setName(WORKSPACE_NAME_2);
     workspace2.setNamespace(WORKSPACE_NAMESPACE);
     workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace2.setResearchPurpose(new ResearchPurpose());
-    workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    workspace2.setCdrVersionId(String.valueOf(cdrVersionEntity.getCdrVersionId()));
 
     CLOCK.setInstant(NOW);
 
@@ -700,7 +700,7 @@ public class CohortsControllerTest {
             .getBody();
     CohortReview cohortReview = new CohortReview();
     cohortReview.setCohortId(cohort.getId());
-    cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
+    cohortReview.setCdrVersionId(cdrVersionEntity.getCdrVersionId());
     cohortReview.setReviewSize(2);
     cohortReview.setReviewedCount(2);
     cohortReviewDao.save(cohortReview);

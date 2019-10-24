@@ -40,7 +40,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.CdrVersionEntity;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
@@ -168,25 +168,25 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return sb.toString();
   }
 
-  private CdrVersion setLiveCdrVersionId(
+  private CdrVersionEntity setLiveCdrVersionId(
       org.pmiops.workbench.db.model.Workspace dbWorkspace, String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
       throw new BadRequestException("missing cdrVersionId");
     }
     try {
-      CdrVersion cdrVersion = cdrVersionDao.findOne(Long.parseLong(cdrVersionId));
-      if (cdrVersion == null) {
+      CdrVersionEntity cdrVersionEntity = cdrVersionDao.findOne(Long.parseLong(cdrVersionId));
+      if (cdrVersionEntity == null) {
         throw new BadRequestException(
             String.format("CDR version with ID %s not found", cdrVersionId));
       }
-      if (ArchivalStatus.LIVE != cdrVersion.getArchivalStatusEnum()) {
+      if (ArchivalStatus.LIVE != cdrVersionEntity.getArchivalStatusEnum()) {
         throw new FailedPreconditionException(
             String.format(
                 "CDR version with ID %s is not live, please select a different CDR version",
                 cdrVersionId));
       }
-      dbWorkspace.setCdrVersion(cdrVersion);
-      return cdrVersion;
+      dbWorkspace.setCdrVersionEntity(cdrVersionEntity);
+      return cdrVersionEntity;
     } catch (NumberFormatException e) {
       throw new BadRequestException(String.format("Invalid cdr version ID: %s", cdrVersionId));
     }
@@ -450,12 +450,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Clone CDR version from the source, by default.
     String reqCdrVersionId = body.getWorkspace().getCdrVersionId();
     if (Strings.isNullOrEmpty(reqCdrVersionId)
-        || reqCdrVersionId.equals(Long.toString(fromWorkspace.getCdrVersion().getCdrVersionId()))) {
-      dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
+        || reqCdrVersionId.equals(Long.toString(fromWorkspace.getCdrVersionEntity().getCdrVersionId()))) {
+      dbWorkspace.setCdrVersionEntity(fromWorkspace.getCdrVersionEntity());
       dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
     } else {
-      CdrVersion reqCdrVersion = setLiveCdrVersionId(dbWorkspace, reqCdrVersionId);
-      dbWorkspace.setDataAccessLevelEnum(reqCdrVersion.getDataAccessLevelEnum());
+      CdrVersionEntity reqCdrVersionEntity = setLiveCdrVersionId(dbWorkspace, reqCdrVersionId);
+      dbWorkspace.setDataAccessLevelEnum(reqCdrVersionEntity.getDataAccessLevelEnum());
     }
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
