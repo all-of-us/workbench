@@ -13,25 +13,29 @@ export const DataUseAgreementContent = () => {
   return <div>
     <BolderHeader style={{display: 'flex', justifyContent: 'center'}}><AoUTitle/></BolderHeader>
     <BoldHeader  style={{display: 'flex', justifyContent: 'center'}}>Demonstration Project Data Use Agreement</BoldHeader>
-    <div>This data use agreement describes how <AoUTitle/> data can and cannot be used for the purposes
+    <p>
+      This data use agreement describes how <AoUTitle/> data can and cannot be used for the purposes
       of program-approved demonstration projects.
-    </div>
-    <div>This is an agreement between Vanderbilt University Medical Center and authorized demonstration users of data
+    </p>
+    <p>
+      This is an agreement between Vanderbilt University Medical Center and authorized demonstration users of data
       from the <AoUTitle/>.
-    </div>
-    <div>An authorized demonstration user is a person who is authorized to access and/or work with registered or
+    </p>
+    <p>
+      An <strong>authorized demonstration user</strong> is a person who is authorized to access
+      and/or work with registered or
       controlled tier data from the <AoUTitle/> for the exclusive purpose of a program-approved
       demonstration project. Authorized demonstration users are limited to trainees, faculty or staff at <AoUTitle/>
       consortium partner institutions.
-    </div>
-    <div>
-      Before they access and/or work with <AoUTitle/> data, authorized demonstration users must:
+    </p>
+    <p>
+      <strong>Before</strong> they access and/or work with <AoUTitle/> data, authorized demonstration users must:
       <IndentedOrderedList>
         <li>complete the <AoUTitle/> research ethics training; and</li>
         <li>read and attest to this data use agreement</li>
       </IndentedOrderedList>
-    </div>
-    <div>Please read this agreement carefully and completely before signing.</div>
+    </p>
+    <p>Please read this agreement carefully and completely before signing.</p>
     <SecondHeader>As “Authorized Demonstration User” of the <AoUTitle/> data, I
       will:</SecondHeader>
     <IndentedUnorderedList>
@@ -44,7 +48,7 @@ export const DataUseAgreementContent = () => {
       <li>respect the privacy of research participants at all times.
         <IndentedUnorderedList>
           <IndentedListItem style={{margin: '0.5rem 0'}}>
-            I <strong>will <strong>NOT</strong> use</strong> or disclose any
+            I will <strong>NOT</strong> use or disclose any
             information that directly identifies one or more participants.
             <br/>
             If I become aware of any information that directly identifies one or more
@@ -186,11 +190,11 @@ export const DataUseAgreementContent = () => {
     </IndentedUnorderedList>
 
     <SecondHeader>Data Disclaimer:</SecondHeader>
-    <div>The <AoUTitle/> does not guarantee the accuracy of the data in
+    <p>The <AoUTitle/> does not guarantee the accuracy of the data in
       the <AoUTitle/> database. The <AoUTitle/>
       does not guarantee the performance of the software in the <AoUTitle/>
       database. The <AoUTitle/> does not warrant or endorse
       the research results obtained by using the <i>All of Us</i> database.
-    </div>
+    </p>
   </div>;
 };
