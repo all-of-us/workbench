@@ -181,11 +181,8 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     componentDidMount() {
-      const {node: {parentId, subtype}} = this.props;
+      const {node: {subtype}} = this.props;
       const{form, options} = this.state;
-      if (this.isSurvey) {
-        console.log(ppiQuestions.getValue()[parentId]);
-      }
       if (this.isMeasurement) {
         this.getMeasurementAttributes();
       } else {
@@ -198,11 +195,10 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     getMeasurementAttributes() {
-      const {node} = this.props;
+      const {node: {conceptId}} = this.props;
       const{form} = this.state;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
-      cohortBuilderApi().getCriteriaAttributeByConceptId(+cdrVersionId, node.conceptId)
-      .then(resp => {
+      cohortBuilderApi().getCriteriaAttributeByConceptId(+cdrVersionId, conceptId).then(resp => {
         resp.items.forEach(attr => {
           if (attr.type === AttrName[AttrName.NUM]) {
             if (!form.num.length) {
@@ -210,7 +206,7 @@ export const AttributesPage = withCurrentWorkspace() (
                 name: AttrName.NUM,
                 operator: null,
                 operands: [],
-                conceptId: node.conceptId,
+                conceptId: conceptId,
                 [attr.conceptName]: parseInt(attr.estCount, 10)
               });
             } else {
@@ -243,7 +239,6 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     selectChange(attributeIndex: number, value: string) {
-      const {node} = this.props;
       const {form} = this.state;
       form.num[attributeIndex].operator = value;
       if (this.isBloodPressure) {
@@ -350,19 +345,19 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     get paramWithAttributes() {
-      const {node} = this.props;
+      const {node, node: {name, subtype}} = this.props;
       const {form} = this.state;
-      let name;
+      let paramName;
       const attrs = [];
       if (form.exists) {
-        name = node.name + ' (Any)';
+        paramName = name + ' (Any)';
       } else {
         form.num.filter(at => at.operator).forEach(({operator, operands, conceptId}) => {
           const attr = {name: AttrName.NUM, operator, operands};
-          if (node.subtype === CriteriaSubType.BP) {
+          if (subtype === CriteriaSubType.BP) {
             attr['conceptId'] = conceptId;
           }
-          if (attr.operator === 'ANY' && node.subtype === CriteriaSubType.BP) {
+          if (attr.operator === 'ANY' && subtype === CriteriaSubType.BP) {
             attr.name = AttrName.ANY;
             attr.operands = [];
             delete attr.operator;
@@ -380,9 +375,9 @@ export const AttributesPage = withCurrentWorkspace() (
           }, []);
           attrs.push({name: AttrName.CAT, operator: Operator.IN, operands: catOperands});
         }
-        name = this.paramName;
+        paramName = this.paramName;
       }
-      return {...node, parameterId: this.paramId, name: name, attributes: attrs};
+      return {...node, parameterId: this.paramId, name: paramName, attributes: attrs};
     }
 
     get paramName() {
@@ -402,18 +397,16 @@ export const AttributesPage = withCurrentWorkspace() (
           if (node.subtype === CriteriaSubType.BP) {
             name += attr.name + ' ';
           }
-          name += optionUtil[attr.operator].display + attr.operands
-            .map(op => parseInt(op, 10).toLocaleString())
-            .join('-');
+          name += optionUtil[attr.operator].display + attr.operands.map(op => parseInt(op, 10).toLocaleString()).join('-');
         }
       });
       if (name !== '') {
         selectionDisplay.push(name);
       }
       form.cat.filter(ca => ca.checked).forEach(attr => selectionDisplay.push(attr.conceptName));
-      return node.name + ' (' + selectionDisplay.join(', ') +
-        (this.isPhysicalMeasurement && form.num[0].operator !== AttrName.ANY
-          ? PM_UNITS[node.subtype] : '') + ')';
+      const nodeName = this.isSurvey ? ppiQuestions.getValue()[node.parentId].name : node.name;
+      return nodeName + ' (' + selectionDisplay.join(', ') +
+        (this.isPhysicalMeasurement && form.num[0].operator !== AttrName.ANY ? PM_UNITS[node.subtype] : '') + ')';
     }
 
     requestPreview() {
@@ -518,6 +511,7 @@ export const AttributesPage = withCurrentWorkspace() (
           {!form.exists && <React.Fragment>
             {form.num.map((attr, a) => <div key={a}>
               {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
+              {this.isSurvey && <div style={styles.label}>{ppiQuestions.getValue()[node.parentId].name}</div>}
               {this.isBloodPressure && <div style={styles.label}>{attr.name}</div>}
               <div style={styles.container}>
                 <div style={styles.dropdown}>
