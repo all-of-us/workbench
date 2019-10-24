@@ -129,7 +129,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     Workspace workspace = new Workspace();
-    workspace.setCdrVersionEntity(cdrVersion);
+    workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);

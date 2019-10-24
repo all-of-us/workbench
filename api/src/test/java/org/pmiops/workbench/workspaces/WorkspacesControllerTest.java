@@ -311,12 +311,12 @@ public class WorkspacesControllerTest {
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
-    CdrVersion archivedCdrVersionEntity = new CdrVersion();
-    archivedCdrVersionEntity.setName("archived");
-    archivedCdrVersionEntity.setCdrDbName("");
-    archivedCdrVersionEntity.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
-    archivedCdrVersionEntity = cdrVersionDao.save(archivedCdrVersionEntity);
-    archivedCdrVersionId = Long.toString(archivedCdrVersionEntity.getCdrVersionId());
+    CdrVersion archivedCdrVersion = new CdrVersion();
+    archivedCdrVersion.setName("archived");
+    archivedCdrVersion.setCdrDbName("");
+    archivedCdrVersion.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
+    archivedCdrVersion = cdrVersionDao.save(archivedCdrVersion);
+    archivedCdrVersionId = Long.toString(archivedCdrVersion.getCdrVersionId());
 
     conceptDao.save(CONCEPT_1);
     conceptDao.save(CONCEPT_2);

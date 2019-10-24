@@ -198,7 +198,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     cdrVersionDao.save(cdrVersion);
 
     workspace = new Workspace();
-    workspace.setCdrVersionEntity(cdrVersion);
+    workspace.setCdrVersion(cdrVersion);
     workspace.setWorkspaceNamespace(NAMESPACE);
     workspace.setFirecloudName(NAME);
     workspaceDao.save(workspace);

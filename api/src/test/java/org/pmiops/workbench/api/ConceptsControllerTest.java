@@ -307,7 +307,7 @@ public class ConceptsControllerTest {
     workspace.setName("name");
     workspace.setFirecloudName("name");
     workspace.setWorkspaceNamespace("ns");
-    workspace.setCdrVersionEntity(cdrVersion);
+    workspace.setCdrVersion(cdrVersion);
     workspaceDao.save(workspace);
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();

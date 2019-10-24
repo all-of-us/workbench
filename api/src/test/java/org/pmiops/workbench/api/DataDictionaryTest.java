@@ -89,7 +89,7 @@ public class DataDictionaryTest {
     cdrVersionDao.save(cdrVersion);
 
     DataDictionaryEntry dataDictionaryEntry = new DataDictionaryEntry();
-    dataDictionaryEntry.setCdrVersionEntity(cdrVersion);
+    dataDictionaryEntry.setCdrVersion(cdrVersion);
     dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
     dataDictionaryEntry.setRelevantOmopTable(ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(Domain.DRUG));
     dataDictionaryEntry.setFieldName("TEST FIELD");
@@ -112,7 +112,7 @@ public class DataDictionaryTest {
     cdrVersionDao.save(cdrVersion);
 
     DataDictionaryEntry dataDictionaryEntry = new DataDictionaryEntry();
-    dataDictionaryEntry.setCdrVersionEntity(cdrVersion);
+    dataDictionaryEntry.setCdrVersion(cdrVersion);
     dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
     dataDictionaryEntry.setRelevantOmopTable(ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(domain));
     dataDictionaryEntry.setFieldName(domainValue);

@@ -185,7 +185,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 "CDR version with ID %s is not live, please select a different CDR version",
                 cdrVersionId));
       }
-      dbWorkspace.setCdrVersionEntity(cdrVersion);
+      dbWorkspace.setCdrVersion(cdrVersion);
       return cdrVersion;
     } catch (NumberFormatException e) {
       throw new BadRequestException(String.format("Invalid cdr version ID: %s", cdrVersionId));
@@ -450,12 +450,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Clone CDR version from the source, by default.
     String reqCdrVersionId = body.getWorkspace().getCdrVersionId();
     if (Strings.isNullOrEmpty(reqCdrVersionId)
-        || reqCdrVersionId.equals(Long.toString(fromWorkspace.getCdrVersionEntity().getCdrVersionId()))) {
-      dbWorkspace.setCdrVersionEntity(fromWorkspace.getCdrVersionEntity());
+        || reqCdrVersionId.equals(Long.toString(fromWorkspace.getCdrVersion().getCdrVersionId()))) {
+      dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
       dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
     } else {
-      CdrVersion reqCdrVersionEntity = setLiveCdrVersionId(dbWorkspace, reqCdrVersionId);
-      dbWorkspace.setDataAccessLevelEnum(reqCdrVersionEntity.getDataAccessLevelEnum());
+      CdrVersion reqCdrVersion = setLiveCdrVersionId(dbWorkspace, reqCdrVersionId);
+      dbWorkspace.setDataAccessLevelEnum(reqCdrVersion.getDataAccessLevelEnum());
     }
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);

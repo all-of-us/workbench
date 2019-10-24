@@ -45,8 +45,8 @@ public class ImmutableCdrVersionRestControllerTest {
 
   @Autowired private CdrVersionRestController cdrVersionRestController;
 
-  private CdrVersion defaultCdrVersionEntity;
-  private CdrVersion protectedCdrVersionEntity;
+  private CdrVersion defaultCdrVersion;
+  private CdrVersion protectedCdrVersion;
   private User user;
 
   @TestConfiguration
@@ -71,25 +71,25 @@ public class ImmutableCdrVersionRestControllerTest {
     user = new User();
     user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
     cdrVersionRestController.setUserProvider(Providers.of(user));
-    defaultCdrVersionEntity =
+    defaultCdrVersion =
         makeCdrVersion(
             1L, /* isDefault */ true, "Test Registered CDR", 123L, DataAccessLevel.REGISTERED);
-    protectedCdrVersionEntity =
+    protectedCdrVersion =
         makeCdrVersion(
             2L, /* isDefault */ false, "Test Protected CDR", 456L, DataAccessLevel.PROTECTED);
   }
 
   @Test
   public void testGetCdrVersionsRegistered() {
-    assertResponse(cdrVersionRestController.getCdrVersions().getBody(), defaultCdrVersionEntity);
+    assertResponse(cdrVersionRestController.getCdrVersions().getBody(), defaultCdrVersion);
   }
 
   @Test
   public void testGetCdrVersionsProtected() {
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     assertResponse(
-        cdrVersionRestController.getCdrVersions().getBody(), protectedCdrVersionEntity,
-        defaultCdrVersionEntity);
+        cdrVersionRestController.getCdrVersions().getBody(), protectedCdrVersion,
+        defaultCdrVersion);
   }
 
   @Test(expected = ForbiddenException.class)
@@ -106,7 +106,7 @@ public class ImmutableCdrVersionRestControllerTest {
                 .toArray())
         .inOrder();
     assertThat(response.getDefaultCdrVersionId())
-        .isEqualTo(String.valueOf(defaultCdrVersionEntity.getCdrVersionId()));
+        .isEqualTo(String.valueOf(defaultCdrVersion.getCdrVersionId()));
   }
 
   private CdrVersion makeCdrVersion(

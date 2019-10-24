@@ -44,8 +44,8 @@ public class WorkspaceConversionUtils {
     if (workspace.getCreator() != null) {
       result.setCreator(workspace.getCreator().getEmail());
     }
-    if (workspace.getCdrVersionEntity() != null) {
-      result.setCdrVersionId(String.valueOf(workspace.getCdrVersionEntity().getCdrVersionId()));
+    if (workspace.getCdrVersion() != null) {
+      result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
 
     return result;
@@ -74,8 +74,8 @@ public class WorkspaceConversionUtils {
     if (fcWorkspace.getCreatedBy() != null) {
       result.setCreator(fcWorkspace.getCreatedBy());
     }
-    if (workspace.getCdrVersionEntity() != null) {
-      result.setCdrVersionId(String.valueOf(workspace.getCdrVersionEntity().getCdrVersionId()));
+    if (workspace.getCdrVersion() != null) {
+      result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
 
     return result;

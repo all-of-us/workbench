@@ -318,7 +318,7 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersion cdrVersion = workspace.getCdrVersionEntity();
+    CdrVersion cdrVersion = workspace.getCdrVersion();
 
     if (request.getCdrVersionName() != null) {
       cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
@@ -380,7 +380,7 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersion cdrVersion = workspace.getCdrVersionEntity();
+    CdrVersion cdrVersion = workspace.getCdrVersion();
 
     if (request.getCdrVersionName() != null) {
       cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
@@ -426,7 +426,7 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersion cdrVersion = workspace.getCdrVersionEntity();
+    CdrVersion cdrVersion = workspace.getCdrVersion();
     if (request.getCdrVersionName() != null) {
       cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
       if (cdrVersion == null) {

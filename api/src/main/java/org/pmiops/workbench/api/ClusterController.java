@@ -180,7 +180,7 @@ public class ClusterController implements ClusterApiDelegate {
     CdrVersion cdrVersion =
         workspaceService
             .getRequired(body.getWorkspaceNamespace(), body.getWorkspaceId())
-            .getCdrVersionEntity();
+            .getCdrVersion();
 
     // For the common case where the notebook cluster matches the workspace
     // namespace, simply name the directory as the workspace ID; else we

@@ -47,7 +47,7 @@ public class LoadDataDictionary {
 
       boolean dryRun = Boolean.parseBoolean(args[0]);
 
-      CdrVersion defaultCdrVersionEntity = cdrVersionDao.findByIsDefault(true);
+      CdrVersion defaultCdrVersion = cdrVersionDao.findByIsDefault(true);
       ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
       SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
       mapper.setDateFormat(df);
@@ -81,7 +81,7 @@ public class LoadDataDictionary {
             targetEntry = new DataDictionaryEntry();
             targetEntry.setRelevantOmopTable(field.getRelevant_omop_table());
             targetEntry.setFieldName(field.getField_name());
-            targetEntry.setCdrVersionEntity(defaultCdrVersionEntity);
+            targetEntry.setCdrVersion(defaultCdrVersion);
           } else {
             targetEntry = entry.get();
           }

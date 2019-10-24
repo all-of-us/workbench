@@ -51,7 +51,7 @@ public class DataDictionaryEntry {
     return cdrVersion;
   }
 
-  public void setCdrVersionEntity(CdrVersion cdrVersion) {
+  public void setCdrVersion(CdrVersion cdrVersion) {
     this.cdrVersion = cdrVersion;
   }
 

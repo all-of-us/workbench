@@ -87,8 +87,8 @@ public class UpdateCdrVersions {
       }
       String dryRunSuffix = dryRun ? " (dry run)" : "";
       for (CdrVersion cdrVersion : cdrVersionEntities) {
-        CdrVersion existingCdrVersionEntity = currentCdrVersions.remove(cdrVersion.getCdrVersionId());
-        if (existingCdrVersionEntity == null) {
+        CdrVersion existingCdrVersion = currentCdrVersions.remove(cdrVersion.getCdrVersionId());
+        if (existingCdrVersion == null) {
           logger.info(
               String.format(
                   "Inserting new CDR version %d '%s'%s: %s",
@@ -100,7 +100,7 @@ public class UpdateCdrVersions {
             cdrVersionDao.save(cdrVersion);
           }
         } else {
-          if (cdrVersion.equals(existingCdrVersionEntity)) {
+          if (cdrVersion.equals(existingCdrVersion)) {
             logger.info(
                 String.format(
                     "CDR version %d '%s' unchanged.",

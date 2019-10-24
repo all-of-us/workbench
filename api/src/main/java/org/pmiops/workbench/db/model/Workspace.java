@@ -184,11 +184,11 @@ public class Workspace {
 
   @ManyToOne
   @JoinColumn(name = "cdr_version_id")
-  public CdrVersion getCdrVersionEntity() {
+  public CdrVersion getCdrVersion() {
     return cdrVersion;
   }
 
-  public void setCdrVersionEntity(CdrVersion cdrVersion) {
+  public void setCdrVersion(CdrVersion cdrVersion) {
     this.cdrVersion = cdrVersion;
   }
 

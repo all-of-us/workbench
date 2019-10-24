@@ -20,16 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class CdrVersionRestController implements CdrVersionsApiDelegate {
   private static final Logger log = Logger.getLogger(CdrVersionRestController.class.getName());
 
-//  @VisibleForTesting
-//  public static final Function<CdrVersionEntity, org.pmiops.workbench.model.CdrVersion> TO_CLIENT_CDR_VERSION =
-//      (CdrVersionEntity cdrVersion) ->
-//          new org.pmiops.workbench.model.CdrVersion()
-//              .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
-//              .creationTime(cdrVersion.getCreationTime().getTime())
-//              .dataAccessLevel(cdrVersion.getDataAccessLevelEnum())
-//              .archivalStatus(cdrVersion.getArchivalStatusEnum())
-//              .name(cdrVersion.getName());
-
   private final CdrVersionService cdrVersionService;
   private Provider<User> userProvider;
 

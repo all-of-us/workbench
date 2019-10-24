@@ -192,7 +192,7 @@ public class ClusterControllerTest {
     Workspace w = new Workspace();
     w.setWorkspaceNamespace(ns);
     w.setFirecloudName(name);
-    w.setCdrVersionEntity(cdrVersion);
+    w.setCdrVersion(cdrVersion);
     when(workspaceService.getRequired(ns, name)).thenReturn(w);
     stubGetFcWorkspace(createFcWorkspace(ns, name, creator));
   }

@@ -222,7 +222,7 @@ public class CohortReviewControllerTest {
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     workspace = new Workspace();
-    workspace.setCdrVersionEntity(cdrVersion);
+    workspace.setCdrVersion(cdrVersion);
     workspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     workspace.setName(WORKSPACE_NAME);
     workspace.setFirecloudName(WORKSPACE_NAME);
