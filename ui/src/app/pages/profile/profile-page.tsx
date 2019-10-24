@@ -293,7 +293,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               <div>All of Us FREE credits used:</div>
               <div>Remaining All of Us FREE credits:</div>
             </FlexColumn>
-            <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem', fontWeight: 600}}>
+            <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
               {usdElement(profile.freeTierUsage)}
               {usdElement(profile.freeTierQuota - profile.freeTierUsage)}
             </FlexColumn>
