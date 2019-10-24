@@ -28,7 +28,9 @@ export class ProfileStubVariables {
     complianceTrainingBypassTime: null,
     eraCommonsCompletionTime: null,
     eraCommonsBypassTime: null,
-    authorities: []
+    authorities: [],
+    freeTierUsage: 1.23,
+    freeTierQuota: 34.56
   };
 }
 
