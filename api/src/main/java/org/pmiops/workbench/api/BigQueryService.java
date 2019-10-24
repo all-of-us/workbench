@@ -147,7 +147,7 @@ public class BigQueryService {
   }
 
   public FieldList getTableFieldsFromDomain(Domain d) {
-    CdrVersion cdrVersionEntity = CdrVersionContext.getCdrVersion();
+    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     String tableName;
     if (Domain.CONDITION.equals(d)) {
       tableName = "ds_condition_occurrence";
@@ -165,7 +165,7 @@ public class BigQueryService {
       throw new BadRequestException("Invalid domain, unable to fetch fields from table");
     }
     TableId tableId =
-        TableId.of(cdrVersionEntity.getBigqueryProject(), cdrVersionEntity.getBigqueryDataset(), tableName);
+        TableId.of(cdrVersion.getBigqueryProject(), cdrVersion.getBigqueryDataset(), tableName);
 
     return getBigQueryService().getTable(tableId).getDefinition().getSchema().getFields();
   }

@@ -190,10 +190,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
    */
   @Override
   public ResponseEntity<Long> countParticipants(Long cdrVersionId, SearchRequest request) {
-    CdrVersion cdrVersionEntity = cdrVersionDao.findOne(cdrVersionId);
-    cdrVersionService.setCdrVersion(cdrVersionEntity);
+    CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
+    cdrVersionService.setCdrVersion(cdrVersion);
     if (configProvider.get().elasticsearch.enableElasticsearchBackend
-        && !Strings.isNullOrEmpty(cdrVersionEntity.getElasticIndexBaseName())
+        && !Strings.isNullOrEmpty(cdrVersion.getElasticIndexBaseName())
         && !isApproximate(request)) {
       try {
         return ResponseEntity.ok(elasticSearchService.count(request));
@@ -288,10 +288,10 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     if (request.getIncludes().isEmpty()) {
       return ResponseEntity.ok(response);
     }
-    CdrVersion cdrVersionEntity = cdrVersionDao.findOne(cdrVersionId);
-    cdrVersionService.setCdrVersion(cdrVersionEntity);
+    CdrVersion cdrVersion = cdrVersionDao.findOne(cdrVersionId);
+    cdrVersionService.setCdrVersion(cdrVersion);
     if (configProvider.get().elasticsearch.enableElasticsearchBackend
-        && !Strings.isNullOrEmpty(cdrVersionEntity.getElasticIndexBaseName())
+        && !Strings.isNullOrEmpty(cdrVersion.getElasticIndexBaseName())
         && !isApproximate(request)) {
       try {
         return ResponseEntity.ok(response.items(elasticSearchService.demoChartInfo(request)));

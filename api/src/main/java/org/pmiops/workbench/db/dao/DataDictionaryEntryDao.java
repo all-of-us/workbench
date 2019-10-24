@@ -9,7 +9,7 @@ import org.springframework.data.repository.CrudRepository;
 public interface DataDictionaryEntryDao extends CrudRepository<DataDictionaryEntry, Long> {
 
   Optional<DataDictionaryEntry> findByRelevantOmopTableAndFieldNameAndCdrVersion(
-      String relevantOmopTable, String fieldName, CdrVersion cdrVersionEntity);
+      String relevantOmopTable, String fieldName, CdrVersion cdrVersion);
 
-  List<DataDictionaryEntry> findByFieldNameAndCdrVersion(String fieldName, CdrVersion cdrVersionEntity);
+  List<DataDictionaryEntry> findByFieldNameAndCdrVersion(String fieldName, CdrVersion cdrVersion);
 }

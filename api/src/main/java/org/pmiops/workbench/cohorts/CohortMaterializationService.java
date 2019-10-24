@@ -282,11 +282,11 @@ public class CohortMaterializationService {
       DataTableSpecification dataTableSpecification,
       @Nullable CohortReview cohortReview,
       @Nullable Set<Long> conceptIds) {
-    CdrVersion cdrVersionEntity = CdrVersionContext.getCdrVersion();
+    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     CdrQuery cdrQuery =
         new CdrQuery()
-            .bigqueryDataset(cdrVersionEntity.getBigqueryDataset())
-            .bigqueryProject(cdrVersionEntity.getBigqueryProject());
+            .bigqueryDataset(cdrVersion.getBigqueryDataset())
+            .bigqueryProject(cdrVersion.getBigqueryProject());
     List<CohortStatus> statusFilter = dataTableSpecification.getStatusFilter();
     if (statusFilter == null) {
       statusFilter = NOT_EXCLUDED;

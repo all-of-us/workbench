@@ -59,8 +59,8 @@ public class LoadDataDictionary {
 
         Timestamp newEntryDefinedTime = dd.getMeta_data()[0].getCreated_time();
 
-        CdrVersion cdrVersionEntity = cdrVersionDao.findByName(dd.getMeta_data()[0].getCdr_version());
-        if (cdrVersionEntity == null) {
+        CdrVersion cdrVersion = cdrVersionDao.findByName(dd.getMeta_data()[0].getCdr_version());
+        if (cdrVersion == null) {
           // Skip over Data Dictionaries for CDR Versions not in the current environment
           continue;
         }
@@ -68,7 +68,7 @@ public class LoadDataDictionary {
         for (AvailableField field : dd.getTransformations()[0].getAvailable_fields()) {
           Optional<DataDictionaryEntry> entry =
               dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
-                  field.getRelevant_omop_table(), field.getField_name(), cdrVersionEntity);
+                  field.getRelevant_omop_table(), field.getField_name(), cdrVersion);
 
           // We are skipping ahead if the defined times match by assuming that the definition has
           // not changed.
@@ -102,7 +102,7 @@ public class LoadDataDictionary {
                     + ", "
                     + targetEntry.getFieldName()
                     + ", "
-                    + cdrVersionEntity.getName()
+                    + cdrVersion.getName()
                     + ")");
           } else {
             dataDictionaryEntryDao.save(targetEntry);

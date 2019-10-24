@@ -318,15 +318,15 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersion cdrVersionEntity = workspace.getCdrVersionEntity();
+    CdrVersion cdrVersion = workspace.getCdrVersionEntity();
 
     if (request.getCdrVersionName() != null) {
-      cdrVersionEntity = cdrVersionDao.findByName(request.getCdrVersionName());
-      if (cdrVersionEntity == null) {
+      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
+      if (cdrVersion == null) {
         throw new NotFoundException(
             String.format("Couldn't find CDR version with name %s", request.getCdrVersionName()));
       }
-      cdrVersionService.setCdrVersion(cdrVersionEntity);
+      cdrVersionService.setCdrVersion(cdrVersion);
     }
     String cohortSpec;
     CohortReview cohortReview = null;
@@ -342,7 +342,7 @@ public class CohortsController implements CohortsApiDelegate {
       }
       cohortReview =
           cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
-              cohort.getCohortId(), cdrVersionEntity.getCdrVersionId());
+              cohort.getCohortId(), cdrVersion.getCdrVersionId());
       cohortSpec = cohort.getCriteria();
     } else if (request.getCohortSpec() != null) {
       cohortSpec = request.getCohortSpec();
@@ -380,15 +380,15 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersion cdrVersionEntity = workspace.getCdrVersionEntity();
+    CdrVersion cdrVersion = workspace.getCdrVersionEntity();
 
     if (request.getCdrVersionName() != null) {
-      cdrVersionEntity = cdrVersionDao.findByName(request.getCdrVersionName());
-      if (cdrVersionEntity == null) {
+      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
+      if (cdrVersion == null) {
         throw new NotFoundException(
             String.format("Couldn't find CDR version with name %s", request.getCdrVersionName()));
       }
-      cdrVersionService.setCdrVersion(cdrVersionEntity);
+      cdrVersionService.setCdrVersion(cdrVersion);
     }
     String cohortSpec;
     CohortReview cohortReview = null;
@@ -404,7 +404,7 @@ public class CohortsController implements CohortsApiDelegate {
       }
       cohortReview =
           cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
-              cohort.getCohortId(), cdrVersionEntity.getCdrVersionId());
+              cohort.getCohortId(), cdrVersion.getCdrVersionId());
       cohortSpec = cohort.getCriteria();
     } else if (request.getCohortSpec() != null) {
       cohortSpec = request.getCohortSpec();
@@ -426,10 +426,10 @@ public class CohortsController implements CohortsApiDelegate {
     Workspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersion cdrVersionEntity = workspace.getCdrVersionEntity();
+    CdrVersion cdrVersion = workspace.getCdrVersionEntity();
     if (request.getCdrVersionName() != null) {
-      cdrVersionEntity = cdrVersionDao.findByName(request.getCdrVersionName());
-      if (cdrVersionEntity == null) {
+      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
+      if (cdrVersion == null) {
         throw new NotFoundException(
             String.format("Couldn't find CDR version with name %s", request.getCdrVersionName()));
       }
@@ -445,7 +445,7 @@ public class CohortsController implements CohortsApiDelegate {
     }
     CohortReview cohortReview =
         cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
-            cohort.getCohortId(), cdrVersionEntity.getCdrVersionId());
+            cohort.getCohortId(), cdrVersion.getCdrVersionId());
     if (cohortReview == null) {
       return ResponseEntity.ok(
           new CohortAnnotationsResponse().columns(request.getAnnotationQuery().getColumns()));

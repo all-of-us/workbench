@@ -75,7 +75,7 @@ public class Workspace {
   private String workspaceNamespace;
   private String firecloudName;
   private Short dataAccessLevel;
-  private CdrVersion cdrVersionEntity;
+  private CdrVersion cdrVersion;
   private User creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
@@ -185,11 +185,11 @@ public class Workspace {
   @ManyToOne
   @JoinColumn(name = "cdr_version_id")
   public CdrVersion getCdrVersionEntity() {
-    return cdrVersionEntity;
+    return cdrVersion;
   }
 
-  public void setCdrVersionEntity(CdrVersion cdrVersionEntity) {
-    this.cdrVersionEntity = cdrVersionEntity;
+  public void setCdrVersionEntity(CdrVersion cdrVersion) {
+    this.cdrVersion = cdrVersion;
   }
 
   @ManyToOne

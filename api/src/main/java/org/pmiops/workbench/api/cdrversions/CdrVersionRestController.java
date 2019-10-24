@@ -22,13 +22,13 @@ public class CdrVersionRestController implements CdrVersionsApiDelegate {
 
 //  @VisibleForTesting
 //  public static final Function<CdrVersionEntity, org.pmiops.workbench.model.CdrVersion> TO_CLIENT_CDR_VERSION =
-//      (CdrVersionEntity cdrVersionEntity) ->
+//      (CdrVersionEntity cdrVersion) ->
 //          new org.pmiops.workbench.model.CdrVersion()
-//              .cdrVersionId(String.valueOf(cdrVersionEntity.getCdrVersionId()))
-//              .creationTime(cdrVersionEntity.getCreationTime().getTime())
-//              .dataAccessLevel(cdrVersionEntity.getDataAccessLevelEnum())
-//              .archivalStatus(cdrVersionEntity.getArchivalStatusEnum())
-//              .name(cdrVersionEntity.getName());
+//              .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
+//              .creationTime(cdrVersion.getCreationTime().getTime())
+//              .dataAccessLevel(cdrVersion.getDataAccessLevelEnum())
+//              .archivalStatus(cdrVersion.getArchivalStatusEnum())
+//              .name(cdrVersion.getName());
 
   private final CdrVersionService cdrVersionService;
   private Provider<User> userProvider;

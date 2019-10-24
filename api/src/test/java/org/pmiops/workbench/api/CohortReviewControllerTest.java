@@ -99,7 +99,7 @@ public class CohortReviewControllerTest {
 
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";
-  private CdrVersion cdrVersionEntity;
+  private CdrVersion cdrVersion;
   private CohortReview cohortReview;
   private Cohort cohort;
   private Cohort cohortWithoutReview;
@@ -215,14 +215,14 @@ public class CohortReviewControllerTest {
     when(userProvider.get()).thenReturn(user);
     cohortReviewController.setUserProvider(userProvider);
 
-    cdrVersionEntity = new CdrVersion();
-    cdrVersionEntity.setBigqueryDataset("dataSetId");
-    cdrVersionEntity.setBigqueryProject("projectId");
-    cdrVersionDao.save(cdrVersionEntity);
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);
+    cdrVersion = new CdrVersion();
+    cdrVersion.setBigqueryDataset("dataSetId");
+    cdrVersion.setBigqueryProject("projectId");
+    cdrVersionDao.save(cdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     workspace = new Workspace();
-    workspace.setCdrVersionEntity(cdrVersionEntity);
+    workspace.setCdrVersionEntity(cdrVersion);
     workspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     workspace.setName(WORKSPACE_NAME);
     workspace.setFirecloudName(WORKSPACE_NAME);
@@ -251,7 +251,7 @@ public class CohortReviewControllerTest {
         cohortReviewDao.save(
             new CohortReview()
                 .cohortId(cohort.getCohortId())
-                .cdrVersionId(cdrVersionEntity.getCdrVersionId())
+                .cdrVersionId(cdrVersion.getCdrVersionId())
                 .reviewSize(2)
                 .creationTime(today));
 
@@ -345,7 +345,7 @@ public class CohortReviewControllerTest {
           WORKSPACE_NAMESPACE,
           WORKSPACE_NAME,
           cohort.getCohortId(),
-          cdrVersionEntity.getCdrVersionId(),
+          cdrVersion.getCdrVersionId(),
           new CreateReviewRequest().size(0));
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
@@ -362,7 +362,7 @@ public class CohortReviewControllerTest {
           WORKSPACE_NAMESPACE,
           WORKSPACE_NAME,
           cohort.getCohortId(),
-          cdrVersionEntity.getCdrVersionId(),
+          cdrVersion.getCdrVersionId(),
           new CreateReviewRequest().size(10001));
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
@@ -385,7 +385,7 @@ public class CohortReviewControllerTest {
           WORKSPACE_NAMESPACE,
           WORKSPACE_NAME,
           cohort.getCohortId(),
-          cdrVersionEntity.getCdrVersionId(),
+          cdrVersion.getCdrVersionId(),
           new CreateReviewRequest().size(1));
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
@@ -395,7 +395,7 @@ public class CohortReviewControllerTest {
               "Bad Request: Cohort Review already created for cohortId: "
                   + cohort.getCohortId()
                   + ", cdrVersionId: "
-                  + cdrVersionEntity.getCdrVersionId());
+                  + cdrVersion.getCdrVersionId());
     }
   }
 
@@ -413,7 +413,7 @@ public class CohortReviewControllerTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 cohortWithoutReview.getCohortId(),
-                cdrVersionEntity.getCdrVersionId(),
+                cdrVersion.getCdrVersionId(),
                 new CreateReviewRequest().size(1))
             .getBody();
 
@@ -441,7 +441,7 @@ public class CohortReviewControllerTest {
               WORKSPACE_NAMESPACE,
               WORKSPACE_NAME,
               cohortId,
-              cdrVersionEntity.getCdrVersionId(),
+              cdrVersion.getCdrVersionId(),
               new CreateReviewRequest().size(1))
           .getBody();
       fail("Should have thrown NotFoundException!");
@@ -465,7 +465,7 @@ public class CohortReviewControllerTest {
               WORKSPACE_NAMESPACE,
               badWorkspaceName,
               cohortWithoutReview.getCohortId(),
-              cdrVersionEntity.getCdrVersionId(),
+              cdrVersion.getCdrVersionId(),
               new CreateReviewRequest().size(1))
           .getBody();
       fail("Should have thrown NotFoundException!");
@@ -941,7 +941,7 @@ public class CohortReviewControllerTest {
                 WORKSPACE_NAMESPACE,
                 WORKSPACE_NAME,
                 cohort.getCohortId(),
-                cdrVersionEntity.getCdrVersionId(),
+                cdrVersion.getCdrVersionId(),
                 new PageFilterRequest()
                     .sortColumn(sortColumn)
                     .page(page)

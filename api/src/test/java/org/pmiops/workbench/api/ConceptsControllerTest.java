@@ -295,19 +295,19 @@ public class ConceptsControllerTest {
     currentUser = user;
     when(userProvider.get()).thenReturn(user);
 
-    CdrVersion cdrVersionEntity = new CdrVersion();
-    cdrVersionEntity.setName("1");
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
-    cdrVersionEntity.setCdrDbName("");
-    cdrVersionEntity = cdrVersionDao.save(cdrVersionEntity);
+    cdrVersion.setCdrDbName("");
+    cdrVersion = cdrVersionDao.save(cdrVersion);
 
     Workspace workspace = new Workspace();
     workspace.setWorkspaceId(1L);
     workspace.setName("name");
     workspace.setFirecloudName("name");
     workspace.setWorkspaceNamespace("ns");
-    workspace.setCdrVersionEntity(cdrVersionEntity);
+    workspace.setCdrVersionEntity(cdrVersion);
     workspaceDao.save(workspace);
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();

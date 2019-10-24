@@ -85,11 +85,11 @@ public class DataDictionaryTest {
 
   @Before
   public void setUp() {
-    CdrVersion cdrVersionEntity = new CdrVersion();
-    cdrVersionDao.save(cdrVersionEntity);
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersionDao.save(cdrVersion);
 
     DataDictionaryEntry dataDictionaryEntry = new DataDictionaryEntry();
-    dataDictionaryEntry.setCdrVersionEntity(cdrVersionEntity);
+    dataDictionaryEntry.setCdrVersionEntity(cdrVersion);
     dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
     dataDictionaryEntry.setRelevantOmopTable(ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(Domain.DRUG));
     dataDictionaryEntry.setFieldName("TEST FIELD");
@@ -108,11 +108,11 @@ public class DataDictionaryTest {
     final Domain domain = Domain.DRUG;
     final String domainValue = "FIELD NAME / DOMAIN VALUE";
 
-    CdrVersion cdrVersionEntity = new CdrVersion();
-    cdrVersionDao.save(cdrVersionEntity);
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersionDao.save(cdrVersion);
 
     DataDictionaryEntry dataDictionaryEntry = new DataDictionaryEntry();
-    dataDictionaryEntry.setCdrVersionEntity(cdrVersionEntity);
+    dataDictionaryEntry.setCdrVersionEntity(cdrVersion);
     dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
     dataDictionaryEntry.setRelevantOmopTable(ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(domain));
     dataDictionaryEntry.setFieldName(domainValue);
@@ -127,7 +127,7 @@ public class DataDictionaryTest {
 
     org.pmiops.workbench.model.DataDictionaryEntry response =
         dataSetController
-            .getDataDictionaryEntry(cdrVersionEntity.getCdrVersionId(), domain.toString(), domainValue)
+            .getDataDictionaryEntry(cdrVersion.getCdrVersionId(), domain.toString(), domainValue)
             .getBody();
 
     assertThat(response.getCdrVersionId().longValue())

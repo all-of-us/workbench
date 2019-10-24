@@ -118,14 +118,14 @@ public class CohortMaterializationServiceTest {
 
   @Before
   public void setUp() {
-    CdrVersion cdrVersionEntity = new CdrVersion();
-    cdrVersionEntity.setBigqueryDataset(DATA_SET_ID);
-    cdrVersionEntity.setBigqueryProject(PROJECT_ID);
-    cdrVersionDao.save(cdrVersionEntity);
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersion.setBigqueryDataset(DATA_SET_ID);
+    cdrVersion.setBigqueryProject(PROJECT_ID);
+    cdrVersionDao.save(cdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     Workspace workspace = new Workspace();
-    workspace.setCdrVersionEntity(cdrVersionEntity);
+    workspace.setCdrVersionEntity(cdrVersion);
     workspace.setName("name");
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
@@ -146,7 +146,7 @@ public class CohortMaterializationServiceTest {
     cohortDao.save(cohort2);
 
     cohortReview = new CohortReview();
-    cohortReview.setCdrVersionId(cdrVersionEntity.getCdrVersionId());
+    cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
     cohortReview.setCohortId(cohort2.getCohortId());
     cohortReview.setMatchedParticipantCount(3);
     cohortReview.setReviewedCount(2);

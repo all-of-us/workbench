@@ -135,7 +135,7 @@ public class ClusterControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired Clock clock;
 
-  private CdrVersion cdrVersionEntity;
+  private CdrVersion cdrVersion;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
   private Cluster testCluster;
 
@@ -158,11 +158,11 @@ public class ClusterControllerTest {
 
     createUser(OTHER_USER_EMAIL);
 
-    cdrVersionEntity = new CdrVersion();
-    cdrVersionEntity.setName("1");
+    cdrVersion = new CdrVersion();
+    cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
-    cdrVersionEntity.setCdrDbName("");
+    cdrVersion.setCdrDbName("");
 
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
     testFcCluster =
@@ -192,7 +192,7 @@ public class ClusterControllerTest {
     Workspace w = new Workspace();
     w.setWorkspaceNamespace(ns);
     w.setFirecloudName(name);
-    w.setCdrVersionEntity(cdrVersionEntity);
+    w.setCdrVersionEntity(cdrVersion);
     when(workspaceService.getRequired(ns, name)).thenReturn(w);
     stubGetFcWorkspace(createFcWorkspace(ns, name, creator));
   }

@@ -174,19 +174,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing cdrVersionId");
     }
     try {
-      CdrVersion cdrVersionEntity = cdrVersionDao.findOne(Long.parseLong(cdrVersionId));
-      if (cdrVersionEntity == null) {
+      CdrVersion cdrVersion = cdrVersionDao.findOne(Long.parseLong(cdrVersionId));
+      if (cdrVersion == null) {
         throw new BadRequestException(
             String.format("CDR version with ID %s not found", cdrVersionId));
       }
-      if (ArchivalStatus.LIVE != cdrVersionEntity.getArchivalStatusEnum()) {
+      if (ArchivalStatus.LIVE != cdrVersion.getArchivalStatusEnum()) {
         throw new FailedPreconditionException(
             String.format(
                 "CDR version with ID %s is not live, please select a different CDR version",
                 cdrVersionId));
       }
-      dbWorkspace.setCdrVersionEntity(cdrVersionEntity);
-      return cdrVersionEntity;
+      dbWorkspace.setCdrVersionEntity(cdrVersion);
+      return cdrVersion;
     } catch (NumberFormatException e) {
       throw new BadRequestException(String.format("Invalid cdr version ID: %s", cdrVersionId));
     }

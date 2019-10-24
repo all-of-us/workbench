@@ -1751,8 +1751,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   protected String getTablePrefix() {
-    CdrVersion cdrVersionEntity = CdrVersionContext.getCdrVersion();
-    return cdrVersionEntity.getBigqueryProject() + "." + cdrVersionEntity.getBigqueryDataset();
+    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    return cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset();
   }
 
   private void insertCriteriaAncestor(int ancestorId, int descendentId) {

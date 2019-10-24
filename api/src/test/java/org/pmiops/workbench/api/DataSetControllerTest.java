@@ -352,18 +352,18 @@ public class DataSetControllerTest {
     currentUser = user;
     when(userProvider.get()).thenReturn(user);
 
-    CdrVersion cdrVersionEntity = new CdrVersion();
-    cdrVersionEntity.setName("1");
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
-    cdrVersionEntity.setCdrDbName("");
-    cdrVersionEntity = cdrVersionDao.save(cdrVersionEntity);
+    cdrVersion.setCdrDbName("");
+    cdrVersion = cdrVersionDao.save(cdrVersion);
 
     workspace = new Workspace();
     workspace.setName(WORKSPACE_NAME);
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
-    workspace.setCdrVersionId(String.valueOf(cdrVersionEntity.getCdrVersionId()));
+    workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubGetWorkspace(

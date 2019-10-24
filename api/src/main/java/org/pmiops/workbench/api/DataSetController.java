@@ -642,8 +642,8 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataDictionaryEntry> getDataDictionaryEntry(
       Long cdrVersionId, String domain, String domainValue) {
-    CdrVersion cdrVersionEntity = cdrVersionDao.findByCdrVersionId(cdrVersionId);
-    if (cdrVersionEntity == null) {
+    CdrVersion cdrVersion = cdrVersionDao.findByCdrVersionId(cdrVersionId);
+    if (cdrVersion == null) {
       throw new BadRequestException("Invalid CDR Version");
     }
 
@@ -653,7 +653,7 @@ public class DataSetController implements DataSetApiDelegate {
     }
 
     List<org.pmiops.workbench.db.model.DataDictionaryEntry> dataDictionaryEntries =
-        dataDictionaryEntryDao.findByFieldNameAndCdrVersion(domainValue, cdrVersionEntity);
+        dataDictionaryEntryDao.findByFieldNameAndCdrVersion(domainValue, cdrVersion);
 
     if (dataDictionaryEntries.isEmpty()) {
       throw new NotFoundException();

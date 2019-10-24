@@ -102,12 +102,12 @@ public class AnnotationQueryBuilderTest {
 
   @Before
   public void setUp() {
-    CdrVersion cdrVersionEntity = new CdrVersion();
-    cdrVersionDao.save(cdrVersionEntity);
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersionEntity);
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersionDao.save(cdrVersion);
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     Workspace workspace = new Workspace();
-    workspace.setCdrVersionEntity(cdrVersionEntity);
+    workspace.setCdrVersionEntity(cdrVersion);
     workspace.setName("name");
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
@@ -120,7 +120,7 @@ public class AnnotationQueryBuilderTest {
     cohortDao.save(cohort);
 
     cohortReview = new CohortReview();
-    cohortReview.setCdrVersionId(cdrVersionEntity.getCdrVersionId());
+    cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
     cohortReview.setCohortId(cohort.getCohortId());
     cohortReview.setMatchedParticipantCount(3);
     cohortReview.setReviewedCount(2);

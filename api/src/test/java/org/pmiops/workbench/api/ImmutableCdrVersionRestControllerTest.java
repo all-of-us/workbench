@@ -115,18 +115,18 @@ public class ImmutableCdrVersionRestControllerTest {
       String name,
       long creationTime,
       DataAccessLevel dataAccessLevel) {
-    CdrVersion cdrVersionEntity = new CdrVersion();
-    cdrVersionEntity.setIsDefault(isDefault);
-    cdrVersionEntity.setBigqueryDataset("a");
-    cdrVersionEntity.setBigqueryProject("b");
-    cdrVersionEntity.setCdrDbName("c");
-    cdrVersionEntity.setCdrVersionId(cdrVersionId);
-    cdrVersionEntity.setCreationTime(new Timestamp(creationTime));
-    cdrVersionEntity.setDataAccessLevelEnum(dataAccessLevel);
-    cdrVersionEntity.setName(name);
-    cdrVersionEntity.setNumParticipants(123);
-    cdrVersionEntity.setReleaseNumber((short) 1);
-    cdrVersionDao.save(cdrVersionEntity);
-    return cdrVersionEntity;
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersion.setIsDefault(isDefault);
+    cdrVersion.setBigqueryDataset("a");
+    cdrVersion.setBigqueryProject("b");
+    cdrVersion.setCdrDbName("c");
+    cdrVersion.setCdrVersionId(cdrVersionId);
+    cdrVersion.setCreationTime(new Timestamp(creationTime));
+    cdrVersion.setDataAccessLevelEnum(dataAccessLevel);
+    cdrVersion.setName(name);
+    cdrVersion.setNumParticipants(123);
+    cdrVersion.setReleaseNumber((short) 1);
+    cdrVersionDao.save(cdrVersion);
+    return cdrVersion;
   }
 }

@@ -177,7 +177,7 @@ public class ClusterController implements ClusterApiDelegate {
               "workspace %s/%s not found or not accessible",
               body.getWorkspaceNamespace(), body.getWorkspaceId()));
     }
-    CdrVersion cdrVersionEntity =
+    CdrVersion cdrVersion =
         workspaceService
             .getRequired(body.getWorkspaceNamespace(), body.getWorkspaceId())
             .getCdrVersionEntity();
@@ -227,7 +227,7 @@ public class ClusterController implements ClusterApiDelegate {
 
     // The Welder extension offers direct links to/from playground mode; write the AoU config file
     // to both locations so notebooks will work in either directory.
-    String aouConfigUri = aouConfigDataUri(fcWorkspace, cdrVersionEntity, projectName);
+    String aouConfigUri = aouConfigDataUri(fcWorkspace, cdrVersion, projectName);
     localizeMap.put(editDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
     localizeMap.put(playgroundDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
 
@@ -281,7 +281,7 @@ public class ClusterController implements ClusterApiDelegate {
 
   private String aouConfigDataUri(
       org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
-      CdrVersion cdrVersionEntity,
+      CdrVersion cdrVersion,
       String cdrBillingCloudProject) {
     JSONObject config = new JSONObject();
 
@@ -296,8 +296,8 @@ public class ClusterController implements ClusterApiDelegate {
     config.put(WORKSPACE_ID_KEY, fcWorkspace.getName());
     config.put(BUCKET_NAME_KEY, fcWorkspace.getBucketName());
     config.put(API_HOST_KEY, host);
-    config.put(CDR_VERSION_CLOUD_PROJECT, cdrVersionEntity.getBigqueryProject());
-    config.put(CDR_VERSION_BIGQUERY_DATASET, cdrVersionEntity.getBigqueryDataset());
+    config.put(CDR_VERSION_CLOUD_PROJECT, cdrVersion.getBigqueryProject());
+    config.put(CDR_VERSION_BIGQUERY_DATASET, cdrVersion.getBigqueryDataset());
     config.put(BILLING_CLOUD_PROJECT, cdrBillingCloudProject);
     return jsonToDataUri(config);
   }

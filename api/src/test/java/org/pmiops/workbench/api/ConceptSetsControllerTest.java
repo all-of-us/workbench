@@ -295,26 +295,26 @@ public class ConceptSetsControllerTest {
     currentUser = user;
     when(userProvider.get()).thenReturn(user);
 
-    CdrVersion cdrVersionEntity = new CdrVersion();
-    cdrVersionEntity.setName("1");
+    CdrVersion cdrVersion = new CdrVersion();
+    cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
-    cdrVersionEntity.setCdrDbName("");
-    cdrVersionEntity = cdrVersionDao.save(cdrVersionEntity);
+    cdrVersion.setCdrDbName("");
+    cdrVersion = cdrVersionDao.save(cdrVersion);
 
     workspace = new Workspace();
     workspace.setName(WORKSPACE_NAME);
     workspace.setNamespace(WORKSPACE_NAMESPACE);
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
-    workspace.setCdrVersionId(String.valueOf(cdrVersionEntity.getCdrVersionId()));
+    workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
     workspace2 = new Workspace();
     workspace2.setName(WORKSPACE_NAME_2);
     workspace2.setNamespace(WORKSPACE_NAMESPACE);
     workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace2.setResearchPurpose(new ResearchPurpose());
-    workspace2.setCdrVersionId(String.valueOf(cdrVersionEntity.getCdrVersionId()));
+    workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
 
     workspacesController.setUserProvider(userProvider);
     conceptSetsController.setUserProvider(userProvider);
