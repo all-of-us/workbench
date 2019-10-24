@@ -39,6 +39,13 @@ const styles = reactStyles({
   },
   menuLinkSelected: {
     backgroundColor: colorWithWhiteness(colors.primary, 0.95)
+  },
+  libraryTabDivider: {
+    width: '100%',
+    margin: '0.5rem 0',
+    backgroundColor: colorWithWhiteness(colors.dark, .5),
+    border: '0 none',
+    height: 1
   }
 });
 
@@ -101,7 +108,7 @@ class State {
   errorText: string;
   workspaceList: WorkspacePermissions[];
   featuredWorkspaces: FeaturedWorkspace[];
-  workspacesLoading: boolean;
+  pendingWorkspaceRequests: number;
 }
 
 export const WorkspaceLibrary = withUserProfile()
@@ -113,7 +120,7 @@ export const WorkspaceLibrary = withUserProfile()
       errorText: '',
       featuredWorkspaces: [],
       workspaceList: [],
-      workspacesLoading: true
+      pendingWorkspaceRequests: 2
     };
   }
 
@@ -137,6 +144,10 @@ export const WorkspaceLibrary = withUserProfile()
     this.updateWorkspaces();
   }
 
+  areWorkspacesLoading() {
+    return this.state.pendingWorkspaceRequests > 0;
+  }
+
   componentDidUpdate(prevProps, prevState) {
     // Reload libraries when switching tabs
     if (this.state.currentTab !== prevState.currentTab) {
@@ -157,7 +168,7 @@ export const WorkspaceLibrary = withUserProfile()
         (a, b) => a.workspace.name.localeCompare(b.workspace.name));
       this.setState({
         workspaceList: workspacesReceived.items.map(w => new WorkspacePermissions(w)),
-        workspacesLoading: false
+        pendingWorkspaceRequests: this.state.pendingWorkspaceRequests - 1
       });
     } catch (e) {
       const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
@@ -174,7 +185,7 @@ export const WorkspaceLibrary = withUserProfile()
       // TODO: There is a bug here where the UI thinks we're done loading when 1 request finishes, not both
       this.setState({
         featuredWorkspaces: resp.featuredWorkspacesList,
-        workspacesLoading: false
+        pendingWorkspaceRequests: this.state.pendingWorkspaceRequests - 1
       });
     } catch (e) {
       const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
@@ -186,8 +197,7 @@ export const WorkspaceLibrary = withUserProfile()
     const {profile: {username}} = this.props.profileState;
     const {
       currentTab,
-      errorText,
-      workspacesLoading
+      errorText
     } = this.state;
     return <FlexRow style={{height: '100%'}}>
       <div style={styles.navPanel}>
@@ -198,12 +208,7 @@ export const WorkspaceLibrary = withUserProfile()
                           onClick={() => this.setState({currentTab: tab})}
                           data-test-id={tab.title}/>
                 {i !== this.libraryTabs.length - 1 &&
-                <hr style={{
-                  width: '100%',
-                  margin: '0.5rem 0',
-                  backgroundColor: colorWithWhiteness(colors.dark, .5),
-                  border: '0 none',
-                  height: 1}}/>}
+                <hr style={styles.libraryTabDivider}/>}
             </React.Fragment>;
           })}
         </FlexColumn>
@@ -222,7 +227,7 @@ export const WorkspaceLibrary = withUserProfile()
           {errorText && <AlertDanger>{errorText}</AlertDanger>}
 
           <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
-            {workspacesLoading ?
+            {this.areWorkspacesLoading() ?
               (<Spinner style={{width: '100%', marginTop: '0.5rem'}}/>) :
               (<div style={{display: 'flex', marginTop: '0.5rem', flexWrap: 'wrap'}}>
                 {currentTab.filter(this.state.workspaceList, this.state.featuredWorkspaces).map(wp => {
