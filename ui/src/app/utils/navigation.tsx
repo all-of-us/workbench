@@ -12,6 +12,13 @@ export const NavStore = {
   navigateByUrl: undefined
 };
 
+// This is an optional warmup store which can be populated to avoid redundant
+// requests on navigation, e.g. from workspace creation/clone -> data page. It
+// is not guaranteed to be populated for all workspace transitions. The value
+// should only be consumed by central infrastructure, but can be updated from
+// specific application pages where appropriate.
+export const nextWorkspaceWarmupStore = new BehaviorSubject<WorkspaceData>(undefined);
+
 export const currentWorkspaceStore = new BehaviorSubject<WorkspaceData>(undefined);
 export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
 export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(undefined);
