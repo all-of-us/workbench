@@ -337,7 +337,9 @@ export class QuickTourReact extends React.Component<QuickTourReactProps, QuickTo
           <div style={styles.breadcrumbs}>
             {panels.map((p, i) => {
               return <React.Fragment key={i}>
-                <div style={{width: i === panels.length - 1 ? null : '128px'}}>
+                {/*We don't set the width on the last item, because there is no connector,
+                so setting a width would offset the entire selection area by half a connector length*/}
+                <div style={{width: i !== panels.length - 1 ? '128px' : null}}>
                   <div style={selected ? completedStyles.circleCompleted : styles.circle}
                        data-test-id={'breadcrumb' + i}
                        onClick={() => this.selectPanel(i)}>
