@@ -26,7 +26,7 @@
       <column name="data_use_agreement_signed_version" type="integer">
         <constraints nullable="false"/>
       </column>
-      <column name="completion_time">
+      <column name="completion_time" type="timestamp">
         <constraints nullable="false"/>
       </column>
     </createTable>
