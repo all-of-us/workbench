@@ -93,6 +93,10 @@ definitions:
     type: string
     enum: &Role [UNDERGRADUATE, TRAINEE, FELLOW, EARLY_CAREER, NON_TENURE, MID_CAREER, LATE_CAREER, PROJECT_PERSONNEL]
 
+  FeaturedWorkspaceCategory:
+    type: string
+    enum: [PHENOTYPE_LIBRARY, TUTORIAL_WORKSPACES]
+
   CdrVersionListResponse:
     type: object
     required:
@@ -206,7 +210,7 @@ definitions:
         type: string
         description: the Firecloud id of the workspace
       category:
-        type: string
+        $ref: '#/definitions/FeaturedWorkspaceCategory'
         description: The category that this workspace belongs to
 
   ErrorResponse:

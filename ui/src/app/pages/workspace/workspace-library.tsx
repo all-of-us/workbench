@@ -14,7 +14,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {environment} from 'environments/environment';
-import {ErrorResponse, FeaturedWorkspace, Profile} from 'generated/fetch';
+import {ErrorResponse, FeaturedWorkspace, FeaturedWorkspaceCategory, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
   navPanel: {
@@ -49,29 +49,33 @@ const styles = reactStyles({
   }
 });
 
-const libraryTabEnums = {
+const libraryTabs = {
   PUBLISHED_WORKSPACES: {
     title: 'Published Workspaces',
     icon: 'bookmark',
-    filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
-      return publishedWorkspaces.filter(ws => !featuredWorkspaces.find(fws =>
-        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace));
+    filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
+      return workspaceList.filter(workspace => !featuredWorkspaces.find(featuredWorkspace =>
+        workspace.workspace.id === featuredWorkspace.id && workspace.workspace.namespace === featuredWorkspace.namespace));
     }
   },
   PHENOTYPE_LIBRARY: {
     title: 'Phenotype Library',
     icon: 'dna',
-    filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
-      return publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
-        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace && fws.category === 'PHENOTYPE_LIBRARY'));
+    filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
+      return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
+        workspace.workspace.id === featuredWorkspace.id &&
+        workspace.workspace.namespace === featuredWorkspace.namespace &&
+        featuredWorkspace.category === FeaturedWorkspaceCategory.PHENOTYPELIBRARY));
     }
   },
   TUTORIAL_WORKSPACES: {
     title: 'Tutorial Workspaces',
     icon: 'library',
-    filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
-      return publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
-        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace && fws.category === 'TUTORIAL_WORKSPACES'));
+    filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
+      return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
+        workspace.workspace.id === featuredWorkspace.id &&
+        workspace.workspace.namespace === featuredWorkspace.namespace &&
+        featuredWorkspace.category === FeaturedWorkspaceCategory.TUTORIALWORKSPACES));
     }
   }
 };
@@ -95,7 +99,7 @@ interface ReloadableProfile {
 interface CurrentTab {
   title: string;
   icon: string;
-  filter: (ws: WorkspacePermissions[], fws: FeaturedWorkspace[]) => WorkspacePermissions[];
+  filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => WorkspacePermissions[];
 }
 
 class Props {
@@ -116,7 +120,7 @@ export const WorkspaceLibrary = withUserProfile()
   constructor(props) {
     super(props);
     this.state = {
-      currentTab: libraryTabEnums.PHENOTYPE_LIBRARY,
+      currentTab: libraryTabs.PHENOTYPE_LIBRARY,
       errorText: '',
       featuredWorkspaces: [],
       workspaceList: [],
@@ -131,13 +135,13 @@ export const WorkspaceLibrary = withUserProfile()
   // environment variable.
   libraryTabs = (this.props.enablePublishedWorkspaces || environment.enablePublishedWorkspaces)
     ? [
-      libraryTabEnums.PUBLISHED_WORKSPACES,
-      libraryTabEnums.PHENOTYPE_LIBRARY,
-      libraryTabEnums.TUTORIAL_WORKSPACES
+      libraryTabs.PUBLISHED_WORKSPACES,
+      libraryTabs.PHENOTYPE_LIBRARY,
+      libraryTabs.TUTORIAL_WORKSPACES
     ]
     : [
-      libraryTabEnums.PHENOTYPE_LIBRARY,
-      libraryTabEnums.TUTORIAL_WORKSPACES
+      libraryTabs.PHENOTYPE_LIBRARY,
+      libraryTabs.TUTORIAL_WORKSPACES
     ];
 
   async componentDidMount() {
@@ -162,18 +166,19 @@ export const WorkspaceLibrary = withUserProfile()
 
   // Gets all published workspaces, including those configured as 'featured'
   async getAllPublishedWorkspaces() {
-    this.setState({
-      pendingWorkspaceRequests: this.state.pendingWorkspaceRequests + 1
-    });
+    this.setState((previousState) => ({
+      pendingWorkspaceRequests: previousState.pendingWorkspaceRequests + 1
+    }));
 
     try {
       const workspacesReceived = await workspacesApi().getPublishedWorkspaces();
       workspacesReceived.items.sort(
         (a, b) => a.workspace.name.localeCompare(b.workspace.name));
-      this.setState({
+
+      this.setState((previousState) => ({
         workspaceList: workspacesReceived.items.map(w => new WorkspacePermissions(w)),
-        pendingWorkspaceRequests: this.state.pendingWorkspaceRequests - 1
-      });
+        pendingWorkspaceRequests: previousState.pendingWorkspaceRequests - 1
+      }));
     } catch (e) {
       const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
       this.setState({errorText: response.message});
@@ -183,17 +188,17 @@ export const WorkspaceLibrary = withUserProfile()
   // Gets the 'featured workspaces' config and filters the list of published workspaces to
   // find the 'featured' ones
   async getFeaturedWorkspaces() {
-    this.setState({
-      pendingWorkspaceRequests: this.state.pendingWorkspaceRequests + 1
-    });
+    this.setState((previousState) => ({
+      pendingWorkspaceRequests: previousState.pendingWorkspaceRequests + 1
+    }));
 
     try {
       const resp = await featuredWorkspacesConfigApi().getFeaturedWorkspacesConfig();
 
-      this.setState({
+      this.setState((previousState) => ({
         featuredWorkspaces: resp.featuredWorkspacesList,
-        pendingWorkspaceRequests: this.state.pendingWorkspaceRequests - 1
-      });
+        pendingWorkspaceRequests: previousState.pendingWorkspaceRequests - 1
+      }));
     } catch (e) {
       const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
       this.setState({errorText: response.message});
