@@ -19,7 +19,7 @@ jest.mock('app/utils/navigation', () => ({
 
 describe('WorkspaceLibrary', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
-  const suffixes = ["", "_1"];
+  const suffixes = [" Phenotype Library", " Tutorial Workspace", " Published Workspace"];
   let profileApi: ProfileApiStub;
   const reload = jest.fn();
   const updateCache = jest.fn();
@@ -49,7 +49,7 @@ describe('WorkspaceLibrary', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should display featured workspaces', async () => {
+  it('should display phenotype library workspaces', async () => {
     const publishedWorkspaceStubs = buildWorkspaceStubs(suffixes).map(w => ({
       ...w,
       published: true
@@ -57,9 +57,26 @@ describe('WorkspaceLibrary', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
+    wrapper.find('[data-test-id="Phenotype Library"]').simulate('click');
+    await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
       .map(c => c.text());
     expect(cardNameList).toEqual([publishedWorkspaceStubs[0].name]);
+  });
+
+  it('should display tutorial workspaces', async () => {
+    const publishedWorkspaceStubs = buildWorkspaceStubs(suffixes).map(w => ({
+      ...w,
+      published: true
+    }));
+    registerApiClient(WorkspacesApi, new WorkspacesApiStub(publishedWorkspaceStubs));
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+    wrapper.find('[data-test-id="Tutorial Workspaces"]').simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+    const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
+      .map(c => c.text());
+    expect(cardNameList).toEqual([publishedWorkspaceStubs[1].name]);
   });
 
   it('should not display unpublished workspaces', async () => {
@@ -82,7 +99,7 @@ describe('WorkspaceLibrary', () => {
     await waitOneTickAndUpdate(wrapper);
     const cardNameList = wrapper.find('[data-test-id="workspace-card-name"]')
       .map(c => c.text());
-    expect(cardNameList).toEqual([publishedWorkspaceStubs[1].name]);
+    expect(cardNameList).toEqual([publishedWorkspaceStubs[2].name]);
   });
 
 });
