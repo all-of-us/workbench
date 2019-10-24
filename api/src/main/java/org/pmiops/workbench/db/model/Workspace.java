@@ -20,6 +20,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.pmiops.workbench.model.BillingAccountType;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -111,6 +113,9 @@ public class Workspace {
   private Boolean reviewRequested;
   private Boolean approved;
   private Timestamp timeRequested;
+  private Short billingStatus = StorageEnums.billingStatusToStorage(BillingStatus.ACTIVE);
+  private Short billingAccountType =
+      StorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
 
   public Workspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -542,5 +547,23 @@ public class Workspace {
 
   private void setBillingMigrationStatus(short s) {
     this.billingMigrationStatus = s;
+  }
+
+  @Column(name = "billing_status")
+  public BillingStatus getBillingStatus() {
+    return StorageEnums.billingStatusFromStorage(billingStatus);
+  }
+
+  public void setBillingStatus(BillingStatus billingStatus) {
+    this.billingStatus = StorageEnums.billingStatusToStorage(billingStatus);
+  }
+
+  @Column(name = "billing_account_type")
+  public BillingAccountType getBillingAccountType() {
+    return StorageEnums.billingAccountTypeFromStorage(billingAccountType);
+  }
+
+  public void setBillingAccountType(BillingAccountType billingAccountType) {
+    this.billingAccountType = StorageEnums.billingAccountTypeToStorage(billingAccountType);
   }
 }

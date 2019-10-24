@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="thibault" id="changelog-105-workspace-free-tier-usage">
+
+    <createTable tableName="workspace_free_tier_usage">
+      <column name="workspace_free_tier_usage_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_free_tier_usage_user_id" references="user(user_id)"/>
+      </column>
+      <column name="workspace_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_free_tier_usage_workspace_id" references="workspace(workspace_id)"/>
+      </column>
+      <column name="cost" type="double">
+        <constraints nullable="false"/>
+      </column>
+      <column name="last_update_time" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+  </changeSet>
+</databaseChangeLog>
