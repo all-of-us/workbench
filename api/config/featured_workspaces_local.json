@@ -4,6 +4,18 @@
     "name": "bug",
     "namespace": "aou-rw-local1-1755351751",
     "id": "bug"
+    },
+    {
+      "name": "test",
+      "namespace": "aou-rw-local1-350c59e3",
+      "id": "test",
+      "category": "Phenotype Library"
+    },
+    {
+      "name": "Duplicate of Test 2",
+      "namespace": "aou-rw-local1-65b2c024",
+      "id": "duplicateoftest2",
+      "category": "Tutorial Workspaces"
     }
   ]
 }

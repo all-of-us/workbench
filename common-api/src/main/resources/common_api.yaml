@@ -205,6 +205,9 @@ definitions:
       id:
         type: string
         description: the Firecloud id of the workspace
+      category:
+        type: string
+        description: The category that this workspace belongs to
 
   ErrorResponse:
     type: object
