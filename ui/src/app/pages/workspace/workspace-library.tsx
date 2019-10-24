@@ -120,7 +120,7 @@ export const WorkspaceLibrary = withUserProfile()
       errorText: '',
       featuredWorkspaces: [],
       workspaceList: [],
-      pendingWorkspaceRequests: 2
+      pendingWorkspaceRequests: 0
     };
   }
 
@@ -162,6 +162,10 @@ export const WorkspaceLibrary = withUserProfile()
 
   // Gets all published workspaces, including those configured as 'featured'
   async getAllPublishedWorkspaces() {
+    this.setState({
+      pendingWorkspaceRequests: this.state.pendingWorkspaceRequests + 1
+    });
+
     try {
       const workspacesReceived = await workspacesApi().getPublishedWorkspaces();
       workspacesReceived.items.sort(
@@ -179,6 +183,10 @@ export const WorkspaceLibrary = withUserProfile()
   // Gets the 'featured workspaces' config and filters the list of published workspaces to
   // find the 'featured' ones
   async getFeaturedWorkspaces() {
+    this.setState({
+      pendingWorkspaceRequests: this.state.pendingWorkspaceRequests + 1
+    });
+
     try {
       const resp = await featuredWorkspacesConfigApi().getFeaturedWorkspacesConfig();
 
