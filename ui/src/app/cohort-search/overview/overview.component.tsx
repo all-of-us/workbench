@@ -445,7 +445,7 @@ export const ListOverview = withCurrentWorkspace()(
           cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request).then(response => {
             if (localCheck === this.state.apiCallCheck) {
               this.setState({
-                chartData: PM_STUB, // TODO switch back to 'chartData: response.items' before merging
+                chartData: +cdrVersionId < 2 ? response.items : PM_STUB, // TODO switch back to use only response.items before merging
                 total: response.items.reduce((sum, data) => sum + data.count, 0),
                 loading: false
               });
