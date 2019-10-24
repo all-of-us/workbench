@@ -107,30 +107,9 @@ export const styles = reactStyles({
     fontSize: 28, lineHeight: '34px', color: colors.white, paddingRight: '2.3rem',
     marginTop: '2rem', width: '33%'
   },
-  footerToDelete: {
-    height: '300px', width: '100%', backgroundColor: colors.primary,
-    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-    marginTop: '2%',
-  },
-  footerInnerToDelete: {
-    display: 'flex', flexDirection: 'column', marginLeft: '5%', marginRight: '5%',
-  },
-  footerTitleToDelete: {
-    height: '34px', opacity: 0.87, color: colors.white, fontSize: 28,
-    fontWeight: 600, lineHeight: '34px', width: '87.34%', marginTop: '1.4rem'
-  },
-  footerTextToDelete: {
-    height: '176px', opacity: 0.87, color: colors.secondary, fontSize: '16px',
-    fontWeight: 400, lineHeight: '30px', display: 'flex', width: '100%',
-    flexDirection: 'column', flexWrap: 'nowrap', overflowY: 'auto'
-  },
-  linksBlockToDelete: {
-    display: 'flex', marginBottom: '1.2rem', marginLeft: '1.4rem',
-    flexDirection: 'column', flexShrink: 1, minWidth: 0
-  },
   bottomBannerToDelete: {
     width: '100%', display: 'flex', backgroundColor: colors.primary, height: '5rem',
-    paddingLeft: '3.5rem', alignItems: 'center'
+    paddingLeft: '3.5rem', alignItems: 'center', marginTop: '1rem'
   },
   bottomLinksToDelete: {
     color: colors.white, fontSize: '0.7rem', height: '1rem',
@@ -521,46 +500,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
                 </React.Fragment>;
               })}
             </div>
-            <div>
-              <div style={styles.footerToDelete}>
-                <div style={styles.footerInnerToDelete}>
-                  <div style={styles.footerTitleToDelete}>
-                    How to Use the All of Us Researcher Workbench</div>
-                  <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-                    <TooltipTrigger content='Coming Soon' side='left'>
-                      <a href='#' style={{color: colors.white}}>See all documentation</a>
-                    </TooltipTrigger>
-                  </div>
-                  <FlexRow style={{width: '87.34%', justifyContent: 'space-between'}}>
-                    {footerLinks.map((col, i) => {
-                      return <React.Fragment key={i}>
-                        <div style={styles.linksBlockToDelete}>
-                          <div style={styles.footerTextToDelete}>
-                            <div style={{color: colors.white, marginTop: '2%'}}>{col.title}</div>
-                            <ul style={{color: colors.secondary}}>
-                              {col.links.map((link, ii) => {
-                                return <li key={ii}>
-                                  <a href='#' style={{color: colors.secondary}}>{link}</a>
-                                </li>;
-                              } )}
-                            </ul>
-                          </div>
-                        </div>
-                      </React.Fragment>;
-                    })}
-                  </FlexRow>
-                </div>
+            <div style={styles.bottomBannerToDelete}>
+              <div style={styles.logo}>
+                <img src='/assets/images/all-of-us-logo-footer.svg'/>
               </div>
-              <div style={styles.bottomBannerToDelete}>
-                <div style={styles.logo}>
-                  <img src='/assets/images/all-of-us-logo-footer.svg'/>
-                </div>
-                <div style={styles.bottomLinksToDelete}>Privacy Policy</div>
-                <div style={styles.bottomLinksToDelete}>Terms of Service</div>
-              </div>
+              <div style={styles.bottomLinksToDelete}>Privacy Policy</div>
+              <div style={styles.bottomLinksToDelete}>Terms of Service</div>
             </div>
           </div>
-
         </div>
 
         {quickTour &&
