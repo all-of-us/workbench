@@ -14,7 +14,7 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCdrVersions, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {reportError} from 'app/utils/errors';
-import {currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
 import {ArchivalStatus, CdrVersion, CdrVersionListResponse, DataAccessLevel, SpecificPopulationEnum, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -555,38 +555,50 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           workspace = await workspacesApi()
               .updateWorkspace(this.state.workspace.namespace, this.state.workspace.id,
                   {workspace: this.state.workspace});
+          // TODO: Investigate removing this GET call, the response from Update should suffice here.
           await workspacesApi()
             .getWorkspace(this.state.workspace.namespace, this.state.workspace.id)
             .then(ws => currentWorkspaceStore.next({
               ...ws.workspace,
               accessLevel: ws.accessLevel
             }));
+          navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+          return;
+        }
+
+        // Remaining logic covers newly created workspace (creates or clones). The high complexity
+        // in this case is to paper over Sam consistency issues on initial creation (see RW-2818).
+        let accessLevel = null;
+        let pollTimedOut = false;
+        setTimeout(() => pollTimedOut = true, NEW_ACL_DELAY_POLL_TIMEOUT_MS);
+        while (!pollTimedOut) {
+          ({workspace, accessLevel} = await workspacesApi().getWorkspace(workspace.namespace, workspace.id));
+          if (accessLevel === WorkspaceAccessLevel.OWNER) {
+            break;
+          }
+          await new Promise((accept) => setTimeout(accept, NEW_ACL_DELAY_POLL_INTERVAL_MS));
         }
 
         const navigateToWorkspace = () => navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
-        if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-          let accessLevel = null;
-          let pollTimedOut = false;
-          setTimeout(() => pollTimedOut = true, NEW_ACL_DELAY_POLL_TIMEOUT_MS);
-          while (!pollTimedOut) {
-            ({workspace, accessLevel} = await workspacesApi().getWorkspace(workspace.namespace, workspace.id));
-            if (accessLevel === WorkspaceAccessLevel.OWNER) {
-              break;
-            }
-            await new Promise((accept) => setTimeout(accept, NEW_ACL_DELAY_POLL_INTERVAL_MS));
-          }
-          if (accessLevel !== WorkspaceAccessLevel.OWNER) {
-            reportError(new Error(
-              `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
-              ` accessLevel: ${accessLevel}`));
-            this.setState({
-              loading: false,
-              workspaceNewAclDelayed: true,
-              workspaceNewAclDelayedContinueFn: navigateToWorkspace
-            });
-            return;
-          }
+        if (accessLevel !== WorkspaceAccessLevel.OWNER) {
+          reportError(new Error(
+            `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
+            ` accessLevel: ${accessLevel}`));
+          // We intentionally do not preload the created workspace via nextWorkspaceWarmupStore in
+          // this situation. This forces a workspace fetch on navigation, which is desired as ACLs
+          // might have finally propagated by the time the navigate button is clicked.
+          this.setState({
+            loading: false,
+            workspaceNewAclDelayed: true,
+            workspaceNewAclDelayedContinueFn: navigateToWorkspace
+          });
+          return;
         }
+
+        // Preload the newly created workspace to avoid a redundant GET on the following navigate.
+        // This is also important for guarding against the ACL delay issue, as we have observed
+        // that even after confirming OWNER access, subsequent calls to GET may still yield NOACCESS.
+        nextWorkspaceWarmupStore.next({...workspace, accessLevel});
         navigateToWorkspace();
 
       } catch (error) {
