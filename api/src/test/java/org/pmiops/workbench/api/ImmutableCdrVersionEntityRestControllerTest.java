@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.cdrversions.CdrVersionRestController;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.cdr.ImmutableCdrVersion;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersionEntity;
@@ -100,7 +101,9 @@ public class ImmutableCdrVersionEntityRestControllerTest {
   private void assertResponse(CdrVersionListResponse response, CdrVersionEntity... versions) {
     assertThat(response.getItems())
         .containsExactly(
-            Arrays.stream(versions).map(CdrVersionRestController.TO_CLIENT_CDR_VERSION).toArray())
+            Arrays.stream(versions)
+                .map(ImmutableCdrVersion::fromEntity)
+                .toArray())
         .inOrder();
     assertThat(response.getDefaultCdrVersionId())
         .isEqualTo(String.valueOf(defaultCdrVersionEntity.getCdrVersionId()));

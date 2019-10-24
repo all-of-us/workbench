@@ -22,15 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class CdrVersionRestController implements CdrVersionsApiDelegate {
   private static final Logger log = Logger.getLogger(CdrVersionRestController.class.getName());
 
-  @VisibleForTesting
-  public static final Function<CdrVersionEntity, org.pmiops.workbench.model.CdrVersion> TO_CLIENT_CDR_VERSION =
-      (CdrVersionEntity cdrVersionEntity) ->
-          new org.pmiops.workbench.model.CdrVersion()
-              .cdrVersionId(String.valueOf(cdrVersionEntity.getCdrVersionId()))
-              .creationTime(cdrVersionEntity.getCreationTime().getTime())
-              .dataAccessLevel(cdrVersionEntity.getDataAccessLevelEnum())
-              .archivalStatus(cdrVersionEntity.getArchivalStatusEnum())
-              .name(cdrVersionEntity.getName());
+//  @VisibleForTesting
+//  public static final Function<CdrVersionEntity, org.pmiops.workbench.model.CdrVersion> TO_CLIENT_CDR_VERSION =
+//      (CdrVersionEntity cdrVersionEntity) ->
+//          new org.pmiops.workbench.model.CdrVersion()
+//              .cdrVersionId(String.valueOf(cdrVersionEntity.getCdrVersionId()))
+//              .creationTime(cdrVersionEntity.getCreationTime().getTime())
+//              .dataAccessLevel(cdrVersionEntity.getDataAccessLevelEnum())
+//              .archivalStatus(cdrVersionEntity.getArchivalStatusEnum())
+//              .name(cdrVersionEntity.getName());
 
   private final CdrVersionService cdrVersionService;
   private Provider<User> userProvider;
@@ -75,7 +75,7 @@ public class CdrVersionRestController implements CdrVersionsApiDelegate {
     return ResponseEntity.ok(
         new CdrVersionListResponse()
             .items(cdrVersionEntities.stream()
-                .map(TO_CLIENT_CDR_VERSION)
+                .map(ImmutableCdrVersion::toClientCdrVerrsion)
                 .collect(Collectors.toList()))
             .defaultCdrVersionId(Long.toString(defaultVersions.get(0))));
   }
