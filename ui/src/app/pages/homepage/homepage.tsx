@@ -13,7 +13,6 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Modal} from 'app/components/modals';
-import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
@@ -30,7 +29,7 @@ import {
 export const styles = reactStyles({
   bottomBanner: {
     width: '100%', display: 'flex', backgroundColor: colors.primary,
-    paddingLeft: '3.5rem', alignItems: 'center'
+    paddingLeft: '3.5rem', alignItems: 'center', marginTop: '2rem'
   },
   bottomLinks: {
     color: colors.white, fontSize: '.5rem', height: '1rem',
@@ -44,29 +43,6 @@ export const styles = reactStyles({
   },
   fadeBox: {
     margin: '1rem 0 0 3%', width: '95%', padding: '0 0.1rem'
-  },
-  footer: {
-    width: '100%', backgroundColor: colors.light, marginTop: '2%'
-  },
-  footerInner: {
-    marginLeft: '3%', marginRight: '2%',
-  },
-  footerText: {
-    height: '176px', opacity: 0.87, color: colors.secondary,
-    fontSize: '0.6rem', fontWeight: 500, lineHeight: '30px', width: '100%',
-    flexWrap: 'nowrap', overflowY: 'auto'
-  },
-  footerTextTitle: {
-    color: colors.primary,
-    fontSize: '0.67rem',
-    fontWeight: 500
-  },
-  footerTitle: {
-    height: '34px', opacity: 0.87, color: colors.primary, fontSize: '0.75rem',
-    fontWeight: 600, lineHeight: '34px', marginTop: '1rem', marginBottom: '0.5rem'
-  },
-  linksBlock: {
-    marginBottom: '1rem', flexShrink: 1, minWidth: '13rem'
   },
   logo: {
     height: '3.5rem', width: '7rem', lineHeight: '85px'
@@ -287,27 +263,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
         onClick: () => this.openVideo('/assets/videos/Workbench Tutorial - Notebooks.mp4')
       }
     ];
-    const footerLinks = [{
-      title: 'Working Within Researcher Workbench',
-      links: ['Researcher Workbench Mission',
-        'User interface components',
-        'What to do when things go wrong',
-        'Contributing to the Workbench']
-    },
-      {
-        title: 'Workspace',
-        links: ['Workspace interface components',
-          'User interface components',
-          'Collaborating with other researchers',
-          'Sharing and Publishing Workspaces']
-      },
-      {
-        title: 'Working with Notebooks',
-        links: ['Notebook interface components',
-          'Notebooks and data',
-          'Collaborating with other researchers',
-          'Sharing and Publishing Notebooks']
-      }];
 
     if (environment.enableHomepageRestyle) {
       return <React.Fragment>
@@ -393,32 +348,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
                 })}
               </FlexRow>
             </FlexColumn>
-            <div>
-              <div style={styles.footer}>
-                <FlexColumn style={styles.footerInner}>
-                  <div style={styles.footerTitle}>
-                    How to Use the All of Us Researcher Workbench</div>
-                  <FlexRow style={{justifyContent: 'space-between'}}>
-                    {footerLinks.map((col, i) => {
-                      return <React.Fragment key={i}>
-                        <FlexColumn style={styles.linksBlock}>
-                          <FlexColumn style={styles.footerText}>
-                            <div style={styles.footerTextTitle}>{col.title}</div>
-                            <ul style={{color: colors.secondary, marginLeft: '2%'}}>
-                              {col.links.map((link, ii) => {
-                                return <li key={ii}>
-                                  <a href='#' style={{color: colors.accent}}>{link}</a>
-                                </li>;
-                              } )}
-                            </ul>
-                          </FlexColumn>
-                        </FlexColumn>
-                      </React.Fragment>;
-                    })}
-                  </FlexRow>
-                </FlexColumn>
-              </div>
-            </div>
             <div style={styles.bottomBanner}>
               <div style={styles.logo}>
                 <img src='/assets/images/all-of-us-logo-footer.svg'/>
