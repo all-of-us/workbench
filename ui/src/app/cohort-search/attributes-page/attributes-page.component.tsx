@@ -3,7 +3,7 @@ import {AttrName, CriteriaSubType, DomainType, Operator} from 'generated/fetch';
 import * as React from 'react';
 
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
-import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {ppiQuestions, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {
   mapParameter,
   sanitizeNumericalInput,
@@ -181,16 +181,19 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     componentDidMount() {
-      const {node} = this.props;
+      const {node: {parentId, subtype}} = this.props;
       const{form, options} = this.state;
+      if (this.isSurvey) {
+        console.log(ppiQuestions.getValue()[parentId]);
+      }
       if (this.isMeasurement) {
         this.getMeasurementAttributes();
       } else {
         options.unshift({label: 'Any', value: AttrName[AttrName.ANY]});
-        form.num = node.subtype === CriteriaSubType[CriteriaSubType.BP]
+        form.num = subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
-          : [{name: node.subtype, operator: 'ANY', operands: []}];
-        this.setState({form, options, count: node.count, loading: false});
+          : [{name: subtype, operator: 'ANY', operands: []}];
+        this.setState({form, options, count: this.nodeCount, loading: false});
       }
     }
 
@@ -259,7 +262,7 @@ export const AttributesPage = withCurrentWorkspace() (
         // delete second operand if it exists
         form.num[attributeIndex].operands.splice(1);
       }
-      const count = value === 'ANY' ? node.count : null;
+      const count = value === 'ANY' ? this.nodeCount : null;
       this.setState({form, count});
     }
 
@@ -317,6 +320,16 @@ export const AttributesPage = withCurrentWorkspace() (
       formValid = formValid ||
         (this.isMeasurement && !operatorSelected && form.cat.some(attr => attr.checked));
       return {formErrors, formValid};
+    }
+
+    get nodeCount() {
+      const {node: {count, parentId}} = this.props;
+      if (this.isSurvey) {
+        const parent = ppiQuestions.getValue()[parentId];
+        return !!parent ? parent.count : null;
+      } else {
+        return count;
+      }
     }
 
     get paramId() {
@@ -467,6 +480,10 @@ export const AttributesPage = withCurrentWorkspace() (
 
     get isPhysicalMeasurement() {
       return this.props.node.domainId === DomainType.PHYSICALMEASUREMENT;
+    }
+
+    get isSurvey() {
+      return this.props.node.domainId === DomainType.SURVEY;
     }
 
     get isBloodPressure() {
