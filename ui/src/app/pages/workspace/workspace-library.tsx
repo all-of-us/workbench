@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {AlertDanger} from 'app/components/alert';
@@ -49,7 +48,7 @@ const libraryTabEnums = {
     icon: 'bookmark',
     filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return publishedWorkspaces.filter(ws => !featuredWorkspaces.find(fws =>
-        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace))
+        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace));
     }
   },
   PHENOTYPE_LIBRARY: {
@@ -57,7 +56,7 @@ const libraryTabEnums = {
     icon: 'dna',
     filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
-        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace && fws.category === 'Phenotype Library'))
+        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace && fws.category === 'Phenotype Library'));
     }
   },
   TUTORIAL_WORKSPACES: {
@@ -65,7 +64,7 @@ const libraryTabEnums = {
     icon: 'library',
     filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
-        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace && fws.category === 'Tutorial Workspaces'))
+        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace && fws.category === 'Tutorial Workspaces'));
     }
   }
 };
@@ -89,7 +88,7 @@ interface ReloadableProfile {
 interface CurrentTab {
   title: string;
   icon: string;
-  filter: (ws: WorkspacePermissions[], fws: FeaturedWorkspace[]) => WorkspacePermissions[]
+  filter: (ws: WorkspacePermissions[], fws: FeaturedWorkspace[]) => WorkspacePermissions[];
 }
 
 class Props {
