@@ -30,6 +30,10 @@ const styles = reactStyles({
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis'
   },
+  suppressedItem: {
+    color: colorWithWhiteness(colors.warning, -.35),
+    flex: 4,
+  },
   codeText: {
     fontWeight: 300,
     color: colors.dark
@@ -63,6 +67,12 @@ const styles = reactStyles({
   viewMore: {
     color: colors.accent,
     cursor: 'pointer',
+    fontSize: '12px',
+  },
+  disabled: {
+    color: colors.accent,
+    pointerEvents: 'none',
+    opacity: 0.6,
     fontSize: '12px',
   }
 });
@@ -286,14 +296,14 @@ export const SearchGroupItem = withCurrentWorkspace()(
             {showCount && <span style={styles.codeText}>{count.toLocaleString()}</span>}
             {error && <span><ClrIcon style={{color: colors.warning}} shape='exclamation-triangle' className='is-solid' size={22} /></span>}
           </div>}
-          {status === 'pending' && <div style={{color: colorWithWhiteness(colors.warning, -.35)}}>
+          {status === 'pending' && <div style={styles.suppressedItem}>
             <ClrIcon shape='exclamation-triangle' className='is-solid' size={23} />
             <span style={{margin: '0 0 2px 2px'}}>
               This criteria has been deleted
               <Button type='link' style={styles.link} onClick={() => this.undo()}>UNDO</Button>
             </span>
           </div>}
-          {status === 'hidden' && <div style={{color: colorWithWhiteness(colors.warning, -.35)}}>
+          {status === 'hidden' && <div style={styles.suppressedItem}>
             <ClrIcon shape='eye-hide' className='is-solid' size={23} />
             <span style={{margin: '0 0 2px 2px'}}>
               This criteria has been suppressed
@@ -306,9 +316,11 @@ export const SearchGroupItem = withCurrentWorkspace()(
         </div>}
         <div style={{...styles.parameterList, maxHeight: paramListOpen ? '15rem' : 0}}>
           {searchParameters.slice(0, 5).map((param, p) => <SearchGroupItemParameter key={p} parameter={param} />)}
-          {searchParameters.length > 5 && <span style={styles.viewMore} onClick={() => this.launchWizard()}>
-            View/edit all criteria ({searchParameters.length - 5} more)
-          </span>}
+          {searchParameters.length > 5 &&
+            <span style={status === 'active' ? styles.viewMore : styles.disabled} onClick={() => this.launchWizard()}>
+              View/edit all criteria ({searchParameters.length - 5} more)
+            </span>
+          }
           {!!modifiers && modifiers.length > 0 && <React.Fragment>
             <h3 style={{fontSize: '14px', marginTop: '0.25rem'}}>Modifiers</h3>
             {modifiers.map((mod, m) => <div key={m} style={styles.parameter}>{this.modifierDisplay(mod)}</div>)}
