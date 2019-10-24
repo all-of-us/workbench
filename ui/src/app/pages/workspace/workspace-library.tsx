@@ -46,7 +46,7 @@ const styles = reactStyles({
 const libraryTabEnums = {
   PUBLISHED_WORKSPACES: {
     title: 'Published Workspaces',
-    icon: 'library',
+    icon: 'bookmark',
     filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return publishedWorkspaces.filter(ws => !featuredWorkspaces.find(fws =>
         ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace))
@@ -54,7 +54,7 @@ const libraryTabEnums = {
   },
   PHENOTYPE_LIBRARY: {
     title: 'Phenotype Library',
-    icon: 'star',
+    icon: 'dna',
     filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
         ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace && fws.category === 'Phenotype Library'))
