@@ -1,4 +1,4 @@
-import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
+import {AttrName, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
 
 export const LIST_PROGRAM_TYPES = [
   {
@@ -118,4 +118,35 @@ export const PREDEFINED_ATTRIBUTES = {
       MAX: 1000
     }
   ],
+};
+
+export const MODIFIERS_MAP = {
+  [ModifierType.AGEATEVENT]: {
+    name: 'Age At Event',
+    operators: {
+      [Operator.BETWEEN]: 'Between',
+      [Operator.GREATERTHANOREQUALTO]: 'Greater Than or Equal To',
+      [Operator.LESSTHANOREQUALTO]: 'Less Than or Equal To',
+    }
+  },
+  [ModifierType.ENCOUNTERS]: {
+    name: 'During Visit Type',
+    operators: {
+      [Operator.IN]: ''
+    }
+  },
+  [ModifierType.EVENTDATE]: {
+    name: 'Event Date',
+    operators: {
+      [Operator.BETWEEN]: 'Between',
+      [Operator.GREATERTHANOREQUALTO]: 'On or After',
+      [Operator.LESSTHANOREQUALTO]: 'On or Before',
+    }
+  },
+  [ModifierType.NUMOFOCCURRENCES]: {
+    name: 'Has Occurrences',
+    operators: {
+      [Operator.GREATERTHANOREQUALTO]: 'N or More',
+    }
+  },
 };
