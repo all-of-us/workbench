@@ -343,20 +343,23 @@ export const DataUseAgreement = withUserProfile()(
     }
 
     render() {
-      const {name, initialName, initialWork, initialSanctions, showSanctionModal,
+      const {initialName, initialWork, initialSanctions, showSanctionModal,
         submitting} = this.state;
-      const errors = validate({name, initialName, initialWork, initialSanctions}, {
-        name: {
-          presence: {allowEmpty: false}
-        },
+      const errors = validate({initialName, initialWork, initialSanctions}, {
         initialName: {
           presence: {allowEmpty: false}
         },
         initialWork: {
-          presence: {allowEmpty: false}
+          presence: {allowEmpty: false},
+          equality: {
+            attribute: "initialName"
+          }
         },
         initialSanctions: {
-          presence: {allowEmpty: false}
+          presence: {allowEmpty: false},
+          equality: {
+            attribute: "initialName"
+          }
         }
       });
       return <div style={styles.dataUseAgreementPage}>
@@ -369,8 +372,9 @@ export const DataUseAgreement = withUserProfile()(
           {submitting && <SpinnerOverlay/>}
           <SecondHeader style={{marginTop: 0}}>Agreement:</SecondHeader>
           <div style={{marginTop: '0.5rem', fontWeight: 600}}>I
-            <DuaTextInput placeholder='FIRST AND LAST NAME' style={{margin: '0 1ex'}}
-                          onChange={(v) => this.setState({name: v})} value={name}
+            <DuaTextInput style={{margin: '0 1ex'}}
+                          disabled
+                          value={this.props.profileState.profile.givenName + " " + this.props.profileState.profile.familyName}
                           data-test-id='dua-name-input'/>
             ("Authorized User") have
             personally reviewed this data use agreement. I agree to follow each of the policies
@@ -408,7 +412,7 @@ export const DataUseAgreement = withUserProfile()(
                         disabled value={this.props.profileState.profile.contactEmail}/>
           <DuaTextInput style={{marginTop: '0.5rem'}}
                         type='text' disabled value={new Date().toLocaleDateString()}/>
-          <TooltipTrigger content={errors && 'All fields required'}>
+          <TooltipTrigger content={errors && 'All fields must be initialed and all sets of initials must match'}>
             <Button
               style={{marginTop: '1rem', cursor: errors && 'not-allowed', padding: '0 1.3rem'}}
               disabled={errors || submitting} data-test-id='submit-dua-button'
