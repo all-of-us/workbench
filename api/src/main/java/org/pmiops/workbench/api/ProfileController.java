@@ -25,6 +25,7 @@ import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.UserDataUseAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
@@ -488,9 +489,9 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Profile> submitDataUseAgreement(Integer dataUseAgreementSignedVersion) {
-    User user = userService.submitDataUseAgreement(dataUseAgreementSignedVersion);
-    return getProfileResponse(saveUserWithConflictHandling(user));
+  public ResponseEntity<Profile> submitDataUseAgreement(Integer dataUseAgreementSignedVersion, String initials) {
+    userService.submitDataUseAgreement(dataUseAgreementSignedVersion, initials);
+    return getProfileResponse(saveUserWithConflictHandling(userProvider.get()));
   }
 
   /**

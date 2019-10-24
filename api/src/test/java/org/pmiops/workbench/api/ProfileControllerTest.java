@@ -34,6 +34,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -95,6 +96,7 @@ public class ProfileControllerTest {
   @Mock private Provider<UserAuthentication> userAuthenticationProvider;
   @Autowired private UserDao userDao;
   @Autowired private AdminActionHistoryDao adminActionHistoryDao;
+  @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
   @Mock private FireCloudService fireCloudService;
   @Mock private LeonardoNotebooksClient leonardoNotebooksClient;
   @Mock private DirectoryService directoryService;
@@ -147,6 +149,7 @@ public class ProfileControllerTest {
             userProvider,
             userDao,
             adminActionHistoryDao,
+            userDataUseAgreementDao,
             clock,
             new FakeLongRandom(NONCE_LONG),
             fireCloudService,
@@ -229,18 +232,8 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitDataUseAgreement_success() throws Exception {
     createUser();
-    assertThat(profileController.submitDataUseAgreement(0).getStatusCode())
+    assertThat(profileController.submitDataUseAgreement(0, "NIH").getStatusCode())
         .isEqualTo(HttpStatus.OK);
-  }
-
-  @Test
-  public void testSubmitDataUseAgreement_updateVersion() throws Exception {
-    createUser();
-    int oldDuaVersion = 0;
-    int newDuaVersion = 1;
-    profileController.submitDataUseAgreement(oldDuaVersion);
-    profileController.submitDataUseAgreement(newDuaVersion);
-    assertThat(user.getDataUseAgreementSignedVersion() == newDuaVersion);
   }
 
   @Test

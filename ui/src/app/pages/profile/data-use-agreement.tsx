@@ -329,9 +329,9 @@ export const DataUseAgreement = withUserProfile()(
       };
     }
 
-    submitDataUseAgreement() {
+    submitDataUseAgreement(initials) {
       this.setState({submitting: true});
-      profileApi().submitDataUseAgreement(dataUseAgreementVersion).then((profile) => {
+      profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
         window.history.back();
       });
@@ -412,7 +412,7 @@ export const DataUseAgreement = withUserProfile()(
             <Button
               style={{marginTop: '1rem', cursor: errors && 'not-allowed', padding: '0 1.3rem'}}
               disabled={errors || submitting} data-test-id='submit-dua-button'
-              onClick={() => this.submitDataUseAgreement()}>Submit</Button>
+              onClick={() => this.submitDataUseAgreement(this.state.initialWork)}>Submit</Button>
           </TooltipTrigger>
         </FlexColumn>
       </div>; }

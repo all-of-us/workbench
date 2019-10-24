@@ -21,6 +21,7 @@ import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DemographicSurvey;
 import org.pmiops.workbench.db.model.InstitutionalAffiliation;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.UserDataUseAgreement;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiClient;
@@ -56,6 +57,7 @@ public class UserService {
   private final Provider<User> userProvider;
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
+  private final UserDataUseAgreementDao userDataUseAgreementDao;
   private final Clock clock;
   private final Random random;
   private final FireCloudService fireCloudService;
@@ -69,6 +71,7 @@ public class UserService {
       Provider<User> userProvider,
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
+      UserDataUseAgreementDao userDataUseAgreementDao,
       Clock clock,
       Random random,
       FireCloudService fireCloudService,
@@ -78,6 +81,7 @@ public class UserService {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
+    this.userDataUseAgreementDao = userDataUseAgreementDao;
     this.clock = clock;
     this.random = random;
     this.fireCloudService = fireCloudService;
@@ -287,14 +291,16 @@ public class UserService {
     return user;
   }
 
-  public User submitDataUseAgreement(Integer dataUseAgreementSignedVersion) {
+  public UserDataUseAgreement submitDataUseAgreement(Integer dataUseAgreementSignedVersion, String initials) {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateUserWithRetries(
-        (user) -> {
-          user.setDataUseAgreementCompletionTime(timestamp);
-          user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
-          return user;
-        });
+    UserDataUseAgreement dataUseAgreement = new UserDataUseAgreement();
+    dataUseAgreement.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+    dataUseAgreement.setUserId(userProvider.get().getUserId());
+    dataUseAgreement.setUserFamilyName(userProvider.get().getFamilyName());
+    dataUseAgreement.setUserGivenName(userProvider.get().getGivenName());
+    dataUseAgreement.setUserInitials(initials);
+    dataUseAgreement.setCompletionTime(timestamp);
+    return userDataUseAgreementDao.save(dataUseAgreement);
   }
 
   public User setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
