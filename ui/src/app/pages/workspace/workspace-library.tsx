@@ -56,7 +56,7 @@ const libraryTabEnums = {
     icon: 'dna',
     filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
-        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace && fws.category === 'Phenotype Library'));
+        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace && fws.category === 'PHENOTYPE_LIBRARY'));
     }
   },
   TUTORIAL_WORKSPACES: {
@@ -64,7 +64,7 @@ const libraryTabEnums = {
     icon: 'library',
     filter: (publishedWorkspaces: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
       return publishedWorkspaces.filter(ws => !!featuredWorkspaces.find(fws =>
-        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace && fws.category === 'Tutorial Workspaces'));
+        ws.workspace.id === fws.id && ws.workspace.namespace === fws.namespace && fws.category === 'TUTORIAL_WORKSPACES'));
     }
   }
 };
