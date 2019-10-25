@@ -4,7 +4,7 @@ import org.gradle.api.tasks.JavaExec
 import org.pmiops.workbench.tooling.GenerateAPIListingTask
 import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
-def swaggerTemplateDir = 'src/main/resources'
+def swaggerTemplateDir = 'src/main/resources/Java'
 def mergedApiSourceFile = 'src/main/resources/merged.yaml'
 def clientApiSourceFile = 'src/main/resources/client_api.yaml'
 def cbReviewApiSourceFile = 'src/main/resources/cb_review_api.yaml'
@@ -430,14 +430,18 @@ dependencies {
   // For Swagger generation. These should include dependencies found in the Swagger codegen
   // example here:
   // https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml
-  generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:${SPRING_BOOT_VERSION}"
-  generatedCompile "io.springfox:springfox-swagger2:${SPRINGFOX_VERSION}"
-  generatedCompile "io.springfox:springfox-swagger-ui:${SPRINGFOX_VERSION}"
+  generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:${JACKSON_VERSION}"
+  generatedCompile "com.google.code.gson:gson:${GSON_VERSION}"
   generatedCompile "com.squareup.okhttp:okhttp:${OKHTTP_VERSION}"
   generatedCompile "com.squareup.okhttp:logging-interceptor:${OKHTTP_VERSION}"
-  generatedCompile "com.google.code.gson:gson:${GSON_VERSION}"
+  generatedCompile "io.opencensus:opencensus-api:${OPENCENSUS_VERSION}"
+  generatedCompile "io.opencensus:opencensus-exporter-trace-stackdriver:${OPENCENSUS_VERSION}"
+  generatedCompile "io.opencensus:opencensus-impl:${OPENCENSUS_VERSION}"
+  generatedCompile "io.springfox:springfox-swagger2:${SPRINGFOX_VERSION}"
+  generatedCompile "io.springfox:springfox-swagger-ui:${SPRINGFOX_VERSION}"
   generatedCompile "joda-time:joda-time:${JODA_VERSION}"
-  generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:${JACKSON_VERSION}"
+  generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:${SPRING_BOOT_VERSION}"
+
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${KOTLIN_VERSION}"
 }
 
