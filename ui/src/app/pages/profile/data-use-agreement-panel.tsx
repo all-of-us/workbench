@@ -105,7 +105,7 @@ export function getDataUseAgreementWidget(submitting, name, initialWork,
     </div>
     <div>By entering my initials next to each statement below, I agree to these terms:</div>
     <InitialsAgreement onChange={(v) => this.setState({initialWork: v})} value={initialWork}>
-      My work may be logged and monitored by the <i>All of Us</i> Research Program to ensure
+      My work may be logged, monitored, and audited by the <i>All of Us</i> Research Program to ensure
       compliance with policies and procedures.
     </InitialsAgreement>
     <InitialsAgreement onChange={(v) => this.setState({initialName: v})} value={initialName}>
@@ -115,17 +115,24 @@ export function getDataUseAgreementWidget(submitting, name, initialWork,
     </InitialsAgreement>
     <InitialsAgreement onChange={(v) => this.setState({initialSanctions: v})}
                        value={initialSanctions}>
-      I have read and understand the <i>All of Us</i> Research Program Sanctions for Privacy
-      and Information Security Violations Policy.
+      Access granted by the program in accordance with this agreement is exclusively
+      for participation in All of Us demonstration projects. At the conclusion of my
+      participation in these activities, I understand that my access to the <i>All of Us</i>
+      data resources will be revoked and/or subject to customary access policies and procedures.
     </InitialsAgreement>
-    <div style={{marginTop: '0.5rem', fontWeight: 600}}>
-      I acknowledge that failure to comply with the terms of this agreement may result in
-      termination of my <i>All of Us</i> Research Program account and/or other sanctions per
-      the <a href='#' onClick={(e) => {
-        this.updateSanction(e);
-      }}>
-      <i>All of Us</i> Research Program policy on Sanctions for Violation of Code of
-      Conduct</a>.
+    <div><strong>I acknowledge that failure to comply with the terms of this agreement may result
+      in termination of my All of Us Research Program account and/or other sanctions, including
+      but not limited to:</strong>
+      <IndentedUnorderedList>
+        <IndentedListItem>
+          posting my name and affiliation on a publicly-accessible list of violators, and
+        </IndentedListItem>
+        <IndentedListItem>notifying the National Institutes of Health or other federal agencies of my
+          actions.</IndentedListItem>
+      </IndentedUnorderedList>
+      <div>I understand that failure to comply with these terms may also carry additional financial, legal, or other
+        repercussions.
+      </div>
     </div>
     <div>
       {showSanctionModal &&

@@ -43,9 +43,12 @@ export const DataUseAgreementContent = () => {
     <IndentedUnorderedList>
       <li>read and adhere to the <AoUTitle/> <a target='_blank' href={CORE_VALUES_URL}>core values</a>.
       </li>
-      <li>know and follow all applicable US federal, state, and local
-        (applicable in the area where I am conducting research) laws
-        regarding research involving human data and data privacy.
+      <li>know and follow all laws regarding research involving human data and data privacy that are
+        applicable in the area where I am conducting research.
+        <IndentedUnorderedList>
+          <IndentedListItem>In the US, this includes all applicable federal, state, and local laws.</IndentedListItem>
+          <IndentedListItem>Outside of the US, other laws will apply.</IndentedListItem>
+        </IndentedUnorderedList>
       </li>
       <li>respect the privacy of research participants at all times.
         <IndentedUnorderedList>
@@ -53,35 +56,37 @@ export const DataUseAgreementContent = () => {
             I will <strong>NOT</strong> use or disclose any
             information that directly identifies one or more participants.
             <br/>
-            If I become aware of any information that directly identifies one or more
-            participants, I will notify the <AoUTitle/> immediately
-            using the automatic notification system.
+            <IndentedUnorderedList>
+              If I become aware of any information that directly identifies one or more
+              participants, I will notify the <AoUTitle/> immediately
+              using the automatic notification system.
+            </IndentedUnorderedList>
           </IndentedListItem>
           <IndentedListItem style={{margin: '0.5rem 0'}}>
             I will <strong>NOT</strong> attempt to re-identify research
             participants or their relatives.
             <br/>
             If I unintentionally re-identify participants through the process of my work, I will
-            contact the <AoUTitle/> immediately using the automatic
-            notification system.
+            contact the <AoUTitle/> immediately using the appropriate process.
           </IndentedListItem>
           <IndentedListItem style={{margin: '0.5rem 0'}}>
             If I become aware of any uses or disclosures of <AoUTitle/> data that
-            could endanger the security or privacy of research participants, I will contact the
-            <AoUTitle/> immediately using the appropriate process.
+            could endanger the security or privacy of research participants, I will contact
+            the <AoUTitle/> immediately using the appropriate process.
           </IndentedListItem>
-          <IndentedListItem>provide a meaningful description of my research purpose when establishing my <AoUTitle/>
-          workspace.</IndentedListItem>
+          <IndentedListItem>provide a meaningful description of my research purpose when establishing
+            my <AoUTitle/> workspace.</IndentedListItem>
           <IndentedListItem>Within each workspace, I will use the data for the research purpose I have provided.
           </IndentedListItem>
-          <IndentedListItem>This description will accurately reflect the demonstration project proposal for which I
-            received All of Us approval.</IndentedListItem>
-          <IndentedListItem>If I have a new research purpose, I will create a new workspace and provide a new
-            research purpose description.</IndentedListItem>
-          <IndentedListItem>Within my workspace, I will only use the data for the demonstration project for which I have
-            received All of Us approval.</IndentedListItem>
-          <IndentedListItem>use a version of the All of Us Research Program database that is current at or after the time my
-            analysis begins</IndentedListItem>
+          <IndentedListItem>
+            provide a meaningful description of my research purpose when establishing my <AoUTitle/> workspace.
+            <IndentedUnorderedList>
+              <IndentedListItem>This description will accurately reflect the demonstration project proposal for which I
+                received <i>All of Us</i> approval.</IndentedListItem>
+              <IndentedListItem>Within my workspace, I will only use the data for the demonstration project for which I
+                have received <i>All of Us</i> approval. </IndentedListItem>
+            </IndentedUnorderedList>
+          </IndentedListItem>
           <IndentedListItem>take full responsibility for any external data, files, or software that I import into my
             Workspace and the consequences thereof.</IndentedListItem>
           <IndentedListItem>I will know and follow all applicable laws, regulations, and policies regarding access and use
