@@ -9,8 +9,9 @@ import {
   Clickable,
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {CustomBulletList, CustomBulletListItem} from 'app/components/CustomBulletList';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {Header, SmallHeader} from 'app/components/headers';
+import {Header, SemiBoldHeader, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Modal} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
@@ -18,8 +19,8 @@ import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
-import {profileApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import colors, {addOpacity} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {environment} from 'environments/environment';
 import {
@@ -51,14 +52,14 @@ export const styles = reactStyles({
     color: colors.primary, fontSize: 28, fontWeight: 400, letterSpacing: 'normal'
   },
   pageWrapper: {
-    marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '16px'
+    marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '1.2em'
   },
   quickTourCardsRow: {
     justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem'
   },
   quickTourLabel: {
-    fontSize: 18, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
-    fontWeight: 600, marginTop: '2rem', width: '33%'
+    fontSize: 22, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
+    fontWeight: 600, marginTop: '1rem', width: '33%'
   },
   welcomeMessageIcon: {
     height: '2.25rem', width: '2.75rem'
@@ -113,7 +114,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
     trainingCompleted: boolean,
     twoFactorAuthCompleted: boolean,
     videoOpen: boolean,
-    videoLink: string
+    videoLink: string,
+    userHasWorkspaces: boolean
   }> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
@@ -134,10 +136,12 @@ export const Homepage = withUserProfile()(class extends React.Component<
       twoFactorAuthCompleted: undefined,
       videoOpen: false,
       videoLink: '',
+      userHasWorkspaces: false,
     };
   }
 
   componentDidMount() {
+    this.checkWorkspaces();
     this.validateNihToken();
     this.callProfile();
   }
@@ -240,6 +244,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
     }));
   }
 
+  async checkWorkspaces() {
+    workspacesApi().getWorkspaces().then(response => {
+      this.setState({
+        userHasWorkspaces: response.items.length > 0
+      });
+    });
+  }
+
   openVideo(videoLink: string): void {
     this.setState({videoOpen: true, videoLink: videoLink});
   }
@@ -305,10 +317,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
                             <FlexColumn>
                               <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
                                 <FlexRow style={{alignItems: 'center'}}>
-                                  <SmallHeader style={{marginTop: '0px'}}>Workspaces</SmallHeader>
+                                  <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
                                   <ClrIcon
                                     shape='plus-circle'
-                                    size={21}
+                                    size={30}
                                     className={'is-solid'}
                                     style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
                                     onClick={() => navigate(['workspaces/build'])}
@@ -324,8 +336,38 @@ export const Homepage = withUserProfile()(class extends React.Component<
                               <RecentWorkspaces />
                             </FlexColumn>
                             <FlexColumn>
-                              <SmallHeader>Recently Accessed Items</SmallHeader>
-                              <RecentResources/>
+                              {this.state.userHasWorkspaces ?
+
+                                (<React.Fragment>
+                                  <SmallHeader>Recently Accessed Items</SmallHeader>
+                                  <RecentResources/>
+                                </React.Fragment>) :
+
+                                <div style={{
+                                  backgroundColor: addOpacity(colors.primary, .1).toString(),
+                                  color: colors.primary,
+                                  borderRadius: 10,
+                                  margin: '2em 0em'}}>
+                                  <div style={{margin: '1em 2em'}}>
+                                    <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
+                                    <CustomBulletList>
+                                      <CustomBulletListItem bullet='→'>
+                                        Create a <a href='https://support.google.com/chrome/answer/2364824'>Chrome Profile </a>
+                                        with your All of Us Researcher Workbench Google account. This will keep your Workbench
+                                        browser sessions isolated from your other Google accounts.
+                                      </CustomBulletListItem>
+                                      <CustomBulletListItem bullet='→'>
+                                        Check out <a onClick={() => navigate(['library'])}> Featured Workspaces </a>
+                                        from the left hand panel to browse through example workspaces.
+                                      </CustomBulletListItem>
+                                      <CustomBulletListItem bullet='→'>
+                                        Browse through our <a href='https://aousupporthelp.zendesk.com/hc/en-us'> support materials </a>
+                                        and forum topics.
+                                      </CustomBulletListItem>
+                                    </CustomBulletList>
+                                  </div>
+                                </div>
+                              }
                             </FlexColumn>
                           </React.Fragment>
                         )
@@ -333,7 +375,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                   <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
             </FlexColumn>
           </FadeBox>
-          <div>
+          <div style={{backgroundColor: addOpacity(colors.light, .4).toString()}}>
             <FlexColumn style={{marginLeft: '3%'}}>
               <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
               <FlexRow style={styles.quickTourCardsRow}>
@@ -341,7 +383,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                   return <React.Fragment key={i}>
                     <Clickable onClick={thumbnail.onClick}
                                data-test-id={'quick-tour-resource-' + i}>
-                      <img style={{maxHeight: '7rem', width: '9rem', marginRight: '0.5rem'}}
+                      <img style={{width: '11rem', marginRight: '0.5rem'}}
                            src={thumbnail.src}/>
                     </Clickable>
                   </React.Fragment>;
