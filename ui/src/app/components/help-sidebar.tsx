@@ -236,18 +236,18 @@ export const HelpSidebar = withUserProfile()(
       return <React.Fragment>
         <div style={styles.iconContainer}>
           <div style={activeIcon === 'help' ? iconStyles.active : styles.icon}>
-            <ClrIcon className='is-solid' shape='info-standard' size={28}
+            <ClrIcon className='is-solid' shape='info-standard' size={28} title='Help Tips'
               onClick={() => this.onIconClick('help')} />
           </div>
           <div style={styles.icon}>
             <a href='https://docs.google.com/spreadsheets/d/1dsvJV8B7EXQj5EWa2XG-KAhs-l7FsQnyJSSFMstLF2U/edit#gid=183931508'
               target='_blank' style={{color: colors.white}}>
-              <ClrIcon className='is-solid' shape='book' size={32} />
+              <ClrIcon className='is-solid' shape='book' size={32} title='Data Dictionary' />
             </a>
           </div>
           {location === 'reviewParticipantDetail' &&
             <div style={activeIcon === 'annotations' ? iconStyles.active : styles.icon}>
-              <ClrIcon shape='note' size={32}
+              <ClrIcon shape='note' size={32}  title='Participant Status and Annotations'
                 onClick={() => this.onIconClick('annotations')} />
             </div>
           }
