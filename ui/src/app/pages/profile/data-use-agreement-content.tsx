@@ -9,6 +9,7 @@ import {
 } from './data-use-agreement-styles';
 
 const CORE_VALUES_URL = 'https://allofus.nih.gov/about/about-all-us-research-program';
+const PII_URL = 'https://www.govinfo.gov/content/pkg/CFR-2014-title2-vol1/pdf/CFR-2014-title2-vol1-sec200-79.pdf';
 
 {/* NOTE: Make sure to update dataUseAgreementVersion if there is any change to the DUA text. */}
 export const DataUseAgreementContent = () => {
@@ -21,7 +22,8 @@ export const DataUseAgreementContent = () => {
     </p>
     <p>
       This is an agreement between Vanderbilt University Medical Center and authorized demonstration users of data
-      from the <AoUTitle/>.
+      from
+      the <AoUTitle/>.
     </p>
     <p>
       An <strong>authorized demonstration user</strong> is a person who is authorized to access
@@ -95,8 +97,8 @@ export const DataUseAgreementContent = () => {
             information (PII).</IndentedListItem>
           <IndentedListItem>PII means information that can be used to distinguish or trace the identity of an individual
             (e.g., name, social security number, biometric records, etc.) either alone, or when combined with other
-            personal or identifying information that is linked or linkable to a specific individual (2 CFR §
-            200.79)</IndentedListItem>
+            personal or identifying information that is linked or linkable to a specific
+            individual <a href={PII_URL}>(2 CFR §200.79)</a></IndentedListItem>
           <IndentedListItem>I will use any external data, files, or software that I upload into my Workspace
             exclusively for the research purpose I have provided for that Workspace.</IndentedListItem>
           <IndentedListItem>I will <strong>NOT</strong> use any external data, files, or software that I upload into
@@ -108,7 +110,7 @@ export const DataUseAgreementContent = () => {
         <li>use a version of the <AoUTitle/> database that is current at or after the time my
           analysis begins.</li>
         <IndentedUnorderedList>
-          <IndentedListItem>Archive versions of the database are maintained for the sole purpose of completion of
+          <IndentedListItem>Archived versions of the database are maintained for the sole purpose of completion of
             existing studies or replication of previous studies. New work may not be initiated on
             archive versions of the database.
           </IndentedListItem>
