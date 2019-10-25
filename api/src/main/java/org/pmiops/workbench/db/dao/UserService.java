@@ -22,6 +22,7 @@ import org.pmiops.workbench.db.model.DemographicSurvey;
 import org.pmiops.workbench.db.model.InstitutionalAffiliation;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserDataUseAgreement;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiClient;
@@ -54,6 +55,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final int MAX_RETRIES = 3;
+  private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 1;
 
   private final Provider<User> userProvider;
   private final UserDao userDao;
@@ -294,6 +296,10 @@ public class UserService {
 
   public UserDataUseAgreement submitDataUseAgreement(
       Integer dataUseAgreementSignedVersion, String initials) {
+    // FIXME: this should not be hardcoded
+    if (dataUseAgreementSignedVersion != CURRENT_DATA_USE_AGREEMENT_VERSION) {
+      throw new BadRequestException("Data Use Agreement Version is not up to date");
+    }
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     UserDataUseAgreement dataUseAgreement = new UserDataUseAgreement();
     dataUseAgreement.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
