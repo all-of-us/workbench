@@ -365,6 +365,10 @@ dependencies {
   compile 'org.springframework.security:spring-security-web:4.2.13.RELEASE'
   compile "org.hibernate:hibernate-core:${HIBERNATE_VERSION}"
 
+  // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
+  // Kotlin dep, resulting in massive logspam.
+  compile "org.jetbrains.kotlin:kotlin-reflect:${KOTLIN_VERSION}"
+
   compile "com.fasterxml.jackson.core:jackson-annotations:${JACKSON_VERSION}"
   compile "com.fasterxml.jackson.core:jackson-core:${JACKSON_VERSION}"
   compile "com.fasterxml.jackson.core:jackson-databind:${JACKSON_VERSION}"
