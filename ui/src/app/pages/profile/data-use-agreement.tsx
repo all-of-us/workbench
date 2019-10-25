@@ -352,13 +352,13 @@ export const DataUseAgreement = withUserProfile()(
         initialWork: {
           presence: {allowEmpty: false},
           equality: {
-            attribute: "initialName"
+            attribute: 'initialName'
           }
         },
         initialSanctions: {
           presence: {allowEmpty: false},
           equality: {
-            attribute: "initialName"
+            attribute: 'initialName'
           }
         }
       });
@@ -374,7 +374,7 @@ export const DataUseAgreement = withUserProfile()(
           <div style={{marginTop: '0.5rem', fontWeight: 600}}>I
             <DuaTextInput style={{margin: '0 1ex'}}
                           disabled
-                          value={this.props.profileState.profile.givenName + " " + this.props.profileState.profile.familyName}
+                          value={this.props.profileState.profile.givenName + ' ' + this.props.profileState.profile.familyName}
                           data-test-id='dua-name-input'/>
             ("Authorized User") have
             personally reviewed this data use agreement. I agree to follow each of the policies
