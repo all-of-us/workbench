@@ -1,12 +1,14 @@
-import {BolderHeader, BoldHeader} from 'app/components/headers';
+import {BolderHeader, BoldHeader, styles as headerStyles} from 'app/components/headers';
 import * as React from 'react';
-import {IndentedListItem, IndentedOrderedList, IndentedUnorderedList, SecondHeader} from './data-use-agreement';
+import {
+  AoUTitle,
+  IndentedListItem,
+  IndentedOrderedList,
+  IndentedUnorderedList,
+  SecondHeader
+} from './data-use-agreement-styles';
 
 const CORE_VALUES_URL = 'https://allofus.nih.gov/about/about-all-us-research-program';
-
-const AoUTitle = () => {
-  return <span><i>All of Us</i> Research Program</span>;
-};
 
 {/* NOTE: Make sure to update dataUseAgreementVersion if there is any change to the DUA text. */}
 export const DataUseAgreementContent = () => {

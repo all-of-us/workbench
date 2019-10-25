@@ -1,34 +1,19 @@
 import {Button} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
 import {TextInput} from 'app/components/inputs';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from '../../components/modals';
-import {dataUseAgreementStyles, IndentedListItem, IndentedUnorderedList, SecondHeader} from './data-use-agreement';
+import {
+  dataUseAgreementStyles,
+  IndentedListItem,
+  IndentedUnorderedList,
+  SecondHeader
+} from './data-use-agreement-styles';
 
-const DuaTextInput = (props) => {
-  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
-  return <TextInput {...fp.omit(['data-test-id'], props)}
-                    style={{
-                      padding: '0 1ex',
-                      width: '12rem',
-                      fontSize: 10,
-                      borderRadius: 6,
-                      ...props.style
-                    }}/>;
-};
-
-const InitialsAgreement = (props) => {
-  return <div style={{display: 'flex', marginTop: '0.5rem'}}>
-    <DuaTextInput onChange={props.onChange} value={props.value}
-                  placeholder='INITIALS' data-test-id='dua-initials-input'
-                  style={{width: '4ex', textAlign: 'center', padding: 0}}/>
-    <div style={{marginLeft: '0.5rem'}}>{props.children}</div>
-  </div>;
-};
 
 export const SanctionModal = (props) => {
   return <Modal width={750}>
@@ -78,6 +63,26 @@ export const SanctionModal = (props) => {
   </Modal>;
 };
 
+const DuaTextInput = (props) => {
+  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+  return <TextInput {...fp.omit(['data-test-id'], props)}
+                    style={{
+                      padding: '0 1ex',
+                      width: '12rem',
+                      fontSize: 10,
+                      borderRadius: 6,
+                      ...props.style
+                    }}/>;
+};
+
+const InitialsAgreement = (props) => {
+  return <div style={{display: 'flex', marginTop: '0.5rem'}}>
+    <DuaTextInput onChange={props.onChange} value={props.value}
+                  placeholder='INITIALS' data-test-id='dua-initials-input'
+                  style={{width: '4ex', textAlign: 'center', padding: 0}}/>
+    <div style={{marginLeft: '0.5rem'}}>{props.children}</div>
+  </div>;
+};
 
 export function getDataUseAgreementWidget(submitting, name, initialWork,
   initialName, initialSanctions, showSanctionModal, errors, profile) {
