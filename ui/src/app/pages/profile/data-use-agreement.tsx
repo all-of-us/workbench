@@ -297,7 +297,6 @@ const SanctionModal = (props) => {
   </Modal>;
 };
 
-
 interface Props {
   profileState: {
     profile: Profile,
@@ -347,18 +346,41 @@ export const DataUseAgreement = withUserProfile()(
         submitting} = this.state;
       const errors = validate({initialName, initialWork, initialSanctions}, {
         initialName: {
-          presence: {allowEmpty: false}
+          presence: {
+            allowEmpty: false,
+            message: 'must be initialed'
+          },
+          length: {
+            maximum: 6,
+            message: 'must be 6 or fewer letters long'
+          }
         },
         initialWork: {
-          presence: {allowEmpty: false},
+          presence: {
+            allowEmpty: false,
+            message: 'must be initialed'
+          },
           equality: {
-            attribute: 'initialName'
+            attribute: 'initialName',
+            message: 'must match'
+          },
+          length: {
+            maximum: 6,
+            message: 'must be 6 or fewer letters long'
           }
         },
         initialSanctions: {
-          presence: {allowEmpty: false},
+          presence: {
+            allowEmpty: false,
+            message: 'must be initialed'
+          },
           equality: {
-            attribute: 'initialName'
+            attribute: 'initialName',
+            message: 'must match'
+          },
+          length: {
+            maximum: 6,
+            message: 'must be 6 or fewer letters long'
           }
         }
       });
@@ -412,7 +434,11 @@ export const DataUseAgreement = withUserProfile()(
                         disabled value={this.props.profileState.profile.contactEmail}/>
           <DuaTextInput style={{marginTop: '0.5rem'}}
                         type='text' disabled value={new Date().toLocaleDateString()}/>
-          <TooltipTrigger content={errors && 'All fields must be initialed and all sets of initials must match'}>
+          <TooltipTrigger content={errors && <div>
+            <div>All fields must be initialed</div>
+            <div>All initials must match</div>
+            <div>Initials must be six letters or fewer</div>
+          </div>}>
             <Button
               style={{marginTop: '1rem', cursor: errors && 'not-allowed', padding: '0 1.3rem'}}
               disabled={errors || submitting} data-test-id='submit-dua-button'
