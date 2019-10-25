@@ -49,8 +49,8 @@ export const RecentWorkspaces = withUserProfile()
 
           this.state.recentWorkspaces.length === 0 ?
 
-            <div style={{color: colors.primary, padding: '10px 30px'}}>
-              <h2 style={{fontWeight: 600}}>Create your first Workspace</h2>
+            <div style={{color: colors.primary, padding: '.5em 2em'}}>
+              <h2 style={{fontWeight: 600, lineHeight: 1.5}}>Create your first Workspace</h2>
               <div>As you create your workspaces, this area will store your most recent workspaces.</div>
               <div>To see all workspaces created, click on <b>See all Workspaces</b> to the right.</div>
             </div> :
