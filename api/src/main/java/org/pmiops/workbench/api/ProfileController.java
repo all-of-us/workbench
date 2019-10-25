@@ -24,6 +24,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.AddressEntity;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -124,22 +125,20 @@ public class ProfileController implements ProfileApiDelegate {
             }
           };
 
-  private static final Function<Address, org.pmiops.workbench.db.model.Address>
-      FROM_CLIENT_ADDRESS =
-          new Function<Address, org.pmiops.workbench.db.model.Address>() {
-            @Override
-            public org.pmiops.workbench.db.model.Address apply(Address address) {
-              org.pmiops.workbench.db.model.Address result =
-                  new org.pmiops.workbench.db.model.Address();
-              result.setStreetAddress1(address.getStreetAddress1());
-              result.setStreetAddress2(address.getStreetAddress2());
-              result.setCity(address.getCity());
-              result.setState(address.getState());
-              result.setZipCode(address.getZipCode());
-              result.setCountry(address.getCountry());
-              return result;
-            }
-          };
+  private static final Function<Address, AddressEntity> FROM_CLIENT_ADDRESS =
+      new Function<Address, AddressEntity>() {
+        @Override
+        public AddressEntity apply(Address address) {
+          AddressEntity result = new AddressEntity();
+          result.setStreetAddress1(address.getStreetAddress1());
+          result.setStreetAddress2(address.getStreetAddress2());
+          result.setCity(address.getCity());
+          result.setState(address.getState());
+          result.setZipCode(address.getZipCode());
+          result.setCountry(address.getCountry());
+          return result;
+        }
+      };
 
   private static final Function<DemographicSurvey, org.pmiops.workbench.db.model.DemographicSurvey>
       FROM_CLIENT_DEMOGRAPHIC_SURVEY =

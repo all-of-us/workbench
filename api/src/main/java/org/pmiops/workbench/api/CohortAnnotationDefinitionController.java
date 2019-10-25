@@ -13,7 +13,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortDataModel;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -117,7 +117,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    Cohort cohort = findCohort(cohortId);
+    CohortDataModel cohort = findCohort(cohortId);
     // this validates that the user is in the proper workspace
     validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
     request.setCohortId(cohortId);
@@ -153,7 +153,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    Cohort cohort = findCohort(cohortId);
+    CohortDataModel cohort = findCohort(cohortId);
     // this validates that the user is in the proper workspace
     validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
@@ -171,7 +171,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    Cohort cohort = findCohort(cohortId);
+    CohortDataModel cohort = findCohort(cohortId);
     // this validates that the user is in the proper workspace
     validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
@@ -189,7 +189,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    Cohort cohort = findCohort(cohortId);
+    CohortDataModel cohort = findCohort(cohortId);
     // this validates that the user is in the proper workspace
     validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
@@ -217,7 +217,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
 
     String columnName = cohortAnnotationDefinitionRequest.getColumnName();
     validateColumnName(columnName);
-    Cohort cohort = findCohort(cohortId);
+    CohortDataModel cohort = findCohort(cohortId);
     // this validates that the user is in the proper workspace
     validateMatchingWorkspace(workspaceNamespace, workspaceId, cohort.getWorkspaceId());
 
@@ -268,8 +268,8 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     return cohortAnnotationDefinition;
   }
 
-  private Cohort findCohort(long cohortId) {
-    Cohort cohort = cohortDao.findOne(cohortId);
+  private CohortDataModel findCohort(long cohortId) {
+    CohortDataModel cohort = cohortDao.findOne(cohortId);
     if (cohort == null) {
       throw new NotFoundException(
           String.format("Not Found: No Cohort exists for cohortId: %s", cohortId));

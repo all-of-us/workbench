@@ -148,8 +148,7 @@ public class WorkspaceServiceTest {
 
   private DbWorkspace buildDbWorkspace(
       long dbId, String name, String namespace, WorkspaceActiveStatus activeStatus) {
-    DbWorkspace workspace =
-        new DbWorkspace();
+    DbWorkspace workspace = new DbWorkspace();
     Timestamp nowTimestamp = Timestamp.from(NOW);
     workspace.setLastModifiedTime(nowTimestamp);
     workspace.setCreationTime(nowTimestamp);

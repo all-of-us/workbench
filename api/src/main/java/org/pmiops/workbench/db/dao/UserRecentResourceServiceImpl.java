@@ -3,7 +3,7 @@ package org.pmiops.workbench.db.dao;
 import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
 import java.util.List;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortDataModel;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +75,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public void updateCohortEntry(
       long workspaceId, long userId, long cohortId, Timestamp lastAccessDateTime) {
-    Cohort cohort = cohortDao.findOne(cohortId);
+    CohortDataModel cohort = cohortDao.findOne(cohortId);
     UserRecentResource resource =
         getDao().findByUserIdAndWorkspaceIdAndCohort(userId, workspaceId, cohort);
     if (resource == null) {

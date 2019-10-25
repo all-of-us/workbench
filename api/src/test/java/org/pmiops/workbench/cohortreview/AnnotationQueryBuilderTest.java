@@ -25,14 +25,14 @@ import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortDataModel;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortStatus;
@@ -112,7 +112,7 @@ public class AnnotationQueryBuilderTest {
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
-    Cohort cohort = new Cohort();
+    CohortDataModel cohort = new CohortDataModel();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohort.setName("males");
     cohort.setType("AOU");

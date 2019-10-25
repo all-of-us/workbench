@@ -27,7 +27,7 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortDataModel;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.DataSet;
@@ -211,7 +211,7 @@ public class DataSetServiceImpl implements DataSetService {
       DataSetRequest dataSetRequest) {
     final boolean includesAllParticipants =
         getBuiltinBooleanFromNullable(dataSetRequest.getIncludesAllParticipants());
-    final ImmutableList<Cohort> cohortsSelected =
+    final ImmutableList<CohortDataModel> cohortsSelected =
         ImmutableList.copyOf(this.cohortDao.findAllByCohortIdIn(dataSetRequest.getCohortIds()));
     final ImmutableList<DomainValuePair> domainValuePairs =
         ImmutableList.copyOf(dataSetRequest.getDomainValuePairs());
@@ -261,7 +261,7 @@ public class DataSetServiceImpl implements DataSetService {
   private ImmutableList<ConceptSet> getExpandedConceptSetSelections(
       PrePackagedConceptSetEnum prePackagedConceptSet,
       List<Long> conceptSetIds,
-      List<Cohort> selectedCohorts,
+      List<CohortDataModel> selectedCohorts,
       boolean includesAllParticipants,
       List<DomainValuePair> domainValuePairs) {
     final ImmutableList<org.pmiops.workbench.db.model.ConceptSet> initialSelectedConceptSets =
@@ -294,7 +294,8 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @VisibleForTesting
-  public QueryAndParameters getCohortQueryStringAndCollectNamedParameters(Cohort cohortDbModel) {
+  public QueryAndParameters getCohortQueryStringAndCollectNamedParameters(
+      CohortDataModel cohortDbModel) {
     String cohortDefinition = cohortDbModel.getCriteria();
     if (cohortDefinition == null) {
       throw new NotFoundException(
@@ -325,7 +326,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   // Build a snake_case parameter key from this named parameter key and cohort ID.
-  private String buildReplacementKey(Cohort cohort, String npKey) {
+  private String buildReplacementKey(CohortDataModel cohort, String npKey) {
     return String.format("%s_%d", npKey, cohort.getCohortId());
   }
 

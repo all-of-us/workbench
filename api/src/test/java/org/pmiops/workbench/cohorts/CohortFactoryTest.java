@@ -9,10 +9,10 @@ import java.time.Clock;
 import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortDataModel;
 import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.ReviewStatus;
 
 public class CohortFactoryTest {
@@ -36,7 +36,7 @@ public class CohortFactoryTest {
 
     long workspaceId = 1l;
 
-    Cohort dbCohort = cohortFactory.createCohort(apiCohort, user, workspaceId);
+    CohortDataModel dbCohort = cohortFactory.createCohort(apiCohort, user, workspaceId);
 
     assertThat(dbCohort.getDescription()).isEqualTo(apiCohort.getDescription());
     assertThat(dbCohort.getName()).isEqualTo(apiCohort.getName());
@@ -48,7 +48,7 @@ public class CohortFactoryTest {
 
   @Test
   public void duplicateCohort() {
-    Cohort originalCohort = new Cohort();
+    CohortDataModel originalCohort = new CohortDataModel();
     originalCohort.setDescription("desc");
     originalCohort.setName("name");
     originalCohort.setType("type");
@@ -59,7 +59,7 @@ public class CohortFactoryTest {
     User user = mock(User.class);
     DbWorkspace workspace = mock(DbWorkspace.class);
     doReturn(1l).when(workspace).getWorkspaceId();
-    Cohort dbCohort = cohortFactory.duplicateCohort("new name", user, workspace, originalCohort);
+    CohortDataModel dbCohort = cohortFactory.duplicateCohort("new name", user, workspace, originalCohort);
 
     assertThat(dbCohort.getDescription()).isEqualTo(originalCohort.getDescription());
     assertThat(dbCohort.getName()).isEqualTo("new name");
@@ -82,7 +82,7 @@ public class CohortFactoryTest {
     originalCohortReview.setReviewedCount(5l);
     originalCohortReview.setReviewStatusEnum(ReviewStatus.CREATED);
 
-    Cohort cohort = mock(Cohort.class);
+    CohortDataModel cohort = mock(CohortDataModel.class);
     doReturn(1l).when(cohort).getCohortId();
     doReturn(now).when(cohort).getCreationTime();
     doReturn(now).when(cohort).getLastModifiedTime();

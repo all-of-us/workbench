@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.model.AddressEntity;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.DemographicSurvey;
@@ -64,24 +65,23 @@ public class ProfileService {
             }
           };
 
-  private static final Function<org.pmiops.workbench.db.model.Address, Address>
-      TO_CLIENT_ADDRESS_SURVEY =
-          new Function<org.pmiops.workbench.db.model.Address, Address>() {
-            @Override
-            public Address apply(org.pmiops.workbench.db.model.Address address) {
-              Address result = new Address();
-              if (address != null) {
-                result.setStreetAddress1(address.getStreetAddress1());
-                result.setStreetAddress2(address.getStreetAddress2());
-                result.setCity(address.getCity());
-                result.setState(address.getState());
-                result.setCountry(address.getCountry());
-                result.setZipCode(address.getZipCode());
-                return result;
-              }
-              return result;
-            }
-          };
+  private static final Function<AddressEntity, Address> TO_CLIENT_ADDRESS_SURVEY =
+      new Function<AddressEntity, Address>() {
+        @Override
+        public Address apply(AddressEntity address) {
+          Address result = new Address();
+          if (address != null) {
+            result.setStreetAddress1(address.getStreetAddress1());
+            result.setStreetAddress2(address.getStreetAddress2());
+            result.setCity(address.getCity());
+            result.setState(address.getState());
+            result.setCountry(address.getCountry());
+            result.setZipCode(address.getZipCode());
+            return result;
+          }
+          return result;
+        }
+      };
 
   private final UserDao userDao;
 

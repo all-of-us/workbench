@@ -17,7 +17,7 @@ import javax.persistence.Version;
 
 @Entity
 @Table(name = "cohort")
-public class Cohort {
+public class CohortDataModel {
 
   private long cohortId;
   private int version;
@@ -31,9 +31,9 @@ public class Cohort {
   private Timestamp lastModifiedTime;
   private Set<CohortReview> cohortReviews;
 
-  public Cohort() {}
+  public CohortDataModel() {}
 
-  public Cohort(Cohort c) {
+  public CohortDataModel(CohortDataModel c) {
     setCriteria(c.getCriteria());
     setDescription(c.getDescription());
     setName(c.getName());

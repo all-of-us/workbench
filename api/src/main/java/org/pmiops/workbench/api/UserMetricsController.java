@@ -17,9 +17,10 @@ import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.model.CohortDataModel;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -60,10 +61,10 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         return resource;
       };
 
-  private static final Function<org.pmiops.workbench.db.model.Cohort, Cohort> TO_CLIENT_COHORT =
-      new Function<org.pmiops.workbench.db.model.Cohort, Cohort>() {
+  private static final Function<CohortDataModel, Cohort> TO_CLIENT_COHORT =
+      new Function<CohortDataModel, Cohort>() {
         @Override
-        public Cohort apply(org.pmiops.workbench.db.model.Cohort cohort) {
+        public Cohort apply(CohortDataModel cohort) {
           if (cohort == null) {
             return null;
           }

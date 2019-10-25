@@ -41,12 +41,12 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortDataModel;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
@@ -158,7 +158,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Mock private Provider<User> userProvider;
 
-  private Cohort cohort;
+  private CohortDataModel cohort;
   private CohortReview review;
   private static User currentUser;
 
@@ -206,7 +206,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     stubMockFirecloudGetWorkspaceAcl();
 
     Gson gson = new Gson();
-    cohort = new Cohort();
+    cohort = new CohortDataModel();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohort.setCriteria(gson.toJson(SearchRequests.males()));
     cohortDao.save(cohort);
@@ -366,7 +366,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void createCohortReview() throws Exception {
-    Cohort cohortWithoutReview = new Cohort();
+    CohortDataModel cohortWithoutReview = new CohortDataModel();
     cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
     String criteria =
         "{\"includes\":[{\"id\":\"includes_kl4uky6kh\",\"items\":[{\"id\":\"items_58myrn9iz\",\"type\":\"CONDITION\",\"searchParameters\":[{"

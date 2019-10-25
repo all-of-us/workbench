@@ -21,10 +21,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortDataModel;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -65,7 +65,7 @@ public class UserMetricsControllerTest {
     user = new User();
     user.setUserId(123L);
 
-    Cohort cohort = new Cohort();
+    CohortDataModel cohort = new CohortDataModel();
     cohort.setName("Cohort Name");
     cohort.setCohortId(1L);
     cohort.setDescription("Cohort description");

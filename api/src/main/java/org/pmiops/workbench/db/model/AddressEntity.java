@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "address")
-public class Address {
+public class AddressEntity {
   private long id;
   private String streetAddress1;
   private String streetAddress2;
@@ -21,7 +21,7 @@ public class Address {
   private String country;
   private User user;
 
-  public Address() {}
+  public AddressEntity() {}
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

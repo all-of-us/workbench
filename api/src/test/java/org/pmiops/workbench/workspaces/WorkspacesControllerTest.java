@@ -620,8 +620,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
-    verify(mockWorkspaceAuditAdapterService)
-        .fireDeleteAction(any(DbWorkspace.class));
+    verify(mockWorkspaceAuditAdapterService).fireDeleteAction(any(DbWorkspace.class));
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");
@@ -2565,8 +2564,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubFcGetWorkspaceACL();
-    DbWorkspace dbWorkspace =
-        workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
     workspaceService.updateRecentWorkspaces(dbWorkspace, currentUser.getUserId(), NOW);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();

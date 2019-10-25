@@ -12,14 +12,14 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortDataModel;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
@@ -60,8 +60,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   public CohortReviewServiceImpl() {}
 
   @Override
-  public Cohort findCohort(long cohortId) {
-    Cohort cohort = cohortDao.findOne(cohortId);
+  public CohortDataModel findCohort(long cohortId) {
+    CohortDataModel cohort = cohortDao.findOne(cohortId);
     if (cohort == null) {
       throw new NotFoundException(
           String.format("Not Found: No Cohort exists for cohortId: %s", cohortId));

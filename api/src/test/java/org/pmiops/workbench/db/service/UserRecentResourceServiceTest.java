@@ -15,11 +15,11 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.CohortDataModel;
 import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -59,7 +59,7 @@ public class UserRecentResourceServiceTest {
     userDao.save(newUser);
     newWorkspace.setWorkspaceId(workspaceId);
     workspaceDao.save(newWorkspace);
-    Cohort cohort = new Cohort();
+    CohortDataModel cohort = new CohortDataModel();
     cohort.setWorkspaceId(workspaceId);
     cohortId = cohortDao.save(cohort).getCohortId();
     ConceptSet conceptSet = new ConceptSet();
@@ -78,7 +78,7 @@ public class UserRecentResourceServiceTest {
         workspaceId, userId, cohortId, new Timestamp(clock.millis()));
     long rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 1);
-    Cohort cohort = new Cohort();
+    CohortDataModel cohort = new CohortDataModel();
     cohort.setWorkspaceId(workspaceId);
     cohortId = cohortDao.save(cohort).getCohortId();
     userRecentResourceService.updateCohortEntry(
