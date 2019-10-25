@@ -122,7 +122,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
           // get PPI question from store
           const question = ppiQuestions.getValue()[this.node.parentId];
           if (question) {
-            modifiedName = question + ' - ' + modifiedName;
+            modifiedName = question.name + ' - ' + modifiedName;
           }
         }
         let attributes = [];
