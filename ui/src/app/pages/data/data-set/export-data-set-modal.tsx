@@ -119,20 +119,25 @@ class ExportDataSetModal extends React.Component<
       cohortIds: dataSet.cohorts.map(c => c.id),
       domainValuePairs: dataSet.domainValuePairs
     };
-    await dataSetApi().exportToNotebook(
-      workspaceNamespace, workspaceFirecloudName,
-      {
-        dataSetRequest: request,
-        notebookName: this.state.notebookName,
-        newNotebook: this.state.newNotebook,
-        kernelType: this.state.kernelType
-      });
-    // Open notebook in a new tab and close the modal
-    const notebookUrl = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}` +
-      `/notebooks/preview/${appendNotebookFileSuffix(
-        encodeURIComponentStrict(this.state.notebookName))}`;
-    navigateByUrl(notebookUrl);
-    this.props.closeFunction();
+    try {
+      await dataSetApi().exportToNotebook(
+        workspaceNamespace, workspaceFirecloudName,
+        {
+          dataSetRequest: request,
+          notebookName: this.state.notebookName,
+          newNotebook: this.state.newNotebook,
+          kernelType: this.state.kernelType
+        });
+      // Open notebook in a new tab and close the modal
+      const notebookUrl = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}` +
+        `/notebooks/preview/${appendNotebookFileSuffix(
+          encodeURIComponentStrict(this.state.notebookName))}`;
+      navigateByUrl(notebookUrl);
+      this.props.closeFunction();
+    } catch (error) {
+      console.error(error);
+      this.setState({loading: false});
+    }
   }
 
   render() {
