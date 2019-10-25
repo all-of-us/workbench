@@ -239,8 +239,11 @@ export const HelpSidebar = withUserProfile()(
             <ClrIcon className='is-solid' shape='info-standard' size={28}
               onClick={() => this.onIconClick('help')} />
           </div>
-          <div style={iconStyles.disabled}>
-            <ClrIcon className='is-solid' shape='book' size={32} />
+          <div style={styles.icon}>
+            <a href='https://docs.google.com/spreadsheets/d/1dsvJV8B7EXQj5EWa2XG-KAhs-l7FsQnyJSSFMstLF2U/edit#gid=183931508'
+              target='_blank' style={{color: colors.white}}>
+              <ClrIcon className='is-solid' shape='book' size={32} />
+            </a>
           </div>
           {location === 'reviewParticipantDetail' &&
             <div style={activeIcon === 'annotations' ? iconStyles.active : styles.icon}>
