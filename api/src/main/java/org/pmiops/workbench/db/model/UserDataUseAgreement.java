@@ -68,6 +68,8 @@ public class UserDataUseAgreement {
     this.userInitials = userInitials;
   }
 
+  // This is set to 'true' whenever user_given_name or user_family_name are not the same as the
+  // given_name or family_name on the User entry referenced by user_id.
   @Column(name = "user_name_out_of_date")
   public boolean isUserNameOutOfDate() {
     return userNameOutOfDate;

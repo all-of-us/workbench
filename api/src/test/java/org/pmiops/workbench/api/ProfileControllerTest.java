@@ -434,8 +434,8 @@ public class ProfileControllerTest {
     profile.setGivenName("OldGivenName");
     profile.setFamilyName("OldFamilyName");
     profileController.updateProfile(profile);
-    profileController.submitDataUseAgreement(1, "OO");
-    profile.setGivenName("NewFamilyName");
+    profileController.submitDataUseAgreement(1, "O.O.");
+    profile.setGivenName("NewGivenName");
     profile.setFamilyName("NewFamilyName");
     profileController.updateProfile(profile);
     List<UserDataUseAgreement> duas =

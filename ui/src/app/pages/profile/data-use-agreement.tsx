@@ -346,42 +346,18 @@ export const DataUseAgreement = withUserProfile()(
         submitting} = this.state;
       const errors = validate({initialName, initialWork, initialSanctions}, {
         initialName: {
-          presence: {
-            allowEmpty: false,
-            message: 'must be initialed'
-          },
-          length: {
-            maximum: 6,
-            message: 'must be 6 or fewer letters long'
-          }
+          presence: {allowEmpty: false},
+          length: {maximum: 6}
         },
         initialWork: {
-          presence: {
-            allowEmpty: false,
-            message: 'must be initialed'
-          },
-          equality: {
-            attribute: 'initialName',
-            message: 'must match'
-          },
-          length: {
-            maximum: 6,
-            message: 'must be 6 or fewer letters long'
-          }
+          presence: {allowEmpty: false},
+          equality: {attribute: 'initialName'},
+          length: {maximum: 6}
         },
         initialSanctions: {
-          presence: {
-            allowEmpty: false,
-            message: 'must be initialed'
-          },
-          equality: {
-            attribute: 'initialName',
-            message: 'must match'
-          },
-          length: {
-            maximum: 6,
-            message: 'must be 6 or fewer letters long'
-          }
+          presence: {allowEmpty: false},
+          equality: {attribute: 'initialName'},
+          length: {maximum: 6}
         }
       });
       return <div style={styles.dataUseAgreementPage}>

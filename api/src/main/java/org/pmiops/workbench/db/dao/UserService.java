@@ -311,14 +311,10 @@ public class UserService {
         userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(
             userProvider.get().getUserId());
     dataUseAgreements.forEach(
-        dua -> {
-          if (!dua.getUserGivenName().equalsIgnoreCase(newGivenName)
-              || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)) {
-            dua.setUserNameOutOfDate(true);
-          } else {
-            dua.setUserNameOutOfDate(false);
-          }
-        });
+        dua ->
+            dua.setUserNameOutOfDate(
+                !dua.getUserGivenName().equalsIgnoreCase(newGivenName)
+                    || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
     userDataUseAgreementDao.save(dataUseAgreements);
   }
 
