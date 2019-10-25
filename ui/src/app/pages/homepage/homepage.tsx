@@ -413,24 +413,25 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                   backgroundColor: addOpacity(colors.primary, .1).toString(),
                                   color: colors.primary,
                                   borderRadius: 10,
-                                  padding: '1em 2em',
                                   margin: '2em 0em'}}>
-                                <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
-                                <CustomBulletList>
-                                  <CustomBulletListItem bullet='→'>
-                                    Create a <a href='https://support.google.com/chrome/answer/2364824'>Chrome Profile </a>
-                                    with your All of Us Researcher workbench Google account. This will keep your Workbench
-                                    browser sessions isolated from your other Google accounts.
-                                  </CustomBulletListItem>
-                                  <CustomBulletListItem bullet='→'>
-                                    Check out <a onClick={() => navigate(['library'])}> Featured Workspaces </a>
-                                    from the left hand panel to browse through example workspaces.
-                                  </CustomBulletListItem>
-                                  <CustomBulletListItem bullet='→'>
-                                    Browse through our <a href='https://aousupporthelp.zendesk.com/hc/en-us'> support materials </a>
-                                    and forum topics.
-                                  </CustomBulletListItem>
-                                </CustomBulletList>
+                                  <div style={{margin: '1em 2em'}}>
+                                    <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
+                                    <CustomBulletList>
+                                      <CustomBulletListItem bullet='→'>
+                                        Create a <a href='https://support.google.com/chrome/answer/2364824'>Chrome Profile </a>
+                                        with your All of Us Researcher Workbench Google account. This will keep your Workbench
+                                        browser sessions isolated from your other Google accounts.
+                                      </CustomBulletListItem>
+                                      <CustomBulletListItem bullet='→'>
+                                        Check out <a onClick={() => navigate(['library'])}> Featured Workspaces </a>
+                                        from the left hand panel to browse through example workspaces.
+                                      </CustomBulletListItem>
+                                      <CustomBulletListItem bullet='→'>
+                                        Browse through our <a href='https://aousupporthelp.zendesk.com/hc/en-us'> support materials </a>
+                                        and forum topics.
+                                      </CustomBulletListItem>
+                                    </CustomBulletList>
+                                  </div>
                                 </div>
                               }
                             </FlexColumn>
