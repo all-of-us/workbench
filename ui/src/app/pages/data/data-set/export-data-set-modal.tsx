@@ -135,6 +135,9 @@ class ExportDataSetModal extends React.Component<
       navigateByUrl(notebookUrl);
       this.props.closeFunction();
     } catch (error) {
+      // https://precisionmedicineinitiative.atlassian.net/browse/RW-3782
+      // The exportToNotebook call can fail with a 400.  Catch that error to ensure the user can exit the modal.
+      // TODO: better failure UX
       console.error(error);
       this.setState({loading: false});
     }
