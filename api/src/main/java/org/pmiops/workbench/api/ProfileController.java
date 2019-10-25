@@ -25,7 +25,6 @@ import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.UserDataUseAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
@@ -489,7 +488,8 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Profile> submitDataUseAgreement(Integer dataUseAgreementSignedVersion, String initials) {
+  public ResponseEntity<Profile> submitDataUseAgreement(
+      Integer dataUseAgreementSignedVersion, String initials) {
     userService.submitDataUseAgreement(dataUseAgreementSignedVersion, initials);
     return getProfileResponse(saveUserWithConflictHandling(userProvider.get()));
   }
@@ -627,9 +627,10 @@ public class ProfileController implements ProfileApiDelegate {
     validateProfileFields(updatedProfile);
     User user = userProvider.get();
 
-    if(!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
+    if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
         || !userProvider.get().getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
-      userService.setDataUseAgreementNameOutOfDate(updatedProfile.getGivenName(), updatedProfile.getFamilyName());
+      userService.setDataUseAgreementNameOutOfDate(
+          updatedProfile.getGivenName(), updatedProfile.getFamilyName());
     }
 
     user.setGivenName(updatedProfile.getGivenName());

@@ -104,19 +104,26 @@ public class UserDataUseAgreement {
       return false;
     }
     UserDataUseAgreement that = (UserDataUseAgreement) o;
-    return userDataUseAgreementId == that.userDataUseAgreementId &&
-        userId == that.userId &&
-        userNameOutOfDate == that.userNameOutOfDate &&
-        dataUseAgreementSignedVersion == that.dataUseAgreementSignedVersion &&
-        userGivenName.equals(that.userGivenName) &&
-        userFamilyName.equals(that.userFamilyName) &&
-        userInitials.equals(that.userInitials) &&
-        completionTime.equals(that.completionTime);
+    return userDataUseAgreementId == that.userDataUseAgreementId
+        && userId == that.userId
+        && userNameOutOfDate == that.userNameOutOfDate
+        && dataUseAgreementSignedVersion == that.dataUseAgreementSignedVersion
+        && userGivenName.equals(that.userGivenName)
+        && userFamilyName.equals(that.userFamilyName)
+        && userInitials.equals(that.userInitials)
+        && completionTime.equals(that.completionTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(userDataUseAgreementId, userId, userGivenName, userFamilyName, userInitials,
-        userNameOutOfDate, dataUseAgreementSignedVersion, completionTime);
+    return Objects.hash(
+        userDataUseAgreementId,
+        userId,
+        userGivenName,
+        userFamilyName,
+        userInitials,
+        userNameOutOfDate,
+        dataUseAgreementSignedVersion,
+        completionTime);
   }
 }

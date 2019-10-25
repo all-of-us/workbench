@@ -438,7 +438,8 @@ public class ProfileControllerTest {
     profile.setGivenName("NewFamilyName");
     profile.setFamilyName("NewFamilyName");
     profileController.updateProfile(profile);
-    List<UserDataUseAgreement> duas = userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(profile.getUserId());
+    List<UserDataUseAgreement> duas =
+        userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(profile.getUserId());
     assertThat(duas.get(0).isUserNameOutOfDate()).isTrue();
   }
 

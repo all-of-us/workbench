@@ -33,7 +33,7 @@ describe('DataUseAgreement', () => {
 
     expect(wrapper.find('[data-test-id="submit-dua-button"]').prop('disabled')).toBeFalsy();
     wrapper.find('[data-test-id="submit-dua-button"]').simulate('click');
-    expect(spy).toHaveBeenCalledWith(1); // dataUseAgreementVersion
+    expect(spy).toHaveBeenCalledWith(1, 'XX'); // dataUseAgreementVersion
   });
 
 });

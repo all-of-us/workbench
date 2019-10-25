@@ -292,7 +292,8 @@ public class UserService {
     return user;
   }
 
-  public UserDataUseAgreement submitDataUseAgreement(Integer dataUseAgreementSignedVersion, String initials) {
+  public UserDataUseAgreement submitDataUseAgreement(
+      Integer dataUseAgreementSignedVersion, String initials) {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     UserDataUseAgreement dataUseAgreement = new UserDataUseAgreement();
     dataUseAgreement.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
@@ -306,15 +307,18 @@ public class UserService {
 
   @Transactional
   public void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName) {
-    List<UserDataUseAgreement> dataUseAgreements = userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(userProvider.get().getUserId());
-    dataUseAgreements.forEach(dua -> {
-      if (!dua.getUserGivenName().equalsIgnoreCase(newGivenName) || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)) {
-        dua.setUserNameOutOfDate(true);
-      }
-      else {
-        dua.setUserNameOutOfDate(false);
-      }
-    });
+    List<UserDataUseAgreement> dataUseAgreements =
+        userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(
+            userProvider.get().getUserId());
+    dataUseAgreements.forEach(
+        dua -> {
+          if (!dua.getUserGivenName().equalsIgnoreCase(newGivenName)
+              || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)) {
+            dua.setUserNameOutOfDate(true);
+          } else {
+            dua.setUserNameOutOfDate(false);
+          }
+        });
     userDataUseAgreementDao.save(dataUseAgreements);
   }
 
