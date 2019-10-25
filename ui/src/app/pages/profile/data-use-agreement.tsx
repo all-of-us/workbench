@@ -6,6 +6,7 @@ import * as React from 'react';
 import {validate} from 'validate.js';
 import {DataUseAgreementContent} from './data-use-agreement-content';
 import {getDataUseAgreementWidget} from './data-use-agreement-panel';
+import {dataUseAgreementStyles} from './data-use-agreement-styles';
 
 
 const dataUseAgreementVersion = 2;
