@@ -198,6 +198,9 @@ def dev_up()
     ./gradlew loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
   }
 
+  common.status "Loading Data Dictionary..."
+  common.run_inline %W{docker-compose run api-scripts ./gradlew loadDataDictionary -PappArgs=false}
+
   run_api()
 end
 
@@ -1664,6 +1667,8 @@ def deploy(cmd_name, args)
     load_config(ctx.project, op.opts.dry_run)
     versions_file = must_get_env_value(gcc.project, :cdr_versions_json)
     update_cdr_versions_for_project("config/#{versions_file}", op.opts.dry_run)
+
+    common.run_inline %W{gradle loadDataDictionary -PappArgs=#{op.opts.dry_run ? true : false}}
 
     common.status "Pushing GCS artifacts..."
     dry_flag = op.opts.dry_run ? %W{--dry-run} : []
