@@ -74,5 +74,3 @@ export const RecentWorkspaces = withUserProfile()
     </React.Fragment>;
   }
 });
-
-//       {this.state.loading && <SpinnerOverlay dark={true} />}
