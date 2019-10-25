@@ -29,7 +29,7 @@ export class GenderChart extends React.Component<Props, State> {
     const {cdrVersionId} = currentWorkspaceStore.getValue();
     this.state = {
       options: null,
-      categories: parseInt(cdrVersionId, 10) < 2 // TODO change 2 to 3 before merging
+      categories: +cdrVersionId < 3
         ? ['Female', 'Male', 'Unknown']
         : ['Female', 'Male', 'Not man only, not woman only, prefer not to answer, or skipped', 'Unknown']
     };
@@ -98,13 +98,11 @@ export class GenderChart extends React.Component<Props, State> {
       {y: 0, name: 'Female', color: '#a8385d'},
       {y: 0, name: 'Unknown', color: '#a27ea8'},
     ];
-    // TODO change 2 to 3 in the below condition that checks cdrVersionId before merging
-    if (+cdrVersionId >= 2) {
+    if (+cdrVersionId >= 3) {
       defaults.push({y: 0, name: 'Not man only, not woman only, prefer not to answer, or skipped', color: '#aae3f5'});
     }
     return data.reduce((acc, datum) => {
-      // TODO change 2 to 3 in the below condition that checks cdrVersionId before merging
-      const gender = +cdrVersionId < 2 ? genderCodes[datum.gender] : datum.gender;
+      const gender = +cdrVersionId < 3 ? genderCodes[datum.gender] : datum.gender;
       const index = acc.findIndex(d => d.name === gender);
       if (index > -1) {
         acc[index].y += datum.count;

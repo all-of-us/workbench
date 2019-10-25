@@ -147,15 +147,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       case CriteriaType[CriteriaType.DECEASED]:
         this.deceasedNode = nodes[0];
         break;
-      case CriteriaType[CriteriaType.GENDER]:
-        this.nodes = nodes.map(n => {
-          if (n.name === 'No matching concept') {
-            n.name = 'Unknown';
-          }
-          return n;
-        });
-        this.loading = false;
-        break;
       default:
         this.nodes = nodes;
         this.loading = false;

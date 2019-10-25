@@ -87,8 +87,7 @@ export class ComboChart extends React.Component<Props, State> {
       'No matching concept': 'Unknown'
     };
     return data.reduce((acc, datum) => {
-      // TODO change 2 to 3 in the below condition that checks cdrVersionId before merging
-      const gender = parseInt(cdrVersionId, 10) < 2 ? codeMap[datum.gender] : datum.gender;
+      const gender = +cdrVersionId < 3 ? codeMap[datum.gender] : datum.gender;
       const key = `${gender} ${datum.ageRange || 'Unknown'}`;
       if (!acc.includes(key)) {
         acc.push(key);
