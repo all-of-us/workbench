@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {AlertDanger} from 'app/components/alert';
@@ -15,7 +14,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {environment} from 'environments/environment';
-import {ErrorResponse, Profile} from 'generated/fetch';
+import {ErrorResponse, FeaturedWorkspace, FeaturedWorkspaceCategory, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
   navPanel: {
@@ -40,17 +39,44 @@ const styles = reactStyles({
   },
   menuLinkSelected: {
     backgroundColor: colorWithWhiteness(colors.primary, 0.95)
+  },
+  libraryTabDivider: {
+    width: '100%',
+    margin: '0.5rem 0',
+    backgroundColor: colorWithWhiteness(colors.dark, .5),
+    border: '0 none',
+    height: 1
   }
 });
 
-const libraryTabEnums = {
-  FEATURED_WORKSPACES: {
-    title: 'Featured Workspaces',
-    icon: 'star'
-  },
+const libraryTabs = {
   PUBLISHED_WORKSPACES: {
     title: 'Published Workspaces',
-    icon: 'library'
+    icon: 'bookmark',
+    filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
+      return workspaceList.filter(workspace => !featuredWorkspaces.find(featuredWorkspace =>
+        workspace.workspace.id === featuredWorkspace.id && workspace.workspace.namespace === featuredWorkspace.namespace));
+    }
+  },
+  PHENOTYPE_LIBRARY: {
+    title: 'Phenotype Library',
+    icon: 'dna',
+    filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
+      return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
+        workspace.workspace.id === featuredWorkspace.id &&
+        workspace.workspace.namespace === featuredWorkspace.namespace &&
+        featuredWorkspace.category === FeaturedWorkspaceCategory.PHENOTYPELIBRARY));
+    }
+  },
+  TUTORIAL_WORKSPACES: {
+    title: 'Tutorial Workspaces',
+    icon: 'library',
+    filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => {
+      return workspaceList.filter(workspace => !!featuredWorkspaces.find(featuredWorkspace =>
+        workspace.workspace.id === featuredWorkspace.id &&
+        workspace.workspace.namespace === featuredWorkspace.namespace &&
+        featuredWorkspace.category === FeaturedWorkspaceCategory.TUTORIALWORKSPACES));
+    }
   }
 };
 
@@ -73,6 +99,7 @@ interface ReloadableProfile {
 interface CurrentTab {
   title: string;
   icon: string;
+  filter: (workspaceList: WorkspacePermissions[], featuredWorkspaces: FeaturedWorkspace[]) => WorkspacePermissions[];
 }
 
 class Props {
@@ -84,9 +111,8 @@ class State {
   currentTab: CurrentTab;
   errorText: string;
   workspaceList: WorkspacePermissions[];
-  publishedWorkspaces: WorkspacePermissions[];
-  featuredWorkspaces: WorkspacePermissions[];
-  workspacesLoading: boolean;
+  featuredWorkspaces: FeaturedWorkspace[];
+  pendingWorkspaceRequests: number;
 }
 
 export const WorkspaceLibrary = withUserProfile()
@@ -94,12 +120,11 @@ export const WorkspaceLibrary = withUserProfile()
   constructor(props) {
     super(props);
     this.state = {
-      currentTab: libraryTabEnums.FEATURED_WORKSPACES,
+      currentTab: libraryTabs.PHENOTYPE_LIBRARY,
       errorText: '',
       featuredWorkspaces: [],
-      publishedWorkspaces: [],
       workspaceList: [],
-      workspacesLoading: true
+      pendingWorkspaceRequests: 0
     };
   }
 
@@ -110,15 +135,21 @@ export const WorkspaceLibrary = withUserProfile()
   // environment variable.
   libraryTabs = (this.props.enablePublishedWorkspaces || environment.enablePublishedWorkspaces)
     ? [
-      libraryTabEnums.FEATURED_WORKSPACES,
-      libraryTabEnums.PUBLISHED_WORKSPACES
+      libraryTabs.PUBLISHED_WORKSPACES,
+      libraryTabs.PHENOTYPE_LIBRARY,
+      libraryTabs.TUTORIAL_WORKSPACES
     ]
     : [
-      libraryTabEnums.FEATURED_WORKSPACES
+      libraryTabs.PHENOTYPE_LIBRARY,
+      libraryTabs.TUTORIAL_WORKSPACES
     ];
 
   async componentDidMount() {
     this.updateWorkspaces();
+  }
+
+  areWorkspacesLoading() {
+    return this.state.pendingWorkspaceRequests > 0;
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -131,20 +162,23 @@ export const WorkspaceLibrary = withUserProfile()
   async updateWorkspaces() {
     await this.getAllPublishedWorkspaces();
     await this.getFeaturedWorkspaces();
-    this.filterPublishedWorkspaces();
   }
 
   // Gets all published workspaces, including those configured as 'featured'
   async getAllPublishedWorkspaces() {
+    this.setState((previousState) => ({
+      pendingWorkspaceRequests: previousState.pendingWorkspaceRequests + 1
+    }));
+
     try {
       const workspacesReceived = await workspacesApi().getPublishedWorkspaces();
       workspacesReceived.items.sort(
         (a, b) => a.workspace.name.localeCompare(b.workspace.name));
-      this.setState({
-        workspaceList: workspacesReceived.items
-          .map(w => new WorkspacePermissions(w)),
-        workspacesLoading: false
-      });
+
+      this.setState((previousState) => ({
+        workspaceList: workspacesReceived.items.map(w => new WorkspacePermissions(w)),
+        pendingWorkspaceRequests: previousState.pendingWorkspaceRequests - 1
+      }));
     } catch (e) {
       const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
       this.setState({errorText: response.message});
@@ -154,40 +188,28 @@ export const WorkspaceLibrary = withUserProfile()
   // Gets the 'featured workspaces' config and filters the list of published workspaces to
   // find the 'featured' ones
   async getFeaturedWorkspaces() {
+    this.setState((previousState) => ({
+      pendingWorkspaceRequests: previousState.pendingWorkspaceRequests + 1
+    }));
+
     try {
       const resp = await featuredWorkspacesConfigApi().getFeaturedWorkspacesConfig();
-      const idToNamespace = new Map();
-      resp.featuredWorkspacesList.map(fw => idToNamespace.set(fw.id, fw.namespace));
 
-      this.setState({
-        featuredWorkspaces: this.state.workspaceList.filter(ws => idToNamespace.get(ws.workspace.id)
-          && idToNamespace.get(ws.workspace.id) === ws.workspace.namespace),
-        workspacesLoading: false
-      });
+      this.setState((previousState) => ({
+        featuredWorkspaces: resp.featuredWorkspacesList,
+        pendingWorkspaceRequests: previousState.pendingWorkspaceRequests - 1
+      }));
     } catch (e) {
       const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
       this.setState({errorText: response.message});
     }
   }
 
-  // Filter the list of published workspaces to find the ones that are not configured as 'featured'
-  filterPublishedWorkspaces() {
-    const publishedWorkspaces = this.state.workspaceList.filter(ws =>
-      !fp.contains(ws, this.state.featuredWorkspaces)
-    );
-    this.setState({
-      publishedWorkspaces: publishedWorkspaces
-    });
-  }
-
   render() {
     const {profile: {username}} = this.props.profileState;
     const {
       currentTab,
-      errorText,
-      featuredWorkspaces,
-      publishedWorkspaces,
-      workspacesLoading
+      errorText
     } = this.state;
     return <FlexRow style={{height: '100%'}}>
       <div style={styles.navPanel}>
@@ -198,7 +220,7 @@ export const WorkspaceLibrary = withUserProfile()
                           onClick={() => this.setState({currentTab: tab})}
                           data-test-id={tab.title}/>
                 {i !== this.libraryTabs.length - 1 &&
-                <hr style={{width: '100%', margin: '0.5rem 0'}}/>}
+                <hr style={styles.libraryTabDivider}/>}
             </React.Fragment>;
           })}
         </FlexColumn>
@@ -216,12 +238,11 @@ export const WorkspaceLibrary = withUserProfile()
           <hr style={styles.divider}/>
           {errorText && <AlertDanger>{errorText}</AlertDanger>}
 
-          {currentTab === libraryTabEnums.PUBLISHED_WORKSPACES &&
           <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
-            {workspacesLoading ?
+            {this.areWorkspacesLoading() ?
               (<Spinner style={{width: '100%', marginTop: '0.5rem'}}/>) :
               (<div style={{display: 'flex', marginTop: '0.5rem', flexWrap: 'wrap'}}>
-                {publishedWorkspaces.map(wp => {
+                {currentTab.filter(this.state.workspaceList, this.state.featuredWorkspaces).map(wp => {
                   return <WorkspaceCard key={wp.workspace.name}
                                         workspace={wp.workspace}
                                         accessLevel={wp.accessLevel}
@@ -229,24 +250,8 @@ export const WorkspaceLibrary = withUserProfile()
                                         reload={() => this.updateWorkspaces()}/>;
                 })}
               </div>)}
-          </div>}
-          {currentTab === libraryTabEnums.FEATURED_WORKSPACES &&
-          <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
-            {workspacesLoading ?
-              (<Spinner style={{width: '100%', marginTop: '0.5rem'}}/>) :
-              (<div style={{display: 'flex', marginTop: '0.5rem', flexWrap: 'wrap'}}>
-                {featuredWorkspaces
-                  .map(wp => {
-                    return <WorkspaceCard
-                      key={wp.workspace.name}
-                      workspace={wp.workspace}
-                      accessLevel={wp.accessLevel}
-                      userEmail={username}
-                      reload={() => this.updateWorkspaces()}
-                    />;
-                  })}
-              </div>)}
-          </div>}
+          </div>
+
         </FlexColumn>
       </div>
     </FlexRow>;
