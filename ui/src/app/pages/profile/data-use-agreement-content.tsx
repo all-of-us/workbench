@@ -27,8 +27,8 @@ export const DataUseAgreementContent = () => {
       An <strong>authorized demonstration user</strong> is a person who is authorized to access
       and/or work with registered or
       controlled tier data from the <AoUTitle/> for the exclusive purpose of a program-approved
-      demonstration project. Authorized demonstration users are limited to trainees, faculty or staff at <AoUTitle/>
-      consortium partner institutions.
+      demonstration project. Authorized demonstration users are limited to trainees, faculty or staff
+      at <AoUTitle/> consortium partner institutions.
     </p>
     <p>
       <strong>Before</strong> they access and/or work with <AoUTitle/> data, authorized demonstration users must:
@@ -58,7 +58,7 @@ export const DataUseAgreementContent = () => {
             using the automatic notification system.
           </IndentedListItem>
           <IndentedListItem style={{margin: '0.5rem 0'}}>
-            I <strong>will <strong>NOT</strong> attempt</strong> to re-identify research
+            I will <strong>NOT</strong> attempt to re-identify research
             participants or their relatives.
             <br/>
             If I unintentionally re-identify participants through the process of my work, I will
