@@ -50,7 +50,7 @@ public interface BillingProjectBufferEntryDao
   @Query(
       "SELECT p.fireCloudProjectName "
           + "FROM BillingProjectBufferEntry p "
-          + "JOIN Workspace w "
+          + "JOIN DbWorkspace w "
           + "ON w.workspaceNamespace = p.fireCloudProjectName "
           + "AND p.status = :billingStatus "
           + "AND w.activeStatus = :workspaceStatus "
