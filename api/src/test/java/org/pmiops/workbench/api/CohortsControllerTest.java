@@ -50,6 +50,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -294,8 +295,7 @@ public class CohortsControllerTest {
 
   private void stubGetWorkspace(String ns, String name, String creator, WorkspaceAccessLevel access)
       throws Exception {
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        new org.pmiops.workbench.firecloud.model.Workspace();
+    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(creator);

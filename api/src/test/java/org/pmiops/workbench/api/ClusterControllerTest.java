@@ -37,6 +37,7 @@ import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterConfig;
@@ -179,9 +180,8 @@ public class ClusterControllerTest {
             .createdDate(createdDate);
   }
 
-  private org.pmiops.workbench.firecloud.model.Workspace createFcWorkspace(
-      String ns, String name, String creator) {
-    return new org.pmiops.workbench.firecloud.model.Workspace()
+  private FirecloudWorkspace createFcWorkspace(String ns, String name, String creator) {
+    return new FirecloudWorkspace()
         .namespace(ns)
         .name(name)
         .createdBy(creator)
@@ -197,8 +197,7 @@ public class ClusterControllerTest {
     stubGetFcWorkspace(createFcWorkspace(ns, name, creator));
   }
 
-  private void stubGetFcWorkspace(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace)
-      throws Exception {
+  private void stubGetFcWorkspace(FirecloudWorkspace fcWorkspace) throws Exception {
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);

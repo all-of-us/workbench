@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.List;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.JWTWrapper;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.NihStatus;
-import org.pmiops.workbench.firecloud.model.Workspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
@@ -67,7 +67,7 @@ public interface FireCloudService {
       String projectName, String ownerEmailToRemove, String callerAccessToken);
 
   /** Creates a new FC workspace. */
-  Workspace createWorkspace(String projectName, String workspaceName);
+  FirecloudWorkspace createWorkspace(String projectName, String workspaceName);
 
   void cloneWorkspace(String fromProject, String fromName, String toProject, String toName);
 

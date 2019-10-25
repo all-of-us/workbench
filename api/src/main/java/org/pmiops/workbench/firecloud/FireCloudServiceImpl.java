@@ -23,13 +23,13 @@ import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.JWTWrapper;
 import org.pmiops.workbench.firecloud.model.ManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.firecloud.model.Profile;
-import org.pmiops.workbench.firecloud.model.Workspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
@@ -291,7 +291,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public Workspace createWorkspace(String projectName, String workspaceName) {
+  public FirecloudWorkspace createWorkspace(String projectName, String workspaceName) {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     WorkspaceIngest workspaceIngest = new WorkspaceIngest();
     workspaceIngest.setName(workspaceName);

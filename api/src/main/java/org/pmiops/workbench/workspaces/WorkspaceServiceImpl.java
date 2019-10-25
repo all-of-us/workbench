@@ -39,6 +39,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
@@ -169,7 +170,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     Workspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
+    FirecloudWorkspace fcWorkspace;
 
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 

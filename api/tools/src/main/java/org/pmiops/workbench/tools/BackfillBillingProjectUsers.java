@@ -19,7 +19,7 @@ import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.model.Workspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -119,7 +119,7 @@ public class BackfillBillingProjectUsers {
     int userUpgrades = 0;
     for (WorkspaceResponse resp :
         workspacesApi.listWorkspaces(FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS)) {
-      Workspace w = resp.getWorkspace();
+      FirecloudWorkspace w = resp.getWorkspace();
       if (!w.getNamespace().startsWith(billingProjectPrefix)) {
         continue;
       }

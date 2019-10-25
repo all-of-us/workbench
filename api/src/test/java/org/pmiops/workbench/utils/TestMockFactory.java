@@ -10,16 +10,15 @@ import java.util.UUID;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 /** Created by brubenst on 9/4/19. */
 public class TestMockFactory {
   private static final String BUCKET_NAME = "workspace-bucket";
 
-  public org.pmiops.workbench.firecloud.model.Workspace createFcWorkspace(
-      String ns, String name, String creator) {
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        new org.pmiops.workbench.firecloud.model.Workspace();
+  public FirecloudWorkspace createFcWorkspace(String ns, String name, String creator) {
+    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setWorkspaceId(ns);
     fcWorkspace.setName(name);
@@ -33,7 +32,7 @@ public class TestMockFactory {
             invocation -> {
               String capturedWorkspaceName = (String) invocation.getArguments()[1];
               String capturedWorkspaceNamespace = (String) invocation.getArguments()[0];
-              org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
+              FirecloudWorkspace fcWorkspace =
                   createFcWorkspace(capturedWorkspaceNamespace, capturedWorkspaceName, null);
 
               org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =

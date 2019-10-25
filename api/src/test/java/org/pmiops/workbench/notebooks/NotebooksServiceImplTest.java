@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.Workspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.test.FakeClock;
@@ -54,7 +54,7 @@ public class NotebooksServiceImplTest {
   @Test
   public void testGetReadOnlyHtml_basicContent() {
     when(firecloudService.getWorkspace(any(), any()))
-        .thenReturn(new WorkspaceResponse().workspace(new Workspace().bucketName("bkt")));
+        .thenReturn(new WorkspaceResponse().workspace(new FirecloudWorkspace().bucketName("bkt")));
     when(cloudStorageService.getFileAsJson(any(), any())).thenReturn(new JSONObject());
     when(firecloudService.staticNotebooksConvert(any()))
         .thenReturn("<html><body><div>asdf</div></body></html>");
@@ -67,7 +67,7 @@ public class NotebooksServiceImplTest {
   @Test
   public void testGetReadOnlyHtml_scriptSanitization() {
     when(firecloudService.getWorkspace(any(), any()))
-        .thenReturn(new WorkspaceResponse().workspace(new Workspace().bucketName("bkt")));
+        .thenReturn(new WorkspaceResponse().workspace(new FirecloudWorkspace().bucketName("bkt")));
     when(cloudStorageService.getFileAsJson(any(), any())).thenReturn(new JSONObject());
     when(firecloudService.staticNotebooksConvert(any()))
         .thenReturn("<html><script>window.alert('hacked');</script></html>");
@@ -80,7 +80,7 @@ public class NotebooksServiceImplTest {
   @Test
   public void testGetReadOnlyHtml_styleSanitization() {
     when(firecloudService.getWorkspace(any(), any()))
-        .thenReturn(new WorkspaceResponse().workspace(new Workspace().bucketName("bkt")));
+        .thenReturn(new WorkspaceResponse().workspace(new FirecloudWorkspace().bucketName("bkt")));
     when(cloudStorageService.getFileAsJson(any(), any())).thenReturn(new JSONObject());
     when(firecloudService.staticNotebooksConvert(any()))
         .thenReturn(
@@ -99,7 +99,7 @@ public class NotebooksServiceImplTest {
   @Test
   public void testGetReadOnlyHtml_allowsDataImage() {
     when(firecloudService.getWorkspace(any(), any()))
-        .thenReturn(new WorkspaceResponse().workspace(new Workspace().bucketName("bkt")));
+        .thenReturn(new WorkspaceResponse().workspace(new FirecloudWorkspace().bucketName("bkt")));
     when(cloudStorageService.getFileAsJson(any(), any())).thenReturn(new JSONObject());
 
     String dataUri = "data:image/png;base64,MTIz";
@@ -113,7 +113,7 @@ public class NotebooksServiceImplTest {
   @Test
   public void testGetReadOnlyHtml_disallowsRemoteImage() {
     when(firecloudService.getWorkspace(any(), any()))
-        .thenReturn(new WorkspaceResponse().workspace(new Workspace().bucketName("bkt")));
+        .thenReturn(new WorkspaceResponse().workspace(new FirecloudWorkspace().bucketName("bkt")));
     when(cloudStorageService.getFileAsJson(any(), any())).thenReturn(new JSONObject());
     when(firecloudService.staticNotebooksConvert(any()))
         .thenReturn("<img src=\"https://eviltrackingpixel.com\" />\n");

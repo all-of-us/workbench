@@ -30,7 +30,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.Workspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -135,7 +135,7 @@ public class WorkspaceServiceTest {
       String workspaceName,
       String workspaceNamespace,
       WorkspaceAccessLevel accessLevel) {
-    Workspace mockWorkspace = mock(Workspace.class);
+    FirecloudWorkspace mockWorkspace = mock(FirecloudWorkspace.class);
     doReturn(workspaceNamespace).when(mockWorkspace).getNamespace();
     doReturn(workspaceName).when(mockWorkspace).getName();
     doReturn(workspaceId).when(mockWorkspace).getWorkspaceId();
