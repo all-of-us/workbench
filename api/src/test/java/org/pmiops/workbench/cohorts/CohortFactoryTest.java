@@ -59,7 +59,8 @@ public class CohortFactoryTest {
     User user = mock(User.class);
     DbWorkspace workspace = mock(DbWorkspace.class);
     doReturn(1l).when(workspace).getWorkspaceId();
-    CohortDataModel dbCohort = cohortFactory.duplicateCohort("new name", user, workspace, originalCohort);
+    CohortDataModel dbCohort =
+        cohortFactory.duplicateCohort("new name", user, workspace, originalCohort);
 
     assertThat(dbCohort.getDescription()).isEqualTo(originalCohort.getDescription());
     assertThat(dbCohort.getName()).isEqualTo("new name");

@@ -25,7 +25,8 @@ public class CohortCloningService {
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
   @Transactional
-  public CohortDataModel cloneCohortAndReviews(CohortDataModel fromCohort, DbWorkspace targetWorkspace) {
+  public CohortDataModel cloneCohortAndReviews(
+      CohortDataModel fromCohort, DbWorkspace targetWorkspace) {
     final CohortDataModel duplicatedCohort =
         cohortFactory.duplicateCohort(
             fromCohort.getName(), targetWorkspace.getCreator(), targetWorkspace, fromCohort);
@@ -52,7 +53,10 @@ public class CohortCloningService {
   }
 
   private void copyCohortReviewAnnotations(
-      CohortDataModel fromCohort, CohortReview fromReview, CohortDataModel toCohort, CohortReview toReview) {
+      CohortDataModel fromCohort,
+      CohortReview fromReview,
+      CohortDataModel toCohort,
+      CohortReview toReview) {
     participantCohortStatusDao.bulkCopyByCohortReview(
         fromReview.getCohortReviewId(), toReview.getCohortReviewId());
     participantCohortAnnotationDao.bulkCopyEnumAnnotationsByCohortReviewAndCohort(

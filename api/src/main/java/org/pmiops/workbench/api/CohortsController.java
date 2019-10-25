@@ -205,8 +205,7 @@ public class CohortsController implements CohortsApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    CohortDataModel dbCohort =
-        getDbCohort(workspaceNamespace, workspaceId, cohortId);
+    CohortDataModel dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
     cohortDao.delete(dbCohort);
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -218,8 +217,7 @@ public class CohortsController implements CohortsApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    CohortDataModel dbCohort =
-        getDbCohort(workspaceNamespace, workspaceId, cohortId);
+    CohortDataModel dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 
@@ -251,8 +249,7 @@ public class CohortsController implements CohortsApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    CohortDataModel dbCohort =
-        getDbCohort(workspaceNamespace, workspaceId, cohortId);
+    CohortDataModel dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
     if (Strings.isNullOrEmpty(cohort.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }

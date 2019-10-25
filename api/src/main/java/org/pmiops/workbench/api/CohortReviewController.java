@@ -714,7 +714,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
    * @param cohort
    * @param creator
    */
-  private CohortReview initializeCohortReview(Long cdrVersionId, CohortDataModel cohort, User creator) {
+  private CohortReview initializeCohortReview(
+      Long cdrVersionId, CohortDataModel cohort, User creator) {
     SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
     TableResult result =
