@@ -104,15 +104,15 @@ export const DataUseAgreementContent = () => {
           <IndentedListItem>I will <strong>NOT</strong> use any external data, files, or software that I upload into
             my Workspace for any malicious purposes.</IndentedListItem>
           <IndentedListItem>If any import of data, files, or software into my Workspace results in unforeseen
-            consequences and/or unintentional violation of these terms, I will notify the <AoUTitle/>
-            as soon as I become aware using the appropriate process.</IndentedListItem>
+            consequences and/or unintentional violation of these terms, I will notify
+            the <AoUTitle/> as soon as I become aware using the appropriate process.</IndentedListItem>
         </IndentedUnorderedList>
         <li>use a version of the <AoUTitle/> database that is current at or after the time my
           analysis begins.</li>
         <IndentedUnorderedList>
           <IndentedListItem>Archived versions of the database are maintained for the sole purpose of completion of
             existing studies or replication of previous studies. New work may not be initiated on
-            archive versions of the database.
+            archived versions of the database.
           </IndentedListItem>
         </IndentedUnorderedList>
       </li>
