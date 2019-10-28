@@ -200,6 +200,10 @@ export class ModalComponent implements OnInit, OnDestroy {
     return this.wizard.domain === DomainType.PERSON ? 'col-md-6' : 'col-md-4';
   }
 
+  get nonAgeDemographics() {
+    return this.wizard.domain === DomainType.PERSON && this.wizard.type !== CriteriaType.AGE;
+  }
+
   setMode(mode: any) {
     if (mode === 'modifiers') {
       triggerEvent(

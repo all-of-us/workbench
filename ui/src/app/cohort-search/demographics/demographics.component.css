@@ -47,10 +47,10 @@ h3 {
 .count-preview {
   background-color: #E4F3FC;
   padding: 0.5rem;
-  margin: 2.5%;
+  margin: 0 2.5%;
   position: absolute;
   width: 95%;
-  bottom: 1rem;
+  bottom: 0.5rem;
 }
 .count-preview .text-bold {
   font-weight: bold;

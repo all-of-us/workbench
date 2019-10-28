@@ -124,11 +124,18 @@ button.tab.active {
 .content {
   flex: 1;
   overflow: auto;
+}
+
+.content.right {
   height: 100%;
 }
 
 .demographics .content.left {
-  padding-bottom: 3.25rem;
+  margin-bottom: 3.5rem;
+}
+
+.demographics.age .content.left {
+  margin-bottom: 0;
 }
 
 .footer {
