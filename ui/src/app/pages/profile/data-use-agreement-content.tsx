@@ -8,10 +8,13 @@ import {
   SecondHeader
 } from './data-use-agreement-styles';
 
+const AOU_DEFINITION_URL = 'https://allofus.nih.gov/about/about-all-us-research-program';
 const CORE_VALUES_URL = 'https://allofus.nih.gov/about/core-values';
-const PII_URL = 'https://www.govinfo.gov/content/pkg/CFR-2014-title2-vol1/pdf/CFR-2014-title2-vol1-sec200-79.pdf';
 const MARKETING_URL =
   'https://www.govinfo.gov/content/pkg/CFR-2004-title45-vol1/pdf/CFR-2004-title45-vol1-sec164-501.pdf';
+const PII_URL = 'https://www.govinfo.gov/content/pkg/CFR-2014-title2-vol1/pdf/CFR-2014-title2-vol1-sec200-79.pdf';
+const STIGMATIZING_RESEARCH_URL =
+  'https://docs.google.com/document/d/1RGWCmujvunLRdlBTYpZArcben4QNFwOhp7mSDK3puC0/view';
 
 {/* NOTE: Make sure to update dataUseAgreementVersion if there is any change to the DUA text. */}
 export const DataUseAgreementContent = () => {
@@ -63,7 +66,7 @@ export const DataUseAgreementContent = () => {
               <IndentedListItem>
                 If I become aware of any information that directly identifies one or more
                 participants, I will notify the <AoUTitle/> immediately
-                using the automatic notification system.
+                using the appropriate process.
               </IndentedListItem>
             </IndentedUnorderedList>
           </IndentedListItem>
@@ -168,7 +171,8 @@ export const DataUseAgreementContent = () => {
       <li>
         <strong>NOT</strong> use <AoUTitle/> data or any external data, files, or software that I upload
         into the Research Workbench for research that is discriminatory or stigmatizing of individuals, families,
-        groups, or communities. Please review the All of Us policy on stigmatizing research here.
+        groups, or communities. Please review the All of Us policy on stigmatizing
+        research <a href={STIGMATIZING_RESEARCH_URL} target='_blank'>here</a>.
         <IndentedUnorderedList>
           <li>I will contact the <AoUTitle/> Resource Access Board (RAB) for
             further guidance on this point as needed.
@@ -212,5 +216,57 @@ export const DataUseAgreementContent = () => {
       The <AoUTitle/> does not warrant or endorse
       the research results obtained by using the <i>All of Us</i> database.
     </p>
+
+    <SecondHeader>Terms and Definitions:</SecondHeader>
+    <IndentedUnorderedList>
+      <IndentedListItem>The <a href={{AOU_DEFINITION_URL}} target='_blank'><AoUTitle/></a> is a national longitudinal
+        research initiative that aims to engage one million or more participants living in the United States.
+        Participants contribute health data and specimens (blood, urine, saliva) to a repository that includes health,
+        behavioral, genomic, and other data. The <AoUTitle/> is a key component of the Precision Medicine Initiative,
+        which aims to leverage advances in genomics and health information technology to accelerate biomedical
+        discoveries.</IndentedListItem>
+      <IndentedListItem>
+        There are <strong>three data access tiers</strong> within the <AoUTitle/>.
+        <IndentedUnorderedList>
+          <IndentedListItem><strong>Public tier:</strong> The resource tier containing only summary statistics and
+            aggregate information that poses negligible risks to the privacy of research participants; the Public Tier
+            can be accessed by anyone without logging into the <i>All of Us</i> Research Platform.</IndentedListItem>
+          <IndentedListItem><strong>Registered tier:</strong> The resource tier that contains data elements that have a
+            lower risk of unapproved re-identification, thus carries minimal risk to the privacy of research
+            participants; Registered data can only be accessed after logging into the <i>All of Us</i> Research
+            Platform; all access will be logged and may be audited.</IndentedListItem>
+          <IndentedListItem><strong>Controlled tier:</strong> The resource tier that contains data elements that may
+            not, in their own right, readily identify individual participants, but may increase the risk of unapproved
+            re-identification when combined with other data elements; such data includes individual-level genomic data,
+            clinical notes, and narrative data; users must be appropriately accredited and granted approval to access
+            the Controlled Tier, and all access will be logged and may be audited.
+          </IndentedListItem>
+        </IndentedUnorderedList>
+      </IndentedListItem>
+      <IndentedListItem>
+        An <strong>authorized demonstration user</strong> is a person who is authorized to access and/or work
+        with <strong>registered</strong> or <strong>controlled</strong> tier data from the <AoUTitle/> for the
+        exclusive purpose of conducting demonstration project(s) sanctioned by the program. Authorized
+        demonstration users must complete the <AoUTitle/> research ethics training, attest to this agreement,
+        and restrict their activities, under this agreement, to those tasks related to the approved demonstration
+        project.
+      </IndentedListItem>
+      <IndentedListItem>
+        The <strong>Committee on Access, Privacy, and Security (CAPS)</strong> is the committee that directs the
+        policies and implementation of data access for the <AoUTitle/>; CAPS is overseen by
+        the <i>All of Us</i> Steering Committee.
+      </IndentedListItem>
+      <IndentedListItem>The <strong>Resource Access Board (RAB)</strong> is the board that operationalizes decisions
+        regarding data access, with review by the CAPS; responsibilities include: administration of user registration
+        and approval, review of potentially stigmatizing research proposals, and review of potential violations of
+        data access principles; the RAB reports to CAPS and the <i>All of Us</i> Steering Committee. </IndentedListItem>
+      <IndentedListItem>
+        <strong>Workspace</strong>: A user-created analytical sandbox within the research platform where users can
+        virtually pull in subsets of data from the <AoUTitle/> database and perform analyses; authorized demonstration
+        users must create a new workspace for each demonstration project using <i>All of Us</i> data and provide a
+        plain language description of the demonstration project, as well as other project information, that may be
+        published publicly on an <i>All of Us</i> website.
+      </IndentedListItem>
+    </IndentedUnorderedList>
   </div>;
 };

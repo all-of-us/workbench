@@ -100,13 +100,13 @@ export function getDataUseAgreementWidget(submitting, name, initialWork,
                     value={profile.givenName + ' ' + profile.familyName}
                     onChange={(v) => this.setState({name: v})}
                     data-test-id='dua-name-input'/>
-      ("Authorized User") have
+      ("Authorized Demonstration User") have
       personally reviewed this data use agreement. I agree to follow each of the policies
       and procedures it describes.
     </div>
     <div>By entering my initials next to each statement below, I agree to these terms:</div>
     <InitialsAgreement onChange={(v) => this.setState({initialWork: v})} value={initialWork}>
-      My work may be logged, monitored, and audited by the <i>All of Us</i> Research Program to ensure
+      My work will be logged, monitored, and audited by the <i>All of Us</i> Research Program to ensure
       compliance with policies and procedures, as well as the demonstration project charges.
     </InitialsAgreement>
     <InitialsAgreement onChange={(v) => this.setState({initialName: v})} value={initialName}>
@@ -139,12 +139,12 @@ export function getDataUseAgreementWidget(submitting, name, initialWork,
       {showSanctionModal &&
       <SanctionModal onClose={() => this.setState({showSanctionModal: false})}/>}
     </div>
-    <DuaTextInput style={{marginTop: '0.5rem'}}
-                  disabled value={this.props.profileState.profile.username}/>
-    <DuaTextInput style={{marginTop: '0.5rem'}}
-                  disabled value={this.props.profileState.profile.contactEmail}/>
-    <DuaTextInput style={{marginTop: '0.5rem'}}
-                  type='text' disabled value={new Date().toLocaleDateString()}/>
+    <label>Authorized Demonstration User Name</label>
+    <DuaTextInput disabled value={this.props.profileState.profile.username}/>
+    <label>Contact Email</label>
+    <DuaTextInput disabled value={this.props.profileState.profile.contactEmail}/>
+    <label>Date</label>
+    <DuaTextInput type='text' disabled value={new Date().toLocaleDateString()}/>
     <TooltipTrigger content={errors && <div>
       <div>All fields must be initialed</div>
       <div>All initials must match</div>
