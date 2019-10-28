@@ -60,7 +60,7 @@ public class WorkbenchConfig {
     // per minute.
     //
     // Per guidance from Google Cloud's project infrastructure team, we should limit our total rate
-    // of project creation to a number less than 1 per section. In practice, a reasonable aggressive
+    // of project creation to a number less than 1 per second. In practice, a reasonable aggressive
     // value for this parameter would be 5-10 project refills per minute.
     public Integer bufferRefillProjectsPerTask;
     // The environment-driven prefix to apply to GCP projects created in the buffer. Example:
