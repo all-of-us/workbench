@@ -55,7 +55,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final int MAX_RETRIES = 3;
-  private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 1;
+  private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
 
   private final Provider<User> userProvider;
   private final UserDao userDao;

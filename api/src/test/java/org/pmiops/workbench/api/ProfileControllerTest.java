@@ -93,6 +93,7 @@ public class ProfileControllerTest {
   private static final String ORGANIZATION = "Test";
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
+  private static final int DUA_VERSION = 2;
 
   @Mock private Provider<User> userProvider;
   @Mock private Provider<UserAuthentication> userAuthenticationProvider;
@@ -234,7 +235,7 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitDataUseAgreement_success() throws Exception {
     createUser();
-    assertThat(profileController.submitDataUseAgreement(1, "NIH").getStatusCode())
+    assertThat(profileController.submitDataUseAgreement(DUA_VERSION, "NIH").getStatusCode())
         .isEqualTo(HttpStatus.OK);
   }
 
@@ -434,7 +435,7 @@ public class ProfileControllerTest {
     profile.setGivenName("OldGivenName");
     profile.setFamilyName("OldFamilyName");
     profileController.updateProfile(profile);
-    profileController.submitDataUseAgreement(1, "O.O.");
+    profileController.submitDataUseAgreement(DUA_VERSION, "O.O.");
     profile.setGivenName("NewGivenName");
     profile.setFamilyName("NewFamilyName");
     profileController.updateProfile(profile);
