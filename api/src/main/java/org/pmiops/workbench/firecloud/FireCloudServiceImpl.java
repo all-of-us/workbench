@@ -301,7 +301,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public Workspace cloneWorkspace(String fromProject, String fromName, String toProject, String toName) {
+  public Workspace cloneWorkspace(
+      String fromProject, String fromName, String toProject, String toName) {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     WorkspaceIngest workspaceIngest = new WorkspaceIngest();
     workspaceIngest.setNamespace(toProject);
