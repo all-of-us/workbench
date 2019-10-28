@@ -8,7 +8,7 @@ import {
   SecondHeader
 } from './data-use-agreement-styles';
 
-const CORE_VALUES_URL = 'https://allofus.nih.gov/about/about-all-us-research-program';
+const CORE_VALUES_URL = 'https://allofus.nih.gov/about/core-values';
 const PII_URL = 'https://www.govinfo.gov/content/pkg/CFR-2014-title2-vol1/pdf/CFR-2014-title2-vol1-sec200-79.pdf';
 const MARKETING_URL =
   'https://www.govinfo.gov/content/pkg/CFR-2004-title45-vol1/pdf/CFR-2004-title45-vol1-sec164-501.pdf';
@@ -42,7 +42,7 @@ export const DataUseAgreementContent = () => {
       </IndentedOrderedList>
     </p>
     <p>Please read this agreement carefully and completely before signing.</p>
-    <SecondHeader>As “Authorized Demonstration User” of the <AoUTitle/> data, I
+    <SecondHeader>As an “Authorized Demonstration User” of the <AoUTitle/> data, I
       will:</SecondHeader>
     <IndentedUnorderedList>
       <li>read and adhere to the <AoUTitle/> <a target='_blank' href={CORE_VALUES_URL}>core values</a>.
@@ -56,26 +56,28 @@ export const DataUseAgreementContent = () => {
       </li>
       <li>respect the privacy of research participants at all times.
         <IndentedUnorderedList>
-          <IndentedListItem style={{margin: '0.5rem 0'}}>
+          <IndentedListItem>
             I will <strong>NOT</strong> use or disclose any
             information that directly identifies one or more participants.
-            <br/>
             <IndentedUnorderedList>
-              If I become aware of any information that directly identifies one or more
-              participants, I will notify the <AoUTitle/> immediately
-              using the automatic notification system.
+              <IndentedListItem>
+                If I become aware of any information that directly identifies one or more
+                participants, I will notify the <AoUTitle/> immediately
+                using the automatic notification system.
+              </IndentedListItem>
             </IndentedUnorderedList>
           </IndentedListItem>
-          <IndentedListItem style={{margin: '0.5rem 0'}}>
+          <IndentedListItem>
             I will <strong>NOT</strong> attempt to re-identify research
             participants or their relatives.
-            <br/>
             <IndentedUnorderedList>
-              If I unintentionally re-identify participants through the process of my work, I will
-              contact the <AoUTitle/> immediately using the appropriate process.
+              <IndentedListItem>
+                If I unintentionally re-identify participants through the process of my work, I will
+                contact the <AoUTitle/> immediately using the appropriate process.
+              </IndentedListItem>
             </IndentedUnorderedList>
           </IndentedListItem>
-          <IndentedListItem style={{margin: '0.5rem 0'}}>
+          <IndentedListItem>
             If I become aware of any uses or disclosures of <AoUTitle/> data that
             could endanger the security or privacy of research participants, I will contact
             the <AoUTitle/> immediately using the appropriate process.
@@ -95,15 +97,15 @@ export const DataUseAgreementContent = () => {
         <IndentedUnorderedList>
           <IndentedListItem>I will know and follow all applicable laws, regulations, and policies regarding access and
             use for any external data, files, or software that I upload into my Workspace.</IndentedListItem>
-          <IndentedListItem style={{margin: '0.5rem 0'}}>I will <strong>NOT</strong> upload data or files containing
+          <IndentedListItem>I will <strong>NOT</strong> upload data or files containing
             personally identifiable information (PII).
-            <br/>
-            <IndentedUnorderedList>PII means information that can be used to distinguish or trace the identity of an individual
+            <IndentedUnorderedList><IndentedListItem>
+              PII means information that can be used to distinguish or trace the identity of an individual
               (e.g., name, social security number, biometric records, etc.) either alone, or when combined with other
               personal or identifying information that is linked or linkable to a specific
-              individual <a href={PII_URL}>(2 CFR §200.79)</a></IndentedUnorderedList>
+              individual <a href={PII_URL}>(2 CFR §200.79)</a>
+            </IndentedListItem></IndentedUnorderedList>
           </IndentedListItem>
-
           <IndentedListItem>I will use any external data, files, or software that I upload into my Workspace
             exclusively for the research purpose I have provided for that Workspace.</IndentedListItem>
           <IndentedListItem>I will <strong>NOT</strong> use any external data, files, or software that I upload into
