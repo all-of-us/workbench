@@ -119,8 +119,16 @@ public class BillingProjectBufferServiceTest {
   }
 
   @Test
+  public void canBufferMultipleProjectsPerTask() {
+    workbenchConfig.billing.bufferRefillProjectsPerTask = 2;
+    billingProjectBufferService.bufferBillingProjects();
+
+    verify(fireCloudService, times(2)).createAllOfUsBillingProject(anyString());
+  }
+
+  @Test
   public void fillBuffer() {
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
@@ -141,7 +149,7 @@ public class BillingProjectBufferServiceTest {
 
     doThrow(RuntimeException.class).when(fireCloudService).createAllOfUsBillingProject(anyString());
     try {
-      billingProjectBufferService.bufferBillingProject();
+      billingProjectBufferService.bufferBillingProjects();
     } catch (Exception e) {
     }
 
@@ -151,7 +159,7 @@ public class BillingProjectBufferServiceTest {
   @Test
   public void fillBuffer_prefixName() {
     workbenchConfig.billing.projectNamePrefix = "test-prefix-";
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
@@ -165,10 +173,10 @@ public class BillingProjectBufferServiceTest {
   public void fillBuffer_capacity() {
     // fill up buffer
     for (int i = 0; i < BUFFER_CAPACITY; i++) {
-      billingProjectBufferService.bufferBillingProject();
+      billingProjectBufferService.bufferBillingProjects();
     }
     int expectedCallCount = 0;
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
     verify(fireCloudService, times((int) BUFFER_CAPACITY + expectedCallCount))
         .createAllOfUsBillingProject(anyString());
 
@@ -177,19 +185,19 @@ public class BillingProjectBufferServiceTest {
     entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     expectedCallCount++;
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
     verify(fireCloudService, times((int) BUFFER_CAPACITY + expectedCallCount))
         .createAllOfUsBillingProject(anyString());
 
     // increase buffer capacity
     expectedCallCount++;
     workbenchConfig.billing.bufferCapacity = (int) BUFFER_CAPACITY + 1;
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
     verify(fireCloudService, times((int) BUFFER_CAPACITY + expectedCallCount))
         .createAllOfUsBillingProject(anyString());
 
     // should be at capacity
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
     verify(fireCloudService, times((int) BUFFER_CAPACITY + expectedCallCount))
         .createAllOfUsBillingProject(anyString());
   }
@@ -198,13 +206,13 @@ public class BillingProjectBufferServiceTest {
   public void fillBuffer_decreaseCapacity() {
     // fill up buffer
     for (int i = 0; i < BUFFER_CAPACITY; i++) {
-      billingProjectBufferService.bufferBillingProject();
+      billingProjectBufferService.bufferBillingProjects();
     }
 
     workbenchConfig.billing.bufferCapacity = (int) BUFFER_CAPACITY - 2;
 
     // should no op since we're at capacity + 2
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
     verify(fireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
 
     // should no op since we're at capacity + 1
@@ -213,28 +221,28 @@ public class BillingProjectBufferServiceTest {
     BillingProjectBufferEntry entry = bufferEntries.next();
     entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
     verify(fireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
 
     // should no op since we're at capacity
     entry = bufferEntries.next();
     entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
     verify(fireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
 
     // should invoke since we're below capacity
     entry = bufferEntries.next();
     entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
     verify(fireCloudService, times((int) BUFFER_CAPACITY + 1))
         .createAllOfUsBillingProject(anyString());
   }
 
   @Test
   public void syncBillingProjectStatus_creating() {
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
@@ -268,7 +276,7 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void syncBillingProjectStatus_ready() {
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
@@ -289,7 +297,7 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void syncBillingProjectStatus_error() {
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
@@ -310,7 +318,7 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void syncBillingProjectStatus_notFound() {
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
@@ -330,9 +338,9 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void syncBillingProjectStatus_multiple() {
-    billingProjectBufferService.bufferBillingProject();
-    billingProjectBufferService.bufferBillingProject();
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
+    billingProjectBufferService.bufferBillingProjects();
+    billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     verify(fireCloudService, times(3)).createAllOfUsBillingProject(captor.capture());
@@ -368,9 +376,9 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void syncBillingProjectStatus_iteratePastStallingRequests() {
-    billingProjectBufferService.bufferBillingProject();
-    billingProjectBufferService.bufferBillingProject();
-    billingProjectBufferService.bufferBillingProject();
+    billingProjectBufferService.bufferBillingProjects();
+    billingProjectBufferService.bufferBillingProjects();
+    billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     verify(fireCloudService, times(3)).createAllOfUsBillingProject(captor.capture());

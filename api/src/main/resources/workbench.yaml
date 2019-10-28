@@ -1139,14 +1139,14 @@ paths:
 
   # Billing ##############################################################################
 
-  /v1/cron/bufferBillingProject:
+  /v1/cron/bufferBillingProjects:
     get:
       security: []
       tags:
         - offlineBilling
         - cron
-      description: If the AoU Billing Project buffer is not full, create a firecloud billing project and add one
-      operationId: bufferBillingProject
+      description: If the AoU Billing Project buffer is not full, refill with one or more billing projects.
+      operationId: bufferBillingProjects
       responses:
         204:
           description: No Error
