@@ -211,7 +211,7 @@ export const DataUseAgreementContent = () => {
 
     <SecondHeader>Terms and Definitions:</SecondHeader>
     <IndentedUnorderedList>
-      <IndentedListItem>The <a href={{AOU_DEFINITION_URL}} target='_blank'><AoUTitle/></a> is a national longitudinal
+      <IndentedListItem>The <a href={AOU_DEFINITION_URL} target='_blank'><AoUTitle/></a> is a national longitudinal
         research initiative that aims to engage one million or more participants living in the United States.
         Participants contribute health data and specimens (blood, urine, saliva) to a repository that includes health,
         behavioral, genomic, and other data. The <AoUTitle/> is a key component of the Precision Medicine Initiative,
