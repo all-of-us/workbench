@@ -209,14 +209,6 @@ export const DataUseAgreementContent = () => {
       </li>
     </IndentedUnorderedList>
 
-    <SecondHeader>Data Disclaimer:</SecondHeader>
-    <p>The <AoUTitle/> does not guarantee the accuracy of the data in
-      the <AoUTitle/> database. The <AoUTitle/> does
-      not guarantee the performance of the software in the <AoUTitle/> database.
-      The <AoUTitle/> does not warrant or endorse
-      the research results obtained by using the <i>All of Us</i> database.
-    </p>
-
     <SecondHeader>Terms and Definitions:</SecondHeader>
     <IndentedUnorderedList>
       <IndentedListItem>The <a href={{AOU_DEFINITION_URL}} target='_blank'><AoUTitle/></a> is a national longitudinal
@@ -268,5 +260,13 @@ export const DataUseAgreementContent = () => {
         published publicly on an <i>All of Us</i> website.
       </IndentedListItem>
     </IndentedUnorderedList>
+
+    <SecondHeader>Data Disclaimer:</SecondHeader>
+    <p>The <AoUTitle/> does not guarantee the accuracy of the data in
+      the <AoUTitle/> database. The <AoUTitle/> does
+      not guarantee the performance of the software in the <AoUTitle/> database.
+      The <AoUTitle/> does not warrant or endorse
+      the research results obtained by using the <i>All of Us</i> database.
+    </p>
   </div>;
 };
