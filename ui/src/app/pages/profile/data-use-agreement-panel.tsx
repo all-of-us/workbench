@@ -98,7 +98,7 @@ export function getDataUseAgreementWidget(submitting, name, initialWork,
       <DuaTextInput style={{margin: '0 1ex'}}
                     disabled
                     value={profile.givenName + ' ' + profile.familyName}
-                    onChange={(v) => this.setState({name: v})} value={name}
+                    onChange={(v) => this.setState({name: v})}
                     data-test-id='dua-name-input'/>
       ("Authorized User") have
       personally reviewed this data use agreement. I agree to follow each of the policies
