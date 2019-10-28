@@ -84,7 +84,8 @@ export const styles = {
     borderBottom: `1px solid ${colors.light}`,
     display: 'flex',
     justifyContent: 'space-between',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    minWidth: '14.5rem'
   } as React.CSSProperties,
 
   listItem: {
@@ -169,7 +170,6 @@ export const styles = {
 
   selectAllContainer: {
     marginLeft: 'auto',
-    width: '5rem',
     display: 'flex',
     alignItems: 'center'
   } as React.CSSProperties,
@@ -818,7 +818,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
             variables and values for one or more of your cohorts. Then export the completed dataset
             to Notebooks where you can perform your analysis</div>
           <div style={{display: 'flex', paddingTop: '1rem'}}>
-            <div style={{width: '33%', height: '80%'}}>
+            <div style={{width: '33%', height: '80%', minWidth: styles.selectBoxHeader.minWidth}}>
               <div style={{backgroundColor: 'white', border: `1px solid ${colors.light}`}}>
                 <BoxHeader step='1' header='Select Cohorts' subHeader='Participants'>
                   {plusLink('cohorts-link', cohortsPath, !this.canWrite)}
@@ -939,7 +939,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
               <div style={{display: 'flex', alignItems: 'flex-end'}}>
                 <div style={styles.previewDataHeader}>
                   <div>
-                    <StepNumber step={'4'}/>
+                    <StepNumber step='4'/>
                   </div>
                   <label style={{marginLeft: '0.5rem', color: colors.primary}}>
                     Preview Dataset
