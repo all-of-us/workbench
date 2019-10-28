@@ -137,7 +137,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     this.getUserActivityTimer = signalUserActivity.getTimer;
 
     INACTIVITY_CONFIG.TRACKED_EVENTS.forEach(eventName => {
-      window.addEventListener(eventName, () => signalUserActivity.invoke(), false);
+      window.addEventListener(eventName, signalUserActivity.invoke, false);
     });
   }
 

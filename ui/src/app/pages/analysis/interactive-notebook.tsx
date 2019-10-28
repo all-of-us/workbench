@@ -13,7 +13,7 @@ import {INACTIVITY_CONFIG} from 'app/pages/signed-in/component';
 import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {debouncer, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {debouncer, Debouncer, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -87,6 +87,7 @@ interface State {
 export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     private runClusterTimer: NodeJS.Timeout;
+    private userActivityDebouncer: Debouncer;
 
     constructor(props) {
       super(props);
@@ -117,21 +118,27 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       });
     }
 
-    componentWillUnmount(): void {
-      clearTimeout(this.runClusterTimer);
-    }
-
     loadNotebookActivityTracker() {
       const frame = document.getElementById('notebook-frame') as HTMLFrameElement;
       frame.addEventListener('load', () => {
-        const signalUserActivity = debouncer(() => {
+        this.userActivityDebouncer = debouncer(() => {
           frame.contentWindow.parent.postMessage(INACTIVITY_CONFIG.MESSAGE_KEY, '*');
         }, 1000);
 
         INACTIVITY_CONFIG.TRACKED_EVENTS.forEach(eventName => {
-          window.addEventListener(eventName, () => signalUserActivity.invoke(), false);
+          window.addEventListener(eventName, this.userActivityDebouncer.invoke, false);
         });
       });
+    }
+
+    componentWillUnmount(): void {
+      clearTimeout(this.runClusterTimer);
+      if (this.userActivityDebouncer) {
+        clearInterval(this.userActivityDebouncer.getTimer());
+        INACTIVITY_CONFIG.TRACKED_EVENTS.forEach(eventName => {
+          window.removeEventListener(eventName, this.userActivityDebouncer.invoke, false);
+        });
+      }
     }
 
     private runCluster(onClusterReady: Function): void {
