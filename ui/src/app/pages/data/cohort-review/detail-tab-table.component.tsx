@@ -19,19 +19,6 @@ import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
 
-const css = `
-  .name-container {
-    overflow: hidden;
-    height: 1.2rem;
-  }
-  .name-container:before {
-    content:"";
-    float: left;
-    width: 1px;
-    height: 100%;
-  }
-`;
-
 const styles = reactStyles({
   container: {
     position: 'relative',
@@ -45,9 +32,11 @@ const styles = reactStyles({
     lineHeight: '0.75rem'
   },
   columnHeader: {
+    display: 'inline-block',
     background: '#f4f4f4',
     color: colors.primary,
     fontWeight: 600,
+    maxWidth: '80%'
   },
   columnBody: {
     background: colors.white,
@@ -70,8 +59,7 @@ const styles = reactStyles({
     width: '2rem',
   },
   filterIcon: {
-    marginLeft: '0.3rem',
-    padding: '2px 2px 1px 1px',
+    marginTop: '2px',
     borderRadius: '50%',
     fontWeight: 600,
     float: 'right'
@@ -146,15 +134,12 @@ const styles = reactStyles({
   },
   showMore: {
     width: '70px',
-    marginLeft: '-80px',
-    bottom: '14px',
-    left: '100%',
+    bottom: 0,
+    right: 0,
     background: colors.white,
     color: colors.accent,
     boxSizing: 'content-box',
-    float: 'right',
-    position: 'relative',
-    marginRight: '1px',
+    position: 'absolute',
     paddingLeft: '10px',
     textAlign: 'left',
     cursor: 'pointer',
@@ -194,6 +179,49 @@ const domains = [
   DomainType.VITAL,
   DomainType.SURVEY,
 ];
+
+class NameContainer extends React.Component<{data: any, vocab: string}, {showMore: boolean}> {
+  container: HTMLDivElement;
+  constructor(props: any) {
+    super(props);
+    this.state = {showMore: false};
+  }
+
+  handleResize = fp.debounce(100, () => {
+    this.checkContainerHeight();
+  });
+
+  componentDidMount(): void {
+    this.checkContainerHeight();
+    window.addEventListener('resize', this.handleResize);
+  }
+
+  componentWillUnmount(): void {
+    window.removeEventListener('resize', this.handleResize);
+  }
+
+  checkContainerHeight() {
+    const {offsetHeight, scrollHeight} = this.container;
+    this.setState({showMore: scrollHeight > offsetHeight});
+  }
+
+  render() {
+    const {data, vocab} = this.props;
+    const {showMore} = this.state;
+    let nl: any;
+    return <div ref={(e) => this.container = e} style={{overflow: 'hidden', maxHeight: '1.2rem'}}>
+      <div style={styles.nameWrapper}>
+        <p style={styles.nameContent}>{data[`${vocab}Name`]}</p>
+      </div>
+      {showMore && <React.Fragment>
+        <span style={styles.showMore} onClick={(e) => nl.toggle(e)}>Show more</span>
+        <OverlayPanel className='labOverlay' ref={(el) => nl = el} showCloseIcon={true} dismissable={true}>
+          <div style={{paddingBottom: '0.2rem'}}>{data[`${vocab}Name`]}</div>
+        </OverlayPanel>
+      </React.Fragment>}
+    </div>;
+  }
+}
 
 interface Props {
   tabName: string;
@@ -314,24 +342,14 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     overlayTemplate = (rowData: any, column: any) => {
-      let nl: any, vl: any;
+      let vl: any;
       const {filterState: {vocab}} = this.props;
       const valueField = (rowData.refRange || rowData.unit) && column.field === 'value';
       const nameField = rowData.route && column.field === `${vocab}Name`;
       return <React.Fragment>
         <div style={{position: 'relative'}}>
           {column.field === 'value' && <span>{rowData.value}</span>}
-          {column.field === `${vocab}Name` && <div className='name-container'>
-            <div style={styles.nameWrapper}>
-              <p style={styles.nameContent}>{rowData[`${vocab}Name`]}</p>
-            </div>
-            <span style={styles.showMore} onClick={(e) => nl.toggle(e)}>Show more</span>
-            <OverlayPanel className='labOverlay' ref={(el) => nl = el}
-                          showCloseIcon={true} dismissable={true}>
-              <div style={{paddingBottom: '0.2rem'}}>{rowData[`${vocab}Name`]}</div>
-            </OverlayPanel>
-          </div>
-          }
+          {column.field === `${vocab}Name` && <NameContainer data={rowData} vocab={vocab} />}
           {(valueField || nameField)
           && <i className='pi pi-caret-down' style={styles.caretIcon}
               onClick={(e) => vl.toggle(e)}/>}
@@ -506,7 +524,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {domain, filterState, filterState: {vocab}} = this.props;
       const columnFilters = filterState.tabs[domain];
       if (!data) {
-        return '';
+        return <i className='pi pi-filter' style={filterIcons.default} />;
       }
       const counts = {total: 0};
       let options: Array<any>;
@@ -566,7 +584,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         }, []);
       const filtered = !columnFilters[column].includes('Select All');
       let fl: any;
-      return <span>
+      return <React.Fragment>
         <i className='pi pi-filter'
            style={filtered ? filterIcons.active : filterIcons.default}
            onClick={(e) => {
@@ -592,7 +610,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             <label style={{paddingLeft: '0.4rem'}}> Select All ({counts.total}) </label>
           </div>
         </OverlayPanel>
-      </span>;
+      </React.Fragment>;
     }
 
     textFilter(column: string) {
@@ -600,7 +618,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       const columnFilters = filterState.tabs[domain];
       const filtered = !!columnFilters[column];
       let fl: any, ip: any;
-      return <span>
+      return <React.Fragment>
         <i className='pi pi-filter'
           style={filtered ? filterIcons.active : filterIcons.default}
           onClick={(e) => {
@@ -620,7 +638,7 @@ export const DetailTabTable = withCurrentWorkspace()(
               placeholder={'Search'} />
           </div>
         </OverlayPanel>
-      </span>;
+      </React.Fragment>;
     }
 
     rowExpansionTemplate = (rowData: any) => {
@@ -701,12 +719,14 @@ export const DetailTabTable = withCurrentWorkspace()(
             style={styles.columnHeader}>
             {col.displayName}
           </span>
-          {hasCheckboxFilter && this.checkboxFilter(col.name)}
-          {hasTextFilter && this.textFilter(col.name)}
-          {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon}
-            onClick={() => this.columnSort(col.name)} />}
-          {(desc && !isExpanderNeeded) && <i className='pi pi-arrow-down' style={styles.sortIcon}
-            onClick={() => this.columnSort(col.name)} />}
+          <span style={{display: 'inline-block', marginTop: '-3px', float: 'right'}}>
+            {hasCheckboxFilter && this.checkboxFilter(col.name)}
+            {hasTextFilter && this.textFilter(col.name)}
+            {(asc && !isExpanderNeeded) && <i className='pi pi-arrow-up' style={styles.sortIcon}
+              onClick={() => this.columnSort(col.name)} />}
+            {(desc && !isExpanderNeeded) && <i className='pi pi-arrow-down' style={styles.sortIcon}
+              onClick={() => this.columnSort(col.name)} />}
+          </span>
         </React.Fragment>;
         return <Column
           expander={isExpanderNeeded}
@@ -720,7 +740,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           body={overlayTemplate}/>;
       });
       return <div style={styles.container}>
-        <style>{datatableStyles + css}</style>
+        <style>{datatableStyles}</style>
         <DataTable
           expandedRows={this.state.expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}

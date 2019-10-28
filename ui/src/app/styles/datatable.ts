@@ -5,12 +5,13 @@ export const datatableStyles = `
     background-color: #f4f4f4;
   }
   body .p-datatable .p-datatable-thead > tr > th {
-    padding: 10px;
+    padding: 15px 0 15px 5px;
     vertical-align: middle;
     background: #f4f4f4;
     border: 0;
     border-bottom: 1px solid #c8c8c8;
     border-left: 1px solid #c8c8c8;
+    line-height: .6rem;
   }
   body .p-datatable .p-datatable-thead > tr > th:first-of-type {
     border-left: 0;
