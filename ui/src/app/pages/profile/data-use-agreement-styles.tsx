@@ -22,17 +22,17 @@ export const dataUseAgreementStyles = reactStyles({
     height: '100%',
     color: colors.primary,
   },
-  h2: {...headerStyles.h2, lineHeight: '24px', fontWeight: 600, fontSize: '16px'},
+  h2: {...headerStyles.h2, lineHeight: '1rem', fontWeight: 600, fontSize: '0.67rem'},
   sanctionModalTitle: {
     fontFamily: 'Montserrat',
-    fontSize: 16,
+    fontSize: '0.67rem',
     fontWeight: 600,
-    lineHeight: '19px'
+    lineHeight: '0.8rem'
   },
   modalLabel: {
     fontFamily: 'Montserrat',
-    fontSize: 14,
-    lineHeight: '24px',
+    fontSize: '0.5rem',
+    lineHeight: '1rem',
     color: colors.primary
   }
 });

@@ -121,8 +121,8 @@ export function getDataUseAgreementWidget(submitting, name, initialWork,
       participation in these activities, I understand that my access to the <i>All of Us</i> data
       resources will be revoked and/or subject to customary access policies and procedures.
     </InitialsAgreement>
-    <div><strong>I acknowledge that failure to comply with the terms of this agreement may result
-      in termination of my <AoUTitle/> account and/or other sanctions, including
+    <div style={{marginTop: '0.5rem'}}><strong>I acknowledge that failure to comply with the terms of this agreement
+      may result in termination of my <AoUTitle/> account and/or other sanctions, including
       but not limited to:</strong>
       <IndentedUnorderedList>
         <IndentedListItem>
