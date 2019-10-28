@@ -48,6 +48,7 @@ public class WorkbenchConfig {
   public static class BillingConfig {
     public Integer retryCount;
     public Integer bufferCapacity;
+    public Integer bufferRefillProjectsPerTask;
     public String projectNamePrefix;
     public String accountId;
     public String exportBigQueryTable;
