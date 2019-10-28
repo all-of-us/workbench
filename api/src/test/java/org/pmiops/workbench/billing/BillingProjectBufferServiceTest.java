@@ -105,6 +105,7 @@ public class BillingProjectBufferServiceTest {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.projectNamePrefix = "test-prefix";
     workbenchConfig.billing.bufferCapacity = (int) BUFFER_CAPACITY;
+    workbenchConfig.billing.bufferRefillProjectsPerTask = 1;
 
     billingProjectBufferEntryDao = spy(billingProjectBufferEntryDao);
     TestLock lock = new TestLock();
