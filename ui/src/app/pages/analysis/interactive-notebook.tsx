@@ -86,6 +86,7 @@ interface State {
 
 export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
+    private runClusterTimer: NodeJS.Timeout;
 
     constructor(props) {
       super(props);
@@ -116,6 +117,10 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       });
     }
 
+    componentWillUnmount(): void {
+      clearTimeout(this.runClusterTimer);
+    }
+
     loadNotebookActivityTracker() {
       const frame = document.getElementById('notebook-frame') as HTMLFrameElement;
       frame.addEventListener('load', () => {
@@ -131,7 +136,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
 
     private runCluster(onClusterReady: Function): void {
       const retry = () => {
-        setTimeout(() => this.runCluster(onClusterReady), 5000);
+        this.runClusterTimer = setTimeout(() => this.runCluster(onClusterReady), 5000);
       };
 
       clusterApi().listClusters(this.props.urlParams.ns)
