@@ -8,6 +8,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {
+  AoUTitle,
   dataUseAgreementStyles,
   IndentedListItem,
   IndentedUnorderedList,
@@ -106,32 +107,32 @@ export function getDataUseAgreementWidget(submitting, name, initialWork,
     <div>By entering my initials next to each statement below, I agree to these terms:</div>
     <InitialsAgreement onChange={(v) => this.setState({initialWork: v})} value={initialWork}>
       My work may be logged, monitored, and audited by the <i>All of Us</i> Research Program to ensure
-      compliance with policies and procedures.
+      compliance with policies and procedures, as well as the demonstration project charges.
     </InitialsAgreement>
     <InitialsAgreement onChange={(v) => this.setState({initialName: v})} value={initialName}>
-      My name, affiliation, and research description will be made public. My research
-      description will be used by the <i>All of Us</i> Research Program to provide
+      My name, affiliation, profile information, and research description will be made public.
+      My research description will be used by the <AoUTitle/> to provide
       participants with meaningful information about the research being conducted.
     </InitialsAgreement>
     <InitialsAgreement onChange={(v) => this.setState({initialSanctions: v})}
                        value={initialSanctions}>
       Access granted by the program in accordance with this agreement is exclusively
-      for participation in All of Us demonstration projects. At the conclusion of my
-      participation in these activities, I understand that my access to the <i>All of Us</i>
-      data resources will be revoked and/or subject to customary access policies and procedures.
+      for participation in <i>All of Us</i> demonstration projects. At the conclusion of my
+      participation in these activities, I understand that my access to the <i>All of Us</i> data
+      resources will be revoked and/or subject to customary access policies and procedures.
     </InitialsAgreement>
     <div><strong>I acknowledge that failure to comply with the terms of this agreement may result
-      in termination of my All of Us Research Program account and/or other sanctions, including
+      in termination of my <AoUTitle/> account and/or other sanctions, including
       but not limited to:</strong>
       <IndentedUnorderedList>
         <IndentedListItem>
-          posting my name and affiliation on a publicly-accessible list of violators, and
+          <strong>posting my name and affiliation on a publicly-accessible list of violators, and</strong>
         </IndentedListItem>
-        <IndentedListItem>notifying the National Institutes of Health or other federal agencies of my
-          actions.</IndentedListItem>
+        <IndentedListItem><strong>notifying the National Institutes of Health or other federal agencies of my
+          actions.</strong></IndentedListItem>
       </IndentedUnorderedList>
-      <div>I understand that failure to comply with these terms may also carry additional financial, legal, or other
-        repercussions.
+      <div><strong>I understand that failure to comply with these terms may also carry additional financial, legal, or other
+        repercussions.</strong>
       </div>
     </div>
     <div>

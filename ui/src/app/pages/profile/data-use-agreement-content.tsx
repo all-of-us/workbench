@@ -10,6 +10,8 @@ import {
 
 const CORE_VALUES_URL = 'https://allofus.nih.gov/about/about-all-us-research-program';
 const PII_URL = 'https://www.govinfo.gov/content/pkg/CFR-2014-title2-vol1/pdf/CFR-2014-title2-vol1-sec200-79.pdf';
+const MARKETING_URL =
+  'https://www.govinfo.gov/content/pkg/CFR-2004-title45-vol1/pdf/CFR-2004-title45-vol1-sec164-501.pdf';
 
 {/* NOTE: Make sure to update dataUseAgreementVersion if there is any change to the DUA text. */}
 export const DataUseAgreementContent = () => {
@@ -68,37 +70,40 @@ export const DataUseAgreementContent = () => {
             I will <strong>NOT</strong> attempt to re-identify research
             participants or their relatives.
             <br/>
-            If I unintentionally re-identify participants through the process of my work, I will
-            contact the <AoUTitle/> immediately using the appropriate process.
+            <IndentedUnorderedList>
+              If I unintentionally re-identify participants through the process of my work, I will
+              contact the <AoUTitle/> immediately using the appropriate process.
+            </IndentedUnorderedList>
           </IndentedListItem>
           <IndentedListItem style={{margin: '0.5rem 0'}}>
             If I become aware of any uses or disclosures of <AoUTitle/> data that
             could endanger the security or privacy of research participants, I will contact
             the <AoUTitle/> immediately using the appropriate process.
           </IndentedListItem>
-          <IndentedListItem>provide a meaningful description of my research purpose when establishing
-            my <AoUTitle/> workspace.</IndentedListItem>
-          <IndentedListItem>Within each workspace, I will use the data for the research purpose I have provided.
+        </IndentedUnorderedList>
+        <IndentedListItem>provide a meaningful description of my research purpose when establishing
+          my <AoUTitle/> workspace.</IndentedListItem>
+        <IndentedUnorderedList>
+          <IndentedListItem>This description will accurately reflect the demonstration project proposal for which I
+            received <i>All of Us</i> approval.</IndentedListItem>
+          <IndentedListItem>Within my workspace, I will only use the data for the demonstration project for which I have
+            received <i>All of Us</i> approval.
           </IndentedListItem>
-          <IndentedListItem>
-            provide a meaningful description of my research purpose when establishing my <AoUTitle/> workspace.
-            <IndentedUnorderedList>
-              <IndentedListItem>This description will accurately reflect the demonstration project proposal for which I
-                received <i>All of Us</i> approval.</IndentedListItem>
-              <IndentedListItem>Within my workspace, I will only use the data for the demonstration project for which I
-                have received <i>All of Us</i> approval. </IndentedListItem>
-            </IndentedUnorderedList>
+        </IndentedUnorderedList>
+        <IndentedListItem>take full responsibility for any external data, files, or software that I import into my
+          Workspace and the consequences thereof.</IndentedListItem>
+        <IndentedUnorderedList>
+          <IndentedListItem>I will know and follow all applicable laws, regulations, and policies regarding access and
+            use for any external data, files, or software that I upload into my Workspace.</IndentedListItem>
+          <IndentedListItem style={{margin: '0.5rem 0'}}>I will <strong>NOT</strong> upload data or files containing
+            personally identifiable information (PII).
+            <br/>
+            <IndentedUnorderedList>PII means information that can be used to distinguish or trace the identity of an individual
+              (e.g., name, social security number, biometric records, etc.) either alone, or when combined with other
+              personal or identifying information that is linked or linkable to a specific
+              individual <a href={PII_URL}>(2 CFR §200.79)</a></IndentedUnorderedList>
           </IndentedListItem>
-          <IndentedListItem>take full responsibility for any external data, files, or software that I import into my
-            Workspace and the consequences thereof.</IndentedListItem>
-          <IndentedListItem>I will know and follow all applicable laws, regulations, and policies regarding access and use
-            for any external data, files, or software that I upload into my Workspace.</IndentedListItem>
-          <IndentedListItem>I will <strong>NOT</strong> upload data or files containing personally identifiable
-            information (PII).</IndentedListItem>
-          <IndentedListItem>PII means information that can be used to distinguish or trace the identity of an individual
-            (e.g., name, social security number, biometric records, etc.) either alone, or when combined with other
-            personal or identifying information that is linked or linkable to a specific
-            individual <a href={PII_URL}>(2 CFR §200.79)</a></IndentedListItem>
+
           <IndentedListItem>I will use any external data, files, or software that I upload into my Workspace
             exclusively for the research purpose I have provided for that Workspace.</IndentedListItem>
           <IndentedListItem>I will <strong>NOT</strong> use any external data, files, or software that I upload into
@@ -117,31 +122,31 @@ export const DataUseAgreementContent = () => {
         </IndentedUnorderedList>
       </li>
       <li>share the results of my demonstration project and all contents of my Workbench with the <AoUTitle/>. </li>
-      <li>My workbench and its contents may be made public for the benefit of all authorized users.</li>
-      <li>honor the contribution of those who take part in <i>All of Us</i> to my work
+      <IndentedUnorderedList>
+        <li>My workbench and its contents may be made public for the benefit of all authorized users.</li>
+      </IndentedUnorderedList>
+      <li>honor the contribution to my work of those who take part in <i>All of Us</i>
         <IndentedUnorderedList>
           <li>I will acknowledge the <AoUTitle/> and its research participants
             in all oral and written presentations, disclosures, and publications resulting from
             any analyses of the data.
             <IndentedUnorderedList>
-              <li>Here is an example acknowledgement statement:</li>
-              <IndentedUnorderedList>
-                <IndentedListItem>
-                  “The <AoUTitle/> is supported by the National Institutes of Health, Office of the
-                  Director: Regional Medical Centers: 1 OT2 OD026549; 1 OT2 OD026554; 1 OT2 OD026557; 1 OT2 OD026556;
-                  1 OT2 OD026550; 1 OT2 OD 026552; 1 OT2 OD026553; 1 OT2 OD026548; 1 OT2 OD026551; 1 OT2 OD026555;
-                  IAA #: AOD 16037; Federally Qualified Health Centers: HHSN 263201600085U; Data and Research Center:
-                  5 U2C OD023196; Biobank: 1 U24 OD023121; The Participant Center: U24 OD023176; Participant Technology
-                  Systems Center: 1 U24 OD023163; Communications and Engagement: 3 OT2 OD023205; 3 OT2 OD023206;
-                  and Community Partners: 1 OT2 OD025277; 3 OT2 OD025315; 1 OT2 OD025337; 1 OT2 OD025276. In addition,
-                  the <AoUTitle/> would not be possible without the partnership of its participants.”
-                </IndentedListItem>
-                <IndentedListItem>
-                  I will submit an electronic version of a final, peer-reviewed manuscript to PubMed Central
-                  immediately upon acceptance for publication, to be made publicly available no later than 12
-                  months after the official date of publication.
-                </IndentedListItem>
-              </IndentedUnorderedList>
+              <li style={{margin: '0.5rem 0'}}>Here is an example acknowledgement statement:
+                <br/>
+                “The <AoUTitle/> is supported by the National Institutes of Health, Office of the
+                Director: Regional Medical Centers: 1 OT2 OD026549; 1 OT2 OD026554; 1 OT2 OD026557; 1 OT2 OD026556;
+                1 OT2 OD026550; 1 OT2 OD 026552; 1 OT2 OD026553; 1 OT2 OD026548; 1 OT2 OD026551; 1 OT2 OD026555;
+                IAA #: AOD 16037; Federally Qualified Health Centers: HHSN 263201600085U; Data and Research Center:
+                5 U2C OD023196; Biobank: 1 U24 OD023121; The Participant Center: U24 OD023176; Participant Technology
+                Systems Center: 1 U24 OD023163; Communications and Engagement: 3 OT2 OD023205; 3 OT2 OD023206;
+                and Community Partners: 1 OT2 OD025277; 3 OT2 OD025315; 1 OT2 OD025337; 1 OT2 OD025276. In addition,
+                the <AoUTitle/> would not be possible without the partnership of its participants.”
+              </li>
+              <li>
+                I will submit an electronic version of a final, peer-reviewed manuscript to PubMed Central
+                immediately upon acceptance for publication, to be made publicly available no later than 12
+                months after the official date of publication.
+              </li>
             </IndentedUnorderedList>
           </li>
         </IndentedUnorderedList>
@@ -170,26 +175,26 @@ export const DataUseAgreementContent = () => {
       </li>
       <li><strong>NOT</strong> attempt to contact <AoUTitle/> participants.
       </li>
-      <li><strong>NOT</strong> make copies of or download individual-level data outside of
-        the <AoUTitle/> environment without approval from RAB.
+      <li><strong>NOT</strong> make copies of or download participant-level data and remove it from
+        the <AoUTitle/> environment.
         <IndentedUnorderedList>
           <li>I will not take screenshots or attempt any other way of
-            copying individual-level data.
+            copying participant-level data.
           </li>
         </IndentedUnorderedList>
       </li>
-
       <li><strong>NOT</strong> redistribute or publish registered or controlled tier <AoUTitle/> data including
         aggregate statistics that are more granular than buckets of 20 individuals without explicit approval from
         the <AoUTitle/>.
       </li>
-      <li><strong>NOT</strong> attempt to link participant-level All of Us data from the registered or controlled
-        tier with participant-level data from other sources without explicit permission from the All of Us Research
-        Program.</li>
-      <li><strong>NOT</strong> use <AoUTitle/> data for marketing purposes.
+      <li><strong>NOT</strong> sell or distribute <AoUTitle/> data at any level of granularity for the purpose
+      of profit or monetary gains.</li>
+      <li><strong>NOT</strong> attempt to link participant-level <i>All of Us</i> data from the registered or controlled
+        tier with participant-level data from other sources without explicit permission from the <AoUTitle/>.</li>
+      <li><strong>NOT</strong> use <AoUTitle/> data or any part of the Research Hub for marketing purposes.
         <IndentedUnorderedList>
           <li>“Marketing” means a communication about a product or service that encourages recipients of the
-            communication to purchase or use the product or service (US 45 CFR 164.501).
+            communication to purchase or use the product or service (<a href={MARKETING_URL}>US 45 CFR 164.501</a>).
           </li>
         </IndentedUnorderedList>
       </li>
@@ -200,9 +205,9 @@ export const DataUseAgreementContent = () => {
 
     <SecondHeader>Data Disclaimer:</SecondHeader>
     <p>The <AoUTitle/> does not guarantee the accuracy of the data in
-      the <AoUTitle/> database. The <AoUTitle/>
-      does not guarantee the performance of the software in the <AoUTitle/>
-      database. The <AoUTitle/> does not warrant or endorse
+      the <AoUTitle/> database. The <AoUTitle/> does
+      not guarantee the performance of the software in the <AoUTitle/> database.
+      The <AoUTitle/> does not warrant or endorse
       the research results obtained by using the <i>All of Us</i> database.
     </p>
   </div>;
