@@ -297,7 +297,6 @@ const SanctionModal = (props) => {
   </Modal>;
 };
 
-
 interface Props {
   profileState: {
     profile: Profile,
@@ -329,9 +328,9 @@ export const DataUseAgreement = withUserProfile()(
       };
     }
 
-    submitDataUseAgreement() {
+    submitDataUseAgreement(initials) {
       this.setState({submitting: true});
-      profileApi().submitDataUseAgreement(dataUseAgreementVersion).then((profile) => {
+      profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
         window.history.back();
       });
@@ -343,20 +342,22 @@ export const DataUseAgreement = withUserProfile()(
     }
 
     render() {
-      const {name, initialName, initialWork, initialSanctions, showSanctionModal,
+      const {initialName, initialWork, initialSanctions, showSanctionModal,
         submitting} = this.state;
-      const errors = validate({name, initialName, initialWork, initialSanctions}, {
-        name: {
-          presence: {allowEmpty: false}
-        },
+      const errors = validate({initialName, initialWork, initialSanctions}, {
         initialName: {
-          presence: {allowEmpty: false}
+          presence: {allowEmpty: false},
+          length: {maximum: 6}
         },
         initialWork: {
-          presence: {allowEmpty: false}
+          presence: {allowEmpty: false},
+          equality: {attribute: 'initialName'},
+          length: {maximum: 6}
         },
         initialSanctions: {
-          presence: {allowEmpty: false}
+          presence: {allowEmpty: false},
+          equality: {attribute: 'initialName'},
+          length: {maximum: 6}
         }
       });
       return <div style={styles.dataUseAgreementPage}>
@@ -369,8 +370,9 @@ export const DataUseAgreement = withUserProfile()(
           {submitting && <SpinnerOverlay/>}
           <SecondHeader style={{marginTop: 0}}>Agreement:</SecondHeader>
           <div style={{marginTop: '0.5rem', fontWeight: 600}}>I
-            <DuaTextInput placeholder='FIRST AND LAST NAME' style={{margin: '0 1ex'}}
-                          onChange={(v) => this.setState({name: v})} value={name}
+            <DuaTextInput style={{margin: '0 1ex'}}
+                          disabled
+                          value={this.props.profileState.profile.givenName + ' ' + this.props.profileState.profile.familyName}
                           data-test-id='dua-name-input'/>
             ("Authorized User") have
             personally reviewed this data use agreement. I agree to follow each of the policies
@@ -408,11 +410,15 @@ export const DataUseAgreement = withUserProfile()(
                         disabled value={this.props.profileState.profile.contactEmail}/>
           <DuaTextInput style={{marginTop: '0.5rem'}}
                         type='text' disabled value={new Date().toLocaleDateString()}/>
-          <TooltipTrigger content={errors && 'All fields required'}>
+          <TooltipTrigger content={errors && <div>
+            <div>All fields must be initialed</div>
+            <div>All initials must match</div>
+            <div>Initials must be six letters or fewer</div>
+          </div>}>
             <Button
               style={{marginTop: '1rem', cursor: errors && 'not-allowed', padding: '0 1.3rem'}}
               disabled={errors || submitting} data-test-id='submit-dua-button'
-              onClick={() => this.submitDataUseAgreement()}>Submit</Button>
+              onClick={() => this.submitDataUseAgreement(this.state.initialWork)}>Submit</Button>
           </TooltipTrigger>
         </FlexColumn>
       </div>; }
