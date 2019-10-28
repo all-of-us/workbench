@@ -573,7 +573,7 @@ paths:
           required: true
           type: string
       responses:
-        202:
+        200:
           description: Deletion success
           schema:
             $ref: '#/definitions/EmptyResponse'
