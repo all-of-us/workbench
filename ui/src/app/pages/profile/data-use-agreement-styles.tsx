@@ -1,9 +1,7 @@
-import * as fp from 'lodash/fp';
+import {styles as headerStyles} from 'app/components/headers';
+import colors from 'app/styles/colors';
+import {reactStyles} from 'app/utils';
 import * as React from 'react';
-import {styles as headerStyles} from '../../components/headers';
-import {TextInput} from '../../components/inputs';
-import colors from '../../styles/colors';
-import {reactStyles} from '../../utils';
 
 
 
