@@ -1,21 +1,20 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {NotebookRedirect} from './notebook-redirect';
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
-import {ClusterApi, ClusterLocalizeRequest, ClusterStatus, WorkspaceAccessLevel} from 'generated/fetch';
-import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {currentWorkspaceStore, queryParamsStore, serverConfigStore, urlParamsStore, userProfileStore} from 'app/utils/navigation';
+import {Kernels} from 'app/utils/notebook-kernels';
+import {ClusterApi, ClusterStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {ClusterApi as NotebooksClusterApi, JupyterApi, NotebooksApi} from 'notebooks-generated/fetch';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {ClusterApiStub} from 'testing/stubs/cluster-api-stub';
 import {JupyterApiStub} from 'testing/stubs/jupyter-api-stub';
 import {NotebooksApiStub} from 'testing/stubs/notebooks-api-stub';
-import {queryParamsStore, serverConfigStore} from 'app/utils/navigation';
-import {Kernels} from 'app/utils/notebook-kernels';
 import {NotebooksClusterApiStub} from 'testing/stubs/notebooks-cluster-api-stub';
-import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
-import {currentWorkspaceStore, urlParamsStore, userProfileStore} from '../../utils/navigation';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
+import {NotebookRedirect} from './notebook-redirect';
 
 describe('NotebookRedirect', () => {
   const workspace = {
@@ -28,16 +27,21 @@ describe('NotebookRedirect', () => {
 
   let clusterStub: ClusterApiStub;
 
+  /*
+  NotebookRedirect.progressCardStates:
+  {includes: [Progress.Unknown, Progress.Initializing, Progress.Resuming], icon: 'notebook'},
+  {includes: [Progress.Authenticating], icon: 'success-standard'},
+  {includes: [Progress.Creating, Progress.Copying], icon: 'copy'},
+  {includes: [Progress.Redirecting], icon: 'circle-arrow'}
+   */
   const progressCardIds = {
-    initializing: 0,
+    unknownInitializingResuming: 0,
     authenticating: 1,
-    loading: 2,
+    creatingCopying: 2,
     redirecting: 3
   };
 
-
-
-  const component = () => {
+  const mountedComponent = () => {
     return mount(<NotebookRedirect/>);
   };
 
@@ -54,7 +58,7 @@ describe('NotebookRedirect', () => {
     registerApiClientNotebooks(NotebooksApi, new NotebooksApiStub());
     registerApiClientNotebooks(NotebooksClusterApi, new NotebooksClusterApiStub());
 
-    serverConfigStore.next({useBillingProjectBuffer: false, gsuiteDomain: 'x'});
+    serverConfigStore.next({gsuiteDomain: 'x'});
     urlParamsStore.next({
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
@@ -68,41 +72,89 @@ describe('NotebookRedirect', () => {
     userProfileStore.next({profile, reload, updateCache});
 
     // mock timers
-    exportFunctions.timeout = jest.fn();
     jest.useFakeTimers();
 
+
+    // joel tmp!
+    jest.setTimeout(1000000);
+
+
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    jest.clearAllMocks();
   });
 
   it('should render', () => {
-    const wrapper = component();
+    const wrapper = mountedComponent();
     expect(wrapper).toBeTruthy();
+    wrapper.unmount();
   });
 
   it('should show redirect display before showing notebook', async() => {
-    const wrapper = component();
+    const wrapper = mountedComponent();
     expect(wrapper.exists('[data-test-id="notebook-redirect"]')).toBeTruthy();
+    wrapper.unmount();
   });
 
-  it('redirect state should be "Initializing" until cluster is running', async() => {
-    const wrapper = component();
+  it('should be "Initializing" until a Creating cluster for an existing notebook is running', async() => {
+    const wrapper = mountedComponent();
+
+    wrapper.setState({creatingNewNotebook: false});
+    clusterStub.cluster.status = ClusterStatus.Creating;
+
+    await expectRedirectingAfterRunning(wrapper);
+
+    wrapper.unmount();
+  });
+
+  it('should be "Initializing" until a Creating cluster for a new notebook is running', async() => {
+    const wrapper = mountedComponent();
+
+    wrapper.setState({creatingNewNotebook: true});
+    clusterStub.cluster.status = ClusterStatus.Creating;
+
+    await expectRedirectingAfterRunning(wrapper);
+
+    wrapper.unmount();
+  });
+
+  it('should be "Resuming" until a Stopped cluster for an existing notebook is running', async() => {
+    const wrapper = mountedComponent();
+
+    wrapper.setState({creatingNewNotebook: false});
+    clusterStub.cluster.status = ClusterStatus.Stopped;
+
+    await expectRedirectingAfterRunning(wrapper);
+
+    wrapper.unmount();
+  });
+
+  it('should be "Resuming" until a Stopped cluster for a new notebook is running', async() => {
+    const wrapper = mountedComponent();
+
+    wrapper.setState({creatingNewNotebook: true});
+    clusterStub.cluster.status = ClusterStatus.Stopped;
+
+    await expectRedirectingAfterRunning(wrapper);
+
+    wrapper.unmount();
+  });
+
+  async function expectRedirectingAfterRunning(wrapper) {
     await waitOneTickAndUpdate(wrapper);
+
     expect(wrapper
-      .exists(getCardSpinnerTestId(progressCardIds.initializing)))
+      .exists(getCardSpinnerTestId(progressCardIds.unknownInitializingResuming)))
       .toBeTruthy();
+
     clusterStub.cluster.status = ClusterStatus.Running;
-    // TODO: not sure how to get repoll to actually happen, or if repoll is
-    // happening and we are just never changing the cluster status to running
-    // so it goes into an infinite loop waiting for the cluster.
-    await waitOneTickAndUpdate(wrapper);
-    jest.runAllTimers();
-    await Promise.resolve();
+    jest.runOnlyPendingTimers();
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper
-      .exists(getCardSpinnerTestId(progressCardIds.initializing)))
-      .toBeFalsy();
-    expect(wrapper.exists(getCardSpinnerTestId(progressCardIds.authenticating))).toBeTruthy();
-  });
-
-
+      .exists(getCardSpinnerTestId(progressCardIds.redirecting)))
+      .toBeTruthy();
+  }
 });

@@ -10,7 +10,9 @@ import {
   BaseAPI,
   ClusterApi,
   Configuration as FetchConfiguration,
-  FetchAPI, JupyterApi, NotebooksApi
+  FetchAPI,
+  JupyterApi,
+  NotebooksApi
 } from 'notebooks-generated/fetch';
 
 let frozen = false;

@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
 
-import {serverConfigStore, urlParamsStore} from 'app/utils/navigation';
+import {urlParamsStore} from 'app/utils/navigation';
 
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -17,7 +17,6 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
   ReactWrapperBase,
-  exportFunctions,
   withCurrentWorkspace,
   withQueryParams,
   withUserProfile
@@ -27,6 +26,8 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Cluster, ClusterStatus, Profile} from 'generated/fetch';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
+
+// TODO Joel Current Failures: new notebook with R??
 
 enum Progress {
   Unknown,
@@ -275,8 +276,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
           if (cluster.status === ClusterStatus.Stopped) {
             await notebooksClusterApi().startCluster(cluster.clusterNamespace, cluster.clusterName);
           }
-          // TODO: I don't think we need to put a timeout here, since there is a timeout already on repoll
-          await exportFunctions.timeout(10000);
           repoll();
         }
       } catch (e) {
@@ -302,13 +301,17 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     setNotebookNames(): void {
       const {nbName} = urlParamsStore.getValue();
       const notebookName = dropNotebookFileSuffix(decodeURIComponent(nbName));
-      this.setState({notebookName: notebookName}, () => {
-        this.setState({fullNotebookName: appendNotebookFileSuffix(notebookName)});
-      });
+      this.setState({notebookName: notebookName,
+        fullNotebookName: appendNotebookFileSuffix(notebookName)});
     }
 
     async initializeNotebookCookies(c: Cluster) {
-      return notebooksApi().setCookie(c.clusterNamespace, c.clusterName, {withCredentials: true});
+      return notebooksApi().setCookie(c.clusterNamespace, c.clusterName,
+        {
+          withCredentials: true,
+          crossDomain: true,
+          credentials: 'include'
+        });
     }
 
     async getNotebookPathAndLocalize(cluster: Cluster) {

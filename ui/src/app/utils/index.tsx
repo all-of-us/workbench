@@ -500,12 +500,3 @@ async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
       apiCall, maxRetries, retryCount + 1, initialWaitTime);
   }
 }
-
-export function timeout(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// This is to allow the timeout function to be mocked in jest tests
-export const exportFunctions = {
-  timeout
-};
