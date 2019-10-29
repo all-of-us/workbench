@@ -428,6 +428,11 @@ public class WorkspacesControllerTest {
     doReturn(workspaceResponses).when(fireCloudService).getWorkspaces(any());
   }
 
+  /**
+   * Mocks out the FireCloud cloneWorkspace call with a FC-model workspace based on the provided
+   * details. The mocked workspace object is returned so the caller can make further modifications
+   * if needed.
+   */
   private org.pmiops.workbench.firecloud.model.Workspace stubCloneWorkspace(
       String ns, String name, String creator) {
     org.pmiops.workbench.firecloud.model.Workspace fcResponse =
@@ -867,8 +872,9 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
-    org.pmiops.workbench.firecloud.model.Workspace clonedWorkspace = stubCloneWorkspace(
-        modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+    org.pmiops.workbench.firecloud.model.Workspace clonedWorkspace =
+        stubCloneWorkspace(
+            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     // Assign the same bucket name as the mock-factory's bucket name, so the clone vs. get equality
     // assertion below will pass.
     clonedWorkspace.setBucketName(TestMockFactory.BUCKET_NAME);
@@ -889,7 +895,6 @@ public class WorkspacesControllerTest {
                 .getWorkspace(workspace2.getNamespace(), workspace2.getId())
                 .getBody()
                 .getWorkspace());
-
 
     assertThat(workspace2.getName()).isEqualTo(modWorkspace.getName());
     assertThat(workspace2.getNamespace()).isEqualTo(modWorkspace.getNamespace());
