@@ -294,8 +294,8 @@ public class UserService {
     return user;
   }
 
-  public UserDataUseAgreement submitDataUseAgreement(
-      Integer dataUseAgreementSignedVersion, String initials) {
+  public User submitDataUseAgreement(
+      User user, Integer dataUseAgreementSignedVersion, String initials) {
     // FIXME: this should not be hardcoded
     if (dataUseAgreementSignedVersion != CURRENT_DATA_USE_AGREEMENT_VERSION) {
       throw new BadRequestException("Data Use Agreement Version is not up to date");
@@ -303,12 +303,16 @@ public class UserService {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     UserDataUseAgreement dataUseAgreement = new UserDataUseAgreement();
     dataUseAgreement.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
-    dataUseAgreement.setUserId(userProvider.get().getUserId());
-    dataUseAgreement.setUserFamilyName(userProvider.get().getFamilyName());
-    dataUseAgreement.setUserGivenName(userProvider.get().getGivenName());
+    dataUseAgreement.setUserId(user.getUserId());
+    dataUseAgreement.setUserFamilyName(user.getFamilyName());
+    dataUseAgreement.setUserGivenName(user.getGivenName());
     dataUseAgreement.setUserInitials(initials);
     dataUseAgreement.setCompletionTime(timestamp);
-    return userDataUseAgreementDao.save(dataUseAgreement);
+    userDataUseAgreementDao.save(dataUseAgreement);
+    // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
+    user.setDataUseAgreementCompletionTime(timestamp);
+    user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+    return userDao.save(user);
   }
 
   @Transactional
