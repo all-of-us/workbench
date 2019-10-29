@@ -126,6 +126,18 @@ button.tab.active {
   overflow: auto;
 }
 
+.content.right {
+  height: 100%;
+}
+
+.demographics .content.left {
+  margin-bottom: 3.5rem;
+}
+
+.demographics.age .content.left {
+  margin-bottom: 0;
+}
+
 .footer {
   margin-top: 0.5rem;
   padding: 0.45rem 0rem;
@@ -186,7 +198,7 @@ button.tab.active {
   background-color: white;
 }
 .demographics .panel-right.selected {
-  height: 40vh;
+  height: calc(100% - 5.5rem);
   min-height: 10rem;
 }
 

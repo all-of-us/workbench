@@ -1,5 +1,7 @@
 <div class="crit-modal-container" *ngIf="wizard" [class.show]="open">
-  <div class="crit-modal-content" [class.demographics]="wizard.domain === domainType.PERSON">
+  <div class="crit-modal-content"
+    [class.demographics]="wizard.domain === domainType.PERSON"
+    [class.age]="wizard.type === criteriaType.AGE">
     <div class="container title-margin">
       <div class="row">
         <div class="col padding-zero" [ngClass]="treeClass">
@@ -44,7 +46,7 @@
               <clr-icon size="24" shape="close"></clr-icon>
             </button>
           </div>
-          <div class="content" *ngIf="open">
+          <div class="content left" *ngIf="open">
             <ng-container [ngSwitch]="wizard.domain">
               <crit-list-demographics *ngSwitchCase="domainType[domainType.PERSON]"></crit-list-demographics>
               <ng-container *ngSwitchDefault>
@@ -101,7 +103,7 @@
         </div>
 
         <div *ngIf="wizard.type !== criteriaType.AGE" class="col padding-zero" [ngClass]="sidebarClass">
-          <div class="content" *ngIf="open">
+          <div class="content right" *ngIf="open">
             <div class="panel-right-container">
               <h5 class="selection-title">Selected Criteria</h5>
               <div class="panel-right selected">
