@@ -10,7 +10,7 @@ import {
   BaseAPI,
   ClusterApi,
   Configuration as FetchConfiguration,
-  FetchAPI
+  FetchAPI, JupyterApi, NotebooksApi
 } from 'notebooks-generated/fetch';
 
 let frozen = false;
@@ -43,6 +43,8 @@ function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
 // To add a new service, add a new entry below. Note that these properties are
 // getters for the API clients, e.g.: clusterApi().listClusters();
 export const notebooksClusterApi = bindCtor(ClusterApi);
+export const notebooksApi = bindCtor(NotebooksApi);
+export const jupyterApi = bindCtor(JupyterApi);
 
 export function bindApiClients(conf: FetchConfiguration, f: FetchAPI) {
   for (const ctor of apiCtors) {

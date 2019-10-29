@@ -16,6 +16,7 @@ import {
   currentCohortStore,
   currentConceptSetStore,
   currentWorkspaceStore,
+  queryParamsStore,
   routeConfigDataStore,
   urlParamsStore,
   userProfileStore
@@ -359,6 +360,11 @@ export const withCdrVersions = () => {
   return connectReplaySubject(cdrVersionStore, 'cdrVersionListResponse');
 };
 
+// HOC that provides a 'queryParams' prop with current query params
+export const withQueryParams = () => {
+  return connectBehaviorSubject(queryParamsStore, 'queryParams');
+};
+
 // Temporary method for converting generated/models/Domain to generated/models/fetch/Domain
 export function generateDomain(domain: FetchDomain): Domain {
   const d = fp.capitalize(FetchDomain[domain]);
@@ -494,3 +500,12 @@ async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
       apiCall, maxRetries, retryCount + 1, initialWaitTime);
   }
 }
+
+export function timeout(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// This is to allow the timeout function to be mocked in jest tests
+export const exportFunctions = {
+  timeout
+};
