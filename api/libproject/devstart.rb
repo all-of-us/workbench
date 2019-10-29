@@ -634,10 +634,9 @@ end
 
 Common.register_command({
   :invocation => "run-local-all-migrations",
-  :description => "Runs local data/schema migrations for cdr/workbench schemas.",
+  :description => "Runs local data/schema migrations for the cdr and workbench schemas.",
   :fn => ->() { run_local_all_migrations() }
 })
-
 
 def run_local_data_migrations()
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
@@ -645,8 +644,19 @@ end
 
 Common.register_command({
   :invocation => "run-local-data-migrations",
-  :description => "Runs local data migrations for cdr/workbench schemas.",
+  :description => "Runs local data migrations for the cdr schema.",
   :fn => ->() { run_local_data_migrations() }
+})
+
+def run_local_rw_migrations()
+  common = Common.new
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+end
+
+Common.register_command({
+  :invocation => "run-local-rw-migrations",
+  :description => "Runs local migrations for the workbench schema.",
+  :fn => ->() { run_local_rw_migrations() }
 })
 
 def make_bq_denormalized_tables(*args)
