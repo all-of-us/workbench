@@ -745,9 +745,9 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set x.est_count = y.cnt
 from
     (
-        select measurement_source_concept_id as concept_id, CAST(value_as_concept_id as STRING) as value, count(distinct person_id) as cnt
-        from \`$BQ_PROJECT.$BQ_DATASET.measurement\`
-        where measurement_source_concept_id IN (1586218, 903120, 903111)
+        select concept_id, CAST(value_as_concept_id as STRING) as value, count(distinct person_id) as cnt
+        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+        where concept_id IN (1586218, 903120, 903111)
         group by 1,2
     ) y
 where x.domain_id = 'PHYSICAL_MEASUREMENT'
