@@ -527,7 +527,7 @@ paths:
 
   # Notebook clusters ####################################################################
 
-  /v1/clusters/{billingProjectId}:
+  /v1/clusters/{billingProjectId}/{workspaceName}:
     get:
       summary: List available notebook clusters
       description: >
@@ -543,6 +543,11 @@ paths:
         - in: path
           name: billingProjectId
           description: The unique identifier of the Google Billing Project containing the clusters
+          required: true
+          type: string
+        - in: path
+          name: workspaceName
+          description: The name of the workspace whose notebook we're looking at
           required: true
           type: string
       responses:

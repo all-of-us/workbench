@@ -78,6 +78,7 @@ public class ClusterControllerTest {
   // a workspace's namespace is always its billing project ID
   private static final String WORKSPACE_NS = BILLING_PROJECT_ID;
   private static final String WORKSPACE_ID = "wsid";
+  private static final String WORKSPACE_NAME = "wsn";
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String OTHER_USER_EMAIL = "alice@gmail.com";
   private static final String BUCKET_NAME = "workspace-bucket";
@@ -85,6 +86,7 @@ public class ClusterControllerTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private static final String API_HOST = "api.stable.fake-research-aou.org";
   private static final String API_BASE_URL = "https://" + API_HOST;
+  private static final String BIGQUERY_DATASET = "dataset-name";
 
   private static WorkbenchConfig config = new WorkbenchConfig();
   private static User user = new User();
@@ -138,6 +140,7 @@ public class ClusterControllerTest {
   private CdrVersion cdrVersion;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
   private Cluster testCluster;
+  private Workspace testWorkspace;
 
   @Before
   public void setUp() {
@@ -163,6 +166,7 @@ public class ClusterControllerTest {
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
+    cdrVersion.setBigqueryDataset(BIGQUERY_DATASET);
 
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
     testFcCluster =
@@ -177,6 +181,11 @@ public class ClusterControllerTest {
             .clusterNamespace(BILLING_PROJECT_ID)
             .status(ClusterStatus.DELETING)
             .createdDate(createdDate);
+
+    testWorkspace = new Workspace();
+    testWorkspace.setWorkspaceNamespace(WORKSPACE_NS);
+    testWorkspace.setName(WORKSPACE_NAME);
+    testWorkspace.setCdrVersion(cdrVersion);
   }
 
   private org.pmiops.workbench.firecloud.model.Workspace createFcWorkspace(
@@ -222,7 +231,11 @@ public class ClusterControllerTest {
     when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
         .thenReturn(testFcCluster);
 
-    assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
+    assertThat(
+            clusterController
+                .listClusters(BILLING_PROJECT_ID, WORKSPACE_NAME)
+                .getBody()
+                .getDefaultCluster())
         .isEqualTo(testCluster);
   }
 
@@ -233,7 +246,7 @@ public class ClusterControllerTest {
 
     assertThat(
             clusterController
-                .listClusters(BILLING_PROJECT_ID)
+                .listClusters(BILLING_PROJECT_ID, WORKSPACE_NAME)
                 .getBody()
                 .getDefaultCluster()
                 .getStatus())
@@ -242,17 +255,23 @@ public class ClusterControllerTest {
 
   @Test(expected = BadRequestException.class)
   public void testListClustersNullBillingProject() throws Exception {
-    clusterController.listClusters(null);
+    clusterController.listClusters(null, WORKSPACE_NAME);
   }
 
   @Test
-  public void testListClustersLazyCreate() {
+  public void testListClustersLazyCreate() throws Exception {
     when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
         .thenThrow(new NotFoundException());
-    when(notebookService.createCluster(eq(BILLING_PROJECT_ID), eq(getClusterName())))
+    when(notebookService.createCluster(
+            eq(BILLING_PROJECT_ID), eq(getClusterName()), eq(WORKSPACE_NAME)))
         .thenReturn(testFcCluster);
+    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_NAME, "test");
 
-    assertThat(clusterController.listClusters(BILLING_PROJECT_ID).getBody().getDefaultCluster())
+    assertThat(
+            clusterController
+                .listClusters(BILLING_PROJECT_ID, WORKSPACE_NAME)
+                .getBody()
+                .getDefaultCluster())
         .isEqualTo(testCluster);
   }
 

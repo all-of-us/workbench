@@ -1360,6 +1360,11 @@ definitions:
         type: boolean
         description: If set to true, sets up welder on the cluster. If unset, welder will not be put on the cluster.
         default: false
+      customClusterEnvironmentVariables:
+        type: object
+        description: A collection of key/value pairs of environment variable names and their desired value to be set in the cluster.
+        additionalProperties:
+          type: string
 
 
   ClusterError:

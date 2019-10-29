@@ -11,6 +11,7 @@ import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.test.Providers;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 
 /** Created by brubenst on 5/8/18. */
@@ -23,6 +24,7 @@ public class NotebooksIntegrationTest {
 
   @Mock private ClusterApi clusterApi;
   @Mock private NotebooksApi notebooksApi;
+  @Mock private WorkspaceService workspaceService;
 
   private final LeonardoNotebooksClient leonardoNotebooksClient =
       new LeonardoNotebooksClientImpl(
@@ -30,7 +32,8 @@ public class NotebooksIntegrationTest {
           Providers.of(notebooksApi),
           Providers.of(createConfig()),
           Providers.of(null),
-          new NotebooksRetryHandler(new NoBackOffPolicy()));
+          new NotebooksRetryHandler(new NoBackOffPolicy()),
+          workspaceService);
 
   @Test
   public void testStatus() {
