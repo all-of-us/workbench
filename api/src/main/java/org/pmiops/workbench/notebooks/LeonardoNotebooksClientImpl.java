@@ -85,9 +85,11 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
       customClusterEnvironmentVariables.put(
-          WorkbenchConstants.CDR_VERSION_CLOUD_PROJECT, workspace.getCdrVersion().getBigqueryProject());
+          WorkbenchConstants.CDR_VERSION_CLOUD_PROJECT,
+          workspace.getCdrVersion().getBigqueryProject());
       customClusterEnvironmentVariables.put(
-          WorkbenchConstants.CDR_VERSION_BIGQUERY_DATASET, workspace.getCdrVersion().getBigqueryDataset());
+          WorkbenchConstants.CDR_VERSION_BIGQUERY_DATASET,
+          workspace.getCdrVersion().getBigqueryDataset());
     }
 
     return new ClusterRequest()
