@@ -136,7 +136,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
           parameterId: paramId,
           attributes: [attr],
         };
-        if (!this.wizard.item.searchParameters.find(s => s.type === CriteriaType[CriteriaType.DECEASED])) {
+        if (!this.wizard.item.searchParameters.length) {
           const wizard = this.wizard;
           wizard.item.searchParameters.push(this.selectedNode);
           const selections = [paramId, ...this.selections];
