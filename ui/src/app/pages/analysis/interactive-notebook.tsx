@@ -134,7 +134,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         setTimeout(() => this.runCluster(onClusterReady), 5000);
       };
 
-      clusterApi().listClusters(this.props.urlParams.ns)
+      clusterApi().listClusters(this.props.urlParams.ns, this.props.urlParams.wsid)
         .then((body) => {
           const cluster = body.defaultCluster;
           this.setState({clusterStatus: cluster.status});
