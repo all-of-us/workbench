@@ -14,7 +14,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
 /** Created by brubenst on 9/4/19. */
 public class TestMockFactory {
-  private static final String BUCKET_NAME = "workspace-bucket";
+  public static final String BUCKET_NAME = "workspace-bucket";
 
   public org.pmiops.workbench.firecloud.model.Workspace createFcWorkspace(
       String ns, String name, String creator) {

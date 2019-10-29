@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -866,13 +867,29 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+    org.pmiops.workbench.firecloud.model.Workspace clonedWorkspace = stubCloneWorkspace(
+        modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+    // Assign the same bucket name as the mock-factory's bucket name, so the clone vs. get equality
+    // assertion below will pass.
+    clonedWorkspace.setBucketName(TestMockFactory.BUCKET_NAME);
+
     mockBillingProjectBuffer("cloned-ns");
     Workspace workspace2 =
         workspacesController
             .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
             .getBody()
             .getWorkspace();
+
+    // Stub out the FC service getWorkspace, since that's called by workspacesController.
+    stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
+    assertWithMessage("get and clone responses are inconsistent")
+        .that(workspace2)
+        .isEqualTo(
+            workspacesController
+                .getWorkspace(workspace2.getNamespace(), workspace2.getId())
+                .getBody()
+                .getWorkspace());
+
 
     assertThat(workspace2.getName()).isEqualTo(modWorkspace.getName());
     assertThat(workspace2.getNamespace()).isEqualTo(modWorkspace.getNamespace());
