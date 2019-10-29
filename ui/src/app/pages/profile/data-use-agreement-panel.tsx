@@ -1,7 +1,6 @@
 import {Button} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
 import {TextInput} from 'app/components/inputs';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -9,7 +8,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {
   AoUTitle,
-  dataUseAgreementStyles,
   IndentedListItem,
   IndentedUnorderedList,
   SecondHeader

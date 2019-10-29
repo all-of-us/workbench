@@ -20,7 +20,7 @@ const styles = {
   dataUseParagraphStyles: {
     marginTop: '0.5rem'
   }
-}
+};
 
 {/* NOTE: Make sure to update dataUseAgreementVersion if there is any change to the DUA text. */}
 export const DataUseAgreementContent = () => {
