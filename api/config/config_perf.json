@@ -19,6 +19,7 @@
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_00293C-5DEA2D-6887E7",
     "retryCount": 4,
     "bufferCapacity": 300,
+    "bufferRefillProjectsPerTask": 5,
     "defaultFreeCreditsLimit": 100.0,
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [

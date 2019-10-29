@@ -29,8 +29,8 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> bufferBillingProject() {
-    billingProjectBufferService.bufferBillingProject();
+  public ResponseEntity<Void> bufferBillingProjects() {
+    billingProjectBufferService.bufferBillingProjects();
     return ResponseEntity.noContent().build();
   }
 
