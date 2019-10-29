@@ -56,8 +56,8 @@ public class WorkbenchConfig {
     public Integer bufferCapacity;
     // The number of times to attempt project creation per cron task execution. This effectively
     // controls the max rate of project refill. If the cron task is configured to run once per
-    // minute and this param is set to 5, then the buffer system will create up to 5 projects
-    // per minute.
+    // minute and this param is set to 5, then the buffer system will create up to approximately
+    // 5 projects per minute.
     //
     // Per guidance from Google Cloud's project infrastructure team, we should limit our total rate
     // of project creation to a number less than 1 per second. In practice, a reasonable aggressive
