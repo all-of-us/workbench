@@ -16,48 +16,54 @@ const PII_URL = 'https://www.govinfo.gov/content/pkg/CFR-2014-title2-vol1/pdf/CF
 const STIGMATIZING_RESEARCH_URL =
   'https://docs.google.com/document/d/1RGWCmujvunLRdlBTYpZArcben4QNFwOhp7mSDK3puC0/view';
 
+const styles = {
+  dataUseParagraphStyles: {
+    marginTop: '0.5rem'
+  }
+}
+
 {/* NOTE: Make sure to update dataUseAgreementVersion if there is any change to the DUA text. */}
 export const DataUseAgreementContent = () => {
-  return <div>
+  return <div style={styles.dataUseParagraphStyles}>
     <BolderHeader style={{display: 'flex', justifyContent: 'center'}}><AoUTitle/></BolderHeader>
     <BoldHeader  style={{display: 'flex', justifyContent: 'center'}}>Demonstration Project Data Use Agreement</BoldHeader>
-    <p>
+    <div style={styles.dataUseParagraphStyles}>
       This data use agreement describes how <AoUTitle/> data can and cannot be used for the purposes
       of program-approved demonstration projects.
-    </p>
-    <p>
+    </div>
+    <div style={styles.dataUseParagraphStyles}>
       This is an agreement between Vanderbilt University Medical Center and authorized demonstration users of data
       from
       the <AoUTitle/>.
-    </p>
-    <p>
+    </div>
+    <div style={styles.dataUseParagraphStyles}>
       An <strong>authorized demonstration user</strong> is a person who is authorized to access
       and/or work with registered or
       controlled tier data from the <AoUTitle/> for the exclusive purpose of a program-approved
       demonstration project. Authorized demonstration users are limited to trainees, faculty or staff
       at <AoUTitle/> consortium partner institutions.
-    </p>
-    <p>
+    </div>
+    <div style={styles.dataUseParagraphStyles}>
       <strong>Before</strong> they access and/or work with <AoUTitle/> data, authorized demonstration users must:
       <IndentedOrderedList>
-        <li>complete the <AoUTitle/> research ethics training; and</li>
-        <li>read and attest to this data use agreement</li>
+        <IndentedListItem>complete the <AoUTitle/> research ethics training; and</IndentedListItem>
+        <IndentedListItem>read and attest to this data use agreement</IndentedListItem>
       </IndentedOrderedList>
-    </p>
-    <p>Please read this agreement carefully and completely before signing.</p>
+    </div>
+    <div style={styles.dataUseParagraphStyles}>Please read this agreement carefully and completely before signing.</div>
     <SecondHeader>As an “Authorized Demonstration User” of the <AoUTitle/> data, I
       will:</SecondHeader>
     <IndentedUnorderedList>
-      <li>read and adhere to the <AoUTitle/> <a target='_blank' href={CORE_VALUES_URL}>core values</a>.
-      </li>
-      <li>know and follow all laws regarding research involving human data and data privacy that are
+      <IndentedListItem>read and adhere to the <AoUTitle/> <a target='_blank' href={CORE_VALUES_URL}>core values</a>.
+      </IndentedListItem>
+      <IndentedListItem>know and follow all laws regarding research involving human data and data privacy that are
         applicable in the area where I am conducting research.
         <IndentedUnorderedList>
           <IndentedListItem>In the US, this includes all applicable federal, state, and local laws.</IndentedListItem>
           <IndentedListItem>Outside of the US, other laws will apply.</IndentedListItem>
         </IndentedUnorderedList>
-      </li>
-      <li>respect the privacy of research participants at all times.
+      </IndentedListItem>
+      <IndentedListItem>respect the privacy of research participants at all times.
         <IndentedUnorderedList>
           <IndentedListItem>
             I will <strong>NOT</strong> use or disclose any
@@ -86,57 +92,61 @@ export const DataUseAgreementContent = () => {
             the <AoUTitle/> immediately using the appropriate process.
           </IndentedListItem>
         </IndentedUnorderedList>
-        <IndentedListItem>provide a meaningful description of my research purpose when establishing
-          my <AoUTitle/> workspace.</IndentedListItem>
-        <IndentedUnorderedList>
-          <IndentedListItem>This description will accurately reflect the demonstration project proposal for which I
-            received <i>All of Us</i> approval.</IndentedListItem>
-          <IndentedListItem>Within my workspace, I will only use the data for the demonstration project for which I have
-            received <i>All of Us</i> approval.
-          </IndentedListItem>
-        </IndentedUnorderedList>
-        <IndentedListItem>take full responsibility for any external data, files, or software that I import into my
-          Workspace and the consequences thereof.</IndentedListItem>
-        <IndentedUnorderedList>
-          <IndentedListItem>I will know and follow all applicable laws, regulations, and policies regarding access and
-            use for any external data, files, or software that I upload into my Workspace.</IndentedListItem>
-          <IndentedListItem>I will <strong>NOT</strong> upload data or files containing
-            personally identifiable information (PII).
-            <IndentedUnorderedList><IndentedListItem>
-              PII means information that can be used to distinguish or trace the identity of an individual
-              (e.g., name, social security number, biometric records, etc.) either alone, or when combined with other
-              personal or identifying information that is linked or linkable to a specific
-              individual <a href={PII_URL}>(2 CFR §200.79)</a>
-            </IndentedListItem></IndentedUnorderedList>
-          </IndentedListItem>
-          <IndentedListItem>I will use any external data, files, or software that I upload into my Workspace
-            exclusively for the research purpose I have provided for that Workspace.</IndentedListItem>
-          <IndentedListItem>I will <strong>NOT</strong> use any external data, files, or software that I upload into
-            my Workspace for any malicious purposes.</IndentedListItem>
-          <IndentedListItem>If any import of data, files, or software into my Workspace results in unforeseen
-            consequences and/or unintentional violation of these terms, I will notify
-            the <AoUTitle/> as soon as I become aware using the appropriate process.</IndentedListItem>
-        </IndentedUnorderedList>
-        <li>use a version of the <AoUTitle/> database that is current at or after the time my
-          analysis begins.</li>
-        <IndentedUnorderedList>
-          <IndentedListItem>Archived versions of the database are maintained for the sole purpose of completion of
-            existing studies or replication of previous studies. New work may not be initiated on
-            archived versions of the database.
-          </IndentedListItem>
-        </IndentedUnorderedList>
-      </li>
-      <li>share the results of my demonstration project and all contents of my Workbench with the <AoUTitle/>. </li>
+      </IndentedListItem>
+      <IndentedListItem>provide a meaningful description of my research purpose when establishing
+        my <AoUTitle/> workspace.</IndentedListItem>
       <IndentedUnorderedList>
-        <li>My workbench and its contents may be made public for the benefit of all authorized users.</li>
+        <IndentedListItem>This description will accurately reflect the demonstration project proposal for which I
+          received <i>All of Us</i> approval.</IndentedListItem>
+        <IndentedListItem>Within my workspace, I will only use the data for the demonstration project for which I have
+          received <i>All of Us</i> approval.
+        </IndentedListItem>
       </IndentedUnorderedList>
-      <li>honor the contribution to my work of those who take part in <i>All of Us</i>
+      <IndentedListItem>take full responsibility for any external data, files, or software that I import into my
+        Workspace and the consequences thereof.</IndentedListItem>
+      <IndentedUnorderedList>
+        <IndentedListItem>I will know and follow all applicable laws, regulations, and policies regarding access and
+          use for any external data, files, or software that I upload into my Workspace.</IndentedListItem>
+        <IndentedListItem>I will <strong>NOT</strong> upload data or files containing
+          personally identifiable information (PII).
+          <IndentedUnorderedList><IndentedListItem>
+            PII means information that can be used to distinguish or trace the identity of an individual
+            (e.g., name, social security number, biometric records, etc.) either alone, or when combined with other
+            personal or identifying information that is linked or linkable to a specific
+            individual <a href={PII_URL}>(2 CFR §200.79)</a>
+          </IndentedListItem></IndentedUnorderedList>
+        </IndentedListItem>
+        <IndentedListItem>I will use any external data, files, or software that I upload into my Workspace
+          exclusively for the research purpose I have provided for that Workspace.</IndentedListItem>
+        <IndentedListItem>I will <strong>NOT</strong> use any external data, files, or software that I upload into
+          my Workspace for any malicious purposes.</IndentedListItem>
+        <IndentedListItem>If any import of data, files, or software into my Workspace results in unforeseen
+          consequences and/or unintentional violation of these terms, I will notify
+          the <AoUTitle/> as soon as I become aware using the appropriate process.</IndentedListItem>
+      </IndentedUnorderedList>
+      <IndentedListItem>use a version of the <AoUTitle/> database that is current at or after the time my
+        analysis begins.</IndentedListItem>
+      <IndentedUnorderedList>
+        <IndentedListItem>Archived versions of the database are maintained for the sole purpose of completion of
+          existing studies or replication of previous studies. New work may not be initiated on
+          archived versions of the database.
+        </IndentedListItem>
+      </IndentedUnorderedList>
+      <IndentedListItem>
+        share the results of my demonstration project and all contents of my Workbench with the <AoUTitle/>.
+      </IndentedListItem>
+      <IndentedUnorderedList>
+        <IndentedListItem>
+          My workbench and its contents may be made public for the benefit of all authorized users.
+        </IndentedListItem>
+      </IndentedUnorderedList>
+      <IndentedListItem>honor the contribution to my work of those who take part in <i>All of Us</i>
         <IndentedUnorderedList>
-          <li>I will acknowledge the <AoUTitle/> and its research participants
+          <IndentedListItem>I will acknowledge the <AoUTitle/> and its research participants
             in all oral and written presentations, disclosures, and publications resulting from
             any analyses of the data.
             <IndentedUnorderedList>
-              <li style={{margin: '0.5rem 0'}}>Here is an example acknowledgement statement:
+              <IndentedListItem style={{margin: '0.5rem 0'}}>Here is an example acknowledgement statement:
                 <br/>
                 “The <AoUTitle/> is supported by the National Institutes of Health, Office of the
                 Director: Regional Medical Centers: 1 OT2 OD026549; 1 OT2 OD026554; 1 OT2 OD026557; 1 OT2 OD026556;
@@ -146,67 +156,69 @@ export const DataUseAgreementContent = () => {
                 Systems Center: 1 U24 OD023163; Communications and Engagement: 3 OT2 OD023205; 3 OT2 OD023206;
                 and Community Partners: 1 OT2 OD025277; 3 OT2 OD025315; 1 OT2 OD025337; 1 OT2 OD025276. In addition,
                 the <AoUTitle/> would not be possible without the partnership of its participants.”
-              </li>
-              <li>
+              </IndentedListItem>
+              <IndentedListItem>
                 I will submit an electronic version of a final, peer-reviewed manuscript to PubMed Central
                 immediately upon acceptance for publication, to be made publicly available no later than 12
                 months after the official date of publication.
-              </li>
+              </IndentedListItem>
             </IndentedUnorderedList>
-          </li>
+          </IndentedListItem>
         </IndentedUnorderedList>
-      </li>
+      </IndentedListItem>
     </IndentedUnorderedList>
     <SecondHeader>As “Authorized Demonstration User” of the <AoUTitle/> data, I
       will:</SecondHeader>
     <IndentedUnorderedList>
-      <li><strong>NOT</strong> share my login information with anyone.
+      <IndentedListItem><strong>NOT</strong> share my login information with anyone.
         <IndentedUnorderedList>
-          <li>I will not share my login information with another authorized demonstration or other user
+          <IndentedListItem>I will not share my login information with another authorized demonstration or other user
             of the <AoUTitle/>.
-          </li>
-          <li>I will not create any group or shared accounts.</li>
+          </IndentedListItem>
+          <IndentedListItem>I will not create any group or shared accounts.</IndentedListItem>
         </IndentedUnorderedList>
-      </li>
-      <li>
+      </IndentedListItem>
+      <IndentedListItem>
         <strong>NOT</strong> use <AoUTitle/> data or any external data, files, or software that I upload
         into the Research Workbench for research that is discriminatory or stigmatizing of individuals, families,
         groups, or communities. Please review the All of Us policy on stigmatizing
         research <a href={STIGMATIZING_RESEARCH_URL} target='_blank'>here</a>.
         <IndentedUnorderedList>
-          <li>I will contact the <AoUTitle/> Resource Access Board (RAB) for
+          <IndentedListItem>I will contact the <AoUTitle/> Resource Access Board (RAB) for
             further guidance on this point as needed.
-          </li>
+          </IndentedListItem>
         </IndentedUnorderedList>
-      </li>
-      <li><strong>NOT</strong> attempt to contact <AoUTitle/> participants.
-      </li>
-      <li><strong>NOT</strong> make copies of or download participant-level data and remove it from
+      </IndentedListItem>
+      <IndentedListItem><strong>NOT</strong> attempt to contact <AoUTitle/> participants.
+      </IndentedListItem>
+      <IndentedListItem><strong>NOT</strong> make copies of or download participant-level data and remove it from
         the <AoUTitle/> environment.
         <IndentedUnorderedList>
-          <li>I will not take screenshots or attempt any other way of
+          <IndentedListItem>I will not take screenshots or attempt any other way of
             copying participant-level data.
-          </li>
+          </IndentedListItem>
         </IndentedUnorderedList>
-      </li>
-      <li><strong>NOT</strong> redistribute or publish registered or controlled tier <AoUTitle/> data including
-        aggregate statistics that are more granular than buckets of 20 individuals without explicit approval from
-        the <AoUTitle/>.
-      </li>
-      <li><strong>NOT</strong> sell or distribute <AoUTitle/> data at any level of granularity for the purpose
-      of profit or monetary gains.</li>
-      <li><strong>NOT</strong> attempt to link participant-level <i>All of Us</i> data from the registered or controlled
-        tier with participant-level data from other sources without explicit permission from the <AoUTitle/>.</li>
-      <li><strong>NOT</strong> use <AoUTitle/> data or any part of the Research Hub for marketing purposes.
+      </IndentedListItem>
+      <IndentedListItem><strong>NOT</strong> redistribute or publish registered or controlled tier <AoUTitle/> data
+        including aggregate statistics that are more granular than buckets of 20 individuals without explicit approval
+        from the <AoUTitle/>.
+      </IndentedListItem>
+      <IndentedListItem><strong>NOT</strong> sell or distribute <AoUTitle/> data at any level of granularity for the
+        purpose of profit or monetary gains.</IndentedListItem>
+      <IndentedListItem><strong>NOT</strong> attempt to link participant-level <i>All of Us</i> data from the
+        registered or controlled tier with participant-level data from other sources without explicit permission from
+        the <AoUTitle/>.</IndentedListItem>
+      <IndentedListItem>
+        <strong>NOT</strong> use <AoUTitle/> data or any part of the Research Hub for marketing purposes.
         <IndentedUnorderedList>
-          <li>“Marketing” means a communication about a product or service that encourages recipients of the
-            communication to purchase or use the product or service (<a href={MARKETING_URL}>US 45 CFR 164.501</a>).
-          </li>
+          <IndentedListItem>“Marketing” means a communication about a product or service that encourages recipients of
+            the communication to purchase or use the product or service (<a href={MARKETING_URL}>US 45 CFR 164.501</a>).
+          </IndentedListItem>
         </IndentedUnorderedList>
-      </li>
-      <li><strong>NOT</strong> represent that the <AoUTitle/> endorses or approves of my research unless such
-        endorsement is expressly provided.
-      </li>
+      </IndentedListItem>
+      <IndentedListItem><strong>NOT</strong> represent that the <AoUTitle/> endorses or approves of my research unless
+        such endorsement is expressly provided.
+      </IndentedListItem>
     </IndentedUnorderedList>
 
     <SecondHeader>Terms and Definitions:</SecondHeader>

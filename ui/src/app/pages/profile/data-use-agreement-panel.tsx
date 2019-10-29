@@ -15,55 +15,6 @@ import {
   SecondHeader
 } from './data-use-agreement-styles';
 
-
-export const SanctionModal = (props) => {
-  return <Modal width={750}>
-    <ModalTitle style={dataUseAgreementStyles.sanctionModalTitle}>
-      All of Us Research Program - Sanctions on Violations of the Code of Conduct
-    </ModalTitle>
-    <ModalBody>
-      <label style={dataUseAgreementStyles.modalLabel}>
-        The Resource Access Board (RAB) of the <i>All of Us</i> Research Program determines whether
-        an investigator has violated the Code of Conduct outlined in the Data Use Agreement
-        signed by each user. The RAB notifies the All of Us Research Program office of the
-        violation.
-        <IndentedUnorderedList>
-          <li>
-            <label>The <i>All of Us</i> Research Program office and/or the All of Us IRB may
-              implement the following sanctions if it is determined that an investigator has violated
-              the Code of Conduct:
-            </label>
-            <IndentedUnorderedList>
-              <IndentedListItem>
-                Determine whether any action by the investigator is required to remedy the
-                violation.
-              </IndentedListItem>
-              <IndentedListItem>
-                Revoke and/or deny access of the violator to all non-public (Registered and
-                Controlled tier) <i>All of Us</i> data.
-              </IndentedListItem>
-              <IndentedListItem>
-                Post the name and affiliation of the violator on a public <i>All of Us</i>
-                Research Program webpage.
-              </IndentedListItem>
-              <IndentedListItem>
-                Revoke extant NIH funding and/or prohibit future funding, either permanently or for
-                an explicit period of time
-              </IndentedListItem>
-              <IndentedListItem>
-                Prosecute the violator for breach of a contract with the federal government
-              </IndentedListItem>
-            </IndentedUnorderedList>
-          </li>
-        </IndentedUnorderedList>
-      </label>
-    </ModalBody>
-    <ModalFooter>
-      <Button type='primary' onClick={props.onClose}>Close</Button>
-    </ModalFooter>
-  </Modal>;
-};
-
 const DuaTextInput = (props) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
   return <TextInput {...fp.omit(['data-test-id'], props)}
@@ -85,8 +36,8 @@ const InitialsAgreement = (props) => {
   </div>;
 };
 
-export function getDataUseAgreementWidget(submitting, name, initialWork,
-  initialName, initialSanctions, showSanctionModal, errors, profile) {
+export function getDataUseAgreementWidget(submitting, initialWork,
+  initialName, initialSanctions, errors, profile) {
   return <FlexColumn style={{
     borderRadius: '1rem',
     backgroundColor: colorWithWhiteness(colors.primary, 0.8),
@@ -98,7 +49,6 @@ export function getDataUseAgreementWidget(submitting, name, initialWork,
       <DuaTextInput style={{margin: '0 1ex'}}
                     disabled
                     value={profile.givenName + ' ' + profile.familyName}
-                    onChange={(v) => this.setState({name: v})}
                     data-test-id='dua-name-input'/>
       ("Authorized Demonstration User") have
       personally reviewed this data use agreement. I agree to follow each of the policies
@@ -134,10 +84,6 @@ export function getDataUseAgreementWidget(submitting, name, initialWork,
       <div><strong>I understand that failure to comply with these terms may also carry additional financial, legal, or other
         repercussions.</strong>
       </div>
-    </div>
-    <div>
-      {showSanctionModal &&
-      <SanctionModal onClose={() => this.setState({showSanctionModal: false})}/>}
     </div>
     <label>Authorized Demonstration User Name</label>
     <DuaTextInput disabled value={this.props.profileState.profile.username}/>
