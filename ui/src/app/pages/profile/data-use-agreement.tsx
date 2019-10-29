@@ -24,7 +24,6 @@ interface State {
   initialName: string;
   initialWork: string;
   initialSanctions: string;
-  showSanctionModal: boolean;
   submitting: boolean;
 }
 
@@ -37,7 +36,6 @@ export const DataUseAgreement = withUserProfile()(
         initialName: '',
         initialWork: '',
         initialSanctions: '',
-        showSanctionModal: false,
         submitting: false
       };
     }
@@ -50,14 +48,8 @@ export const DataUseAgreement = withUserProfile()(
       });
     }
 
-    updateSanction(event) {
-      event.preventDefault();
-      this.setState({showSanctionModal: true});
-    }
-
     render() {
-      const {initialName, initialWork, initialSanctions, showSanctionModal,
-        submitting} = this.state;
+      const {initialName, initialWork, initialSanctions, submitting} = this.state;
       const errors = validate({initialName, initialWork, initialSanctions}, {
         initialName: {
           presence: {allowEmpty: false},
@@ -79,11 +71,9 @@ export const DataUseAgreement = withUserProfile()(
         <div style={{height: '1rem'}}/>
         {getDataUseAgreementWidget.call(this,
           submitting,
-          name,
           initialWork,
           initialName,
           initialSanctions,
-          showSanctionModal,
           errors,
           this.props.profileState.profile)
         }
