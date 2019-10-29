@@ -69,7 +69,7 @@ public interface FireCloudService {
   /** Creates a new FC workspace. */
   Workspace createWorkspace(String projectName, String workspaceName);
 
-  void cloneWorkspace(String fromProject, String fromName, String toProject, String toName);
+  Workspace cloneWorkspace(String fromProject, String fromName, String toProject, String toName);
 
   /** Retrieves all billing project memberships for the user from FireCloud. */
   List<BillingProjectMembership> getBillingProjectMemberships();

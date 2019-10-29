@@ -301,17 +301,15 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void cloneWorkspace(String fromProject, String fromName, String toProject, String toName) {
+  public Workspace cloneWorkspace(
+      String fromProject, String fromName, String toProject, String toName) {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     WorkspaceIngest workspaceIngest = new WorkspaceIngest();
     workspaceIngest.setNamespace(toProject);
     workspaceIngest.setName(toName);
     checkAndAddRegistered(workspaceIngest);
-    retryHandler.run(
-        (context) -> {
-          workspacesApi.cloneWorkspace(fromProject, fromName, workspaceIngest);
-          return null;
-        });
+    return retryHandler.run(
+        (context) -> workspacesApi.cloneWorkspace(fromProject, fromName, workspaceIngest));
   }
 
   @Override
