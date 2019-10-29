@@ -1103,7 +1103,7 @@ select ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(ID) FROM \`$BQ_PROJE
     'PERSON',1,'RACE',concept_id,
     CASE
         WHEN a.race_concept_id = 0 THEN 'Unknown'
-        ELSE CONCAT( UPPER(SUBSTR(concept_name, 1, 1)), LOWER(SUBSTR(concept_name, 2)) )
+        ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
     END as name,
     a.cnt,0,1,0,0
 FROM
@@ -1128,7 +1128,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 select ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS ID,
     (SELECT ID FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE type = 'ETHNICITY' and parent_id = 0) as parent_id,
     'PERSON',1,'ETHNICITY',concept_id,
-    CONCAT( UPPER(SUBSTR(concept_name, 1, 1)), LOWER(SUBSTR(concept_name, 2)) ) as name,
+    regexp_replace(b.concept_name, r'^.+:\s', ''),
     a.cnt,0,1,0,0
 FROM
     (
