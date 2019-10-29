@@ -263,7 +263,7 @@ public class ClusterControllerTest {
     when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
         .thenThrow(new NotFoundException());
     when(notebookService.createCluster(
-            eq(BILLING_PROJECT_ID), eq(getClusterName()), eq(BIGQUERY_DATASET)))
+            eq(BILLING_PROJECT_ID), eq(getClusterName()), eq(WORKSPACE_NAME)))
         .thenReturn(testFcCluster);
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_NAME, "test");
 
