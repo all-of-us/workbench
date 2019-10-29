@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.CBCriteria;
@@ -64,7 +63,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   private CBCriteriaDao cbCriteriaDao;
   private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   private CdrVersionDao cdrVersionDao;
-  private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
   private CdrVersionService cdrVersionService;
   private ElasticSearchService elasticSearchService;
   private Provider<WorkbenchConfig> configProvider;
@@ -122,7 +120,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
       CBCriteriaDao cbCriteriaDao,
       CBCriteriaAttributeDao cbCriteriaAttributeDao,
       CdrVersionDao cdrVersionDao,
-      Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
       CdrVersionService cdrVersionService,
       ElasticSearchService elasticSearchService,
       Provider<WorkbenchConfig> configProvider) {
@@ -131,7 +128,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     this.cbCriteriaDao = cbCriteriaDao;
     this.cbCriteriaAttributeDao = cbCriteriaAttributeDao;
     this.cdrVersionDao = cdrVersionDao;
-    this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     this.cdrVersionService = cdrVersionService;
     this.elasticSearchService = elasticSearchService;
     this.configProvider = configProvider;
@@ -355,20 +351,33 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
   @Override
   public ResponseEntity<ParticipantDemographics> getParticipantDemographics(Long cdrVersionId) {
     cdrVersionService.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
-
-    Map<String, Map<Long, String>> concepts =
-        genderRaceEthnicityConceptProvider.get().getConcepts();
+    List<CBCriteria> criteriaList = cbCriteriaDao.findGenderRaceEthnicity();
     List<ConceptIdName> genderList =
-        concepts.get(FilterColumns.GENDER.name()).entrySet().stream()
-            .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+        criteriaList.stream()
+            .filter(c -> c.getType().equals(FilterColumns.GENDER.toString()))
+            .map(
+                c ->
+                    new ConceptIdName()
+                        .conceptId(new Long(c.getConceptId()))
+                        .conceptName(c.getName()))
             .collect(Collectors.toList());
     List<ConceptIdName> raceList =
-        concepts.get(FilterColumns.RACE.name()).entrySet().stream()
-            .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+        criteriaList.stream()
+            .filter(c -> c.getType().equals(FilterColumns.RACE.toString()))
+            .map(
+                c ->
+                    new ConceptIdName()
+                        .conceptId(new Long(c.getConceptId()))
+                        .conceptName(c.getName()))
             .collect(Collectors.toList());
     List<ConceptIdName> ethnicityList =
-        concepts.get(FilterColumns.ETHNICITY.name()).entrySet().stream()
-            .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+        criteriaList.stream()
+            .filter(c -> c.getType().equals(FilterColumns.ETHNICITY.toString()))
+            .map(
+                c ->
+                    new ConceptIdName()
+                        .conceptId(new Long(c.getConceptId()))
+                        .conceptName(c.getName()))
             .collect(Collectors.toList());
 
     ParticipantDemographics participantDemographics =
