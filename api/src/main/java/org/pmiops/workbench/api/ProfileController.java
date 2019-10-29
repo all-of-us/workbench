@@ -490,8 +490,10 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> submitDataUseAgreement(
       Integer dataUseAgreementSignedVersion, String initials) {
-    userService.submitDataUseAgreement(dataUseAgreementSignedVersion, initials);
-    return getProfileResponse(saveUserWithConflictHandling(userProvider.get()));
+    User user =
+        userService.submitDataUseAgreement(
+            userProvider.get(), dataUseAgreementSignedVersion, initials);
+    return getProfileResponse(saveUserWithConflictHandling(user));
   }
 
   /**
