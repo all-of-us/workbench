@@ -164,9 +164,8 @@ class NewDataSetModal extends React.Component<Props, State> {
             newNotebook: this.state.newNotebook
           });
         // Open notebook in a new tab and return back to the Data tab
-        const notebookUrl = `/workspaces/${workspaceNamespace}/${workspaceId}` +
-            `/notebooks/preview/${appendNotebookFileSuffix(
-              encodeURIComponentStrict(this.state.notebookName))}`;
+        const notebookUrl = `/workspaces/${workspaceNamespace}/${workspaceId}/notebooks/preview/` +
+          appendNotebookFileSuffix(encodeURIComponentStrict(this.state.notebookName));
         navigateByUrl(notebookUrl);
       } else {
         window.history.back();

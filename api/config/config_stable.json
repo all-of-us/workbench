@@ -20,7 +20,7 @@
     "retryCount": 2,
     "bufferCapacity": 10,
     "bufferRefillProjectsPerTask": 1,
-    "defaultFreeCreditsLimit": 300.0,
+    "defaultFreeCreditsLimit": 100.0,
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-stable-1@all-of-us-rw-stable.iam.gserviceaccount.com"
@@ -70,7 +70,7 @@
   "access": {
     "enableComplianceTraining": false,
     "enableEraCommons": true,
-    "enableDataUseAgreement": false,
+    "enableDataUseAgreement": true,
     "enableBetaAccess": true,
     "unsafeAllowSelfBypass": false
   },

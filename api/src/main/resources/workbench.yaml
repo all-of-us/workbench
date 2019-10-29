@@ -359,6 +359,11 @@ paths:
           description: Version \# of the Data Use Agreement that was signed.
           type: integer
           required: true
+        - in: query
+          name: initials
+          description: Initials of the user on the form.
+          type: string
+          required: true
       responses:
         200:
           description: The user's profile.
@@ -568,7 +573,7 @@ paths:
           required: true
           type: string
       responses:
-        202:
+        200:
           description: Deletion success
           schema:
             $ref: '#/definitions/EmptyResponse'

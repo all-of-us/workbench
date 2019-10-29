@@ -51,6 +51,7 @@ public class UserServiceTest {
 
   @Autowired private UserDao userDao;
   @Mock private AdminActionHistoryDao adminActionHistoryDao;
+  @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
   @Mock private FireCloudService fireCloudService;
   @Mock private ComplianceService complianceService;
   @Mock private DirectoryService directoryService;
@@ -70,6 +71,7 @@ public class UserServiceTest {
             Providers.of(testUser),
             userDao,
             adminActionHistoryDao,
+            userDataUseAgreementDao,
             CLOCK,
             new Random(),
             fireCloudService,

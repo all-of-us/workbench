@@ -15,6 +15,7 @@ import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -56,6 +57,7 @@ public class AuthDomainControllerTest {
   @Mock private ComplianceService complianceService;
   @Mock private DirectoryService directoryService;
   @Autowired private UserDao userDao;
+  @Mock private UserDataUseAgreementDao userDataUseAgreementDao;
 
   private AuthDomainController authDomainController;
 
@@ -78,6 +80,7 @@ public class AuthDomainControllerTest {
             userProvider,
             userDao,
             adminActionHistoryDao,
+            userDataUseAgreementDao,
             clock,
             new FakeLongRandom(12345),
             fireCloudService,

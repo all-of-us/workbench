@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -34,8 +35,10 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.UserDataUseAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -90,11 +93,13 @@ public class ProfileControllerTest {
   private static final String ORGANIZATION = "Test";
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
+  private static final int DUA_VERSION = 2;
 
   @Mock private Provider<User> userProvider;
   @Mock private Provider<UserAuthentication> userAuthenticationProvider;
   @Autowired private UserDao userDao;
   @Autowired private AdminActionHistoryDao adminActionHistoryDao;
+  @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
   @Mock private FireCloudService fireCloudService;
   @Mock private LeonardoNotebooksClient leonardoNotebooksClient;
   @Mock private DirectoryService directoryService;
@@ -147,6 +152,7 @@ public class ProfileControllerTest {
             userProvider,
             userDao,
             adminActionHistoryDao,
+            userDataUseAgreementDao,
             clock,
             new FakeLongRandom(NONCE_LONG),
             fireCloudService,
@@ -229,18 +235,8 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitDataUseAgreement_success() throws Exception {
     createUser();
-    assertThat(profileController.submitDataUseAgreement(0).getStatusCode())
+    assertThat(profileController.submitDataUseAgreement(DUA_VERSION, "NIH").getStatusCode())
         .isEqualTo(HttpStatus.OK);
-  }
-
-  @Test
-  public void testSubmitDataUseAgreement_updateVersion() throws Exception {
-    createUser();
-    int oldDuaVersion = 0;
-    int newDuaVersion = 1;
-    profileController.submitDataUseAgreement(oldDuaVersion);
-    profileController.submitDataUseAgreement(newDuaVersion);
-    assertThat(user.getDataUseAgreementSignedVersion() == newDuaVersion);
   }
 
   @Test
@@ -430,6 +426,22 @@ public class ProfileControllerTest {
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     assertThat(user.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
+  }
+
+  @Test
+  public void updateName_alsoUpdatesDua() throws Exception {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setGivenName("OldGivenName");
+    profile.setFamilyName("OldFamilyName");
+    profileController.updateProfile(profile);
+    profileController.submitDataUseAgreement(DUA_VERSION, "O.O.");
+    profile.setGivenName("NewGivenName");
+    profile.setFamilyName("NewFamilyName");
+    profileController.updateProfile(profile);
+    List<UserDataUseAgreement> duas =
+        userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(profile.getUserId());
+    assertThat(duas.get(0).isUserNameOutOfDate()).isTrue();
   }
 
   @Test(expected = BadRequestException.class)

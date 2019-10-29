@@ -1,9 +1,11 @@
 import {Component, Input} from '@angular/core';
-import {getChartObj} from 'app/cohort-search/utils';
-import {ReactWrapperBase} from 'app/utils';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
+
+import {getChartObj} from 'app/cohort-search/utils';
+import {ReactWrapperBase} from 'app/utils';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 
 highCharts.setOptions({
   lang: {
@@ -17,13 +19,20 @@ interface Props {
 }
 
 interface State {
+  categories: Array<string>;
   options: any;
 }
 
 export class GenderChart extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = {options: null};
+    const {cdrVersionId} = currentWorkspaceStore.getValue();
+    this.state = {
+      options: null,
+      categories: +cdrVersionId < 3
+        ? ['Female', 'Male', 'Unknown']
+        : ['Female', 'Male', 'Not man only, not woman only, prefer not to answer, or skipped', 'Unknown']
+    };
   }
 
   componentDidMount(): void {
@@ -31,6 +40,7 @@ export class GenderChart extends React.Component<Props, State> {
   }
 
   getChartOptions() {
+    const {categories} = this.state;
     const options = {
       chart: {
         height: 200,
@@ -43,7 +53,7 @@ export class GenderChart extends React.Component<Props, State> {
         text: ''
       },
       xAxis: {
-        categories: ['Female', 'Male', 'Unknown'],
+        categories,
         tickLength: 0,
         tickPixelInterval: 50,
         title: {
@@ -77,6 +87,7 @@ export class GenderChart extends React.Component<Props, State> {
 
   getSeries() {
     const {data} = this.props;
+    const {cdrVersionId} = currentWorkspaceStore.getValue();
     const genderCodes = {
       'M': 'Male',
       'F': 'Female',
@@ -87,8 +98,12 @@ export class GenderChart extends React.Component<Props, State> {
       {y: 0, name: 'Female', color: '#a8385d'},
       {y: 0, name: 'Unknown', color: '#a27ea8'},
     ];
+    if (+cdrVersionId >= 3) {
+      defaults.push({y: 0, name: 'Not man only, not woman only, prefer not to answer, or skipped', color: '#aae3f5'});
+    }
     return data.reduce((acc, datum) => {
-      const index = acc.findIndex(d => d.name === genderCodes[datum.gender]);
+      const gender = +cdrVersionId < 3 ? genderCodes[datum.gender] : datum.gender;
+      const index = acc.findIndex(d => d.name === gender);
       if (index > -1) {
         acc[index].y += datum.count;
       }

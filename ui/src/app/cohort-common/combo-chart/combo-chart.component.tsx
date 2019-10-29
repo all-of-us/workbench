@@ -1,9 +1,11 @@
 import {Component, Input} from '@angular/core';
-import {getChartObj} from 'app/cohort-search/utils';
-import {ReactWrapperBase} from 'app/utils';
 import * as highCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as React from 'react';
+
+import {getChartObj} from 'app/cohort-search/utils';
+import {ReactWrapperBase} from 'app/utils';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 
 interface Props {
   mode: string;
@@ -15,12 +17,6 @@ interface State {
 }
 
 export class ComboChart extends React.Component<Props, State> {
-  readonly codeMap = {
-    'M': 'Male',
-    'F': 'Female',
-    'No matching concept': 'Unknown'
-  };
-
   constructor(props: Props) {
     super(props);
     this.state = {options: null};
@@ -84,8 +80,15 @@ export class ComboChart extends React.Component<Props, State> {
 
   getCategories() {
     const {data} = this.props;
+    const {cdrVersionId} = currentWorkspaceStore.getValue();
+    const codeMap = {
+      'M': 'Male',
+      'F': 'Female',
+      'No matching concept': 'Unknown'
+    };
     return data.reduce((acc, datum) => {
-      const key = `${this.codeMap[datum.gender]} ${datum.ageRange || 'Unknown'}`;
+      const gender = +cdrVersionId < 3 ? codeMap[datum.gender] : datum.gender;
+      const key = `${gender} ${datum.ageRange || 'Unknown'}`;
       if (!acc.includes(key)) {
         acc.push(key);
       }

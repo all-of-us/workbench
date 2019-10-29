@@ -179,6 +179,7 @@ buildscript {    // Configuration for building
     GAE_VERSION = '1.9.64'
     SPRING_BOOT_VERSION = '1.5.22.RELEASE'
     JACKSON_VERSION = '2.9.10'
+    JACKSON_DATABIND_VERSION = '2.9.10.1'
     ELASTICSEARCH_VERSION = '6.8.3'
     OKHTTP_VERSION = '2.7.5'
     GSON_VERSION = '2.8.5'
@@ -365,9 +366,13 @@ dependencies {
   compile 'org.springframework.security:spring-security-web:4.2.13.RELEASE'
   compile "org.hibernate:hibernate-core:${HIBERNATE_VERSION}"
 
+  // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
+  // Kotlin dep, resulting in massive logspam.
+  compile "org.jetbrains.kotlin:kotlin-reflect:${KOTLIN_VERSION}"
+
   compile "com.fasterxml.jackson.core:jackson-annotations:${JACKSON_VERSION}"
   compile "com.fasterxml.jackson.core:jackson-core:${JACKSON_VERSION}"
-  compile "com.fasterxml.jackson.core:jackson-databind:${JACKSON_VERSION}"
+  compile "com.fasterxml.jackson.core:jackson-databind:${JACKSON_DATABIND_VERSION}"
   compile "com.fasterxml.jackson.module:jackson-module-kotlin:${JACKSON_VERSION}"
   compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${JACKSON_VERSION}"
 
