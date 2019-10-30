@@ -31,7 +31,7 @@ const fields = [
   {field: 'participantId', name: 'Participant ID'},
   {field: 'birthDate', name: 'Date of Birth'},
   {field: 'deceased', name: 'Deceased'},
-  {field: 'gender', name: 'Sex'},
+  {field: 'gender', name: 'Gender'},
   {field: 'race', name: 'Race'},
   {field: 'ethnicity', name: 'Ethnicity'},
   {field: 'status', name: 'Status'},
@@ -282,8 +282,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
               ...arr.map(i => {
                 filters[_type].push(i.conceptName);
                 return {
-                  name: _type === Columns.GENDER
-                      ? this.formatGenderForText(i.conceptName) : i.conceptName,
+                  name: i.conceptName,
                   value: i.conceptName
                 };
               }),
@@ -400,16 +399,6 @@ export const ParticipantsTable = withCurrentWorkspace()(
         [CohortStatus.NEEDSFURTHERREVIEW]: 'Needs Further Review',
         [CohortStatus.NOTREVIEWED]: '',
       }[status];
-    }
-
-    formatGenderForText(gender: string): string {
-      return {
-        AMBIGUOUS: 'Ambiguous',
-        FEMALE: 'Female',
-        MALE: 'Male',
-        OTHER: 'Other',
-        UNKNOWN: 'Unknown'
-      }[gender];
     }
 
     goBack() {

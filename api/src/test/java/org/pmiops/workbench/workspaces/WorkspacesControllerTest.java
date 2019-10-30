@@ -62,7 +62,6 @@ import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -111,7 +110,6 @@ import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.PageFilterRequest;
@@ -251,15 +249,6 @@ public class WorkspacesControllerTest {
     @Bean
     Clock clock() {
       return CLOCK;
-    }
-
-    @Bean
-    GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
-      Map<String, Map<Long, String>> concepts = new HashMap<>();
-      concepts.put(FilterColumns.RACE.name(), new HashMap<>());
-      concepts.put(FilterColumns.GENDER.name(), new HashMap<>());
-      concepts.put(FilterColumns.ETHNICITY.name(), new HashMap<>());
-      return new GenderRaceEthnicityConcept(concepts);
     }
 
     @Bean
