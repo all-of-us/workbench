@@ -85,7 +85,7 @@ export const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     flexDirection: 'row',
-    minWidth: '14.5rem'
+    minWidth: '15rem'
   } as React.CSSProperties,
 
   listItem: {
