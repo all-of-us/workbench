@@ -1,36 +1,43 @@
 package org.pmiops.workbench.audit
 
-import java.util.Optional
-import java.util.UUID
+import com.google.appengine.repackaged.com.google.common.collect.ImmutableMap
+import com.google.cloud.MonitoredResource
+import com.google.cloud.logging.Payload
+import java.util.UUID.randomUUID
 
-interface ActionAuditEvent {
+class ActionAuditEvent(
+        val timestamp: Long,
+        val agentType: AgentType,
+        val agentId: Long,
+        private val agentEmailMaybe: String?,
+        val actionId: String,
+        val actionType: ActionType,
+        val targetType: TargetType,
+        private val targetPropertyMaybe: String? = null,
+        private val targetIdMaybe: Long? = null,
+        private val previousValueMaybe: String? = null,
+        private val newValueMaybe: String? = null) {
 
-    fun timestamp(): Long
-
-    fun actionId(): String
-
-    fun agentType(): AgentType
-
-    fun agentId(): Long
-
-    fun agentEmail(): Optional<String>
-
-    fun actionType(): ActionType
-
-    fun targetType(): TargetType
-
-    fun targetId(): Optional<Long>
-
-    fun targetProperty(): Optional<String>
-
-    fun previousValue(): Optional<String>
-
-    fun newValue(): Optional<String>
+    val jsonPayload: Payload.JsonPayload
+        get() {
+            val resultBuilder = ImmutableMap.builder<String, Any>()
+            resultBuilder.put(AuditColumn.TIMESTAMP.name, timestamp)
+            resultBuilder.put(AuditColumn.ACTION_ID.name, actionId)
+            resultBuilder.put(AuditColumn.ACTION_TYPE.name, actionType)
+            resultBuilder.put(AuditColumn.AGENT_TYPE.name, agentType)
+            resultBuilder.put(AuditColumn.AGENT_ID.name, agentId)
+            agentEmailMaybe ?: resultBuilder.put(AuditColumn.AGENT_EMAIL.name, agentEmailMaybe!!)
+            resultBuilder.put(AuditColumn.TARGET_TYPE.name, targetType)
+            targetIdMaybe ?: resultBuilder.put(AuditColumn.TARGET_ID.name, targetIdMaybe!!)
+            resultBuilder.put(AuditColumn.AGENT_ID.name, agentId)
+            targetPropertyMaybe ?: resultBuilder.put(AuditColumn.TARGET_PROPERTY.name, targetPropertyMaybe!!)
+            previousValueMaybe ?: resultBuilder.put(AuditColumn.PREV_VALUE.name, previousValueMaybe!!)
+            newValueMaybe ?: resultBuilder.put(AuditColumn.NEW_VALUE.name, newValueMaybe!!)
+            return Payload.JsonPayload.of(resultBuilder.build())
+        }
 
     companion object {
-
-        fun newActionId(): String {
-            return UUID.randomUUID().toString()
-        }
+        private val MONITORED_RESOURCE = MonitoredResource.newBuilder("global").build()
+        fun newActionId(): String = randomUUID().toString()
     }
 }
