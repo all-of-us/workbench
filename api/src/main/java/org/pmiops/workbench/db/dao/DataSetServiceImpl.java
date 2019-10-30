@@ -564,14 +564,14 @@ public class DataSetServiceImpl implements DataSetService {
 
   @Transactional
   @Override
-  public List<ConceptSet> getConceptSets(DataSet dataSet) {
+  public List<ConceptSet> getConceptSetsForDataset(DataSet dataSet) {
     return conceptSetDao.findAllByConceptSetIdIn(
         dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
   }
 
   @Transactional
   @Override
-  public List<Cohort> getCohorts(DataSet dataSet) {
+  public List<Cohort> getCohortsForDataset(DataSet dataSet) {
     return cohortDao.findAllByCohortIdIn(dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
   }
 

@@ -43,7 +43,7 @@ public interface DataSetService {
 
   List<DataSet> getDataSets(Workspace workspace);
 
-  List<ConceptSet> getConceptSets(DataSet dataSet);
+  List<ConceptSet> getConceptSetsForDataset(DataSet dataSet);
 
-  List<Cohort> getCohorts(DataSet dataSet);
+  List<Cohort> getCohortsForDataset(DataSet dataSet);
 }

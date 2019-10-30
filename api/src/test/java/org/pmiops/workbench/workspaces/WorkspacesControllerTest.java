@@ -1272,34 +1272,41 @@ public class WorkspacesControllerTest {
     cdrVersion2.setCdrDbName("");
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
+    final String expectedConceptSetName = "cs1";
+    final String expectedConceptSetDescription = "d1";
     org.pmiops.workbench.db.model.ConceptSet originalConceptSet =
         new org.pmiops.workbench.db.model.ConceptSet();
-    originalConceptSet.setName("cs1");
-    originalConceptSet.setDescription("d1");
+    originalConceptSet.setName(expectedConceptSetName);
+    originalConceptSet.setDescription(expectedConceptSetDescription);
     originalConceptSet.setDomainEnum(Domain.CONDITION);
     originalConceptSet.setConceptIds(Collections.singleton(CLIENT_CONCEPT_1.getConceptId()));
     originalConceptSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
     originalConceptSet = conceptSetDao.save(originalConceptSet);
 
+    final String expectedCohortName = "cohort name";
+    final String expectedCohortDescription = "cohort description";
     org.pmiops.workbench.db.model.Cohort originalCohort =
         new org.pmiops.workbench.db.model.Cohort();
-    originalCohort.setName("cohort name");
-    originalCohort.setDescription("cohort description");
+    originalCohort.setName(expectedCohortName);
+    originalCohort.setDescription(expectedCohortDescription);
     originalCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
     originalCohort = cohortDao.save(originalCohort);
 
+    final String expectedCohortReviewName = "cohort review";
+    final String expectedCohortReviewDefinition = "cohort definition";
     org.pmiops.workbench.db.model.CohortReview originalCohortReview =
         new org.pmiops.workbench.db.model.CohortReview();
-    originalCohortReview.setCohortName("cohort review");
-    originalCohortReview.setCohortDefinition("cohort definition");
+    originalCohortReview.setCohortName(expectedCohortReviewName);
+    originalCohortReview.setCohortDefinition(expectedCohortReviewDefinition);
     originalCohortReview.setCohortId(originalCohort.getCohortId());
     originalCohortReview = cohortReviewDao.save(originalCohortReview);
 
     originalCohort.setCohortReviews(Collections.singleton(originalCohortReview));
     originalCohort = cohortDao.save(originalCohort);
 
+    final String expectedDatasetName = "data set name";
     DataSet originalDataSet = new DataSet();
-    originalDataSet.setName("data set name");
+    originalDataSet.setName(expectedDatasetName);
     originalDataSet.setVersion(1);
     originalDataSet.setConceptSetIds(
         Collections.singletonList(originalConceptSet.getConceptSetId()));
@@ -1339,32 +1346,32 @@ public class WorkspacesControllerTest {
 
     List<DataSet> dataSets = dataSetService.getDataSets(clonedDbWorkspace);
     assertThat(dataSets).hasSize(1);
-    assertThat(dataSets.get(0).getName()).isEqualTo("data set name");
+    assertThat(dataSets.get(0).getName()).isEqualTo(expectedDatasetName);
     assertThat(dataSets.get(0).getDataSetId()).isNotEqualTo(originalDataSet.getDataSetId());
 
     List<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
-        dataSetService.getConceptSets(dataSets.get(0));
+        dataSetService.getConceptSetsForDataset(dataSets.get(0));
     assertThat(conceptSets).hasSize(1);
-    assertThat(conceptSets.get(0).getName()).isEqualTo("cs1");
-    assertThat(conceptSets.get(0).getDescription()).isEqualTo("d1");
+    assertThat(conceptSets.get(0).getName()).isEqualTo(expectedConceptSetName);
+    assertThat(conceptSets.get(0).getDescription()).isEqualTo(expectedConceptSetDescription);
     assertThat(conceptSets.get(0).getDomainEnum()).isEqualTo(Domain.CONDITION);
     assertThat(conceptSets.get(0).getConceptIds())
         .isEqualTo(Collections.singleton(CLIENT_CONCEPT_1.getConceptId()));
     assertThat(conceptSets.get(0).getConceptSetId())
         .isNotEqualTo(originalConceptSet.getConceptSetId());
 
-    List<org.pmiops.workbench.db.model.Cohort> cohorts = dataSetService.getCohorts(dataSets.get(0));
+    List<org.pmiops.workbench.db.model.Cohort> cohorts = dataSetService.getCohortsForDataset(dataSets.get(0));
     assertThat(cohorts).hasSize(1);
-    assertThat(cohorts.get(0).getName()).isEqualTo("cohort name");
-    assertThat(cohorts.get(0).getDescription()).isEqualTo("cohort description");
+    assertThat(cohorts.get(0).getName()).isEqualTo(expectedCohortName);
+    assertThat(cohorts.get(0).getDescription()).isEqualTo(expectedCohortDescription);
     assertThat(cohorts.get(0).getCohortId()).isNotEqualTo(originalCohort.getCohortId());
 
     Set<org.pmiops.workbench.db.model.CohortReview> cohortReviews =
         cohortReviewDao.findAllByCohortId(cohorts.get(0).getCohortId());
     assertThat(cohortReviews).hasSize(1);
-    assertThat(cohortReviews.iterator().next().getCohortName()).isEqualTo("cohort review");
+    assertThat(cohortReviews.iterator().next().getCohortName()).isEqualTo(expectedCohortReviewName);
     assertThat(cohortReviews.iterator().next().getCohortDefinition())
-        .isEqualTo("cohort definition");
+        .isEqualTo(expectedCohortReviewDefinition);
     assertThat(cohortReviews.iterator().next().getCohortReviewId())
         .isNotEqualTo(originalCohortReview.getCohortReviewId());
   }
