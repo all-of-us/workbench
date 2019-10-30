@@ -38,6 +38,12 @@ git submodule update --init --recursive
 
 Then set up [git secrets](#git-secrets) and fire up the [development servers](#running-the-dev-servers). Optionally, you can [set up your Intellij](https://docs.google.com/document/d/1DtESBapEzvuti7xODTFPHorwmLM7LybF-6D5lhbIkLU/edit) for UI or API work.
 
+Before doing any development, you must run:
+```Shell
+./project.rb appengineRun
+```
+This will generate MapStruct files that are necessary for the app to compile. This command will never complete - when it has gotten to 97% it will hang forever. It can safely be `ctrl+c`'d at that point.
+
 ## Development Process
 
 To make changes, do:
@@ -143,6 +149,18 @@ All commands should be run from `workbench/api`
 #### Hot Code Swapping
 
 While the API is running locally, saving a .java file should cause a recompile and reload of that class. Status is logged to the console. Not all changes reload correctly (e.g., model classes do not appear to reload more than once).
+
+#### Caveats
+
+The first time a server is started after a database clear (`./project.rb docker-clean`, `./project.rb run-local-all-migrations`), it may take some time for a billing project to become available for workspace creation. Generally, this takes about 5 minutes, but has been known to take upwards of 40 in some cases. The billing project buffer size is set to 2 for local environments (`config_local.json`). A cron job runs every minute while the API server is running to check if there are empty slots.
+
+To check whether you have available billing projects:
+```Shell
+./project.rb connect-to-db
+select * from billing_project_buffer_entry;
+```
+
+The `status` column enum values can be found in `org.pmiops.workbench.db.model.StorageEnums`.
 
 ### UI
 
