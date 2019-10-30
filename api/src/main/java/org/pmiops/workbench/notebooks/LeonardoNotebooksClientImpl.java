@@ -36,7 +36,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private static final String CLUSTER_LABEL_AOU = "all-of-us";
   private static final String CLUSTER_LABEL_CREATED_BY = "created-by";
   private static final String WORKSPACE_CDR = "WORKSPACE_CDR";
-  private static final String JUPYTER_DOCKER_IMAGE = "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-python:0.0.2";
+  private static final String JUPYTER_DOCKER_IMAGE = "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-gatk:0.0.3";
 
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
