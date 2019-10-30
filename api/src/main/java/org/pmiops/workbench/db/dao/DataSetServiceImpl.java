@@ -572,8 +572,7 @@ public class DataSetServiceImpl implements DataSetService {
   @Transactional
   @Override
   public List<Cohort> getCohorts(DataSet dataSet) {
-    return cohortDao.findAllByCohortIdIn(
-        dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
+    return cohortDao.findAllByCohortIdIn(dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
   }
 
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {

@@ -151,7 +151,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -1260,11 +1259,11 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceDao
-        .findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-          workspace.getNamespace(),
-          workspace.getId(),
-          StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+            workspace.getNamespace(),
+            workspace.getId(),
+            StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
 
     CdrVersion cdrVersion2 = new CdrVersion();
     cdrVersion2.setName("2");
@@ -1272,8 +1271,8 @@ public class WorkspacesControllerTest {
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
-        "condition_occurrence",
-        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+            "condition_occurrence",
+            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
         .thenReturn(123);
     ConceptSet conceptSet1 =
         conceptSetsController
@@ -1326,17 +1325,18 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
 
-
-    org.pmiops.workbench.db.model.Workspace clonedDbWorkspace = workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-        cloned.getNamespace(), cloned.getId(), StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    org.pmiops.workbench.db.model.Workspace clonedDbWorkspace =
+        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+            cloned.getNamespace(),
+            cloned.getId(),
+            StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
 
     List<DataSet> dataSets = dataSetService.getDataSets(clonedDbWorkspace);
     assertThat(dataSets).hasSize(1);
     assertThat(dataSets.get(0).getName()).isEqualTo("data set name");
 
-
-    List<org.pmiops.workbench.db.model.ConceptSet> conceptSets = dataSetService.getConceptSets(
-        dataSets.get(0));
+    List<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
+        dataSetService.getConceptSets(dataSets.get(0));
     assertThat(conceptSets).hasSize(1);
     assertThat(conceptSets.get(0).getName()).isEqualTo("cs1");
     assertThat(conceptSets.get(0).getDescription()).isEqualTo("d1");
