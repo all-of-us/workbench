@@ -87,28 +87,22 @@ export class GenderChart extends React.Component<Props, State> {
 
   getSeries() {
     const {data} = this.props;
-    const {cdrVersionId} = currentWorkspaceStore.getValue();
     const genderCodes = {
       'M': 'Male',
       'F': 'Female',
       'No matching concept': 'Unknown'
     };
-    const defaults = [
-      {y: 0, name: 'Male', color: '#7aa3e5'},
-      {y: 0, name: 'Female', color: '#a8385d'},
-      {y: 0, name: 'Unknown', color: '#a27ea8'},
-    ];
-    if (+cdrVersionId >= 3) {
-      defaults.push({y: 0, name: 'Not man only, not woman only, prefer not to answer, or skipped', color: '#aae3f5'});
-    }
+    const colors = ['#7aa3e5', '#a8385d', '#a27ea8', '#aae3f5'];
     return data.reduce((acc, datum) => {
-      const gender = +cdrVersionId < 3 ? genderCodes[datum.gender] : datum.gender;
+      const gender = !!genderCodes[datum.gender] ? genderCodes[datum.gender] : datum.gender;
       const index = acc.findIndex(d => d.name === gender);
       if (index > -1) {
         acc[index].y += datum.count;
+      } else {
+        acc.push({y: datum.count, name: gender, color: colors[acc.length]});
       }
       return acc;
-    }, defaults).sort((a, b) => a['name'] > b['name'] ? 1 : -1);
+    }, []).filter(it => it.y > 0).sort((a, b) => a['name'] > b['name'] ? 1 : -1);
   }
 
   render() {
