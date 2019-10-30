@@ -42,7 +42,7 @@ Before doing any development, you must run:
 ```Shell
 ./project.rb appengineRun
 ```
-This will generate MapStruct files that are necessary for the app to compile. This command will never complete - when it has gotten to 97% it will hang forever. It can safely be `ctrl+c`'d at that point.
+This will generate MapStruct files that are necessary for the app to compile. On Macs, this command will never complete - when it has gotten to 97% it will hang forever. It can safely be `ctrl+c`'d at that point.
 
 ## Development Process
 
