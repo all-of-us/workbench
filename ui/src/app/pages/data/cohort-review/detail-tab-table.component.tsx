@@ -60,6 +60,7 @@ const styles = reactStyles({
   },
   filterIcon: {
     marginTop: '2px',
+    padding: '2px 2px 1px 1px',
     borderRadius: '50%',
     fontWeight: 600,
     float: 'right'
@@ -177,7 +178,6 @@ const domains = [
   DomainType.PHYSICALMEASUREMENT,
   DomainType.LAB,
   DomainType.VITAL,
-  DomainType.SURVEY,
 ];
 
 class NameContainer extends React.Component<{data: any, vocab: string}, {showMore: boolean}> {
