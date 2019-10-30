@@ -306,6 +306,7 @@ export const ListOverview = withCurrentWorkspace()(
       const {cohort, chartData, deleting, apiError, loading, saveModalOpen, name, description,
         nameTouched, saving, saveError, stackChart, total} = this.state;
       const disableIcon = loading || !cohort ;
+      const disableSave = loading || saving || this.definitionErrors || !total;
       const invalid = nameTouched && !name;
       const showTotal = total !== undefined && total !== null;
       const items = [
@@ -318,18 +319,15 @@ export const ListOverview = withCurrentWorkspace()(
           <div style={styles.overviewHeader}>
             <div style={{width: '100%'}}>
               {!!cohort ? <React.Fragment>
-                <Menu appendTo={document.body}
-                  model={items} popup={true} ref={el => this.dropdown = el} />
-                <Button type='primary' style={styles.saveButton}
-                  onClick={(event) => this.dropdown.toggle(event)}
-                  disabled={loading || saving || this.definitionErrors}>
+                <Menu appendTo={document.body} model={items} popup={true} ref={el => this.dropdown = el} />
+                <Button type='primary' style={styles.saveButton} onClick={(event) => this.dropdown.toggle(event)} disabled={disableSave}>
                   Save Cohort <ClrIcon shape='caret down' />
                 </Button>
               </React.Fragment>
               : <Button type='primary'
                 onClick={() => this.setState({saveModalOpen: true})}
                 style={styles.saveButton}
-                disabled={loading || this.definitionErrors}>Create Cohort</Button>}
+                disabled={disableSave}>Create Cohort</Button>}
               <TooltipTrigger content={<div>Export to notebook</div>}>
                 <Clickable style={{...styles.actionIcon, ...styles.disabled}}
                   onClick={() => this.navigateTo('notebook')} disabled>
