@@ -177,7 +177,6 @@ const domains = [
   DomainType.PHYSICALMEASUREMENT,
   DomainType.LAB,
   DomainType.VITAL,
-  DomainType.SURVEY,
 ];
 
 class NameContainer extends React.Component<{data: any, vocab: string}, {showMore: boolean}> {
