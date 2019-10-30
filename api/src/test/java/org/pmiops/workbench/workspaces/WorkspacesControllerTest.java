@@ -6,6 +6,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -885,6 +886,10 @@ public class WorkspacesControllerTest {
             .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
             .getBody()
             .getWorkspace();
+    verify(mockWorkspaceAuditAdapterService)
+        .fireDuplicateAction(
+            any(org.pmiops.workbench.db.model.Workspace.class),
+            any(org.pmiops.workbench.db.model.Workspace.class));
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
@@ -1653,6 +1658,7 @@ public class WorkspacesControllerTest {
         workspacesController
             .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
             .getBody();
+    verify(mockWorkspaceAuditAdapterService).fireCollaborateAction(anyLong(), anyMap());
     Workspace workspace2 =
         workspacesController
             .getWorkspace(workspace.getNamespace(), workspace.getName())

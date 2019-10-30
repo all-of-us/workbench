@@ -1,11 +1,13 @@
 package org.pmiops.workbench.audit.targetproperties;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Function;
 import org.pmiops.workbench.model.Workspace;
 
@@ -34,6 +36,9 @@ public enum WorkspaceTargetProperty {
   }
 
   public String extract(Workspace workspace) {
+    if (workspace == null) {
+      return null;
+    }
     return extractor.apply(workspace);
   }
 
@@ -49,5 +54,26 @@ public enum WorkspaceTargetProperty {
                     prop.getPropertyName(), prop.extract(workspace)))
         .filter(entry -> entry.getValue() != null)
         .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
+  }
+
+  public static Map<String, PreviousNewValuePair> getChangedValuesByName(
+      Workspace previousWorkspace, Workspace newWorkspace) {
+    ImmutableMap.Builder<String, PreviousNewValuePair> resultBuilder = new Builder<>();
+    for (WorkspaceTargetProperty property : WorkspaceTargetProperty.values()) {
+      final Optional<String> previousValue = Optional.ofNullable(property.extract(previousWorkspace));
+      final Optional<String> newValue = Optional.ofNullable(property.extract(newWorkspace));
+
+      // put entry in the map for change, delete, or add on the property
+      if ((previousValue.isPresent() && ! previousValue.equals(newValue)) ||
+          (newValue.isPresent() && !newValue.equals(previousValue))) {
+          resultBuilder.put(
+              property.propertyName,
+              PreviousNewValuePair.builder()
+                  .setNewValue(newValue.orElse(null))
+                  .setPreviousValue(previousValue.orElse(null))
+                  .build());
+      }
+    }
+    return resultBuilder.build();
   }
 }

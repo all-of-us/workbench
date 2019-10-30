@@ -82,5 +82,8 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": false
+  },
+  "actionAudit": {
+    "logName": "workbench-action-audit-perf"
   }
 }

@@ -23,6 +23,7 @@ public class WorkbenchConfig {
   public CohortBuilderConfig cohortbuilder;
   public FeatureFlagsConfig featureFlags;
   public BillingConfig billing;
+  public ActionAuditConfig actionAudit;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -42,6 +43,7 @@ public class WorkbenchConfig {
     config.moodle = new MoodleConfig();
     config.server = new ServerConfig();
     config.billing = new BillingConfig();
+    config.actionAudit = new ActionAuditConfig();
     return config;
   }
 
@@ -182,5 +184,9 @@ public class WorkbenchConfig {
     // Flag to indicate whether to enable the new Create Account flow
     // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
     public boolean enableNewAccountCreation;
+  }
+
+  public static class ActionAuditConfig {
+    public String logName;
   }
 }
