@@ -35,7 +35,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   private static final String CLUSTER_LABEL_AOU = "all-of-us";
   private static final String CLUSTER_LABEL_CREATED_BY = "created-by";
-  private static final String WORKSPACE_CDR = "WORKSPCAE_CDR";
+  private static final String WORKSPACE_CDR = "WORKSPACE_CDR";
 
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
