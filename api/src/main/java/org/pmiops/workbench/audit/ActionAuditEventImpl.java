@@ -13,7 +13,7 @@ public class ActionAuditEventImpl implements ActionAuditEvent {
   private final AgentType agentType;
   private final long agentId;
   private final String actionId;
-  private Optional<String> agentEmail;
+  private Optional<String> agentEmailMaybe;
   private final ActionType actionType;
   private final TargetType targetType;
   private final Optional<String> targetPropertyMaybe;
@@ -25,7 +25,7 @@ public class ActionAuditEventImpl implements ActionAuditEvent {
       long timestamp,
       AgentType agentType,
       long agentId,
-      Optional<String> agentEmail,
+      Optional<String> agentEmailMaybe,
       String actionId,
       ActionType actionType,
       TargetType targetType,
@@ -36,7 +36,7 @@ public class ActionAuditEventImpl implements ActionAuditEvent {
     this.timestamp = timestamp;
     this.agentType = agentType;
     this.agentId = agentId;
-    this.agentEmail = agentEmail;
+    this.agentEmailMaybe = agentEmailMaybe;
     this.actionId = actionId;
     this.actionType = actionType;
     this.targetType = targetType;
@@ -63,7 +63,7 @@ public class ActionAuditEventImpl implements ActionAuditEvent {
 
   @Override
   public Optional<String> agentEmail() {
-    return agentEmail;
+    return agentEmailMaybe;
   }
 
   @Override
