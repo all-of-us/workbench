@@ -60,18 +60,19 @@ public enum WorkspaceTargetProperty {
       Workspace previousWorkspace, Workspace newWorkspace) {
     ImmutableMap.Builder<String, PreviousNewValuePair> resultBuilder = new Builder<>();
     for (WorkspaceTargetProperty property : WorkspaceTargetProperty.values()) {
-      final Optional<String> previousValue = Optional.ofNullable(property.extract(previousWorkspace));
+      final Optional<String> previousValue =
+          Optional.ofNullable(property.extract(previousWorkspace));
       final Optional<String> newValue = Optional.ofNullable(property.extract(newWorkspace));
 
       // put entry in the map for change, delete, or add on the property
-      if ((previousValue.isPresent() && ! previousValue.equals(newValue)) ||
-          (newValue.isPresent() && !newValue.equals(previousValue))) {
-          resultBuilder.put(
-              property.propertyName,
-              PreviousNewValuePair.builder()
-                  .setNewValue(newValue.orElse(null))
-                  .setPreviousValue(previousValue.orElse(null))
-                  .build());
+      if ((previousValue.isPresent() && !previousValue.equals(newValue))
+          || (newValue.isPresent() && !newValue.equals(previousValue))) {
+        resultBuilder.put(
+            property.propertyName,
+            PreviousNewValuePair.builder()
+                .setNewValue(newValue.orElse(null))
+                .setPreviousValue(previousValue.orElse(null))
+                .build());
       }
     }
     return resultBuilder.build();
