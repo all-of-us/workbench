@@ -33,19 +33,18 @@ constructor(
             val timestamp = clock.millis()
             // omit the previous value column
             val events = propertyValues.entries.stream()
-                    .map { entry ->
-                        ActionAuditEventImpl.Builder()
-                                .setActionId(actionId)
-                                .setAgentEmail(userEmail)
-                                .setActionType(ActionType.CREATE)
-                                .setAgentType(AgentType.USER)
-                                .setAgentId(userId)
-                                .setTargetType(TargetType.WORKSPACE)
-                                .setTargetProperty(entry.key)
-                                .setTargetId(dbWorkspaceId)
-                                .setNewValue(entry.value)
-                                .setTimestamp(timestamp)
-                                .build()
+                    .map { entry -> ActionAuditEvent(
+                            actionId = actionId,
+                            agentEmailMaybe = userEmail,
+                            actionType = ActionType.CREATE,
+                            agentType = AgentType.USER,
+                            agentId = userId,
+                            targetType = TargetType.WORKSPACE,
+                            targetPropertyMaybe = entry.key,
+                            targetIdMaybe = dbWorkspaceId,
+                            previousValueMaybe = null,
+                            newValueMaybe = entry.value,
+                            timestamp = timestamp)
                     }
                     .collect<ImmutableList<ActionAuditEvent>, Any>(ImmutableList.toImmutableList())
             actionAuditService.send(events)

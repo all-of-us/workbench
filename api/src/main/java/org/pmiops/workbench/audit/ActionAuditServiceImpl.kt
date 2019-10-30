@@ -6,7 +6,6 @@ import com.google.cloud.logging.Logging
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.Severity
 import com.google.common.collect.ImmutableList
-import java.util.Collections
 import java.util.HashMap
 import java.util.Optional
 import java.util.logging.Level
@@ -53,7 +52,7 @@ constructor(private val configProvider: Provider<WorkbenchConfig>, private val c
         result[AuditColumn.ACTION_TYPE.name] = auditEvent.actionType()
         result[AuditColumn.AGENT_TYPE.name] = auditEvent.agentType()
         result[AuditColumn.AGENT_ID.name] = auditEvent.agentId()
-        result[AuditColumn.AGENT_EMAIL.name] = toNullable(auditEvent.agentEmail())
+        result[AuditColumn.AGENT_EMAIL.name] = toNullable(auditEvent.agentEmailMaybe())
         result[AuditColumn.TARGET_TYPE.name] = auditEvent.targetType()
         result[AuditColumn.TARGET_ID.name] = toNullable(auditEvent.targetId())
         result[AuditColumn.AGENT_ID.name] = auditEvent.agentId()
