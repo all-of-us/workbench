@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="aschwart" id="changelog-108-user-data-use-agreement">
+
+    <createTable tableName="user_data_use_agreement">
+      <column name="user_data_user_agreement_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_dua_usage_user_id" references="user(user_id)"/>
+      </column>
+      <column name="user_given_name" type="varchar(80)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_family_name" type="varchar(80)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_initials" type="varchar(6)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="user_name_out_of_date" type="tinyint" defaultValue="0"/>
+      <column name="data_use_agreement_signed_version" type="integer">
+        <constraints nullable="false"/>
+      </column>
+      <column name="completion_time" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+  </changeSet>
+</databaseChangeLog>

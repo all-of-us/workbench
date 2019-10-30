@@ -23,6 +23,7 @@ public class WorkbenchConfig {
   public CohortBuilderConfig cohortbuilder;
   public FeatureFlagsConfig featureFlags;
   public BillingConfig billing;
+  public ActionAuditConfig actionAudit;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -42,16 +43,40 @@ public class WorkbenchConfig {
     config.moodle = new MoodleConfig();
     config.server = new ServerConfig();
     config.billing = new BillingConfig();
+    config.actionAudit = new ActionAuditConfig();
     return config;
   }
 
+  // Environment config variables related to billing and the billing project buffer (which buffers
+  // GCP projects, aka "billing projects" in Terra terminology).
   public static class BillingConfig {
+    // This config variable seems to be unused.
     public Integer retryCount;
+    // The total capacity of the GCP project buffer. The buffering system will not attempt to create
+    // any new projects when the total number of in-progress & ready projects is at or above this
+    // level.
     public Integer bufferCapacity;
+    // The number of times to attempt project creation per cron task execution. This effectively
+    // controls the max rate of project refill. If the cron task is configured to run once per
+    // minute and this param is set to 5, then the buffer system will create up to approximately
+    // 5 projects per minute.
+    //
+    // Per guidance from Google Cloud's project infrastructure team, we should limit our total rate
+    // of project creation to a number less than 1 per second. In practice, a reasonable aggressive
+    // value for this parameter would be 5-10 project refills per minute.
+    public Integer bufferRefillProjectsPerTask;
+    // The environment-driven prefix to apply to GCP projects created in the buffer. Example:
+    // "aou-rw-perf-" causes the buffer to create projects named like "aou-rw-perf-8aec175b".
     public String projectNamePrefix;
+    // The free tier GCP billing account ID to associate with Terra / GCP projects.
     public String accountId;
+    // The full table name for the BigQuery billing export, which is read from by the free-tier
+    // usage tracking cron endpoint.
     public String exportBigQueryTable;
+    // The default limit to apply to free-credit usage in this environment.
     public Double defaultFreeCreditsLimit;
+    // For project garbage collection, the max # of projects allowed to be associated with each
+    // garbage-collection service account.
     public Integer garbageCollectionUserCapacity;
     // A list of GCP service accounts for billing project garbage collection
     public ArrayList<String> garbageCollectionUsers;
@@ -159,5 +184,9 @@ public class WorkbenchConfig {
     // Flag to indicate whether to enable the new Create Account flow
     // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
     public boolean enableNewAccountCreation;
+  }
+
+  public static class ActionAuditConfig {
+    public String logName;
   }
 }

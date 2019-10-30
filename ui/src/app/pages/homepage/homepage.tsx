@@ -9,18 +9,18 @@ import {
   Clickable,
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {CustomBulletList, CustomBulletListItem} from 'app/components/CustomBulletList';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {Header, SmallHeader} from 'app/components/headers';
+import {Header, SemiBoldHeader, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {Modal} from 'app/components/modals';
-import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
-import {profileApi} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
+import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import colors, {addOpacity} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {environment} from 'environments/environment';
 import {
@@ -30,7 +30,7 @@ import {
 export const styles = reactStyles({
   bottomBanner: {
     width: '100%', display: 'flex', backgroundColor: colors.primary,
-    paddingLeft: '3.5rem', alignItems: 'center'
+    paddingLeft: '3.5rem', alignItems: 'center', marginTop: '2rem'
   },
   bottomLinks: {
     color: colors.white, fontSize: '.5rem', height: '1rem',
@@ -45,29 +45,6 @@ export const styles = reactStyles({
   fadeBox: {
     margin: '1rem 0 0 3%', width: '95%', padding: '0 0.1rem'
   },
-  footer: {
-    width: '100%', backgroundColor: colors.light, marginTop: '2%'
-  },
-  footerInner: {
-    marginLeft: '3%', marginRight: '2%',
-  },
-  footerText: {
-    height: '176px', opacity: 0.87, color: colors.secondary,
-    fontSize: '0.6rem', fontWeight: 500, lineHeight: '30px', width: '100%',
-    flexWrap: 'nowrap', overflowY: 'auto'
-  },
-  footerTextTitle: {
-    color: colors.primary,
-    fontSize: '0.67rem',
-    fontWeight: 500
-  },
-  footerTitle: {
-    height: '34px', opacity: 0.87, color: colors.primary, fontSize: '0.75rem',
-    fontWeight: 600, lineHeight: '34px', marginTop: '1rem', marginBottom: '0.5rem'
-  },
-  linksBlock: {
-    marginBottom: '1rem', flexShrink: 1, minWidth: '13rem'
-  },
   logo: {
     height: '3.5rem', width: '7rem', lineHeight: '85px'
   },
@@ -75,14 +52,14 @@ export const styles = reactStyles({
     color: colors.primary, fontSize: 28, fontWeight: 400, letterSpacing: 'normal'
   },
   pageWrapper: {
-    marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '16px'
+    marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '1.2em'
   },
   quickTourCardsRow: {
     justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem'
   },
   quickTourLabel: {
-    fontSize: 18, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
-    fontWeight: 600, marginTop: '2rem', width: '33%'
+    fontSize: 22, lineHeight: '34px', color: colors.primary, paddingRight: '2.3rem',
+    fontWeight: 600, marginTop: '1rem', width: '33%'
   },
   welcomeMessageIcon: {
     height: '2.25rem', width: '2.75rem'
@@ -107,30 +84,9 @@ export const styles = reactStyles({
     fontSize: 28, lineHeight: '34px', color: colors.white, paddingRight: '2.3rem',
     marginTop: '2rem', width: '33%'
   },
-  footerToDelete: {
-    height: '300px', width: '100%', backgroundColor: colors.primary,
-    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-    marginTop: '2%',
-  },
-  footerInnerToDelete: {
-    display: 'flex', flexDirection: 'column', marginLeft: '5%', marginRight: '5%',
-  },
-  footerTitleToDelete: {
-    height: '34px', opacity: 0.87, color: colors.white, fontSize: 28,
-    fontWeight: 600, lineHeight: '34px', width: '87.34%', marginTop: '1.4rem'
-  },
-  footerTextToDelete: {
-    height: '176px', opacity: 0.87, color: colors.secondary, fontSize: '16px',
-    fontWeight: 400, lineHeight: '30px', display: 'flex', width: '100%',
-    flexDirection: 'column', flexWrap: 'nowrap', overflowY: 'auto'
-  },
-  linksBlockToDelete: {
-    display: 'flex', marginBottom: '1.2rem', marginLeft: '1.4rem',
-    flexDirection: 'column', flexShrink: 1, minWidth: 0
-  },
   bottomBannerToDelete: {
     width: '100%', display: 'flex', backgroundColor: colors.primary, height: '5rem',
-    paddingLeft: '3.5rem', alignItems: 'center'
+    paddingLeft: '3.5rem', alignItems: 'center', marginTop: '1rem'
   },
   bottomLinksToDelete: {
     color: colors.white, fontSize: '0.7rem', height: '1rem',
@@ -158,7 +114,8 @@ export const Homepage = withUserProfile()(class extends React.Component<
     trainingCompleted: boolean,
     twoFactorAuthCompleted: boolean,
     videoOpen: boolean,
-    videoLink: string
+    videoLink: string,
+    userHasWorkspaces: boolean
   }> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
@@ -179,10 +136,12 @@ export const Homepage = withUserProfile()(class extends React.Component<
       twoFactorAuthCompleted: undefined,
       videoOpen: false,
       videoLink: '',
+      userHasWorkspaces: false,
     };
   }
 
   componentDidMount() {
+    this.checkWorkspaces();
     this.validateNihToken();
     this.callProfile();
   }
@@ -285,6 +244,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
     }));
   }
 
+  async checkWorkspaces() {
+    workspacesApi().getWorkspaces().then(response => {
+      this.setState({
+        userHasWorkspaces: response.items.length > 0
+      });
+    });
+  }
+
   openVideo(videoLink: string): void {
     this.setState({videoOpen: true, videoLink: videoLink});
   }
@@ -308,27 +275,6 @@ export const Homepage = withUserProfile()(class extends React.Component<
         onClick: () => this.openVideo('/assets/videos/Workbench Tutorial - Notebooks.mp4')
       }
     ];
-    const footerLinks = [{
-      title: 'Working Within Researcher Workbench',
-      links: ['Researcher Workbench Mission',
-        'User interface components',
-        'What to do when things go wrong',
-        'Contributing to the Workbench']
-    },
-      {
-        title: 'Workspace',
-        links: ['Workspace interface components',
-          'User interface components',
-          'Collaborating with other researchers',
-          'Sharing and Publishing Workspaces']
-      },
-      {
-        title: 'Working with Notebooks',
-        links: ['Notebook interface components',
-          'Notebooks and data',
-          'Collaborating with other researchers',
-          'Sharing and Publishing Notebooks']
-      }];
 
     if (environment.enableHomepageRestyle) {
       return <React.Fragment>
@@ -371,10 +317,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
                             <FlexColumn>
                               <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
                                 <FlexRow style={{alignItems: 'center'}}>
-                                  <SmallHeader style={{marginTop: '0px'}}>Workspaces</SmallHeader>
+                                  <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
                                   <ClrIcon
                                     shape='plus-circle'
-                                    size={21}
+                                    size={30}
                                     className={'is-solid'}
                                     style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
                                     onClick={() => navigate(['workspaces/build'])}
@@ -390,8 +336,38 @@ export const Homepage = withUserProfile()(class extends React.Component<
                               <RecentWorkspaces />
                             </FlexColumn>
                             <FlexColumn>
-                              <SmallHeader>Recently Accessed Items</SmallHeader>
-                              <RecentResources/>
+                              {this.state.userHasWorkspaces ?
+
+                                (<React.Fragment>
+                                  <SmallHeader>Recently Accessed Items</SmallHeader>
+                                  <RecentResources/>
+                                </React.Fragment>) :
+
+                                <div style={{
+                                  backgroundColor: addOpacity(colors.primary, .1).toString(),
+                                  color: colors.primary,
+                                  borderRadius: 10,
+                                  margin: '2em 0em'}}>
+                                  <div style={{margin: '1em 2em'}}>
+                                    <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
+                                    <CustomBulletList>
+                                      <CustomBulletListItem bullet='→'>
+                                        Create a <a href='https://support.google.com/chrome/answer/2364824'>Chrome Profile </a>
+                                        with your All of Us Researcher Workbench Google account. This will keep your Workbench
+                                        browser sessions isolated from your other Google accounts.
+                                      </CustomBulletListItem>
+                                      <CustomBulletListItem bullet='→'>
+                                        Check out <a onClick={() => navigate(['library'])}> Featured Workspaces </a>
+                                        from the left hand panel to browse through example workspaces.
+                                      </CustomBulletListItem>
+                                      <CustomBulletListItem bullet='→'>
+                                        Browse through our <a href='https://aousupporthelp.zendesk.com/hc/en-us'> support materials </a>
+                                        and forum topics.
+                                      </CustomBulletListItem>
+                                    </CustomBulletList>
+                                  </div>
+                                </div>
+                              }
                             </FlexColumn>
                           </React.Fragment>
                         )
@@ -399,7 +375,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                   <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
             </FlexColumn>
           </FadeBox>
-          <div>
+          <div style={{backgroundColor: addOpacity(colors.light, .4).toString()}}>
             <FlexColumn style={{marginLeft: '3%'}}>
               <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
               <FlexRow style={styles.quickTourCardsRow}>
@@ -407,39 +383,13 @@ export const Homepage = withUserProfile()(class extends React.Component<
                   return <React.Fragment key={i}>
                     <Clickable onClick={thumbnail.onClick}
                                data-test-id={'quick-tour-resource-' + i}>
-                      <img style={{maxHeight: '7rem', width: '9rem', marginRight: '0.5rem'}}
+                      <img style={{width: '11rem', marginRight: '0.5rem'}}
                            src={thumbnail.src}/>
                     </Clickable>
                   </React.Fragment>;
                 })}
               </FlexRow>
             </FlexColumn>
-            <div>
-              <div style={styles.footer}>
-                <FlexColumn style={styles.footerInner}>
-                  <div style={styles.footerTitle}>
-                    How to Use the All of Us Researcher Workbench</div>
-                  <FlexRow style={{justifyContent: 'space-between'}}>
-                    {footerLinks.map((col, i) => {
-                      return <React.Fragment key={i}>
-                        <FlexColumn style={styles.linksBlock}>
-                          <FlexColumn style={styles.footerText}>
-                            <div style={styles.footerTextTitle}>{col.title}</div>
-                            <ul style={{color: colors.secondary, marginLeft: '2%'}}>
-                              {col.links.map((link, ii) => {
-                                return <li key={ii}>
-                                  <a href='#' style={{color: colors.accent}}>{link}</a>
-                                </li>;
-                              } )}
-                            </ul>
-                          </FlexColumn>
-                        </FlexColumn>
-                      </React.Fragment>;
-                    })}
-                  </FlexRow>
-                </FlexColumn>
-              </div>
-            </div>
             <div style={styles.bottomBanner}>
               <div style={styles.logo}>
                 <img src='/assets/images/all-of-us-logo-footer.svg'/>
@@ -521,46 +471,14 @@ export const Homepage = withUserProfile()(class extends React.Component<
                 </React.Fragment>;
               })}
             </div>
-            <div>
-              <div style={styles.footerToDelete}>
-                <div style={styles.footerInnerToDelete}>
-                  <div style={styles.footerTitleToDelete}>
-                    How to Use the All of Us Researcher Workbench</div>
-                  <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-                    <TooltipTrigger content='Coming Soon' side='left'>
-                      <a href='#' style={{color: colors.white}}>See all documentation</a>
-                    </TooltipTrigger>
-                  </div>
-                  <FlexRow style={{width: '87.34%', justifyContent: 'space-between'}}>
-                    {footerLinks.map((col, i) => {
-                      return <React.Fragment key={i}>
-                        <div style={styles.linksBlockToDelete}>
-                          <div style={styles.footerTextToDelete}>
-                            <div style={{color: colors.white, marginTop: '2%'}}>{col.title}</div>
-                            <ul style={{color: colors.secondary}}>
-                              {col.links.map((link, ii) => {
-                                return <li key={ii}>
-                                  <a href='#' style={{color: colors.secondary}}>{link}</a>
-                                </li>;
-                              } )}
-                            </ul>
-                          </div>
-                        </div>
-                      </React.Fragment>;
-                    })}
-                  </FlexRow>
-                </div>
+            <div style={styles.bottomBannerToDelete}>
+              <div style={styles.logo}>
+                <img src='/assets/images/all-of-us-logo-footer.svg'/>
               </div>
-              <div style={styles.bottomBannerToDelete}>
-                <div style={styles.logo}>
-                  <img src='/assets/images/all-of-us-logo-footer.svg'/>
-                </div>
-                <div style={styles.bottomLinksToDelete}>Privacy Policy</div>
-                <div style={styles.bottomLinksToDelete}>Terms of Service</div>
-              </div>
+              <div style={styles.bottomLinksToDelete}>Privacy Policy</div>
+              <div style={styles.bottomLinksToDelete}>Terms of Service</div>
             </div>
           </div>
-
         </div>
 
         {quickTour &&

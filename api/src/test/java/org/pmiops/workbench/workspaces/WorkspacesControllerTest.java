@@ -6,6 +6,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -426,6 +427,25 @@ public class WorkspacesControllerTest {
     List<WorkspaceResponse> workspaceResponses = fireCloudService.getWorkspaces(any());
     workspaceResponses.add(fcResponse);
     doReturn(workspaceResponses).when(fireCloudService).getWorkspaces(any());
+  }
+
+  /**
+   * Mocks out the FireCloud cloneWorkspace call with a FC-model workspace based on the provided
+   * details. The mocked workspace object is returned so the caller can make further modifications
+   * if needed.
+   */
+  private org.pmiops.workbench.firecloud.model.Workspace stubCloneWorkspace(
+      String ns, String name, String creator) {
+    org.pmiops.workbench.firecloud.model.Workspace fcResponse =
+        new org.pmiops.workbench.firecloud.model.Workspace();
+    fcResponse.setNamespace(ns);
+    fcResponse.setName(name);
+    fcResponse.setCreatedBy(creator);
+
+    when(fireCloudService.cloneWorkspace(anyString(), anyString(), eq(ns), eq(name)))
+        .thenReturn(fcResponse);
+
+    return fcResponse;
   }
 
   private void stubBigQueryCohortCalls() {
@@ -853,18 +873,26 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
-    stubGetWorkspace(
-        modWorkspace.getNamespace(),
-        modWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
+    org.pmiops.workbench.firecloud.model.Workspace clonedWorkspace =
+        stubCloneWorkspace(
+            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+    // Assign the same bucket name as the mock-factory's bucket name, so the clone vs. get equality
+    // assertion below will pass.
+    clonedWorkspace.setBucketName(TestMockFactory.BUCKET_NAME);
+
     mockBillingProjectBuffer("cloned-ns");
     Workspace workspace2 =
         workspacesController
             .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
             .getBody()
             .getWorkspace();
+    verify(mockWorkspaceAuditAdapterService)
+        .fireDuplicateAction(
+            any(org.pmiops.workbench.db.model.Workspace.class),
+            any(org.pmiops.workbench.db.model.Workspace.class));
 
+    // Stub out the FC service getWorkspace, since that's called by workspacesController.
+    stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
     assertWithMessage("get and clone responses are inconsistent")
         .that(workspace2)
         .isEqualTo(
@@ -1063,11 +1091,7 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
-    stubGetWorkspace(
-        modWorkspace.getNamespace(),
-        modWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
+    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     mockBillingProjectBuffer("cloned-ns");
     Workspace cloned =
@@ -1216,11 +1240,7 @@ public class WorkspacesControllerTest {
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
 
-    stubGetWorkspace(
-        modWorkspace.getNamespace(),
-        modWorkspace.getName(),
-        LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
+    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
             "condition_occurrence",
@@ -1315,11 +1335,11 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
+
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        testMockFactory.createFcWorkspace(
+        stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     fcWorkspace.setBucketName("bucket2");
-    stubGetWorkspace(fcWorkspace, WorkspaceAccessLevel.OWNER);
     String f1 = NotebooksService.withNotebookExtension("notebooks/f1");
     String f2 = NotebooksService.withNotebookExtension("notebooks/f2 with spaces");
     String f3 = "foo/f3.vcf";
@@ -1357,11 +1377,7 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
-    stubGetWorkspace(
-        modWorkspace.getNamespace(),
-        modWorkspace.getName(),
-        "cloner@gmail.com",
-        WorkspaceAccessLevel.OWNER);
+    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
 
     mockBillingProjectBuffer("cloned-ns");
 
@@ -1390,11 +1406,7 @@ public class WorkspacesControllerTest {
             .namespace("cloned-ns")
             .researchPurpose(workspace.getResearchPurpose())
             .cdrVersionId(cdrVersionId2);
-    stubGetWorkspace(
-        modWorkspace.getNamespace(),
-        modWorkspace.getName(),
-        "cloner@gmail.com",
-        WorkspaceAccessLevel.OWNER);
+    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
 
     mockBillingProjectBuffer("cloned-ns");
 
@@ -1418,11 +1430,7 @@ public class WorkspacesControllerTest {
             .namespace("cloned-ns")
             .researchPurpose(workspace.getResearchPurpose())
             .cdrVersionId("bad-cdr-version-id");
-    stubGetWorkspace(
-        modWorkspace.getNamespace(),
-        modWorkspace.getName(),
-        "cloner@gmail.com",
-        WorkspaceAccessLevel.OWNER);
+    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
     mockBillingProjectBuffer("cloned-ns");
     workspacesController.cloneWorkspace(
         workspace.getNamespace(),
@@ -1440,11 +1448,7 @@ public class WorkspacesControllerTest {
             .namespace("cloned-ns")
             .researchPurpose(workspace.getResearchPurpose())
             .cdrVersionId(archivedCdrVersionId);
-    stubGetWorkspace(
-        modWorkspace.getNamespace(),
-        modWorkspace.getName(),
-        "cloner@gmail.com",
-        WorkspaceAccessLevel.OWNER);
+    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
     mockBillingProjectBuffer("cloned-ns");
     workspacesController.cloneWorkspace(
         workspace.getNamespace(),
@@ -1519,7 +1523,7 @@ public class WorkspacesControllerTest {
             .name("cloned")
             .researchPurpose(workspace.getResearchPurpose());
 
-    stubGetWorkspace("cloned-ns", "cloned", cloner.getEmail(), WorkspaceAccessLevel.OWNER);
+    stubCloneWorkspace("cloned-ns", "cloned", cloner.getEmail());
     mockBillingProjectBuffer("cloned-ns");
 
     Workspace workspace2 =
@@ -1654,6 +1658,7 @@ public class WorkspacesControllerTest {
         workspacesController
             .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
             .getBody();
+    verify(mockWorkspaceAuditAdapterService).fireCollaborateAction(anyLong(), anyMap());
     Workspace workspace2 =
         workspacesController
             .getWorkspace(workspace.getNamespace(), workspace.getName())

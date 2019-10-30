@@ -1,10 +1,11 @@
-import {AttrName, CriteriaType, DomainType, Operator} from 'generated/fetch';
+import {AttrName, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
 
 export const LIST_PROGRAM_TYPES = [
   {
     name: 'Demographics', domain: DomainType.PERSON, children: [
       {name: 'Current Age/Deceased', domain: DomainType.PERSON, type: CriteriaType.AGE},
       {name: 'Gender', domain: DomainType.PERSON, type: CriteriaType.GENDER},
+      {name: 'Sex', domain: DomainType.PERSON, type: CriteriaType.SEX},
       {name: 'Race', domain: DomainType.PERSON, type: CriteriaType.RACE},
       {name: 'Ethnicity', domain: DomainType.PERSON, type: CriteriaType.ETHNICITY},
     ]
@@ -118,4 +119,35 @@ export const PREDEFINED_ATTRIBUTES = {
       MAX: 1000
     }
   ],
+};
+
+export const MODIFIERS_MAP = {
+  [ModifierType.AGEATEVENT]: {
+    name: 'Age At Event',
+    operators: {
+      [Operator.BETWEEN]: 'Between',
+      [Operator.GREATERTHANOREQUALTO]: 'Greater Than or Equal To',
+      [Operator.LESSTHANOREQUALTO]: 'Less Than or Equal To',
+    }
+  },
+  [ModifierType.ENCOUNTERS]: {
+    name: 'During Visit Type',
+    operators: {
+      [Operator.IN]: ''
+    }
+  },
+  [ModifierType.EVENTDATE]: {
+    name: 'Event Date',
+    operators: {
+      [Operator.BETWEEN]: 'Between',
+      [Operator.GREATERTHANOREQUALTO]: 'On or After',
+      [Operator.LESSTHANOREQUALTO]: 'On or Before',
+    }
+  },
+  [ModifierType.NUMOFOCCURRENCES]: {
+    name: 'Has Occurrences',
+    operators: {
+      [Operator.GREATERTHANOREQUALTO]: 'N or More',
+    }
+  },
 };

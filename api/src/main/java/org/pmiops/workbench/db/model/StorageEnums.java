@@ -6,6 +6,8 @@ import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBuf
 import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.BillingAccountType;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ReviewStatus;
@@ -202,6 +204,34 @@ public final class StorageEnums {
 
   public static Short specificPopulationToStorage(SpecificPopulationEnum s) {
     return CLIENT_TO_STORAGE_SPECIFIC_POPULATION.get(s);
+  }
+
+  public static final BiMap<BillingStatus, Short> CLIENT_TO_STORAGE_BILLING_STATUS =
+      ImmutableBiMap.<BillingStatus, Short>builder()
+          .put(BillingStatus.ACTIVE, (short) 0)
+          .put(BillingStatus.INACTIVE, (short) 1)
+          .build();
+
+  public static BillingStatus billingStatusFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_BILLING_STATUS.inverse().get(s);
+  }
+
+  public static Short billingStatusToStorage(BillingStatus s) {
+    return CLIENT_TO_STORAGE_BILLING_STATUS.get(s);
+  }
+
+  public static final BiMap<BillingAccountType, Short> CLIENT_TO_STORAGE_BILLING_ACCOUNT_TYPE =
+      ImmutableBiMap.<BillingAccountType, Short>builder()
+          .put(BillingAccountType.FREE_TIER, (short) 0)
+          .put(BillingAccountType.USER_PROVIDED, (short) 1)
+          .build();
+
+  public static BillingAccountType billingAccountTypeFromStorage(Short s) {
+    return CLIENT_TO_STORAGE_BILLING_ACCOUNT_TYPE.inverse().get(s);
+  }
+
+  public static Short billingAccountTypeToStorage(BillingAccountType s) {
+    return CLIENT_TO_STORAGE_BILLING_ACCOUNT_TYPE.get(s);
   }
 
   /** Utility class. */

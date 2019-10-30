@@ -29,8 +29,8 @@ cron:
   schedule: every 24 hours
   timezone: UTC
   target: api
-- description: 'If the AoU Billing Project buffer is not full, create a firecloud billing project and add one'
-  url: /v1/cron/bufferBillingProject
+- description: 'If the AoU Billing Project buffer is not full, refill with one or more projects.'
+  url: /v1/cron/bufferBillingProjects
   schedule: every 1 minutes
   timezone: UTC
   target: api

@@ -10,6 +10,7 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -208,11 +209,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private org.pmiops.workbench.firecloud.model.Workspace attemptFirecloudWorkspaceCreation(
       FirecloudWorkspaceId workspaceId) {
-    fireCloudService.createWorkspace(
+    return fireCloudService.createWorkspace(
         workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
-    return fireCloudService
-        .getWorkspace(workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName())
-        .getWorkspace();
   }
 
   @Override
@@ -415,17 +413,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     FirecloudWorkspaceId toFcWorkspaceId =
         generateFirecloudWorkspaceId(toWorkspaceName, toWorkspace.getName());
-    fireCloudService.cloneWorkspace(
-        fromWorkspaceNamespace,
-        fromWorkspaceId,
-        toFcWorkspaceId.getWorkspaceNamespace(),
-        toFcWorkspaceId.getWorkspaceName());
-
     org.pmiops.workbench.firecloud.model.Workspace toFcWorkspace =
-        fireCloudService
-            .getWorkspace(
-                toFcWorkspaceId.getWorkspaceNamespace(), toFcWorkspaceId.getWorkspaceName())
-            .getWorkspace();
+        fireCloudService.cloneWorkspace(
+            fromWorkspaceNamespace,
+            fromWorkspaceId,
+            toFcWorkspaceId.getWorkspaceNamespace(),
+            toFcWorkspaceId.getWorkspaceName());
 
     // In the future, we may want to allow callers to specify whether files
     // should be cloned at all (by default, yes), else they are currently stuck
@@ -505,6 +498,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspaceService.updateWorkspaceAcls(
               savedWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
+    workspaceAuditAdapterService.fireDuplicateAction(fromWorkspace, savedWorkspace);
     return ResponseEntity.ok(
         new CloneWorkspaceResponse()
             .workspace(WorkspaceConversionUtils.toApiWorkspace(savedWorkspace, toFcWorkspace)));
@@ -535,21 +529,29 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify user roles with outdated workspace etag");
     }
-    Map<String, WorkspaceAccessLevel> shareRolesMap = new HashMap<>();
+
+    ImmutableMap.Builder<String, WorkspaceAccessLevel> shareRolesMapBuilder =
+        new ImmutableMap.Builder<>();
+    ImmutableMap.Builder<Long, String> aclStringsByUserIdBuilder = new ImmutableMap.Builder<>();
+
     for (UserRole role : request.getItems()) {
       if (role.getRole() == null || role.getRole().toString().trim().isEmpty()) {
         throw new BadRequestException("Role required.");
       }
-      User newUser = userDao.findUserByEmail(role.getEmail());
-      if (newUser == null) {
+      final User invitedUser = userDao.findUserByEmail(role.getEmail());
+      if (invitedUser == null) {
         throw new BadRequestException(String.format("User %s doesn't exist", role.getEmail()));
       }
-      shareRolesMap.put(role.getEmail(), role.getRole());
+
+      aclStringsByUserIdBuilder.put(invitedUser.getUserId(), role.getRole().toString());
+      shareRolesMapBuilder.put(role.getEmail(), role.getRole());
     }
+    final ImmutableMap<String, WorkspaceAccessLevel> aclsByEmail = shareRolesMapBuilder.build();
+
     // This automatically enforces the "canShare" permission.
     dbWorkspace =
         workspaceService.updateWorkspaceAcls(
-            dbWorkspace, shareRolesMap, getRegisteredUserDomainEmail());
+            dbWorkspace, aclsByEmail, getRegisteredUserDomainEmail());
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
@@ -559,6 +561,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     List<UserRole> updatedUserRoles =
         workspaceService.convertWorkspaceAclsToUserRoles(updatedWsAcls);
     resp.setItems(updatedUserRoles);
+
+    workspaceAuditAdapterService.fireCollaborateAction(
+        dbWorkspace.getWorkspaceId(), aclStringsByUserIdBuilder.build());
     return ResponseEntity.ok(resp);
   }
 

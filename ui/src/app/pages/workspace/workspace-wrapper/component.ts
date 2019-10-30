@@ -7,6 +7,7 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
   currentWorkspaceStore,
   navigate,
+  nextWorkspaceWarmupStore,
   routeConfigDataStore,
   urlParamsStore,
   userProfileStore
@@ -84,6 +85,15 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         // initializes before we have access to the route.
         if (ns === undefined || wsid === undefined) {
           return Promise.resolve(null);
+        }
+
+        // In a handful of situations - namely on workspace creation/clone,
+        // the application will preload the next workspace to avoid a redundant
+        // refetch here.
+        const nextWs = nextWorkspaceWarmupStore.getValue();
+        nextWorkspaceWarmupStore.next(undefined);
+        if (nextWs && nextWs.namespace === ns && nextWs.id === wsid) {
+          return Promise.resolve(nextWs);
         }
         return workspacesApi().getWorkspace(ns, wsid).then((wsResponse) => {
           return {

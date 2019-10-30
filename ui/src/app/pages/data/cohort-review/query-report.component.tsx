@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
 import {ComboChart} from 'app/cohort-common/combo-chart/combo-chart.component';
-import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {CohortDefinition} from 'app/pages/data/cohort-review/cohort-definition.component';
 import {ParticipantsCharts} from 'app/pages/data/cohort-review/participants-charts';
@@ -308,14 +307,15 @@ export const QueryReport = withCurrentWorkspace()(
                     <div style={{...columns.col10, ...styles.queryTitle}}>
                       Descriptive Statistics
                     </div>
-                    <ClrIcon
-                      className='is-solid'
-                      style={{...columns.col2,
-                        ...(groupedData ? styles.print : styles.printDisabled)}}
-                      onClick={() => groupedData && window.print()}
-                      disabled={!groupedData}
-                      shape='printer'
-                      size={32} />
+                    {/*TODO uncomment print icon when we know how we want to display the data download policy*/}
+                    {/*<ClrIcon*/}
+                    {/*  className='is-solid'*/}
+                    {/*  style={{...columns.col2,*/}
+                    {/*    ...(groupedData ? styles.print : styles.printDisabled)}}*/}
+                    {/*  onClick={() => groupedData && window.print()}*/}
+                    {/*  disabled={!groupedData}*/}
+                    {/*  shape='printer'*/}
+                    {/*  size={32} />*/}
                 </div>
               </div>
               {groupedData && Object.keys(groupedData).map((group, g) => (

@@ -311,7 +311,7 @@ export function mapParameter(sp: any) {
     ancestorData: hasAncestorData,
     standard: isStandard
   };
-  if (conceptId) {
+  if (conceptId !== null && conceptId !== undefined) {
     param.conceptId = conceptId;
   }
   if (domainId === DomainType.SURVEY) {

@@ -7,7 +7,8 @@ public enum ActionType {
   BYPASS,
   EDIT,
   CREATE,
-  DUPLICATE,
+  DUPLICATE_FROM,
+  DUPLICATE_TO,
   COLLABORATE,
   DELETE
 }

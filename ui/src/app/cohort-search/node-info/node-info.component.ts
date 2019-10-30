@@ -72,8 +72,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get paramId() {
-    return `param${this.node.conceptId && !this.isSurvey ?
-        (this.node.conceptId + this.node.value) : this.node.id}`;
+    return `param${this.node.conceptId && !this.isSurvey ? (this.node.conceptId + this.node.code) : this.node.id}`;
   }
 
   get selectable() {
@@ -122,7 +121,7 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
           // get PPI question from store
           const question = ppiQuestions.getValue()[this.node.parentId];
           if (question) {
-            modifiedName = question + ' - ' + modifiedName;
+            modifiedName = question.name + ' - ' + modifiedName;
           }
         }
         let attributes = [];

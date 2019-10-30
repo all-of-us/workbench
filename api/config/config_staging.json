@@ -18,8 +18,9 @@
     "projectNamePrefix": "aou-rw-staging-",
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0",
     "retryCount": 2,
-    "bufferCapacity": 10,
-    "defaultFreeCreditsLimit": 300.0,
+    "bufferCapacity": 50,
+    "bufferRefillProjectsPerTask": 1,
+    "defaultFreeCreditsLimit": 100.0,
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-staging-1@all-of-us-rw-staging.iam.gserviceaccount.com"
@@ -69,7 +70,7 @@
   "access": {
     "enableComplianceTraining": false,
     "enableEraCommons": true,
-    "enableDataUseAgreement": false,
+    "enableDataUseAgreement": true,
     "enableBetaAccess": true,
     "unsafeAllowSelfBypass": false
   },
@@ -78,5 +79,8 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": false
+  },
+  "actionAudit": {
+    "logName":"workbench-action-audit-staging"
   }
 }

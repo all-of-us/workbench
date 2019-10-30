@@ -3,7 +3,7 @@ import {AttrName, CriteriaSubType, DomainType, Operator} from 'generated/fetch';
 import * as React from 'react';
 
 import {PM_UNITS, PREDEFINED_ATTRIBUTES} from 'app/cohort-search/constant';
-import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {ppiQuestions, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {
   mapParameter,
   sanitizeNumericalInput,
@@ -181,25 +181,24 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     componentDidMount() {
-      const {node} = this.props;
+      const {node: {subtype}} = this.props;
       const{form, options} = this.state;
       if (this.isMeasurement) {
         this.getMeasurementAttributes();
       } else {
         options.unshift({label: 'Any', value: AttrName[AttrName.ANY]});
-        form.num = node.subtype === CriteriaSubType[CriteriaSubType.BP]
+        form.num = subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
-          : [{name: node.subtype, operator: 'ANY', operands: []}];
-        this.setState({form, options, count: node.count, loading: false});
+          : [{name: subtype, operator: 'ANY', operands: []}];
+        this.setState({form, options, count: this.nodeCount, loading: false});
       }
     }
 
     getMeasurementAttributes() {
-      const {node} = this.props;
+      const {node: {conceptId}} = this.props;
       const{form} = this.state;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
-      cohortBuilderApi().getCriteriaAttributeByConceptId(+cdrVersionId, node.conceptId)
-      .then(resp => {
+      cohortBuilderApi().getCriteriaAttributeByConceptId(+cdrVersionId, conceptId).then(resp => {
         resp.items.forEach(attr => {
           if (attr.type === AttrName[AttrName.NUM]) {
             if (!form.num.length) {
@@ -207,7 +206,7 @@ export const AttributesPage = withCurrentWorkspace() (
                 name: AttrName.NUM,
                 operator: null,
                 operands: [],
-                conceptId: node.conceptId,
+                conceptId: conceptId,
                 [attr.conceptName]: parseInt(attr.estCount, 10)
               });
             } else {
@@ -240,7 +239,6 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     selectChange(attributeIndex: number, value: string) {
-      const {node} = this.props;
       const {form} = this.state;
       form.num[attributeIndex].operator = value;
       if (this.isBloodPressure) {
@@ -259,7 +257,7 @@ export const AttributesPage = withCurrentWorkspace() (
         // delete second operand if it exists
         form.num[attributeIndex].operands.splice(1);
       }
-      const count = value === 'ANY' ? node.count : null;
+      const count = value === 'ANY' ? this.nodeCount : null;
       this.setState({form, count});
     }
 
@@ -319,6 +317,16 @@ export const AttributesPage = withCurrentWorkspace() (
       return {formErrors, formValid};
     }
 
+    get nodeCount() {
+      const {node: {count, parentId}} = this.props;
+      if (this.isSurvey) {
+        const parent = ppiQuestions.getValue()[parentId];
+        return !!parent ? parent.count : null;
+      } else {
+        return count;
+      }
+    }
+
     get paramId() {
       const {node: {conceptId, id}} = this.props;
       const {form} = this.state;
@@ -337,19 +345,19 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     get paramWithAttributes() {
-      const {node} = this.props;
+      const {node, node: {name, subtype}} = this.props;
       const {form} = this.state;
-      let name;
+      let paramName;
       const attrs = [];
       if (form.exists) {
-        name = node.name + ' (Any)';
+        paramName = name + ' (Any)';
       } else {
         form.num.filter(at => at.operator).forEach(({operator, operands, conceptId}) => {
           const attr = {name: AttrName.NUM, operator, operands};
-          if (node.subtype === CriteriaSubType.BP) {
+          if (subtype === CriteriaSubType.BP) {
             attr['conceptId'] = conceptId;
           }
-          if (attr.operator === 'ANY' && node.subtype === CriteriaSubType.BP) {
+          if (attr.operator === 'ANY' && subtype === CriteriaSubType.BP) {
             attr.name = AttrName.ANY;
             attr.operands = [];
             delete attr.operator;
@@ -367,9 +375,9 @@ export const AttributesPage = withCurrentWorkspace() (
           }, []);
           attrs.push({name: AttrName.CAT, operator: Operator.IN, operands: catOperands});
         }
-        name = this.paramName;
+        paramName = this.paramName;
       }
-      return {...node, parameterId: this.paramId, name: name, attributes: attrs};
+      return {...node, parameterId: this.paramId, name: paramName, attributes: attrs};
     }
 
     get paramName() {
@@ -389,18 +397,16 @@ export const AttributesPage = withCurrentWorkspace() (
           if (node.subtype === CriteriaSubType.BP) {
             name += attr.name + ' ';
           }
-          name += optionUtil[attr.operator].display + attr.operands
-            .map(op => parseInt(op, 10).toLocaleString())
-            .join('-');
+          name += optionUtil[attr.operator].display + attr.operands.map(op => parseInt(op, 10).toLocaleString()).join('-');
         }
       });
       if (name !== '') {
         selectionDisplay.push(name);
       }
       form.cat.filter(ca => ca.checked).forEach(attr => selectionDisplay.push(attr.conceptName));
-      return node.name + ' (' + selectionDisplay.join(', ') +
-        (this.isPhysicalMeasurement && form.num[0].operator !== AttrName.ANY
-          ? PM_UNITS[node.subtype] : '') + ')';
+      const nodeName = this.isSurvey ? ppiQuestions.getValue()[node.parentId].name : node.name;
+      return nodeName + ' (' + selectionDisplay.join(', ') +
+        (this.isPhysicalMeasurement && form.num[0].operator !== AttrName.ANY ? PM_UNITS[node.subtype] : '') + ')';
     }
 
     requestPreview() {
@@ -469,6 +475,10 @@ export const AttributesPage = withCurrentWorkspace() (
       return this.props.node.domainId === DomainType.PHYSICALMEASUREMENT;
     }
 
+    get isSurvey() {
+      return this.props.node.domainId === DomainType.SURVEY;
+    }
+
     get isBloodPressure() {
       return this.props.node.subtype === CriteriaSubType.BP;
     }
@@ -501,6 +511,7 @@ export const AttributesPage = withCurrentWorkspace() (
           {!form.exists && <React.Fragment>
             {form.num.map((attr, a) => <div key={a}>
               {this.isMeasurement && <div style={styles.label}>Numeric Values</div>}
+              {this.isSurvey && <div style={styles.label}>{ppiQuestions.getValue()[node.parentId].name}</div>}
               {this.isBloodPressure && <div style={styles.label}>{attr.name}</div>}
               <div style={styles.container}>
                 <div style={styles.dropdown}>

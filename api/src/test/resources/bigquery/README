@@ -12,7 +12,7 @@
 
 4. Find the output file by running this from the /api directory `find . -name your_bq_output.ser`
 5. Copy that file into src/test/resources/bigquery/
-6. See `BillingAlertsServiceTest` to see an example on how to read the file and use it in tests
+6. See `FreeTierBillingServiceTest` to see an example on how to read the file and use it in tests
 
 // Generating .json files
 // This isn't necessary to run the tests but useful for having a human readable version of the test

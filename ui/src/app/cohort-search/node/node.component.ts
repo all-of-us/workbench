@@ -75,7 +75,7 @@ export class NodeComponent implements OnInit, OnDestroy {
     if (!event || (this.node.id !== 0 && !!this.children)) { return; }
     this.loading = true;
     const cdrId = +(currentWorkspaceStore.getValue().cdrVersionId);
-    const {domainId, id, isStandard, name} = this.node;
+    const {count, domainId, id, isStandard, name} = this.node;
     const type = domainId === DomainType.DRUG ? CriteriaType[CriteriaType.ATC] : this.node.type;
     try {
       if (!this.wizard.fullTree) {
@@ -96,7 +96,7 @@ export class NodeComponent implements OnInit, OnDestroy {
               if (!this.empty && domainId === DomainType.SURVEY && !resp.items[0].group) {
                 // save questions in the store so we can display them along with answers if selected
                 const questions = ppiQuestions.getValue();
-                questions[id] = name;
+                questions[id] = {count, name};
                 ppiQuestions.next(questions);
               }
             }

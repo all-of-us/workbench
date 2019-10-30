@@ -19,7 +19,8 @@
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.gcp_billing_export_v1_015EAA_E95687_1F8614",
     "retryCount": 4,
     "bufferCapacity": 100,
-    "defaultFreeCreditsLimit": 300.0,
+    "bufferRefillProjectsPerTask": 1,
+    "defaultFreeCreditsLimit": 100.0,
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-prod-1@all-of-us-rw-prod.iam.gserviceaccount.com"
@@ -69,7 +70,7 @@
   "access": {
     "enableComplianceTraining": false,
     "enableEraCommons": true,
-    "enableDataUseAgreement": false,
+    "enableDataUseAgreement": true,
     "enableBetaAccess": true,
     "unsafeAllowSelfBypass": false
   },
@@ -78,5 +79,8 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": false
+  },
+  "actionAudit": {
+    "logName":"workbench-action-audit-prod"
   }
 }

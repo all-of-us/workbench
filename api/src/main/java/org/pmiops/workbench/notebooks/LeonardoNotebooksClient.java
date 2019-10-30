@@ -16,8 +16,11 @@ public interface LeonardoNotebooksClient {
    *
    * @param googleProject the google project that will be used for this notebooks cluster
    * @param clusterName the user assigned/auto-generated name for this notebooks cluster
+   * @param cdrVersion the version of the CDR that the workspace to which this notebook belongs is
+   *     using
    */
-  Cluster createCluster(String googleProject, String clusterName) throws WorkbenchException;
+  Cluster createCluster(String googleProject, String clusterName, String cdrVersion)
+      throws WorkbenchException;
 
   /** Deletes a notebook cluster */
   void deleteCluster(String googleProject, String clusterName) throws WorkbenchException;

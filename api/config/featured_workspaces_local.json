@@ -1,9 +1,22 @@
 {
   "featuredWorkspaces": [
     {
-    "name": "bug",
-    "namespace": "aou-rw-local1-1755351751",
-    "id": "bug"
+      "name": "phenotype",
+      "namespace": "aou-rw-local1-c217495e",
+      "id": "phenotype",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "test",
+      "namespace": "aou-rw-local1-350c59e3",
+      "id": "test",
+      "category": "PHENOTYPE_LIBRARY"
+    },
+    {
+      "name": "Duplicate of Test 2",
+      "namespace": "aou-rw-local1-65b2c024",
+      "id": "duplicateoftest2",
+      "category": "TUTORIAL_WORKSPACES"
     }
   ]
 }

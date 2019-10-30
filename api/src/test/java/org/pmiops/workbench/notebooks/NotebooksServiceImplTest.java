@@ -95,4 +95,30 @@ public class NotebooksServiceImplTest {
     // therefore safe. Ideally we would keep the style tag, but sanitize the contents.
     assertThat(html).contains("XSS");
   }
+
+  @Test
+  public void testGetReadOnlyHtml_allowsDataImage() {
+    when(firecloudService.getWorkspace(any(), any()))
+        .thenReturn(new WorkspaceResponse().workspace(new Workspace().bucketName("bkt")));
+    when(cloudStorageService.getFileAsJson(any(), any())).thenReturn(new JSONObject());
+
+    String dataUri = "data:image/png;base64,MTIz";
+    when(firecloudService.staticNotebooksConvert(any()))
+        .thenReturn("<img src=\"" + dataUri + "\" />\n");
+
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    assertThat(html).contains(dataUri);
+  }
+
+  @Test
+  public void testGetReadOnlyHtml_disallowsRemoteImage() {
+    when(firecloudService.getWorkspace(any(), any()))
+        .thenReturn(new WorkspaceResponse().workspace(new Workspace().bucketName("bkt")));
+    when(cloudStorageService.getFileAsJson(any(), any())).thenReturn(new JSONObject());
+    when(firecloudService.staticNotebooksConvert(any()))
+        .thenReturn("<img src=\"https://eviltrackingpixel.com\" />\n");
+
+    String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
+    assertThat(html).doesNotContain("eviltrackingpixel.com");
+  }
 }

@@ -118,6 +118,7 @@ public final class SearchGroupItemQueryBuilder {
   private static final String RACE_SQL = "p.race_concept_id in unnest(%s)\n";
   private static final String GEN_SQL = "p.gender_concept_id in unnest(%s)\n";
   private static final String ETH_SQL = "p.ethnicity_concept_id in unnest(%s)\n";
+  private static final String SEX_SQL = "p.sex_at_birth_concept_id in unnest(%s)\n";
   private static final String DEC_SQL =
       "exists (\n"
           + "SELECT 'x' FROM `${projectId}.${dataSetId}.death` d\n"
@@ -240,19 +241,23 @@ public final class SearchGroupItemQueryBuilder {
             + String.format(
                 AGE_SQL, OperatorUtils.getSqlOperator(attribute.getOperator()), finaParam);
       case GENDER:
+      case SEX:
       case ETHNICITY:
       case RACE:
-        // Gender, Ethnicity and Race all share the same implementation
+        // Gender, Sex, Ethnicity and Race all share the same implementation
         Long[] conceptIds =
             searchGroupItem.getSearchParameters().stream()
                 .map(SearchParameter::getConceptId)
                 .toArray(Long[]::new);
         String namedParameter =
             addQueryParameterValue(queryParams, QueryParameterValue.array(conceptIds, Long.class));
+
         String demoSql =
             CriteriaType.RACE.toString().equals(param.getType())
                 ? RACE_SQL
-                : CriteriaType.GENDER.toString().equals(param.getType()) ? GEN_SQL : ETH_SQL;
+                : CriteriaType.GENDER.toString().equals(param.getType())
+                    ? GEN_SQL
+                    : CriteriaType.ETHNICITY.toString().equals(param.getType()) ? ETH_SQL : SEX_SQL;
         return DEMO_BASE + String.format(demoSql, namedParameter);
       case DECEASED:
         return DEMO_BASE + DEC_SQL;

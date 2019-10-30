@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -28,13 +29,16 @@ import org.mockito.Mockito;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
+import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.UserDataUseAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -89,16 +93,18 @@ public class ProfileControllerTest {
   private static final String ORGANIZATION = "Test";
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
+  private static final int DUA_VERSION = 2;
 
   @Mock private Provider<User> userProvider;
   @Mock private Provider<UserAuthentication> userAuthenticationProvider;
   @Autowired private UserDao userDao;
   @Autowired private AdminActionHistoryDao adminActionHistoryDao;
+  @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
   @Mock private FireCloudService fireCloudService;
   @Mock private LeonardoNotebooksClient leonardoNotebooksClient;
   @Mock private DirectoryService directoryService;
   @Mock private CloudStorageService cloudStorageService;
-  @Mock private Provider<WorkbenchConfig> configProvider;
+  @Mock private FreeTierBillingService freeTierBillingService;
   @Mock private ComplianceService complianceTrainingService;
   @Mock private MailService mailService;
   @Mock private UserService userService;
@@ -146,13 +152,14 @@ public class ProfileControllerTest {
             userProvider,
             userDao,
             adminActionHistoryDao,
+            userDataUseAgreementDao,
             clock,
             new FakeLongRandom(NONCE_LONG),
             fireCloudService,
             Providers.of(config),
             complianceTrainingService,
             directoryService);
-    ProfileService profileService = new ProfileService(userDao);
+    ProfileService profileService = new ProfileService(userDao, freeTierBillingService);
     this.profileController =
         new ProfileController(
             profileService,
@@ -228,18 +235,8 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitDataUseAgreement_success() throws Exception {
     createUser();
-    assertThat(profileController.submitDataUseAgreement(0).getStatusCode())
+    assertThat(profileController.submitDataUseAgreement(DUA_VERSION, "NIH").getStatusCode())
         .isEqualTo(HttpStatus.OK);
-  }
-
-  @Test
-  public void testSubmitDataUseAgreement_updateVersion() throws Exception {
-    createUser();
-    int oldDuaVersion = 0;
-    int newDuaVersion = 1;
-    profileController.submitDataUseAgreement(oldDuaVersion);
-    profileController.submitDataUseAgreement(newDuaVersion);
-    assertThat(user.getDataUseAgreementSignedVersion() == newDuaVersion);
   }
 
   @Test
@@ -431,6 +428,22 @@ public class ProfileControllerTest {
     assertThat(user.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
   }
 
+  @Test
+  public void updateName_alsoUpdatesDua() throws Exception {
+    createUser();
+    Profile profile = profileController.getMe().getBody();
+    profile.setGivenName("OldGivenName");
+    profile.setFamilyName("OldFamilyName");
+    profileController.updateProfile(profile);
+    profileController.submitDataUseAgreement(DUA_VERSION, "O.O.");
+    profile.setGivenName("NewGivenName");
+    profile.setFamilyName("NewFamilyName");
+    profileController.updateProfile(profile);
+    List<UserDataUseAgreement> duas =
+        userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(profile.getUserId());
+    assertThat(duas.get(0).isUserNameOutOfDate()).isTrue();
+  }
+
   @Test(expected = BadRequestException.class)
   public void updateGivenName_badRequest() throws Exception {
     createUser();
@@ -551,7 +564,7 @@ public class ProfileControllerTest {
     userService = spy(userService);
     WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchConfig config = generateConfig();
-    ProfileService profileService = new ProfileService(userDao);
+    ProfileService profileService = new ProfileService(userDao, freeTierBillingService);
     this.profileController =
         new ProfileController(
             profileService,
