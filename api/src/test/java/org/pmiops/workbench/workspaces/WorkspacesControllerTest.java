@@ -1360,7 +1360,8 @@ public class WorkspacesControllerTest {
     assertThat(conceptSets.get(0).getConceptSetId())
         .isNotEqualTo(originalConceptSet.getConceptSetId());
 
-    List<org.pmiops.workbench.db.model.Cohort> cohorts = dataSetService.getCohortsForDataset(dataSets.get(0));
+    List<org.pmiops.workbench.db.model.Cohort> cohorts =
+        dataSetService.getCohortsForDataset(dataSets.get(0));
     assertThat(cohorts).hasSize(1);
     assertThat(cohorts.get(0).getName()).isEqualTo(expectedCohortName);
     assertThat(cohorts.get(0).getDescription()).isEqualTo(expectedCohortDescription);
