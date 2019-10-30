@@ -220,7 +220,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   @Query(
       value =
-          "select * from cb_criteria where domain_id = 'PERSON' and type in ('GENDER', 'RACE', 'ETHNICITY') and parent_id != 0",
+          "select * from cb_criteria where domain_id = 'PERSON' and type in ('GENDER', 'RACE', 'ETHNICITY') and parent_id != 0 order by name asc",
       nativeQuery = true)
   List<CBCriteria> findGenderRaceEthnicity();
 
