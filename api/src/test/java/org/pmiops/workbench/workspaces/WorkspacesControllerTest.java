@@ -74,6 +74,9 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -82,6 +85,8 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DataSet;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -126,6 +131,7 @@ import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
@@ -145,6 +151,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -285,8 +292,12 @@ public class WorkspacesControllerTest {
   @Autowired UserDao userDao;
   @Autowired ConceptDao conceptDao;
   @Autowired CdrVersionDao cdrVersionDao;
+  @Autowired CohortDao cohortDao;
   @Autowired CohortsController cohortsController;
+  @Autowired ConceptSetDao conceptSetDao;
+  @Autowired ConceptSetService conceptSetService;
   @Autowired ConceptSetsController conceptSetsController;
+  @Autowired DataSetDao dataSetDao;
   @Autowired DataSetService dataSetService;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired CohortReviewController cohortReviewController;
@@ -1240,6 +1251,100 @@ public class WorkspacesControllerTest {
             .getItems();
     assertThat(conceptSets.size()).isEqualTo(1);
     assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned, 456);
+  }
+
+  @Test
+  public void testCloneWorkspace_Dataset() throws Exception {
+    stubFcGetWorkspaceACL();
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    org.pmiops.workbench.db.model.Workspace dbWorkspace = workspaceDao
+        .findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+          workspace.getNamespace(),
+          workspace.getId(),
+          StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+
+    CdrVersion cdrVersion2 = new CdrVersion();
+    cdrVersion2.setName("2");
+    cdrVersion2.setCdrDbName("");
+    cdrVersion2 = cdrVersionDao.save(cdrVersion2);
+
+    when(conceptBigQueryService.getParticipantCountForConcepts(
+        "condition_occurrence",
+        ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+        .thenReturn(123);
+    ConceptSet conceptSet1 =
+        conceptSetsController
+            .createConceptSet(
+                workspace.getNamespace(),
+                workspace.getId(),
+                new CreateConceptSetRequest()
+                    .conceptSet(
+                        new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
+                    .addedIds(
+                        ImmutableList.of(
+                            CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+            .getBody();
+
+    org.pmiops.workbench.db.model.Cohort cohort = new org.pmiops.workbench.db.model.Cohort();
+    cohort.setName("cohort name");
+    cohort.setDescription("cohort description");
+    cohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    cohort = cohortDao.save(cohort);
+
+    DataSet dataSet = new DataSet();
+    dataSet.setName("data set name");
+    dataSet.setVersion(1);
+    dataSet.setConceptSetIds(Collections.singletonList(conceptSet1.getId()));
+    dataSet.setCohortIds(Collections.singletonList(cohort.getCohortId()));
+    dataSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    dataSetDao.save(dataSet);
+
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setCdrVersionId(String.valueOf(cdrVersion2.getCdrVersionId()));
+
+    ResearchPurpose modPurpose = new ResearchPurpose();
+    modPurpose.setAncestry(true);
+    modWorkspace.setResearchPurpose(modPurpose);
+    req.setWorkspace(modWorkspace);
+
+    stubGetWorkspace(
+        modWorkspace.getNamespace(),
+        modWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL,
+        WorkspaceAccessLevel.OWNER);
+
+    mockBillingProjectBuffer("cloned-ns");
+    Workspace cloned =
+        workspacesController
+            .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+            .getBody()
+            .getWorkspace();
+
+
+    org.pmiops.workbench.db.model.Workspace clonedDbWorkspace = workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+        cloned.getNamespace(), cloned.getId(), StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+
+    List<DataSet> dataSets = dataSetService.getDataSets(clonedDbWorkspace);
+    assertThat(dataSets).hasSize(1);
+    assertThat(dataSets.get(0).getName()).isEqualTo("data set name");
+
+
+    List<org.pmiops.workbench.db.model.ConceptSet> conceptSets = dataSetService.getConceptSets(
+        dataSets.get(0));
+    assertThat(conceptSets).hasSize(1);
+    assertThat(conceptSets.get(0).getName()).isEqualTo("cs1");
+    assertThat(conceptSets.get(0).getDescription()).isEqualTo("d1");
+
+    List<org.pmiops.workbench.db.model.Cohort> cohorts = dataSetService.getCohorts(dataSets.get(0));
+    assertThat(cohorts).hasSize(1);
+    assertThat(cohorts.get(0).getName()).isEqualTo("cohort name");
+    assertThat(cohorts.get(0).getDescription()).isEqualTo("cohort description");
   }
 
   private void assertConceptSetClone(
