@@ -359,6 +359,11 @@ paths:
           description: Version \# of the Data Use Agreement that was signed.
           type: integer
           required: true
+        - in: query
+          name: initials
+          description: Initials of the user on the form.
+          type: string
+          required: true
       responses:
         200:
           description: The user's profile.
@@ -522,7 +527,7 @@ paths:
 
   # Notebook clusters ####################################################################
 
-  /v1/clusters/{billingProjectId}:
+  /v1/clusters/{billingProjectId}/{workspaceName}:
     get:
       summary: List available notebook clusters
       description: >
@@ -538,6 +543,11 @@ paths:
         - in: path
           name: billingProjectId
           description: The unique identifier of the Google Billing Project containing the clusters
+          required: true
+          type: string
+        - in: path
+          name: workspaceName
+          description: The name of the workspace whose notebook we're looking at
           required: true
           type: string
       responses:
@@ -568,7 +578,7 @@ paths:
           required: true
           type: string
       responses:
-        202:
+        200:
           description: Deletion success
           schema:
             $ref: '#/definitions/EmptyResponse'
@@ -1139,14 +1149,14 @@ paths:
 
   # Billing ##############################################################################
 
-  /v1/cron/bufferBillingProject:
+  /v1/cron/bufferBillingProjects:
     get:
       security: []
       tags:
         - offlineBilling
         - cron
-      description: If the AoU Billing Project buffer is not full, create a firecloud billing project and add one
-      operationId: bufferBillingProject
+      description: If the AoU Billing Project buffer is not full, refill with one or more billing projects.
+      operationId: bufferBillingProjects
       responses:
         204:
           description: No Error
@@ -2156,6 +2166,9 @@ definitions:
         description: |
           Stackdriver API key for error reporting, scoped to a particular
           domain. If unset, Stackdriver error reporting should be disabled.
+      enableComplianceTraining:
+        type: boolean
+        description: Feature flag for enabling compliance training in registration steps
       enableDataUseAgreement:
         type: boolean
         description: Feature flag for enabling data use agreement
@@ -3410,6 +3423,12 @@ definitions:
         description: Version of the data use agreement that the user last signed.
       address:
         $ref: '#/definitions/Address'
+      freeTierUsage:
+        type: number
+        format: double
+      freeTierQuota:
+        type: number
+        format: double
 
   InstitutionalAffiliation:
     type: object
@@ -3740,3 +3759,19 @@ definitions:
         description: The time when the lock will expire, in ms from the Unix epoch
         type: integer
         format: int64
+
+  BillingStatus:
+    type: string
+    description: >
+      Is the billing account associated with this workspace available to incur costs?  For a free
+      tier project, this indicates whether a user has an available balance in their quota.  For a
+      user-provided billing account, this corresponds to whether payment is valid and up to date.
+    enum: [ ACTIVE, INACTIVE ]
+
+  BillingAccountType:
+    type: string
+    description: >
+      Whether a billing project is provided by the Researcher Workbench as a Free Tier project
+      subject to quota checks, or the project has a billing account provided by the user
+    enum: [ FREE_TIER, USER_PROVIDED ]
+

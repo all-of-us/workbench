@@ -365,8 +365,6 @@ paths:
             type: object
             $ref: '#/definitions/WorkspaceIngest'
       responses:
-        200:
-          description: No response was specified
         201:
           description: Successful Request
           schema:
@@ -505,6 +503,8 @@ paths:
       responses:
         201:
           description: Successful Request
+          schema:
+            $ref: '#/definitions/Workspace'
         400:
           description: Unable to create resources for workspace
         404:
@@ -999,6 +999,11 @@ definitions:
         type: string
         description: User's email
 
+  # Core workspace data model object. Used by Get and List workspace. This schema is similar to, but not exactly the
+  # same, as the model used by Create and Clone workspace. The differences are not (currently) meaningful
+  # for any AoU workbench use case, so we've edited the YAML to merge these schemas for our own code simplicity.
+  #
+  # The Terra App Services team plans to clean this up with ticket AS-21.
   Workspace:
     description: ''
     required:
@@ -1088,6 +1093,7 @@ definitions:
           $ref: '#/definitions/ManagedGroupRef'
         description: The list of groups to form the Authorization Domain (empty if no Authorization Domain is set)
 
+  # The response object returned from Get or List workspace.
   WorkspaceResponse:
     description: ''
     properties:

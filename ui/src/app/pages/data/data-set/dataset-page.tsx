@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Button, Clickable} from 'app/components/buttons';
+import {Button, Clickable, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {HelpSidebar} from 'app/components/help-sidebar';
@@ -27,15 +27,18 @@ import {
   ReactWrapperBase,
   toggleIncludes,
   withCurrentWorkspace,
-  withUrlParams
+  withUrlParams,
+  withUserProfile
 } from 'app/utils';
-import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {openZendeskWidget} from 'app/utils/zendesk';
 import {
   Cohort,
   ConceptSet,
+  DataDictionaryEntry,
   DataSet,
   DataSetPreviewRequest,
   DataSetPreviewValueList,
@@ -45,6 +48,7 @@ import {
   DomainValuesResponse,
   ErrorResponse,
   PrePackagedConceptSetEnum,
+  Profile,
   Surveys,
   ValueSet,
 } from 'generated/fetch';
@@ -52,6 +56,25 @@ import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 
 export const styles = {
+  dataDictionaryHeader: {
+    fontSize: '16px',
+    color: colors.primary,
+    textTransform: 'uppercase'
+  } as React.CSSProperties,
+
+  dataDictionarySubheader: {
+    fontSize: '13px',
+    fontWeight: 600,
+    color: colors.primary,
+    paddingTop: '0.5rem'
+  } as React.CSSProperties,
+
+  dataDictionaryText: {
+    color: colors.primary,
+    fontSize: '13px',
+    lineHeight: '20px'
+  } as React.CSSProperties,
+
   selectBoxHeader: {
     fontSize: '16px',
     height: '2rem',
@@ -63,12 +86,13 @@ export const styles = {
     justifyContent: 'space-between',
     flexDirection: 'row'
   } as React.CSSProperties,
+
   listItem: {
     border: `0.5px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
     margin: '.4rem .4rem .4rem .55rem',
     height: '1.5rem',
     display: 'flex'
-  },
+  } as React.CSSProperties,
 
   listItemCheckbox: {
     height: 17,
@@ -77,7 +101,7 @@ export const styles = {
     marginTop: 10,
     marginRight: 10,
     backgroundColor: colors.success
-  },
+  } as React.CSSProperties,
 
   valueListItemCheckboxStyling: {
     height: 17,
@@ -85,7 +109,7 @@ export const styles = {
     marginTop: 10,
     marginRight: 10,
     backgroundColor: colors.success
-  },
+  } as React.CSSProperties,
 
   subheader: {
     fontWeight: 400,
@@ -93,7 +117,7 @@ export const styles = {
     marginTop: '0.5rem',
     paddingLeft: '0.55rem',
     color: colors.primary
-  },
+  } as React.CSSProperties,
 
   previewButtonBox: {
     width: '100%',
@@ -130,7 +154,7 @@ export const styles = {
     paddingRight: '1.5rem',
     justifyContent: 'space-between',
     display: 'flex'
-  },
+  } as React.CSSProperties,
 
   warningMessage: {
     display: 'flex',
@@ -148,19 +172,19 @@ export const styles = {
     width: '5rem',
     display: 'flex',
     alignItems: 'center'
-  },
+  } as React.CSSProperties,
   previewLink: {
     marginTop: '0.5rem',
     height: '1.8rem',
     width: '6.5rem',
     color: colors.secondary
-  },
+  } as React.CSSProperties,
   footer: {
     display: 'block',
     padding: '20px',
     height: '60px',
     width: '100%'
-  },
+  } as React.CSSProperties,
   stickyFooter: {
     backgroundColor: colors.white,
     borderTop: `1px solid ${colors.light}`,
@@ -185,7 +209,7 @@ export const styles = {
       display: 'flex',
       justifyContent: 'center',
       lineHeight: '19px'
-    };
+    } as React.CSSProperties;
   }
 };
 
@@ -210,16 +234,107 @@ const Subheader = (props) => {
   return <div style={{...styles.subheader, ...props.style}}>{props.children}</div>;
 };
 
-export const ValueListItem: React.FunctionComponent <
-  {domainValue: DomainValue, onChange: Function, checked: boolean}> =
-  ({domainValue, onChange, checked}) => {
-    return <div style={{display: 'flex', height: '1.2rem', marginLeft: '0.55rem'}}>
-      <input type='checkbox' value={domainValue.value} onChange={() => onChange()}
-             style={styles.valueListItemCheckboxStyling} checked={checked}/>
-      <div style={{lineHeight: '1.5rem', wordWrap: 'break-word', color: colors.primary}}>
-        {domainValue.value}</div>
+interface DataDictionaryPopupProps {
+  dataDictionaryEntry: DataDictionaryEntry;
+}
+
+const DataDictionaryDescription: React.FunctionComponent<DataDictionaryPopupProps> = ({dataDictionaryEntry}) => {
+  return <div style={{width: '100%', borderTop: `1px solid ${colorWithWhiteness(colors.dark, 0.6)}`}}>
+    {dataDictionaryEntry ? <FlexColumn style={{padding: '0.5rem'}}>
+      <div style={{...styles.dataDictionarySubheader, paddingTop: 0}}>Description</div>
+      <div style={styles.dataDictionaryText}>{dataDictionaryEntry.description}</div>
+      <div style={styles.dataDictionarySubheader}>Relevant OMOP Table</div>
+      <div style={styles.dataDictionaryText}>{dataDictionaryEntry.relevantOmopTable}</div>
+      <div style={styles.dataDictionarySubheader}>Type</div>
+      <div style={styles.dataDictionaryText}>{dataDictionaryEntry.fieldType}</div>
+      <div style={styles.dataDictionarySubheader}>Data Provenance</div>
+      <div style={styles.dataDictionaryText}>
+        {dataDictionaryEntry.dataProvenance}{dataDictionaryEntry.dataProvenance.includes('PPI') ?
+        `: ${dataDictionaryEntry.sourcePpiModule}` : null}</div>
+    </FlexColumn> : <div style={{display: 'flex', justifyContent: 'center'}}>
+      <Spinner style={{height: 36, width: 36, margin: '0.5rem'}}/></div>}
+  </div>;
+};
+
+interface ValueListItemProps {
+  checked: boolean;
+  domain: Domain;
+  domainValue: DomainValue;
+  onChange: Function;
+}
+
+interface ValueListItemState {
+  dataDictionaryEntry: DataDictionaryEntry;
+  dataDictionaryEntryError: boolean;
+  showDataDictionaryEntry: boolean;
+}
+
+
+
+export class ValueListItem extends React.Component<
+  ValueListItemProps, ValueListItemState> {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      dataDictionaryEntry: undefined,
+      dataDictionaryEntryError: false,
+      showDataDictionaryEntry: false,
+    };
+  }
+
+  fetchDataDictionaryEntry() {
+    const {domain, domainValue} = this.props;
+
+    dataSetApi().getDataDictionaryEntry(
+      parseInt(currentWorkspaceStore.getValue().cdrVersionId, 10),
+      domain.toString(),
+      domainValue.value).then(dataDictionaryEntry => {
+        this.setState({dataDictionaryEntry});
+      }).catch(e => {
+        this.setState({dataDictionaryEntryError: true});
+      });
+  }
+
+  toggleDataDictionaryEntry() {
+    this.setState({showDataDictionaryEntry: !this.state.showDataDictionaryEntry});
+
+    if (this.state.dataDictionaryEntry === undefined) {
+      this.fetchDataDictionaryEntry();
+    }
+  }
+
+  render() {
+    const {checked, domainValue, onChange} = this.props;
+    const {dataDictionaryEntry, dataDictionaryEntryError, showDataDictionaryEntry} = this.state;
+
+    return <div style={{
+      ...styles.listItem,
+      height: 'auto',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingLeft: '10px',
+      paddingRight: '10px'
+    }}>
+      <FlexRow style={{width: '100%'}}>
+        <input type='checkbox' value={domainValue.value} onChange={() => onChange()}
+               style={{...styles.listItemCheckbox, marginTop: 11, marginLeft: 0, marginRight: 0}} checked={checked}/>
+        <div style={{width: '100%'}}>
+          <FlexRow style={{justifyContent: 'space-between', width: '100%', alignItems: 'center'}}>
+            <div style={{lineHeight: '1.5rem', paddingLeft: 10, wordWrap: 'break-word', color: colors.primary}}>
+              {domainValue.value}</div>
+            <Clickable onClick={() => this.toggleDataDictionaryEntry()} data-test-id='value-list-expander'>
+              <ClrIcon shape='angle' style={{transform: showDataDictionaryEntry ? 'rotate(180deg)' : 'rotate(90deg)',
+                color: colors.accent, height: 18, width: 18}} />
+            </Clickable>
+          </FlexRow>
+          {showDataDictionaryEntry && <DataDictionaryDescription dataDictionaryEntry={dataDictionaryEntry}/>}
+          {dataDictionaryEntryError && showDataDictionaryEntry && <div>Data Dictionary Entry not found.</div>}
+        </div>
+      </FlexRow>
     </div>;
-  };
+  }
+}
 
 const plusLink = (dataTestId: string, path: string, disable?: boolean) => {
   return <TooltipTrigger data-test-id='plus-icon-tooltip' disabled={!disable}
@@ -247,13 +362,17 @@ const BoxHeader = ({text= '', header =  '', subHeader = '', style= {}, ...props}
 
 interface DataSetPreviewInfo {
   isLoading: boolean;
-  errorText: string;
+  errorText: JSX.Element;
   values?: Array<DataSetPreviewValueList>;
 }
 
 interface Props {
   workspace: WorkspaceData;
   urlParams: any;
+  profileState: {
+    profile: Profile,
+    reload: Function
+  };
 }
 
 interface State {
@@ -276,7 +395,7 @@ interface State {
   valuesLoading: boolean;
 }
 
-const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
+const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams())(
   class extends React.Component<Props, State> {
     dt: any;
     constructor(props) {
@@ -543,7 +662,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       const domains = fp.uniq(this.state.selectedDomainValuePairs.map(domainValue => domainValue.domain));
       const newPreviewList: Map<Domain, DataSetPreviewInfo> =
         new Map(domains.map<[Domain, DataSetPreviewInfo]>(domain => [domain, {
-          isLoading: true, errorText: '', values: []}]));
+          isLoading: true, errorText: null, values: []}]));
       this.setState({
         previewList: newPreviewList,
         selectedPreviewDomain: domains[0]
@@ -569,7 +688,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
           () => dataSetApi().previewDataSetByDomain(namespace, id, domainRequest));
         newPreviewInformation = {
           isLoading: false,
-          errorText: '',
+          errorText: null,
           values: domainPreviewResponse.values
         };
       } catch (ex) {
@@ -584,24 +703,29 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
       this.setState(state => ({previewList: state.previewList.set(domain, newPreviewInformation)}));
     }
 
+    openZendeskWidget() {
+      const {profile} = this.props.profileState;
+      openZendeskWidget(profile.givenName, profile.familyName, profile.username, profile.contactEmail);
+    }
+
     // TODO: Move to using a response based error handling method, rather than a error based one
     generateErrorTextFromPreviewException(exceptionResponse: ErrorResponse,
-      domain: Domain): string {
+      domain: Domain): JSX.Element {
       switch (exceptionResponse.statusCode) {
         case 400:
-          return exceptionResponse.message;
+          return <div>{exceptionResponse.message}</div>;
           break;
         case 404:
-          return exceptionResponse.message;
+          return <div>{exceptionResponse.message}</div>;
           break;
         case 504:
-          return `Query to load data from the All of Us Database timed out for domain:
-                ${domain}. Please either try again or export dataset to a notebook to try
-                there`;
+          return <div>The preview table cannot be loaded because the query took too long to run.
+            Please export this Dataset to a Notebook by clicking the Analyze button.</div>;
           break;
         default:
-          return `An unexpected error has occurred loading domain: ${domain}.
-              Please submit a bug using the contact support button`;
+          return <div>An unexpected error has occurred while running your Dataset query.
+            Please <Link style={{display: 'inline-block'}} onClick={() => this.openZendeskWidget()}>
+              create a bug report</Link> for our team.</div>;
       }
     }
 
@@ -771,7 +895,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       </div>
                     </div>
                   </BoxHeader>
-                  <div style={{height: '9rem', overflowY: 'auto'}}>
+                  <div style={{height: valueSets.length > 0 ? '7.625rem' : '9rem', overflowY: 'auto'}}>
                     {valuesLoading && <Spinner style={{position: 'relative',
                       top: '2rem', left: 'calc(50% - 36px)'}}/>}
                     {valueSets.map(valueSet =>
@@ -781,7 +905,7 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                         </Subheader>
                         {valueSet.values.items.map(domainValue =>
                           <ValueListItem data-test-id='value-list-items'
-                            key={domainValue.value} domainValue={domainValue}
+                            key={domainValue.value} domain={valueSet.domain} domainValue={domainValue}
                             onChange={() => this.selectDomainValue(valueSet.domain, domainValue)}
                             checked={fp.some({domain: valueSet.domain, value: domainValue.value},
                               selectedDomainValuePairs)}/>
@@ -789,6 +913,16 @@ const DataSetPage = fp.flow(withCurrentWorkspace(), withUrlParams())(
                       </div>)
                     }
                   </div>
+                  {valueSets.length > 0 && <FlexRow style={{
+                    width: '100%', height: '1.375rem', backgroundColor: colorWithWhiteness(colors.dark, 0.9),
+                    color: colors.primary, paddingLeft: '0.4rem', fontSize: '13px', lineHeight: '16px',
+                    alignItems: 'center'}}>
+                    <a href={'https://aousupporthelp.zendesk.com/hc/en-us/articles/' +
+                    '360033200232-Data-Dictionary-for-Registered-Tier-CDR'} target='_blank'
+                       style={{color: colors.accent}}>
+                      Learn more
+                    </a>&nbsp;in the data dictionary
+                  </FlexRow>}
                 </div>
               </div>
             </div>

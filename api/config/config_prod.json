@@ -3,6 +3,8 @@
     "baseUrl": "https:\/\/api.firecloud.org",
     "clusterMaxAgeDays": 14,
     "clusterIdleMaxAgeDays": 7,
+    "clusterDefaultMachineType": "n1-standard-4",
+    "clusterDefaultDiskSizeGb": 50,
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
     "registeredDomainName": "all-of-us-registered-prod",
@@ -17,7 +19,8 @@
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.gcp_billing_export_v1_015EAA_E95687_1F8614",
     "retryCount": 4,
     "bufferCapacity": 100,
-    "defaultFreeCreditsLimit": 300.0,
+    "bufferRefillProjectsPerTask": 1,
+    "defaultFreeCreditsLimit": 100.0,
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-prod-1@all-of-us-rw-prod.iam.gserviceaccount.com"
@@ -65,9 +68,9 @@
     "enableMoodleBackend": true
   },
   "access": {
-    "enableComplianceTraining": true,
+    "enableComplianceTraining": false,
     "enableEraCommons": true,
-    "enableDataUseAgreement": false,
+    "enableDataUseAgreement": true,
     "enableBetaAccess": true,
     "unsafeAllowSelfBypass": false
   },

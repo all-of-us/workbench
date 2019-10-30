@@ -205,11 +205,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private org.pmiops.workbench.firecloud.model.Workspace attemptFirecloudWorkspaceCreation(
       FirecloudWorkspaceId workspaceId) {
-    fireCloudService.createWorkspace(
+    return fireCloudService.createWorkspace(
         workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
-    return fireCloudService
-        .getWorkspace(workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName())
-        .getWorkspace();
   }
 
   @Override
@@ -395,17 +392,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     FirecloudWorkspaceId toFcWorkspaceId =
         generateFirecloudWorkspaceId(toWorkspaceName, toWorkspace.getName());
-    fireCloudService.cloneWorkspace(
-        fromWorkspaceNamespace,
-        fromWorkspaceId,
-        toFcWorkspaceId.getWorkspaceNamespace(),
-        toFcWorkspaceId.getWorkspaceName());
-
     org.pmiops.workbench.firecloud.model.Workspace toFcWorkspace =
-        fireCloudService
-            .getWorkspace(
-                toFcWorkspaceId.getWorkspaceNamespace(), toFcWorkspaceId.getWorkspaceName())
-            .getWorkspace();
+        fireCloudService.cloneWorkspace(
+            fromWorkspaceNamespace,
+            fromWorkspaceId,
+            toFcWorkspaceId.getWorkspaceNamespace(),
+            toFcWorkspaceId.getWorkspaceName());
 
     // In the future, we may want to allow callers to specify whether files
     // should be cloned at all (by default, yes), else they are currently stuck

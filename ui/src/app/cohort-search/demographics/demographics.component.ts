@@ -101,23 +101,20 @@ export class DemographicsComponent implements OnInit, OnDestroy {
      * sort them by count, then by name.
      */
     this.loading = true;
-    cohortBuilderApi().getCriteriaBy(cdrid, DomainType[DomainType.PERSON], type)
-      .then(response => {
-        const items = response.items
-                  .filter(item => item.parentId !== 0
-                      || type === CriteriaType[CriteriaType.DECEASED]);
+    cohortBuilderApi().getCriteriaBy(cdrid, DomainType[DomainType.PERSON], type).then(response => {
+      const items = response.items.filter(item => item.parentId !== 0 || type === CriteriaType[CriteriaType.DECEASED]);
+      if (type !== CriteriaType[CriteriaType.AGE]) {
+        items.sort(sortByCountThenName);
+      }
+      const nodes = items.map(node => {
         if (type !== CriteriaType[CriteriaType.AGE]) {
-          items.sort(sortByCountThenName);
+          node['parameterId'] = type === CriteriaType[CriteriaType.DECEASED] ? 'param-dec' :
+            `param${node.conceptId || node.code}`;
         }
-        const nodes = items.map(node => {
-          if (type !== CriteriaType[CriteriaType.AGE]) {
-            node['parameterId'] = type === CriteriaType[CriteriaType.DECEASED] ? 'param-dec' :
-              `param${node.conceptId || node.code}`;
-          }
-          return node;
-        });
-        this.loadOptions(nodes, type);
+        return node;
       });
+      this.loadOptions(nodes, type);
+    });
   }
 
   loadOptions(nodes: any, type: string) {
@@ -135,7 +132,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         const paramId = `age-param${this.ageNode.id}`;
         this.selectedNode = {
           ...this.ageNode,
-          name: `${minAge.toString()} - ${maxAge.toString()}`,
+          name: `Age In Range ${minAge.toString()} - ${maxAge.toString()}`,
           parameterId: paramId,
           attributes: [attr],
         };
@@ -252,7 +249,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         const paramId = `age-param${this.ageNode.id}`;
         return {
           ...this.ageNode,
-          name: `${lo} - ${hi}`,
+          name: `Age In Range ${lo} - ${hi}`,
           parameterId: paramId,
           attributes: [attr],
         };

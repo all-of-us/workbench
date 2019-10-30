@@ -29,6 +29,7 @@ import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.Me;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.firecloud.model.Profile;
+import org.pmiops.workbench.firecloud.model.Workspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
@@ -290,31 +291,25 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void createWorkspace(String projectName, String workspaceName) {
+  public Workspace createWorkspace(String projectName, String workspaceName) {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     WorkspaceIngest workspaceIngest = new WorkspaceIngest();
     workspaceIngest.setName(workspaceName);
     workspaceIngest.setNamespace(projectName);
     checkAndAddRegistered(workspaceIngest);
-    retryHandler.run(
-        (context) -> {
-          workspacesApi.createWorkspace(workspaceIngest);
-          return null;
-        });
+    return retryHandler.run((context) -> workspacesApi.createWorkspace(workspaceIngest));
   }
 
   @Override
-  public void cloneWorkspace(String fromProject, String fromName, String toProject, String toName) {
+  public Workspace cloneWorkspace(
+      String fromProject, String fromName, String toProject, String toName) {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     WorkspaceIngest workspaceIngest = new WorkspaceIngest();
     workspaceIngest.setNamespace(toProject);
     workspaceIngest.setName(toName);
     checkAndAddRegistered(workspaceIngest);
-    retryHandler.run(
-        (context) -> {
-          workspacesApi.cloneWorkspace(fromProject, fromName, workspaceIngest);
-          return null;
-        });
+    return retryHandler.run(
+        (context) -> workspacesApi.cloneWorkspace(fromProject, fromName, workspaceIngest));
   }
 
   @Override

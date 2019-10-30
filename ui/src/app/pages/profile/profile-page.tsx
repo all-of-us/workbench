@@ -5,6 +5,7 @@ import * as React from 'react';
 import * as validate from 'validate.js';
 
 import {Button, Clickable} from 'app/components/buttons';
+import { FlexColumn, FlexRow } from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
@@ -17,8 +18,6 @@ import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
-
-
 
 const styles = reactStyles({
   h1: {
@@ -122,6 +121,16 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
         areaOfResearch: 'Current Research'
       }[v] || validate.prettify(v))
     });
+
+    // render a float value as US currency, rounded to cents: 255.372793 -> $255.37
+    const usdElement = (value: number) => {
+      value = value || 0.0;
+      if (value < 0.0) {
+        return <div style={{fontWeight: 600}}>-${(-value).toFixed(2)}</div>;
+      } else {
+        return <div style={{fontWeight: 600}}>${(value).toFixed(2)}</div>;
+      }
+    };
 
     const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
       const errorText = profile && errors && errors[valueKey];
@@ -276,8 +285,19 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             </TooltipTrigger>
           </div>
         </div>
-
-        <div>
+       <div>
+          {profile && <FlexRow style={{
+            color: colors.primary, paddingRight: '0.5rem', justifyContent: 'flex-end'
+          }}>
+            <FlexColumn style={{alignItems: 'flex-end'}}>
+              <div>All of Us FREE credits used:</div>
+              <div>Remaining All of Us FREE credits:</div>
+            </FlexColumn>
+            <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
+              {usdElement(profile.freeTierUsage)}
+              {usdElement(profile.freeTierQuota - profile.freeTierUsage)}
+            </FlexColumn>
+          </FlexRow>}
           <ProfileRegistrationStepStatus
             title='Google 2-Step Verification'
             wasBypassed={!!profile.twoFactorAuthBypassTime}
@@ -287,14 +307,14 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
             completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick  } />
 
-          <ProfileRegistrationStepStatus
+          {serverConfigStore.getValue().enableComplianceTraining && <ProfileRegistrationStepStatus
             title='Access Training'
             wasBypassed={!!profile.complianceTrainingBypassTime}
             incompleteButtonText='Access Training'
             completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
             completionTimestamp={getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile)}
             isComplete={!!(getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
-            completeStep={getRegistrationTasksMap()['complianceTraining'].onClick} />
+            completeStep={getRegistrationTasksMap()['complianceTraining'].onClick} />}
 
           {serverConfigStore.getValue().enableEraCommons && <ProfileRegistrationStepStatus
             title='eRA Commons Account'

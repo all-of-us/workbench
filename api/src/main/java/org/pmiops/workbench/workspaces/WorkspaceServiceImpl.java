@@ -536,18 +536,18 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     long userId = userProvider.get().getUserId();
     List<UserRecentWorkspace> userRecentWorkspaces =
         userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
-    return pruneInaccessibleRecentWorkspaces(userRecentWorkspaces);
+    return pruneInaccessibleRecentWorkspaces(userRecentWorkspaces, userId);
   }
 
   private List<UserRecentWorkspace> pruneInaccessibleRecentWorkspaces(
-      List<UserRecentWorkspace> recentWorkspaces) {
+      List<UserRecentWorkspace> recentWorkspaces, long userId) {
     List<Workspace> dbWorkspaces =
         workspaceDao.findAllByWorkspaceIdIn(
             recentWorkspaces.stream()
                 .map(UserRecentWorkspace::getWorkspaceId)
                 .collect(Collectors.toList()));
 
-    Set<Long> idsToDelete =
+    Set<Long> workspaceIdsToDelete =
         dbWorkspaces.stream()
             .filter(
                 workspace -> {
@@ -564,12 +564,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
             .map(Workspace::getWorkspaceId)
             .collect(Collectors.toSet());
 
-    if (!idsToDelete.isEmpty()) {
-      userRecentWorkspaceDao.deleteByWorkspaceIdIn(idsToDelete);
+    if (!workspaceIdsToDelete.isEmpty()) {
+      userRecentWorkspaceDao.deleteByUserIdAndWorkspaceIdIn(userId, workspaceIdsToDelete);
     }
 
     return recentWorkspaces.stream()
-        .filter(recentWorkspace -> !idsToDelete.contains(recentWorkspace.getWorkspaceId()))
+        .filter(recentWorkspace -> !workspaceIdsToDelete.contains(recentWorkspace.getWorkspaceId()))
         .collect(Collectors.toList());
   }
 
@@ -593,6 +593,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
+  @Transactional
   public UserRecentWorkspace updateRecentWorkspaces(Workspace workspace) {
     return updateRecentWorkspaces(
         workspace, userProvider.get().getUserId(), new Timestamp(clock.instant().toEpochMilli()));
@@ -604,10 +605,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     ArrayList<Long> idsToDelete = new ArrayList<>();
     while (userRecentWorkspaces.size() > RECENT_WORKSPACE_COUNT) {
-      idsToDelete.add(userRecentWorkspaces.get(userRecentWorkspaces.size() - 1).getId());
+      idsToDelete.add(userRecentWorkspaces.get(userRecentWorkspaces.size() - 1).getWorkspaceId());
       userRecentWorkspaces.remove(userRecentWorkspaces.size() - 1);
     }
-    userRecentWorkspaceDao.deleteByWorkspaceIdIn(idsToDelete);
+    userRecentWorkspaceDao.deleteByUserIdAndWorkspaceIdIn(userId, idsToDelete);
   }
 
   @Override

@@ -8,16 +8,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OfflineBillingController implements OfflineBillingApiDelegate {
 
-  private final BillingAlertsService billingAlertsService;
+  private final FreeTierBillingService freeTierBillingService;
   private final BillingProjectBufferService billingProjectBufferService;
   private final BillingGarbageCollectionService billingGarbageCollectionService;
 
   @Autowired
   OfflineBillingController(
-      BillingAlertsService billingAlertsService,
+      FreeTierBillingService freeTierBillingService,
       BillingProjectBufferService billingProjectBufferService,
       BillingGarbageCollectionService billingGarbageCollectionService) {
-    this.billingAlertsService = billingAlertsService;
+    this.freeTierBillingService = freeTierBillingService;
     this.billingProjectBufferService = billingProjectBufferService;
     this.billingGarbageCollectionService = billingGarbageCollectionService;
   }
@@ -29,8 +29,8 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Void> bufferBillingProject() {
-    billingProjectBufferService.bufferBillingProject();
+  public ResponseEntity<Void> bufferBillingProjects() {
+    billingProjectBufferService.bufferBillingProjects();
     return ResponseEntity.noContent().build();
   }
 
@@ -48,7 +48,7 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
 
   @Override
   public ResponseEntity<Void> checkFreeTierBillingUsage() {
-    billingAlertsService.checkFreeTierBillingUsage();
+    freeTierBillingService.checkFreeTierBillingUsage();
     return ResponseEntity.noContent().build();
   }
 }

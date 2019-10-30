@@ -55,7 +55,7 @@ export class ModalComponent implements OnInit, OnDestroy {
         this.selectionList = wizard.item.searchParameters;
         this.noSelection = this.selectionList.length === 0;
         if (!this.open) {
-          this.title = domainToTitle(wizard.domain);
+          this.title = wizard.domain === DomainType.PERSON ? typeToTitle(wizard.type) : domainToTitle(wizard.domain);
           if (this.initTree) {
             this.hierarchyNode = {
               domainId: wizard.domain,
@@ -198,6 +198,10 @@ export class ModalComponent implements OnInit, OnDestroy {
 
   get sidebarClass() {
     return this.wizard.domain === DomainType.PERSON ? 'col-md-6' : 'col-md-4';
+  }
+
+  get nonAgeDemographics() {
+    return this.wizard.domain === DomainType.PERSON && this.wizard.type !== CriteriaType.AGE;
   }
 
   setMode(mode: any) {

@@ -198,6 +198,9 @@ def dev_up()
     ./gradlew loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
   }
 
+  common.status "Loading Data Dictionary..."
+  common.run_inline %W{docker-compose run api-scripts ./gradlew loadDataDictionary -PappArgs=false}
+
   run_api()
 end
 
@@ -631,10 +634,9 @@ end
 
 Common.register_command({
   :invocation => "run-local-all-migrations",
-  :description => "Runs local data/schema migrations for cdr/workbench schemas.",
+  :description => "Runs local data/schema migrations for the cdr and workbench schemas.",
   :fn => ->() { run_local_all_migrations() }
 })
-
 
 def run_local_data_migrations()
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
@@ -642,8 +644,19 @@ end
 
 Common.register_command({
   :invocation => "run-local-data-migrations",
-  :description => "Runs local data migrations for cdr/workbench schemas.",
+  :description => "Runs local data migrations for the cdr schema.",
   :fn => ->() { run_local_data_migrations() }
+})
+
+def run_local_rw_migrations()
+  common = Common.new
+  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+end
+
+Common.register_command({
+  :invocation => "run-local-rw-migrations",
+  :description => "Runs local migrations for the workbench schema.",
+  :fn => ->() { run_local_rw_migrations() }
 })
 
 def make_bq_denormalized_tables(*args)
@@ -1664,6 +1677,8 @@ def deploy(cmd_name, args)
     load_config(ctx.project, op.opts.dry_run)
     versions_file = must_get_env_value(gcc.project, :cdr_versions_json)
     update_cdr_versions_for_project("config/#{versions_file}", op.opts.dry_run)
+
+    common.run_inline %W{gradle loadDataDictionary -PappArgs=#{op.opts.dry_run ? true : false}}
 
     common.status "Pushing GCS artifacts..."
     dry_flag = op.opts.dry_run ? %W{--dry-run} : []

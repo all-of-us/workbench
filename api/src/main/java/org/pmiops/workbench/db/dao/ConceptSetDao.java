@@ -19,6 +19,7 @@ public interface ConceptSetDao extends CrudRepository<ConceptSet, Long> {
           .put(Domain.MEASUREMENT, "measurement")
           .put(Domain.OBSERVATION, "observation")
           .put(Domain.PROCEDURE, "procedure_occurrence")
+          .put(Domain.PERSON, "person")
           .put(Domain.VISIT, "visit_occurrence")
           .put(Domain.SURVEY, "observation")
           .build();

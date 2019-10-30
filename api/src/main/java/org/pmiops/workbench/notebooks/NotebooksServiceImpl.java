@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
@@ -33,6 +34,14 @@ public class NotebooksServiceImpl implements NotebooksService {
           .and(Sanitizers.LINKS)
           .and(Sanitizers.STYLES)
           .and(Sanitizers.TABLES)
+          .and(
+              new HtmlPolicyBuilder()
+                  .allowElements("img")
+                  .allowUrlProtocols("data")
+                  .allowAttributes("src")
+                  .matching(Pattern.compile("^data:image.*"))
+                  .onElements("img")
+                  .toFactory())
           .and(
               new HtmlPolicyBuilder()
                   // nbconvert renders styles into a style tag; unfortunately the OWASP library does

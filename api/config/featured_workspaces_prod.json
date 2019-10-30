@@ -1,13 +1,25 @@
 {
   "featuredWorkspaces": [
     {
-      "name": "",
-      "namespace": "aou-rw-36",
-      "id": "featuredworkspacehiv"
+      "name": "Understanding the OMOP Common Data Model v1",
+      "namespace": "aou-rw-e7bedcf6",
+      "id": "duplicateoffeaturedworkspaceunderstandingtheomopcommondatamodelv1",
+      "category": "TUTORIAL_WORKSPACES"
     }, {
-      "name": "",
-      "namespace": "aou-rw-36",
-      "id": "featuredworkspacedementia"
+      "name": "Jupyter Notebooks 101 v1",
+      "namespace": "aou-rw-1e5ce07f",
+      "id": "featuredworkspacejupyternotebooks101v1",
+      "category": "TUTORIAL_WORKSPACES"
+    }, {
+      "name": "Working with All of Us Survey Data v1",
+      "namespace": "aou-rw-bbb5bfea",
+      "id": "featuredworkspaceworkingwithallofussurveydatav1",
+      "category": "TUTORIAL_WORKSPACES"
+    }, {
+      "name": "Working with All of Us Physical Measurements Data v1",
+      "namespace": "aou-rw-274bb61a",
+      "id": "featuredworkspaceworkingwithphysicalmeasurementdatav1",
+      "category": "TUTORIAL_WORKSPACES"
     }
   ]
 }

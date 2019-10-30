@@ -21,6 +21,8 @@ import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DemographicSurvey;
 import org.pmiops.workbench.db.model.InstitutionalAffiliation;
 import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.UserDataUseAgreement;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiClient;
@@ -38,6 +40,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * A higher-level service class containing user manipulation and business logic which can't be
@@ -52,10 +55,12 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   private final int MAX_RETRIES = 3;
+  private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
 
   private final Provider<User> userProvider;
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
+  private final UserDataUseAgreementDao userDataUseAgreementDao;
   private final Clock clock;
   private final Random random;
   private final FireCloudService fireCloudService;
@@ -69,6 +74,7 @@ public class UserService {
       Provider<User> userProvider,
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
+      UserDataUseAgreementDao userDataUseAgreementDao,
       Clock clock,
       Random random,
       FireCloudService fireCloudService,
@@ -78,6 +84,7 @@ public class UserService {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
+    this.userDataUseAgreementDao = userDataUseAgreementDao;
     this.clock = clock;
     this.random = random;
     this.fireCloudService = fireCloudService;
@@ -287,14 +294,38 @@ public class UserService {
     return user;
   }
 
-  public User submitDataUseAgreement(Integer dataUseAgreementSignedVersion) {
+  public User submitDataUseAgreement(
+      User user, Integer dataUseAgreementSignedVersion, String initials) {
+    // FIXME: this should not be hardcoded
+    if (dataUseAgreementSignedVersion != CURRENT_DATA_USE_AGREEMENT_VERSION) {
+      throw new BadRequestException("Data Use Agreement Version is not up to date");
+    }
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    return updateUserWithRetries(
-        (user) -> {
-          user.setDataUseAgreementCompletionTime(timestamp);
-          user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
-          return user;
-        });
+    UserDataUseAgreement dataUseAgreement = new UserDataUseAgreement();
+    dataUseAgreement.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+    dataUseAgreement.setUserId(user.getUserId());
+    dataUseAgreement.setUserFamilyName(user.getFamilyName());
+    dataUseAgreement.setUserGivenName(user.getGivenName());
+    dataUseAgreement.setUserInitials(initials);
+    dataUseAgreement.setCompletionTime(timestamp);
+    userDataUseAgreementDao.save(dataUseAgreement);
+    // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
+    user.setDataUseAgreementCompletionTime(timestamp);
+    user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+    return userDao.save(user);
+  }
+
+  @Transactional
+  public void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName) {
+    List<UserDataUseAgreement> dataUseAgreements =
+        userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(
+            userProvider.get().getUserId());
+    dataUseAgreements.forEach(
+        dua ->
+            dua.setUserNameOutOfDate(
+                !dua.getUserGivenName().equalsIgnoreCase(newGivenName)
+                    || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
+    userDataUseAgreementDao.save(dataUseAgreements);
   }
 
   public User setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {

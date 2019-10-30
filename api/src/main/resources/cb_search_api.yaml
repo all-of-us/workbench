@@ -770,7 +770,7 @@ definitions:
   CriteriaType:
     type: string
     description: possible criteria types
-    enum: [AGE, ATC, BRAND, CPT4, DECEASED, ETHNICITY, GENDER, HCPCS, ICD10CM, ICD10PCS, ICD9CM, ICD9Proc, LOINC, PPI, RACE, RXNORM, SNOMED, VISIT]
+    enum: [AGE, ATC, BRAND, CPT4, DECEASED, ETHNICITY, GENDER, HCPCS, ICD10CM, ICD10PCS, ICD9CM, ICD9Proc, LOINC, PPI, RACE, RXNORM, SEX, SNOMED, VISIT]
 
   CriteriaSubType:
     type: string

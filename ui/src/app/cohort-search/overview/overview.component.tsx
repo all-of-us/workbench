@@ -142,7 +142,7 @@ export const ListOverview = withCurrentWorkspace()(
         saveModalOpen: false,
         saving: false,
         showConflictError: false,
-        stackChart: false,
+        stackChart: true,
         total: undefined,
       };
     }

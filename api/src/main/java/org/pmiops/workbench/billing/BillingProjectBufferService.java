@@ -57,7 +57,20 @@ public class BillingProjectBufferService {
     return new Timestamp(clock.instant().toEpochMilli());
   }
 
-  public void bufferBillingProject() {
+  /** Makes a configurable number of project creation attempts. */
+  public void bufferBillingProjects() {
+    int creationAttempts = this.workbenchConfigProvider.get().billing.bufferRefillProjectsPerTask;
+    for (int i = 0; i < creationAttempts; i++) {
+      bufferBillingProject();
+    }
+  }
+
+  /**
+   * Creates a new billing project in the buffer, and kicks off the FireCloud project creation.
+   *
+   * <p>No action is taken if the buffer is full.
+   */
+  private void bufferBillingProject() {
     if (getUnfilledBufferSpace() <= 0) {
       return;
     }

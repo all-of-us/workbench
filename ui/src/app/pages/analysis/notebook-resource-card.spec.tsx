@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {NotebookResourceCard} from './notebook-resource-card';
+import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {WorkspaceAccessLevel} from 'generated/fetch';
 
 
@@ -14,7 +14,10 @@ describe('NotebookResourceCard', () => {
       permission: WorkspaceAccessLevel.WRITER
     };
 
-    return mount(<NotebookResourceCard resource={props} onUpdate={() => {}}/>);
+    return mount(<NotebookResourceCard
+      resource={props}
+      existingNameList={[]}
+      onUpdate={() => {}}/>);
   };
 
   it('should render', () => {
