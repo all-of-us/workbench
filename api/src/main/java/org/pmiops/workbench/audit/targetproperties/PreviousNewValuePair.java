@@ -4,6 +4,7 @@ import java.util.Objects;
 
 public class PreviousNewValuePair {
 
+  // TODO: make these nullable after Kotlin conversion
   private String previousValue;
   private String newValue;
 
