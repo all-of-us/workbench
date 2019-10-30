@@ -25,8 +25,6 @@ public interface ConceptSetDao extends CrudRepository<ConceptSet, Long> {
           .put(Domain.SURVEY, "observation")
           .build();
 
-  ConceptSet findByConceptSetId(long id);
-
   List<ConceptSet> findByWorkspaceId(long workspaceId);
 
   List<ConceptSet> findByWorkspaceIdAndSurvey(long workspaceId, short surveyId);

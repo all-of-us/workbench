@@ -565,10 +565,8 @@ public class DataSetServiceImpl implements DataSetService {
   @Transactional
   @Override
   public List<ConceptSet> getConceptSets(DataSet dataSet) {
-    DataSet newlyFetched = dataSetDao.findOne(dataSet.getDataSetId());
-    return newlyFetched.getConceptSetIds().stream()
-        .map(id -> conceptSetDao.findByConceptSetId(id))
-        .collect(Collectors.toList());
+    return conceptSetDao.findAllByConceptSetIdIn(
+        dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
   }
 
   @Transactional
