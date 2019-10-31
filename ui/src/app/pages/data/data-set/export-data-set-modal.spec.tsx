@@ -1,4 +1,4 @@
-import {DataSet, DataSetApi, WorkspacesApi} from "../../../../generated/fetch/api";
+import {DataSet, DataSetApi, PrePackagedConceptSetEnum, WorkspacesApi} from 'generated/fetch/api';
 import {WorkspacesApiStub} from "../../../../testing/stubs/workspaces-api-stub";
 import {DataSetApiStub} from "../../../../testing/stubs/data-set-api-stub";
 import {registerApiClient} from "../../../services/swagger-fetch-clients";
@@ -15,6 +15,7 @@ const dataSet: DataSet = {
   cohorts: [],
   domainValuePairs: [],
   includesAllParticipants: false,
+  prePackagedConceptSet: PrePackagedConceptSetEnum.SURVEY
 };
 
 const createExportDataSetModal = () => {
