@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
@@ -22,6 +23,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
@@ -39,6 +41,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
@@ -72,6 +75,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private DataSetService dataSetService;
   private UserDao userDao;
   private Provider<User> userProvider;
+  private Provider<WorkbenchConfig> workbenchConfigProvider;
   private UserRecentWorkspaceDao userRecentWorkspaceDao;
   private WorkspaceDao workspaceDao;
 
@@ -88,6 +92,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       UserDao userDao,
       Provider<User> userProvider,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao) {
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
@@ -97,7 +102,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
+  }
+
+  @VisibleForTesting
+  public void setWorkbenchConfigProvider(Provider<WorkbenchConfig> workbenchConfigProvider) {
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   /**
@@ -434,8 +445,15 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public WorkspaceAccessLevel getWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId) {
     WorkspaceACL workspaceACL = fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId);
+    Map<String, WorkspaceAccessEntry> workspaceAcls = workspaceACL.getAcl();
+    WorkspaceAccessEntry userAcl = workspaceAcls.get(userProvider.get().getEmail());
+    // Published / featured workspaces don't give ACLs to everyone per se, they give READER access
+    // to the registered user domain email, so we check for that one if the user doesn't have access
+    // themself.
+    WorkspaceAccessEntry actualAcl =
+        userAcl == null ? workspaceAcls.get(getRegisteredUserDomainEmail()) : userAcl;
     WorkspaceAccessEntry workspaceAccessEntry =
-        Optional.of(workspaceACL.getAcl().get(userProvider.get().getEmail()))
+        Optional.of(actualAcl)
             .orElseThrow(
                 () ->
                     new NotFoundException(
@@ -623,5 +641,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     } else {
       return false;
     }
+  }
+
+  public String getRegisteredUserDomainEmail() {
+    ManagedGroupWithMembers registeredDomainGroup =
+        fireCloudService.getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
+    return registeredDomainGroup.getGroupEmail();
   }
 }

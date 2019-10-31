@@ -280,7 +280,6 @@ public class ConceptSetsControllerTest {
             CLOCK,
             notebooksService,
             userService,
-            workbenchConfigProvider,
             workspaceAuditAdapterService);
 
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);

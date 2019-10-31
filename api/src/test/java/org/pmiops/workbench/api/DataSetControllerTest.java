@@ -303,7 +303,6 @@ public class DataSetControllerTest {
             CLOCK,
             notebooksService,
             userService,
-            workbenchConfigProvider,
             workspaceAuditAdapterService);
     CohortsController cohortsController =
         new CohortsController(

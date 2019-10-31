@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
@@ -62,6 +63,7 @@ public class WorkspaceServiceTest {
   @Mock private ConceptSetService mockConceptSetService;
   @Mock private DataSetService mockDataSetService;
   @Mock private Provider<User> mockUserProvider;
+  @Mock private Provider<WorkbenchConfig> mockWorkbenchConfigProvider;
   @Mock private FireCloudService mockFireCloudService;
   @Mock private Clock mockClock;
 
@@ -88,6 +90,7 @@ public class WorkspaceServiceTest {
             userDao,
             mockUserProvider,
             userRecentWorkspaceDao,
+            mockWorkbenchConfigProvider,
             workspaceDao);
 
     mockWorkspaceResponses.clear();

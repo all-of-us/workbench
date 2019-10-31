@@ -36,7 +36,6 @@ import org.pmiops.workbench.api.WorkspacesApiDelegate;
 import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -53,7 +52,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.ArchivalStatus;
@@ -113,7 +111,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Clock clock;
   private final NotebooksService notebooksService;
   private final UserService userService;
-  private Provider<WorkbenchConfig> workbenchConfigProvider;
   private WorkspaceAuditAdapterService workspaceAuditAdapterService;
 
   @Autowired
@@ -128,7 +125,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Clock clock,
       NotebooksService notebooksService,
       UserService userService,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditAdapterService workspaceAuditAdapterService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
@@ -140,24 +136,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.clock = clock;
     this.notebooksService = notebooksService;
     this.userService = userService;
-    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditAdapterService = workspaceAuditAdapterService;
   }
 
   @VisibleForTesting
   public void setUserProvider(Provider<User> userProvider) {
     this.userProvider = userProvider;
-  }
-
-  @VisibleForTesting
-  void setWorkbenchConfigProvider(Provider<WorkbenchConfig> workbenchConfigProvider) {
-    this.workbenchConfigProvider = workbenchConfigProvider;
-  }
-
-  private String getRegisteredUserDomainEmail() {
-    ManagedGroupWithMembers registeredDomainGroup =
-        fireCloudService.getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
-    return registeredDomainGroup.getGroupEmail();
   }
 
   private static String generateRandomChars(String candidateChars, int length) {
@@ -475,7 +459,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
       savedWorkspace =
           workspaceService.updateWorkspaceAcls(
-              savedWorkspace, clonedRoles, getRegisteredUserDomainEmail());
+              savedWorkspace, clonedRoles, workspaceService.getRegisteredUserDomainEmail());
     }
     workspaceAuditAdapterService.fireDuplicateAction(fromWorkspace, savedWorkspace);
     return ResponseEntity.ok(
@@ -530,7 +514,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // This automatically enforces the "canShare" permission.
     dbWorkspace =
         workspaceService.updateWorkspaceAcls(
-            dbWorkspace, aclsByEmail, getRegisteredUserDomainEmail());
+            dbWorkspace, aclsByEmail, workspaceService.getRegisteredUserDomainEmail());
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
@@ -749,7 +733,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), true);
+    workspaceService.setPublished(
+        dbWorkspace, workspaceService.getRegisteredUserDomainEmail(), true);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -760,7 +745,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
+    workspaceService.setPublished(
+        dbWorkspace, workspaceService.getRegisteredUserDomainEmail(), false);
     return ResponseEntity.ok(new EmptyResponse());
   }
 

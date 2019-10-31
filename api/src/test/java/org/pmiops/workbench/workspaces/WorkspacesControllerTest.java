@@ -320,7 +320,7 @@ public class WorkspacesControllerTest {
     testConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
     when(configProvider.get()).thenReturn(testConfig);
 
-    workspacesController.setWorkbenchConfigProvider(configProvider);
+    workspaceService.setWorkbenchConfigProvider(configProvider);
     fcWorkspaceAcl = createWorkspaceACL();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);

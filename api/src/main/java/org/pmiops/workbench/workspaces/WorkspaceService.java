@@ -3,6 +3,8 @@ package org.pmiops.workbench.workspaces;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Provider;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.db.model.Workspace;
@@ -78,4 +80,8 @@ public interface WorkspaceService {
   UserRecentWorkspace updateRecentWorkspaces(Workspace workspace);
 
   boolean maybeDeleteRecentWorkspace(long workspaceId);
+
+  String getRegisteredUserDomainEmail();
+
+  void setWorkbenchConfigProvider(Provider<WorkbenchConfig> configProvider);
 }
