@@ -8,6 +8,7 @@ require_relative "../../aou-utils/workbench"
 require_relative "cloudsqlproxycontext"
 require_relative "gcloudcontext"
 require_relative "wboptionsparser"
+require "benchmark"
 require "fileutils"
 require "io/console"
 require "json"
@@ -164,6 +165,10 @@ def read_db_vars(gcc)
   })
 end
 
+def format_benchmark(bm)
+  "%.2fs" % [bm.real]
+end
+
 def dev_up()
   common = Common.new
 
@@ -173,34 +178,51 @@ def dev_up()
   end
 
   at_exit { common.run_inline %W{docker-compose down} }
-  common.status "Starting database..."
-  common.run_inline %W{docker-compose up -d db}
-  common.status "Running database migrations..."
-  common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
-  init_new_cdr_db %W{--cdr-db-name cdr}
 
-  common.status "Updating CDR versions..."
-  common.run_inline %W{docker-compose run api-scripts ./gradlew updateCdrVersions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
+  overall_bm = Benchmark.measure {
+    common.status "Database startup..."
+    bm = Benchmark.measure { common.run_inline %W{docker-compose up -d db} }
+    common.status "Database startup complete (#{format_benchmark(bm)})"
 
-  common.status "Updating workbench configuration..."
-  common.run_inline %W{
-    docker-compose run api-scripts
-    ./gradlew loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json
+    common.status "Database init & migrations..."
+    bm = Benchmark.measure {
+      common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+      init_new_cdr_db %W{--cdr-db-name cdr}
+    }
+    common.status "Database init & migrations complete (#{format_benchmark(bm)})"
+
+    common.status "Pushing configs & data..."
+    bm = Benchmark.measure {
+      common.status "  --> Updating CDR versions"
+      common.run_inline %W{docker-compose run api-scripts ./gradlew updateCdrVersions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
+
+      common.status "  --> Loading Workbench config"
+      common.run_inline %W{
+        docker-compose run api-scripts
+        ./gradlew loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json
+      }
+
+      common.status "  --> Loading CDR BigQuery Schema config"
+      common.run_inline %W{
+        docker-compose run api-scripts
+        ./gradlew loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
+      }
+
+      common.status "  --> Loading Featured Workspaces config"
+      common.run_inline %W{
+        docker-compose run api-scripts
+        ./gradlew loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
+      }
+
+      common.status "  --> Loading Data Dictionary data"
+      common.run_inline %W{docker-compose run api-scripts ./gradlew loadDataDictionary -PappArgs=false}
+    }
+    common.status "Pushing configs complete (#{format_benchmark(bm)})"
+
   }
-  common.status "Updating CDR schema configuration..."
-  common.run_inline %W{
-    docker-compose run api-scripts
-    ./gradlew loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
-  }
-  common.status "Updating featured workspaces..."
-  common.run_inline %W{
-    docker-compose run api-scripts
-    ./gradlew loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
-  }
+  common.status "All dev-env setup steps complete (#{format_benchmark(overall_bm)})"
 
-  common.status "Loading Data Dictionary..."
-  common.run_inline %W{docker-compose run api-scripts ./gradlew loadDataDictionary -PappArgs=false}
-
+  common.status "Starting API server..."
   run_api()
 end
 
