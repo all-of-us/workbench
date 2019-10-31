@@ -84,7 +84,7 @@ class ExportDataSetModal extends React.Component<
 
   get datasetRequest() {
     const {dataSet} = this.props;
-    const request: DataSetRequest = {
+    return {
       name: dataSet.name,
       includesAllParticipants: dataSet.includesAllParticipants,
       description: dataSet.description,
@@ -93,7 +93,6 @@ class ExportDataSetModal extends React.Component<
       domainValuePairs: dataSet.domainValuePairs,
       prePackagedConceptSet: dataSet.prePackagedConceptSet
     };
-    return request;
   }
 
   async generateQuery() {
