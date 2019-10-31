@@ -51,13 +51,13 @@ constructor(private val configProvider: Provider<WorkbenchConfig>, private val c
         result[AuditColumn.ACTION_TYPE.name] = auditEvent.actionType
         result[AuditColumn.AGENT_TYPE.name] = auditEvent.agentType
         result[AuditColumn.AGENT_ID.name] = auditEvent.agentId
-        result[AuditColumn.AGENT_EMAIL.name] = auditEvent.agentEmailMaybe!!
+        result[AuditColumn.AGENT_EMAIL.name] = auditEvent.agentEmailMaybe
         result[AuditColumn.TARGET_TYPE.name] = auditEvent.targetType
-        result[AuditColumn.TARGET_ID.name] = auditEvent.targetIdMaybe!!
+        result[AuditColumn.TARGET_ID.name] = auditEvent.targetIdMaybe
         result[AuditColumn.AGENT_ID.name] = auditEvent.agentId
-        result[AuditColumn.TARGET_PROPERTY.name] = auditEvent.targetPropertyMaybe!!
-        result[AuditColumn.PREV_VALUE.name] = auditEvent.previousValueMaybe!!
-        result[AuditColumn.NEW_VALUE.name] = auditEvent.newValueMaybe!!
+        result[AuditColumn.TARGET_PROPERTY.name] = auditEvent.targetPropertyMaybe
+        result[AuditColumn.PREV_VALUE.name] = auditEvent.previousValueMaybe
+        result[AuditColumn.NEW_VALUE.name] = auditEvent.newValueMaybe
         return JsonPayload.of(result)
     }
 
