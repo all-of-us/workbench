@@ -24,8 +24,8 @@ public class ActionAuditServiceImpl implements ActionAuditService {
   private static final Logger serviceLogger =
       Logger.getLogger(ActionAuditServiceImpl.class.getName());
 
-  private static final String MONITORED_RESOURCE_TYPE = "Global";
-  public static final MonitoredResource MONITORED_RESOURCE =
+  private static final String MONITORED_RESOURCE_TYPE = "global";
+  private static final MonitoredResource MONITORED_RESOURCE =
       MonitoredResource.newBuilder(MONITORED_RESOURCE_TYPE).build();
 
   private final Logging cloudLogging;
