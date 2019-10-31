@@ -12,6 +12,7 @@ import com.google.cloud.logging.Payload
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.Payload.Type
 import com.google.common.collect.ImmutableList
+import org.hibernate.validator.internal.xml.PayloadType
 import java.util.Arrays
 import java.util.Collections
 import javax.inject.Provider
@@ -35,8 +36,8 @@ class ActionAuditServiceTest {
     @Captor
     private val logEntryListCaptor: ArgumentCaptor<List<LogEntry>>? = null
 
-    private var event1: ActionAuditEventImpl? = null
-    private var event2: ActionAuditEventImpl? = null
+    private var event1: ActionAuditEvent? = null
+    private var event2: ActionAuditEvent? = null
     private var actionAuditService: ActionAuditService? = null
 
     @Before
@@ -56,33 +57,45 @@ class ActionAuditServiceTest {
 
         // ordinarily events sharing an action would have more things in common than this,
         // but the schema doesn't require it
-        event1 = ActionAuditEventImpl.Builder()
-                .setAgentEmail("a@b.co")
-                .setTargetType(TargetType.DATASET)
-                .setTargetId(1L)
-                .setAgentType(AgentType.USER)
-                .setAgentId(AGENT_ID_1)
-                .setActionId(actionId)
-                .setActionType(ActionType.EDIT)
-                .setTargetProperty("foot")
-                .setPreviousValue("bare")
-                .setNewValue("shod")
-                .setTimestamp(System.currentTimeMillis())
-                .build()
-
-        event2 = ActionAuditEventImpl.Builder()
-                .setAgentEmail("f@b.co")
-                .setTargetType(TargetType.DATASET)
-                .setTargetId(2L)
-                .setAgentType(AgentType.USER)
-                .setAgentId(AGENT_ID_2)
-                .setActionId(actionId)
-                .setActionType(ActionType.EDIT)
-                .setTargetProperty("height")
-                .setPreviousValue("yay high")
-                .setNewValue("about that tall")
-                .setTimestamp(System.currentTimeMillis())
-                .build()
+        event1 = ActionAuditEvent(
+                agentEmailMaybe = "a@b.co",
+                targetType = TargetType.DATASET,
+                targetIdMaybe = 1L,
+                agentType = AgentType.USER,
+                agentId = AGENT_ID_1,
+                actionId = actionId,
+                actionType = ActionType.EDIT,
+                targetPropertyMaybe = "foot",
+                previousValueMaybe = "bare",
+                newValueMaybe = "shod",
+                timestamp = System.currentTimeMillis()
+        )
+//        event2 = ActionAuditEventImpl.Builder()
+//                .setAgentEmail("f@b.co")
+//                .setTargetType(TargetType.DATASET)
+//                .setTargetId(2L)
+//                .setAgentType(AgentType.USER)
+//                .setAgentId(AGENT_ID_2)
+//                .setActionId(actionId)
+//                .setActionType(ActionType.EDIT)
+//                .setTargetProperty("height")
+//                .setPreviousValue("yay high")
+//                .setNewValue("about that tall")
+//                .setTimestamp(System.currentTimeMillis())
+//                .build()
+        event2 = ActionAuditEvent(
+                agentEmailMaybe = "f@b.co",
+                targetType = TargetType.DATASET,
+                targetIdMaybe = 2L,
+                agentType = AgentType.USER,
+                agentId = AGENT_ID_2,
+                actionId = actionId,
+                actionType = ActionType.EDIT,
+                targetPropertyMaybe = "height",
+                previousValueMaybe = "yay high",
+                newValueMaybe = "about that tall",
+                timestamp = System.currentTimeMillis()
+        )
     }
 
     @Test
@@ -90,12 +103,13 @@ class ActionAuditServiceTest {
         actionAuditService!!.send(event1!!)
         verify<Logging>(mockLogging).write(logEntryListCaptor!!.capture())
 
-        val entryList = logEntryListCaptor.value
+        val entryList: List<LogEntry> = logEntryListCaptor.value
         assertThat(entryList.size).isEqualTo(1)
 
-        val entry = entryList[0]
-        assertThat<Type>(entry.getPayload<Payload>().getType()).isEqualTo(Payload.Type.JSON)
-
+        val entry: LogEntry = entryList[0]
+        val payload: Payload = entry.<JsonPayload>getPayload<>()
+//        assertThat<Type>(entry.getPayload<Payload>().getType()).isEqualTo(Type.JSON)
+        assertThat(entry.getPayload()?.type).isEqualTo(Type.JSON)
         val jsonPayload = entry.getPayload<JsonPayload>()
         assertThat(jsonPayload.dataAsMap.size).isEqualTo(11)
 
@@ -112,7 +126,7 @@ class ActionAuditServiceTest {
         val entryList = logEntryListCaptor.value
         assertThat(entryList.size).isEqualTo(1)
         val entry = entryList[0]
-        assertThat<Type>(entry.getPayload<Payload>().getType()).isEqualTo(Payload.Type.JSON)
+        assertThat<Type>(entry.getPayload<Payload>().getType()).isEqualTo(Type.JSON)
         val jsonPayload = entry.getPayload<JsonPayload>()
 
         for (key in jsonPayload.dataAsMap.keys) {
