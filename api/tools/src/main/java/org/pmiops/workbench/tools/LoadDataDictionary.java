@@ -8,8 +8,12 @@ import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.CdrVersion;
@@ -39,7 +43,7 @@ public class LoadDataDictionary {
 
   @Bean
   public CommandLineRunner run(
-      CdrVersionDao cdrVersionDao, DataDictionaryEntryDao dataDictionaryEntryDao) {
+      CdrVersionDao cdrVersionDao, DataDictionaryEntryDao dataDictionaryEntryDao, EntityManager entityManager, Provider<WorkbenchConfig> workbenchConfigProvider) {
     return (args) -> {
       if (args.length != 1) {
         throw new IllegalArgumentException("Expected 1 arg. Got " + Arrays.asList(args));
@@ -107,6 +111,15 @@ public class LoadDataDictionary {
             dataDictionaryEntryDao.save(targetEntry);
           }
         }
+      }
+
+      List<String> missingCdrVersions = entityManager.createNativeQuery("select name from cdr_version cdr "
+          + "left join data_dictionary_entry dde on cdr.cdr_version_id=dde.cdr_version_id "
+          + "where dde.data_dictionary_entry_id is null").getResultList();
+
+
+      if (workbenchConfigProvider.get().server.projectId.equals("all-of-us-rw-prod") && missingCdrVersions.size() > 0) {
+        throw new RuntimeException("No data dictionary found for following CDR Versions: " + String.join(",", missingCdrVersions));
       }
     };
   }
