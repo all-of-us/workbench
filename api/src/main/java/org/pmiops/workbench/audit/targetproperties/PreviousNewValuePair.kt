@@ -9,13 +9,13 @@ class PreviousNewValuePair constructor(var previousValue: String?, var newValue:
     }
 
     override fun toString(): String {
-        return ("PreviousNewValuePair{"
-                + "previousValue='"
-                + previousValue
-                + '\''.toString()
-                + ", newValue='"
-                + newValue
-                + '\''.toString()
-                + '}'.toString())
+        return ("PreviousNewValuePair{" +
+                "previousValue='" +
+                previousValue +
+                '\''.toString() +
+                ", newValue='" +
+                newValue +
+                '\''.toString() +
+                '}'.toString())
     }
 }

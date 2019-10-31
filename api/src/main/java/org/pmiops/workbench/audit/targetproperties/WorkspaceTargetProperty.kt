@@ -1,16 +1,10 @@
 package org.pmiops.workbench.audit.targetproperties
 
-import com.google.common.collect.ImmutableMap
-import com.google.common.collect.ImmutableMap.Builder
-import java.util.AbstractMap
-import java.util.Arrays
-import java.util.Collections
-import kotlin.collections.Map.Entry
-import java.util.Optional
 import java.util.function.Function
 import org.pmiops.workbench.model.Workspace
 
 internal data class WorkspaceTargetPropertyNameValue(val propertyName: String, val value: String)
+
 enum class WorkspaceTargetProperty private constructor(val propertyName: String, private val extractor: Function<Workspace, String>) {
     NAME("name", Function<Workspace, String> { it.name }),
     INTENDED_STUDY("intended_study", Function<Workspace, String> { it.researchPurpose.intendedStudy }),
@@ -30,20 +24,22 @@ enum class WorkspaceTargetProperty private constructor(val propertyName: String,
     }
 
     companion object {
-
-        fun getPropertyValuesByName(workspace: Workspace): Map<String, String> {
+        @JvmStatic
+        fun getPropertyValuesByName(workspace: Workspace?): Map<String, String> {
             return values()
                     .filter { it.extract(workspace) != null }
                     .map { it.propertyName to it.extract(workspace)!! }
                     .toMap()
         }
 
-
+        @JvmStatic
         fun getChangedValuesByName(
-                previousWorkspace: Workspace, newWorkspace: Workspace): Map<String, PreviousNewValuePair> {
+            previousWorkspace: Workspace?,
+            newWorkspace: Workspace?
+        ): Map<String, PreviousNewValuePair> {
             return values()
-                    .map({ it.propertyName to PreviousNewValuePair(previousValue = it.extract(previousWorkspace), newValue = it.extract(newWorkspace)) })
-                    .filter({ it.second.valueChanged() })
+                    .map { it.propertyName to PreviousNewValuePair(previousValue = it.extract(previousWorkspace), newValue = it.extract(newWorkspace)) }
+                    .filter { it.second.valueChanged() }
                     .toMap()
         }
     }

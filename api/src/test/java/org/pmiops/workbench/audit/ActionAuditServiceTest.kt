@@ -8,13 +8,10 @@ import org.mockito.Mockito.verify
 
 import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.Logging
-import com.google.cloud.logging.Payload
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.Payload.Type
 import com.google.common.collect.ImmutableList
-import org.hibernate.validator.internal.xml.PayloadType
 import java.util.Arrays
-import java.util.Collections
 import javax.inject.Provider
 import org.junit.Before
 import org.junit.Test
@@ -107,14 +104,14 @@ class ActionAuditServiceTest {
         assertThat(entryList.size).isEqualTo(1)
 
         val entry: LogEntry = entryList[0]
-        val payload: Payload = entry.<JsonPayload>getPayload<>()
-//        assertThat<Type>(entry.getPayload<Payload>().getType()).isEqualTo(Type.JSON)
-        assertThat(entry.getPayload()?.type).isEqualTo(Type.JSON)
         val jsonPayload = entry.getPayload<JsonPayload>()
+
+        assertThat(jsonPayload.type).isEqualTo(Type.JSON)
         assertThat(jsonPayload.dataAsMap.size).isEqualTo(11)
 
         val payloadMap = jsonPayload.dataAsMap
         assertThat(payloadMap[AuditColumn.NEW_VALUE.name]).isEqualTo("shod")
+
         // Logging passes numeric json fields as doubles when building a JsonPayload
         assertThat(payloadMap[AuditColumn.AGENT_ID.name]).isEqualTo(AGENT_ID_1.toDouble())
     }
@@ -126,7 +123,6 @@ class ActionAuditServiceTest {
         val entryList = logEntryListCaptor.value
         assertThat(entryList.size).isEqualTo(1)
         val entry = entryList[0]
-        assertThat<Type>(entry.getPayload<Payload>().getType()).isEqualTo(Type.JSON)
         val jsonPayload = entry.getPayload<JsonPayload>()
 
         for (key in jsonPayload.dataAsMap.keys) {
@@ -142,24 +138,16 @@ class ActionAuditServiceTest {
         val entryList = logEntryListCaptor.value
         assertThat(entryList.size).isEqualTo(2)
 
-        val payloads = entryList.stream()
-                .map<Any>(Function<LogEntry, Any> { it.getPayload() })
-                .filter { p -> (p as Payload<*>).type == Type.JSON }
-                .map { p -> p as JsonPayload }
-                .collect<ImmutableList<JsonPayload>, Any>(ImmutableList.toImmutableList())
+        val payloads = entryList
+                .map { it.getPayload<JsonPayload>() }
 
         assertThat(
-                payloads.stream()
-                        .map<Map<String, Any>>(Function<JsonPayload, Map<String, Any>> { it.getDataAsMap() })
-                        .map<Any> { entry -> entry[AuditColumn.ACTION_ID.name] }
+                payloads
+                        .map { it.getDataAsMap() }
+                        .map { it[AuditColumn.ACTION_ID.name] }
                         .distinct()
                         .count())
                 .isEqualTo(1)
-    }
-
-    @Test
-    fun testNullPayloadDoesNotThrow() {
-        actionAuditService!!.send((null as Collection<ActionAuditEvent>?)!!)
     }
 
     @Test

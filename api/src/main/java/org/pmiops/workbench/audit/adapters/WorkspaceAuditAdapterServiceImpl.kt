@@ -1,5 +1,6 @@
 package org.pmiops.workbench.audit.adapters
 
+import com.google.common.annotations.VisibleForTesting
 import com.google.common.collect.ImmutableList
 import java.time.Clock
 import java.util.logging.Level
@@ -18,10 +19,14 @@ import org.pmiops.workbench.workspaces.WorkspaceConversionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
+@VisibleForTesting
 @Service
-class WorkspaceAuditAdapterServiceImpl @Autowired
+open class WorkspaceAuditAdapterServiceImpl @Autowired
 constructor(
-        private val userProvider: Provider<User>, private val actionAuditService: ActionAuditService, private val clock: Clock) : WorkspaceAuditAdapterService {
+    private val userProvider: Provider<User>,
+    private val actionAuditService: ActionAuditService,
+    private val clock: Clock
+) : WorkspaceAuditAdapterService {
 
     override fun fireCreateAction(createdWorkspace: Workspace, dbWorkspaceId: Long) {
         try {
@@ -50,7 +55,6 @@ constructor(
         } catch (e: RuntimeException) {
             logAndSwallow(e)
         }
-
     }
 
     private fun logAndSwallow(e: RuntimeException) {
@@ -81,8 +85,9 @@ constructor(
     }
 
     override fun fireDuplicateAction(
-            sourceWorkspaceDbModel: org.pmiops.workbench.db.model.Workspace,
-            destinationWorkspaceDbModel: org.pmiops.workbench.db.model.Workspace) {
+        sourceWorkspaceDbModel: org.pmiops.workbench.db.model.Workspace,
+        destinationWorkspaceDbModel: org.pmiops.workbench.db.model.Workspace
+    ) {
         try {
             // We represent the duplication as a single action with events with different
             // ActionTypes: DUPLICATE_FROM and DUPLICATE_TO. The latter action generates many events
@@ -106,7 +111,7 @@ constructor(
                     WorkspaceConversionUtils.toApiWorkspace(destinationWorkspaceDbModel))
 
             val destinationEvents: List<ActionAuditEvent> = propertyValues.entries
-                    .map {ActionAuditEvent(
+                    .map { ActionAuditEvent(
                             actionId = actionId,
                             agentEmailMaybe = userEmail,
                             actionType = ActionType.DUPLICATE_TO,
@@ -117,7 +122,7 @@ constructor(
                             targetIdMaybe = destinationWorkspaceDbModel.workspaceId,
                             newValueMaybe = it.value,
                             timestamp = timestamp
-                            )}
+                            ) }
                     .toList()
 
             val allEvents = listOf(listOf(sourceEvent), destinationEvents).flatten()
@@ -125,7 +130,6 @@ constructor(
         } catch (e: RuntimeException) {
             logAndSwallow(e)
         }
-
     }
 
     // We fire at least two events for this action, one with a target type of workspace,
@@ -166,7 +170,7 @@ constructor(
                             targetIdMaybe = it.key,
                             targetPropertyMaybe = AclTargetProperty.ACCESS_LEVEL.name,
                             newValueMaybe = it.value
-                    )}
+                    ) }
             val allEventsBuilder = ImmutableList.Builder<ActionAuditEvent>()
             allEventsBuilder.add(workspaceTargetEvent)
             allEventsBuilder.addAll(inviteeEvents)
@@ -175,7 +179,6 @@ constructor(
         } catch (e: RuntimeException) {
             logAndSwallow(e)
         }
-
     }
 
     companion object {
