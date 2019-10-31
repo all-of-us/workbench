@@ -15,7 +15,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
-import org.pmiops.workbench.WorkbenchConstants;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -53,6 +52,8 @@ public class ClusterController implements ClusterApiDelegate {
   private static final String WORKSPACE_ID_KEY = "WORKSPACE_ID";
   private static final String API_HOST_KEY = "API_HOST";
   private static final String BUCKET_NAME_KEY = "BUCKET_NAME";
+  private static final String CDR_VERSION_CLOUD_PROJECT = "CDR_VERSION_CLOUD_PROJECT";
+  private static final String CDR_VERSION_BIGQUERY_DATASET = "CDR_VERSION_BIGQUERY_DATASET";
   // The billing project to use for the analysis.
   private static final String BILLING_CLOUD_PROJECT = "BILLING_CLOUD_PROJECT";
   private static final String DATA_URI_PREFIX = "data:application/json;base64,";
@@ -297,8 +298,8 @@ public class ClusterController implements ClusterApiDelegate {
     config.put(WORKSPACE_ID_KEY, fcWorkspace.getName());
     config.put(BUCKET_NAME_KEY, fcWorkspace.getBucketName());
     config.put(API_HOST_KEY, host);
-    config.put(WorkbenchConstants.CDR_VERSION_CLOUD_PROJECT, cdrVersion.getBigqueryProject());
-    config.put(WorkbenchConstants.CDR_VERSION_BIGQUERY_DATASET, cdrVersion.getBigqueryDataset());
+    config.put(CDR_VERSION_CLOUD_PROJECT, cdrVersion.getBigqueryProject());
+    config.put(CDR_VERSION_BIGQUERY_DATASET, cdrVersion.getBigqueryDataset());
     config.put(BILLING_CLOUD_PROJECT, cdrBillingCloudProject);
     return jsonToDataUri(config);
   }
