@@ -40,9 +40,9 @@ Then set up [git secrets](#git-secrets) and fire up the [development servers](#r
 
 Before doing any development, you must run:
 ```Shell
-./project.rb appengineRun
+./gradlew compileGeneratedJava appengineRun
 ```
-This will generate MapStruct files that are necessary for the app to compile. On Macs, this command will never complete - when it has gotten to 97% it will hang forever. It can safely be `ctrl+c`'d at that point.
+This will generate compiled Java and MapStruct files that are necessary for the app to compile. On Macs, this command will never complete - when it has gotten to 97% it will hang forever. It can safely be `ctrl+c`'d at that point.
 
 ## Development Process
 
