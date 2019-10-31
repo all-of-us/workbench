@@ -12,7 +12,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -59,8 +58,6 @@ public class CohortBuilderControllerTest {
 
   @Mock private CdrVersionDao cdrVersionDao;
 
-  @Mock private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
-
   @Mock private CdrVersionService cdrVersionService;
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
@@ -87,7 +84,6 @@ public class CohortBuilderControllerTest {
             cbCriteriaDao,
             cbCriteriaAttributeDao,
             cdrVersionDao,
-            genderRaceEthnicityConceptProvider,
             cdrVersionService,
             elasticSearchService,
             configProvider);

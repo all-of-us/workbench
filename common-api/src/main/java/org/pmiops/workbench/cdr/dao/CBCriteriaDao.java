@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -216,4 +217,16 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
               + "and c.domain_id = 'DRUG' and c.type = 'RXNORM' and match(synonyms) against('+[drug_rank1]' in boolean mode) order by c.est_count desc",
       nativeQuery = true)
   List<CBCriteria> findDrugIngredientByConceptId(@Param("conceptId") String conceptId);
+
+  @Query(
+      value =
+          "select * from cb_criteria where domain_id = 'PERSON' and type in ('GENDER', 'RACE', 'ETHNICITY') and parent_id != 0 order by name asc",
+      nativeQuery = true)
+  List<CBCriteria> findGenderRaceEthnicity();
+
+  List<CBCriteria> findByDomainIdAndTypeAndParentIdNotIn(
+      @Param("domainId") String domainId,
+      @Param("type") String type,
+      @Param("parentId") Long parentId,
+      Sort sort);
 }

@@ -20,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.CBCriteria;
@@ -112,8 +111,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Mock private Provider<WorkbenchConfig> configProvider;
 
-  @Mock private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
-
   @Autowired private JdbcTemplate jdbcTemplate;
 
   @Override
@@ -145,7 +142,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             cbCriteriaDao,
             cbCriteriaAttributeDao,
             cdrVersionDao,
-            genderRaceEthnicityConceptProvider,
             cdrVersionService,
             elasticSearchService,
             configProvider);

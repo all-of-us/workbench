@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
-import org.pmiops.workbench.WorkbenchConstants;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.User.ClusterConfig;
@@ -36,6 +35,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   private static final String CLUSTER_LABEL_AOU = "all-of-us";
   private static final String CLUSTER_LABEL_CREATED_BY = "created-by";
+  private static final String WORKSPACE_CDR = "WORKSPACE_CDR";
 
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
@@ -85,11 +85,10 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
       customClusterEnvironmentVariables.put(
-          WorkbenchConstants.CDR_VERSION_CLOUD_PROJECT,
-          workspace.getCdrVersion().getBigqueryProject());
-      customClusterEnvironmentVariables.put(
-          WorkbenchConstants.CDR_VERSION_BIGQUERY_DATASET,
-          workspace.getCdrVersion().getBigqueryDataset());
+          WORKSPACE_CDR,
+          workspace.getCdrVersion().getBigqueryProject()
+              + "."
+              + workspace.getCdrVersion().getBigqueryDataset());
     }
 
     return new ClusterRequest()

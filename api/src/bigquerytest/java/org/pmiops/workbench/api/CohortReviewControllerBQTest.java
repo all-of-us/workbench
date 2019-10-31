@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Provider;
@@ -24,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
@@ -58,7 +56,6 @@ import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantChartData;
 import org.pmiops.workbench.model.ParticipantChartDataListResponse;
@@ -107,14 +104,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     DataSetService.class
   })
   static class Configuration {
-    @Bean
-    public GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
-      Map<String, Map<Long, String>> concepts = new HashMap<>();
-      concepts.put(FilterColumns.RACE.name(), new HashMap<>());
-      concepts.put(FilterColumns.GENDER.name(), new HashMap<>());
-      concepts.put(FilterColumns.ETHNICITY.name(), new HashMap<>());
-      return new GenderRaceEthnicityConcept(concepts);
-    }
 
     @Bean
     @Scope("prototype")
