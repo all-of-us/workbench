@@ -142,7 +142,8 @@ public class WorkspaceAuditAdapterServiceTest {
     assertThat(eventsSent).hasSize(2);
 
     // need same actionId for all events
-    assertThat(eventsSent.stream().map(ActionAuditEvent::getActionId).distinct().count()).isEqualTo(1);
+    assertThat(eventsSent.stream().map(ActionAuditEvent::getActionId).distinct().count())
+        .isEqualTo(1);
 
     assertThat(
             eventsSent.stream()
@@ -176,7 +177,8 @@ public class WorkspaceAuditAdapterServiceTest {
 
     Map<String, Long> countByTargetType =
         eventsSent.stream()
-            .collect(Collectors.groupingBy(e -> e.getTargetType().toString(), Collectors.counting()));
+            .collect(
+                Collectors.groupingBy(e -> e.getTargetType().toString(), Collectors.counting()));
 
     assertThat(countByTargetType.get(TargetType.WORKSPACE.toString())).isEqualTo(1);
     assertThat(countByTargetType.get(TargetType.USER.toString())).isEqualTo(3);
@@ -191,7 +193,8 @@ public class WorkspaceAuditAdapterServiceTest {
     assertThat(targetPropertyMaybe.get()).isEqualTo(AclTargetProperty.ACCESS_LEVEL.toString());
 
     // need same actionId for all events
-    assertThat(eventsSent.stream().map(ActionAuditEvent::getActionId).distinct().count()).isEqualTo(1);
+    assertThat(eventsSent.stream().map(ActionAuditEvent::getActionId).distinct().count())
+        .isEqualTo(1);
 
     Optional<ActionAuditEvent> readerEventMaybe =
         eventsSent.stream()
