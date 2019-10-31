@@ -6,7 +6,6 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import javax.inject.Provider
 import org.pmiops.workbench.audit.ActionAuditEvent
-import org.pmiops.workbench.audit.ActionAuditEventImpl
 import org.pmiops.workbench.audit.ActionAuditService
 import org.pmiops.workbench.audit.ActionType
 import org.pmiops.workbench.audit.AgentType
@@ -32,21 +31,21 @@ constructor(
             val propertyValues = WorkspaceTargetProperty.getPropertyValuesByName(createdWorkspace)
             val timestamp = clock.millis()
             // omit the previous value column
-            val events = propertyValues.entries.stream()
-                    .map { entry -> ActionAuditEvent(
+            val events = propertyValues.entries
+                    .map { ActionAuditEvent(
                             actionId = actionId,
                             agentEmailMaybe = userEmail,
                             actionType = ActionType.CREATE,
                             agentType = AgentType.USER,
                             agentId = userId,
                             targetType = TargetType.WORKSPACE,
-                            targetPropertyMaybe = entry.key,
+                            targetPropertyMaybe = it.key,
                             targetIdMaybe = dbWorkspaceId,
                             previousValueMaybe = null,
-                            newValueMaybe = entry.value,
+                            newValueMaybe = it.value,
                             timestamp = timestamp)
                     }
-                    .collect<ImmutableList<ActionAuditEvent>, Any>(ImmutableList.toImmutableList())
+                    .toList()
             actionAuditService.send(events)
         } catch (e: RuntimeException) {
             logAndSwallow(e)
@@ -67,21 +66,18 @@ constructor(
             val userId = userProvider.get().userId
             val userEmail = userProvider.get().email
             val timestamp = clock.millis()
-            val event = ActionAuditEventImpl.Builder()
-                    .setActionId(actionId)
-                    .setAgentEmail(userEmail)
-                    .setActionType(ActionType.DELETE)
-                    .setAgentType(AgentType.USER)
-                    .setAgentId(userId)
-                    .setTargetType(TargetType.WORKSPACE)
-                    .setTargetId(dbWorkspace.workspaceId)
-                    .setTimestamp(timestamp)
-                    .build()
+            val event = ActionAuditEvent(
+                    actionId = actionId,
+                    agentEmailMaybe = userEmail,
+                    actionType = ActionType.DELETE,
+                    agentType = AgentType.USER,
+                    agentId = userId,
+                    targetType = TargetType.WORKSPACE,
+                    timestamp = timestamp)
             actionAuditService.send(event)
         } catch (e: RuntimeException) {
             logAndSwallow(e)
         }
-
     }
 
     override fun fireDuplicateAction(
@@ -96,40 +92,36 @@ constructor(
             val userId = userProvider.get().userId
             val userEmail = userProvider.get().email
             val timestamp = clock.millis()
-            val sourceEvent = ActionAuditEventImpl.builder()
-                    .setActionId(actionId)
-                    .setAgentEmail(userEmail)
-                    .setActionType(ActionType.DUPLICATE_FROM)
-                    .setAgentType(AgentType.USER)
-                    .setAgentId(userId)
-                    .setTargetType(TargetType.WORKSPACE)
-                    .setTargetId(sourceWorkspaceDbModel.workspaceId)
-                    .setTimestamp(timestamp)
-                    .build()
+            val sourceEvent = ActionAuditEvent(
+                    actionId = actionId,
+                    agentEmailMaybe = userEmail,
+                    actionType = ActionType.DUPLICATE_FROM,
+                    agentType = AgentType.USER,
+                    agentId = userId,
+                    targetType = TargetType.WORKSPACE,
+                    targetIdMaybe = sourceWorkspaceDbModel.workspaceId,
+                    timestamp = timestamp
+            )
             val propertyValues = WorkspaceTargetProperty.getPropertyValuesByName(
                     WorkspaceConversionUtils.toApiWorkspace(destinationWorkspaceDbModel))
 
-            val destinationEvents = propertyValues.entries.stream()
-                    .map { entry ->
-                        ActionAuditEventImpl.builder()
-                                .setActionId(actionId)
-                                .setAgentEmail(userEmail)
-                                .setActionType(ActionType.DUPLICATE_TO)
-                                .setAgentType(AgentType.USER)
-                                .setAgentId(userId)
-                                .setTargetType(TargetType.WORKSPACE)
-                                .setTargetProperty(entry.key)
-                                .setTargetId(destinationWorkspaceDbModel.workspaceId)
-                                .setNewValue(entry.value)
-                                .setTimestamp(timestamp)
-                                .build()
-                    }
-                    .collect<ImmutableList<ActionAuditEvent>, Any>(ImmutableList.toImmutableList())
+            val destinationEvents: List<ActionAuditEvent> = propertyValues.entries
+                    .map {ActionAuditEvent(
+                            actionId = actionId,
+                            agentEmailMaybe = userEmail,
+                            actionType = ActionType.DUPLICATE_TO,
+                            agentType = AgentType.USER,
+                            agentId = userId,
+                            targetType = TargetType.WORKSPACE,
+                            targetPropertyMaybe = it.key,
+                            targetIdMaybe = destinationWorkspaceDbModel.workspaceId,
+                            newValueMaybe = it.value,
+                            timestamp = timestamp
+                            )}
+                    .toList()
 
-            val allEventsBuilder = ImmutableList.Builder<ActionAuditEvent>()
-            allEventsBuilder.add(sourceEvent)
-            allEventsBuilder.addAll(destinationEvents)
-            actionAuditService.send(allEventsBuilder.build())
+            val allEvents = listOf(listOf(sourceEvent), destinationEvents).flatten()
+            actionAuditService.send(allEvents)
         } catch (e: RuntimeException) {
             logAndSwallow(e)
         }
@@ -151,34 +143,30 @@ constructor(
             val userEmail = userProvider.get().email
             val timestamp = clock.millis()
 
-            val workspaceTargetEvent = ActionAuditEventImpl.builder()
-                    .setActionId(actionId)
-                    .setActionType(ActionType.COLLABORATE)
-                    .setAgentType(AgentType.USER)
-                    .setAgentEmail(userEmail)
-                    .setAgentId(sharingUserId)
-                    .setTimestamp(timestamp)
-                    .setTargetType(TargetType.WORKSPACE)
-                    .setTargetId(sourceWorkspaceId)
-                    .build()
+            val workspaceTargetEvent = ActionAuditEvent(
+                    actionId = actionId,
+                    actionType = ActionType.COLLABORATE,
+                    agentType = AgentType.USER,
+                    agentEmailMaybe = userEmail,
+                    agentId = sharingUserId,
+                    timestamp = timestamp,
+                    targetType = TargetType.WORKSPACE,
+                    targetIdMaybe = sourceWorkspaceId
+            )
 
-            val inviteeEvents = aclStringsByUserId.entries.stream()
-                    .map { entry ->
-                        ActionAuditEventImpl.builder()
-                                .setActionId(actionId)
-                                .setActionType(ActionType.COLLABORATE)
-                                .setAgentType(AgentType.USER)
-                                .setAgentEmail(userEmail)
-                                .setAgentId(sharingUserId)
-                                .setTimestamp(timestamp)
-                                .setTargetType(TargetType.USER)
-                                .setTargetId(entry.key)
-                                .setTargetProperty(AclTargetProperty.ACCESS_LEVEL.name)
-                                .setNewValue(entry.value)
-                                .build()
-                    }
-                    .collect<ImmutableList<ActionAuditEvent>, Any>(ImmutableList.toImmutableList())
-
+            val inviteeEvents = aclStringsByUserId.entries
+                    .map { ActionAuditEvent(
+                            actionId = actionId,
+                            actionType = ActionType.COLLABORATE,
+                            agentType = AgentType.USER,
+                            agentEmailMaybe = userEmail,
+                            agentId = sharingUserId,
+                            timestamp = timestamp,
+                            targetType = TargetType.USER,
+                            targetIdMaybe = it.key,
+                            targetPropertyMaybe = AclTargetProperty.ACCESS_LEVEL.name,
+                            newValueMaybe = it.value
+                    )}
             val allEventsBuilder = ImmutableList.Builder<ActionAuditEvent>()
             allEventsBuilder.add(workspaceTargetEvent)
             allEventsBuilder.addAll(inviteeEvents)

@@ -6,9 +6,9 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class ActionAuditConfig {
+open class ActionAuditConfig {
 
-    val cloudLogging: Logging
+    open val cloudLogging: Logging
         @Bean
         get() = LoggingOptions.getDefaultInstance().service
 }
