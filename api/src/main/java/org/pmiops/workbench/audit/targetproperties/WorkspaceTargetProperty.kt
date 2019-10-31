@@ -10,15 +10,16 @@ import java.util.Optional
 import java.util.function.Function
 import org.pmiops.workbench.model.Workspace
 
+internal data class WorkspaceTargetPropertyNameValue(val propertyName: String, val value: String)
 enum class WorkspaceTargetProperty private constructor(val propertyName: String, private val extractor: Function<Workspace, String>) {
     NAME("name", Function<Workspace, String> { it.name }),
-    INTENDED_STUDY("intended_study", { w -> w.getResearchPurpose().getIntendedStudy() }),
+    INTENDED_STUDY("intended_study", Function<Workspace, String> { it.researchPurpose.intendedStudy }),
     CREATOR("creator", Function<Workspace, String> { it.creator }),
-    ADDITIONAL_NOTES("additional_notes", { w -> w.getResearchPurpose().getAdditionalNotes() }),
+    ADDITIONAL_NOTES("additional_notes", Function<Workspace, String> { it.researchPurpose.additionalNotes }),
     ANTICIPATED_FINDINGS(
-            "anticipated_findings", { w -> w.getResearchPurpose().getAnticipatedFindings() }),
-    DISEASE_OF_FOCUS("disease_of_focus", { w -> w.getResearchPurpose().getDiseaseOfFocus() }),
-    REASON_FOR_ALL_OF_US("reason_for_all_of_us", { w -> w.getResearchPurpose().getReasonForAllOfUs() }),
+            "anticipated_findings", Function<Workspace, String> { w -> w.getResearchPurpose().getAnticipatedFindings() }),
+    DISEASE_OF_FOCUS("disease_of_focus", Function<Workspace, String> { w -> w.getResearchPurpose().getDiseaseOfFocus() }),
+    REASON_FOR_ALL_OF_US("reason_for_all_of_us", Function<Workspace, String> { w -> w.getResearchPurpose().getReasonForAllOfUs() }),
     NAMESPACE("namespace", Function<Workspace, String> { it.namespace }),
     CDR_VERSION_ID("cdr_version_id", Function<Workspace, String> { it.cdrVersionId });
 
@@ -30,37 +31,23 @@ enum class WorkspaceTargetProperty private constructor(val propertyName: String,
 
     companion object {
 
-        fun getPropertyValuesByName(workspace: Workspace?): Map<String, String> {
-            return if (workspace == null) {
-                emptyMap()
-            } else Arrays.stream(WorkspaceTargetProperty.values())
-                    .map<SimpleImmutableEntry<String, String>> { prop ->
-                        AbstractMap.SimpleImmutableEntry<String, String>(
-                                prop.propertyName, prop.extract(workspace))
-                    }
-                    .filter { entry -> entry.value != null }
-                    .collect<ImmutableMap<String, String>, Any>(ImmutableMap.toImmutableMap<SimpleImmutableEntry<String, String>, String, String>({ it.key }, { it.value }))
-
+        fun getPropertyValuesByName(workspace: Workspace): Map<String, String> {
+            return values()
+                    .filter {it.extract(workspace) != null}
+                    .map {it.propertyName to it.extract(workspace)!!}
+                    .toMap()
         }
+
 
         fun getChangedValuesByName(
-                previousWorkspace: Workspace, newWorkspace: Workspace): Map<String, PreviousNewValuePair> {
-            val resultBuilder = Builder<String, PreviousNewValuePair>()
-            for (property in WorkspaceTargetProperty.values()) {
-                val previousValue = Optional.ofNullable(property.extract(previousWorkspace))
-                val newValue = Optional.ofNullable(property.extract(newWorkspace))
+            previousWorkspace: Workspace, newWorkspace: Workspace): Map<String, PreviousNewValuePair> {
+            return values()
+                    .map({it.propertyName to  PreviousNewValuePair(previousValue = it.extract(previousWorkspace), newValue  = it.extract(newWorkspace)) })
+                    .filter( {it.second.valueChanged()})
+                    .toMap()
+    }
+}
 
-                // put entry in the map for change, delete, or add on the property
-                if (previousValue.isPresent && previousValue != newValue || newValue.isPresent && newValue != previousValue) {
-                    resultBuilder.put(
-                            property.propertyName,
-                            PreviousNewValuePair.builder()
-                                    .setNewValue(newValue.orElse(null))
-                                    .setPreviousValue(previousValue.orElse(null))
-                                    .build())
-                }
-            }
-            return resultBuilder.build()
-        }
+
     }
 }

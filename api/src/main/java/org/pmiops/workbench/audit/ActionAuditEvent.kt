@@ -9,14 +9,14 @@ class ActionAuditEvent(
         val timestamp: Long,
         val agentType: AgentType,
         val agentId: Long,
-        private val agentEmailMaybe: String?,
+        val agentEmailMaybe: String?,
         val actionId: String,
         val actionType: ActionType,
         val targetType: TargetType,
-        private val targetPropertyMaybe: String? = null,
-        private val targetIdMaybe: Long? = null,
-        private val previousValueMaybe: String? = null,
-        private val newValueMaybe: String? = null) {
+        val targetPropertyMaybe: String? = null,
+        val targetIdMaybe: Long? = null,
+        val previousValueMaybe: String? = null,
+        val newValueMaybe: String? = null) {
 
     val jsonPayload: Payload.JsonPayload
         get() {

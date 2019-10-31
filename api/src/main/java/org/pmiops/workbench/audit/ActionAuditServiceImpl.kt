@@ -25,8 +25,10 @@ constructor(private val configProvider: Provider<WorkbenchConfig>, private val c
 
     override fun send(events: Collection<ActionAuditEvent>) {
         try {
-            val logEntries = events.stream().map<LogEntry>(Function<ActionAuditEvent, LogEntry> { this.auditEventToLogEntry(it) }).collect<ImmutableList<LogEntry>, Any>(ImmutableList.toImmutableList())
-            if (!logEntries.isEmpty()) {
+            val logEntries : List<LogEntry> = events
+                    .map { this.auditEventToLogEntry(it) }
+                    .toList()
+            if (logEntries.isNotEmpty()) {
                 cloudLogging.write(logEntries)
             }
         } catch (e: RuntimeException) {
@@ -47,32 +49,24 @@ constructor(private val configProvider: Provider<WorkbenchConfig>, private val c
 
     private fun toJsonPayload(auditEvent: ActionAuditEvent): JsonPayload {
         val result = HashMap<String, Any>() // allow null values
-        result[AuditColumn.TIMESTAMP.name] = auditEvent.timestamp()
-        result[AuditColumn.ACTION_ID.name] = auditEvent.actionId()
-        result[AuditColumn.ACTION_TYPE.name] = auditEvent.actionType()
-        result[AuditColumn.AGENT_TYPE.name] = auditEvent.agentType()
-        result[AuditColumn.AGENT_ID.name] = auditEvent.agentId()
-        result[AuditColumn.AGENT_EMAIL.name] = toNullable(auditEvent.agentEmailMaybe())
-        result[AuditColumn.TARGET_TYPE.name] = auditEvent.targetType()
-        result[AuditColumn.TARGET_ID.name] = toNullable(auditEvent.targetId())
-        result[AuditColumn.AGENT_ID.name] = auditEvent.agentId()
-        result[AuditColumn.TARGET_PROPERTY.name] = toNullable(auditEvent.targetProperty())
-        result[AuditColumn.PREV_VALUE.name] = toNullable(auditEvent.previousValue())
-        result[AuditColumn.NEW_VALUE.name] = toNullable(auditEvent.newValue())
+        result[AuditColumn.TIMESTAMP.name] = auditEvent.timestamp
+        result[AuditColumn.ACTION_ID.name] = auditEvent.actionId
+        result[AuditColumn.ACTION_TYPE.name] = auditEvent.actionType
+        result[AuditColumn.AGENT_TYPE.name] = auditEvent.agentType
+        result[AuditColumn.AGENT_ID.name] = auditEvent.agentId
+        result[AuditColumn.AGENT_EMAIL.name] = auditEvent.agentEmailMaybe!!
+        result[AuditColumn.TARGET_TYPE.name] = auditEvent.targetType
+        result[AuditColumn.TARGET_ID.name] = auditEvent.targetIdMaybe!!
+        result[AuditColumn.AGENT_ID.name] = auditEvent.agentId
+        result[AuditColumn.TARGET_PROPERTY.name] = auditEvent.targetPropertyMaybe!!
+        result[AuditColumn.PREV_VALUE.name] = auditEvent.previousValueMaybe!!
+        result[AuditColumn.NEW_VALUE.name] = auditEvent.newValueMaybe!!
         return JsonPayload.of(result)
     }
 
     companion object {
-
         private val serviceLogger = Logger.getLogger(ActionAuditServiceImpl::class.java.name)
-
-        private val MONITORED_RESOURCE_TYPE = "Global"
+        private val MONITORED_RESOURCE_TYPE = "global"
         val MONITORED_RESOURCE = MonitoredResource.newBuilder(MONITORED_RESOURCE_TYPE).build()
-
-        // Inverse of Optional.ofNullable(). Used for JSON api which expects null values for empty
-        // columns. Though perhaps we could just leave those out...
-        private fun <T> toNullable(opt: Optional<T>): T {
-            return opt.orElse(null)
-        }
     }
 }
