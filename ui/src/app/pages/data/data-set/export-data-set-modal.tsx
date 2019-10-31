@@ -13,7 +13,7 @@ import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 
 
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
-import {DataSet, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
+import {DataSet, FileDetail, KernelTypeEnum} from 'generated/fetch';
 
 interface Props {
   closeFunction: Function;
