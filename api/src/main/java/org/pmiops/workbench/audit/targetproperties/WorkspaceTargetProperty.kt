@@ -33,21 +33,18 @@ enum class WorkspaceTargetProperty private constructor(val propertyName: String,
 
         fun getPropertyValuesByName(workspace: Workspace): Map<String, String> {
             return values()
-                    .filter {it.extract(workspace) != null}
-                    .map {it.propertyName to it.extract(workspace)!!}
+                    .filter { it.extract(workspace) != null }
+                    .map { it.propertyName to it.extract(workspace)!! }
                     .toMap()
         }
 
 
         fun getChangedValuesByName(
-            previousWorkspace: Workspace, newWorkspace: Workspace): Map<String, PreviousNewValuePair> {
+                previousWorkspace: Workspace, newWorkspace: Workspace): Map<String, PreviousNewValuePair> {
             return values()
-                    .map({it.propertyName to  PreviousNewValuePair(previousValue = it.extract(previousWorkspace), newValue  = it.extract(newWorkspace)) })
-                    .filter( {it.second.valueChanged()})
+                    .map({ it.propertyName to PreviousNewValuePair(previousValue = it.extract(previousWorkspace), newValue = it.extract(newWorkspace)) })
+                    .filter({ it.second.valueChanged() })
                     .toMap()
-    }
-}
-
-
+        }
     }
 }
