@@ -5,9 +5,7 @@ import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.Logging
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.Severity
-import com.google.common.collect.ImmutableList
 import java.util.HashMap
-import java.util.Optional
 import java.util.logging.Level
 import java.util.logging.Logger
 import javax.inject.Provider
@@ -25,7 +23,7 @@ constructor(private val configProvider: Provider<WorkbenchConfig>, private val c
 
     override fun send(events: Collection<ActionAuditEvent>) {
         try {
-            val logEntries : List<LogEntry> = events
+            val logEntries: List<LogEntry> = events
                     .map { this.auditEventToLogEntry(it) }
                     .toList()
             if (logEntries.isNotEmpty()) {
@@ -35,7 +33,6 @@ constructor(private val configProvider: Provider<WorkbenchConfig>, private val c
             serviceLogger.log(
                     Level.SEVERE, e) { "Exception encountered writing log entries to Cloud Logging." }
         }
-
     }
 
     private fun auditEventToLogEntry(auditEvent: ActionAuditEvent): LogEntry {

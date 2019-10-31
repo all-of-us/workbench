@@ -8,8 +8,9 @@ interface WorkspaceAuditAdapterService {
     fun fireDeleteAction(dbWorkspace: org.pmiops.workbench.db.model.Workspace)
 
     fun fireDuplicateAction(
-            sourceWorkspaceDbModel: org.pmiops.workbench.db.model.Workspace,
-            destinationWorkspaceDbModel: org.pmiops.workbench.db.model.Workspace)
+        sourceWorkspaceDbModel: org.pmiops.workbench.db.model.Workspace,
+        destinationWorkspaceDbModel: org.pmiops.workbench.db.model.Workspace
+    )
 
     fun fireCollaborateAction(sourceWorkspaceId: Long, aclStringsByUserId: Map<Long, String>)
 }
