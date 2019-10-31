@@ -58,7 +58,7 @@ class WorkspaceAuditAdapterServiceTest {
 
     @TestConfiguration
     @MockBean(value = [ActionAuditService::class])
-    internal class Configuration
+    internal open class Configuration
 
     @Before
     fun setUp() {
@@ -112,21 +112,12 @@ class WorkspaceAuditAdapterServiceTest {
         assertThat(eventsSent.size).isEqualTo(6)
         val firstEvent = eventsSent.stream().findFirst()
         assertThat(firstEvent.isPresent).isTrue()
-        assertThat(firstEvent.get().actionType()).isEqualTo(ActionType.CREATE)
-        assertThat(
-                eventsSent.stream()
-                        .map<ActionType>(Function<ActionAuditEvent, ActionType> { it.actionType() })
-                        .collect<Set<ActionType>, Any>(Collectors.toSet())
-                        .size)
+        assertThat(firstEvent.get().actionType).isEqualTo(ActionType.CREATE)
+        assertThat(eventsSent
+            .map { it.actionType }
+                        .distinct()
+                        .count())
                 .isEqualTo(1)
-    }
-
-    @Test
-    fun testFirestNoEventsForNullWorkspace() {
-        workspaceAuditAdapterService!!.fireCreateAction(null!!, WORKSPACE_1_DB_ID)
-        verify<ActionAuditService>(mockActionAuditService).send(eventListCaptor!!.capture())
-        val eventsSent = eventListCaptor.value
-        assertThat(eventsSent).isEmpty()
     }
 
     @Test
@@ -134,8 +125,8 @@ class WorkspaceAuditAdapterServiceTest {
         workspaceAuditAdapterService!!.fireDeleteAction(dbWorkspace1!!)
         verify<ActionAuditService>(mockActionAuditService).send(eventCaptor!!.capture())
         val eventSent = eventCaptor.value
-        assertThat(eventSent.actionType()).isEqualTo(ActionType.DELETE)
-        assertThat(eventSent.timestamp()).isEqualTo(Y2K_EPOCH_MILLIS)
+        assertThat(eventSent.actionType).isEqualTo(ActionType.DELETE)
+        assertThat(eventSent.timestamp).isEqualTo(Y2K_EPOCH_MILLIS)
     }
 
     @Test
@@ -145,19 +136,22 @@ class WorkspaceAuditAdapterServiceTest {
         val eventsSent = eventListCaptor.value
         assertThat(eventsSent).hasSize(2)
 
+        val uniqueActionIdCount: Int = eventsSent
+                .map { it.actionId }
+                .distinct()
+                .count()
         // need same actionId for all events
-        assertThat(eventsSent.stream().map<String>(Function<ActionAuditEvent, String> { it.actionId() }).distinct().count()).isEqualTo(1)
+        assertThat(uniqueActionIdCount).isEqualTo(1)
 
         assertThat(
-                eventsSent.stream()
-                        .map<TargetType>(Function<ActionAuditEvent, TargetType> { it.targetType() })
-                        .allMatch { t -> t == TargetType.WORKSPACE })
+                eventsSent
+                        .all( { it.targetType == TargetType.WORKSPACE}))
                 .isTrue()
 
         val expectedActionTypes = ImmutableSet.of(ActionType.DUPLICATE_FROM, ActionType.DUPLICATE_TO)
-        val actualActionTypes = eventsSent.stream()
-                .map<ActionType>(Function<ActionAuditEvent, ActionType> { it.actionType() })
-                .collect<ImmutableSet<ActionType>, Any>(ImmutableSet.toImmutableSet())
+        val actualActionTypes = eventsSent
+                .map { it.actionType }
+                .toSet()
         assertThat(actualActionTypes).containsExactlyElementsIn(expectedActionTypes)
     }
 
