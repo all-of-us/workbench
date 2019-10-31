@@ -3,7 +3,7 @@ services:
   scripts:
     build:
       context: ./src/dev/server
-    user: ${UID}
+    user: ${USER_ID}
     working_dir: /w/api
     volumes:
       - src-sync:/w:nocopy
@@ -36,7 +36,7 @@ services:
       - elastic
     build:
       context: ./src/dev/server
-    user: ${UID}
+    user: ${USER_ID}
     working_dir: /w/api
     volumes:
       - src-sync:/w:nocopy
@@ -56,7 +56,7 @@ services:
       - elastic
     build:
       context: ./src/dev/server
-    user: ${UID}
+    user: ${USER_ID}
     working_dir: /w/api
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/w/api/sa-key.json
@@ -70,7 +70,7 @@ services:
       - db
     build:
       context: ./src/dev/server
-    user: ${UID}
+    user: ${USER_ID}
     working_dir: /w/api/db
     volumes:
       - src-sync:/w:nocopy
@@ -84,7 +84,7 @@ services:
       - db
     build:
       context: ./src/dev/server
-    user: ${UID}
+    user: ${USER_ID}
     working_dir: /w/api
     volumes:
       - src-sync:/w:nocopy
@@ -98,7 +98,7 @@ services:
       - db
     build:
       context: ./src/dev/server
-    user: ${UID}
+    user: ${USER_ID}
     working_dir: /w/api/db-cdr
     volumes:
       - src-sync:/w:nocopy
@@ -114,7 +114,7 @@ services:
       - db
     build:
       context: ./src/dev/server
-    user: ${UID}
+    user: ${USER_ID}
     working_dir: /w/db-cdr
     volumes:
       - gradle-cache:/.gradle
@@ -130,7 +130,7 @@ services:
   db-cloudsql-import:
     build:
       context: ./src/dev/server
-    user: ${UID}
+    user: ${USER_ID}
     working_dir: /w/db-cdr
     volumes:
       - gradle-cache:/.gradle
@@ -147,7 +147,7 @@ services:
   db-local-mysql-import:
     build:
       context: ./src/dev/server
-    user: ${UID}
+    user: ${USER_ID}
     working_dir: /w/db-cdr
     volumes:
       - gradle-cache:/.gradle
@@ -164,7 +164,7 @@ services:
   cloud-sql-proxy:
     build:
       context: ./src/dev/server
-    user: ${UID}
+    user: ${USER_ID}
     working_dir: /w
     volumes:
       - .:/w:cached
@@ -179,7 +179,7 @@ services:
     depends_on:
       - cloud-sql-proxy
     image: mysql:5.7.27
-    user: ${UID}
+    user: ${USER_ID}
     working_dir: /w
     volumes:
       - .:/w:cached
