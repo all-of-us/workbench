@@ -34,7 +34,7 @@
           (blur)="checkMax()">
       </div>
 
-      <clr-checkbox formControlName="deceased">
+      <clr-checkbox formControlName="deceased" [clrDisabled]="!ageNode || !deceasedNode">
         Is Deceased
         <span *ngIf="deceasedNode" class="badge badge-info">
           {{ deceasedNode.count | number }}

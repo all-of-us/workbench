@@ -132,11 +132,11 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         const paramId = `age-param${this.ageNode.id}`;
         this.selectedNode = {
           ...this.ageNode,
-          name: `Age In Range ${minAge.toString()} - ${maxAge.toString()}`,
+          name: `Age In Range ${minAge} - ${maxAge}`,
           parameterId: paramId,
           attributes: [attr],
         };
-        if (!this.wizard.item.searchParameters.find(s => s.type === CriteriaType[CriteriaType.DECEASED])) {
+        if (!this.wizard.item.searchParameters.length) {
           const wizard = this.wizard;
           wizard.item.searchParameters.push(this.selectedNode);
           const selections = [paramId, ...this.selections];
@@ -231,7 +231,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     const max = this.demoForm.get('ageMax');
     const params = this.wizard.item.searchParameters;
     if (params.length && params[0].type === CriteriaType.AGE) {
-      const range = params[0].attributes[0].operands;
+      const range = params[0].attributes[0].operands.map(op => parseInt(op, 10));
       this.ageRange.setValue(range);
       min.setValue(range[0]);
       max.setValue(range[1]);
@@ -244,7 +244,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         const attr = {
           name: AttrName.AGE,
           operator: Operator.BETWEEN,
-          operands: [lo, hi]
+          operands: [lo.toString(), hi.toString()]
         };
         const paramId = `age-param${this.ageNode.id}`;
         return {
