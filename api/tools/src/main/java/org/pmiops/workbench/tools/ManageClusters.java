@@ -79,7 +79,7 @@ public class ManageClusters {
       status = c.getStatus();
     }
     return String.format(
-        "%-30.30s %-50.50s %-10s %-15s", clusterId(c), creator, status, c.getCreatedDate());
+        "%-40.40s %-50.50s %-10s %-15s", clusterId(c), creator, status, c.getCreatedDate());
   }
 
   private static void listClusters(String apiUrl) throws IOException, ApiException {
