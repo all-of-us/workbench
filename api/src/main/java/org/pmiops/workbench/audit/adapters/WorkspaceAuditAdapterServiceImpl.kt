@@ -1,7 +1,6 @@
 package org.pmiops.workbench.audit.adapters
 
 import com.google.common.annotations.VisibleForTesting
-import com.google.common.collect.ImmutableList
 import java.time.Clock
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -35,7 +34,6 @@ constructor(
             val userEmail = userProvider.get().email
             val propertyValues = WorkspaceTargetProperty.getPropertyValuesByName(createdWorkspace)
             val timestamp = clock.millis()
-            // omit the previous value column
             val events = propertyValues.entries
                     .map { ActionAuditEvent(
                             actionId = actionId,
@@ -50,7 +48,6 @@ constructor(
                             newValueMaybe = it.value,
                             timestamp = timestamp)
                     }
-                    .toList()
             actionAuditService.send(events)
         } catch (e: RuntimeException) {
             logAndSwallow(e)
@@ -78,6 +75,7 @@ constructor(
                     agentId = userId,
                     targetType = TargetType.WORKSPACE,
                     timestamp = timestamp)
+
             actionAuditService.send(event)
         } catch (e: RuntimeException) {
             logAndSwallow(e)
@@ -97,6 +95,7 @@ constructor(
             val userId = userProvider.get().userId
             val userEmail = userProvider.get().email
             val timestamp = clock.millis()
+            // TODO(jaycarlton): consider grabbing source event properties as well
             val sourceEvent = ActionAuditEvent(
                     actionId = actionId,
                     agentEmailMaybe = userEmail,
@@ -107,10 +106,10 @@ constructor(
                     targetIdMaybe = sourceWorkspaceDbModel.workspaceId,
                     timestamp = timestamp
             )
-            val propertyValues = WorkspaceTargetProperty.getPropertyValuesByName(
+            val destinationPropertyValues = WorkspaceTargetProperty.getPropertyValuesByName(
                     WorkspaceConversionUtils.toApiWorkspace(destinationWorkspaceDbModel))
 
-            val destinationEvents: List<ActionAuditEvent> = propertyValues.entries
+            val destinationEvents: List<ActionAuditEvent> = destinationPropertyValues.entries
                     .map { ActionAuditEvent(
                             actionId = actionId,
                             agentEmailMaybe = userEmail,
@@ -123,7 +122,6 @@ constructor(
                             newValueMaybe = it.value,
                             timestamp = timestamp
                             ) }
-                    .toList()
 
             val allEvents = listOf(listOf(sourceEvent), destinationEvents).flatten()
             actionAuditService.send(allEvents)
@@ -171,18 +169,14 @@ constructor(
                             targetPropertyMaybe = AclTargetProperty.ACCESS_LEVEL.name,
                             newValueMaybe = it.value
                     ) }
-            val allEventsBuilder = ImmutableList.Builder<ActionAuditEvent>()
-            allEventsBuilder.add(workspaceTargetEvent)
-            allEventsBuilder.addAll(inviteeEvents)
-
-            actionAuditService.send(allEventsBuilder.build())
+            val allEvents = listOf(listOf(workspaceTargetEvent), inviteeEvents).flatten()
+            actionAuditService.send(allEvents)
         } catch (e: RuntimeException) {
             logAndSwallow(e)
         }
     }
 
     companion object {
-
         private val logger = Logger.getLogger(WorkspaceAuditAdapterServiceImpl::class.java.name)
     }
 }
