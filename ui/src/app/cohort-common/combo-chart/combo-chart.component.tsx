@@ -5,7 +5,6 @@ import * as React from 'react';
 
 import {getChartObj} from 'app/cohort-search/utils';
 import {ReactWrapperBase} from 'app/utils';
-import {currentWorkspaceStore} from 'app/utils/navigation';
 
 interface Props {
   mode: string;
@@ -80,14 +79,13 @@ export class ComboChart extends React.Component<Props, State> {
 
   getCategories() {
     const {data} = this.props;
-    const {cdrVersionId} = currentWorkspaceStore.getValue();
     const codeMap = {
       'M': 'Male',
       'F': 'Female',
       'No matching concept': 'Unknown'
     };
     return data.reduce((acc, datum) => {
-      const gender = +cdrVersionId < 3 ? codeMap[datum.gender] : datum.gender;
+      const gender = !!codeMap[datum.gender] ? codeMap[datum.gender] : datum.gender;
       const key = `${gender} ${datum.ageRange || 'Unknown'}`;
       if (!acc.includes(key)) {
         acc.push(key);
@@ -112,11 +110,7 @@ export class ComboChart extends React.Component<Props, State> {
   render() {
     const {options} = this.state;
     return <div style={{minHeight: 200}}>
-      {options && <HighchartsReact
-        highcharts={highCharts}
-        options={options}
-        callback={getChartObj}
-      />}
+      {options && <HighchartsReact highcharts={highCharts} options={options} callback={getChartObj} />}
     </div>;
   }
 }
