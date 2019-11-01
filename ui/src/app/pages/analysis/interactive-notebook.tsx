@@ -87,7 +87,6 @@ interface State {
 export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     private runClusterTimer: NodeJS.Timeout;
-    private userActivityDebouncer: Debouncer;
 
     constructor(props) {
       super(props);
@@ -107,7 +106,6 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
 
       workspacesApi().readOnlyNotebook(ns, wsid, nbName).then(html => {
         this.setState({html: html.html});
-        this.loadNotebookActivityTracker();
       });
 
       workspacesApi().getNotebookLockingMetadata(ns, wsid, nbName).then((resp) => {
@@ -118,27 +116,8 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       });
     }
 
-    loadNotebookActivityTracker() {
-      const frame = document.getElementById('notebook-frame') as HTMLFrameElement;
-      frame.addEventListener('load', () => {
-        this.userActivityDebouncer = debouncer(() => {
-          frame.contentWindow.parent.postMessage(INACTIVITY_CONFIG.MESSAGE_KEY, '*');
-        }, 1000);
-
-        INACTIVITY_CONFIG.TRACKED_EVENTS.forEach(eventName => {
-          window.addEventListener(eventName, this.userActivityDebouncer.invoke, false);
-        });
-      });
-    }
-
     componentWillUnmount(): void {
       clearTimeout(this.runClusterTimer);
-      if (this.userActivityDebouncer) {
-        clearInterval(this.userActivityDebouncer.getTimer());
-        INACTIVITY_CONFIG.TRACKED_EVENTS.forEach(eventName => {
-          window.removeEventListener(eventName, this.userActivityDebouncer.invoke, false);
-        });
-      }
     }
 
     private runCluster(onClusterReady: Function): void {

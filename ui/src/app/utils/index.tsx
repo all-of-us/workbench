@@ -406,15 +406,10 @@ export function sliceByHalfLength(obj) {
   return Math.ceil(obj.length / 2);
 }
 
-export interface Debouncer {
-  invoke: (e?: Event) => any;
-  getTimer: () => NodeJS.Timeout;
-}
-
 // Returns a function which will execute `action` at most once every `sensitivityMs` milliseconds
 // if the returned function has been invoked within the last `sensitivityMs` milliseconds
 // Example : debouncing user activity events to change rate of invocation from 1000/s to 1/s
-export function debouncer(action, sensitivityMs): Debouncer {
+export function debouncer(action, sensitivityMs) {
   let t = Date.now();
 
   const timer = setInterval(() => {
