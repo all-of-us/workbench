@@ -324,7 +324,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(opt.type)} - ${opt.name}`);
     if (!this.selections.includes(opt.parameterId)) {
       const wizard = this.wizard;
-      wizard.item.searchParameters.push(opt);
+      wizard.item.searchParameters.push({...opt, name: `${typeToTitle(opt.type)} - ${opt.name}`});
       const selections = [...this.selections, opt.parameterId];
       wizardStore.next(wizard);
       selectionsStore.next(selections);
@@ -336,5 +336,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     this.wizard.item.searchParameters.forEach(selection => {
       this.count += selection.count;
     });
+  }
+
+  get noSexData() {
+    return !this.loading && this.wizard.type === CriteriaType.SEX && this.nodes.length === 0;
   }
 }
