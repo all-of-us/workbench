@@ -166,7 +166,7 @@ def read_db_vars(gcc)
 end
 
 def format_benchmark(bm)
-  "%.2fs" % [bm.real]
+  "%ds" % [bm.real]
 end
 
 def dev_up()
@@ -220,7 +220,7 @@ def dev_up()
     common.status "Pushing configs complete (#{format_benchmark(bm)})"
 
   }
-  common.status "All dev-env setup steps complete (#{format_benchmark(overall_bm)})"
+  common.status "Total dev-env setup time: #{format_benchmark(overall_bm)}"
 
   common.status "Starting API server..."
   run_api()
