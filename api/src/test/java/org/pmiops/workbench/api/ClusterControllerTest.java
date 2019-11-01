@@ -348,7 +348,7 @@ public class ClusterControllerTest {
     assertThat(aouJson.getString("BILLING_CLOUD_PROJECT")).isEqualTo(BILLING_PROJECT_ID);
     assertThat(aouJson.getString("API_HOST")).isEqualTo(API_HOST);
     verify(userRecentResourceService, times(1))
-        .updateNotebookEntry(anyLong(), anyLong(), anyString(), any(Timestamp.class));
+        .updateNotebookEntry(anyLong(), anyLong(), anyString());
   }
 
   @Test

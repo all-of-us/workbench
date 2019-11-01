@@ -786,7 +786,7 @@ public class CohortReviewControllerTest {
     assertParticipantCohortStatuses(
         expectedReview1, page, pageSize, SortOrder.DESC, FilterColumns.STATUS);
     verify(userRecentResourceService)
-        .updateCohortEntry(anyLong(), anyLong(), anyLong(), any(Timestamp.class));
+        .updateCohortEntry(anyLong(), anyLong(), anyLong());
     assertParticipantCohortStatuses(
         expectedReview2, page, pageSize, SortOrder.DESC, FilterColumns.PARTICIPANTID);
     assertParticipantCohortStatuses(expectedReview3, null, null, null, FilterColumns.STATUS);

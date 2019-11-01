@@ -150,8 +150,7 @@ public class CohortsController implements CohortsApiDelegate {
       userRecentResourceService.updateCohortEntry(
           workspace.getWorkspaceId(),
           userProvider.get().getUserId(),
-          newCohort.getCohortId(),
-          newCohort.getLastModifiedTime());
+          newCohort.getCohortId());
     } catch (DataIntegrityViolationException e) {
       // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
       // client by Spring (the client gets a default reason string).
@@ -184,8 +183,7 @@ public class CohortsController implements CohortsApiDelegate {
       userRecentResourceService.updateCohortEntry(
           workspace.getWorkspaceId(),
           userProvider.get().getUserId(),
-          newCohort.getCohortId(),
-          new Timestamp(clock.instant().toEpochMilli()));
+          newCohort.getCohortId());
     } catch (Exception e) {
       throw new ServerErrorException(
           String.format(

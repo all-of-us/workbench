@@ -2159,7 +2159,7 @@ public class WorkspacesControllerTest {
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
     verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
+        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
@@ -2184,7 +2184,7 @@ public class WorkspacesControllerTest {
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
     verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
+        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
@@ -2222,7 +2222,7 @@ public class WorkspacesControllerTest {
 
     verify(userRecentResourceService)
         .updateNotebookEntry(
-            2l, 1l, "gs://workspace-bucket/notebooks/" + expectedNotebookName, NOW);
+            2l, 1l, "gs://workspace-bucket/notebooks/" + expectedNotebookName);
   }
 
   @Test
@@ -2371,7 +2371,7 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService)
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
+        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
   }
 
   @Test
