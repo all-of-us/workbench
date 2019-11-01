@@ -34,9 +34,6 @@ public abstract class RetryHandler<E extends Exception> {
       return retryTemplate.execute(retryCallback);
     } catch (RetryException retryException) {
       throw new ServerErrorException(retryException.getCause());
-    } catch (WorkbenchException workbenchException) {
-      // No need to convert here, just pass through.
-      throw workbenchException;
     } catch (Exception exception) {
       throw convertException((E) exception);
     }
