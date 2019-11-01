@@ -1339,6 +1339,7 @@ public class WorkspacesControllerTest {
         modWorkspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
+    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     mockBillingProjectBuffer("cloned-ns");
     Workspace cloned =
