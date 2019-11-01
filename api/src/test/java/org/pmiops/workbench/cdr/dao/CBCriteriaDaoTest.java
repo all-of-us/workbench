@@ -113,7 +113,6 @@ public class CBCriteriaDaoTest {
                 .domainId(DomainType.PERSON.toString())
                 .type(CriteriaType.RACE.toString())
                 .name("Race")
-                .standard(true)
                 .parentId(0));
     raceAsian =
         cbCriteriaDao.save(
@@ -121,7 +120,6 @@ public class CBCriteriaDaoTest {
                 .domainId(DomainType.PERSON.toString())
                 .type(CriteriaType.RACE.toString())
                 .name("Asian")
-                .standard(true)
                 .parentId(raceParent.getId()));
     raceWhite =
         cbCriteriaDao.save(
@@ -129,7 +127,6 @@ public class CBCriteriaDaoTest {
                 .domainId(DomainType.PERSON.toString())
                 .type(CriteriaType.RACE.toString())
                 .name("White")
-                .standard(true)
                 .parentId(raceParent.getId()));
   }
 
