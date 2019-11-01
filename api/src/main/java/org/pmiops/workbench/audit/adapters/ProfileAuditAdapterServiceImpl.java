@@ -5,7 +5,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.audit.ActionAuditEvent;
-import org.pmiops.workbench.audit.ActionAuditEventImpl;
 import org.pmiops.workbench.audit.ActionAuditService;
 import org.pmiops.workbench.audit.ActionType;
 import org.pmiops.workbench.audit.AgentType;
@@ -39,22 +38,24 @@ public class ProfileAuditAdapterServiceImpl implements ProfileAuditAdapterServic
   @Override
   public void fireUpdateAction(Profile previousProfile, Profile updatedProfile) {}
 
-  // Each user is assumed to have only one profile, but we shouldn't rely on
-  // the userProvider if the user is deleted.
+  // Each user is assumed to have only one profile, but we can't rely on
+  // the userProvider if the user is deleted before the profile.
   @Override
   public void fireDeleteAction(long userId, String userEmail) {
     try {
-      ActionAuditEvent deleteProfileEvent =
-          ActionAuditEventImpl.builder()
-              .setActionId(ActionAuditService.newActionId())
-              .setActionType(ActionType.DELETE)
-              .setAgentType(AgentType.USER)
-              .setAgentId(userId)
-              .setAgentEmail(userEmail)
-              .setTargetType(TargetType.PROFILE)
-              .setTargetId(userId)
-              .setTimestamp(clock.millis())
-              .build();
+      final ActionAuditEvent deleteProfileEvent =
+          new ActionAuditEvent(
+              clock.millis(),
+              AgentType.USER,
+              userId,
+              userEmail,
+              ActionAuditEvent.newActionId(),
+              ActionType.DELETE,
+              TargetType.PROFILE,
+              null,
+              userId,
+              null,
+              null);
       actionAuditService.send(deleteProfileEvent);
     } catch (RuntimeException e) {
       logAndSwallow(e);

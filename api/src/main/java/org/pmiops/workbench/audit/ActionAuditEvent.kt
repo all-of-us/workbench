@@ -17,6 +17,7 @@ class ActionAuditEvent(
 ) {
 
     companion object {
+        @JvmStatic
         fun newActionId(): String = randomUUID().toString()
     }
 }

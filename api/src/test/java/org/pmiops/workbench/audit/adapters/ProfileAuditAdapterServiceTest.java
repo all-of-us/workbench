@@ -51,15 +51,14 @@ public class ProfileAuditAdapterServiceTest {
     verify(mockActionAuditService).send(eventCaptor.capture());
     ActionAuditEvent eventSent = eventCaptor.getValue();
 
-    assertThat(eventSent.targetType()).isEqualTo(TargetType.PROFILE);
-    assertThat(eventSent.targetId().isPresent()).isTrue();
-    assertThat(eventSent.agentType()).isEqualTo(AgentType.USER);
-    assertThat(eventSent.agentId()).isEqualTo(USER_ID);
-    assertThat(eventSent.targetId().get()).isEqualTo(USER_ID);
-    assertThat(eventSent.actionType()).isEqualTo(ActionType.DELETE);
-    assertThat(eventSent.timestamp()).isEqualTo(Y2K_EPOCH_MILLIS);
-    assertThat(eventSent.targetProperty().isPresent()).isFalse();
-    assertThat(eventSent.newValue().isPresent()).isFalse();
-    assertThat(eventSent.previousValue().isPresent()).isFalse();
+    assertThat(eventSent.getTargetType()).isEqualTo(TargetType.PROFILE);
+    assertThat(eventSent.getAgentType()).isEqualTo(AgentType.USER);
+    assertThat(eventSent.getAgentId()).isEqualTo(USER_ID);
+    assertThat(eventSent.getTargetIdMaybe()).isEqualTo(USER_ID);
+    assertThat(eventSent.getActionType()).isEqualTo(ActionType.DELETE);
+    assertThat(eventSent.getTimestamp()).isEqualTo(Y2K_EPOCH_MILLIS);
+    assertThat(eventSent.getTargetPropertyMaybe()).isNull();
+    assertThat(eventSent.getNewValueMaybe()).isNull();
+    assertThat(eventSent.getPreviousValueMaybe()).isNull();
   }
 }
