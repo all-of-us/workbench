@@ -18,7 +18,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   private UserRecentResourceDao userRecentResourceDao;
 
   @Autowired
-  public UserRecentResourceServiceImpl(Clock clock,
+  public UserRecentResourceServiceImpl(
+      Clock clock,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
       UserRecentResourceDao userRecentResourceDao) {
@@ -37,15 +38,14 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public UserRecentResource updateNotebookEntry(
       long workspaceId, long userId, String notebookNameWithPath) {
-    Timestamp now =  new Timestamp(clock.instant().toEpochMilli());
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     UserRecentResource recentResource =
-        userRecentResourceDao
-            .findByUserIdAndWorkspaceIdAndNotebookName(userId, workspaceId, notebookNameWithPath);
+        userRecentResourceDao.findByUserIdAndWorkspaceIdAndNotebookName(
+            userId, workspaceId, notebookNameWithPath);
     if (recentResource == null) {
       handleUserLimit(userId);
-      recentResource =
-          new UserRecentResource(workspaceId, userId, notebookNameWithPath, now);
+      recentResource = new UserRecentResource(workspaceId, userId, notebookNameWithPath, now);
     }
     recentResource.setLastAccessDate(now);
     userRecentResourceDao.save(recentResource);
@@ -59,9 +59,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
    * entry
    */
   @Override
-  public void updateCohortEntry(
-      long workspaceId, long userId, long cohortId) {
-    Timestamp now =  new Timestamp(clock.instant().toEpochMilli());
+  public void updateCohortEntry(long workspaceId, long userId, long cohortId) {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     Cohort cohort = cohortDao.findOne(cohortId);
     UserRecentResource resource =
@@ -76,13 +75,13 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   }
 
   @Override
-  public void updateConceptSetEntry(
-      long workspaceId, long userId, long conceptSetId) {
-    Timestamp now =  new Timestamp(clock.instant().toEpochMilli());
+  public void updateConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     ConceptSet conceptSet = conceptSetDao.findOne(conceptSetId);
     UserRecentResource resource =
-        userRecentResourceDao.findByUserIdAndWorkspaceIdAndConceptSet(userId, workspaceId, conceptSet);
+        userRecentResourceDao.findByUserIdAndWorkspaceIdAndConceptSet(
+            userId, workspaceId, conceptSet);
     if (resource == null) {
       handleUserLimit(userId);
       resource = new UserRecentResource(workspaceId, userId, now);
@@ -96,7 +95,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public void deleteNotebookEntry(long workspaceId, long userId, String notebookPath) {
     UserRecentResource resource =
-        userRecentResourceDao.findByUserIdAndWorkspaceIdAndNotebookName(userId, workspaceId, notebookPath);
+        userRecentResourceDao.findByUserIdAndWorkspaceIdAndNotebookName(
+            userId, workspaceId, notebookPath);
     if (resource != null) {
       userRecentResourceDao.delete(resource);
     }
@@ -120,7 +120,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   private void handleUserLimit(long userId) {
     long count = userRecentResourceDao.countUserRecentResourceByUserId(userId);
     while (count-- >= USER_ENTRY_COUNT) {
-      UserRecentResource resource = userRecentResourceDao.findTopByUserIdOrderByLastAccessDate(userId);
+      UserRecentResource resource =
+          userRecentResourceDao.findTopByUserIdOrderByLastAccessDate(userId);
       userRecentResourceDao.delete(resource);
     }
   }

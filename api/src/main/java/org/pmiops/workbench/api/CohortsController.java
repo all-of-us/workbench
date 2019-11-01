@@ -148,9 +148,7 @@ public class CohortsController implements CohortsApiDelegate {
       // TODO Make this a pre-check within a transaction?
       newCohort = cohortDao.save(newCohort);
       userRecentResourceService.updateCohortEntry(
-          workspace.getWorkspaceId(),
-          userProvider.get().getUserId(),
-          newCohort.getCohortId());
+          workspace.getWorkspaceId(), userProvider.get().getUserId(), newCohort.getCohortId());
     } catch (DataIntegrityViolationException e) {
       // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
       // client by Spring (the client gets a default reason string).
@@ -181,9 +179,7 @@ public class CohortsController implements CohortsApiDelegate {
     try {
       newCohort = cohortDao.save(newCohort);
       userRecentResourceService.updateCohortEntry(
-          workspace.getWorkspaceId(),
-          userProvider.get().getUserId(),
-          newCohort.getCohortId());
+          workspace.getWorkspaceId(), userProvider.get().getUserId(), newCohort.getCohortId());
     } catch (Exception e) {
       throw new ServerErrorException(
           String.format(

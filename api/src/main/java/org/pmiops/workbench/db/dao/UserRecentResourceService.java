@@ -12,11 +12,9 @@ public interface UserRecentResourceService {
   UserRecentResource updateNotebookEntry(
       long workspaceId, long userId, String notebookNameWithPath);
 
-  void updateCohortEntry(
-      long workspaceId, long userId, long cohortId);
+  void updateCohortEntry(long workspaceId, long userId, long cohortId);
 
-  void updateConceptSetEntry(
-      long workspaceId, long userId, long conceptSetId);
+  void updateConceptSetEntry(long workspaceId, long userId, long conceptSetId);
 
   void deleteNotebookEntry(long workspaceId, long userId, String notebookName);
 
