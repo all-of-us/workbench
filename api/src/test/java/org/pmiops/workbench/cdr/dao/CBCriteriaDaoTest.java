@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.CBCriteria;
+import org.pmiops.workbench.cdr.model.MenuOption;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
@@ -111,6 +112,7 @@ public class CBCriteriaDaoTest {
                 .domainId(DomainType.PERSON.toString())
                 .type(CriteriaType.RACE.toString())
                 .name("Race")
+                .standard(true)
                 .parentId(0));
     raceAsian =
         cbCriteriaDao.save(
@@ -118,6 +120,7 @@ public class CBCriteriaDaoTest {
                 .domainId(DomainType.PERSON.toString())
                 .type(CriteriaType.RACE.toString())
                 .name("Asian")
+                .standard(true)
                 .parentId(raceParent.getId()));
     raceWhite =
         cbCriteriaDao.save(
@@ -125,6 +128,7 @@ public class CBCriteriaDaoTest {
                 .domainId(DomainType.PERSON.toString())
                 .type(CriteriaType.RACE.toString())
                 .name("White")
+                .standard(true)
                 .parentId(raceParent.getId()));
   }
 
@@ -295,5 +299,27 @@ public class CBCriteriaDaoTest {
     assertEquals(2, criteriaList.size());
     assertEquals(raceWhite, criteriaList.get(0));
     assertEquals(raceAsian, criteriaList.get(1));
+  }
+
+  @Test
+  public void findMenuOptionParents() throws Exception {
+    List<MenuOption> options = cbCriteriaDao.findMenuOptionParents();
+    assertEquals(4, options.size());
+
+    MenuOption option = options.get(0);
+    assertEquals(DomainType.CONDITION.toString(), option.getDomain());
+    assertEquals("Conditions", option.getDomainName());
+
+    option = options.get(1);
+    assertEquals(DomainType.MEASUREMENT.toString(), option.getDomain());
+    assertEquals("Measurements", option.getDomainName());
+
+    option = options.get(2);
+    assertEquals(DomainType.PERSON.toString(), option.getDomain());
+    assertEquals("Demographics", option.getDomainName());
+
+    option = options.get(3);
+    assertEquals(DomainType.SURVEY.toString(), option.getDomain());
+    assertEquals("Surveys", option.getDomainName());
   }
 }

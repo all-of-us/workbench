@@ -3,6 +3,7 @@ package org.pmiops.workbench.cdr.dao;
 import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.cdr.model.CBCriteria;
+import org.pmiops.workbench.cdr.model.MenuOption;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -229,4 +230,35 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
       @Param("type") String type,
       @Param("parentId") Long parentId,
       Sort sort);
+
+  @Query(
+      value =
+          "select domain_id as domain, "
+              + "case when domain_id = 'CONDITION' then 'Conditions' "
+              + "when domain_id = 'DRUG' then 'Drugs' "
+              + "when domain_id = 'MEASUREMENT' then 'Measurements' "
+              + "when domain_id = 'PERSON' then 'Demographics' "
+              + "when domain_id = 'PHYSICAL_MEASUREMENT' then 'Physical Measurements' "
+              + "when domain_id = 'PROCEDURE' then 'Procedures' "
+              + "when domain_id = 'SURVEY' then 'Surveys' "
+              + "when domain_id = 'VISIT' then 'Visits' "
+              + "else null end as domainName, "
+              + "case when domain_id = 'CONDITION' then null "
+              + "when domain_id = 'PROCEDURE' then null "
+              + "when domain_id = 'DRUG' then null "
+              + "when domain_id = 'MEASUREMENT' then null "
+              + "else type end as domainType, "
+              + "case when type = 'AGE' then 'Current Age/Deceased' "
+              + "when type = 'DECEASED' then 'Current Age/Deceased' "
+              + "when type = 'GENDER' then 'Gender' "
+              + "when type = 'SEX' then 'Sex' "
+              + "when type = 'RACE' then 'Race' "
+              + "when type = 'ETHNICITY' then 'Ethnicity' "
+              + "else null end as domainTypeName "
+              + "from cb_criteria "
+              + "where parent_id = 0 "
+              + "group by domain, domainType, domainTypeName "
+              + "order by domain",
+      nativeQuery = true)
+  List<MenuOption> findMenuOption();
 }
