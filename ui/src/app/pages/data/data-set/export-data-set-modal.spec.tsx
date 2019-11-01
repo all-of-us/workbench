@@ -1,10 +1,10 @@
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {mount} from 'enzyme';
 import {DataSet, DataSetApi, PrePackagedConceptSetEnum, WorkspacesApi} from 'generated/fetch/api';
-import {WorkspacesApiStub} from "../../../../testing/stubs/workspaces-api-stub";
-import {DataSetApiStub} from "../../../../testing/stubs/data-set-api-stub";
-import {registerApiClient} from "../../../services/swagger-fetch-clients";
-import {mount} from "enzyme";
-import * as React from "react";
-import {ExportDataSetModal} from "./export-data-set-modal";
+import * as React from 'react';
+import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {ExportDataSetModal} from './export-data-set-modal';
 
 const workspaceNamespace = 'workspaceNamespace';
 const workspaceFirecloudName = 'workspaceId';
