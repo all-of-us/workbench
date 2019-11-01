@@ -67,19 +67,6 @@ class ActionAuditServiceTest {
                 newValueMaybe = "shod",
                 timestamp = System.currentTimeMillis()
         )
-//        event2 = ActionAuditEventImpl.Builder()
-//                .setAgentEmail("f@b.co")
-//                .setTargetType(TargetType.DATASET)
-//                .setTargetId(2L)
-//                .setAgentType(AgentType.USER)
-//                .setAgentId(AGENT_ID_2)
-//                .setActionId(actionId)
-//                .setActionType(ActionType.EDIT)
-//                .setTargetProperty("height")
-//                .setPreviousValue("yay high")
-//                .setNewValue("about that tall")
-//                .setTimestamp(System.currentTimeMillis())
-//                .build()
         event2 = ActionAuditEvent(
                 agentEmailMaybe = "f@b.co",
                 targetType = TargetType.DATASET,
@@ -158,7 +145,7 @@ class ActionAuditServiceTest {
 
     companion object {
 
-        private val AGENT_ID_1 = 101L
-        private val AGENT_ID_2 = 102L
+        private const val AGENT_ID_1 = 101L
+        private const val AGENT_ID_2 = 102L
     }
 }
