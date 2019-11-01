@@ -74,6 +74,7 @@ constructor(
                     agentType = AgentType.USER,
                     agentId = userId,
                     targetType = TargetType.WORKSPACE,
+                    targetIdMaybe = dbWorkspace.workspaceId,
                     timestamp = timestamp)
 
             actionAuditService.send(event)
