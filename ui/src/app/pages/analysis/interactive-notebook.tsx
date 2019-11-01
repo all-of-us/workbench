@@ -13,7 +13,7 @@ import {INACTIVITY_CONFIG} from 'app/pages/signed-in/component';
 import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {debouncer, Debouncer, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {debouncer, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
