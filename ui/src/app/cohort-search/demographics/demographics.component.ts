@@ -324,7 +324,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(opt.type)} - ${opt.name}`);
     if (!this.selections.includes(opt.parameterId)) {
       const wizard = this.wizard;
-      wizard.item.searchParameters.push(opt);
+      wizard.item.searchParameters.push({...opt, name: `${typeToTitle(opt.type)} - ${opt.name}`});
       const selections = [...this.selections, opt.parameterId];
       wizardStore.next(wizard);
       selectionsStore.next(selections);

@@ -13,19 +13,7 @@ import {
 import {idsInUse} from './search-state.service';
 
 export function typeDisplay(parameter): string {
-  const {domainId, type} = parameter;
-  if (domainId === DomainType.PERSON) {
-    return {
-      'GENDER': 'Gender Identity',
-      'SEX': 'Sex Assigned at Birth',
-      'RACE': 'Race',
-      'ETHNICITY': 'Ethnicity',
-      'AGE': 'Age',
-      'DECEASED': 'Deceased'
-    }[type] || '';
-  } else if (
-      [DomainType.CONDITION, DomainType.PROCEDURE, DomainType.MEASUREMENT].includes(domainId)
-  ) {
+  if ([DomainType.CONDITION, DomainType.PROCEDURE, DomainType.MEASUREMENT].includes(parameter.domainId)) {
     return parameter.code;
   }
 }
