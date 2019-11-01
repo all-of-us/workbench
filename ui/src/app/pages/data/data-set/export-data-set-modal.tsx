@@ -82,15 +82,22 @@ class ExportDataSetModal extends React.Component<
     }
   }
 
-  async generateQuery() {
-    const {dataSet, workspaceNamespace, workspaceFirecloudName} = this.props;
-    const dataSetRequest: DataSetRequest = {
+  get datasetRequest() {
+    const {dataSet} = this.props;
+    return {
       name: dataSet.name,
+      includesAllParticipants: dataSet.includesAllParticipants,
+      description: dataSet.description,
       conceptSetIds: dataSet.conceptSets.map(cs => cs.id),
       cohortIds: dataSet.cohorts.map(c => c.id),
       domainValuePairs: dataSet.domainValuePairs,
-      includesAllParticipants: dataSet.includesAllParticipants,
-    };
+      prePackagedConceptSet: dataSet.prePackagedConceptSet
+    } as DataSetRequest;
+  }
+
+  async generateQuery() {
+    const {workspaceNamespace, workspaceFirecloudName} = this.props;
+    const dataSetRequest = this.datasetRequest;
     dataSetApi().generateCode(
       workspaceNamespace,
       workspaceFirecloudName,
@@ -110,15 +117,8 @@ class ExportDataSetModal extends React.Component<
 
   async exportDataSet() {
     this.setState({loading: true});
-    const {dataSet, workspaceNamespace, workspaceFirecloudName} = this.props;
-    const request: DataSetRequest = {
-      name: dataSet.name,
-      includesAllParticipants: dataSet.includesAllParticipants,
-      description: dataSet.description,
-      conceptSetIds: dataSet.conceptSets.map(cs => cs.id),
-      cohortIds: dataSet.cohorts.map(c => c.id),
-      domainValuePairs: dataSet.domainValuePairs
-    };
+    const {workspaceNamespace, workspaceFirecloudName} = this.props;
+    const request = this.datasetRequest;
     try {
       await dataSetApi().exportToNotebook(
         workspaceNamespace, workspaceFirecloudName,
