@@ -16,7 +16,8 @@ export function typeDisplay(parameter): string {
   const {domainId, type} = parameter;
   if (domainId === DomainType.PERSON) {
     return {
-      'GENDER': 'Gender',
+      'GENDER': 'Gender Identity',
+      'SEX': 'Sex Assigned at Birth',
       'RACE': 'Race',
       'ETHNICITY': 'Ethnicity',
       'AGE': 'Age',
@@ -114,10 +115,13 @@ export function typeToTitle(_type: string): string {
       _type = 'Ethnicity';
       break;
     case CriteriaType[CriteriaType.GENDER]:
-      _type = 'Gender';
+      _type = 'Gender Identity';
       break;
     case CriteriaType[CriteriaType.RACE]:
       _type = 'Race';
+      break;
+    case CriteriaType[CriteriaType.SEX]:
+      _type = 'Sex Assigned at Birth';
       break;
   }
   return _type;

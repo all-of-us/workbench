@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {MODIFIERS_MAP} from 'app/cohort-search/constant';
 import {encountersStore, initExisting, searchRequestStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {domainToTitle, getTypeAndStandard, mapGroupItem} from 'app/cohort-search/utils';
+import {domainToTitle, getTypeAndStandard, mapGroupItem, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
@@ -274,6 +274,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
       const {item: {modifiers, searchParameters, type}} = this.props;
       const {count, paramListOpen, error, loading, status} = this.state;
       const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
+      const titleDisplay = type === DomainType.PERSON ? typeToTitle(searchParameters[0].type) : domainToTitle(type);
       const showCount = !loading && status !== 'hidden' && count !== null;
       const actionItems = [
         {label: 'Edit criteria', command: () => this.launchWizard()},
@@ -289,7 +290,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
               <ClrIcon shape='ellipsis-vertical' />
             </Clickable>
             <span className='item-title' style={{...styles.codeText, paddingRight: '10px'}} onClick={() => this.launchWizard()}>
-              Contains {domainToTitle(type)} {codeDisplay}
+              Contains {titleDisplay} {codeDisplay}
             </span>
             {status !== 'hidden' && <span style={{...styles.codeText, paddingRight: '10px'}}>|</span>}
             {loading && <span className='spinner spinner-inline'>Loading...</span>}
