@@ -337,4 +337,8 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       this.count += selection.count;
     });
   }
+
+  get noSexData() {
+    return !this.loading && this.wizard.type === CriteriaType.SEX && this.nodes.length === 0;
+  }
 }
