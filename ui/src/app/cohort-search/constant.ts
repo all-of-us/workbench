@@ -4,8 +4,8 @@ export const LIST_PROGRAM_TYPES = [
   {
     name: 'Demographics', domain: DomainType.PERSON, children: [
       {name: 'Current Age/Deceased', domain: DomainType.PERSON, type: CriteriaType.AGE},
-      {name: 'Gender', domain: DomainType.PERSON, type: CriteriaType.GENDER},
-      {name: 'Sex', domain: DomainType.PERSON, type: CriteriaType.SEX},
+      {name: 'Gender Identity', domain: DomainType.PERSON, type: CriteriaType.GENDER},
+      {name: 'Sex Assigned at Birth', domain: DomainType.PERSON, type: CriteriaType.SEX},
       {name: 'Race', domain: DomainType.PERSON, type: CriteriaType.RACE},
       {name: 'Ethnicity', domain: DomainType.PERSON, type: CriteriaType.ETHNICITY},
     ]
