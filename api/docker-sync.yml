@@ -51,7 +51,7 @@ syncs:
 
     # optional, a list of excludes. These patterns will not be synced
     # see http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html#ignore for the possible syntax and see sync_excludes_type below
-    # sync_excludes: ['Gemfile.lock', 'Gemfile', 'config.rb', '.sass-cache', 'sass', 'sass-cache', 'composer.json' , 'bower.json', 'package.json', 'Gruntfile*', 'bower_components', 'node_modules', '.gitignore', '.git', '*.coffee', '*.scss', '*.sass']
+    sync_excludes: ['node_modules', '.gradle', '.idea', 'tsc-app', 'tsc-out', 'api/build', 'api/out', 'common-api/build', 'common-api/out']
 
     # use this to change the exclude syntax.
     # Path: you match the exact path ( nesting problem )
@@ -83,7 +83,7 @@ syncs:
 
     # optional, a list of regular expressions to exclude from the fswatch - see fswatch docs for details
     # IMPORTANT: this is not supported by native_osx
-    watch_excludes: ['.*/.git', '.*/node_modules', '.*/bower_components', '.*/sass-cache', '.*/.sass-cache', '.*/.sass-cache', '.coffee', '.scss', '.sass', '.gitignore']
+    # watch_excludes: ['.*/.git', '.*/node_modules', '.*/bower_components', '.*/sass-cache', '.*/.sass-cache', '.*/.sass-cache', '.coffee', '.scss', '.sass', '.gitignore']
 
     # optional: use this to switch to fswatch verbose mode
     # watch_args: '-v'
