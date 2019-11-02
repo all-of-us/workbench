@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,18 +46,18 @@ public class ConceptSetServiceTest {
 
   @Test
   public void testCloneConceptSetWithNoCdrVersionChange() {
-    ConceptSet fromConceptSet = mockConceptSet();
-    ConceptSet copiedConceptSet =
+    DbConceptSet fromConceptSet = mockConceptSet();
+    DbConceptSet copiedConceptSet =
         conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, workspace, false);
     assertNotNull(copiedConceptSet);
     assertEquals(copiedConceptSet.getConceptIds().size(), 5);
     assertEquals(copiedConceptSet.getWorkspaceId(), workspace.getWorkspaceId());
   }
 
-  private ConceptSet mockConceptSet() {
+  private DbConceptSet mockConceptSet() {
     Set conceptIdsSet = Stream.of(1, 2, 3, 4, 5).collect(Collectors.toCollection(HashSet::new));
 
-    ConceptSet conceptSet = new ConceptSet();
+    DbConceptSet conceptSet = new DbConceptSet();
     conceptSet.setConceptIds(conceptIdsSet);
     conceptSet.setConceptSetId(1);
     conceptSet.setName("Mock Concept Set");

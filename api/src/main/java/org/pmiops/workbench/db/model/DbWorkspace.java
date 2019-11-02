@@ -83,7 +83,7 @@ public class DbWorkspace {
   private Timestamp lastModifiedTime;
   private Timestamp lastAccessedTime;
   private Set<DbCohort> cohorts = new HashSet<>();
-  private Set<ConceptSet> conceptSets = new HashSet<>();
+  private Set<DbConceptSet> conceptSets = new HashSet<>();
   private Set<DataSet> dataSets = new HashSet<>();
   private Short activeStatus;
   private Short billingMigrationStatus =
@@ -478,11 +478,11 @@ public class DbWorkspace {
   }
 
   @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
-  public Set<ConceptSet> getConceptSets() {
+  public Set<DbConceptSet> getConceptSets() {
     return conceptSets;
   }
 
-  public void setConceptSets(Set<ConceptSet> conceptSets) {
+  public void setConceptSets(Set<DbConceptSet> conceptSets) {
     this.conceptSets = conceptSets;
   }
 

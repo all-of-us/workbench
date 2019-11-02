@@ -44,6 +44,7 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DataSetValue;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -233,7 +234,7 @@ public class DataSetController implements DataSetApiDelegate {
         }
       };
 
-  private ConceptSet toClientConceptSet(org.pmiops.workbench.db.model.ConceptSet conceptSet) {
+  private ConceptSet toClientConceptSet(DbConceptSet conceptSet) {
     ConceptSet result = ConceptSetsController.TO_CLIENT_CONCEPT_SET.apply(conceptSet);
     if (!conceptSet.getConceptIds().isEmpty()) {
       Iterable<org.pmiops.workbench.cdr.model.Concept> concepts =

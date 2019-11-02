@@ -25,7 +25,7 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl.QueryAndParameters;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
@@ -111,8 +111,8 @@ public class DataSetServiceTest {
     return cohortDbModel;
   }
 
-  private ConceptSet buildConceptSet(long conceptSetId, Domain domain, Set<Long> conceptIds) {
-    ConceptSet result = new ConceptSet();
+  private DbConceptSet buildConceptSet(long conceptSetId, Domain domain, Set<Long> conceptIds) {
+    DbConceptSet result = new DbConceptSet();
     result.setConceptSetId(conceptSetId);
     result.setDomain(domainToStorage(domain));
     result.setConceptIds(conceptIds);
@@ -142,7 +142,7 @@ public class DataSetServiceTest {
 
   @Test
   public void testRejectsConceptSetListWithNoConcepts() {
-    final ConceptSet conceptSet1 = new ConceptSet();
+    final DbConceptSet conceptSet1 = new DbConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet1.setConceptIds(Collections.emptySet());
     final boolean isValid =
@@ -153,11 +153,11 @@ public class DataSetServiceTest {
 
   @Test
   public void testAcceptsTwoDomainsWithConcepts() {
-    final ConceptSet conceptSet1 = new ConceptSet();
+    final DbConceptSet conceptSet1 = new DbConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet1.setConceptIds(ImmutableSet.of(1L, 2L, 3L));
 
-    final ConceptSet conceptSet2 = new ConceptSet();
+    final DbConceptSet conceptSet2 = new DbConceptSet();
     conceptSet2.setDomain((short) Domain.PERSON.ordinal());
     conceptSet2.setConceptIds(ImmutableSet.of(4L, 5L, 6L));
 
@@ -169,15 +169,15 @@ public class DataSetServiceTest {
 
   @Test
   public void testRejectsSomeDomainsWithConceptsSomeWithout() {
-    final ConceptSet conceptSet1 = new ConceptSet();
+    final DbConceptSet conceptSet1 = new DbConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet1.setConceptIds(ImmutableSet.of(1L, 2L, 3L));
 
-    final ConceptSet conceptSet2 = new ConceptSet();
+    final DbConceptSet conceptSet2 = new DbConceptSet();
     conceptSet2.setDomain((short) Domain.PERSON.ordinal());
     conceptSet2.setConceptIds(ImmutableSet.of(4L, 5L, 6L));
 
-    final ConceptSet conceptSet3 = new ConceptSet();
+    final DbConceptSet conceptSet3 = new DbConceptSet();
     conceptSet3.setDomain((short) Domain.DRUG.ordinal());
     conceptSet3.setConceptIds(Collections.emptySet());
 
@@ -189,15 +189,15 @@ public class DataSetServiceTest {
 
   @Test
   public void testAcceptsEmptyConceptSetIfDomainIsPopulated() {
-    final ConceptSet conceptSet1 = new ConceptSet();
+    final DbConceptSet conceptSet1 = new DbConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet1.setConceptIds(ImmutableSet.of(1L, 2L, 3L));
 
-    final ConceptSet conceptSet2 = new ConceptSet();
+    final DbConceptSet conceptSet2 = new DbConceptSet();
     conceptSet2.setDomain((short) Domain.PERSON.ordinal());
     conceptSet2.setConceptIds(ImmutableSet.of(4L, 5L, 6L));
 
-    final ConceptSet conceptSet3 = new ConceptSet();
+    final DbConceptSet conceptSet3 = new DbConceptSet();
     conceptSet3.setDomain((short) Domain.DEVICE.ordinal());
     conceptSet3.setConceptIds(Collections.emptySet());
 
@@ -218,8 +218,8 @@ public class DataSetServiceTest {
   @Test
   public void testBuildConceptIdListClause_same() {
     Domain domain1 = Domain.CONDITION;
-    ConceptSet conceptSet1 = buildConceptSet(1L, domain1, ImmutableSet.of(1L, 2L, 3L));
-    ConceptSet conceptSet2 = buildConceptSet(2L, domain1, ImmutableSet.of(4L, 5L, 6L));
+    DbConceptSet conceptSet1 = buildConceptSet(1L, domain1, ImmutableSet.of(1L, 2L, 3L));
+    DbConceptSet conceptSet2 = buildConceptSet(2L, domain1, ImmutableSet.of(4L, 5L, 6L));
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
             domain1, ImmutableList.of(conceptSet1, conceptSet2));
@@ -229,8 +229,8 @@ public class DataSetServiceTest {
 
   @Test
   public void testBuildConceptIdListClause_differentDomains() {
-    ConceptSet conceptSet1 = buildConceptSet(1L, Domain.CONDITION, ImmutableSet.of(1L, 2L, 3L));
-    ConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, ImmutableSet.of(4L, 5L, 6L));
+    DbConceptSet conceptSet1 = buildConceptSet(1L, Domain.CONDITION, ImmutableSet.of(1L, 2L, 3L));
+    DbConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, ImmutableSet.of(4L, 5L, 6L));
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
             Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
@@ -240,8 +240,8 @@ public class DataSetServiceTest {
 
   @Test
   public void testBuildConceptIdListClause_noClauseForPersonDomain() {
-    ConceptSet conceptSet1 = buildConceptSet(1L, Domain.CONDITION, ImmutableSet.of(1L, 2L, 3L));
-    ConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, ImmutableSet.of(4L, 5L, 6L));
+    DbConceptSet conceptSet1 = buildConceptSet(1L, Domain.CONDITION, ImmutableSet.of(1L, 2L, 3L));
+    DbConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, ImmutableSet.of(4L, 5L, 6L));
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
             Domain.PERSON, ImmutableList.of(conceptSet1, conceptSet2));

@@ -27,7 +27,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.StorageEnums;
@@ -407,7 +407,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
           cohortCloningService.cloneCohortAndReviews(fromCohort, to).getCohortId());
     }
     Map<Long, Long> fromConceptSetIdToToConceptSetId = new HashMap<>();
-    for (ConceptSet fromConceptSet : conceptSetService.getConceptSets(from)) {
+    for (DbConceptSet fromConceptSet : conceptSetService.getConceptSets(from)) {
       fromConceptSetIdToToConceptSetId.put(
           fromConceptSet.getConceptSetId(),
           conceptSetService

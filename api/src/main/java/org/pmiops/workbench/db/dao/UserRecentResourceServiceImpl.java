@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
 import java.util.List;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -91,7 +91,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   @Override
   public void updateConceptSetEntry(
       long workspaceId, long userId, long conceptSetId, Timestamp lastAccessDateTime) {
-    ConceptSet conceptSet = conceptSetDao.findOne(conceptSetId);
+    DbConceptSet conceptSet = conceptSetDao.findOne(conceptSetId);
     UserRecentResource resource =
         getDao().findByUserIdAndWorkspaceIdAndConceptSet(userId, workspaceId, conceptSet);
     if (resource == null) {

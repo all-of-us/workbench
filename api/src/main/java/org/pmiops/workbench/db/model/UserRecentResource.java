@@ -19,7 +19,7 @@ public class UserRecentResource {
   private Long userId;
   private Long workspaceId;
   private DbCohort cohort;
-  private ConceptSet conceptSet;
+  private DbConceptSet conceptSet;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -84,11 +84,11 @@ public class UserRecentResource {
 
   @ManyToOne
   @JoinColumn(name = "concept_set_id")
-  public ConceptSet getConceptSet() {
+  public DbConceptSet getConceptSet() {
     return conceptSet;
   }
 
-  public void setConceptSet(ConceptSet conceptSet) {
+  public void setConceptSet(DbConceptSet conceptSet) {
     this.conceptSet = conceptSet;
   }
 

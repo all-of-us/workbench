@@ -89,6 +89,7 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
@@ -1286,8 +1287,8 @@ public class WorkspacesControllerTest {
 
     final String expectedConceptSetName = "cs1";
     final String expectedConceptSetDescription = "d1";
-    org.pmiops.workbench.db.model.ConceptSet originalConceptSet =
-        new org.pmiops.workbench.db.model.ConceptSet();
+    DbConceptSet originalConceptSet =
+        new DbConceptSet();
     originalConceptSet.setName(expectedConceptSetName);
     originalConceptSet.setDescription(expectedConceptSetDescription);
     originalConceptSet.setDomainEnum(Domain.CONDITION);
@@ -1362,7 +1363,7 @@ public class WorkspacesControllerTest {
     assertThat(dataSets.get(0).getName()).isEqualTo(expectedDatasetName);
     assertThat(dataSets.get(0).getDataSetId()).isNotEqualTo(originalDataSet.getDataSetId());
 
-    List<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
+    List<DbConceptSet> conceptSets =
         dataSetService.getConceptSetsForDataset(dataSets.get(0));
     assertThat(conceptSets).hasSize(1);
     assertThat(conceptSets.get(0).getName()).isEqualTo(expectedConceptSetName);

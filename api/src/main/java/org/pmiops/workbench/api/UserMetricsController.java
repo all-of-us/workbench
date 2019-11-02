@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -85,11 +86,11 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         }
       };
 
-  private static final Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>
+  private static final Function<DbConceptSet, ConceptSet>
       TO_CLIENT_CONCEPT_SET =
-          new Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>() {
+          new Function<DbConceptSet, ConceptSet>() {
             @Override
-            public ConceptSet apply(org.pmiops.workbench.db.model.ConceptSet conceptSet) {
+            public ConceptSet apply(DbConceptSet conceptSet) {
               if (conceptSet == null) {
                 return null;
               }

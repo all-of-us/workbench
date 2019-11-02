@@ -16,7 +16,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
@@ -62,7 +62,7 @@ public class UserRecentResourceServiceTest {
     DbCohort cohort = new DbCohort();
     cohort.setWorkspaceId(workspaceId);
     cohortId = cohortDao.save(cohort).getCohortId();
-    ConceptSet conceptSet = new ConceptSet();
+    DbConceptSet conceptSet = new DbConceptSet();
     conceptSet.setWorkspaceId(workspaceId);
     conceptSetId = conceptSetDao.save(conceptSet).getConceptSetId();
     userRecentResourceService = new UserRecentResourceServiceImpl();
@@ -93,7 +93,7 @@ public class UserRecentResourceServiceTest {
         workspaceId, userId, conceptSetId, new Timestamp(clock.millis()));
     long rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, 1);
-    ConceptSet conceptSet = new ConceptSet();
+    DbConceptSet conceptSet = new DbConceptSet();
     conceptSet.setWorkspaceId(workspaceId);
     conceptSetId = conceptSetDao.save(conceptSet).getConceptSetId();
     userRecentResourceService.updateConceptSetEntry(

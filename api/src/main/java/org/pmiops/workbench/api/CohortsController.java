@@ -22,7 +22,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbCohortReview;
-import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
@@ -287,7 +287,7 @@ public class CohortsController implements CohortsApiDelegate {
   private Set<Long> getConceptIds(DbWorkspace workspace, TableQuery tableQuery) {
     String conceptSetName = tableQuery.getConceptSetName();
     if (conceptSetName != null) {
-      ConceptSet conceptSet =
+      DbConceptSet conceptSet =
           conceptSetDao.findConceptSetByNameAndWorkspaceId(
               conceptSetName, workspace.getWorkspaceId());
       if (conceptSet == null) {

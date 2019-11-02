@@ -21,6 +21,7 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -60,11 +61,11 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   @VisibleForTesting int maxConceptsPerSet;
 
-  static final Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>
+  static final Function<DbConceptSet, ConceptSet>
       TO_CLIENT_CONCEPT_SET =
-          new Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>() {
+          new Function<DbConceptSet, ConceptSet>() {
             @Override
-            public ConceptSet apply(org.pmiops.workbench.db.model.ConceptSet conceptSet) {
+            public ConceptSet apply(DbConceptSet conceptSet) {
               ConceptSet result =
                   new ConceptSet()
                       .etag(Etags.fromVersion(conceptSet.getVersion()))
@@ -83,13 +84,13 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
             }
           };
 
-  private static final Function<ConceptSet, org.pmiops.workbench.db.model.ConceptSet>
+  private static final Function<ConceptSet, DbConceptSet>
       FROM_CLIENT_CONCEPT_SET =
-          new Function<ConceptSet, org.pmiops.workbench.db.model.ConceptSet>() {
+          new Function<ConceptSet, DbConceptSet>() {
             @Override
-            public org.pmiops.workbench.db.model.ConceptSet apply(ConceptSet conceptSet) {
-              org.pmiops.workbench.db.model.ConceptSet dbConceptSet =
-                  new org.pmiops.workbench.db.model.ConceptSet();
+            public DbConceptSet apply(ConceptSet conceptSet) {
+              DbConceptSet dbConceptSet =
+                  new DbConceptSet();
               dbConceptSet.setDomainEnum(conceptSet.getDomain());
               if (conceptSet.getSurvey() != null) {
                 dbConceptSet.setSurveysEnum(conceptSet.getSurvey());
@@ -143,7 +144,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (request.getAddedIds() == null || request.getAddedIds().size() == 0) {
       throw new BadRequestException("Cannot create a concept set with no concepts");
     }
-    org.pmiops.workbench.db.model.ConceptSet dbConceptSet =
+    DbConceptSet dbConceptSet =
         FROM_CLIENT_CONCEPT_SET.apply(request.getConceptSet());
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbConceptSet.setCreator(userProvider.get());
@@ -179,7 +180,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     return ResponseEntity.ok(toClientConceptSet(dbConceptSet));
   }
 
-  private ConceptSet toClientConceptSet(org.pmiops.workbench.db.model.ConceptSet conceptSet) {
+  private ConceptSet toClientConceptSet(DbConceptSet conceptSet) {
     ConceptSet result = TO_CLIENT_CONCEPT_SET.apply(conceptSet);
     if (!conceptSet.getConceptIds().isEmpty()) {
       Iterable<org.pmiops.workbench.cdr.model.Concept> concepts =
@@ -196,7 +197,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteConceptSet(
       String workspaceNamespace, String workspaceId, Long conceptSetId) {
-    org.pmiops.workbench.db.model.ConceptSet conceptSet =
+    DbConceptSet conceptSet =
         getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.WRITER);
     conceptSetDao.delete(conceptSet.getConceptSetId());
     return ResponseEntity.ok(new EmptyResponse());
@@ -205,7 +206,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   @Override
   public ResponseEntity<ConceptSet> getConceptSet(
       String workspaceNamespace, String workspaceId, Long conceptSetId) {
-    org.pmiops.workbench.db.model.ConceptSet conceptSet =
+    DbConceptSet conceptSet =
         getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(toClientConceptSet(conceptSet));
   }
@@ -217,7 +218,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    List<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
+    List<DbConceptSet> conceptSets =
         conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
     ConceptSetListResponse response = new ConceptSetListResponse();
     // Concept sets in the list response will *not* have concepts under them, as this could be
@@ -238,7 +239,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     short surveyId =
         CommonStorageEnums.surveysToStorage(Surveys.fromValue(surveyName.toUpperCase()));
-    List<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
+    List<DbConceptSet> conceptSets =
         conceptSetDao.findByWorkspaceIdAndSurvey(workspace.getWorkspaceId(), surveyId);
     ConceptSetListResponse response = new ConceptSetListResponse();
     response.setItems(
@@ -252,7 +253,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   @Override
   public ResponseEntity<ConceptSet> updateConceptSet(
       String workspaceNamespace, String workspaceId, Long conceptSetId, ConceptSet conceptSet) {
-    org.pmiops.workbench.db.model.ConceptSet dbConceptSet =
+    DbConceptSet dbConceptSet =
         getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.WRITER);
     if (Strings.isNullOrEmpty(conceptSet.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
@@ -282,7 +283,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   }
 
   private void addConceptsToSet(
-      org.pmiops.workbench.db.model.ConceptSet dbConceptSet, List<Long> addedIds) {
+      DbConceptSet dbConceptSet, List<Long> addedIds) {
     Domain domainEnum = dbConceptSet.getDomainEnum();
     Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(addedIds);
     List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
@@ -314,7 +315,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       String workspaceId,
       Long conceptSetId,
       UpdateConceptSetRequest request) {
-    org.pmiops.workbench.db.model.ConceptSet dbConceptSet =
+    DbConceptSet dbConceptSet =
         getDbConceptSet(workspaceNamespace, workspaceId, conceptSetId, WorkspaceAccessLevel.WRITER);
 
     Set<Long> allConceptSetIds = dbConceptSet.getConceptIds();
@@ -387,7 +388,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new BadRequestException(
           "Target workspace does not have the same CDR version as current workspace");
     }
-    org.pmiops.workbench.db.model.ConceptSet conceptSet =
+    DbConceptSet conceptSet =
         conceptSetDao.findOne(Long.valueOf(fromConceptSetId));
     if (conceptSet == null) {
       throw new NotFoundException(
@@ -395,8 +396,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
               "Concept set %s does not exist",
               createResourcePath(fromWorkspaceNamespace, fromWorkspaceId, fromConceptSetId)));
     }
-    org.pmiops.workbench.db.model.ConceptSet newConceptSet =
-        new org.pmiops.workbench.db.model.ConceptSet(conceptSet);
+    DbConceptSet newConceptSet =
+        new DbConceptSet(conceptSet);
 
     newConceptSet.setName(copyRequest.getNewName());
     newConceptSet.setCreator(userProvider.get());
@@ -429,7 +430,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     return String.format("\"/%s/%s/%s\"", workspaceNamespace, workspaceFirecloudName, identifier);
   }
 
-  private org.pmiops.workbench.db.model.ConceptSet getDbConceptSet(
+  private DbConceptSet getDbConceptSet(
       String workspaceNamespace,
       String workspaceId,
       Long conceptSetId,
@@ -438,7 +439,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, workspaceAccessLevel);
 
-    org.pmiops.workbench.db.model.ConceptSet conceptSet = conceptSetDao.findOne(conceptSetId);
+    DbConceptSet conceptSet = conceptSetDao.findOne(conceptSetId);
     if (conceptSet == null || workspace.getWorkspaceId() != conceptSet.getWorkspaceId()) {
       throw new NotFoundException(
           String.format(
