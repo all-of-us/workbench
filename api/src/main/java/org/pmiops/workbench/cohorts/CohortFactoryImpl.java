@@ -5,7 +5,7 @@ import java.time.Clock;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +33,7 @@ public class CohortFactoryImpl implements CohortFactory {
 
   @Override
   public Cohort duplicateCohort(
-      String newName, User creator, Workspace workspace, Cohort original) {
+      String newName, User creator, DbWorkspace workspace, Cohort original) {
     return createCohort(
         original.getDescription(),
         newName,

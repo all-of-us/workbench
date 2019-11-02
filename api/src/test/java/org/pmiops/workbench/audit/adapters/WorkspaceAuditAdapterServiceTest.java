@@ -27,6 +27,7 @@ import org.pmiops.workbench.audit.ActionAuditService;
 import org.pmiops.workbench.audit.ActionType;
 import org.pmiops.workbench.audit.TargetType;
 import org.pmiops.workbench.audit.targetproperties.AclTargetProperty;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -49,8 +50,8 @@ public class WorkspaceAuditAdapterServiceTest {
   private WorkspaceAuditAdapterService workspaceAuditAdapterService;
   private Workspace workspace1;
   private User user1;
-  private org.pmiops.workbench.db.model.Workspace dbWorkspace1;
-  private org.pmiops.workbench.db.model.Workspace dbWorkspace2;
+  private DbWorkspace dbWorkspace1;
+  private DbWorkspace dbWorkspace2;
 
   @Mock private Provider<User> mockUserProvider;
   @Mock private Clock mockClock;
@@ -80,7 +81,7 @@ public class WorkspaceAuditAdapterServiceTest {
     final long now = System.currentTimeMillis();
 
     workspace1 = new Workspace();
-    workspace1.setName("Workspace 1");
+    workspace1.setName("DbWorkspace 1");
     workspace1.setId("fc-id-1");
     workspace1.setNamespace("aou-rw-local1-c4be869a");
     workspace1.setCreator("user@fake-research-aou.org");
@@ -98,7 +99,7 @@ public class WorkspaceAuditAdapterServiceTest {
     dbWorkspace1.setLastModifiedTime(new Timestamp(now));
     dbWorkspace1.setCreationTime(new Timestamp(now));
 
-    dbWorkspace2 = new org.pmiops.workbench.db.model.Workspace();
+    dbWorkspace2 = new DbWorkspace();
     dbWorkspace2.setWorkspaceId(201L);
     dbWorkspace2.setPublished(false);
     dbWorkspace2.setLastModifiedTime(new Timestamp(now));

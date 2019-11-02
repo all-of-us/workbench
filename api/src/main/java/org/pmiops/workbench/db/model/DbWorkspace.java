@@ -28,7 +28,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 @Entity
 @Table(name = "workspace")
-public class Workspace {
+public class DbWorkspace {
   private String firecloudUuid;
 
   public static class FirecloudWorkspaceId {
@@ -67,7 +67,7 @@ public class Workspace {
   // see https://precisionmedicineinitiative.atlassian.net/browse/RW-2705
   public enum BillingMigrationStatus {
     OLD, // pre-1PPW; this billing project may be associated with multiple workspaces
-    NEW, // a One Project Per Workspace (1PPW) billing project
+    NEW, // a One Project Per DbWorkspace (1PPW) billing project
     MIGRATED // a pre-1PPW billing project which has been cloned and is now ready to be deleted
   }
 
@@ -117,7 +117,7 @@ public class Workspace {
   private Short billingAccountType =
       StorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
 
-  public Workspace() {
+  public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
 

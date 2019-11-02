@@ -23,8 +23,8 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -122,7 +122,7 @@ public class CohortsController implements CohortsApiDelegate {
     this.userProvider = userProvider;
   }
 
-  private void checkForDuplicateCohortNameException(String newCohortName, Workspace workspace) {
+  private void checkForDuplicateCohortNameException(String newCohortName, DbWorkspace workspace) {
     if (cohortDao.findCohortByNameAndWorkspaceId(newCohortName, workspace.getWorkspaceId())
         != null) {
       throw new BadRequestException(
@@ -138,7 +138,7 @@ public class CohortsController implements CohortsApiDelegate {
     // This also enforces registered auth domain.
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     checkForDuplicateCohortNameException(cohort.getName(), workspace);
 
@@ -170,7 +170,7 @@ public class CohortsController implements CohortsApiDelegate {
       String workspaceNamespace, String workspaceId, DuplicateCohortRequest params) {
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     checkForDuplicateCohortNameException(params.getNewName(), workspace);
 
@@ -229,7 +229,7 @@ public class CohortsController implements CohortsApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    Workspace workspace = workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
+    DbWorkspace workspace = workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
     CohortListResponse response = new CohortListResponse();
     Set<org.pmiops.workbench.db.model.Cohort> cohorts = workspace.getCohorts();
     if (cohorts != null) {
@@ -283,7 +283,7 @@ public class CohortsController implements CohortsApiDelegate {
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 
-  private Set<Long> getConceptIds(Workspace workspace, TableQuery tableQuery) {
+  private Set<Long> getConceptIds(DbWorkspace workspace, TableQuery tableQuery) {
     String conceptSetName = tableQuery.getConceptSetName();
     if (conceptSetName != null) {
       ConceptSet conceptSet =
@@ -315,7 +315,7 @@ public class CohortsController implements CohortsApiDelegate {
   public ResponseEntity<MaterializeCohortResponse> materializeCohort(
       String workspaceNamespace, String workspaceId, MaterializeCohortRequest request) {
     // This also enforces registered auth domain.
-    Workspace workspace =
+    DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     CdrVersion cdrVersion = workspace.getCdrVersion();
@@ -377,7 +377,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CdrQuery> getDataTableQuery(
       String workspaceNamespace, String workspaceId, DataTableSpecification request) {
-    Workspace workspace =
+    DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     CdrVersion cdrVersion = workspace.getCdrVersion();
@@ -423,7 +423,7 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<CohortAnnotationsResponse> getCohortAnnotations(
       String workspaceNamespace, String workspaceId, CohortAnnotationsRequest request) {
-    Workspace workspace =
+    DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     CdrVersion cdrVersion = workspace.getCdrVersion();
@@ -455,7 +455,7 @@ public class CohortsController implements CohortsApiDelegate {
 
   private org.pmiops.workbench.db.model.Cohort getDbCohort(
       String workspaceNamespace, String workspaceId, Long cohortId) {
-    Workspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     org.pmiops.workbench.db.model.Cohort cohort = cohortDao.findOne(cohortId);
     if (cohort == null || cohort.getWorkspaceId() != workspace.getWorkspaceId()) {

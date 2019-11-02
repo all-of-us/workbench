@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.ConceptSet;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -35,7 +35,7 @@ public class ConceptSetServiceTest {
   @Autowired private WorkspaceDao workspaceDao;
 
   private ConceptSetService conceptSetService;
-  private Workspace workspace;
+  private DbWorkspace workspace;
 
   @Before
   public void setUp() {
@@ -65,9 +65,9 @@ public class ConceptSetServiceTest {
     return conceptSet;
   }
 
-  private Workspace mockWorkspace() {
-    Workspace workspace = new Workspace();
-    workspace.setName("Target Workspace");
+  private DbWorkspace mockWorkspace() {
+    DbWorkspace workspace = new DbWorkspace();
+    workspace.setName("Target DbWorkspace");
     workspace.setWorkspaceId(2);
     workspace = workspaceDao.save(workspace);
     return workspace;

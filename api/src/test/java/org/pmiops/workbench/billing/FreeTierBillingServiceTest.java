@@ -33,9 +33,9 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
+import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.WorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
@@ -107,7 +107,7 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
     User user = createUser("test@test.com");
-    Workspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
@@ -122,7 +122,7 @@ public class FreeTierBillingServiceTest {
     User user = createUser("test@test.com");
     user.setDisabled(true);
     userDao.save(user);
-    Workspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
@@ -135,7 +135,7 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
     User user = createUser("test@test.com");
-    Workspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     workspaceDao.save(workspace);
 
@@ -150,7 +150,7 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.defaultFreeCreditsLimit = 500.0;
 
     User user = createUser("test@test.com");
-    Workspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verifyZeroInteractions(notificationService);
@@ -163,7 +163,7 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.defaultFreeCreditsLimit = 500.0;
 
     User user = createUser("test@test.com");
-    Workspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
     createWorkspace(null, "rumney");
 
     freeTierBillingService.checkFreeTierBillingUsage();
@@ -177,7 +177,7 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.defaultFreeCreditsLimit = 10.0;
 
     User user = createUser("test@test.com");
-    Workspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
@@ -209,8 +209,8 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.defaultFreeCreditsLimit = 500.0;
 
     User user = createUser("test@test.com");
-    Workspace ws1 = createWorkspace(user, "aou-test-f1-26");
-    Workspace ws2 = createWorkspace(user, "aou-test-f1-47");
+    DbWorkspace ws1 = createWorkspace(user, "aou-test-f1-26");
+    DbWorkspace ws2 = createWorkspace(user, "aou-test-f1-47");
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
 
@@ -220,9 +220,9 @@ public class FreeTierBillingServiceTest {
 
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(2);
 
-    for (Workspace ws : Arrays.asList(ws1, ws2)) {
+    for (DbWorkspace ws : Arrays.asList(ws1, ws2)) {
       // retrieve from DB again to reflect update after cron
-      Workspace dbWorkspace = workspaceDao.findOne(ws.getWorkspaceId());
+      DbWorkspace dbWorkspace = workspaceDao.findOne(ws.getWorkspaceId());
       assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
       assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
@@ -239,9 +239,9 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
     User user1 = createUser("test@test.com");
-    Workspace ws1 = createWorkspace(user1, "aou-test-f1-26");
+    DbWorkspace ws1 = createWorkspace(user1, "aou-test-f1-26");
     User user2 = createUser("more@test.com");
-    Workspace ws2 = createWorkspace(user2, "aou-test-f1-47");
+    DbWorkspace ws2 = createWorkspace(user2, "aou-test-f1-47");
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user1), any());
     verify(notificationService).alertUser(eq(user2), any());
@@ -252,9 +252,9 @@ public class FreeTierBillingServiceTest {
 
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(2);
 
-    for (Workspace ws : Arrays.asList(ws1, ws2)) {
+    for (DbWorkspace ws : Arrays.asList(ws1, ws2)) {
       // retrieve from DB again to reflect update after cron
-      Workspace dbWorkspace = workspaceDao.findOne(ws.getWorkspaceId());
+      DbWorkspace dbWorkspace = workspaceDao.findOne(ws.getWorkspaceId());
       assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
       assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
@@ -295,7 +295,7 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
     User user = createUser("test@test.com");
-    Workspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user), any());
@@ -315,7 +315,7 @@ public class FreeTierBillingServiceTest {
     verify(notificationService, times(2)).alertUser(eq(user), any());
 
     // retrieve from DB again to reflect update after cron
-    Workspace dbWorkspace = workspaceDao.findOne(workspace.getWorkspaceId());
+    DbWorkspace dbWorkspace = workspaceDao.findOne(workspace.getWorkspaceId());
     assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
     assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
@@ -423,9 +423,9 @@ public class FreeTierBillingServiceTest {
   }
 
   private void assertSingleWorkspaceTestDbState(
-      User user, Workspace workspaceForQuerying, BillingStatus billingStatus) {
+      User user, DbWorkspace workspaceForQuerying, BillingStatus billingStatus) {
 
-    final Workspace workspace = workspaceDao.findOne(workspaceForQuerying.getWorkspaceId());
+    final DbWorkspace workspace = workspaceDao.findOne(workspaceForQuerying.getWorkspaceId());
     assertThat(workspace.getBillingStatus()).isEqualTo(billingStatus);
     assertThat(workspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
@@ -443,13 +443,13 @@ public class FreeTierBillingServiceTest {
   }
 
   // we only alert/record for BillingMigrationStatus.NEW workspaces
-  private Workspace createWorkspace(User creator, String namespace) {
+  private DbWorkspace createWorkspace(User creator, String namespace) {
     return createWorkspace(creator, namespace, BillingMigrationStatus.NEW);
   }
 
-  private Workspace createWorkspace(
+  private DbWorkspace createWorkspace(
       User creator, String namespace, BillingMigrationStatus billingMigrationStatus) {
-    Workspace workspace = new Workspace();
+    DbWorkspace workspace = new DbWorkspace();
     workspace.setCreator(creator);
     workspace.setWorkspaceNamespace(namespace);
     workspace.setBillingMigrationStatusEnum(billingMigrationStatus);

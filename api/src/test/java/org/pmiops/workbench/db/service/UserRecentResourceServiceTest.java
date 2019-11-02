@@ -17,9 +17,9 @@ import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
-import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -45,7 +45,7 @@ public class UserRecentResourceServiceTest {
   @Autowired ConceptSetDao conceptSetDao;
 
   private User newUser = new User();
-  private Workspace newWorkspace = new Workspace();
+  private DbWorkspace newWorkspace = new DbWorkspace();
   private Long cohortId;
   private Long conceptSetId;
   private long workspaceId = 1l;
@@ -168,7 +168,7 @@ public class UserRecentResourceServiceTest {
 
   @Test
   public void testUserLimit() {
-    Workspace newWorkspace = new Workspace();
+    DbWorkspace newWorkspace = new DbWorkspace();
     newWorkspace.setWorkspaceId(2l);
     workspaceDao.save(newWorkspace);
     userRecentResourceService.updateNotebookEntry(

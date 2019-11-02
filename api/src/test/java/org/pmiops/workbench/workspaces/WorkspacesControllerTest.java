@@ -87,6 +87,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DataSet;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -641,7 +642,7 @@ public class WorkspacesControllerTest {
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
     verify(mockWorkspaceAuditAdapterService)
-        .fireDeleteAction(any(org.pmiops.workbench.db.model.Workspace.class));
+        .fireDeleteAction(any(DbWorkspace.class));
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");
@@ -889,8 +890,8 @@ public class WorkspacesControllerTest {
             .getWorkspace();
     verify(mockWorkspaceAuditAdapterService)
         .fireDuplicateAction(
-            any(org.pmiops.workbench.db.model.Workspace.class),
-            any(org.pmiops.workbench.db.model.Workspace.class));
+            any(DbWorkspace.class),
+            any(DbWorkspace.class));
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
@@ -1270,7 +1271,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+    DbWorkspace dbWorkspace =
         workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
             workspace.getNamespace(),
             workspace.getId(),
@@ -1348,7 +1349,7 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
 
-    org.pmiops.workbench.db.model.Workspace clonedDbWorkspace =
+    DbWorkspace clonedDbWorkspace =
         workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
             cloned.getNamespace(),
             cloned.getId(),
@@ -2635,7 +2636,7 @@ public class WorkspacesControllerTest {
             .put("extraMetadata", "is not a problem")
             .build();
 
-    // This user is not listed in the Workspace ACL so I don't know them
+    // This user is not listed in the DbWorkspace ACL so I don't know them
 
     final NotebookLockingMetadataResponse expectedResponse =
         new NotebookLockingMetadataResponse()
@@ -2694,7 +2695,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubFcGetWorkspaceACL();
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+    DbWorkspace dbWorkspace =
         workspaceService.get(workspace.getNamespace(), workspace.getId());
     workspaceService.updateRecentWorkspaces(dbWorkspace, currentUser.getUserId(), NOW);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =

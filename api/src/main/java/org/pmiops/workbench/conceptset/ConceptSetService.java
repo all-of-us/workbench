@@ -5,7 +5,7 @@ import java.util.List;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.ConceptSet;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +21,7 @@ public class ConceptSetService {
 
   @Transactional
   public ConceptSet cloneConceptSetAndConceptIds(
-      ConceptSet conceptSet, Workspace targetWorkspace, boolean cdrVersionChanged) {
+      ConceptSet conceptSet, DbWorkspace targetWorkspace, boolean cdrVersionChanged) {
     ConceptSet c = new ConceptSet(conceptSet);
     if (cdrVersionChanged) {
       String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(conceptSet.getDomainEnum());
@@ -37,7 +37,7 @@ public class ConceptSetService {
     return conceptSetDao.save(c);
   }
 
-  public List<ConceptSet> getConceptSets(Workspace workspace) {
+  public List<ConceptSet> getConceptSets(DbWorkspace workspace) {
     // Allows for fetching concept sets for a workspace once its collection is no longer
     // bound to a session.
     return conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());

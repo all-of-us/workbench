@@ -14,6 +14,7 @@ import org.pmiops.workbench.audit.AgentType;
 import org.pmiops.workbench.audit.TargetType;
 import org.pmiops.workbench.audit.targetproperties.AclTargetProperty;
 import org.pmiops.workbench.audit.targetproperties.WorkspaceTargetProperty;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
@@ -79,7 +80,7 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
   // has a different signature than for the create action. This makes keeping the properties
   // consistent across actions somewhat challenging.
   @Override
-  public void fireDeleteAction(org.pmiops.workbench.db.model.Workspace dbWorkspace) {
+  public void fireDeleteAction(DbWorkspace dbWorkspace) {
     try {
       final String actionId = ActionAuditEvent.newActionId();
       final long userId = userProvider.get().getUserId();
@@ -104,8 +105,8 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
 
   @Override
   public void fireDuplicateAction(
-      org.pmiops.workbench.db.model.Workspace sourceWorkspaceDbModel,
-      org.pmiops.workbench.db.model.Workspace destinationWorkspaceDbModel) {
+      DbWorkspace sourceWorkspaceDbModel,
+      DbWorkspace destinationWorkspaceDbModel) {
     try {
       // We represent the duplication as a single action with events with different
       // ActionTypes: DUPLICATE_FROM and DUPLICATE_TO. The latter action generates many events

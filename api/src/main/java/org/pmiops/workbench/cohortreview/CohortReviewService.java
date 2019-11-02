@@ -7,7 +7,7 @@ import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
@@ -29,7 +29,7 @@ public interface CohortReviewService {
    * @param workspaceName
    * @param workspaceId
    */
-  Workspace validateMatchingWorkspaceAndSetCdrVersion(
+  DbWorkspace validateMatchingWorkspaceAndSetCdrVersion(
       String workspaceNamespace,
       String workspaceName,
       long workspaceId,

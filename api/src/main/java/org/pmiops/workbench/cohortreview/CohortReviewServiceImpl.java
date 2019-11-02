@@ -16,10 +16,10 @@ import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.Workspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
@@ -70,12 +70,12 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public Workspace validateMatchingWorkspaceAndSetCdrVersion(
+  public DbWorkspace validateMatchingWorkspaceAndSetCdrVersion(
       String workspaceNamespace,
       String workspaceName,
       long workspaceId,
       WorkspaceAccessLevel accessRequired) {
-    Workspace workspace =
+    DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceName, accessRequired);
     if (workspace == null || workspace.getWorkspaceId() != workspaceId) {

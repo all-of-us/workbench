@@ -14,7 +14,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
@@ -42,7 +42,7 @@ public class CohortAnnotationDefinitionControllerTest {
   private static String NAME = "test";
   private static String EXISTING_COLUMN_NAME = "testing";
   private static String NEW_COLUMN_NAME = "new_column";
-  private Workspace workspace;
+  private DbWorkspace workspace;
   private Cohort cohort;
   private CohortAnnotationDefinition dbCohortAnnotationDefinition;
   @Autowired CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
@@ -57,7 +57,7 @@ public class CohortAnnotationDefinitionControllerTest {
         new CohortAnnotationDefinitionController(
             cohortAnnotationDefinitionDao, cohortDao, workspaceService);
 
-    workspace = new Workspace();
+    workspace = new DbWorkspace();
     workspace.setWorkspaceNamespace(NAMESPACE);
     workspace.setFirecloudName(NAME);
     workspaceDao.save(workspace);
@@ -478,7 +478,7 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   private void setupWorkspaceServiceMock() {
-    Workspace mockWorkspace = new Workspace();
+    DbWorkspace mockWorkspace = new DbWorkspace();
     mockWorkspace.setWorkspaceNamespace(NAMESPACE);
     mockWorkspace.setFirecloudName(NAME);
     mockWorkspace.setWorkspaceId(workspace.getWorkspaceId());
@@ -489,7 +489,7 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   private void setupBadWorkspaceServiceMock() {
-    Workspace mockWorkspace = new Workspace();
+    DbWorkspace mockWorkspace = new DbWorkspace();
     mockWorkspace.setWorkspaceNamespace(NAMESPACE);
     mockWorkspace.setFirecloudName(NAME);
     mockWorkspace.setWorkspaceId(0L);

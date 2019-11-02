@@ -42,10 +42,11 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentWorkspace;
-import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
-import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
+import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
+import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
@@ -170,7 +171,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private CdrVersion setLiveCdrVersionId(
-      org.pmiops.workbench.db.model.Workspace dbWorkspace, String cdrVersionId) {
+      DbWorkspace dbWorkspace, String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
       throw new BadRequestException("missing cdrVersionId");
     }
@@ -218,7 +219,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } else if (workspace.getDataAccessLevel() == null) {
       throw new BadRequestException("missing required field 'dataAccessLevel'");
     } else if (workspace.getName().length() > 80) {
-      throw new BadRequestException("Workspace name must be 80 characters or less");
+      throw new BadRequestException("DbWorkspace name must be 80 characters or less");
     }
 
     User user = userProvider.get();
@@ -238,13 +239,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         attemptFirecloudWorkspaceCreation(workspaceId);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
-        new org.pmiops.workbench.db.model.Workspace();
+    DbWorkspace dbWorkspace =
+        new DbWorkspace();
     setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
 
     setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    org.pmiops.workbench.db.model.Workspace reqWorkspace =
+    DbWorkspace reqWorkspace =
         WorkspaceConversionUtils.toDbWorkspace(workspace);
     // TODO: enforce data access level authorization
     dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
@@ -267,7 +268,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private void setDbWorkspaceFields(
-      org.pmiops.workbench.db.model.Workspace dbWorkspace,
+      DbWorkspace dbWorkspace,
       User user,
       FirecloudWorkspaceId workspaceId,
       org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
@@ -289,7 +290,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // to the workspace and its resources in the Workbench database.
     // This is for auditing purposes and potentially workspace restore.
     // TODO: do we want to delete workspace resource references and save only metadata?
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+    DbWorkspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
     // This automatically handles access control to the workspace.
     fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
@@ -316,7 +317,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<Workspace> updateWorkspace(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+    DbWorkspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
@@ -383,11 +384,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             .getWorkspace()
             .getBucketName();
 
-    org.pmiops.workbench.db.model.Workspace fromWorkspace =
+    DbWorkspace fromWorkspace =
         workspaceService.getRequiredWithCohorts(fromWorkspaceNamespace, fromWorkspaceId);
     if (fromWorkspace == null) {
       throw new NotFoundException(
-          String.format("Workspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceId));
+          String.format("DbWorkspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceId));
     }
 
     FirecloudWorkspaceId toFcWorkspaceId =
@@ -428,8 +429,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Firecloud workspaces / buckets, but a user should not be able to see
     // half-way cloned workspaces via AoU - so it will just appear as a
     // transient failure.
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
-        new org.pmiops.workbench.db.model.Workspace();
+    DbWorkspace dbWorkspace =
+        new DbWorkspace();
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     setDbWorkspaceFields(dbWorkspace, user, toFcWorkspaceId, toFcWorkspace, now);
@@ -456,7 +457,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    org.pmiops.workbench.db.model.Workspace savedWorkspace =
+    DbWorkspace savedWorkspace =
         workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
 
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
@@ -502,7 +503,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("Missing required update field 'workspaceEtag'");
     }
 
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+    DbWorkspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
     int version = Etags.toVersion(request.getWorkspaceEtag());
     if (dbWorkspace.getVersion() != version) {
@@ -551,7 +552,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<EmptyResponse> reviewWorkspace(
       String ns, String id, ResearchPurposeReviewRequest review) {
-    org.pmiops.workbench.db.model.Workspace workspace = workspaceService.get(ns, id);
+    DbWorkspace workspace = workspaceService.get(ns, id);
     userService.logAdminWorkspaceAction(
         workspace.getWorkspaceId(),
         "research purpose approval",
@@ -564,14 +565,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   // Note we do not paginate the workspaces list, since we expect few workspaces
   // to require review.
   //
-  // We can add pagination in the DAO by returning Slice<Workspace> if we want the method to return
-  // pagination information (e.g. are there more workspaces to get), and Page<Workspace> if we
+  // We can add pagination in the DAO by returning Slice<DbWorkspace> if we want the method to return
+  // pagination information (e.g. are there more workspaces to get), and Page<DbWorkspace> if we
   // want the method to return both pagination information and a total count.
   @Override
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
     WorkspaceListResponse response = new WorkspaceListResponse();
-    List<org.pmiops.workbench.db.model.Workspace> workspaces = workspaceService.findForReview();
+    List<DbWorkspace> workspaces = workspaceService.findForReview();
     response.setItems(
         workspaces.stream()
             .map(WorkspaceConversionUtils::toApiWorkspace)
@@ -723,7 +724,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceUserRolesResponse> getFirecloudWorkspaceUserRoles(
       String workspaceNamespace, String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+    DbWorkspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     Map<String, WorkspaceAccessEntry> firecloudAcls =
@@ -746,7 +747,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> publishWorkspace(
       String workspaceNamespace, String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+    DbWorkspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), true);
@@ -757,7 +758,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> unpublishWorkspace(
       String workspaceNamespace, String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+    DbWorkspace dbWorkspace =
         workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
@@ -771,18 +772,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         userRecentWorkspaces.stream()
             .map(UserRecentWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    List<org.pmiops.workbench.db.model.Workspace> dbWorkspaces =
+    List<DbWorkspace> dbWorkspaces =
         workspaceService.getDao().findAllByWorkspaceIdIn(workspaceIds);
-    Map<Long, org.pmiops.workbench.db.model.Workspace> dbWorkspacesById =
+    Map<Long, DbWorkspace> dbWorkspacesById =
         dbWorkspaces.stream()
             .collect(
                 Collectors.toMap(
-                    org.pmiops.workbench.db.model.Workspace::getWorkspaceId, Function.identity()));
+                    DbWorkspace::getWorkspaceId, Function.identity()));
     Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsById =
         dbWorkspaces.stream()
             .collect(
                 Collectors.toMap(
-                    org.pmiops.workbench.db.model.Workspace::getWorkspaceId,
+                    DbWorkspace::getWorkspaceId,
                     dbWorkspace ->
                         workspaceService.getWorkspaceAccessLevel(
                             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())));
@@ -798,7 +799,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<RecentWorkspaceResponse> updateRecentWorkspaces(
       String workspaceNamespace, String workspaceId) {
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+    DbWorkspace dbWorkspace =
         workspaceService.get(workspaceNamespace, workspaceId);
     UserRecentWorkspace userRecentWorkspace = workspaceService.updateRecentWorkspaces(dbWorkspace);
     WorkspaceAccessLevel workspaceAccessLevel =

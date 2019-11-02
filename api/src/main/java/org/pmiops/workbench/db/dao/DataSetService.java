@@ -9,7 +9,7 @@ import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.DataSetValue;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
@@ -39,9 +39,9 @@ public interface DataSetService {
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);
 
   DataSet cloneDataSetToWorkspace(
-      DataSet fromDataSet, Workspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds);
+      DataSet fromDataSet, DbWorkspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds);
 
-  List<DataSet> getDataSets(Workspace workspace);
+  List<DataSet> getDataSets(DbWorkspace workspace);
 
   List<ConceptSet> getConceptSetsForDataset(DataSet dataSet);
 
