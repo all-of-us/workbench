@@ -45,7 +45,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
-import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
+import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -320,9 +320,9 @@ public class CohortReviewControllerTest {
             .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.ENUM))
             .columnName("test")
             .cohortId(cohort.getCohortId());
-    SortedSet<CohortAnnotationEnumValue> enumValues = new TreeSet<CohortAnnotationEnumValue>();
+    SortedSet<DbCohortAnnotationEnumValue> enumValues = new TreeSet<DbCohortAnnotationEnumValue>();
     enumValues.add(
-        new CohortAnnotationEnumValue()
+        new DbCohortAnnotationEnumValue()
             .name("test")
             .cohortAnnotationDefinition(enumAnnotationDefinition));
     cohortAnnotationDefinitionDao.save(enumAnnotationDefinition.enumValues(enumValues));

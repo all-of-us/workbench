@@ -14,7 +14,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
 @Table(name = "cohort_annotation_enum_value")
-public class CohortAnnotationEnumValue implements Comparable {
+public class DbCohortAnnotationEnumValue implements Comparable {
 
   private long cohortAnnotationEnumValueId;
   private String name;
@@ -33,7 +33,7 @@ public class CohortAnnotationEnumValue implements Comparable {
     this.cohortAnnotationEnumValueId = cohortAnnotationEnumValueId;
   }
 
-  public CohortAnnotationEnumValue cohortAnnotationEnumValueId(long cohortAnnotationEnumValueId) {
+  public DbCohortAnnotationEnumValue cohortAnnotationEnumValueId(long cohortAnnotationEnumValueId) {
     this.cohortAnnotationEnumValueId = cohortAnnotationEnumValueId;
     return this;
   }
@@ -47,7 +47,7 @@ public class CohortAnnotationEnumValue implements Comparable {
     this.name = name;
   }
 
-  public CohortAnnotationEnumValue name(String name) {
+  public DbCohortAnnotationEnumValue name(String name) {
     this.name = name;
     return this;
   }
@@ -61,7 +61,7 @@ public class CohortAnnotationEnumValue implements Comparable {
     this.order = order;
   }
 
-  public CohortAnnotationEnumValue order(int order) {
+  public DbCohortAnnotationEnumValue order(int order) {
     this.order = order;
     return this;
   }
@@ -76,7 +76,7 @@ public class CohortAnnotationEnumValue implements Comparable {
     this.cohortAnnotationDefinition = cohortAnnotationDefinition;
   }
 
-  public CohortAnnotationEnumValue cohortAnnotationDefinition(
+  public DbCohortAnnotationEnumValue cohortAnnotationDefinition(
       DbCohortAnnotationDefinition cohortAnnotationDefinition) {
     this.cohortAnnotationDefinition = cohortAnnotationDefinition;
     return this;
@@ -92,7 +92,7 @@ public class CohortAnnotationEnumValue implements Comparable {
     this.participantCohortAnnotation = participantCohortAnnotation;
   }
 
-  public CohortAnnotationEnumValue participantCohortAnnotation(
+  public DbCohortAnnotationEnumValue participantCohortAnnotation(
       ParticipantCohortAnnotation participantCohortAnnotation) {
     this.participantCohortAnnotation = participantCohortAnnotation;
     return this;
@@ -102,7 +102,7 @@ public class CohortAnnotationEnumValue implements Comparable {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    CohortAnnotationEnumValue enumValue = (CohortAnnotationEnumValue) o;
+    DbCohortAnnotationEnumValue enumValue = (DbCohortAnnotationEnumValue) o;
     return Objects.equals(name, enumValue.name);
   }
 
@@ -122,7 +122,7 @@ public class CohortAnnotationEnumValue implements Comparable {
   @Override
   public int compareTo(Object o) {
     Integer thisOrder = new Integer(this.getOrder());
-    Integer otherOrder = new Integer(((CohortAnnotationEnumValue) o).getOrder());
+    Integer otherOrder = new Integer(((DbCohortAnnotationEnumValue) o).getOrder());
     return thisOrder.compareTo(otherOrder);
   }
 }

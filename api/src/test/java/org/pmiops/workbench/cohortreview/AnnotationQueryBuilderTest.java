@@ -27,7 +27,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
-import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
+import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
@@ -95,7 +95,7 @@ public class AnnotationQueryBuilderTest {
   private DbCohortAnnotationDefinition booleanAnnotation;
   private DbCohortAnnotationDefinition dateAnnotation;
   private DbCohortAnnotationDefinition enumAnnotation;
-  private Map<String, CohortAnnotationEnumValue> enumValueMap;
+  private Map<String, DbCohortAnnotationEnumValue> enumValueMap;
   private ImmutableMap<String, Object> expectedResult1;
   private ImmutableMap<String, Object> expectedResult2;
   private List<String> allColumns;
@@ -147,7 +147,7 @@ public class AnnotationQueryBuilderTest {
             makeAnnotationDefinition(
                 cohort.getCohortId(), "enum annotation", AnnotationType.ENUM, "zebra", "aardvark"));
     enumValueMap =
-        Maps.uniqueIndex(enumAnnotation.getEnumValues(), CohortAnnotationEnumValue::getName);
+        Maps.uniqueIndex(enumAnnotation.getEnumValues(), DbCohortAnnotationEnumValue::getName);
 
     expectedResult1 =
         ImmutableMap.<String, Object>builder()
@@ -179,7 +179,7 @@ public class AnnotationQueryBuilderTest {
     cohortAnnotationDefinition.setColumnName(columnName);
     if (enumValues.length > 0) {
       for (int i = 0; i < enumValues.length; i++) {
-        CohortAnnotationEnumValue enumValue = new CohortAnnotationEnumValue();
+        DbCohortAnnotationEnumValue enumValue = new DbCohortAnnotationEnumValue();
         enumValue.setOrder(i);
         enumValue.setName(enumValues[i]);
         cohortAnnotationDefinition.getEnumValues().add(enumValue);

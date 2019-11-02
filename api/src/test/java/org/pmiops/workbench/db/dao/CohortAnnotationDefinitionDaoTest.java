@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
-import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
+import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
 import org.pmiops.workbench.model.AnnotationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -47,18 +47,18 @@ public class CohortAnnotationDefinitionDaoTest {
   @Test
   public void saveWithEnumValues() throws Exception {
     DbCohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
-    CohortAnnotationEnumValue enumValue1 =
-        new CohortAnnotationEnumValue()
+    DbCohortAnnotationEnumValue enumValue1 =
+        new DbCohortAnnotationEnumValue()
             .name("z")
             .order(0)
             .cohortAnnotationDefinition(cohortAnnotationDefinition);
-    CohortAnnotationEnumValue enumValue2 =
-        new CohortAnnotationEnumValue()
+    DbCohortAnnotationEnumValue enumValue2 =
+        new DbCohortAnnotationEnumValue()
             .name("r")
             .order(1)
             .cohortAnnotationDefinition(cohortAnnotationDefinition);
-    CohortAnnotationEnumValue enumValue3 =
-        new CohortAnnotationEnumValue()
+    DbCohortAnnotationEnumValue enumValue3 =
+        new DbCohortAnnotationEnumValue()
             .name("a")
             .order(2)
             .cohortAnnotationDefinition(cohortAnnotationDefinition);

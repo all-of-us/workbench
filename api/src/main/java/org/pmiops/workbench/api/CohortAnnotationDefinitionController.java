@@ -14,7 +14,7 @@ import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
+import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -51,7 +51,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                 cohortAnnotationDefinition.getEnumValues() == null
                     ? null
                     : cohortAnnotationDefinition.getEnumValues().stream()
-                        .map(CohortAnnotationEnumValue::getName)
+                        .map(DbCohortAnnotationEnumValue::getName)
                         .collect(Collectors.toList());
             return new CohortAnnotationDefinition()
                 .etag(Etags.fromVersion(cohortAnnotationDefinition.getVersion()))
@@ -72,18 +72,18 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
                     .cohortId(cohortAnnotationDefinition.getCohortId())
                     .columnName(cohortAnnotationDefinition.getColumnName())
                     .annotationTypeEnum(cohortAnnotationDefinition.getAnnotationType());
-            List<CohortAnnotationEnumValue> enumValuesList =
+            List<DbCohortAnnotationEnumValue> enumValuesList =
                 (cohortAnnotationDefinition.getEnumValues() == null)
                     ? new ArrayList<>()
                     : IntStream.range(0, cohortAnnotationDefinition.getEnumValues().size())
                         .mapToObj(
                             i ->
-                                new CohortAnnotationEnumValue()
+                                new DbCohortAnnotationEnumValue()
                                     .name(cohortAnnotationDefinition.getEnumValues().get(i))
                                     .order(i)
                                     .cohortAnnotationDefinition(dbCohortAnnotationDefinition))
                         .collect(Collectors.toList());
-            for (CohortAnnotationEnumValue cohortAnnotationEnumValue : enumValuesList) {
+            for (DbCohortAnnotationEnumValue cohortAnnotationEnumValue : enumValuesList) {
               dbCohortAnnotationDefinition.getEnumValues().add(cohortAnnotationEnumValue);
             }
             return dbCohortAnnotationDefinition;

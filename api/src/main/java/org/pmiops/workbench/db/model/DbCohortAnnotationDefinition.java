@@ -27,7 +27,7 @@ public class DbCohortAnnotationDefinition {
   private long cohortId;
   private String columnName;
   private Short annotationType;
-  private SortedSet<CohortAnnotationEnumValue> enumValues = new TreeSet<>();
+  private SortedSet<DbCohortAnnotationEnumValue> enumValues = new TreeSet<>();
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -122,15 +122,15 @@ public class DbCohortAnnotationDefinition {
       orphanRemoval = true,
       cascade = CascadeType.ALL)
   @OrderBy("cohortAnnotationEnumValueId ASC")
-  public SortedSet<CohortAnnotationEnumValue> getEnumValues() {
+  public SortedSet<DbCohortAnnotationEnumValue> getEnumValues() {
     return enumValues;
   }
 
-  public void setEnumValues(SortedSet<CohortAnnotationEnumValue> enumValues) {
+  public void setEnumValues(SortedSet<DbCohortAnnotationEnumValue> enumValues) {
     this.enumValues = enumValues;
   }
 
-  public DbCohortAnnotationDefinition enumValues(SortedSet<CohortAnnotationEnumValue> enumValues) {
+  public DbCohortAnnotationDefinition enumValues(SortedSet<DbCohortAnnotationEnumValue> enumValues) {
     this.setEnumValues(enumValues);
     return this;
   }

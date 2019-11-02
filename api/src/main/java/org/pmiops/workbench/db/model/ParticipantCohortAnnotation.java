@@ -21,7 +21,7 @@ public class ParticipantCohortAnnotation {
   private Long cohortReviewId;
   private Long participantId;
   private String annotationValueString;
-  private CohortAnnotationEnumValue cohortAnnotationEnumValue;
+  private DbCohortAnnotationEnumValue cohortAnnotationEnumValue;
   private String annotationValueEnum;
   private Date annotationValueDate;
   private String annotationValueDateString;
@@ -103,16 +103,16 @@ public class ParticipantCohortAnnotation {
 
   @OneToOne
   @JoinColumn(name = "cohort_annotation_enum_value_id")
-  public CohortAnnotationEnumValue getCohortAnnotationEnumValue() {
+  public DbCohortAnnotationEnumValue getCohortAnnotationEnumValue() {
     return cohortAnnotationEnumValue;
   }
 
-  public void setCohortAnnotationEnumValue(CohortAnnotationEnumValue cohortAnnotationEnumValue) {
+  public void setCohortAnnotationEnumValue(DbCohortAnnotationEnumValue cohortAnnotationEnumValue) {
     this.cohortAnnotationEnumValue = cohortAnnotationEnumValue;
   }
 
   public ParticipantCohortAnnotation cohortAnnotationEnumValue(
-      CohortAnnotationEnumValue cohortAnnotationEnumValue) {
+      DbCohortAnnotationEnumValue cohortAnnotationEnumValue) {
     this.cohortAnnotationEnumValue = cohortAnnotationEnumValue;
     return this;
   }

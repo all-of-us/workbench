@@ -14,7 +14,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
-import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
+import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
@@ -343,7 +343,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
             AnnotationType.ENUM.name(),
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
-      List<CohortAnnotationEnumValue> enumValues =
+      List<DbCohortAnnotationEnumValue> enumValues =
           cohortAnnotationDefinition.getEnumValues().stream()
               .filter(
                   enumValue ->
