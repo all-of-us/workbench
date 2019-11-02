@@ -12,7 +12,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -60,8 +60,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   public CohortReviewServiceImpl() {}
 
   @Override
-  public Cohort findCohort(long cohortId) {
-    Cohort cohort = cohortDao.findOne(cohortId);
+  public DbCohort findCohort(long cohortId) {
+    DbCohort cohort = cohortDao.findOne(cohortId);
     if (cohort == null) {
       throw new NotFoundException(
           String.format("Not Found: No Cohort exists for cohortId: %s", cohortId));

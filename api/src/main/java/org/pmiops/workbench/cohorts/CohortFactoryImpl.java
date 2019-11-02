@@ -2,7 +2,7 @@ package org.pmiops.workbench.cohorts;
 
 import java.sql.Timestamp;
 import java.time.Clock;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -20,7 +20,7 @@ public class CohortFactoryImpl implements CohortFactory {
   }
 
   @Override
-  public Cohort createCohort(
+  public DbCohort createCohort(
       org.pmiops.workbench.model.Cohort apiCohort, User creator, long workspaceId) {
     return createCohort(
         apiCohort.getDescription(),
@@ -32,8 +32,8 @@ public class CohortFactoryImpl implements CohortFactory {
   }
 
   @Override
-  public Cohort duplicateCohort(
-      String newName, User creator, DbWorkspace workspace, Cohort original) {
+  public DbCohort duplicateCohort(
+      String newName, User creator, DbWorkspace workspace, DbCohort original) {
     return createCohort(
         original.getDescription(),
         newName,
@@ -44,7 +44,7 @@ public class CohortFactoryImpl implements CohortFactory {
   }
 
   @Override
-  public CohortReview duplicateCohortReview(CohortReview original, Cohort targetCohort) {
+  public CohortReview duplicateCohortReview(CohortReview original, DbCohort targetCohort) {
     CohortReview newCohortReview = new CohortReview();
 
     newCohortReview.setCohortId(targetCohort.getCohortId());
@@ -63,10 +63,10 @@ public class CohortFactoryImpl implements CohortFactory {
     return newCohortReview;
   }
 
-  private Cohort createCohort(
+  private DbCohort createCohort(
       String desc, String name, String type, String criteria, User creator, long workspaceId) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    Cohort cohort = new Cohort();
+    DbCohort cohort = new DbCohort();
 
     cohort.setDescription(desc);
     cohort.setName(name);

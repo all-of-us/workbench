@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -65,7 +65,7 @@ public class UserMetricsControllerTest {
     user = new User();
     user.setUserId(123L);
 
-    Cohort cohort = new Cohort();
+    DbCohort cohort = new DbCohort();
     cohort.setName("Cohort Name");
     cohort.setCohortId(1L);
     cohort.setDescription("Cohort description");

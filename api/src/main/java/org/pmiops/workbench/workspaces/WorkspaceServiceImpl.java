@@ -26,7 +26,7 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -401,7 +401,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     boolean cdrVersionChanged =
         from.getCdrVersion().getCdrVersionId() != to.getCdrVersion().getCdrVersionId();
     Map<Long, Long> fromCohortIdToToCohortId = new HashMap<>();
-    for (Cohort fromCohort : from.getCohorts()) {
+    for (DbCohort fromCohort : from.getCohorts()) {
       fromCohortIdToToCohortId.put(
           fromCohort.getCohortId(),
           cohortCloningService.cloneCohortAndReviews(fromCohort, to).getCohortId());

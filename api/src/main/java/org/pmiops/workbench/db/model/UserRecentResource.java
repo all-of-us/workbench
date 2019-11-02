@@ -18,7 +18,7 @@ public class UserRecentResource {
   private String notebookName;
   private Long userId;
   private Long workspaceId;
-  private Cohort cohort;
+  private DbCohort cohort;
   private ConceptSet conceptSet;
 
   @Id
@@ -74,11 +74,11 @@ public class UserRecentResource {
 
   @ManyToOne
   @JoinColumn(name = "cohort_id")
-  public Cohort getCohort() {
+  public DbCohort getCohort() {
     return cohort;
   }
 
-  public void setCohort(Cohort cohort) {
+  public void setCohort(DbCohort cohort) {
     this.cohort = cohort;
   }
 

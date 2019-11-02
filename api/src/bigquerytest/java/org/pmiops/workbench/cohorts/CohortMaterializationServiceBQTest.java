@@ -41,7 +41,7 @@ import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
@@ -132,7 +132,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
-    Cohort cohort = new Cohort();
+    DbCohort cohort = new DbCohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohort.setName("males");
     cohort.setType("AOU");
@@ -140,7 +140,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     cohort.setCriteria(gson.toJson(SearchRequests.males()));
     cohortDao.save(cohort);
 
-    Cohort cohort2 = new Cohort();
+    DbCohort cohort2 = new DbCohort();
     cohort2.setWorkspaceId(workspace.getWorkspaceId());
     cohort2.setName("all genders");
     cohort2.setType("AOU");

@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -43,7 +43,7 @@ public class CohortAnnotationDefinitionControllerTest {
   private static String EXISTING_COLUMN_NAME = "testing";
   private static String NEW_COLUMN_NAME = "new_column";
   private DbWorkspace workspace;
-  private Cohort cohort;
+  private DbCohort cohort;
   private CohortAnnotationDefinition dbCohortAnnotationDefinition;
   @Autowired CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
   @Autowired CohortDao cohortDao;
@@ -62,7 +62,7 @@ public class CohortAnnotationDefinitionControllerTest {
     workspace.setFirecloudName(NAME);
     workspaceDao.save(workspace);
 
-    cohort = new Cohort();
+    cohort = new DbCohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohortDao.save(cohort);
 

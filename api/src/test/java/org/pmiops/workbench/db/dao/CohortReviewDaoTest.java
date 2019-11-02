@@ -7,7 +7,7 @@ import java.util.Calendar;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.StorageEnums;
@@ -38,7 +38,7 @@ public class CohortReviewDaoTest {
 
   @Before
   public void setUp() throws Exception {
-    Cohort cohort = new Cohort();
+    DbCohort cohort = new DbCohort();
     DbWorkspace workspace = new DbWorkspace();
     workspace.setWorkspaceNamespace("namespace");
     workspace.setFirecloudName("firecloudName");

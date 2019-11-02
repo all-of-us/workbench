@@ -43,7 +43,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
@@ -103,8 +103,8 @@ public class CohortReviewControllerTest {
   private static final String WORKSPACE_NAME = "name";
   private CdrVersion cdrVersion;
   private CohortReview cohortReview;
-  private Cohort cohort;
-  private Cohort cohortWithoutReview;
+  private DbCohort cohort;
+  private DbCohort cohortWithoutReview;
   private ParticipantCohortStatus participantCohortStatus1;
   private ParticipantCohortStatus participantCohortStatus2;
   private DbWorkspace workspace;
@@ -246,7 +246,7 @@ public class CohortReviewControllerTest {
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
-    cohort = new Cohort();
+    cohort = new DbCohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     String criteria =
         "{\"includes\":[{\"id\":\"includes_kl4uky6kh\",\"items\":[{\"id\":\"items_58myrn9iz\",\"type\":\"CONDITION\",\"searchParameters\":[{"
@@ -256,7 +256,7 @@ public class CohortReviewControllerTest {
     cohort.setCriteria(criteria);
     cohortDao.save(cohort);
 
-    cohortWithoutReview = new Cohort();
+    cohortWithoutReview = new DbCohort();
     cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
     cohortWithoutReview.setName("test");
     cohortWithoutReview.setDescription("test desc");

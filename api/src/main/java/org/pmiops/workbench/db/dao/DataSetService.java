@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.DataSetValue;
@@ -45,5 +45,5 @@ public interface DataSetService {
 
   List<ConceptSet> getConceptSetsForDataset(DataSet dataSet);
 
-  List<Cohort> getCohortsForDataset(DataSet dataSet);
+  List<DbCohort> getCohortsForDataset(DataSet dataSet);
 }

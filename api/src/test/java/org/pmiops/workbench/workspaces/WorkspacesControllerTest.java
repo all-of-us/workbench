@@ -87,6 +87,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DataSet;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
@@ -1295,8 +1296,8 @@ public class WorkspacesControllerTest {
 
     final String expectedCohortName = "cohort name";
     final String expectedCohortDescription = "cohort description";
-    org.pmiops.workbench.db.model.Cohort originalCohort =
-        new org.pmiops.workbench.db.model.Cohort();
+    DbCohort originalCohort =
+        new DbCohort();
     originalCohort.setName(expectedCohortName);
     originalCohort.setDescription(expectedCohortDescription);
     originalCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
@@ -1371,7 +1372,7 @@ public class WorkspacesControllerTest {
     assertThat(conceptSets.get(0).getConceptSetId())
         .isNotEqualTo(originalConceptSet.getConceptSetId());
 
-    List<org.pmiops.workbench.db.model.Cohort> cohorts =
+    List<DbCohort> cohorts =
         dataSetService.getCohortsForDataset(dataSets.get(0));
     assertThat(cohorts).hasSize(1);
     assertThat(cohorts.get(0).getName()).isEqualTo(expectedCohortName);

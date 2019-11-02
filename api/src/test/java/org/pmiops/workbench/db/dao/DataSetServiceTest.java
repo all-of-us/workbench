@@ -24,7 +24,7 @@ import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl.QueryAndParameters;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -88,7 +88,7 @@ public class DataSetServiceTest {
             cohortQueryBuilder,
             dataSetDao);
 
-    final Cohort cohort = buildSimpleCohort();
+    final DbCohort cohort = buildSimpleCohort();
     when(cohortDao.findCohortByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(cohort);
     when(cohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(
@@ -99,11 +99,11 @@ public class DataSetServiceTest {
         .thenReturn(QUERY_JOB_CONFIGURATION_1);
   }
 
-  private Cohort buildSimpleCohort() {
+  private DbCohort buildSimpleCohort() {
     final SearchRequest searchRequest = SearchRequests.males();
     final String cohortCriteria = new Gson().toJson(searchRequest);
 
-    final Cohort cohortDbModel = new Cohort();
+    final DbCohort cohortDbModel = new DbCohort();
     cohortDbModel.setCohortId(101L);
     cohortDbModel.setType("foo");
     cohortDbModel.setWorkspaceId(1L);
@@ -133,7 +133,7 @@ public class DataSetServiceTest {
 
   @Test
   public void testGetsCohortQueryStringAndCollectsNamedParameters() {
-    final Cohort cohortDbModel = buildSimpleCohort();
+    final DbCohort cohortDbModel = buildSimpleCohort();
     final QueryAndParameters queryAndParameters =
         dataSetServiceImpl.getCohortQueryStringAndCollectNamedParameters(cohortDbModel);
     assertThat(queryAndParameters.getQuery()).isNotEmpty();

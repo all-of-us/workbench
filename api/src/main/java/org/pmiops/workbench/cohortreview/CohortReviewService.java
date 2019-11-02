@@ -2,7 +2,7 @@ package org.pmiops.workbench.cohortreview;
 
 import java.util.List;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
@@ -14,12 +14,12 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 public interface CohortReviewService {
 
   /**
-   * Find the {@link Cohort} for the specified cohortId.
+   * Find the {@link DbCohort} for the specified cohortId.
    *
    * @param cohortId
    * @return
    */
-  Cohort findCohort(long cohortId);
+  DbCohort findCohort(long cohortId);
 
   /**
    * Validate that a workspace exists for the specified workspaceId, and set the workspace's. CDR

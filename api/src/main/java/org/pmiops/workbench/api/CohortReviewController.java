@@ -59,7 +59,7 @@ import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
@@ -278,7 +278,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               "Bad Request: Cohort Review size must be between %s and %s", 0, MAX_REVIEW_SIZE));
     }
 
-    Cohort cohort = cohortReviewService.findCohort(cohortId);
+    DbCohort cohort = cohortReviewService.findCohort(cohortId);
     // this validates that the user is in the proper workspace
     cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
         workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
@@ -407,7 +407,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     CohortReview cohortReview = cohortReviewService.findCohortReview(cohortReviewId);
-    Cohort cohort = cohortReviewService.findCohort(cohortReview.getCohortId());
+    DbCohort cohort = cohortReviewService.findCohort(cohortReview.getCohortId());
     cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
         workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
 
@@ -466,7 +466,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               MIN_LIMIT, MAX_LIMIT));
     }
     CohortReview cohortReview = cohortReviewService.findCohortReview(cohortReviewId);
-    Cohort cohort = cohortReviewService.findCohort(cohortReview.getCohortId());
+    DbCohort cohort = cohortReviewService.findCohort(cohortReview.getCohortId());
     cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
         workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
 
@@ -507,7 +507,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       getParticipantCohortStatus(
           String workspaceNamespace, String workspaceId, Long cohortReviewId, Long participantId) {
     CohortReview review = cohortReviewService.findCohortReview(cohortReviewId);
-    Cohort cohort = cohortReviewService.findCohort(review.getCohortId());
+    DbCohort cohort = cohortReviewService.findCohort(review.getCohortId());
     cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
         workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
 
@@ -529,7 +529,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cdrVersionId,
       PageFilterRequest request) {
     CohortReview cohortReview = null;
-    Cohort cohort = cohortReviewService.findCohort(cohortId);
+    DbCohort cohort = cohortReviewService.findCohort(cohortId);
 
     cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
         workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
@@ -572,7 +572,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long participantId,
       PageFilterRequest request) {
     CohortReview review = cohortReviewService.findCohortReview(cohortReviewId);
-    Cohort cohort = cohortReviewService.findCohort(review.getCohortId());
+    DbCohort cohort = cohortReviewService.findCohort(review.getCohortId());
     cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
         workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
 
@@ -611,7 +611,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public ResponseEntity<VocabularyListResponse> getVocabularies(
       String workspaceNamespace, String workspaceId, Long cohortReviewId) {
     CohortReview review = cohortReviewService.findCohortReview(cohortReviewId);
-    Cohort cohort = cohortReviewService.findCohort(review.getCohortId());
+    DbCohort cohort = cohortReviewService.findCohort(review.getCohortId());
     cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
         workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
 
@@ -693,7 +693,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
           Long participantId,
           ModifyCohortStatusRequest cohortStatusRequest) {
     CohortReview cohortReview = cohortReviewService.findCohortReview(cohortReviewId);
-    Cohort cohort = cohortReviewService.findCohort(cohortReview.getCohortId());
+    DbCohort cohort = cohortReviewService.findCohort(cohortReview.getCohortId());
     cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
         workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.WRITER);
 
@@ -718,7 +718,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
    * @param cohort
    * @param creator
    */
-  private CohortReview initializeCohortReview(Long cdrVersionId, Cohort cohort, User creator) {
+  private CohortReview initializeCohortReview(Long cdrVersionId, DbCohort cohort, User creator) {
     SearchRequest request = new Gson().fromJson(getCohortDefinition(cohort), SearchRequest.class);
 
     TableResult result =
@@ -768,12 +768,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   /**
    * Helper to method that consolidates access to Cohort Definition. Will throw a {@link
-   * NotFoundException} if {@link Cohort#getCriteria()} return null.
+   * NotFoundException} if {@link DbCohort#getCriteria()} return null.
    *
    * @param cohort
    * @return
    */
-  private String getCohortDefinition(Cohort cohort) {
+  private String getCohortDefinition(DbCohort cohort) {
     String definition = cohort.getCriteria();
     if (definition == null) {
       throw new NotFoundException(
@@ -793,7 +793,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
    * @return
    */
   private CohortReview createNewCohortReview(
-      Cohort cohort, Long cdrVersionId, Long cohortCount, User creator) {
+      DbCohort cohort, Long cdrVersionId, Long cohortCount, User creator) {
     return new CohortReview()
         .cohortId(cohort.getCohortId())
         .cohortDefinition(getCohortDefinition(cohort))

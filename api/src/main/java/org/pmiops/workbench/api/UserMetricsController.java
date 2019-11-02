@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -60,10 +61,10 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         return resource;
       };
 
-  private static final Function<org.pmiops.workbench.db.model.Cohort, Cohort> TO_CLIENT_COHORT =
-      new Function<org.pmiops.workbench.db.model.Cohort, Cohort>() {
+  private static final Function<DbCohort, Cohort> TO_CLIENT_COHORT =
+      new Function<DbCohort, Cohort>() {
         @Override
-        public Cohort apply(org.pmiops.workbench.db.model.Cohort cohort) {
+        public Cohort apply(DbCohort cohort) {
           if (cohort == null) {
             return null;
           }
