@@ -79,7 +79,7 @@
       </div>
     </div>
 </form>
-<div class="container count-preview" *ngIf="(selections && selections.length) && wizard.type !== criteriaType.AGE">
+<div class="container count-preview" *ngIf="showPreview">
   <div class="row">
     <ng-container>
       <div class="col-lg-12 text-padding" *ngIf="count">

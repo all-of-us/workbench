@@ -67,20 +67,17 @@ export class DemographicsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     wizardStore.subscribe(wizard => this.wizard = wizard);
-    selectionsStore
-      .subscribe(selections => {
-        this.selections = selections;
-        if (this.wizard && this.wizard.type !== CriteriaType.AGE) {
-          this.calculate();
-        }
-      });
+    selectionsStore.subscribe(selections => {
+      this.selections = selections;
+      if (this.wizard && this.wizard.type !== CriteriaType.AGE) {
+        this.calculate();
+      }
+    });
     if (this.wizard.type === CriteriaType.AGE) {
       this.initAgeControls();
       this.initDeceased();
       this.initAgeRange();
       this.loadNodesFromApi(CriteriaType[CriteriaType.DECEASED]);
-    } else if (this.selections.length) {
-      this.calculate();
     }
     this.loadNodesFromApi();
   }
@@ -149,6 +146,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         break;
       default:
         this.nodes = nodes;
+        if (this.wizard.item.searchParameters.length) {
+          this.calculate(true);
+        }
         this.loading = false;
     }
   }
@@ -331,14 +331,24 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     }
   }
 
-  calculate() {
+  calculate(init?: boolean) {
     this.count = 0;
-    this.wizard.item.searchParameters.forEach(selection => {
-      this.count += selection.count;
+    this.wizard.item.searchParameters.forEach(sp => {
+      if (init) {
+        const node = this.nodes.find(n => n.conceptId === sp.conceptId);
+        if (node) {
+          sp.count = node.count;
+        }
+      }
+      this.count += sp.count;
     });
   }
 
   get noSexData() {
     return !this.loading && this.wizard.type === CriteriaType.SEX && this.nodes.length === 0;
+  }
+
+  get showPreview() {
+    return !this.loading && (this.selections && this.selections.length) && this.wizard.type !== CriteriaType.AGE;
   }
 }
