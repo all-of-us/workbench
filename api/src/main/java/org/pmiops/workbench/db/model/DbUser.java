@@ -252,7 +252,9 @@ public class DbUser {
 
   public void setAuthoritiesEnum(Set<Authority> newAuthorities) {
     this.setAuthorities(
-        newAuthorities.stream().map(DbStorageEnums::authorityToStorage).collect(Collectors.toSet()));
+        newAuthorities.stream()
+            .map(DbStorageEnums::authorityToStorage)
+            .collect(Collectors.toSet()));
   }
 
   @OneToMany(

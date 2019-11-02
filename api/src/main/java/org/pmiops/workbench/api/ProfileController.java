@@ -103,16 +103,13 @@ public class ProfileController implements ProfileApiDelegate {
               return result;
             }
           };
-  private static final Function<
-          InstitutionalAffiliation, DbInstitutionalAffiliation>
+  private static final Function<InstitutionalAffiliation, DbInstitutionalAffiliation>
       FROM_CLIENT_INSTITUTIONAL_AFFILIATION =
-          new Function<
-              InstitutionalAffiliation, DbInstitutionalAffiliation>() {
+          new Function<InstitutionalAffiliation, DbInstitutionalAffiliation>() {
             @Override
             public DbInstitutionalAffiliation apply(
                 InstitutionalAffiliation institutionalAffiliation) {
-              DbInstitutionalAffiliation result =
-                  new DbInstitutionalAffiliation();
+              DbInstitutionalAffiliation result = new DbInstitutionalAffiliation();
               if (institutionalAffiliation.getInstitution() != null) {
                 result.setInstitution(institutionalAffiliation.getInstitution());
               }
@@ -128,31 +125,27 @@ public class ProfileController implements ProfileApiDelegate {
             }
           };
 
-  private static final Function<Address, DbAddress>
-      FROM_CLIENT_ADDRESS =
-          new Function<Address, DbAddress>() {
-            @Override
-            public DbAddress apply(Address address) {
-              DbAddress result =
-                  new DbAddress();
-              result.setStreetAddress1(address.getStreetAddress1());
-              result.setStreetAddress2(address.getStreetAddress2());
-              result.setCity(address.getCity());
-              result.setState(address.getState());
-              result.setZipCode(address.getZipCode());
-              result.setCountry(address.getCountry());
-              return result;
-            }
-          };
+  private static final Function<Address, DbAddress> FROM_CLIENT_ADDRESS =
+      new Function<Address, DbAddress>() {
+        @Override
+        public DbAddress apply(Address address) {
+          DbAddress result = new DbAddress();
+          result.setStreetAddress1(address.getStreetAddress1());
+          result.setStreetAddress2(address.getStreetAddress2());
+          result.setCity(address.getCity());
+          result.setState(address.getState());
+          result.setZipCode(address.getZipCode());
+          result.setCountry(address.getCountry());
+          return result;
+        }
+      };
 
   private static final Function<DemographicSurvey, DbDemographicSurvey>
       FROM_CLIENT_DEMOGRAPHIC_SURVEY =
           new Function<DemographicSurvey, DbDemographicSurvey>() {
             @Override
-            public DbDemographicSurvey apply(
-                DemographicSurvey demographicSurvey) {
-              DbDemographicSurvey result =
-                  new DbDemographicSurvey();
+            public DbDemographicSurvey apply(DemographicSurvey demographicSurvey) {
+              DbDemographicSurvey result = new DbDemographicSurvey();
               if (demographicSurvey.getRace() != null)
                 result.setRaceEnum(demographicSurvey.getRace());
               if (demographicSurvey.getEthnicity() != null)
@@ -617,8 +610,7 @@ public class ProfileController implements ProfileApiDelegate {
     boolean shouldAdd =
         user.getPageVisits().stream().noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
     if (shouldAdd) {
-      DbPageVisit firstPageVisit =
-          new DbPageVisit();
+      DbPageVisit firstPageVisit = new DbPageVisit();
       firstPageVisit.setPageId(newPageVisit.getPage());
       firstPageVisit.setUser(user);
       firstPageVisit.setFirstVisit(timestamp);
@@ -666,8 +658,7 @@ public class ProfileController implements ProfileApiDelegate {
       affiliation.setOrderIndex(i);
       affiliation.setUser(user);
       if (oldAffilations.hasNext()) {
-        DbInstitutionalAffiliation oldAffilation =
-            oldAffilations.next();
+        DbInstitutionalAffiliation oldAffilation = oldAffilations.next();
         if (!oldAffilation.getRole().equals(affiliation.getRole())
             || !oldAffilation.getInstitution().equals(affiliation.getInstitution())) {
           shouldAdd = true;

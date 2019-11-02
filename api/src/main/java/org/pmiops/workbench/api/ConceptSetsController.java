@@ -22,8 +22,8 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -61,52 +61,49 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   @VisibleForTesting int maxConceptsPerSet;
 
-  static final Function<DbConceptSet, ConceptSet>
-      TO_CLIENT_CONCEPT_SET =
-          new Function<DbConceptSet, ConceptSet>() {
-            @Override
-            public ConceptSet apply(DbConceptSet conceptSet) {
-              ConceptSet result =
-                  new ConceptSet()
-                      .etag(Etags.fromVersion(conceptSet.getVersion()))
-                      .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
-                      .creationTime(conceptSet.getCreationTime().getTime())
-                      .description(conceptSet.getDescription())
-                      .id(conceptSet.getConceptSetId())
-                      .name(conceptSet.getName())
-                      .domain(conceptSet.getDomainEnum())
-                      .participantCount(conceptSet.getParticipantCount())
-                      .survey(conceptSet.getSurveysEnum());
-              if (conceptSet.getCreator() != null) {
-                result.creator(conceptSet.getCreator().getEmail());
-              }
-              return result;
-            }
-          };
+  static final Function<DbConceptSet, ConceptSet> TO_CLIENT_CONCEPT_SET =
+      new Function<DbConceptSet, ConceptSet>() {
+        @Override
+        public ConceptSet apply(DbConceptSet conceptSet) {
+          ConceptSet result =
+              new ConceptSet()
+                  .etag(Etags.fromVersion(conceptSet.getVersion()))
+                  .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
+                  .creationTime(conceptSet.getCreationTime().getTime())
+                  .description(conceptSet.getDescription())
+                  .id(conceptSet.getConceptSetId())
+                  .name(conceptSet.getName())
+                  .domain(conceptSet.getDomainEnum())
+                  .participantCount(conceptSet.getParticipantCount())
+                  .survey(conceptSet.getSurveysEnum());
+          if (conceptSet.getCreator() != null) {
+            result.creator(conceptSet.getCreator().getEmail());
+          }
+          return result;
+        }
+      };
 
-  private static final Function<ConceptSet, DbConceptSet>
-      FROM_CLIENT_CONCEPT_SET =
-          new Function<ConceptSet, DbConceptSet>() {
-            @Override
-            public DbConceptSet apply(ConceptSet conceptSet) {
-              DbConceptSet dbConceptSet =
-                  new DbConceptSet();
-              dbConceptSet.setDomainEnum(conceptSet.getDomain());
-              if (conceptSet.getSurvey() != null) {
-                dbConceptSet.setSurveysEnum(conceptSet.getSurvey());
-              }
-              if (dbConceptSet.getDomainEnum() == null) {
-                throw new BadRequestException(
-                    "Domain " + conceptSet.getDomain() + " is not allowed for concept sets");
-              }
-              if (conceptSet.getEtag() != null) {
-                dbConceptSet.setVersion(Etags.toVersion(conceptSet.getEtag()));
-              }
-              dbConceptSet.setDescription(conceptSet.getDescription());
-              dbConceptSet.setName(conceptSet.getName());
-              return dbConceptSet;
-            }
-          };
+  private static final Function<ConceptSet, DbConceptSet> FROM_CLIENT_CONCEPT_SET =
+      new Function<ConceptSet, DbConceptSet>() {
+        @Override
+        public DbConceptSet apply(ConceptSet conceptSet) {
+          DbConceptSet dbConceptSet = new DbConceptSet();
+          dbConceptSet.setDomainEnum(conceptSet.getDomain());
+          if (conceptSet.getSurvey() != null) {
+            dbConceptSet.setSurveysEnum(conceptSet.getSurvey());
+          }
+          if (dbConceptSet.getDomainEnum() == null) {
+            throw new BadRequestException(
+                "Domain " + conceptSet.getDomain() + " is not allowed for concept sets");
+          }
+          if (conceptSet.getEtag() != null) {
+            dbConceptSet.setVersion(Etags.toVersion(conceptSet.getEtag()));
+          }
+          dbConceptSet.setDescription(conceptSet.getDescription());
+          dbConceptSet.setName(conceptSet.getName());
+          return dbConceptSet;
+        }
+      };
 
   private static final Ordering<Concept> CONCEPT_NAME_ORDERING =
       Ordering.from(String.CASE_INSENSITIVE_ORDER).onResultOf(Concept::getConceptName);
@@ -144,8 +141,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (request.getAddedIds() == null || request.getAddedIds().size() == 0) {
       throw new BadRequestException("Cannot create a concept set with no concepts");
     }
-    DbConceptSet dbConceptSet =
-        FROM_CLIENT_CONCEPT_SET.apply(request.getConceptSet());
+    DbConceptSet dbConceptSet = FROM_CLIENT_CONCEPT_SET.apply(request.getConceptSet());
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     dbConceptSet.setCreator(userProvider.get());
     dbConceptSet.setWorkspaceId(workspace.getWorkspaceId());
@@ -218,8 +214,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    List<DbConceptSet> conceptSets =
-        conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+    List<DbConceptSet> conceptSets = conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
     ConceptSetListResponse response = new ConceptSetListResponse();
     // Concept sets in the list response will *not* have concepts under them, as this could be
     // a lot of data... you need to open up a concept set to see what concepts are within it.
@@ -282,8 +277,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     return ResponseEntity.ok(toClientConceptSet(dbConceptSet));
   }
 
-  private void addConceptsToSet(
-      DbConceptSet dbConceptSet, List<Long> addedIds) {
+  private void addConceptsToSet(DbConceptSet dbConceptSet, List<Long> addedIds) {
     Domain domainEnum = dbConceptSet.getDomainEnum();
     Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(addedIds);
     List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
@@ -388,16 +382,14 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       throw new BadRequestException(
           "Target workspace does not have the same CDR version as current workspace");
     }
-    DbConceptSet conceptSet =
-        conceptSetDao.findOne(Long.valueOf(fromConceptSetId));
+    DbConceptSet conceptSet = conceptSetDao.findOne(Long.valueOf(fromConceptSetId));
     if (conceptSet == null) {
       throw new NotFoundException(
           String.format(
               "Concept set %s does not exist",
               createResourcePath(fromWorkspaceNamespace, fromWorkspaceId, fromConceptSetId)));
     }
-    DbConceptSet newConceptSet =
-        new DbConceptSet(conceptSet);
+    DbConceptSet newConceptSet = new DbConceptSet(conceptSet);
 
     newConceptSet.setName(copyRequest.getNewName());
     newConceptSet.setCreator(userProvider.get());

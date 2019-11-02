@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.model.RecentWorkspace;
@@ -54,8 +54,7 @@ public class WorkspaceConversionUtils {
   }
 
   public static Workspace toApiWorkspace(
-      DbWorkspace workspace,
-      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
+      DbWorkspace workspace, org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     if (workspace.getPopulation()) {
       researchPurpose.setPopulationDetails(new ArrayList<>(workspace.getSpecificPopulationsEnum()));
@@ -104,8 +103,7 @@ public class WorkspaceConversionUtils {
     return result;
   }
 
-  public static UserRole toApiUserRole(
-      DbUser user, WorkspaceAccessEntry aclEntry) {
+  public static UserRole toApiUserRole(DbUser user, WorkspaceAccessEntry aclEntry) {
     UserRole result = new UserRole();
     result.setEmail(user.getEmail());
     result.setGivenName(user.getGivenName());
@@ -118,8 +116,7 @@ public class WorkspaceConversionUtils {
    * This probably doesn't belong in a mapper service but it makes the refactoring easier atm. Sets
    * user-editable research purpose detail fields.
    */
-  public static void setResearchPurposeDetails(
-      DbWorkspace dbWorkspace, ResearchPurpose purpose) {
+  public static void setResearchPurposeDetails(DbWorkspace dbWorkspace, ResearchPurpose purpose) {
     dbWorkspace.setDiseaseFocusedResearch(purpose.getDiseaseFocusedResearch());
     dbWorkspace.setDiseaseOfFocus(purpose.getDiseaseOfFocus());
     dbWorkspace.setMethodsDevelopment(purpose.getMethodsDevelopment());
@@ -143,8 +140,7 @@ public class WorkspaceConversionUtils {
     dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
   }
 
-  private static ResearchPurpose createResearchPurpose(
-      DbWorkspace workspace) {
+  private static ResearchPurpose createResearchPurpose(DbWorkspace workspace) {
     ResearchPurpose researchPurpose =
         new ResearchPurpose()
             .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())

@@ -302,7 +302,8 @@ public class AnnotationQueryBuilder {
                     if (column.equals(REVIEW_STATUS_COLUMN)) {
                       result.put(
                           column,
-                          DbStorageEnums.cohortStatusFromStorage(((Number) obj).shortValue()).name());
+                          DbStorageEnums.cohortStatusFromStorage(((Number) obj).shortValue())
+                              .name());
                     } else if (obj instanceof java.sql.Date) {
                       result.put(column, DATE_FORMAT.format((java.sql.Date) obj));
                     } else {

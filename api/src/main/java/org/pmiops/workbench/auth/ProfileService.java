@@ -22,11 +22,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProfileService {
-  private static final Function<
-      DbInstitutionalAffiliation, InstitutionalAffiliation>
+  private static final Function<DbInstitutionalAffiliation, InstitutionalAffiliation>
       TO_CLIENT_INSTITUTIONAL_AFFILIATION =
-          new Function<
-              DbInstitutionalAffiliation, InstitutionalAffiliation>() {
+          new Function<DbInstitutionalAffiliation, InstitutionalAffiliation>() {
             @Override
             public InstitutionalAffiliation apply(
                 DbInstitutionalAffiliation institutionalAffiliation) {
@@ -38,24 +36,22 @@ public class ProfileService {
             }
           };
 
-  private static final Function<DbPageVisit, PageVisit>
-      TO_CLIENT_PAGE_VISIT =
-          new Function<DbPageVisit, PageVisit>() {
-            @Override
-            public PageVisit apply(DbPageVisit pageVisit) {
-              PageVisit result = new PageVisit();
-              result.setPage(pageVisit.getPageId());
-              result.setFirstVisit(pageVisit.getFirstVisit().getTime());
-              return result;
-            }
-          };
+  private static final Function<DbPageVisit, PageVisit> TO_CLIENT_PAGE_VISIT =
+      new Function<DbPageVisit, PageVisit>() {
+        @Override
+        public PageVisit apply(DbPageVisit pageVisit) {
+          PageVisit result = new PageVisit();
+          result.setPage(pageVisit.getPageId());
+          result.setFirstVisit(pageVisit.getFirstVisit().getTime());
+          return result;
+        }
+      };
 
   private static final Function<DbDemographicSurvey, DemographicSurvey>
       TO_CLIENT_DEMOGRAPHIC_SURVEY =
           new Function<DbDemographicSurvey, DemographicSurvey>() {
             @Override
-            public DemographicSurvey apply(
-                DbDemographicSurvey demographicSurvey) {
+            public DemographicSurvey apply(DbDemographicSurvey demographicSurvey) {
               DemographicSurvey result = new DemographicSurvey();
               if (result.getDisability() != null)
                 result.setDisability(demographicSurvey.getDisabilityEnum().equals(Disability.TRUE));
@@ -69,24 +65,23 @@ public class ProfileService {
             }
           };
 
-  private static final Function<DbAddress, Address>
-      TO_CLIENT_ADDRESS_SURVEY =
-          new Function<DbAddress, Address>() {
-            @Override
-            public Address apply(DbAddress address) {
-              Address result = new Address();
-              if (address != null) {
-                result.setStreetAddress1(address.getStreetAddress1());
-                result.setStreetAddress2(address.getStreetAddress2());
-                result.setCity(address.getCity());
-                result.setState(address.getState());
-                result.setCountry(address.getCountry());
-                result.setZipCode(address.getZipCode());
-                return result;
-              }
-              return result;
-            }
-          };
+  private static final Function<DbAddress, Address> TO_CLIENT_ADDRESS_SURVEY =
+      new Function<DbAddress, Address>() {
+        @Override
+        public Address apply(DbAddress address) {
+          Address result = new Address();
+          if (address != null) {
+            result.setStreetAddress1(address.getStreetAddress1());
+            result.setStreetAddress2(address.getStreetAddress2());
+            result.setCity(address.getCity());
+            result.setState(address.getState());
+            result.setCountry(address.getCountry());
+            result.setZipCode(address.getZipCode());
+            return result;
+          }
+          return result;
+        }
+      };
 
   private final UserDao userDao;
   private final FreeTierBillingService freeTierBillingService;

@@ -133,7 +133,9 @@ public class CohortMaterializationService {
       return ImmutableSet.of();
     }
     List<Short> dbStatusFilter =
-        statusFilter.stream().map(DbStorageEnums::cohortStatusToStorage).collect(Collectors.toList());
+        statusFilter.stream()
+            .map(DbStorageEnums::cohortStatusToStorage)
+            .collect(Collectors.toList());
     Set<Long> participantIds =
         participantCohortStatusDao
             .findByParticipantKey_CohortReviewIdAndStatusIn(

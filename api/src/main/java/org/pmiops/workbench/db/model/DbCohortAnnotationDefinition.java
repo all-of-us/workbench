@@ -130,7 +130,8 @@ public class DbCohortAnnotationDefinition {
     this.enumValues = enumValues;
   }
 
-  public DbCohortAnnotationDefinition enumValues(SortedSet<DbCohortAnnotationEnumValue> enumValues) {
+  public DbCohortAnnotationDefinition enumValues(
+      SortedSet<DbCohortAnnotationEnumValue> enumValues) {
     this.setEnumValues(enumValues);
     return this;
   }

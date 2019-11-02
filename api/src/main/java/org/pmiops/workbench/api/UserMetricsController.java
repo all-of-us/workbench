@@ -86,25 +86,24 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         }
       };
 
-  private static final Function<DbConceptSet, ConceptSet>
-      TO_CLIENT_CONCEPT_SET =
-          new Function<DbConceptSet, ConceptSet>() {
-            @Override
-            public ConceptSet apply(DbConceptSet conceptSet) {
-              if (conceptSet == null) {
-                return null;
-              }
-              ConceptSet result =
-                  new ConceptSet()
-                      .etag(Etags.fromVersion(conceptSet.getVersion()))
-                      .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
-                      .creationTime(conceptSet.getCreationTime().getTime())
-                      .description(conceptSet.getDescription())
-                      .id(conceptSet.getConceptSetId())
-                      .name(conceptSet.getName());
-              return result;
-            }
-          };
+  private static final Function<DbConceptSet, ConceptSet> TO_CLIENT_CONCEPT_SET =
+      new Function<DbConceptSet, ConceptSet>() {
+        @Override
+        public ConceptSet apply(DbConceptSet conceptSet) {
+          if (conceptSet == null) {
+            return null;
+          }
+          ConceptSet result =
+              new ConceptSet()
+                  .etag(Etags.fromVersion(conceptSet.getVersion()))
+                  .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
+                  .creationTime(conceptSet.getCreationTime().getTime())
+                  .description(conceptSet.getDescription())
+                  .id(conceptSet.getConceptSetId())
+                  .name(conceptSet.getName());
+          return result;
+        }
+      };
 
   @Autowired
   UserMetricsController(

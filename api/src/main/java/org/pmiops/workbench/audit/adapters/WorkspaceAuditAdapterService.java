@@ -10,8 +10,7 @@ public interface WorkspaceAuditAdapterService {
   void fireDeleteAction(DbWorkspace dbWorkspace);
 
   void fireDuplicateAction(
-      DbWorkspace sourceWorkspaceDbModel,
-      DbWorkspace destinationWorkspaceDbModel);
+      DbWorkspace sourceWorkspaceDbModel, DbWorkspace destinationWorkspaceDbModel);
 
   void fireCollaborateAction(long sourceWorkspaceId, Map<Long, String> aclStringsByUserId);
 }

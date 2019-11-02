@@ -27,8 +27,8 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbDatasetValue;
@@ -272,8 +272,7 @@ public class DataSetServiceImpl implements DataSetService {
       throw new BadRequestException("Data Sets must include at least one cohort and concept.");
     }
 
-    final ImmutableList.Builder<DbConceptSet>
-        selectedConceptSetsBuilder = ImmutableList.builder();
+    final ImmutableList.Builder<DbConceptSet> selectedConceptSetsBuilder = ImmutableList.builder();
     selectedConceptSetsBuilder.addAll(initialSelectedConceptSets);
 
     // If pre packaged all survey concept set is selected create a temp concept set with concept ids
@@ -462,7 +461,8 @@ public class DataSetServiceImpl implements DataSetService {
 
   // Gather all the concept IDs from the ConceptSets provided, taking account of
   // domain-specific rules.
-  private Optional<String> buildConceptIdSqlInClause(Domain domain, List<DbConceptSet> conceptSets) {
+  private Optional<String> buildConceptIdSqlInClause(
+      Domain domain, List<DbConceptSet> conceptSets) {
     final String conceptSetIDs =
         conceptSets.stream()
             .filter(cs -> domain == cs.getDomainEnum())
@@ -543,7 +543,10 @@ public class DataSetServiceImpl implements DataSetService {
   @Override
   @Transactional
   public DbDataset cloneDataSetToWorkspace(
-      DbDataset fromDataSet, DbWorkspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds) {
+      DbDataset fromDataSet,
+      DbWorkspace toWorkspace,
+      Set<Long> cohortIds,
+      Set<Long> conceptSetIds) {
     DbDataset toDataSet = new DbDataset(fromDataSet);
     toDataSet.setWorkspaceId(toWorkspace.getWorkspaceId());
     toDataSet.setCreatorId(toWorkspace.getCreator().getUserId());

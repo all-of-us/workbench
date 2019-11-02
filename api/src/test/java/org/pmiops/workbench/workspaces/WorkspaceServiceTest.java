@@ -27,9 +27,9 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.Workspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
@@ -148,8 +148,7 @@ public class WorkspaceServiceTest {
 
   private DbWorkspace buildDbWorkspace(
       long dbId, String name, String namespace, WorkspaceActiveStatus activeStatus) {
-    DbWorkspace workspace =
-        new DbWorkspace();
+    DbWorkspace workspace = new DbWorkspace();
     Timestamp nowTimestamp = Timestamp.from(NOW);
     workspace.setLastModifiedTime(nowTimestamp);
     workspace.setCreationTime(nowTimestamp);

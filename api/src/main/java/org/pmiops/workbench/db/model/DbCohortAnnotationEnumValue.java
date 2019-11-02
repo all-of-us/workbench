@@ -72,7 +72,8 @@ public class DbCohortAnnotationEnumValue implements Comparable {
     return cohortAnnotationDefinition;
   }
 
-  public void setCohortAnnotationDefinition(DbCohortAnnotationDefinition cohortAnnotationDefinition) {
+  public void setCohortAnnotationDefinition(
+      DbCohortAnnotationDefinition cohortAnnotationDefinition) {
     this.cohortAnnotationDefinition = cohortAnnotationDefinition;
   }
 

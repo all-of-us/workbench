@@ -40,11 +40,11 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -170,8 +170,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return sb.toString();
   }
 
-  private CdrVersion setLiveCdrVersionId(
-      DbWorkspace dbWorkspace, String cdrVersionId) {
+  private CdrVersion setLiveCdrVersionId(DbWorkspace dbWorkspace, String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
       throw new BadRequestException("missing cdrVersionId");
     }
@@ -239,14 +238,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         attemptFirecloudWorkspaceCreation(workspaceId);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbWorkspace dbWorkspace =
-        new DbWorkspace();
+    DbWorkspace dbWorkspace = new DbWorkspace();
     setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
 
     setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    DbWorkspace reqWorkspace =
-        WorkspaceConversionUtils.toDbWorkspace(workspace);
+    DbWorkspace reqWorkspace = WorkspaceConversionUtils.toDbWorkspace(workspace);
     // TODO: enforce data access level authorization
     dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
     dbWorkspace.setName(reqWorkspace.getName());
@@ -290,8 +287,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // to the workspace and its resources in the Workbench database.
     // This is for auditing purposes and potentially workspace restore.
     // TODO: do we want to delete workspace resource references and save only metadata?
-    DbWorkspace dbWorkspace =
-        workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     // This automatically handles access control to the workspace.
     fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
@@ -317,8 +313,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<Workspace> updateWorkspace(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
-    DbWorkspace dbWorkspace =
-        workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
@@ -429,8 +424,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Firecloud workspaces / buckets, but a user should not be able to see
     // half-way cloned workspaces via AoU - so it will just appear as a
     // transient failure.
-    DbWorkspace dbWorkspace =
-        new DbWorkspace();
+    DbWorkspace dbWorkspace = new DbWorkspace();
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     setDbWorkspaceFields(dbWorkspace, user, toFcWorkspaceId, toFcWorkspace, now);
@@ -503,8 +497,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("Missing required update field 'workspaceEtag'");
     }
 
-    DbWorkspace dbWorkspace =
-        workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     int version = Etags.toVersion(request.getWorkspaceEtag());
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify user roles with outdated workspace etag");
@@ -565,7 +558,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   // Note we do not paginate the workspaces list, since we expect few workspaces
   // to require review.
   //
-  // We can add pagination in the DAO by returning Slice<DbWorkspace> if we want the method to return
+  // We can add pagination in the DAO by returning Slice<DbWorkspace> if we want the method to
+  // return
   // pagination information (e.g. are there more workspaces to get), and Page<DbWorkspace> if we
   // want the method to return both pagination information and a total count.
   @Override
@@ -724,8 +718,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceUserRolesResponse> getFirecloudWorkspaceUserRoles(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace =
-        workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     Map<String, WorkspaceAccessEntry> firecloudAcls =
         workspaceService.getFirecloudWorkspaceAcls(
@@ -747,8 +740,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> publishWorkspace(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace =
-        workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), true);
     return ResponseEntity.ok(new EmptyResponse());
@@ -758,8 +750,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> unpublishWorkspace(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace =
-        workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
     return ResponseEntity.ok(new EmptyResponse());
@@ -772,13 +763,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         userRecentWorkspaces.stream()
             .map(DbUserRecentWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    List<DbWorkspace> dbWorkspaces =
-        workspaceService.getDao().findAllByWorkspaceIdIn(workspaceIds);
+    List<DbWorkspace> dbWorkspaces = workspaceService.getDao().findAllByWorkspaceIdIn(workspaceIds);
     Map<Long, DbWorkspace> dbWorkspacesById =
         dbWorkspaces.stream()
-            .collect(
-                Collectors.toMap(
-                    DbWorkspace::getWorkspaceId, Function.identity()));
+            .collect(Collectors.toMap(DbWorkspace::getWorkspaceId, Function.identity()));
     Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsById =
         dbWorkspaces.stream()
             .collect(
@@ -799,9 +787,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<RecentWorkspaceResponse> updateRecentWorkspaces(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace =
-        workspaceService.get(workspaceNamespace, workspaceId);
-    DbUserRecentWorkspace userRecentWorkspace = workspaceService.updateRecentWorkspaces(dbWorkspace);
+    DbWorkspace dbWorkspace = workspaceService.get(workspaceNamespace, workspaceId);
+    DbUserRecentWorkspace userRecentWorkspace =
+        workspaceService.updateRecentWorkspaces(dbWorkspace);
     WorkspaceAccessLevel workspaceAccessLevel =
         workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
 

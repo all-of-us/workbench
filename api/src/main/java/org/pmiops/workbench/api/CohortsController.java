@@ -21,11 +21,11 @@ import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -205,8 +205,7 @@ public class CohortsController implements CohortsApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    DbCohort dbCohort =
-        getDbCohort(workspaceNamespace, workspaceId, cohortId);
+    DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
     cohortDao.delete(dbCohort);
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -218,8 +217,7 @@ public class CohortsController implements CohortsApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    DbCohort dbCohort =
-        getDbCohort(workspaceNamespace, workspaceId, cohortId);
+    DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
     return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
   }
 
@@ -230,7 +228,8 @@ public class CohortsController implements CohortsApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    DbWorkspace workspace = workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
+    DbWorkspace workspace =
+        workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
     CohortListResponse response = new CohortListResponse();
     Set<DbCohort> cohorts = workspace.getCohorts();
     if (cohorts != null) {
@@ -250,8 +249,7 @@ public class CohortsController implements CohortsApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    DbCohort dbCohort =
-        getDbCohort(workspaceNamespace, workspaceId, cohortId);
+    DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
     if (Strings.isNullOrEmpty(cohort.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
     }
@@ -454,8 +452,7 @@ public class CohortsController implements CohortsApiDelegate {
     return ResponseEntity.ok(cohortMaterializationService.getAnnotations(cohortReview, request));
   }
 
-  private DbCohort getDbCohort(
-      String workspaceNamespace, String workspaceId, Long cohortId) {
+  private DbCohort getDbCohort(String workspaceNamespace, String workspaceId, Long cohortId) {
     DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
     DbCohort cohort = cohortDao.findOne(cohortId);

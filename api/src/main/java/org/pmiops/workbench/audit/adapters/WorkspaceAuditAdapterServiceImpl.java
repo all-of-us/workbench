@@ -14,8 +14,8 @@ import org.pmiops.workbench.audit.AgentType;
 import org.pmiops.workbench.audit.TargetType;
 import org.pmiops.workbench.audit.targetproperties.AclTargetProperty;
 import org.pmiops.workbench.audit.targetproperties.WorkspaceTargetProperty;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,8 +105,7 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
 
   @Override
   public void fireDuplicateAction(
-      DbWorkspace sourceWorkspaceDbModel,
-      DbWorkspace destinationWorkspaceDbModel) {
+      DbWorkspace sourceWorkspaceDbModel, DbWorkspace destinationWorkspaceDbModel) {
     try {
       // We represent the duplication as a single action with events with different
       // ActionTypes: DUPLICATE_FROM and DUPLICATE_TO. The latter action generates many events

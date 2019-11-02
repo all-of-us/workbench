@@ -29,10 +29,10 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -586,7 +586,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                   return recentWorkspace;
                 })
             .orElseGet(
-                () -> new DbUserRecentWorkspace(workspace.getWorkspaceId(), userId, lastAccessDate));
+                () ->
+                    new DbUserRecentWorkspace(workspace.getWorkspaceId(), userId, lastAccessDate));
     userRecentWorkspaceDao.save(matchingRecentWorkspace);
     handleWorkspaceLimit(userId);
     return matchingRecentWorkspace;

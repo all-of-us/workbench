@@ -84,15 +84,15 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
@@ -644,8 +644,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
-    verify(mockWorkspaceAuditAdapterService)
-        .fireDeleteAction(any(DbWorkspace.class));
+    verify(mockWorkspaceAuditAdapterService).fireDeleteAction(any(DbWorkspace.class));
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");
@@ -892,9 +891,7 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
     verify(mockWorkspaceAuditAdapterService)
-        .fireDuplicateAction(
-            any(DbWorkspace.class),
-            any(DbWorkspace.class));
+        .fireDuplicateAction(any(DbWorkspace.class), any(DbWorkspace.class));
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
@@ -1287,8 +1284,7 @@ public class WorkspacesControllerTest {
 
     final String expectedConceptSetName = "cs1";
     final String expectedConceptSetDescription = "d1";
-    DbConceptSet originalConceptSet =
-        new DbConceptSet();
+    DbConceptSet originalConceptSet = new DbConceptSet();
     originalConceptSet.setName(expectedConceptSetName);
     originalConceptSet.setDescription(expectedConceptSetDescription);
     originalConceptSet.setDomainEnum(Domain.CONDITION);
@@ -1298,8 +1294,7 @@ public class WorkspacesControllerTest {
 
     final String expectedCohortName = "cohort name";
     final String expectedCohortDescription = "cohort description";
-    DbCohort originalCohort =
-        new DbCohort();
+    DbCohort originalCohort = new DbCohort();
     originalCohort.setName(expectedCohortName);
     originalCohort.setDescription(expectedCohortDescription);
     originalCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
@@ -1307,8 +1302,7 @@ public class WorkspacesControllerTest {
 
     final String expectedCohortReviewName = "cohort review";
     final String expectedCohortReviewDefinition = "cohort definition";
-    DbCohortReview originalCohortReview =
-        new DbCohortReview();
+    DbCohortReview originalCohortReview = new DbCohortReview();
     originalCohortReview.setCohortName(expectedCohortReviewName);
     originalCohortReview.setCohortDefinition(expectedCohortReviewDefinition);
     originalCohortReview.setCohortId(originalCohort.getCohortId());
@@ -1363,8 +1357,7 @@ public class WorkspacesControllerTest {
     assertThat(dataSets.get(0).getName()).isEqualTo(expectedDatasetName);
     assertThat(dataSets.get(0).getDataSetId()).isNotEqualTo(originalDataSet.getDataSetId());
 
-    List<DbConceptSet> conceptSets =
-        dataSetService.getConceptSetsForDataset(dataSets.get(0));
+    List<DbConceptSet> conceptSets = dataSetService.getConceptSetsForDataset(dataSets.get(0));
     assertThat(conceptSets).hasSize(1);
     assertThat(conceptSets.get(0).getName()).isEqualTo(expectedConceptSetName);
     assertThat(conceptSets.get(0).getDescription()).isEqualTo(expectedConceptSetDescription);
@@ -1374,8 +1367,7 @@ public class WorkspacesControllerTest {
     assertThat(conceptSets.get(0).getConceptSetId())
         .isNotEqualTo(originalConceptSet.getConceptSetId());
 
-    List<DbCohort> cohorts =
-        dataSetService.getCohortsForDataset(dataSets.get(0));
+    List<DbCohort> cohorts = dataSetService.getCohortsForDataset(dataSets.get(0));
     assertThat(cohorts).hasSize(1);
     assertThat(cohorts.get(0).getName()).isEqualTo(expectedCohortName);
     assertThat(cohorts.get(0).getDescription()).isEqualTo(expectedCohortDescription);
@@ -2698,8 +2690,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubFcGetWorkspaceACL();
-    DbWorkspace dbWorkspace =
-        workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
     workspaceService.updateRecentWorkspaces(dbWorkspace, currentUser.getUserId(), NOW);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();

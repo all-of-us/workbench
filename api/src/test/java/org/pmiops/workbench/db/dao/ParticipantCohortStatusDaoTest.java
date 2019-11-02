@@ -54,7 +54,9 @@ public class ParticipantCohortStatusDaoTest {
         new DbParticipantCohortStatus()
             .statusEnum(CohortStatus.INCLUDED)
             .participantKey(
-                new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1))
+                new DbParticipantCohortStatusKey()
+                    .cohortReviewId(COHORT_REVIEW_ID)
+                    .participantId(1))
             .genderConceptId(8507L)
             .birthDate(birthDate)
             .raceConceptId(8515L)
@@ -66,7 +68,9 @@ public class ParticipantCohortStatusDaoTest {
         new DbParticipantCohortStatus()
             .statusEnum(CohortStatus.EXCLUDED)
             .participantKey(
-                new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2))
+                new DbParticipantCohortStatusKey()
+                    .cohortReviewId(COHORT_REVIEW_ID)
+                    .participantId(2))
             .genderConceptId(8507L)
             .birthDate(birthDate)
             .raceConceptId(8515L)

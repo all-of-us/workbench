@@ -117,8 +117,8 @@ public interface CohortReviewService {
   DbParticipantCohortStatus findParticipantCohortStatus(Long cohortReviewId, Long participantId);
 
   /**
-   * Find a list of {@link DbParticipantCohortStatus} for the specified cohortReviewId, filtering and
-   * paging.
+   * Find a list of {@link DbParticipantCohortStatus} for the specified cohortReviewId, filtering
+   * and paging.
    *
    * @param cohortReviewId
    * @param pageRequest
@@ -146,8 +146,8 @@ public interface CohortReviewService {
       Long cohortReviewId, DbParticipantCohortAnnotation participantCohortAnnotation);
 
   /**
-   * Save the {@link DbParticipantCohortAnnotation} for the specified participantId, annotationId and
-   * {@link ModifyParticipantCohortAnnotationRequest}.
+   * Save the {@link DbParticipantCohortAnnotation} for the specified participantId, annotationId
+   * and {@link ModifyParticipantCohortAnnotationRequest}.
    *
    * @param annotationId
    * @param participantId

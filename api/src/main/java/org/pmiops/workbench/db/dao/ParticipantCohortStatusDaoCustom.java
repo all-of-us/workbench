@@ -11,7 +11,8 @@ import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
  */
 public interface ParticipantCohortStatusDaoCustom {
 
-  void saveParticipantCohortStatusesCustom(List<DbParticipantCohortStatus> participantCohortStatuses);
+  void saveParticipantCohortStatusesCustom(
+      List<DbParticipantCohortStatus> participantCohortStatuses);
 
   List<DbParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest);
 
