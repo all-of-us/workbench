@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DataSet;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DataSetValue;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface DataSetService {
-  DataSet saveDataSet(
+  DbDataset saveDataSet(
       String name,
       Boolean includesAllParticipants,
       String description,
@@ -38,12 +38,12 @@ public interface DataSetService {
       String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);
 
-  DataSet cloneDataSetToWorkspace(
-      DataSet fromDataSet, DbWorkspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds);
+  DbDataset cloneDataSetToWorkspace(
+      DbDataset fromDataSet, DbWorkspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds);
 
-  List<DataSet> getDataSets(DbWorkspace workspace);
+  List<DbDataset> getDataSets(DbWorkspace workspace);
 
-  List<DbConceptSet> getConceptSetsForDataset(DataSet dataSet);
+  List<DbConceptSet> getConceptSetsForDataset(DbDataset dataSet);
 
-  List<DbCohort> getCohortsForDataset(DataSet dataSet);
+  List<DbCohort> getCohortsForDataset(DbDataset dataSet);
 }

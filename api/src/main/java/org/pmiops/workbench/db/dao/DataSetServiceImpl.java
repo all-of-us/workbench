@@ -30,7 +30,7 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DataSet;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DataSetValue;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -160,7 +160,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
-  public DataSet saveDataSet(
+  public DbDataset saveDataSet(
       String name,
       Boolean includesAllParticipants,
       String description,
@@ -171,7 +171,7 @@ public class DataSetServiceImpl implements DataSetService {
       PrePackagedConceptSetEnum prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime) {
-    final DataSet dataSetModel = new DataSet();
+    final DbDataset dataSetModel = new DbDataset();
     dataSetModel.setName(name);
     dataSetModel.setVersion(DATA_SET_VERSION);
     dataSetModel.setIncludesAllParticipants(includesAllParticipants);
@@ -542,9 +542,9 @@ public class DataSetServiceImpl implements DataSetService {
 
   @Override
   @Transactional
-  public DataSet cloneDataSetToWorkspace(
-      DataSet fromDataSet, DbWorkspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds) {
-    DataSet toDataSet = new DataSet(fromDataSet);
+  public DbDataset cloneDataSetToWorkspace(
+      DbDataset fromDataSet, DbWorkspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds) {
+    DbDataset toDataSet = new DbDataset(fromDataSet);
     toDataSet.setWorkspaceId(toWorkspace.getWorkspaceId());
     toDataSet.setCreatorId(toWorkspace.getCreator().getUserId());
     toDataSet.setLastModifiedTime(toWorkspace.getLastModifiedTime());
@@ -556,7 +556,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
-  public List<DataSet> getDataSets(DbWorkspace workspace) {
+  public List<DbDataset> getDataSets(DbWorkspace workspace) {
     // Allows for fetching data sets for a workspace once its collection is no longer
     // bound to a session.
     return dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
@@ -564,14 +564,14 @@ public class DataSetServiceImpl implements DataSetService {
 
   @Transactional
   @Override
-  public List<DbConceptSet> getConceptSetsForDataset(DataSet dataSet) {
+  public List<DbConceptSet> getConceptSetsForDataset(DbDataset dataSet) {
     return conceptSetDao.findAllByConceptSetIdIn(
         dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
   }
 
   @Transactional
   @Override
-  public List<DbCohort> getCohortsForDataset(DataSet dataSet) {
+  public List<DbCohort> getCohortsForDataset(DbDataset dataSet) {
     return cohortDao.findAllByCohortIdIn(dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
   }
 

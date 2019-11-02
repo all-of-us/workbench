@@ -18,7 +18,7 @@ import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 
 @Entity
 @Table(name = "data_set")
-public class DataSet {
+public class DbDataset {
   private static final int INITIAL_VERSION = 1;
 
   private long dataSetId;
@@ -36,11 +36,11 @@ public class DataSet {
   private List<DataSetValue> values;
   private short prePackagedConceptSet;
 
-  public DataSet() {
-    setVersion(DataSet.INITIAL_VERSION);
+  public DbDataset() {
+    setVersion(DbDataset.INITIAL_VERSION);
   }
 
-  public DataSet(
+  public DbDataset(
       long dataSetId,
       long workspaceId,
       String name,
@@ -51,16 +51,16 @@ public class DataSet {
     this.dataSetId = dataSetId;
     this.workspaceId = workspaceId;
     this.name = name;
-    this.version = DataSet.INITIAL_VERSION;
+    this.version = DbDataset.INITIAL_VERSION;
     this.description = description;
     this.creatorId = creatorId;
     this.creationTime = creationTime;
     this.invalid = invalid;
   }
 
-  public DataSet(DataSet dataSet) {
+  public DbDataset(DbDataset dataSet) {
     setName(dataSet.getName());
-    setVersion(DataSet.INITIAL_VERSION);
+    setVersion(DbDataset.INITIAL_VERSION);
     setDescription(dataSet.getDescription());
     setInvalid(dataSet.getInvalid());
     setIncludesAllParticipants(dataSet.getIncludesAllParticipants());

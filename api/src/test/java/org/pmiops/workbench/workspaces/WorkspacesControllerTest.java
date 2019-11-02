@@ -86,7 +86,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.DataSet;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -1318,7 +1318,7 @@ public class WorkspacesControllerTest {
     originalCohort = cohortDao.save(originalCohort);
 
     final String expectedDatasetName = "data set name";
-    DataSet originalDataSet = new DataSet();
+    DbDataset originalDataSet = new DbDataset();
     originalDataSet.setName(expectedDatasetName);
     originalDataSet.setVersion(1);
     originalDataSet.setConceptSetIds(
@@ -1358,7 +1358,7 @@ public class WorkspacesControllerTest {
             cloned.getId(),
             StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
 
-    List<DataSet> dataSets = dataSetService.getDataSets(clonedDbWorkspace);
+    List<DbDataset> dataSets = dataSetService.getDataSets(clonedDbWorkspace);
     assertThat(dataSets).hasSize(1);
     assertThat(dataSets.get(0).getName()).isEqualTo(expectedDatasetName);
     assertThat(dataSets.get(0).getDataSetId()).isNotEqualTo(originalDataSet.getDataSetId());

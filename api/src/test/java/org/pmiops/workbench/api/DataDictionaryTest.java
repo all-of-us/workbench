@@ -21,7 +21,7 @@ import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.DataDictionaryEntry;
+import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -88,7 +88,7 @@ public class DataDictionaryTest {
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersionDao.save(cdrVersion);
 
-    DataDictionaryEntry dataDictionaryEntry = new DataDictionaryEntry();
+    DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
     dataDictionaryEntry.setCdrVersion(cdrVersion);
     dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
     dataDictionaryEntry.setRelevantOmopTable(ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(Domain.DRUG));
@@ -111,7 +111,7 @@ public class DataDictionaryTest {
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersionDao.save(cdrVersion);
 
-    DataDictionaryEntry dataDictionaryEntry = new DataDictionaryEntry();
+    DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
     dataDictionaryEntry.setCdrVersion(cdrVersion);
     dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
     dataDictionaryEntry.setRelevantOmopTable(ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(domain));

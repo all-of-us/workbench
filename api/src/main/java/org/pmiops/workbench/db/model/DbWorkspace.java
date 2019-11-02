@@ -84,7 +84,7 @@ public class DbWorkspace {
   private Timestamp lastAccessedTime;
   private Set<DbCohort> cohorts = new HashSet<>();
   private Set<DbConceptSet> conceptSets = new HashSet<>();
-  private Set<DataSet> dataSets = new HashSet<>();
+  private Set<DbDataset> dataSets = new HashSet<>();
   private Short activeStatus;
   private Short billingMigrationStatus =
       StorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.OLD);
@@ -487,15 +487,15 @@ public class DbWorkspace {
   }
 
   @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
-  public Set<DataSet> getDataSets() {
+  public Set<DbDataset> getDataSets() {
     return dataSets;
   }
 
-  public void setDataSets(Set<DataSet> dataSets) {
+  public void setDataSets(Set<DbDataset> dataSets) {
     this.dataSets = dataSets;
   }
 
-  public void addDataSet(DataSet dataSet) {
+  public void addDataSet(DbDataset dataSet) {
     this.dataSets.add(dataSet);
   }
 

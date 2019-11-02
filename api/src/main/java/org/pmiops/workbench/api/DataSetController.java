@@ -45,6 +45,8 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DataSetValue;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -154,7 +156,7 @@ public class DataSetController implements DataSetApiDelegate {
             .map(this::getDataSetValuesFromDomainValueSet)
             .collect(toImmutableList());
     try {
-      org.pmiops.workbench.db.model.DataSet savedDataSet =
+      DbDataset savedDataSet =
           dataSetService.saveDataSet(
               dataSetRequest.getName(),
               dataSetRequest.getIncludesAllParticipants(),
@@ -196,10 +198,10 @@ public class DataSetController implements DataSetApiDelegate {
     }
   }
 
-  private final Function<org.pmiops.workbench.db.model.DataSet, DataSet> TO_CLIENT_DATA_SET =
-      new Function<org.pmiops.workbench.db.model.DataSet, DataSet>() {
+  private final Function<DbDataset, DataSet> TO_CLIENT_DATA_SET =
+      new Function<DbDataset, DataSet>() {
         @Override
-        public DataSet apply(org.pmiops.workbench.db.model.DataSet dataSet) {
+        public DataSet apply(DbDataset dataSet) {
           final DataSet result =
               new DataSet()
                   .name(dataSet.getName())
@@ -528,7 +530,7 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    List<org.pmiops.workbench.db.model.DataSet> dataSets =
+    List<DbDataset> dataSets =
         dataSetDao.findByWorkspaceIdAndInvalid(workspace.getWorkspaceId(), false);
     DataSetListResponse response = new DataSetListResponse();
 
@@ -545,7 +547,7 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, MarkDataSetRequest markDataSetRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    List<org.pmiops.workbench.db.model.DataSet> dbDataSetList = new ArrayList<>();
+    List<DbDataset> dbDataSetList = new ArrayList<>();
     if (markDataSetRequest.getResourceType().equalsIgnoreCase(COHORT)) {
       dbDataSetList = dataSetDao.findDataSetsByCohortIds(markDataSetRequest.getId());
     } else if (markDataSetRequest.getResourceType().equalsIgnoreCase(CONCEPT_SET)) {
@@ -571,7 +573,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    org.pmiops.workbench.db.model.DataSet dataSet =
+    DbDataset dataSet =
         getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
     dataSetDao.delete(dataSet.getDataSetId());
     return ResponseEntity.ok(new EmptyResponse());
@@ -580,7 +582,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSet> updateDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId, DataSetRequest request) {
-    org.pmiops.workbench.db.model.DataSet dbDataSet =
+    DbDataset dbDataSet =
         getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.WRITER);
     if (Strings.isNullOrEmpty(request.getEtag())) {
       throw new BadRequestException("missing required update field 'etag'");
@@ -616,7 +618,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSet> getDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    org.pmiops.workbench.db.model.DataSet dataSet =
+    DbDataset dataSet =
         getDbDataSet(workspaceNamespace, workspaceId, dataSetId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(TO_CLIENT_DATA_SET.apply(dataSet));
   }
@@ -627,8 +629,8 @@ public class DataSetController implements DataSetApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    List<org.pmiops.workbench.db.model.DataSet> dbDataSets =
-        new ArrayList<org.pmiops.workbench.db.model.DataSet>();
+    List<DbDataset> dbDataSets =
+        new ArrayList<DbDataset>();
     if (resourceType.equals(COHORT)) {
       dbDataSets = dataSetDao.findDataSetsByCohortIds(id);
     } else if (resourceType.equals(CONCEPT_SET)) {
@@ -653,7 +655,7 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("Invalid Domain");
     }
 
-    List<org.pmiops.workbench.db.model.DataDictionaryEntry> dataDictionaryEntries =
+    List<DbDataDictionaryEntry> dataDictionaryEntries =
         dataDictionaryEntryDao.findByFieldNameAndCdrVersion(domainValue, cdrVersion);
 
     if (dataDictionaryEntries.isEmpty()) {
@@ -674,7 +676,7 @@ public class DataSetController implements DataSetApiDelegate {
         .put("source", new JSONArray().put(cellInformation));
   }
 
-  private org.pmiops.workbench.db.model.DataSet getDbDataSet(
+  private DbDataset getDbDataSet(
       String workspaceNamespace,
       String workspaceId,
       Long dataSetId,
@@ -683,7 +685,7 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, workspaceAccessLevel);
 
-    org.pmiops.workbench.db.model.DataSet dataSet = dataSetDao.findOne(dataSetId);
+    DbDataset dataSet = dataSetDao.findOne(dataSetId);
     if (dataSet == null || workspace.getWorkspaceId() != dataSet.getWorkspaceId()) {
       throw new NotFoundException(
           String.format(
