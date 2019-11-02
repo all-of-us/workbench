@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortReview;
-import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.AnnotationQuery;
@@ -302,7 +302,7 @@ public class AnnotationQueryBuilder {
                     if (column.equals(REVIEW_STATUS_COLUMN)) {
                       result.put(
                           column,
-                          StorageEnums.cohortStatusFromStorage(((Number) obj).shortValue()).name());
+                          DbStorageEnums.cohortStatusFromStorage(((Number) obj).shortValue()).name());
                     } else if (obj instanceof java.sql.Date) {
                       result.put(column, DATE_FORMAT.format((java.sql.Date) obj));
                     } else {

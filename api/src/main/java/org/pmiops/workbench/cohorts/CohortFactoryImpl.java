@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class CohortFactoryImpl implements CohortFactory {
 
   @Override
   public DbCohort createCohort(
-      org.pmiops.workbench.model.Cohort apiCohort, User creator, long workspaceId) {
+      org.pmiops.workbench.model.Cohort apiCohort, DbUser creator, long workspaceId) {
     return createCohort(
         apiCohort.getDescription(),
         apiCohort.getName(),
@@ -33,7 +33,7 @@ public class CohortFactoryImpl implements CohortFactory {
 
   @Override
   public DbCohort duplicateCohort(
-      String newName, User creator, DbWorkspace workspace, DbCohort original) {
+      String newName, DbUser creator, DbWorkspace workspace, DbCohort original) {
     return createCohort(
         original.getDescription(),
         newName,
@@ -64,7 +64,7 @@ public class CohortFactoryImpl implements CohortFactory {
   }
 
   private DbCohort createCohort(
-      String desc, String name, String type, String criteria, User creator, long workspaceId) {
+      String desc, String name, String type, String criteria, DbUser creator, long workspaceId) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbCohort cohort = new DbCohort();
 

@@ -18,8 +18,8 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.UserRecentResource;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -44,7 +44,7 @@ public class UserRecentResourceServiceTest {
   @Autowired UserRecentResourceDao notebookCohortCacheDao;
   @Autowired ConceptSetDao conceptSetDao;
 
-  private User newUser = new User();
+  private DbUser newUser = new DbUser();
   private DbWorkspace newWorkspace = new DbWorkspace();
   private Long cohortId;
   private Long conceptSetId;
@@ -202,7 +202,7 @@ public class UserRecentResourceServiceTest {
         new Timestamp(clock.millis()));
     rowsCount = userRecentResourceService.getDao().count();
     assertEquals(rowsCount, userRecentResourceService.getUserEntryCount());
-    UserRecentResource cache =
+    DbUserRecentResource cache =
         userRecentResourceService
             .getDao()
             .findByUserIdAndWorkspaceIdAndNotebookName(
@@ -256,7 +256,7 @@ public class UserRecentResourceServiceTest {
     userDao.save(newUser);
     userRecentResourceService.updateCohortEntry(
         workspaceId, 78l, cohortId, new Timestamp(clock.millis()));
-    List<UserRecentResource> resources = userRecentResourceService.findAllResourcesByUser(userId);
+    List<DbUserRecentResource> resources = userRecentResourceService.findAllResourcesByUser(userId);
     assertEquals(resources.size(), 3);
     assertEquals(resources.get(0).getNotebookName(), "gs://someDirectory1/notebooks/notebook2");
     assertEquals(resources.get(1).getCohort().getCohortId(), cohortId.longValue());

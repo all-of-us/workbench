@@ -17,9 +17,9 @@ import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
@@ -145,7 +145,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     return cohortReviewDao.findByFirecloudNameAndActiveStatus(
         ns,
         firecloudName,
-        StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   @Override
@@ -156,21 +156,21 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   @Override
   @Transactional
   public void saveFullCohortReview(
-      DbCohortReview cohortReview, List<ParticipantCohortStatus> participantCohortStatuses) {
+      DbCohortReview cohortReview, List<DbParticipantCohortStatus> participantCohortStatuses) {
     saveCohortReview(cohortReview);
     participantCohortStatusDao.saveParticipantCohortStatusesCustom(participantCohortStatuses);
   }
 
   @Override
-  public ParticipantCohortStatus saveParticipantCohortStatus(
-      ParticipantCohortStatus participantCohortStatus) {
+  public DbParticipantCohortStatus saveParticipantCohortStatus(
+      DbParticipantCohortStatus participantCohortStatus) {
     return participantCohortStatusDao.save(participantCohortStatus);
   }
 
   @Override
-  public ParticipantCohortStatus findParticipantCohortStatus(
+  public DbParticipantCohortStatus findParticipantCohortStatus(
       Long cohortReviewId, Long participantId) {
-    ParticipantCohortStatus participantCohortStatus =
+    DbParticipantCohortStatus participantCohortStatus =
         participantCohortStatusDao
             .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                 cohortReviewId, participantId);
@@ -183,7 +183,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     return participantCohortStatus;
   }
 
-  public List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
+  public List<DbParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
     return participantCohortStatusDao.findAll(cohortReviewId, pageRequest);
   }
 
@@ -193,8 +193,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public ParticipantCohortAnnotation saveParticipantCohortAnnotation(
-      Long cohortReviewId, ParticipantCohortAnnotation participantCohortAnnotation) {
+  public DbParticipantCohortAnnotation saveParticipantCohortAnnotation(
+      Long cohortReviewId, DbParticipantCohortAnnotation participantCohortAnnotation) {
     DbCohortAnnotationDefinition cohortAnnotationDefinition =
         findCohortAnnotationDefinition(
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
@@ -215,12 +215,12 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public ParticipantCohortAnnotation updateParticipantCohortAnnotation(
+  public DbParticipantCohortAnnotation updateParticipantCohortAnnotation(
       Long annotationId,
       Long cohortReviewId,
       Long participantId,
       ModifyParticipantCohortAnnotationRequest modifyRequest) {
-    ParticipantCohortAnnotation participantCohortAnnotation =
+    DbParticipantCohortAnnotation participantCohortAnnotation =
         participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(
             annotationId, cohortReviewId, participantId);
     if (participantCohortAnnotation == null) {
@@ -262,7 +262,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   @Override
   public void deleteParticipantCohortAnnotation(
       Long annotationId, Long cohortReviewId, Long participantId) {
-    ParticipantCohortAnnotation participantCohortAnnotation =
+    DbParticipantCohortAnnotation participantCohortAnnotation =
         participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(
             annotationId, cohortReviewId, participantId);
     if (participantCohortAnnotation == null) {
@@ -276,7 +276,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public ParticipantCohortAnnotation findParticipantCohortAnnotation(
+  public DbParticipantCohortAnnotation findParticipantCohortAnnotation(
       Long cohortReviewId, Long cohortAnnotationDefinitionId, Long participantId) {
     return participantCohortAnnotationDao
         .findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(
@@ -284,7 +284,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(
+  public List<DbParticipantCohortAnnotation> findParticipantCohortAnnotations(
       Long cohortReviewId, Long participantId) {
     return participantCohortAnnotationDao.findByCohortReviewIdAndParticipantId(
         cohortReviewId, participantId);
@@ -296,7 +296,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
    * @param participantCohortAnnotation
    */
   private void validateParticipantCohortAnnotation(
-      ParticipantCohortAnnotation participantCohortAnnotation,
+      DbParticipantCohortAnnotation participantCohortAnnotation,
       DbCohortAnnotationDefinition cohortAnnotationDefinition) {
 
     if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.BOOLEAN)) {

@@ -18,10 +18,10 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
-import org.pmiops.workbench.db.model.DemographicSurvey;
-import org.pmiops.workbench.db.model.InstitutionalAffiliation;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.UserDataUseAgreement;
+import org.pmiops.workbench.db.model.DbDemographicSurvey;
+import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -57,7 +57,7 @@ public class UserService {
   private final int MAX_RETRIES = 3;
   private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
 
-  private final Provider<User> userProvider;
+  private final Provider<DbUser> userProvider;
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
   private final UserDataUseAgreementDao userDataUseAgreementDao;
@@ -71,7 +71,7 @@ public class UserService {
 
   @Autowired
   public UserService(
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
       UserDataUseAgreementDao userDataUseAgreementDao,
@@ -99,8 +99,8 @@ public class UserService {
    * <p>Ensures that the data access level for the user reflects the state of other fields on the
    * user; handles conflicts with concurrent updates by retrying.
    */
-  private User updateUserWithRetries(Function<User, User> modifyUser) {
-    User user = userProvider.get();
+  private DbUser updateUserWithRetries(Function<DbUser, DbUser> modifyUser) {
+    DbUser user = userProvider.get();
     return updateUserWithRetries(modifyUser, user);
   }
 
@@ -110,7 +110,7 @@ public class UserService {
    * <p>Ensures that the data access level for the user reflects the state of other fields on the
    * user; handles conflicts with concurrent updates by retrying.
    */
-  public User updateUserWithRetries(Function<User, User> userModifier, User user) {
+  public DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser user) {
     int objectLockingFailureCount = 0;
     int statementClosedCount = 0;
     while (true) {
@@ -151,7 +151,7 @@ public class UserService {
     }
   }
 
-  private void updateDataAccessLevel(User user) {
+  private void updateDataAccessLevel(DbUser user) {
     boolean dataUseAgreementCompliant =
         user.getDataUseAgreementCompletionTime() != null
             || user.getDataUseAgreementBypassTime() != null
@@ -198,12 +198,12 @@ public class UserService {
     }
   }
 
-  private boolean isServiceAccount(User user) {
+  private boolean isServiceAccount(DbUser user) {
     return configProvider.get().auth.serviceAccountApiUsers.contains(user.getEmail());
   }
 
-  public User createServiceAccountUser(String email) {
-    User user = new User();
+  public DbUser createServiceAccountUser(String email) {
+    DbUser user = new DbUser();
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     user.setEmail(email);
     user.setDisabled(false);
@@ -221,7 +221,7 @@ public class UserService {
     return user;
   }
 
-  public User createUser(
+  public DbUser createUser(
       String givenName,
       String familyName,
       String email,
@@ -242,7 +242,7 @@ public class UserService {
         null);
   }
 
-  public User createUser(
+  public DbUser createUser(
       String givenName,
       String familyName,
       String email,
@@ -251,9 +251,9 @@ public class UserService {
       String organization,
       String areaOfResearch,
       DbAddress address,
-      DemographicSurvey demographicSurvey,
-      List<InstitutionalAffiliation> institutionalAffiliations) {
-    User user = new User();
+      DbDemographicSurvey demographicSurvey,
+      List<DbInstitutionalAffiliation> institutionalAffiliations) {
+    DbUser user = new DbUser();
     user.setCreationNonce(Math.abs(random.nextLong()));
     user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
     user.setEmail(email);
@@ -274,7 +274,7 @@ public class UserService {
     }
     if (demographicSurvey != null) demographicSurvey.setUser(user);
     if (institutionalAffiliations != null) {
-      final User u = user;
+      final DbUser u = user;
       institutionalAffiliations.forEach(
           affiliation -> {
             affiliation.setUser(u);
@@ -294,14 +294,14 @@ public class UserService {
     return user;
   }
 
-  public User submitDataUseAgreement(
-      User user, Integer dataUseAgreementSignedVersion, String initials) {
+  public DbUser submitDataUseAgreement(
+      DbUser user, Integer dataUseAgreementSignedVersion, String initials) {
     // FIXME: this should not be hardcoded
     if (dataUseAgreementSignedVersion != CURRENT_DATA_USE_AGREEMENT_VERSION) {
       throw new BadRequestException("Data Use Agreement Version is not up to date");
     }
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    UserDataUseAgreement dataUseAgreement = new UserDataUseAgreement();
+    DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
     dataUseAgreement.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
     dataUseAgreement.setUserId(user.getUserId());
     dataUseAgreement.setUserFamilyName(user.getFamilyName());
@@ -317,7 +317,7 @@ public class UserService {
 
   @Transactional
   public void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName) {
-    List<UserDataUseAgreement> dataUseAgreements =
+    List<DbUserDataUseAgreement> dataUseAgreements =
         userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(
             userProvider.get().getUserId());
     dataUseAgreements.forEach(
@@ -328,8 +328,8 @@ public class UserService {
     userDataUseAgreementDao.save(dataUseAgreements);
   }
 
-  public User setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
-    User user = userDao.findUserByUserId(userId);
+  public DbUser setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
+    DbUser user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(
         (u) -> {
           u.setDataUseAgreementBypassTime(bypassTime);
@@ -338,8 +338,8 @@ public class UserService {
         user);
   }
 
-  public User setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
-    User user = userDao.findUserByUserId(userId);
+  public DbUser setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
+    DbUser user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(
         (u) -> {
           u.setComplianceTrainingBypassTime(bypassTime);
@@ -348,8 +348,8 @@ public class UserService {
         user);
   }
 
-  public User setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
-    User user = userDao.findUserByUserId(userId);
+  public DbUser setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
+    DbUser user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(
         (u) -> {
           u.setBetaAccessBypassTime(bypassTime);
@@ -358,8 +358,8 @@ public class UserService {
         user);
   }
 
-  public User setEmailVerificationBypassTime(Long userId, Timestamp bypassTime) {
-    User user = userDao.findUserByUserId(userId);
+  public DbUser setEmailVerificationBypassTime(Long userId, Timestamp bypassTime) {
+    DbUser user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(
         (u) -> {
           u.setEmailVerificationBypassTime(bypassTime);
@@ -368,8 +368,8 @@ public class UserService {
         user);
   }
 
-  public User setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
-    User user = userDao.findUserByUserId(userId);
+  public DbUser setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
+    DbUser user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(
         (u) -> {
           u.setEraCommonsBypassTime(bypassTime);
@@ -378,8 +378,8 @@ public class UserService {
         user);
   }
 
-  public User setIdVerificationBypassTime(Long userId, Timestamp bypassTime) {
-    User user = userDao.findUserByUserId(userId);
+  public DbUser setIdVerificationBypassTime(Long userId, Timestamp bypassTime) {
+    DbUser user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(
         (u) -> {
           u.setIdVerificationBypassTime(bypassTime);
@@ -388,8 +388,8 @@ public class UserService {
         user);
   }
 
-  public User setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
-    User user = userDao.findUserByUserId(userId);
+  public DbUser setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
+    DbUser user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(
         (u) -> {
           u.setTwoFactorAuthBypassTime(bypassTime);
@@ -398,7 +398,7 @@ public class UserService {
         user);
   }
 
-  public User setClusterRetryCount(int clusterRetryCount) {
+  public DbUser setClusterRetryCount(int clusterRetryCount) {
     return updateUserWithRetries(
         (user) -> {
           user.setClusterCreateRetries(clusterRetryCount);
@@ -406,7 +406,7 @@ public class UserService {
         });
   }
 
-  public User setBillingRetryCount(int billingRetryCount) {
+  public DbUser setBillingRetryCount(int billingRetryCount) {
     return updateUserWithRetries(
         (user) -> {
           user.setBillingProjectRetries(billingRetryCount);
@@ -414,8 +414,8 @@ public class UserService {
         });
   }
 
-  public User setDisabledStatus(Long userId, boolean disabled) {
-    User user = userDao.findUserByUserId(userId);
+  public DbUser setDisabledStatus(Long userId, boolean disabled) {
+    DbUser user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(
         (u) -> {
           u.setDisabled(disabled);
@@ -424,7 +424,7 @@ public class UserService {
         user);
   }
 
-  public List<User> getAllUsers() {
+  public List<DbUser> getAllUsers() {
     return userDao.findUsers();
   }
 
@@ -460,7 +460,7 @@ public class UserService {
   }
 
   /** Find users matching the user's name or email */
-  public List<User> findUsersBySearchString(String term, Sort sort) {
+  public List<DbUser> findUsersBySearchString(String term, Sort sort) {
     List<Short> dataAccessLevels =
         Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
             .map(CommonStorageEnums::dataAccessLevelToStorage)
@@ -469,7 +469,7 @@ public class UserService {
   }
 
   /** Syncs the current user's training status from Moodle. */
-  public User syncComplianceTrainingStatus()
+  public DbUser syncComplianceTrainingStatus()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     return syncComplianceTrainingStatus(userProvider.get());
   }
@@ -486,7 +486,7 @@ public class UserService {
    * MOODLE. 3. If there are no badges for a user set training completion time and expiration date
    * as null
    */
-  public User syncComplianceTrainingStatus(User user)
+  public DbUser syncComplianceTrainingStatus(DbUser user)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     if (isServiceAccount(user)) {
       // Skip sync for service account user rows.
@@ -562,7 +562,7 @@ public class UserService {
    *
    * <p>This method saves the updated user object to the database and returns it.
    */
-  private User setEraCommonsStatus(User targetUser, NihStatus nihStatus) {
+  private DbUser setEraCommonsStatus(DbUser targetUser, NihStatus nihStatus) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     return updateUserWithRetries(
@@ -608,8 +608,8 @@ public class UserService {
   }
 
   /** Syncs the eraCommons access module status for the current user. */
-  public User syncEraCommonsStatus() {
-    User user = userProvider.get();
+  public DbUser syncEraCommonsStatus() {
+    DbUser user = userProvider.get();
     NihStatus nihStatus = fireCloudService.getNihStatus();
     return setEraCommonsStatus(user, nihStatus);
   }
@@ -622,7 +622,7 @@ public class UserService {
    *
    * <p>Returns the updated User object.
    */
-  public User syncEraCommonsStatusUsingImpersonation(User user)
+  public DbUser syncEraCommonsStatusUsingImpersonation(DbUser user)
       throws IOException, org.pmiops.workbench.firecloud.ApiException {
     if (isServiceAccount(user)) {
       // Skip sync for service account user rows.
@@ -651,7 +651,7 @@ public class UserService {
   }
 
   /** */
-  public User syncTwoFactorAuthStatus(User targetUser) {
+  public DbUser syncTwoFactorAuthStatus(DbUser targetUser) {
     if (isServiceAccount(targetUser)) {
       // Skip sync for service account user rows.
       return targetUser;

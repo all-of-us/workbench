@@ -33,8 +33,8 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
-import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.CdrQuery;
@@ -313,14 +313,14 @@ public class CohortMaterializationServiceTest {
     return makeRequest(pageSize).fieldSet(fieldSet);
   }
 
-  private ParticipantCohortStatus makeStatus(
+  private DbParticipantCohortStatus makeStatus(
       long cohortReviewId, long participantId, CohortStatus status) {
-    ParticipantCohortStatusKey key =
-        new ParticipantCohortStatusKey()
+    DbParticipantCohortStatusKey key =
+        new DbParticipantCohortStatusKey()
             .cohortReviewId(cohortReviewId)
             .participantId(participantId);
-    ParticipantCohortStatus result =
-        new ParticipantCohortStatus().statusEnum(status).participantKey(key);
+    DbParticipantCohortStatus result =
+        new DbParticipantCohortStatus().statusEnum(status).participantKey(key);
     return result;
   }
 

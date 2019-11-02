@@ -38,9 +38,9 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbCohortReview;
-import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
-import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.DbParticipantIdAndCohortStatus;
+import org.pmiops.workbench.db.model.DbParticipantIdAndCohortStatus.Key;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CdrQuery;
 import org.pmiops.workbench.model.CohortAnnotationsRequest;
@@ -133,13 +133,13 @@ public class CohortMaterializationService {
       return ImmutableSet.of();
     }
     List<Short> dbStatusFilter =
-        statusFilter.stream().map(StorageEnums::cohortStatusToStorage).collect(Collectors.toList());
+        statusFilter.stream().map(DbStorageEnums::cohortStatusToStorage).collect(Collectors.toList());
     Set<Long> participantIds =
         participantCohortStatusDao
             .findByParticipantKey_CohortReviewIdAndStatusIn(
                 cohortReview.getCohortReviewId(), dbStatusFilter)
             .stream()
-            .map(ParticipantIdAndCohortStatus::getParticipantKey)
+            .map(DbParticipantIdAndCohortStatus::getParticipantKey)
             .map(Key::getParticipantId)
             .collect(Collectors.toSet());
     return participantIds;

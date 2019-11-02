@@ -9,7 +9,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -34,14 +34,14 @@ public class CdrVersionService {
               .put(DataAccessLevel.PROTECTED, REGISTERED_AND_PROTECTED)
               .build();
 
-  private Provider<User> userProvider;
+  private Provider<DbUser> userProvider;
   private Provider<WorkbenchConfig> configProvider;
   private FireCloudService fireCloudService;
   private CdrVersionDao cdrVersionDao;
 
   @Autowired
   public CdrVersionService(
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> configProvider,
       FireCloudService fireCloudService,
       CdrVersionDao cdrVersionDao) {
@@ -73,7 +73,7 @@ public class CdrVersionService {
    * Retrieve all the CDR versions visible to users with the specified data access level. When
    * {@link DataAccessLevel#PROTECTED} is provided, CDR versions for both {@link
    * DataAccessLevel#REGISTERED} and {@link DataAccessLevel#PROTECTED} are returned. Note: this
-   * relies on {@link User#dataAccessLevel} accurately reflecting that the user is in the
+   * relies on {@link DbUser#dataAccessLevel} accurately reflecting that the user is in the
    * authorization domain that has access to the CDR version BigQuery data sets with the matching
    * {@link DataAccessLevel} values.
    *

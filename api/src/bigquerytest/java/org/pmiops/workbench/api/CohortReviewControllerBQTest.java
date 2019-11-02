@@ -41,9 +41,9 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
-import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -107,7 +107,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     @Bean
     @Scope("prototype")
-    User user() {
+    DbUser user() {
       return currentUser;
     }
 
@@ -145,11 +145,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private UserDao userDao;
 
-  @Mock private Provider<User> userProvider;
+  @Mock private Provider<DbUser> userProvider;
 
   private DbCohort cohort;
   private DbCohortReview review;
-  private static User currentUser;
+  private static DbUser currentUser;
 
   @Override
   public List<String> getTableNames() {
@@ -164,7 +164,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() throws Exception {
-    User user = new User();
+    DbUser user = new DbUser();
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
     user.setDisabled(false);
@@ -209,20 +209,20 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .cohortId(cohort.getCohortId());
     cohortReviewDao.save(review);
 
-    ParticipantCohortStatusKey key =
-        new ParticipantCohortStatusKey()
+    DbParticipantCohortStatusKey key =
+        new DbParticipantCohortStatusKey()
             .participantId(PARTICIPANT_ID)
             .cohortReviewId(review.getCohortReviewId());
-    ParticipantCohortStatus participantCohortStatus =
-        new ParticipantCohortStatus().participantKey(key);
+    DbParticipantCohortStatus participantCohortStatus =
+        new DbParticipantCohortStatus().participantKey(key);
     participantCohortStatusDao.save(participantCohortStatus);
 
-    ParticipantCohortStatusKey key2 =
-        new ParticipantCohortStatusKey()
+    DbParticipantCohortStatusKey key2 =
+        new DbParticipantCohortStatusKey()
             .participantId(PARTICIPANT_ID2)
             .cohortReviewId(review.getCohortReviewId());
-    ParticipantCohortStatus participantCohortStatus2 =
-        new ParticipantCohortStatus().participantKey(key2);
+    DbParticipantCohortStatus participantCohortStatus2 =
+        new DbParticipantCohortStatus().participantKey(key2);
     participantCohortStatusDao.save(participantCohortStatus2);
   }
 

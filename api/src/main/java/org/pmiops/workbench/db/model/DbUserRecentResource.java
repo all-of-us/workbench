@@ -12,7 +12,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "user_recent_resource")
-public class UserRecentResource {
+public class DbUserRecentResource {
   private Timestamp lastAccessDate;
   private int id;
   private String notebookName;
@@ -92,9 +92,9 @@ public class UserRecentResource {
     this.conceptSet = conceptSet;
   }
 
-  public UserRecentResource() {}
+  public DbUserRecentResource() {}
 
-  public UserRecentResource(
+  public DbUserRecentResource(
       long workspaceId, long userId, String notebookName, Timestamp lastAccessDate) {
     this.workspaceId = workspaceId;
     this.userId = userId;
@@ -104,7 +104,7 @@ public class UserRecentResource {
     this.conceptSet = null;
   }
 
-  public UserRecentResource(long workspaceId, long userId, Timestamp lastAccessDate) {
+  public DbUserRecentResource(long workspaceId, long userId, Timestamp lastAccessDate) {
     this.workspaceId = workspaceId;
     this.userId = userId;
     this.notebookName = null;

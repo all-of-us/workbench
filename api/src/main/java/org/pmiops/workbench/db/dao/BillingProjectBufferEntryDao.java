@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus;
-import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.data.jpa.repository.Query;
@@ -42,9 +42,9 @@ public interface BillingProjectBufferEntryDao
   // Billing Migration Status.  These are ready to be garbage-collected
   default List<String> findBillingProjectsForGarbageCollection() {
     return findByStatusAndActiveStatusAndBillingMigrationStatus(
-        StorageEnums.billingProjectBufferStatusToStorage(BillingProjectBufferStatus.ASSIGNED),
-        StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.DELETED),
-        StorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.NEW));
+        DbStorageEnums.billingProjectBufferStatusToStorage(BillingProjectBufferStatus.ASSIGNED),
+        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.DELETED),
+        DbStorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.NEW));
   }
 
   @Query(

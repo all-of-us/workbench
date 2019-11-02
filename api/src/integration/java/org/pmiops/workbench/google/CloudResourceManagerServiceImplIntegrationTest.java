@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.IntegrationTestConfig;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -61,7 +61,7 @@ public class CloudResourceManagerServiceImplIntegrationTest {
 
   @Test
   public void testGetAllProjectsForUser() {
-    User testUser = new User();
+    DbUser testUser = new DbUser();
     testUser.setEmail(CLOUD_RESOURCE_MANAGER_TEST_USER_EMAIL);
     List<Project> projectList = service.getAllProjectsForUser(testUser);
     assertThat(projectList.size()).isEqualTo(1);

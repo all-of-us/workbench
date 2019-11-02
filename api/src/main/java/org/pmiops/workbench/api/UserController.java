@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -27,7 +27,7 @@ public class UserController implements UserApiDelegate {
   private static final Logger log = Logger.getLogger(UserController.class.getName());
   private static final int DEFAULT_PAGE_SIZE = 10;
   private static final String DEFAULT_SORT_FIELD = "email";
-  private static final Function<User, org.pmiops.workbench.model.User> TO_USER_RESPONSE_USER =
+  private static final Function<DbUser, org.pmiops.workbench.model.User> TO_USER_RESPONSE_USER =
       user -> {
         org.pmiops.workbench.model.User modelUser = new org.pmiops.workbench.model.User();
         modelUser.setEmail(user.getEmail());
@@ -36,14 +36,14 @@ public class UserController implements UserApiDelegate {
         return modelUser;
       };
 
-  private Provider<User> userProvider;
+  private Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> configProvider;
   private final UserService userService;
   private final FireCloudService fireCloudService;
 
   @Autowired
   public UserController(
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> configProvider,
       FireCloudService fireCloudService,
       UserService userService) {
@@ -86,13 +86,13 @@ public class UserController implements UserApiDelegate {
 
     // What we are really looking for here are users who have a FC account.
     // This should exist if they have signed in at least once
-    List<User> users =
+    List<DbUser> users =
         userService.findUsersBySearchString(term, sort).stream()
             .filter(user -> user.getFirstSignInTime() != null)
             .collect(Collectors.toList());
 
     int pageSize = Optional.ofNullable(size).orElse(DEFAULT_PAGE_SIZE);
-    List<List<User>> pagedUsers = Lists.partition(users, pageSize);
+    List<List<DbUser>> pagedUsers = Lists.partition(users, pageSize);
 
     int pageOffset = Long.valueOf(paginationToken.getOffset()).intValue();
 

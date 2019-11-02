@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.BillingStatus;
 import org.springframework.data.jpa.repository.Query;
@@ -46,7 +46,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
   List<DbWorkspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
 
   default List<DbWorkspace> findAllByBillingMigrationStatus(BillingMigrationStatus status) {
-    return findAllByBillingMigrationStatus(StorageEnums.billingMigrationStatusToStorage(status));
+    return findAllByBillingMigrationStatus(DbStorageEnums.billingMigrationStatusToStorage(status));
   }
 
   default void updateBillingStatus(long workspaceId, BillingStatus status) {

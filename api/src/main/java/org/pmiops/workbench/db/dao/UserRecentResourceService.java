@@ -2,13 +2,13 @@ package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
 import java.util.List;
-import org.pmiops.workbench.db.model.UserRecentResource;
+import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.springframework.stereotype.Service;
 
 @Service
 public interface UserRecentResourceService {
 
-  UserRecentResource updateNotebookEntry(
+  DbUserRecentResource updateNotebookEntry(
       long workspaceId, long userId, String notebookNameWithPath, Timestamp lastAccessDateTime);
 
   void updateCohortEntry(
@@ -19,5 +19,5 @@ public interface UserRecentResourceService {
 
   void deleteNotebookEntry(long workspaceId, long userId, String notebookName);
 
-  List<UserRecentResource> findAllResourcesByUser(long userId);
+  List<DbUserRecentResource> findAllResourcesByUser(long userId);
 }

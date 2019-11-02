@@ -34,9 +34,9 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
-import org.pmiops.workbench.db.model.WorkspaceFreeTierUsage;
+import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -106,7 +106,7 @@ public class FreeTierBillingServiceTest {
   public void checkFreeTierBillingUsage_singleProjectExceedsLimit() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
-    User user = createUser("test@test.com");
+    DbUser user = createUser("test@test.com");
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
@@ -119,7 +119,7 @@ public class FreeTierBillingServiceTest {
   public void checkFreeTierBillingUsage_disabledUserNotIgnored() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
-    User user = createUser("test@test.com");
+    DbUser user = createUser("test@test.com");
     user.setDisabled(true);
     userDao.save(user);
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
@@ -134,7 +134,7 @@ public class FreeTierBillingServiceTest {
   public void checkFreeTierBillingUsage_deletedWorkspaceNotIgnored() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
-    User user = createUser("test@test.com");
+    DbUser user = createUser("test@test.com");
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     workspaceDao.save(workspace);
@@ -149,7 +149,7 @@ public class FreeTierBillingServiceTest {
   public void checkFreeTierBillingUsage_noAlert() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 500.0;
 
-    User user = createUser("test@test.com");
+    DbUser user = createUser("test@test.com");
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
@@ -162,7 +162,7 @@ public class FreeTierBillingServiceTest {
   public void checkFreeTierBillingUsage_workspaceMissingCreator() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 500.0;
 
-    User user = createUser("test@test.com");
+    DbUser user = createUser("test@test.com");
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
     createWorkspace(null, "rumney");
 
@@ -176,7 +176,7 @@ public class FreeTierBillingServiceTest {
   public void checkFreeTierBillingUsage_override() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 10.0;
 
-    User user = createUser("test@test.com");
+    DbUser user = createUser("test@test.com");
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
@@ -208,7 +208,7 @@ public class FreeTierBillingServiceTest {
   public void checkFreeTierBillingUsage_combinedProjectsExceedsLimit() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 500.0;
 
-    User user = createUser("test@test.com");
+    DbUser user = createUser("test@test.com");
     DbWorkspace ws1 = createWorkspace(user, "aou-test-f1-26");
     DbWorkspace ws2 = createWorkspace(user, "aou-test-f1-47");
     freeTierBillingService.checkFreeTierBillingUsage();
@@ -226,7 +226,7 @@ public class FreeTierBillingServiceTest {
       assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
       assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
-      WorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(ws);
+      DbWorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(ws);
       assertThat(usage.getUser()).isEqualTo(user);
       assertThat(usage.getWorkspace()).isEqualTo(ws);
       assertThat(usage.getCost())
@@ -238,9 +238,9 @@ public class FreeTierBillingServiceTest {
   public void checkFreeTierBillingUsage_twoUsers() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
-    User user1 = createUser("test@test.com");
+    DbUser user1 = createUser("test@test.com");
     DbWorkspace ws1 = createWorkspace(user1, "aou-test-f1-26");
-    User user2 = createUser("more@test.com");
+    DbUser user2 = createUser("more@test.com");
     DbWorkspace ws2 = createWorkspace(user2, "aou-test-f1-47");
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUser(eq(user1), any());
@@ -258,7 +258,7 @@ public class FreeTierBillingServiceTest {
       assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
       assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
-      WorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(ws);
+      DbWorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(ws);
       assertThat(usage.getUser()).isEqualTo(ws.getCreator());
       assertThat(usage.getWorkspace()).isEqualTo(ws);
       assertThat(usage.getCost())
@@ -270,7 +270,7 @@ public class FreeTierBillingServiceTest {
   public void checkFreeTierBillingUsage_ignoreOLDMigrationStatus() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
-    User user = createUser("test@test.com");
+    DbUser user = createUser("test@test.com");
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT, BillingMigrationStatus.OLD);
     freeTierBillingService.checkFreeTierBillingUsage();
 
@@ -282,7 +282,7 @@ public class FreeTierBillingServiceTest {
   public void checkFreeTierBillingUsage_ignoreMIGRATEDMigrationStatus() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
-    User user = createUser("test@test.com");
+    DbUser user = createUser("test@test.com");
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT, BillingMigrationStatus.MIGRATED);
     freeTierBillingService.checkFreeTierBillingUsage();
 
@@ -294,7 +294,7 @@ public class FreeTierBillingServiceTest {
   public void checkFreeTierBillingUsage_dbUpdate() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
-    User user = createUser("test@test.com");
+    DbUser user = createUser("test@test.com");
     DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     freeTierBillingService.checkFreeTierBillingUsage();
@@ -320,7 +320,7 @@ public class FreeTierBillingServiceTest {
     assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(1);
-    WorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
+    DbWorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
     assertThat(dbEntry.getUser()).isEqualTo(user);
     assertThat(dbEntry.getWorkspace()).isEqualTo(workspace);
     assertThat(dbEntry.getCost())
@@ -332,7 +332,7 @@ public class FreeTierBillingServiceTest {
 
   @Test
   public void getUserFreeTierLimit_default() {
-    User user = createUser("test@test.com");
+    DbUser user = createUser("test@test.com");
 
     workbenchConfig.billing.defaultFreeCreditsLimit = 1.0;
     assertThat(freeTierBillingService.getUserFreeTierLimit(user))
@@ -347,7 +347,7 @@ public class FreeTierBillingServiceTest {
   public void getUserFreeTierLimit_override() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 123.456;
 
-    User user = createUser("test@test.com");
+    DbUser user = createUser("test@test.com");
     user.setFreeTierCreditsLimitOverride(100.0);
     userDao.save(user);
 
@@ -365,7 +365,7 @@ public class FreeTierBillingServiceTest {
   public void getUserCachedFreeTierUsage() {
     workbenchConfig.billing.defaultFreeCreditsLimit = 100.0;
 
-    User user = createUser("test@test.com");
+    DbUser user = createUser("test@test.com");
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     // we have not yet had a chance to cache this usage
@@ -391,7 +391,7 @@ public class FreeTierBillingServiceTest {
     assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user))
         .isCloseTo(1100.0, withinPercentage(0.001));
 
-    User user2 = createUser("another user");
+    DbUser user2 = createUser("another user");
     createWorkspace(user2, "project 3");
     newCosts.put("project 3", 999.9);
     doReturn(mockBQTableResult(newCosts)).when(bigQueryService).executeQuery(any());
@@ -423,32 +423,32 @@ public class FreeTierBillingServiceTest {
   }
 
   private void assertSingleWorkspaceTestDbState(
-      User user, DbWorkspace workspaceForQuerying, BillingStatus billingStatus) {
+      DbUser user, DbWorkspace workspaceForQuerying, BillingStatus billingStatus) {
 
     final DbWorkspace workspace = workspaceDao.findOne(workspaceForQuerying.getWorkspaceId());
     assertThat(workspace.getBillingStatus()).isEqualTo(billingStatus);
     assertThat(workspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
     assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(1);
-    final WorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
+    final DbWorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
     assertThat(dbEntry.getUser()).isEqualTo(user);
     assertThat(dbEntry.getWorkspace()).isEqualTo(workspace);
     assertThat(dbEntry.getCost()).isCloseTo(SINGLE_WORKSPACE_TEST_COST, withinPercentage(0.001));
   }
 
-  private User createUser(String email) {
-    User user = new User();
+  private DbUser createUser(String email) {
+    DbUser user = new DbUser();
     user.setEmail(email);
     return userDao.save(user);
   }
 
   // we only alert/record for BillingMigrationStatus.NEW workspaces
-  private DbWorkspace createWorkspace(User creator, String namespace) {
+  private DbWorkspace createWorkspace(DbUser creator, String namespace) {
     return createWorkspace(creator, namespace, BillingMigrationStatus.NEW);
   }
 
   private DbWorkspace createWorkspace(
-      User creator, String namespace, BillingMigrationStatus billingMigrationStatus) {
+      DbUser creator, String namespace, BillingMigrationStatus billingMigrationStatus) {
     DbWorkspace workspace = new DbWorkspace();
     workspace.setCreator(creator);
     workspace.setWorkspaceNamespace(namespace);

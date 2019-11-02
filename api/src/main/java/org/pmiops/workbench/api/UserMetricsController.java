@@ -19,8 +19,8 @@ import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.UserRecentResource;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserMetricsController implements UserMetricsApiDelegate {
   private static final int MAX_RECENT_NOTEBOOKS = 8;
   private static final Logger log = Logger.getLogger(UserMetricsController.class.getName());
-  private final Provider<User> userProvider;
+  private final Provider<DbUser> userProvider;
   private final UserRecentResourceService userRecentResourceService;
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
@@ -50,7 +50,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private Clock clock;
 
   // Converts DB model to client Model
-  private final Function<UserRecentResource, RecentResource> TO_CLIENT =
+  private final Function<DbUserRecentResource, RecentResource> TO_CLIENT =
       userRecentResource -> {
         RecentResource resource = new RecentResource();
         resource.setCohort(TO_CLIENT_COHORT.apply(userRecentResource.getCohort()));
@@ -108,7 +108,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   @Autowired
   UserMetricsController(
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
@@ -146,7 +146,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
               .getBucketName();
       notebookPath = "gs://" + bucket + "/notebooks/" + recentResourceRequest.getNotebookName();
     }
-    UserRecentResource recentResource =
+    DbUserRecentResource recentResource =
         userRecentResourceService.updateNotebookEntry(
             wId, userProvider.get().getUserId(), notebookPath, now);
     return ResponseEntity.ok(TO_CLIENT.apply(recentResource));
@@ -165,11 +165,11 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   @Override
   public ResponseEntity<RecentResourceResponse> getUserRecentResources() {
     long userId = userProvider.get().getUserId();
-    List<UserRecentResource> userRecentResourceList =
+    List<DbUserRecentResource> userRecentResourceList =
         userRecentResourceService.findAllResourcesByUser(userId);
     List<Long> workspaceIdList =
         userRecentResourceList.stream()
-            .map(UserRecentResource::getWorkspaceId)
+            .map(DbUserRecentResource::getWorkspaceId)
             .distinct()
             .limit(distinctWorkspacelimit)
             .collect(Collectors.toList());
@@ -190,7 +190,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                       return workspaceResponse;
                     }));
 
-    List<UserRecentResource> workspaceFilteredResources =
+    List<DbUserRecentResource> workspaceFilteredResources =
         userRecentResourceList.stream()
             .filter(r -> workspaceAccessMap.containsKey(r.getWorkspaceId()))
             // Drop any invalid notebook resources - parseBlobId will log errors.

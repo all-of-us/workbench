@@ -28,7 +28,7 @@ import org.pmiops.workbench.audit.ActionType;
 import org.pmiops.workbench.audit.TargetType;
 import org.pmiops.workbench.audit.targetproperties.AclTargetProperty;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
@@ -49,11 +49,11 @@ public class WorkspaceAuditAdapterServiceTest {
 
   private WorkspaceAuditAdapterService workspaceAuditAdapterService;
   private Workspace workspace1;
-  private User user1;
+  private DbUser user1;
   private DbWorkspace dbWorkspace1;
   private DbWorkspace dbWorkspace2;
 
-  @Mock private Provider<User> mockUserProvider;
+  @Mock private Provider<DbUser> mockUserProvider;
   @Mock private Clock mockClock;
   @Mock private ActionAuditService mockActionAuditService;
 
@@ -66,7 +66,7 @@ public class WorkspaceAuditAdapterServiceTest {
 
   @Before
   public void setUp() {
-    user1 = new User();
+    user1 = new DbUser();
     user1.setUserId(101L);
     user1.setEmail("fflinstone@slate.com");
     user1.setGivenName("Fred");

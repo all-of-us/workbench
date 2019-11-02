@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.UserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
@@ -70,12 +70,12 @@ public interface WorkspaceService {
 
   DbWorkspace setPublished(DbWorkspace workspace, String publishedWorkspaceGroup, boolean publish);
 
-  List<UserRecentWorkspace> getRecentWorkspaces();
+  List<DbUserRecentWorkspace> getRecentWorkspaces();
 
-  UserRecentWorkspace updateRecentWorkspaces(
+  DbUserRecentWorkspace updateRecentWorkspaces(
       DbWorkspace workspace, long userId, Timestamp lastAccessDate);
 
-  UserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace);
+  DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace);
 
   boolean maybeDeleteRecentWorkspace(long workspaceId);
 }

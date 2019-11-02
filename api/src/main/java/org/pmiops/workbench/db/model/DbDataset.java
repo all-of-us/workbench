@@ -33,7 +33,7 @@ public class DbDataset {
   private Boolean includesAllParticipants;
   private List<Long> conceptSetIds;
   private List<Long> cohortIds;
-  private List<DataSetValue> values;
+  private List<DbDatasetValue> values;
   private short prePackagedConceptSet;
 
   public DbDataset() {
@@ -64,7 +64,7 @@ public class DbDataset {
     setDescription(dataSet.getDescription());
     setInvalid(dataSet.getInvalid());
     setIncludesAllParticipants(dataSet.getIncludesAllParticipants());
-    setValues(dataSet.getValues().stream().map(DataSetValue::new).collect(Collectors.toList()));
+    setValues(dataSet.getValues().stream().map(DbDatasetValue::new).collect(Collectors.toList()));
     setPrePackagedConceptSet(dataSet.getPrePackagedConceptSet());
   }
 
@@ -186,11 +186,11 @@ public class DbDataset {
   @ElementCollection
   @CollectionTable(name = "data_set_values", joinColumns = @JoinColumn(name = "data_set_id"))
   @Column(name = "values")
-  public List<DataSetValue> getValues() {
+  public List<DbDatasetValue> getValues() {
     return values;
   }
 
-  public void setValues(List<DataSetValue> values) {
+  public void setValues(List<DbDatasetValue> values) {
     this.values = values;
   }
 

@@ -31,7 +31,7 @@ public class DbConceptSet {
   private Short survey;
   private String description;
   private long workspaceId;
-  private User creator;
+  private DbUser creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private int participantCount;
@@ -141,11 +141,11 @@ public class DbConceptSet {
 
   @ManyToOne
   @JoinColumn(name = "creator_id")
-  public User getCreator() {
+  public DbUser getCreator() {
     return creator;
   }
 
-  public void setCreator(User creator) {
+  public void setCreator(DbUser creator) {
     this.creator = creator;
   }
 

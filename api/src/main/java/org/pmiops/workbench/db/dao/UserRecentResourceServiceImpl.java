@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.UserRecentResource;
+import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,15 +51,15 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
    * a new entry
    */
   @Override
-  public UserRecentResource updateNotebookEntry(
+  public DbUserRecentResource updateNotebookEntry(
       long workspaceId, long userId, String notebookNameWithPath, Timestamp lastAccessDateTime) {
-    UserRecentResource recentResource =
+    DbUserRecentResource recentResource =
         getDao()
             .findByUserIdAndWorkspaceIdAndNotebookName(userId, workspaceId, notebookNameWithPath);
     if (recentResource == null) {
       handleUserLimit(userId);
       recentResource =
-          new UserRecentResource(workspaceId, userId, notebookNameWithPath, lastAccessDateTime);
+          new DbUserRecentResource(workspaceId, userId, notebookNameWithPath, lastAccessDateTime);
     }
     recentResource.setLastAccessDate(lastAccessDateTime);
     getDao().save(recentResource);
@@ -76,11 +76,11 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   public void updateCohortEntry(
       long workspaceId, long userId, long cohortId, Timestamp lastAccessDateTime) {
     DbCohort cohort = cohortDao.findOne(cohortId);
-    UserRecentResource resource =
+    DbUserRecentResource resource =
         getDao().findByUserIdAndWorkspaceIdAndCohort(userId, workspaceId, cohort);
     if (resource == null) {
       handleUserLimit(userId);
-      resource = new UserRecentResource(workspaceId, userId, lastAccessDateTime);
+      resource = new DbUserRecentResource(workspaceId, userId, lastAccessDateTime);
       resource.setCohort(cohort);
       resource.setConceptSet(null);
     }
@@ -92,11 +92,11 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   public void updateConceptSetEntry(
       long workspaceId, long userId, long conceptSetId, Timestamp lastAccessDateTime) {
     DbConceptSet conceptSet = conceptSetDao.findOne(conceptSetId);
-    UserRecentResource resource =
+    DbUserRecentResource resource =
         getDao().findByUserIdAndWorkspaceIdAndConceptSet(userId, workspaceId, conceptSet);
     if (resource == null) {
       handleUserLimit(userId);
-      resource = new UserRecentResource(workspaceId, userId, lastAccessDateTime);
+      resource = new DbUserRecentResource(workspaceId, userId, lastAccessDateTime);
       resource.setConceptSet(conceptSet);
       resource.setCohort(null);
     }
@@ -107,7 +107,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   /** Deletes notebook entry from user_recent_resource */
   @Override
   public void deleteNotebookEntry(long workspaceId, long userId, String notebookPath) {
-    UserRecentResource resource =
+    DbUserRecentResource resource =
         getDao().findByUserIdAndWorkspaceIdAndNotebookName(userId, workspaceId, notebookPath);
     if (resource != null) {
       getDao().delete(resource);
@@ -121,7 +121,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
    * @param userId : User id for whom the resources are returned
    */
   @Override
-  public List<UserRecentResource> findAllResourcesByUser(long userId) {
+  public List<DbUserRecentResource> findAllResourcesByUser(long userId) {
     return getDao().findUserRecentResourcesByUserIdOrderByLastAccessDateDesc(userId);
   }
 
@@ -132,7 +132,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   private void handleUserLimit(long userId) {
     long count = getDao().countUserRecentResourceByUserId(userId);
     while (count-- >= USER_ENTRY_COUNT) {
-      UserRecentResource resource = getDao().findTopByUserIdOrderByLastAccessDate(userId);
+      DbUserRecentResource resource = getDao().findTopByUserIdOrderByLastAccessDate(userId);
       getDao().delete(resource);
     }
   }

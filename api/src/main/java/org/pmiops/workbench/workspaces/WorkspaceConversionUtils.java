@@ -7,8 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.UserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.model.RecentWorkspace;
@@ -104,7 +105,7 @@ public class WorkspaceConversionUtils {
   }
 
   public static UserRole toApiUserRole(
-      org.pmiops.workbench.db.model.User user, WorkspaceAccessEntry aclEntry) {
+      DbUser user, WorkspaceAccessEntry aclEntry) {
     UserRole result = new UserRole();
     result.setEmail(user.getEmail());
     result.setGivenName(user.getGivenName());
@@ -173,7 +174,7 @@ public class WorkspaceConversionUtils {
   }
 
   public static RecentWorkspace buildRecentWorkspace(
-      UserRecentWorkspace userRecentWorkspace,
+      DbUserRecentWorkspace userRecentWorkspace,
       DbWorkspace dbWorkspace,
       WorkspaceAccessLevel accessLevel) {
     return new RecentWorkspace()
@@ -183,7 +184,7 @@ public class WorkspaceConversionUtils {
   }
 
   public static List<RecentWorkspace> buildRecentWorkspaceList(
-      List<UserRecentWorkspace> userRecentWorkspaces,
+      List<DbUserRecentWorkspace> userRecentWorkspaces,
       Map<Long, DbWorkspace> dbWorkspacesByWorkspaceId,
       Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsByWorkspaceId) {
     return userRecentWorkspaces.stream()

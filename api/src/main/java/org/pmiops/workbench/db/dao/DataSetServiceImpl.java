@@ -31,7 +31,7 @@ import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DataSetValue;
+import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -167,7 +167,7 @@ public class DataSetServiceImpl implements DataSetService {
       long workspaceId,
       List<Long> cohortIdList,
       List<Long> conceptIdList,
-      List<DataSetValue> values,
+      List<DbDatasetValue> values,
       PrePackagedConceptSetEnum prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime) {

@@ -41,8 +41,8 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -363,15 +363,15 @@ public class BillingProjectBufferServiceTest {
 
     assertThat(
             billingProjectBufferEntryDao.countByStatus(
-                StorageEnums.billingProjectBufferStatusToStorage(CREATING)))
+                DbStorageEnums.billingProjectBufferStatusToStorage(CREATING)))
         .isEqualTo(0);
     assertThat(
             billingProjectBufferEntryDao.countByStatus(
-                StorageEnums.billingProjectBufferStatusToStorage(AVAILABLE)))
+                DbStorageEnums.billingProjectBufferStatusToStorage(AVAILABLE)))
         .isEqualTo(2);
     assertThat(
             billingProjectBufferEntryDao.countByStatus(
-                StorageEnums.billingProjectBufferStatusToStorage(ERROR)))
+                DbStorageEnums.billingProjectBufferStatusToStorage(ERROR)))
         .isEqualTo(1);
   }
 
@@ -413,7 +413,7 @@ public class BillingProjectBufferServiceTest {
     entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
-    User user = mock(User.class);
+    DbUser user = mock(DbUser.class);
     doReturn("fake-email@aou.org").when(user).getEmail();
 
     DbBillingProjectBufferEntry assignedEntry =
@@ -442,7 +442,7 @@ public class BillingProjectBufferServiceTest {
     firstEntry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(firstEntry);
 
-    User firstUser = new User();
+    DbUser firstUser = new DbUser();
     firstUser.setEmail("fake-email-1@aou.org");
     userDao.save(firstUser);
 
@@ -452,7 +452,7 @@ public class BillingProjectBufferServiceTest {
     secondEntry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(secondEntry);
 
-    User secondUser = new User();
+    DbUser secondUser = new DbUser();
     secondUser.setEmail("fake-email-2@aou.org");
     userDao.save(secondUser);
 

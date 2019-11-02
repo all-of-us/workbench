@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.ReviewStatus;
 
 public class CohortFactoryTest {
@@ -32,7 +32,7 @@ public class CohortFactoryTest {
     apiCohort.setType("type");
     apiCohort.setCriteria("criteria");
 
-    User user = mock(User.class);
+    DbUser user = mock(DbUser.class);
 
     long workspaceId = 1l;
 
@@ -56,7 +56,7 @@ public class CohortFactoryTest {
     originalCohort.setWorkspaceId(1l);
     originalCohort.setCohortReviews(Collections.singleton(mock(DbCohortReview.class)));
 
-    User user = mock(User.class);
+    DbUser user = mock(DbUser.class);
     DbWorkspace workspace = mock(DbWorkspace.class);
     doReturn(1l).when(workspace).getWorkspaceId();
     DbCohort dbCohort = cohortFactory.duplicateCohort("new name", user, workspace, originalCohort);

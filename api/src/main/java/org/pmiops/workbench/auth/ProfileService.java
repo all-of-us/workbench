@@ -7,7 +7,10 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAddress;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbDemographicSurvey;
+import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
+import org.pmiops.workbench.db.model.DbPageVisit;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
@@ -20,13 +23,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProfileService {
   private static final Function<
-          org.pmiops.workbench.db.model.InstitutionalAffiliation, InstitutionalAffiliation>
+      DbInstitutionalAffiliation, InstitutionalAffiliation>
       TO_CLIENT_INSTITUTIONAL_AFFILIATION =
           new Function<
-              org.pmiops.workbench.db.model.InstitutionalAffiliation, InstitutionalAffiliation>() {
+              DbInstitutionalAffiliation, InstitutionalAffiliation>() {
             @Override
             public InstitutionalAffiliation apply(
-                org.pmiops.workbench.db.model.InstitutionalAffiliation institutionalAffiliation) {
+                DbInstitutionalAffiliation institutionalAffiliation) {
               InstitutionalAffiliation result = new InstitutionalAffiliation();
               result.setRole(institutionalAffiliation.getRole());
               result.setInstitution(institutionalAffiliation.getInstitution());
@@ -35,11 +38,11 @@ public class ProfileService {
             }
           };
 
-  private static final Function<org.pmiops.workbench.db.model.PageVisit, PageVisit>
+  private static final Function<DbPageVisit, PageVisit>
       TO_CLIENT_PAGE_VISIT =
-          new Function<org.pmiops.workbench.db.model.PageVisit, PageVisit>() {
+          new Function<DbPageVisit, PageVisit>() {
             @Override
-            public PageVisit apply(org.pmiops.workbench.db.model.PageVisit pageVisit) {
+            public PageVisit apply(DbPageVisit pageVisit) {
               PageVisit result = new PageVisit();
               result.setPage(pageVisit.getPageId());
               result.setFirstVisit(pageVisit.getFirstVisit().getTime());
@@ -47,12 +50,12 @@ public class ProfileService {
             }
           };
 
-  private static final Function<org.pmiops.workbench.db.model.DemographicSurvey, DemographicSurvey>
+  private static final Function<DbDemographicSurvey, DemographicSurvey>
       TO_CLIENT_DEMOGRAPHIC_SURVEY =
-          new Function<org.pmiops.workbench.db.model.DemographicSurvey, DemographicSurvey>() {
+          new Function<DbDemographicSurvey, DemographicSurvey>() {
             @Override
             public DemographicSurvey apply(
-                org.pmiops.workbench.db.model.DemographicSurvey demographicSurvey) {
+                DbDemographicSurvey demographicSurvey) {
               DemographicSurvey result = new DemographicSurvey();
               if (result.getDisability() != null)
                 result.setDisability(demographicSurvey.getDisabilityEnum().equals(Disability.TRUE));
@@ -94,9 +97,9 @@ public class ProfileService {
     this.freeTierBillingService = freeTierBillingService;
   }
 
-  public Profile getProfile(User user) {
+  public Profile getProfile(DbUser user) {
     // Fetch the user's authorities, since they aren't loaded during normal request interception.
-    User userWithAuthoritiesAndPageVisits =
+    DbUser userWithAuthoritiesAndPageVisits =
         userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
     if (userWithAuthoritiesAndPageVisits != null) {
       // If the user is already written to the database, use it and whatever authorities and page

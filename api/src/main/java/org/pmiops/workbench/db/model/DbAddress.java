@@ -19,7 +19,7 @@ public class DbAddress {
   private String city;
   private String state;
   private String country;
-  private User user;
+  private DbUser user;
 
   public DbAddress() {}
 
@@ -90,11 +90,11 @@ public class DbAddress {
 
   @ManyToOne
   @JoinColumn(name = "user_id")
-  public User getUser() {
+  public DbUser getUser() {
     return user;
   }
 
-  public void setUser(User user) {
+  public void setUser(DbUser user) {
     this.user = user;
   }
 }

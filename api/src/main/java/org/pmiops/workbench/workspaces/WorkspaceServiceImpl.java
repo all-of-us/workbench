@@ -30,9 +30,9 @@ import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.UserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -71,7 +71,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   private ConceptSetService conceptSetService;
   private DataSetService dataSetService;
   private UserDao userDao;
-  private Provider<User> userProvider;
+  private Provider<DbUser> userProvider;
   private UserRecentWorkspaceDao userRecentWorkspaceDao;
   private WorkspaceDao workspaceDao;
 
@@ -86,7 +86,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       DataSetService dataSetService,
       FireCloudService fireCloudService,
       UserDao userDao,
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       WorkspaceDao workspaceDao) {
     this.clock = clock;
@@ -119,7 +119,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
         ns,
         firecloudName,
-        StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   @Override
@@ -223,7 +223,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public DbWorkspace getByName(String ns, String name) {
     return workspaceDao.findByWorkspaceNamespaceAndNameAndActiveStatus(
-        ns, name, StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+        ns, name, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   @Override
@@ -242,7 +242,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         workspaceDao.findByFirecloudNameAndActiveStatusWithEagerCohorts(
             ns,
             firecloudName,
-            StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     if (workspace == null) {
       throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
     }
@@ -495,7 +495,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     List<UserRole> userRoles = new ArrayList<>();
     for (Map.Entry<String, WorkspaceAccessEntry> entry : rolesMap.entrySet()) {
       // Filter out groups
-      User user = userDao.findUserByEmail(entry.getKey());
+      DbUser user = userDao.findUserByEmail(entry.getKey());
       if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       } else {
@@ -532,19 +532,19 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   @Transactional
-  public List<UserRecentWorkspace> getRecentWorkspaces() {
+  public List<DbUserRecentWorkspace> getRecentWorkspaces() {
     long userId = userProvider.get().getUserId();
-    List<UserRecentWorkspace> userRecentWorkspaces =
+    List<DbUserRecentWorkspace> userRecentWorkspaces =
         userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
     return pruneInaccessibleRecentWorkspaces(userRecentWorkspaces, userId);
   }
 
-  private List<UserRecentWorkspace> pruneInaccessibleRecentWorkspaces(
-      List<UserRecentWorkspace> recentWorkspaces, long userId) {
+  private List<DbUserRecentWorkspace> pruneInaccessibleRecentWorkspaces(
+      List<DbUserRecentWorkspace> recentWorkspaces, long userId) {
     List<DbWorkspace> dbWorkspaces =
         workspaceDao.findAllByWorkspaceIdIn(
             recentWorkspaces.stream()
-                .map(UserRecentWorkspace::getWorkspaceId)
+                .map(DbUserRecentWorkspace::getWorkspaceId)
                 .collect(Collectors.toList()));
 
     Set<Long> workspaceIdsToDelete =
@@ -574,11 +574,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public UserRecentWorkspace updateRecentWorkspaces(
+  public DbUserRecentWorkspace updateRecentWorkspaces(
       DbWorkspace workspace, long userId, Timestamp lastAccessDate) {
-    Optional<UserRecentWorkspace> maybeRecentWorkspace =
+    Optional<DbUserRecentWorkspace> maybeRecentWorkspace =
         userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspace.getWorkspaceId(), userId);
-    final UserRecentWorkspace matchingRecentWorkspace =
+    final DbUserRecentWorkspace matchingRecentWorkspace =
         maybeRecentWorkspace
             .map(
                 recentWorkspace -> {
@@ -586,7 +586,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
                   return recentWorkspace;
                 })
             .orElseGet(
-                () -> new UserRecentWorkspace(workspace.getWorkspaceId(), userId, lastAccessDate));
+                () -> new DbUserRecentWorkspace(workspace.getWorkspaceId(), userId, lastAccessDate));
     userRecentWorkspaceDao.save(matchingRecentWorkspace);
     handleWorkspaceLimit(userId);
     return matchingRecentWorkspace;
@@ -594,13 +594,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   @Transactional
-  public UserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
+  public DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
     return updateRecentWorkspaces(
         workspace, userProvider.get().getUserId(), new Timestamp(clock.instant().toEpochMilli()));
   }
 
   private void handleWorkspaceLimit(long userId) {
-    List<UserRecentWorkspace> userRecentWorkspaces =
+    List<DbUserRecentWorkspace> userRecentWorkspaces =
         userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
 
     ArrayList<Long> idsToDelete = new ArrayList<>();
@@ -615,7 +615,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   /** Returns true if anything was deleted from user_recent_workspaces, false if nothing was */
   public boolean maybeDeleteRecentWorkspace(long workspaceId) {
     long userId = userProvider.get().getUserId();
-    Optional<UserRecentWorkspace> maybeRecentWorkspace =
+    Optional<DbUserRecentWorkspace> maybeRecentWorkspace =
         userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
     if (maybeRecentWorkspace.isPresent()) {
       userRecentWorkspaceDao.delete(maybeRecentWorkspace.get());

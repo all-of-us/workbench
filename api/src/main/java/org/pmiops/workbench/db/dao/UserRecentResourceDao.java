@@ -3,23 +3,23 @@ package org.pmiops.workbench.db.dao;
 import java.util.List;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.UserRecentResource;
+import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.springframework.data.repository.CrudRepository;
 
-public interface UserRecentResourceDao extends CrudRepository<UserRecentResource, Long> {
+public interface UserRecentResourceDao extends CrudRepository<DbUserRecentResource, Long> {
 
   long countUserRecentResourceByUserId(long userId);
 
-  UserRecentResource findTopByUserIdOrderByLastAccessDate(long userId);
+  DbUserRecentResource findTopByUserIdOrderByLastAccessDate(long userId);
 
-  UserRecentResource findByUserIdAndWorkspaceIdAndCohort(
+  DbUserRecentResource findByUserIdAndWorkspaceIdAndCohort(
       long userId, long workspaceId, DbCohort cohort);
 
-  UserRecentResource findByUserIdAndWorkspaceIdAndNotebookName(
+  DbUserRecentResource findByUserIdAndWorkspaceIdAndNotebookName(
       long userId, long workspaceId, String notebookPath);
 
-  UserRecentResource findByUserIdAndWorkspaceIdAndConceptSet(
+  DbUserRecentResource findByUserIdAndWorkspaceIdAndConceptSet(
       long userId, long workspaceId, DbConceptSet conceptSet);
 
-  List<UserRecentResource> findUserRecentResourcesByUserIdOrderByLastAccessDateDesc(long userId);
+  List<DbUserRecentResource> findUserRecentResourcesByUserIdOrderByLastAccessDateDesc(long userId);
 }

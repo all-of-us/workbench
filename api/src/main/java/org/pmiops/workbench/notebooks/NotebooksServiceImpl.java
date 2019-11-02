@@ -15,7 +15,7 @@ import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.GoogleCloudLocators;
@@ -60,7 +60,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   private final Clock clock;
   private final CloudStorageService cloudStorageService;
   private final FireCloudService fireCloudService;
-  private final Provider<User> userProvider;
+  private final Provider<DbUser> userProvider;
   private final UserRecentResourceService userRecentResourceService;
   private final WorkspaceService workspaceService;
 
@@ -69,7 +69,7 @@ public class NotebooksServiceImpl implements NotebooksService {
       Clock clock,
       CloudStorageService cloudStorageService,
       FireCloudService fireCloudService,
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceService workspaceService) {
     this.clock = clock;

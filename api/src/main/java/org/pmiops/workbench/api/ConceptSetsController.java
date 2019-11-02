@@ -23,7 +23,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -57,7 +57,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private final ConceptBigQueryService conceptBigQueryService;
   private final Clock clock;
 
-  private Provider<User> userProvider;
+  private Provider<DbUser> userProvider;
 
   @VisibleForTesting int maxConceptsPerSet;
 
@@ -118,7 +118,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       ConceptDao conceptDao,
       ConceptBigQueryService conceptBigQueryService,
       UserRecentResourceService userRecentResourceService,
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       Clock clock) {
     this.workspaceService = workspaceService;
     this.conceptSetDao = conceptSetDao;
@@ -131,7 +131,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   }
 
   @VisibleForTesting
-  public void setUserProvider(Provider<User> userProvider) {
+  public void setUserProvider(Provider<DbUser> userProvider) {
     this.userProvider = userProvider;
   }
 

@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "user_recent_workspace")
-public class UserRecentWorkspace {
+public class DbUserRecentWorkspace {
   private Timestamp lastAccessDate;
   private long id;
   private Long userId;
@@ -58,7 +58,7 @@ public class UserRecentWorkspace {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    UserRecentWorkspace that = (UserRecentWorkspace) o;
+    DbUserRecentWorkspace that = (DbUserRecentWorkspace) o;
     return id == that.id
         && lastAccessDate.equals(that.lastAccessDate)
         && userId.equals(that.userId)
@@ -70,9 +70,9 @@ public class UserRecentWorkspace {
     return Objects.hash(lastAccessDate, id, userId, workspaceId);
   }
 
-  public UserRecentWorkspace() {}
+  public DbUserRecentWorkspace() {}
 
-  public UserRecentWorkspace(long workspaceId, long userId, Timestamp lastAccessDate) {
+  public DbUserRecentWorkspace(long workspaceId, long userId, Timestamp lastAccessDate) {
     this.workspaceId = workspaceId;
     this.userId = userId;
     this.lastAccessDate = lastAccessDate;

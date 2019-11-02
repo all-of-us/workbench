@@ -13,7 +13,7 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.BillingStatus;
@@ -46,7 +46,7 @@ public class FreeTierBillingService {
   public void checkFreeTierBillingUsage() {
     final Map<DbWorkspace, Double> workspaceCosts = getFreeTierWorkspaceCosts();
 
-    final Set<User> expiredCreditsUsers =
+    final Set<DbUser> expiredCreditsUsers =
         workspaceCosts.entrySet().stream()
             .collect(
                 Collectors.groupingBy(
@@ -57,7 +57,7 @@ public class FreeTierBillingService {
             .map(Entry::getKey)
             .collect(Collectors.toSet());
 
-    for (User expiredUser : expiredCreditsUsers) {
+    for (DbUser expiredUser : expiredCreditsUsers) {
       notificationService.alertUser(expiredUser, "You have exceeded your free tier credits.");
     }
 
@@ -103,11 +103,11 @@ public class FreeTierBillingService {
   // Retrieve the user's total free tier usage from the DB by summing across Workspaces.
   // This is not live BigQuery data: it is only as recent as the last
   // checkFreeTierBillingUsage Cron job, recorded as last_update_time in the DB.
-  public Double getUserCachedFreeTierUsage(User user) {
+  public Double getUserCachedFreeTierUsage(DbUser user) {
     return workspaceFreeTierUsageDao.totalCostByUser(user);
   }
 
-  public Double getUserFreeTierLimit(User user) {
+  public Double getUserFreeTierLimit(DbUser user) {
     if (user.getFreeTierCreditsLimitOverride() != null) {
       return user.getFreeTierCreditsLimitOverride();
     }

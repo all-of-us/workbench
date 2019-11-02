@@ -15,7 +15,7 @@ import org.pmiops.workbench.audit.TargetType;
 import org.pmiops.workbench.audit.targetproperties.AclTargetProperty;
 import org.pmiops.workbench.audit.targetproperties.WorkspaceTargetProperty;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +27,13 @@ public class WorkspaceAuditAdapterServiceImpl implements WorkspaceAuditAdapterSe
   private static final Logger logger =
       Logger.getLogger(WorkspaceAuditAdapterServiceImpl.class.getName());
 
-  private Provider<User> userProvider;
+  private Provider<DbUser> userProvider;
   private ActionAuditService actionAuditService;
   private Clock clock;
 
   @Autowired
   public WorkspaceAuditAdapterServiceImpl(
-      Provider<User> userProvider, ActionAuditService actionAuditService, Clock clock) {
+      Provider<DbUser> userProvider, ActionAuditService actionAuditService, Clock clock) {
     this.userProvider = userProvider;
     this.actionAuditService = actionAuditService;
     this.clock = clock;

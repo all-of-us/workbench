@@ -33,7 +33,7 @@ public class DbCohortReview {
   private long reviewSize;
   private long reviewedCount;
   private Short reviewStatus;
-  private User creator;
+  private DbUser creator;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -227,28 +227,28 @@ public class DbCohortReview {
 
   @Transient
   public ReviewStatus getReviewStatusEnum() {
-    return StorageEnums.reviewStatusFromStorage(getReviewStatus());
+    return DbStorageEnums.reviewStatusFromStorage(getReviewStatus());
   }
 
   public void setReviewStatusEnum(ReviewStatus reviewStatus) {
-    setReviewStatus(StorageEnums.reviewStatusToStorage(reviewStatus));
+    setReviewStatus(DbStorageEnums.reviewStatusToStorage(reviewStatus));
   }
 
   public DbCohortReview reviewStatusEnum(ReviewStatus reviewStatus) {
-    return this.reviewStatus(StorageEnums.reviewStatusToStorage(reviewStatus));
+    return this.reviewStatus(DbStorageEnums.reviewStatusToStorage(reviewStatus));
   }
 
   @ManyToOne
   @JoinColumn(name = "creator_id")
-  public User getCreator() {
+  public DbUser getCreator() {
     return creator;
   }
 
-  public void setCreator(User creator) {
+  public void setCreator(DbUser creator) {
     this.creator = creator;
   }
 
-  public DbCohortReview creator(User creator) {
+  public DbCohortReview creator(DbUser creator) {
     this.creator = creator;
     return this;
   }

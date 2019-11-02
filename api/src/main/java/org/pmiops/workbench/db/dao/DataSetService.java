@@ -8,7 +8,7 @@ import java.util.Set;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DataSetValue;
+import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -24,7 +24,7 @@ public interface DataSetService {
       long workspaceId,
       List<Long> cohortIdList,
       List<Long> conceptIdList,
-      List<DataSetValue> values,
+      List<DbDatasetValue> values,
       PrePackagedConceptSetEnum prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime);

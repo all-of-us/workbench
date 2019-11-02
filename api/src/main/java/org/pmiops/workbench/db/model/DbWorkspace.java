@@ -78,7 +78,7 @@ public class DbWorkspace {
   private String firecloudName;
   private Short dataAccessLevel;
   private CdrVersion cdrVersion;
-  private User creator;
+  private DbUser creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private Timestamp lastAccessedTime;
@@ -87,7 +87,7 @@ public class DbWorkspace {
   private Set<DbDataset> dataSets = new HashSet<>();
   private Short activeStatus;
   private Short billingMigrationStatus =
-      StorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.OLD);
+      DbStorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.OLD);
   private boolean published;
 
   private boolean diseaseFocusedResearch;
@@ -113,9 +113,9 @@ public class DbWorkspace {
   private Boolean reviewRequested;
   private Boolean approved;
   private Timestamp timeRequested;
-  private Short billingStatus = StorageEnums.billingStatusToStorage(BillingStatus.ACTIVE);
+  private Short billingStatus = DbStorageEnums.billingStatusToStorage(BillingStatus.ACTIVE);
   private Short billingAccountType =
-      StorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
+      DbStorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -199,11 +199,11 @@ public class DbWorkspace {
 
   @ManyToOne
   @JoinColumn(name = "creator_id")
-  public User getCreator() {
+  public DbUser getCreator() {
     return creator;
   }
 
-  public void setCreator(User creator) {
+  public void setCreator(DbUser creator) {
     this.creator = creator;
   }
 
@@ -378,14 +378,14 @@ public class DbWorkspace {
       return null;
     }
     return from.stream()
-        .map(StorageEnums::specificPopulationFromStorage)
+        .map(DbStorageEnums::specificPopulationFromStorage)
         .collect(Collectors.toSet());
   }
 
   public void setSpecificPopulationsEnum(Set<SpecificPopulationEnum> newPopulationDetails) {
     setPopulationDetails(
         newPopulationDetails.stream()
-            .map(StorageEnums::specificPopulationToStorage)
+            .map(DbStorageEnums::specificPopulationToStorage)
             .collect(Collectors.toSet()));
   }
 
@@ -524,20 +524,20 @@ public class DbWorkspace {
 
   @Transient
   public WorkspaceActiveStatus getWorkspaceActiveStatusEnum() {
-    return StorageEnums.workspaceActiveStatusFromStorage(getActiveStatus());
+    return DbStorageEnums.workspaceActiveStatusFromStorage(getActiveStatus());
   }
 
   public void setWorkspaceActiveStatusEnum(WorkspaceActiveStatus activeStatus) {
-    setActiveStatus(StorageEnums.workspaceActiveStatusToStorage(activeStatus));
+    setActiveStatus(DbStorageEnums.workspaceActiveStatusToStorage(activeStatus));
   }
 
   @Transient
   public BillingMigrationStatus getBillingMigrationStatusEnum() {
-    return StorageEnums.billingMigrationStatusFromStorage(billingMigrationStatus);
+    return DbStorageEnums.billingMigrationStatusFromStorage(billingMigrationStatus);
   }
 
   public void setBillingMigrationStatusEnum(BillingMigrationStatus status) {
-    this.billingMigrationStatus = StorageEnums.billingMigrationStatusToStorage(status);
+    this.billingMigrationStatus = DbStorageEnums.billingMigrationStatusToStorage(status);
   }
 
   @Column(name = "billing_migration_status")
@@ -551,19 +551,19 @@ public class DbWorkspace {
 
   @Column(name = "billing_status")
   public BillingStatus getBillingStatus() {
-    return StorageEnums.billingStatusFromStorage(billingStatus);
+    return DbStorageEnums.billingStatusFromStorage(billingStatus);
   }
 
   public void setBillingStatus(BillingStatus billingStatus) {
-    this.billingStatus = StorageEnums.billingStatusToStorage(billingStatus);
+    this.billingStatus = DbStorageEnums.billingStatusToStorage(billingStatus);
   }
 
   @Column(name = "billing_account_type")
   public BillingAccountType getBillingAccountType() {
-    return StorageEnums.billingAccountTypeFromStorage(billingAccountType);
+    return DbStorageEnums.billingAccountTypeFromStorage(billingAccountType);
   }
 
   public void setBillingAccountType(BillingAccountType billingAccountType) {
-    this.billingAccountType = StorageEnums.billingAccountTypeToStorage(billingAccountType);
+    this.billingAccountType = DbStorageEnums.billingAccountTypeToStorage(billingAccountType);
   }
 }

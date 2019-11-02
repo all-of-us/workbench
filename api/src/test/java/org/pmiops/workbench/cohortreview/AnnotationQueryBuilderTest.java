@@ -30,9 +30,9 @@ import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortStatus;
@@ -188,12 +188,12 @@ public class AnnotationQueryBuilderTest {
     return cohortAnnotationDefinition;
   }
 
-  private ParticipantCohortStatus makeStatus(
+  private DbParticipantCohortStatus makeStatus(
       long cohortReviewId, long participantId, CohortStatus status) {
-    ParticipantCohortStatusKey key = new ParticipantCohortStatusKey();
+    DbParticipantCohortStatusKey key = new DbParticipantCohortStatusKey();
     key.setCohortReviewId(cohortReviewId);
     key.setParticipantId(participantId);
-    ParticipantCohortStatus result = new ParticipantCohortStatus();
+    DbParticipantCohortStatus result = new DbParticipantCohortStatus();
     result.setStatusEnum(status);
     result.setParticipantKey(key);
     return result;
@@ -435,7 +435,7 @@ public class AnnotationQueryBuilderTest {
       String enumValue)
       throws ParseException {
     if (integerValue != null) {
-      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      DbParticipantCohortAnnotation annotation = new DbParticipantCohortAnnotation();
       annotation.setCohortAnnotationDefinitionId(
           integerAnnotation.getCohortAnnotationDefinitionId());
       annotation.setParticipantId(personId);
@@ -444,7 +444,7 @@ public class AnnotationQueryBuilderTest {
       participantCohortAnnotationDao.save(annotation);
     }
     if (stringValue != null) {
-      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      DbParticipantCohortAnnotation annotation = new DbParticipantCohortAnnotation();
       annotation.setCohortAnnotationDefinitionId(
           stringAnnotation.getCohortAnnotationDefinitionId());
       annotation.setParticipantId(personId);
@@ -453,7 +453,7 @@ public class AnnotationQueryBuilderTest {
       participantCohortAnnotationDao.save(annotation);
     }
     if (booleanValue != null) {
-      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      DbParticipantCohortAnnotation annotation = new DbParticipantCohortAnnotation();
       annotation.setCohortAnnotationDefinitionId(
           booleanAnnotation.getCohortAnnotationDefinitionId());
       annotation.setParticipantId(personId);
@@ -462,7 +462,7 @@ public class AnnotationQueryBuilderTest {
       participantCohortAnnotationDao.save(annotation);
     }
     if (dateValue != null) {
-      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      DbParticipantCohortAnnotation annotation = new DbParticipantCohortAnnotation();
       annotation.setCohortAnnotationDefinitionId(dateAnnotation.getCohortAnnotationDefinitionId());
       annotation.setParticipantId(personId);
       annotation.setCohortReviewId(cohortReview.getCohortReviewId());
@@ -471,7 +471,7 @@ public class AnnotationQueryBuilderTest {
       participantCohortAnnotationDao.save(annotation);
     }
     if (enumValue != null) {
-      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      DbParticipantCohortAnnotation annotation = new DbParticipantCohortAnnotation();
       annotation.setCohortAnnotationDefinitionId(enumAnnotation.getCohortAnnotationDefinitionId());
       annotation.setParticipantId(personId);
       annotation.setCohortReviewId(cohortReview.getCohortReviewId());

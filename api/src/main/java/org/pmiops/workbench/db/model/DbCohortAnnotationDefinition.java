@@ -105,15 +105,15 @@ public class DbCohortAnnotationDefinition {
 
   @Transient
   public AnnotationType getAnnotationTypeEnum() {
-    return StorageEnums.annotationTypeFromStorage(getAnnotationType());
+    return DbStorageEnums.annotationTypeFromStorage(getAnnotationType());
   }
 
   public void setAnnotationTypeEnum(AnnotationType annotationType) {
-    setAnnotationType(StorageEnums.annotationTypeToStorage(annotationType));
+    setAnnotationType(DbStorageEnums.annotationTypeToStorage(annotationType));
   }
 
   public DbCohortAnnotationDefinition annotationTypeEnum(AnnotationType annotationType) {
-    return this.annotationType(StorageEnums.annotationTypeToStorage(annotationType));
+    return this.annotationType(DbStorageEnums.annotationTypeToStorage(annotationType));
   }
 
   @OneToMany(

@@ -25,7 +25,7 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -87,7 +87,7 @@ public class CohortsController implements CohortsApiDelegate {
   private final CohortReviewDao cohortReviewDao;
   private final ConceptSetDao conceptSetDao;
   private final CohortMaterializationService cohortMaterializationService;
-  private Provider<User> userProvider;
+  private Provider<DbUser> userProvider;
   private final Clock clock;
   private final CdrVersionService cdrVersionService;
   private final UserRecentResourceService userRecentResourceService;
@@ -101,7 +101,7 @@ public class CohortsController implements CohortsApiDelegate {
       CohortReviewDao cohortReviewDao,
       ConceptSetDao conceptSetDao,
       CohortMaterializationService cohortMaterializationService,
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       Clock clock,
       CdrVersionService cdrVersionService,
       UserRecentResourceService userRecentResourceService) {
@@ -119,7 +119,7 @@ public class CohortsController implements CohortsApiDelegate {
   }
 
   @VisibleForTesting
-  public void setUserProvider(Provider<User> userProvider) {
+  public void setUserProvider(Provider<DbUser> userProvider) {
     this.userProvider = userProvider;
   }
 

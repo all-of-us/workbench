@@ -22,7 +22,7 @@ public class DbBillingProjectBufferEntry {
   private Timestamp lastSyncRequestTime;
   private Timestamp lastStatusChangedTime;
   private Short status;
-  private User assignedUser;
+  private DbUser assignedUser;
 
   public enum BillingProjectBufferStatus {
     // Sent a request to FireCloud to create a BillingProject. Status of BillingProject is TBD
@@ -88,23 +88,23 @@ public class DbBillingProjectBufferEntry {
 
   @ManyToOne
   @JoinColumn(name = "assigned_user_id")
-  public User getAssignedUser() {
+  public DbUser getAssignedUser() {
     return assignedUser;
   }
 
-  public void setAssignedUser(User assignedUser) {
+  public void setAssignedUser(DbUser assignedUser) {
     this.assignedUser = assignedUser;
   }
 
   @Transient
   public BillingProjectBufferStatus getStatusEnum() {
-    return StorageEnums.billingProjectBufferStatusFromStorage(status);
+    return DbStorageEnums.billingProjectBufferStatusFromStorage(status);
   }
 
   public void setStatusEnum(
       BillingProjectBufferStatus status, Supplier<Timestamp> currentTimestamp) {
     this.setLastStatusChangedTime(currentTimestamp.get());
-    this.status = StorageEnums.billingProjectBufferStatusToStorage(status);
+    this.status = DbStorageEnums.billingProjectBufferStatusToStorage(status);
   }
 
   @Column(name = "status")

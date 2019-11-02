@@ -91,8 +91,8 @@ import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
@@ -264,7 +264,7 @@ public class WorkspacesControllerTest {
 
     @Bean
     @Scope("prototype")
-    User user() {
+    DbUser user() {
       return currentUser;
     }
 
@@ -276,7 +276,7 @@ public class WorkspacesControllerTest {
     }
   }
 
-  private static User currentUser;
+  private static DbUser currentUser;
   private static WorkspaceACL fcWorkspaceAcl;
   @Autowired FireCloudService fireCloudService;
   @Autowired private WorkspaceService workspaceService;
@@ -342,8 +342,8 @@ public class WorkspacesControllerTest {
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
   }
 
-  private User createUser(String email) {
-    User user = new User();
+  private DbUser createUser(String email) {
+    DbUser user = new DbUser();
     user.setEmail(email);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
@@ -848,7 +848,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     // The original workspace is shared with one other user.
-    User writerUser = new User();
+    DbUser writerUser = new DbUser();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setDisabled(false);
@@ -1278,7 +1278,7 @@ public class WorkspacesControllerTest {
         workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
             workspace.getNamespace(),
             workspace.getId(),
-            StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
 
     CdrVersion cdrVersion2 = new CdrVersion();
     cdrVersion2.setName("2");
@@ -1356,7 +1356,7 @@ public class WorkspacesControllerTest {
         workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
             cloned.getNamespace(),
             cloned.getId(),
-            StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
 
     List<DbDataset> dataSets = dataSetService.getDataSets(clonedDbWorkspace);
     assertThat(dataSets).hasSize(1);
@@ -1492,7 +1492,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    User cloner = new User();
+    DbUser cloner = new DbUser();
     cloner.setEmail("cloner@gmail.com");
     cloner.setUserId(456L);
     cloner.setDisabled(false);
@@ -1588,9 +1588,9 @@ public class WorkspacesControllerTest {
   @Test
   public void testCloneWorkspaceIncludeUserRoles() throws Exception {
     stubFcGetGroup();
-    User cloner = createUser("cloner@gmail.com");
-    User reader = createUser("reader@gmail.com");
-    User writer = createUser("writer@gmail.com");
+    DbUser cloner = createUser("cloner@gmail.com");
+    DbUser reader = createUser("reader@gmail.com");
+    DbUser writer = createUser("writer@gmail.com");
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
     List<UserRole> collaborators =
         new ArrayList<>(
@@ -1696,7 +1696,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     // Clone with a different user.
-    User cloner = new User();
+    DbUser cloner = new DbUser();
     cloner.setEmail("cloner@gmail.com");
     cloner.setUserId(456L);
     cloner.setDisabled(false);
@@ -1749,13 +1749,13 @@ public class WorkspacesControllerTest {
   @Test
   public void testShareWorkspace() throws Exception {
     stubFcGetGroup();
-    User writerUser = new User();
+    DbUser writerUser = new DbUser();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setDisabled(false);
 
     writerUser = userDao.save(writerUser);
-    User readerUser = new User();
+    DbUser readerUser = new DbUser();
     readerUser.setEmail("readerfriend@gmail.com");
     readerUser.setUserId(125L);
     readerUser.setDisabled(false);
@@ -1803,13 +1803,13 @@ public class WorkspacesControllerTest {
   @Test
   public void testShareWorkspaceAddBillingProjectUser() throws Exception {
     stubFcGetGroup();
-    User writerUser = new User();
+    DbUser writerUser = new DbUser();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setDisabled(false);
 
     writerUser = userDao.save(writerUser);
-    User ownerUser = new User();
+    DbUser ownerUser = new DbUser();
     ownerUser.setEmail("ownerfriend@gmail.com");
     ownerUser.setUserId(125L);
     ownerUser.setDisabled(false);
@@ -1840,13 +1840,13 @@ public class WorkspacesControllerTest {
   @Test
   public void testShareWorkspaceRemoveBillingProjectUser() throws Exception {
     stubFcGetGroup();
-    User writerUser = new User();
+    DbUser writerUser = new DbUser();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setDisabled(false);
 
     writerUser = userDao.save(writerUser);
-    User ownerUser = new User();
+    DbUser ownerUser = new DbUser();
     ownerUser.setEmail("ownerfriend@gmail.com");
     ownerUser.setUserId(125L);
     ownerUser.setDisabled(false);
@@ -1898,7 +1898,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testShareWorkspaceNoRoleFailure() throws Exception {
-    User writerUser = new User();
+    DbUser writerUser = new DbUser();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setDisabled(false);
@@ -1932,12 +1932,12 @@ public class WorkspacesControllerTest {
   @Test
   public void testUnshareWorkspace() throws Exception {
     stubFcGetGroup();
-    User writerUser = new User();
+    DbUser writerUser = new DbUser();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setDisabled(false);
     writerUser = userDao.save(writerUser);
-    User readerUser = new User();
+    DbUser readerUser = new DbUser();
     readerUser.setEmail("readerfriend@gmail.com");
     readerUser.setUserId(125L);
     readerUser.setDisabled(false);

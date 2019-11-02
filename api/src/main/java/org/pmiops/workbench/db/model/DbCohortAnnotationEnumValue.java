@@ -20,7 +20,7 @@ public class DbCohortAnnotationEnumValue implements Comparable {
   private String name;
   private int order;
   private DbCohortAnnotationDefinition cohortAnnotationDefinition;
-  private ParticipantCohortAnnotation participantCohortAnnotation;
+  private DbParticipantCohortAnnotation participantCohortAnnotation;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -83,17 +83,17 @@ public class DbCohortAnnotationEnumValue implements Comparable {
   }
 
   @OneToOne(mappedBy = "cohortAnnotationEnumValue")
-  public ParticipantCohortAnnotation getParticipantCohortAnnotation() {
+  public DbParticipantCohortAnnotation getParticipantCohortAnnotation() {
     return participantCohortAnnotation;
   }
 
   public void setParticipantCohortAnnotation(
-      ParticipantCohortAnnotation participantCohortAnnotation) {
+      DbParticipantCohortAnnotation participantCohortAnnotation) {
     this.participantCohortAnnotation = participantCohortAnnotation;
   }
 
   public DbCohortAnnotationEnumValue participantCohortAnnotation(
-      ParticipantCohortAnnotation participantCohortAnnotation) {
+      DbParticipantCohortAnnotation participantCohortAnnotation) {
     this.participantCohortAnnotation = participantCohortAnnotation;
     return this;
   }

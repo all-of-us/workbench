@@ -43,12 +43,12 @@ import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
-import org.pmiops.workbench.db.model.DataSetValue;
+import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
@@ -86,7 +86,7 @@ public class DataSetController implements DataSetApiDelegate {
   private final Clock clock;
   private DataSetService dataSetService;
 
-  private Provider<User> userProvider;
+  private Provider<DbUser> userProvider;
   private final WorkspaceService workspaceService;
 
   private static int NO_OF_PREVIEW_ROWS = 20;
@@ -124,7 +124,7 @@ public class DataSetController implements DataSetApiDelegate {
       DataSetService dataSetService,
       FireCloudService fireCloudService,
       NotebooksService notebooksService,
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       WorkspaceService workspaceService) {
     this.bigQueryService = bigQueryService;
     this.clock = clock;
@@ -151,7 +151,7 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER);
     final long workspaceId =
         workspaceService.get(workspaceNamespace, workspaceFirecloudName).getWorkspaceId();
-    final ImmutableList<DataSetValue> dataSetValueList =
+    final ImmutableList<DbDatasetValue> dataSetValueList =
         dataSetRequest.getDomainValuePairs().stream()
             .map(this::getDataSetValuesFromDomainValueSet)
             .collect(toImmutableList());
@@ -174,8 +174,8 @@ public class DataSetController implements DataSetApiDelegate {
     }
   }
 
-  private DataSetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
-    return new DataSetValue(
+  private DbDatasetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
+    return new DbDatasetValue(
         CommonStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
         domainValuePair.getValue());
   }
@@ -250,7 +250,7 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   // TODO(jaycarlton): move into helper methods in one or both of these classes
-  private static final Function<DataSetValue, DomainValuePair> TO_CLIENT_DOMAIN_VALUE =
+  private static final Function<DbDatasetValue, DomainValuePair> TO_CLIENT_DOMAIN_VALUE =
       dataSetValue -> {
         DomainValuePair domainValuePair = new DomainValuePair();
         domainValuePair.setValue(dataSetValue.getValue());

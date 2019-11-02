@@ -27,7 +27,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.AuthConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.GoogleDirectoryServiceConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.Me;
@@ -62,7 +62,7 @@ public class AuthInterceptorTest {
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
   private AuthInterceptor interceptor;
-  private User user;
+  private DbUser user;
 
   @Before
   public void setUp() {
@@ -75,7 +75,7 @@ public class AuthInterceptorTest {
     this.interceptor =
         new AuthInterceptor(
             userInfoService, fireCloudService, Providers.of(workbenchConfig), userDao, userService);
-    this.user = new User();
+    this.user = new DbUser();
     user.setUserId(USER_ID);
     user.setDisabled(false);
   }
@@ -207,7 +207,7 @@ public class AuthInterceptorTest {
   @Test
   public void authorityCheckPermitsWithNoAnnotation() throws Exception {
     Method method = getProfileApiMethod("getBillingProjects");
-    assertThat(interceptor.hasRequiredAuthority(method, new User())).isTrue();
+    assertThat(interceptor.hasRequiredAuthority(method, new DbUser())).isTrue();
   }
 
   @Test
@@ -219,7 +219,7 @@ public class AuthInterceptorTest {
 
   @Test
   public void authorityCheckPermitsWhenUserHasAuthority() throws Exception {
-    User userWithAuthorities = new User();
+    DbUser userWithAuthorities = new DbUser();
     Set<Authority> required = new HashSet<>();
     required.add(Authority.REVIEW_RESEARCH_PURPOSE);
     userWithAuthorities.setAuthoritiesEnum(required);

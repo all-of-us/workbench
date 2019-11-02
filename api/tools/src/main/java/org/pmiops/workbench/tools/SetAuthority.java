@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Authority;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -61,7 +61,7 @@ public class SetAuthority {
 
       for (String email : emails) {
         numUsers++;
-        User user = userDao.findUserByEmail(email);
+        DbUser user = userDao.findUserByEmail(email);
         if (user == null) {
           log.log(Level.SEVERE, "No user for {0}.", email);
           numErrors++;

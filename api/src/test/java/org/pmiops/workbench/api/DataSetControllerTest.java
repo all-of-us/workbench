@@ -63,7 +63,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
@@ -143,7 +143,7 @@ public class DataSetControllerTest {
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
-  private static User currentUser;
+  private static DbUser currentUser;
 
   private String cohortCriteria;
   private SearchRequest searchRequest;
@@ -192,7 +192,7 @@ public class DataSetControllerTest {
 
   @Autowired UserDao userDao;
 
-  @Mock Provider<User> userProvider;
+  @Mock Provider<DbUser> userProvider;
 
   @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
 
@@ -248,7 +248,7 @@ public class DataSetControllerTest {
 
     @Bean
     @Scope("prototype")
-    User user() {
+    DbUser user() {
       return currentUser;
     }
 
@@ -343,7 +343,7 @@ public class DataSetControllerTest {
 
     when(cdrBigQuerySchemaConfigService.getConfig()).thenReturn(cdrBigQuerySchemaConfig);
 
-    User user = new User();
+    DbUser user = new DbUser();
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);

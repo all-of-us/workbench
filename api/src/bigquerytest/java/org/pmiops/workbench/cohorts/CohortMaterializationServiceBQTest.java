@@ -43,8 +43,8 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
-import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
@@ -107,12 +107,12 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Mock private Provider<WorkbenchConfig> configProvider;
 
-  private ParticipantCohortStatus makeStatus(
+  private DbParticipantCohortStatus makeStatus(
       long cohortReviewId, long participantId, CohortStatus status) {
-    ParticipantCohortStatusKey key = new ParticipantCohortStatusKey();
+    DbParticipantCohortStatusKey key = new DbParticipantCohortStatusKey();
     key.setCohortReviewId(cohortReviewId);
     key.setParticipantId(participantId);
-    ParticipantCohortStatus result = new ParticipantCohortStatus();
+    DbParticipantCohortStatus result = new DbParticipantCohortStatus();
     result.setStatusEnum(status);
     result.setParticipantKey(key);
     return result;

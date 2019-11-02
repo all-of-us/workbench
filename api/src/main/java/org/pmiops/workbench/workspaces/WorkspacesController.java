@@ -43,8 +43,8 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.UserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -108,7 +108,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
   private final UserDao userDao;
-  private Provider<User> userProvider;
+  private Provider<DbUser> userProvider;
   private final FireCloudService fireCloudService;
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
@@ -123,7 +123,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceService workspaceService,
       CdrVersionDao cdrVersionDao,
       UserDao userDao,
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
       Clock clock,
@@ -146,7 +146,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @VisibleForTesting
-  public void setUserProvider(Provider<User> userProvider) {
+  public void setUserProvider(Provider<DbUser> userProvider) {
     this.userProvider = userProvider;
   }
 
@@ -222,7 +222,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("DbWorkspace name must be 80 characters or less");
     }
 
-    User user = userProvider.get();
+    DbUser user = userProvider.get();
     String workspaceNamespace;
     DbBillingProjectBufferEntry bufferedBillingProject;
     try {
@@ -269,7 +269,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private void setDbWorkspaceFields(
       DbWorkspace dbWorkspace,
-      User user,
+      DbUser user,
       FirecloudWorkspaceId workspaceId,
       org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
       Timestamp createdAndLastModifiedTime) {
@@ -366,7 +366,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'workspace.researchPurpose'");
     }
 
-    User user = userProvider.get();
+    DbUser user = userProvider.get();
 
     String toWorkspaceName;
     DbBillingProjectBufferEntry bufferedBillingProject;
@@ -518,7 +518,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       if (role.getRole() == null || role.getRole().toString().trim().isEmpty()) {
         throw new BadRequestException("Role required.");
       }
-      final User invitedUser = userDao.findUserByEmail(role.getEmail());
+      final DbUser invitedUser = userDao.findUserByEmail(role.getEmail());
       if (invitedUser == null) {
         throw new BadRequestException(String.format("User %s doesn't exist", role.getEmail()));
       }
@@ -767,10 +767,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<RecentWorkspaceResponse> getUserRecentWorkspaces() {
-    List<UserRecentWorkspace> userRecentWorkspaces = workspaceService.getRecentWorkspaces();
+    List<DbUserRecentWorkspace> userRecentWorkspaces = workspaceService.getRecentWorkspaces();
     List<Long> workspaceIds =
         userRecentWorkspaces.stream()
-            .map(UserRecentWorkspace::getWorkspaceId)
+            .map(DbUserRecentWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
     List<DbWorkspace> dbWorkspaces =
         workspaceService.getDao().findAllByWorkspaceIdIn(workspaceIds);
@@ -801,7 +801,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace =
         workspaceService.get(workspaceNamespace, workspaceId);
-    UserRecentWorkspace userRecentWorkspace = workspaceService.updateRecentWorkspaces(dbWorkspace);
+    DbUserRecentWorkspace userRecentWorkspace = workspaceService.updateRecentWorkspaces(dbWorkspace);
     WorkspaceAccessLevel workspaceAccessLevel =
         workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
 

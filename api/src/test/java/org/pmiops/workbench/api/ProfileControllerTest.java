@@ -37,8 +37,8 @@ import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.UserDataUseAgreement;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -95,7 +95,7 @@ public class ProfileControllerTest {
   private static final String RESEARCH_PURPOSE = "To test things";
   private static final int DUA_VERSION = 2;
 
-  @Mock private Provider<User> userProvider;
+  @Mock private Provider<DbUser> userProvider;
   @Mock private Provider<UserAuthentication> userAuthenticationProvider;
   @Autowired private UserDao userDao;
   @Autowired private AdminActionHistoryDao adminActionHistoryDao;
@@ -115,7 +115,7 @@ public class ProfileControllerTest {
   private InvitationVerificationRequest invitationVerificationRequest;
   private com.google.api.services.directory.model.User googleUser;
   private FakeClock clock;
-  private User user;
+  private DbUser user;
 
   @Rule public final ExpectedException exception = ExpectedException.none();
 
@@ -207,7 +207,7 @@ public class ProfileControllerTest {
   @Test
   public void testCreateAccount_success() throws Exception {
     createUser();
-    User user = userDao.findUserByEmail(PRIMARY_EMAIL);
+    DbUser user = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(user).isNotNull();
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
   }
@@ -439,7 +439,7 @@ public class ProfileControllerTest {
     profile.setGivenName("NewGivenName");
     profile.setFamilyName("NewFamilyName");
     profileController.updateProfile(profile);
-    List<UserDataUseAgreement> duas =
+    List<DbUserDataUseAgreement> duas =
         userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(profile.getUserId());
     assertThat(duas.get(0).isUserNameOutOfDate()).isTrue();
   }
@@ -625,7 +625,7 @@ public class ProfileControllerTest {
       String givenName,
       DataAccessLevel dataAccessLevel,
       Timestamp firstSignInTime) {
-    User user = userDao.findUserByEmail(primaryEmail);
+    DbUser user = userDao.findUserByEmail(primaryEmail);
     assertThat(user).isNotNull();
     assertThat(user.getContactEmail()).isEqualTo(contactEmail);
     assertThat(user.getFamilyName()).isEqualTo(familyName);

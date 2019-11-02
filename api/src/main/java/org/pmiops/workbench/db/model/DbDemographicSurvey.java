@@ -22,7 +22,7 @@ import org.pmiops.workbench.model.Race;
 
 @Entity
 @Table(name = "demographic_survey")
-public class DemographicSurvey {
+public class DbDemographicSurvey {
   private long id;
   private List<Short> race;
   private Short ethnicity;
@@ -30,11 +30,11 @@ public class DemographicSurvey {
   private int year_of_birth;
   private Short education;
   private Short disability;
-  private User user;
+  private DbUser user;
 
-  public DemographicSurvey() {}
+  public DbDemographicSurvey() {}
 
-  public DemographicSurvey(org.pmiops.workbench.model.DemographicSurvey demographicSurvey) {
+  public DbDemographicSurvey(org.pmiops.workbench.model.DemographicSurvey demographicSurvey) {
     this.race =
         demographicSurvey.getRace().stream()
             .map((race) -> DemographicSurveyEnum.raceToStorage(race))
@@ -195,11 +195,11 @@ public class DemographicSurvey {
 
   @ManyToOne
   @JoinColumn(name = "user_id")
-  public User getUser() {
+  public DbUser getUser() {
     return user;
   }
 
-  public void setUser(User user) {
+  public void setUser(DbUser user) {
     this.user = user;
   }
 }

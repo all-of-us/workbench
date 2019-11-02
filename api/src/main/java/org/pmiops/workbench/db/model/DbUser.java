@@ -29,7 +29,7 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
 @Table(name = "user")
-public class User {
+public class DbUser {
 
   /**
    * This is a Gson compatible class for encoding a JSON blob which is stored in MySQL. This
@@ -67,10 +67,10 @@ public class User {
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
   private Short emailVerificationStatus;
-  private Set<PageVisit> pageVisits = new HashSet<>();
+  private Set<DbPageVisit> pageVisits = new HashSet<>();
   private String clusterConfigDefault;
 
-  private List<InstitutionalAffiliation> institutionalAffiliations = new ArrayList<>();
+  private List<DbInstitutionalAffiliation> institutionalAffiliations = new ArrayList<>();
   private String aboutYou;
   private String areaOfResearch;
   private Integer clusterCreateRetries;
@@ -96,7 +96,7 @@ public class User {
   private Timestamp idVerificationBypassTime;
   private Timestamp twoFactorAuthCompletionTime;
   private Timestamp twoFactorAuthBypassTime;
-  private DemographicSurvey demographicSurvey;
+  private DbDemographicSurvey demographicSurvey;
   private DbAddress address;
 
   @Id
@@ -247,12 +247,12 @@ public class User {
     if (from == null) {
       return null;
     }
-    return from.stream().map(StorageEnums::authorityFromStorage).collect(Collectors.toSet());
+    return from.stream().map(DbStorageEnums::authorityFromStorage).collect(Collectors.toSet());
   }
 
   public void setAuthoritiesEnum(Set<Authority> newAuthorities) {
     this.setAuthorities(
-        newAuthorities.stream().map(StorageEnums::authorityToStorage).collect(Collectors.toSet()));
+        newAuthorities.stream().map(DbStorageEnums::authorityToStorage).collect(Collectors.toSet()));
   }
 
   @OneToMany(
@@ -261,11 +261,11 @@ public class User {
       fetch = FetchType.LAZY,
       mappedBy = "user")
   @Column(name = "page_id")
-  public Set<PageVisit> getPageVisits() {
+  public Set<DbPageVisit> getPageVisits() {
     return pageVisits;
   }
 
-  public void setPageVisits(Set<PageVisit> newPageVisits) {
+  public void setPageVisits(Set<DbPageVisit> newPageVisits) {
     this.pageVisits = newPageVisits;
   }
 
@@ -332,12 +332,12 @@ public class User {
 
   @Transient
   public EmailVerificationStatus getEmailVerificationStatusEnum() {
-    return StorageEnums.emailVerificationStatusFromStorage(getEmailVerificationStatus());
+    return DbStorageEnums.emailVerificationStatusFromStorage(getEmailVerificationStatus());
   }
 
   public void setEmailVerificationStatusEnum(EmailVerificationStatus emailVerificationStatus) {
     setEmailVerificationStatus(
-        StorageEnums.emailVerificationStatusToStorage(emailVerificationStatus));
+        DbStorageEnums.emailVerificationStatusToStorage(emailVerificationStatus));
   }
 
   @OneToMany(
@@ -346,12 +346,12 @@ public class User {
       mappedBy = "user",
       cascade = CascadeType.ALL)
   @OrderColumn(name = "order_index")
-  public List<InstitutionalAffiliation> getInstitutionalAffiliations() {
+  public List<DbInstitutionalAffiliation> getInstitutionalAffiliations() {
     return institutionalAffiliations;
   }
 
   public void setInstitutionalAffiliations(
-      List<InstitutionalAffiliation> newInstitutionalAffiliations) {
+      List<DbInstitutionalAffiliation> newInstitutionalAffiliations) {
     this.institutionalAffiliations = newInstitutionalAffiliations;
   }
 
@@ -359,7 +359,7 @@ public class User {
     this.institutionalAffiliations.clear();
   }
 
-  public void addInstitutionalAffiliation(InstitutionalAffiliation newInstitutionalAffiliation) {
+  public void addInstitutionalAffiliation(DbInstitutionalAffiliation newInstitutionalAffiliation) {
     this.institutionalAffiliations.add(newInstitutionalAffiliation);
   }
 
@@ -575,11 +575,11 @@ public class User {
       orphanRemoval = true,
       fetch = FetchType.LAZY,
       mappedBy = "user")
-  public DemographicSurvey getDemographicSurvey() {
+  public DbDemographicSurvey getDemographicSurvey() {
     return demographicSurvey;
   }
 
-  public void setDemographicSurvey(DemographicSurvey demographicSurvey) {
+  public void setDemographicSurvey(DbDemographicSurvey demographicSurvey) {
     this.demographicSurvey = demographicSurvey;
   }
 

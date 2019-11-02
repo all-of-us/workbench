@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.model.CdrVersionListResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -31,16 +31,16 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
               .name(cdrVersion.getName());
 
   private final CdrVersionService cdrVersionService;
-  private Provider<User> userProvider;
+  private Provider<DbUser> userProvider;
 
   @Autowired
-  CdrVersionsController(CdrVersionService cdrVersionService, Provider<User> userProvider) {
+  CdrVersionsController(CdrVersionService cdrVersionService, Provider<DbUser> userProvider) {
     this.cdrVersionService = cdrVersionService;
     this.userProvider = userProvider;
   }
 
   @VisibleForTesting
-  void setUserProvider(Provider<User> userProvider) {
+  void setUserProvider(Provider<DbUser> userProvider) {
     this.userProvider = userProvider;
   }
 

@@ -5,8 +5,8 @@ import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortReview;
-import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.db.model.ParticipantCohortStatus;
+import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -90,41 +90,41 @@ public interface CohortReviewService {
   DbCohortReview saveCohortReview(DbCohortReview cohortReview);
 
   /**
-   * Save the {@link DbCohortReview} as well as the collection of {@link ParticipantCohortStatus}.
+   * Save the {@link DbCohortReview} as well as the collection of {@link DbParticipantCohortStatus}.
    *
    * @param cohortReview
    * @param participantCohortStatuses
    */
   void saveFullCohortReview(
-      DbCohortReview cohortReview, List<ParticipantCohortStatus> participantCohortStatuses);
+      DbCohortReview cohortReview, List<DbParticipantCohortStatus> participantCohortStatuses);
 
   /**
-   * Save the specified {@link ParticipantCohortStatus}.
+   * Save the specified {@link DbParticipantCohortStatus}.
    *
    * @param participantCohortStatus
    * @return
    */
-  ParticipantCohortStatus saveParticipantCohortStatus(
-      ParticipantCohortStatus participantCohortStatus);
+  DbParticipantCohortStatus saveParticipantCohortStatus(
+      DbParticipantCohortStatus participantCohortStatus);
 
   /**
-   * Find the {@link ParticipantCohortStatus} for the specified cohortReviewId and participantId.
+   * Find the {@link DbParticipantCohortStatus} for the specified cohortReviewId and participantId.
    *
    * @param cohortReviewId
    * @param participantId
    * @return
    */
-  ParticipantCohortStatus findParticipantCohortStatus(Long cohortReviewId, Long participantId);
+  DbParticipantCohortStatus findParticipantCohortStatus(Long cohortReviewId, Long participantId);
 
   /**
-   * Find a list of {@link ParticipantCohortStatus} for the specified cohortReviewId, filtering and
+   * Find a list of {@link DbParticipantCohortStatus} for the specified cohortReviewId, filtering and
    * paging.
    *
    * @param cohortReviewId
    * @param pageRequest
    * @return
    */
-  List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest);
+  List<DbParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest);
 
   /**
    * Find count for the specified cohortReviewId, filtering and paging.
@@ -136,17 +136,17 @@ public interface CohortReviewService {
   Long findCount(Long cohortReviewId, PageRequest pageRequest);
 
   /**
-   * Save the specified {@link ParticipantCohortAnnotation}.
+   * Save the specified {@link DbParticipantCohortAnnotation}.
    *
    * @param cohortReviewId
    * @param participantCohortAnnotation
    * @return
    */
-  ParticipantCohortAnnotation saveParticipantCohortAnnotation(
-      Long cohortReviewId, ParticipantCohortAnnotation participantCohortAnnotation);
+  DbParticipantCohortAnnotation saveParticipantCohortAnnotation(
+      Long cohortReviewId, DbParticipantCohortAnnotation participantCohortAnnotation);
 
   /**
-   * Save the {@link ParticipantCohortAnnotation} for the specified participantId, annotationId and
+   * Save the {@link DbParticipantCohortAnnotation} for the specified participantId, annotationId and
    * {@link ModifyParticipantCohortAnnotationRequest}.
    *
    * @param annotationId
@@ -154,7 +154,7 @@ public interface CohortReviewService {
    * @param modifyParticipantCohortAnnotationRequest
    * @return
    */
-  ParticipantCohortAnnotation updateParticipantCohortAnnotation(
+  DbParticipantCohortAnnotation updateParticipantCohortAnnotation(
       Long annotationId,
       Long cohortReviewId,
       Long participantId,
@@ -169,7 +169,7 @@ public interface CohortReviewService {
   DbCohortAnnotationDefinition findCohortAnnotationDefinition(Long cohortAnnotationDefinitionId);
 
   /**
-   * Delete the {@link ParticipantCohortAnnotation} for the specified annotationId, cohortReviewId
+   * Delete the {@link DbParticipantCohortAnnotation} for the specified annotationId, cohortReviewId
    * and participantId.
    *
    * @param annotationId
@@ -180,7 +180,7 @@ public interface CohortReviewService {
       Long annotationId, Long cohortReviewId, Long participantId);
 
   /**
-   * Find the {@link ParticipantCohortAnnotation} for the specified cohortReviewId,
+   * Find the {@link DbParticipantCohortAnnotation} for the specified cohortReviewId,
    * cohortAnnotationDefinitonId and participantId.
    *
    * @param cohortReviewId
@@ -188,17 +188,17 @@ public interface CohortReviewService {
    * @param participantId
    * @return
    */
-  ParticipantCohortAnnotation findParticipantCohortAnnotation(
+  DbParticipantCohortAnnotation findParticipantCohortAnnotation(
       Long cohortReviewId, Long cohortAnnotationDefinitionId, Long participantId);
 
   /**
-   * Find a list of {@link ParticipantCohortAnnotation} for the specified cohortReviewId and
+   * Find a list of {@link DbParticipantCohortAnnotation} for the specified cohortReviewId and
    * participantId.
    *
    * @param cohortReviewId
    * @param participantId
    * @return
    */
-  List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(
+  List<DbParticipantCohortAnnotation> findParticipantCohortAnnotations(
       Long cohortReviewId, Long participantId);
 }

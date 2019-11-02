@@ -7,7 +7,7 @@ import java.io.InputStream;
 import javax.servlet.ServletContext;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.UserAuthentication;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
@@ -62,7 +62,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public User user(UserAuthentication userAuthentication) {
+  public DbUser user(UserAuthentication userAuthentication) {
     return userAuthentication.getUser();
   }
 
