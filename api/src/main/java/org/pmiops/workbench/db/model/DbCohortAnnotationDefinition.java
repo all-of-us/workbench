@@ -20,7 +20,7 @@ import org.pmiops.workbench.model.AnnotationType;
 
 @Entity
 @Table(name = "cohort_annotation_definition")
-public class CohortAnnotationDefinition {
+public class DbCohortAnnotationDefinition {
 
   private long cohortAnnotationDefinitionId;
   private int version;
@@ -40,7 +40,7 @@ public class CohortAnnotationDefinition {
     this.cohortAnnotationDefinitionId = cohortAnnotationDefinitionId;
   }
 
-  public CohortAnnotationDefinition cohortAnnotationDefinitionId(
+  public DbCohortAnnotationDefinition cohortAnnotationDefinitionId(
       long cohortAnnotationDefinitionId) {
     this.cohortAnnotationDefinitionId = cohortAnnotationDefinitionId;
     return this;
@@ -56,7 +56,7 @@ public class CohortAnnotationDefinition {
     this.version = version;
   }
 
-  public CohortAnnotationDefinition version(int version) {
+  public DbCohortAnnotationDefinition version(int version) {
     this.version = version;
     return this;
   }
@@ -70,7 +70,7 @@ public class CohortAnnotationDefinition {
     this.cohortId = cohortId;
   }
 
-  public CohortAnnotationDefinition cohortId(long cohortId) {
+  public DbCohortAnnotationDefinition cohortId(long cohortId) {
     this.cohortId = cohortId;
     return this;
   }
@@ -84,7 +84,7 @@ public class CohortAnnotationDefinition {
     this.columnName = columnName;
   }
 
-  public CohortAnnotationDefinition columnName(String columnName) {
+  public DbCohortAnnotationDefinition columnName(String columnName) {
     this.columnName = columnName;
     return this;
   }
@@ -98,7 +98,7 @@ public class CohortAnnotationDefinition {
     this.annotationType = annotationType;
   }
 
-  public CohortAnnotationDefinition annotationType(Short annotationType) {
+  public DbCohortAnnotationDefinition annotationType(Short annotationType) {
     this.annotationType = annotationType;
     return this;
   }
@@ -112,7 +112,7 @@ public class CohortAnnotationDefinition {
     setAnnotationType(StorageEnums.annotationTypeToStorage(annotationType));
   }
 
-  public CohortAnnotationDefinition annotationTypeEnum(AnnotationType annotationType) {
+  public DbCohortAnnotationDefinition annotationTypeEnum(AnnotationType annotationType) {
     return this.annotationType(StorageEnums.annotationTypeToStorage(annotationType));
   }
 
@@ -130,7 +130,7 @@ public class CohortAnnotationDefinition {
     this.enumValues = enumValues;
   }
 
-  public CohortAnnotationDefinition enumValues(SortedSet<CohortAnnotationEnumValue> enumValues) {
+  public DbCohortAnnotationDefinition enumValues(SortedSet<CohortAnnotationEnumValue> enumValues) {
     this.setEnumValues(enumValues);
     return this;
   }
@@ -139,7 +139,7 @@ public class CohortAnnotationDefinition {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    CohortAnnotationDefinition that = (CohortAnnotationDefinition) o;
+    DbCohortAnnotationDefinition that = (DbCohortAnnotationDefinition) o;
     return version == that.version
         && cohortId == that.cohortId
         && Objects.equals(columnName, that.columnName)

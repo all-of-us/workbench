@@ -3,7 +3,7 @@ package org.pmiops.workbench.cohortreview;
 import java.util.List;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -161,12 +161,12 @@ public interface CohortReviewService {
       ModifyParticipantCohortAnnotationRequest modifyParticipantCohortAnnotationRequest);
 
   /**
-   * Find the {@link CohortAnnotationDefinition} for the specified cohortAnnotationDefinitionId.
+   * Find the {@link DbCohortAnnotationDefinition} for the specified cohortAnnotationDefinitionId.
    *
    * @param cohortAnnotationDefinitionId
    * @return
    */
-  CohortAnnotationDefinition findCohortAnnotationDefinition(Long cohortAnnotationDefinitionId);
+  DbCohortAnnotationDefinition findCohortAnnotationDefinition(Long cohortAnnotationDefinitionId);
 
   /**
    * Delete the {@link ParticipantCohortAnnotation} for the specified annotationId, cohortReviewId

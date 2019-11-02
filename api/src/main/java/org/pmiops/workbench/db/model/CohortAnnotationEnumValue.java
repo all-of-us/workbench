@@ -19,7 +19,7 @@ public class CohortAnnotationEnumValue implements Comparable {
   private long cohortAnnotationEnumValueId;
   private String name;
   private int order;
-  private CohortAnnotationDefinition cohortAnnotationDefinition;
+  private DbCohortAnnotationDefinition cohortAnnotationDefinition;
   private ParticipantCohortAnnotation participantCohortAnnotation;
 
   @Id
@@ -68,16 +68,16 @@ public class CohortAnnotationEnumValue implements Comparable {
 
   @ManyToOne
   @JoinColumn(name = "cohort_annotation_definition_id")
-  public CohortAnnotationDefinition getCohortAnnotationDefinition() {
+  public DbCohortAnnotationDefinition getCohortAnnotationDefinition() {
     return cohortAnnotationDefinition;
   }
 
-  public void setCohortAnnotationDefinition(CohortAnnotationDefinition cohortAnnotationDefinition) {
+  public void setCohortAnnotationDefinition(DbCohortAnnotationDefinition cohortAnnotationDefinition) {
     this.cohortAnnotationDefinition = cohortAnnotationDefinition;
   }
 
   public CohortAnnotationEnumValue cohortAnnotationDefinition(
-      CohortAnnotationDefinition cohortAnnotationDefinition) {
+      DbCohortAnnotationDefinition cohortAnnotationDefinition) {
     this.cohortAnnotationDefinition = cohortAnnotationDefinition;
     return this;
   }

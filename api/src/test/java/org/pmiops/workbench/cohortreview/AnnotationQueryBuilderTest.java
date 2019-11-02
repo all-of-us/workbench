@@ -26,7 +26,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -90,11 +90,11 @@ public class AnnotationQueryBuilderTest {
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
   private CohortReview cohortReview;
-  private CohortAnnotationDefinition integerAnnotation;
-  private CohortAnnotationDefinition stringAnnotation;
-  private CohortAnnotationDefinition booleanAnnotation;
-  private CohortAnnotationDefinition dateAnnotation;
-  private CohortAnnotationDefinition enumAnnotation;
+  private DbCohortAnnotationDefinition integerAnnotation;
+  private DbCohortAnnotationDefinition stringAnnotation;
+  private DbCohortAnnotationDefinition booleanAnnotation;
+  private DbCohortAnnotationDefinition dateAnnotation;
+  private DbCohortAnnotationDefinition enumAnnotation;
   private Map<String, CohortAnnotationEnumValue> enumValueMap;
   private ImmutableMap<String, Object> expectedResult1;
   private ImmutableMap<String, Object> expectedResult2;
@@ -171,9 +171,9 @@ public class AnnotationQueryBuilderTest {
     allColumns = ImmutableList.copyOf(expectedResult1.keySet());
   }
 
-  private CohortAnnotationDefinition makeAnnotationDefinition(
+  private DbCohortAnnotationDefinition makeAnnotationDefinition(
       long cohortId, String columnName, AnnotationType annotationType, String... enumValues) {
-    CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition();
+    DbCohortAnnotationDefinition cohortAnnotationDefinition = new DbCohortAnnotationDefinition();
     cohortAnnotationDefinition.setAnnotationTypeEnum(annotationType);
     cohortAnnotationDefinition.setCohortId(cohortId);
     cohortAnnotationDefinition.setColumnName(columnName);

@@ -13,7 +13,7 @@ import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -44,7 +44,7 @@ public class CohortAnnotationDefinitionControllerTest {
   private static String NEW_COLUMN_NAME = "new_column";
   private DbWorkspace workspace;
   private DbCohort cohort;
-  private CohortAnnotationDefinition dbCohortAnnotationDefinition;
+  private DbCohortAnnotationDefinition dbCohortAnnotationDefinition;
   @Autowired CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
   @Autowired CohortDao cohortDao;
   @Autowired WorkspaceDao workspaceDao;
@@ -67,7 +67,7 @@ public class CohortAnnotationDefinitionControllerTest {
     cohortDao.save(cohort);
 
     dbCohortAnnotationDefinition =
-        new CohortAnnotationDefinition()
+        new DbCohortAnnotationDefinition()
             .cohortId(cohort.getCohortId())
             .annotationTypeEnum(AnnotationType.STRING)
             .columnName(EXISTING_COLUMN_NAME)

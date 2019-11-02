@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -91,17 +91,17 @@ public class AnnotationQueryBuilder {
       " LEFT OUTER JOIN cohort_annotation_enum_value ae%d "
           + "ON ae%d.cohort_annotation_enum_value_id = a%d.cohort_annotation_enum_value_id";
 
-  private Map<String, CohortAnnotationDefinition> getAnnotationDefinitions(
+  private Map<String, DbCohortAnnotationDefinition> getAnnotationDefinitions(
       CohortReview cohortReview) {
     return Maps.uniqueIndex(
         cohortAnnotationDefinitionDao.findByCohortId(cohortReview.getCohortId()),
-        CohortAnnotationDefinition::getColumnName);
+        DbCohortAnnotationDefinition::getColumnName);
   }
 
   private String getSelectAndFromSql(
       CohortReview cohortReview,
       List<String> columns,
-      Map<String, CohortAnnotationDefinition> annotationDefinitions,
+      Map<String, DbCohortAnnotationDefinition> annotationDefinitions,
       Map<String, String> columnAliasMap,
       ImmutableMap.Builder<String, Object> parameters) {
     StringBuilder selectBuilder = new StringBuilder("SELECT ");
@@ -122,7 +122,7 @@ public class AnnotationQueryBuilder {
         if (annotationDefinitions == null) {
           annotationDefinitions = getAnnotationDefinitions(cohortReview);
         }
-        CohortAnnotationDefinition definition = annotationDefinitions.get(column);
+        DbCohortAnnotationDefinition definition = annotationDefinitions.get(column);
         if (definition == null) {
           throw new BadRequestException("Invalid annotation name: " + column);
         }
@@ -229,7 +229,7 @@ public class AnnotationQueryBuilder {
       AnnotationQuery annotationQuery,
       Integer limit,
       long offset,
-      Map<String, CohortAnnotationDefinition> annotationDefinitions,
+      Map<String, DbCohortAnnotationDefinition> annotationDefinitions,
       ImmutableMap.Builder<String, Object> parameters) {
     Map<String, String> columnAliasMap = Maps.newHashMap();
     String selectAndFromSql =
@@ -258,7 +258,7 @@ public class AnnotationQueryBuilder {
     if (statusFilter == null || statusFilter.isEmpty()) {
       throw new BadRequestException("statusFilter cannot be empty");
     }
-    Map<String, CohortAnnotationDefinition> annotationDefinitions = null;
+    Map<String, DbCohortAnnotationDefinition> annotationDefinitions = null;
     List<String> columns = annotationQuery.getColumns();
     if (columns == null || columns.isEmpty()) {
       // By default get person_id, review_status, and all the annotation definitions.
@@ -268,7 +268,7 @@ public class AnnotationQueryBuilder {
       annotationDefinitions = getAnnotationDefinitions(cohortReview);
       columns.addAll(
           annotationDefinitions.values().stream()
-              .map(CohortAnnotationDefinition::getColumnName)
+              .map(DbCohortAnnotationDefinition::getColumnName)
               .collect(Collectors.toList()));
       annotationQuery.setColumns(columns);
     }

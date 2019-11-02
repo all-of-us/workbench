@@ -44,7 +44,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -111,11 +111,11 @@ public class CohortReviewControllerTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
-  private CohortAnnotationDefinition stringAnnotationDefinition;
-  private CohortAnnotationDefinition enumAnnotationDefinition;
-  private CohortAnnotationDefinition dateAnnotationDefinition;
-  private CohortAnnotationDefinition booleanAnnotationDefinition;
-  private CohortAnnotationDefinition integerAnnotationDefinition;
+  private DbCohortAnnotationDefinition stringAnnotationDefinition;
+  private DbCohortAnnotationDefinition enumAnnotationDefinition;
+  private DbCohortAnnotationDefinition dateAnnotationDefinition;
+  private DbCohortAnnotationDefinition booleanAnnotationDefinition;
+  private DbCohortAnnotationDefinition integerAnnotationDefinition;
   private org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantAnnotation;
 
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -310,13 +310,13 @@ public class CohortReviewControllerTest {
     participantCohortStatusDao.save(participantCohortStatus2);
 
     stringAnnotationDefinition =
-        new CohortAnnotationDefinition()
+        new DbCohortAnnotationDefinition()
             .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.STRING))
             .columnName("test")
             .cohortId(cohort.getCohortId());
     cohortAnnotationDefinitionDao.save(stringAnnotationDefinition);
     enumAnnotationDefinition =
-        new CohortAnnotationDefinition()
+        new DbCohortAnnotationDefinition()
             .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.ENUM))
             .columnName("test")
             .cohortId(cohort.getCohortId());
@@ -327,19 +327,19 @@ public class CohortReviewControllerTest {
             .cohortAnnotationDefinition(enumAnnotationDefinition));
     cohortAnnotationDefinitionDao.save(enumAnnotationDefinition.enumValues(enumValues));
     dateAnnotationDefinition =
-        new CohortAnnotationDefinition()
+        new DbCohortAnnotationDefinition()
             .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.DATE))
             .columnName("test")
             .cohortId(cohort.getCohortId());
     cohortAnnotationDefinitionDao.save(dateAnnotationDefinition);
     booleanAnnotationDefinition =
-        new CohortAnnotationDefinition()
+        new DbCohortAnnotationDefinition()
             .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.BOOLEAN))
             .columnName("test")
             .cohortId(cohort.getCohortId());
     cohortAnnotationDefinitionDao.save(booleanAnnotationDefinition);
     integerAnnotationDefinition =
-        new CohortAnnotationDefinition()
+        new DbCohortAnnotationDefinition()
             .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.INTEGER))
             .columnName("test")
             .cohortId(cohort.getCohortId());

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.model.AnnotationType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class CohortAnnotationDefinitionDaoTest {
 
   private static long COHORT_ID = 1;
   @Autowired CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
-  private CohortAnnotationDefinition cohortAnnotationDefinition;
+  private DbCohortAnnotationDefinition cohortAnnotationDefinition;
 
   @Before
   public void setUp() {
@@ -46,7 +46,7 @@ public class CohortAnnotationDefinitionDaoTest {
 
   @Test
   public void saveWithEnumValues() throws Exception {
-    CohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
+    DbCohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
     CohortAnnotationEnumValue enumValue1 =
         new CohortAnnotationEnumValue()
             .name("z")
@@ -68,7 +68,7 @@ public class CohortAnnotationDefinitionDaoTest {
 
     cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
-    CohortAnnotationDefinition cad =
+    DbCohortAnnotationDefinition cad =
         cohortAnnotationDefinitionDao.findOne(
             cohortAnnotationDefinition.getCohortAnnotationDefinitionId());
     assertEquals(cohortAnnotationDefinition, cad);
@@ -92,8 +92,8 @@ public class CohortAnnotationDefinitionDaoTest {
             .get(0));
   }
 
-  private CohortAnnotationDefinition createCohortAnnotationDefinition() {
-    return new CohortAnnotationDefinition()
+  private DbCohortAnnotationDefinition createCohortAnnotationDefinition() {
+    return new DbCohortAnnotationDefinition()
         .cohortId(COHORT_ID)
         .columnName("annotation name")
         .annotationTypeEnum(AnnotationType.BOOLEAN);

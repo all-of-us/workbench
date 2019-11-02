@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.AnnotationType;
@@ -37,8 +37,8 @@ public class ParticipantCohortAnnotationDaoTest {
 
   @Before
   public void setUp() throws Exception {
-    CohortAnnotationDefinition enumAnnotationDefinition =
-        new CohortAnnotationDefinition()
+    DbCohortAnnotationDefinition enumAnnotationDefinition =
+        new DbCohortAnnotationDefinition()
             .cohortId(COHORT_ID)
             .columnName("enum")
             .annotationTypeEnum(AnnotationType.ENUM);
@@ -62,8 +62,8 @@ public class ParticipantCohortAnnotationDaoTest {
     enumAnnotationDefinition.getEnumValues().add(enumValue3);
     cohortAnnotationDefinitionDao.save(enumAnnotationDefinition);
 
-    CohortAnnotationDefinition booleanAnnotationDefinition =
-        new CohortAnnotationDefinition()
+    DbCohortAnnotationDefinition booleanAnnotationDefinition =
+        new DbCohortAnnotationDefinition()
             .cohortId(COHORT_ID)
             .columnName("boolean")
             .annotationTypeEnum(AnnotationType.BOOLEAN);

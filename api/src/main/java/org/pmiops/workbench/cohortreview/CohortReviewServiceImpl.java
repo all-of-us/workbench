@@ -13,7 +13,7 @@ import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.CohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -195,7 +195,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   @Override
   public ParticipantCohortAnnotation saveParticipantCohortAnnotation(
       Long cohortReviewId, ParticipantCohortAnnotation participantCohortAnnotation) {
-    CohortAnnotationDefinition cohortAnnotationDefinition =
+    DbCohortAnnotationDefinition cohortAnnotationDefinition =
         findCohortAnnotationDefinition(
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
 
@@ -235,7 +235,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
         .annotationValueDateString(modifyRequest.getAnnotationValueDate())
         .annotationValueBoolean(modifyRequest.getAnnotationValueBoolean())
         .annotationValueInteger(modifyRequest.getAnnotationValueInteger());
-    CohortAnnotationDefinition cohortAnnotationDefinition =
+    DbCohortAnnotationDefinition cohortAnnotationDefinition =
         findCohortAnnotationDefinition(
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
 
@@ -245,9 +245,9 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public CohortAnnotationDefinition findCohortAnnotationDefinition(
+  public DbCohortAnnotationDefinition findCohortAnnotationDefinition(
       Long cohortAnnotationDefinitionId) {
-    CohortAnnotationDefinition cohortAnnotationDefinition =
+    DbCohortAnnotationDefinition cohortAnnotationDefinition =
         cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId);
 
     if (cohortAnnotationDefinition == null) {
@@ -297,7 +297,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
    */
   private void validateParticipantCohortAnnotation(
       ParticipantCohortAnnotation participantCohortAnnotation,
-      CohortAnnotationDefinition cohortAnnotationDefinition) {
+      DbCohortAnnotationDefinition cohortAnnotationDefinition) {
 
     if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.BOOLEAN)) {
       if (participantCohortAnnotation.getAnnotationValueBoolean() == null) {
