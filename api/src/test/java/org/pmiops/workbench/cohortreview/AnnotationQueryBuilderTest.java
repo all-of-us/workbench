@@ -28,7 +28,7 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -89,7 +89,7 @@ public class AnnotationQueryBuilderTest {
 
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
-  private CohortReview cohortReview;
+  private DbCohortReview cohortReview;
   private DbCohortAnnotationDefinition integerAnnotation;
   private DbCohortAnnotationDefinition stringAnnotation;
   private DbCohortAnnotationDefinition booleanAnnotation;
@@ -119,7 +119,7 @@ public class AnnotationQueryBuilderTest {
     cohort.setCriteria("blah");
     cohortDao.save(cohort);
 
-    cohortReview = new CohortReview();
+    cohortReview = new DbCohortReview();
     cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
     cohortReview.setCohortId(cohort.getCohortId());
     cohortReview.setMatchedParticipantCount(3);

@@ -14,7 +14,7 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -92,14 +92,14 @@ public class AnnotationQueryBuilder {
           + "ON ae%d.cohort_annotation_enum_value_id = a%d.cohort_annotation_enum_value_id";
 
   private Map<String, DbCohortAnnotationDefinition> getAnnotationDefinitions(
-      CohortReview cohortReview) {
+      DbCohortReview cohortReview) {
     return Maps.uniqueIndex(
         cohortAnnotationDefinitionDao.findByCohortId(cohortReview.getCohortId()),
         DbCohortAnnotationDefinition::getColumnName);
   }
 
   private String getSelectAndFromSql(
-      CohortReview cohortReview,
+      DbCohortReview cohortReview,
       List<String> columns,
       Map<String, DbCohortAnnotationDefinition> annotationDefinitions,
       Map<String, String> columnAliasMap,
@@ -161,7 +161,7 @@ public class AnnotationQueryBuilder {
   }
 
   private String getWhereSql(
-      CohortReview cohortReview,
+      DbCohortReview cohortReview,
       List<CohortStatus> statusFilter,
       ImmutableMap.Builder<String, Object> parameters) {
     StringBuilder whereBuilder =
@@ -224,7 +224,7 @@ public class AnnotationQueryBuilder {
   }
 
   private String getSql(
-      CohortReview cohortReview,
+      DbCohortReview cohortReview,
       List<CohortStatus> statusFilter,
       AnnotationQuery annotationQuery,
       Integer limit,
@@ -250,7 +250,7 @@ public class AnnotationQueryBuilder {
   }
 
   public AnnotationResults materializeAnnotationQuery(
-      CohortReview cohortReview,
+      DbCohortReview cohortReview,
       List<CohortStatus> statusFilter,
       AnnotationQuery annotationQuery,
       Integer limit,

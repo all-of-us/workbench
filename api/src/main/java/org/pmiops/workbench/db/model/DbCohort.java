@@ -29,7 +29,7 @@ public class DbCohort {
   private User creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
-  private Set<CohortReview> cohortReviews;
+  private Set<DbCohortReview> cohortReviews;
 
   public DbCohort() {}
 
@@ -140,11 +140,11 @@ public class DbCohort {
   }
 
   @OneToMany(mappedBy = "cohortId", orphanRemoval = true, cascade = CascadeType.ALL)
-  public Set<CohortReview> getCohortReviews() {
+  public Set<DbCohortReview> getCohortReviews() {
     return cohortReviews;
   }
 
-  public void setCohortReviews(Set<CohortReview> cohortReviews) {
+  public void setCohortReviews(Set<DbCohortReview> cohortReviews) {
     if (this.cohortReviews == null) {
       this.cohortReviews = cohortReviews;
       return;
@@ -152,7 +152,7 @@ public class DbCohort {
     this.cohortReviews.addAll(cohortReviews);
   }
 
-  public void addCohortReview(CohortReview cohortReview) {
+  public void addCohortReview(DbCohortReview cohortReview) {
     this.cohortReviews.add(cohortReview);
   }
 }

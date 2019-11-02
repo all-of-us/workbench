@@ -1,7 +1,7 @@
 package org.pmiops.workbench.cohorts;
 
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 
@@ -11,5 +11,5 @@ public interface CohortFactory {
 
   DbCohort duplicateCohort(String newName, User creator, DbWorkspace targetWorkspace, DbCohort original);
 
-  CohortReview duplicateCohortReview(CohortReview original, DbCohort targetCohort);
+  DbCohortReview duplicateCohortReview(DbCohortReview original, DbCohort targetCohort);
 }

@@ -4,7 +4,7 @@ import java.util.List;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -39,64 +39,64 @@ public interface CohortReviewService {
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess);
 
   /**
-   * Find the {@link CohortReview} for the specified cohortId and cdrVersionId.
+   * Find the {@link DbCohortReview} for the specified cohortId and cdrVersionId.
    *
    * @param cohortId
    * @param cdrVersionId
    * @return
    */
-  CohortReview findCohortReview(Long cohortId, Long cdrVersionId);
+  DbCohortReview findCohortReview(Long cohortId, Long cdrVersionId);
 
   /**
-   * Find the {@link CohortReview} for the specified cohortReviewId.
+   * Find the {@link DbCohortReview} for the specified cohortReviewId.
    *
    * @param cohortReviewId
    * @return
    */
-  CohortReview findCohortReview(Long cohortReviewId);
+  DbCohortReview findCohortReview(Long cohortReviewId);
 
   /**
-   * Find the {@link CohortReview} for the specified ns, firecloudName and cohortReviewId
+   * Find the {@link DbCohortReview} for the specified ns, firecloudName and cohortReviewId
    *
    * @param ns
    * @param firecloudName
    * @param cohortReviewId
    * @return
    */
-  CohortReview findCohortReview(String ns, String firecloudName, Long cohortReviewId);
+  DbCohortReview findCohortReview(String ns, String firecloudName, Long cohortReviewId);
 
   /**
    * Delete the specified cohort review.
    *
    * @param cohortReview
    */
-  void deleteCohortReview(CohortReview cohortReview);
+  void deleteCohortReview(DbCohortReview cohortReview);
 
   /**
-   * Find the {@link CohortReview} for the specified ns and firecloudName.
+   * Find the {@link DbCohortReview} for the specified ns and firecloudName.
    *
    * @param ns
    * @param firecloudName
    * @return
    */
-  List<CohortReview> getRequiredWithCohortReviews(String ns, String firecloudName);
+  List<DbCohortReview> getRequiredWithCohortReviews(String ns, String firecloudName);
 
   /**
-   * Save the specified {@link CohortReview}.
+   * Save the specified {@link DbCohortReview}.
    *
    * @param cohortReview
    * @return
    */
-  CohortReview saveCohortReview(CohortReview cohortReview);
+  DbCohortReview saveCohortReview(DbCohortReview cohortReview);
 
   /**
-   * Save the {@link CohortReview} as well as the collection of {@link ParticipantCohortStatus}.
+   * Save the {@link DbCohortReview} as well as the collection of {@link ParticipantCohortStatus}.
    *
    * @param cohortReview
    * @param participantCohortStatuses
    */
   void saveFullCohortReview(
-      CohortReview cohortReview, List<ParticipantCohortStatus> participantCohortStatuses);
+      DbCohortReview cohortReview, List<ParticipantCohortStatus> participantCohortStatuses);
 
   /**
    * Save the specified {@link ParticipantCohortStatus}.

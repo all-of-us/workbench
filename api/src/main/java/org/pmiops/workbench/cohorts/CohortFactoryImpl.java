@@ -3,7 +3,7 @@ package org.pmiops.workbench.cohorts;
 import java.sql.Timestamp;
 import java.time.Clock;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +44,8 @@ public class CohortFactoryImpl implements CohortFactory {
   }
 
   @Override
-  public CohortReview duplicateCohortReview(CohortReview original, DbCohort targetCohort) {
-    CohortReview newCohortReview = new CohortReview();
+  public DbCohortReview duplicateCohortReview(DbCohortReview original, DbCohort targetCohort) {
+    DbCohortReview newCohortReview = new DbCohortReview();
 
     newCohortReview.setCohortId(targetCohort.getCohortId());
     newCohortReview.creationTime(targetCohort.getCreationTime());

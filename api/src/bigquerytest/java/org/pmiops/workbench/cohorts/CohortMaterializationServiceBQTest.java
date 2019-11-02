@@ -42,7 +42,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -81,7 +81,7 @@ import org.springframework.context.annotation.Import;
 public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   private CohortMaterializationService cohortMaterializationService;
-  private CohortReview cohortReview;
+  private DbCohortReview cohortReview;
 
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
@@ -147,7 +147,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     cohort2.setCriteria(gson.toJson(SearchRequests.allGenders()));
     cohortDao.save(cohort2);
 
-    cohortReview = new CohortReview();
+    cohortReview = new DbCohortReview();
     cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
     cohortReview.setCohortId(cohort2.getCohortId());
     cohortReview.setMatchedParticipantCount(3);

@@ -44,7 +44,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -698,7 +698,7 @@ public class CohortsControllerTest {
         cohortsController
             .createCohort(workspace.getNamespace(), workspace.getId(), cohort)
             .getBody();
-    CohortReview cohortReview = new CohortReview();
+    DbCohortReview cohortReview = new DbCohortReview();
     cohortReview.setCohortId(cohort.getId());
     cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
     cohortReview.setReviewSize(2);

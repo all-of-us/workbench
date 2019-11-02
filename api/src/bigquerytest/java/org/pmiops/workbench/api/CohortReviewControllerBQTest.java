@@ -40,7 +40,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
 import org.pmiops.workbench.db.model.User;
@@ -148,7 +148,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Mock private Provider<User> userProvider;
 
   private DbCohort cohort;
-  private CohortReview review;
+  private DbCohortReview review;
   private static User currentUser;
 
   @Override
@@ -201,7 +201,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     cohortDao.save(cohort);
 
     review =
-        new CohortReview()
+        new DbCohortReview()
             .cdrVersionId(cdrVersion.getCdrVersionId())
             .matchedParticipantCount(212)
             .creationTime(new Timestamp(new Date().getTime()))

@@ -10,7 +10,7 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.ReviewStatus;
@@ -54,7 +54,7 @@ public class CohortFactoryTest {
     originalCohort.setType("type");
     originalCohort.setCriteria("criteria");
     originalCohort.setWorkspaceId(1l);
-    originalCohort.setCohortReviews(Collections.singleton(mock(CohortReview.class)));
+    originalCohort.setCohortReviews(Collections.singleton(mock(DbCohortReview.class)));
 
     User user = mock(User.class);
     DbWorkspace workspace = mock(DbWorkspace.class);
@@ -74,7 +74,7 @@ public class CohortFactoryTest {
   public void duplicateCohortReview() {
     Timestamp now = new Timestamp(Clock.systemUTC().millis());
 
-    CohortReview originalCohortReview = new CohortReview();
+    DbCohortReview originalCohortReview = new DbCohortReview();
     originalCohortReview.setCohortId(1l);
     originalCohortReview.setCdrVersionId(2l);
     originalCohortReview.setMatchedParticipantCount(3l);
@@ -86,7 +86,7 @@ public class CohortFactoryTest {
     doReturn(1l).when(cohort).getCohortId();
     doReturn(now).when(cohort).getCreationTime();
     doReturn(now).when(cohort).getLastModifiedTime();
-    CohortReview newReview = cohortFactory.duplicateCohortReview(originalCohortReview, cohort);
+    DbCohortReview newReview = cohortFactory.duplicateCohortReview(originalCohortReview, cohort);
 
     assertThat(newReview.getCohortId()).isEqualTo(originalCohortReview.getCohortId());
     assertThat(newReview.getCreationTime()).isEqualTo(now);

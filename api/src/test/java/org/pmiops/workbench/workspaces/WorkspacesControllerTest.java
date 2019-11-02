@@ -88,6 +88,7 @@ import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
@@ -1305,8 +1306,8 @@ public class WorkspacesControllerTest {
 
     final String expectedCohortReviewName = "cohort review";
     final String expectedCohortReviewDefinition = "cohort definition";
-    org.pmiops.workbench.db.model.CohortReview originalCohortReview =
-        new org.pmiops.workbench.db.model.CohortReview();
+    DbCohortReview originalCohortReview =
+        new DbCohortReview();
     originalCohortReview.setCohortName(expectedCohortReviewName);
     originalCohortReview.setCohortDefinition(expectedCohortReviewDefinition);
     originalCohortReview.setCohortId(originalCohort.getCohortId());
@@ -1379,7 +1380,7 @@ public class WorkspacesControllerTest {
     assertThat(cohorts.get(0).getDescription()).isEqualTo(expectedCohortDescription);
     assertThat(cohorts.get(0).getCohortId()).isNotEqualTo(originalCohort.getCohortId());
 
-    Set<org.pmiops.workbench.db.model.CohortReview> cohortReviews =
+    Set<DbCohortReview> cohortReviews =
         cohortReviewDao.findAllByCohortId(cohorts.get(0).getCohortId());
     assertThat(cohortReviews).hasSize(1);
     assertThat(cohortReviews.iterator().next().getCohortName()).isEqualTo(expectedCohortReviewName);

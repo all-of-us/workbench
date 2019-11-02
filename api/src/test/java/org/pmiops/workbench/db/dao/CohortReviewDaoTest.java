@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -33,7 +33,7 @@ public class CohortReviewDaoTest {
   @Autowired WorkspaceDao workspaceDao;
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewDao cohortReviewDao;
-  private CohortReview cohortReview;
+  private DbCohortReview cohortReview;
   private long cohortId;
 
   @Before
@@ -81,8 +81,8 @@ public class CohortReviewDaoTest {
             .get(0));
   }
 
-  private CohortReview createCohortReview() {
-    return new CohortReview()
+  private DbCohortReview createCohortReview() {
+    return new DbCohortReview()
         .cohortId(cohortId)
         .cdrVersionId(CDR_VERSION_ID)
         .creationTime(new Timestamp(Calendar.getInstance().getTimeInMillis()))

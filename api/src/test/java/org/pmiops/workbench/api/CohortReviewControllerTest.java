@@ -46,7 +46,7 @@ import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
 import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
@@ -102,7 +102,7 @@ public class CohortReviewControllerTest {
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";
   private CdrVersion cdrVersion;
-  private CohortReview cohortReview;
+  private DbCohortReview cohortReview;
   private DbCohort cohort;
   private DbCohort cohortWithoutReview;
   private ParticipantCohortStatus participantCohortStatus1;
@@ -266,7 +266,7 @@ public class CohortReviewControllerTest {
     Timestamp today = new Timestamp(new Date().getTime());
     cohortReview =
         cohortReviewDao.save(
-            new CohortReview()
+            new DbCohortReview()
                 .cohortId(cohort.getCohortId())
                 .cdrVersionId(cdrVersion.getCdrVersionId())
                 .reviewSize(2)
@@ -1005,7 +1005,7 @@ public class CohortReviewControllerTest {
   }
 
   private org.pmiops.workbench.model.CohortReview createCohortReview(
-      CohortReview actualReview,
+      DbCohortReview actualReview,
       List<ParticipantCohortStatus> participantCohortStatusList,
       Integer page,
       Integer pageSize,

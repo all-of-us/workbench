@@ -21,7 +21,7 @@ import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.ConceptSet;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -330,7 +330,7 @@ public class CohortsController implements CohortsApiDelegate {
       cdrVersionService.setCdrVersion(cdrVersion);
     }
     String cohortSpec;
-    CohortReview cohortReview = null;
+    DbCohortReview cohortReview = null;
     if (request.getCohortName() != null) {
       DbCohort cohort =
           cohortDao.findCohortByNameAndWorkspaceId(
@@ -392,7 +392,7 @@ public class CohortsController implements CohortsApiDelegate {
       cdrVersionService.setCdrVersion(cdrVersion);
     }
     String cohortSpec;
-    CohortReview cohortReview = null;
+    DbCohortReview cohortReview = null;
     if (request.getCohortName() != null) {
       DbCohort cohort =
           cohortDao.findCohortByNameAndWorkspaceId(
@@ -444,7 +444,7 @@ public class CohortsController implements CohortsApiDelegate {
               "Couldn't find cohort with name %s in workspace %s/%s",
               request.getCohortName(), workspaceNamespace, workspaceId));
     }
-    CohortReview cohortReview =
+    DbCohortReview cohortReview =
         cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
             cohort.getCohortId(), cdrVersion.getCdrVersionId());
     if (cohortReview == null) {

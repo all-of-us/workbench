@@ -15,7 +15,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.db.model.ParticipantCohortStatus;
@@ -95,8 +95,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public CohortReview findCohortReview(Long cohortId, Long cdrVersionId) {
-    CohortReview cohortReview =
+  public DbCohortReview findCohortReview(Long cohortId, Long cdrVersionId) {
+    DbCohortReview cohortReview =
         cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
 
     if (cohortReview == null) {
@@ -109,8 +109,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public CohortReview findCohortReview(Long cohortReviewId) {
-    CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortReviewId(cohortReviewId);
+  public DbCohortReview findCohortReview(Long cohortReviewId) {
+    DbCohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortReviewId(cohortReviewId);
 
     if (cohortReview == null) {
       throw new NotFoundException(
@@ -121,8 +121,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public CohortReview findCohortReview(String ns, String firecloudName, Long cohortReviewId) {
-    CohortReview cohortReview =
+  public DbCohortReview findCohortReview(String ns, String firecloudName, Long cohortReviewId) {
+    DbCohortReview cohortReview =
         cohortReviewDao.findByNamespaceAndFirecloudNameAndCohortReviewId(
             ns, firecloudName, cohortReviewId);
 
@@ -136,12 +136,12 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public void deleteCohortReview(CohortReview cohortReview) {
+  public void deleteCohortReview(DbCohortReview cohortReview) {
     cohortReviewDao.delete(cohortReview);
   }
 
   @Override
-  public List<CohortReview> getRequiredWithCohortReviews(String ns, String firecloudName) {
+  public List<DbCohortReview> getRequiredWithCohortReviews(String ns, String firecloudName) {
     return cohortReviewDao.findByFirecloudNameAndActiveStatus(
         ns,
         firecloudName,
@@ -149,14 +149,14 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public CohortReview saveCohortReview(CohortReview cohortReview) {
+  public DbCohortReview saveCohortReview(DbCohortReview cohortReview) {
     return cohortReviewDao.save(cohortReview);
   }
 
   @Override
   @Transactional
   public void saveFullCohortReview(
-      CohortReview cohortReview, List<ParticipantCohortStatus> participantCohortStatuses) {
+      DbCohortReview cohortReview, List<ParticipantCohortStatus> participantCohortStatuses) {
     saveCohortReview(cohortReview);
     participantCohortStatusDao.saveParticipantCohortStatusesCustom(participantCohortStatuses);
   }
