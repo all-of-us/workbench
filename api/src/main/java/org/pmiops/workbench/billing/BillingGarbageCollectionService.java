@@ -17,7 +17,7 @@ import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.dao.BillingProjectGarbageCollectionDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus;
-import org.pmiops.workbench.db.model.BillingProjectGarbageCollection;
+import org.pmiops.workbench.db.model.DbBillingProjectGarbageCollection;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -100,7 +100,7 @@ public class BillingGarbageCollectionService {
 
   private void recordGarbageCollection(final String projectName, final String garbageCollectionSA) {
 
-    final BillingProjectGarbageCollection gc = new BillingProjectGarbageCollection();
+    final DbBillingProjectGarbageCollection gc = new DbBillingProjectGarbageCollection();
     gc.setFireCloudProjectName(projectName);
     gc.setOwner(garbageCollectionSA);
     billingProjectGarbageCollectionDao.save(gc);
