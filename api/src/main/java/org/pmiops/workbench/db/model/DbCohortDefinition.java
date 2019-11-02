@@ -1,6 +1,6 @@
 package org.pmiops.workbench.db.model;
 
-public interface CohortDefinition {
+public interface DbCohortDefinition {
 
   String getCriteria();
 }
