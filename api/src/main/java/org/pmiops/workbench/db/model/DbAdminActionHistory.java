@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "admin_action_history")
-public class AdminActionHistory {
+public class DbAdminActionHistory {
   private long historyId;
   private long adminUserId;
   private Long targetUserId;

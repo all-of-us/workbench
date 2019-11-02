@@ -16,7 +16,7 @@ import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAddress;
-import org.pmiops.workbench.db.model.AdminActionHistory;
+import org.pmiops.workbench.db.model.DbAdminActionHistory;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DemographicSurvey;
 import org.pmiops.workbench.db.model.InstitutionalAffiliation;
@@ -444,7 +444,7 @@ public class UserService {
       String targetAction,
       Object oldValue,
       Object newValue) {
-    AdminActionHistory adminActionHistory = new AdminActionHistory();
+    DbAdminActionHistory adminActionHistory = new DbAdminActionHistory();
     adminActionHistory.setTargetUserId(targetUserId);
     adminActionHistory.setTargetWorkspaceId(targetWorkspaceId);
     adminActionHistory.setTargetAction(targetAction);
