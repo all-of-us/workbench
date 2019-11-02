@@ -84,7 +84,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DataSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -374,7 +374,7 @@ public class WorkspacesControllerTest {
   }
 
   private void mockBillingProjectBuffer(String projectName) {
-    BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
+    DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
     doReturn(projectName).when(entry).getFireCloudProjectName();
     doReturn(entry).when(billingProjectBufferService).assignBillingProject(any());
   }

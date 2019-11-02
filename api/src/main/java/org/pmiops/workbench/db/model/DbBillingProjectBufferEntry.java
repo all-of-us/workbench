@@ -14,7 +14,7 @@ import javax.persistence.Transient;
 
 @Entity
 @Table(name = "billing_project_buffer_entry")
-public class BillingProjectBufferEntry {
+public class DbBillingProjectBufferEntry {
 
   private long id;
   private String fireCloudProjectName;

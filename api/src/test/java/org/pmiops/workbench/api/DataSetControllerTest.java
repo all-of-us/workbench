@@ -61,7 +61,7 @@ import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -329,7 +329,7 @@ public class DataSetControllerTest {
             CLOCK);
     doAnswer(
             invocation -> {
-              BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
+              DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
               doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
               return entry;
             })

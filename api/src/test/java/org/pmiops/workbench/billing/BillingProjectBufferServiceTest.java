@@ -10,11 +10,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNING;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNING;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -40,7 +40,7 @@ import org.pmiops.workbench.TestLock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -182,7 +182,7 @@ public class BillingProjectBufferServiceTest {
         .createAllOfUsBillingProject(anyString());
 
     // free up buffer
-    BillingProjectBufferEntry entry = billingProjectBufferEntryDao.findAll().iterator().next();
+    DbBillingProjectBufferEntry entry = billingProjectBufferEntryDao.findAll().iterator().next();
     entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     expectedCallCount++;
@@ -217,9 +217,9 @@ public class BillingProjectBufferServiceTest {
     verify(fireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
 
     // should no op since we're at capacity + 1
-    Iterator<BillingProjectBufferEntry> bufferEntries =
+    Iterator<DbBillingProjectBufferEntry> bufferEntries =
         billingProjectBufferEntryDao.findAll().iterator();
-    BillingProjectBufferEntry entry = bufferEntries.next();
+    DbBillingProjectBufferEntry entry = bufferEntries.next();
     entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProjects();
@@ -407,7 +407,7 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void assignBillingProject() {
-    BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
     entry.setFireCloudProjectName("test-project-name");
     entry.setCreationTime(getCurrentTimestamp());
@@ -416,7 +416,7 @@ public class BillingProjectBufferServiceTest {
     User user = mock(User.class);
     doReturn("fake-email@aou.org").when(user).getEmail();
 
-    BillingProjectBufferEntry assignedEntry =
+    DbBillingProjectBufferEntry assignedEntry =
         billingProjectBufferService.assignBillingProject(user);
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
@@ -436,7 +436,7 @@ public class BillingProjectBufferServiceTest {
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
   public void assignBillingProject_locking() throws InterruptedException, ExecutionException {
-    BillingProjectBufferEntry firstEntry = new BillingProjectBufferEntry();
+    DbBillingProjectBufferEntry firstEntry = new DbBillingProjectBufferEntry();
     firstEntry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
     firstEntry.setFireCloudProjectName("test-project-name-1");
     firstEntry.setCreationTime(getCurrentTimestamp());
@@ -446,7 +446,7 @@ public class BillingProjectBufferServiceTest {
     firstUser.setEmail("fake-email-1@aou.org");
     userDao.save(firstUser);
 
-    BillingProjectBufferEntry secondEntry = new BillingProjectBufferEntry();
+    DbBillingProjectBufferEntry secondEntry = new DbBillingProjectBufferEntry();
     secondEntry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
     secondEntry.setFireCloudProjectName("test-project-name-2");
     secondEntry.setCreationTime(getCurrentTimestamp());
@@ -458,19 +458,19 @@ public class BillingProjectBufferServiceTest {
 
     doAnswer(new CallsRealMethodsWithDelay(500))
         .when(billingProjectBufferEntryDao)
-        .save(any(BillingProjectBufferEntry.class));
+        .save(any(DbBillingProjectBufferEntry.class));
 
-    Callable<BillingProjectBufferEntry> t1 =
+    Callable<DbBillingProjectBufferEntry> t1 =
         () -> billingProjectBufferService.assignBillingProject(firstUser);
-    Callable<BillingProjectBufferEntry> t2 =
+    Callable<DbBillingProjectBufferEntry> t2 =
         () -> billingProjectBufferService.assignBillingProject(secondUser);
 
-    List<Callable<BillingProjectBufferEntry>> callableTasks = new ArrayList<>();
+    List<Callable<DbBillingProjectBufferEntry>> callableTasks = new ArrayList<>();
     callableTasks.add(t1);
     callableTasks.add(t2);
 
     ExecutorService executor = Executors.newFixedThreadPool(2);
-    List<Future<BillingProjectBufferEntry>> futures = executor.invokeAll(callableTasks);
+    List<Future<DbBillingProjectBufferEntry>> futures = executor.invokeAll(callableTasks);
 
     assertThat(futures.get(0).get().getFireCloudProjectName())
         .isNotEqualTo(futures.get(1).get().getFireCloudProjectName());
@@ -478,7 +478,7 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void cleanBillingBuffer_creating() {
-    BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setStatusEnum(CREATING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
@@ -492,7 +492,7 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void cleanBillingBuffer_assigning() {
-    BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setStatusEnum(ASSIGNING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
@@ -506,7 +506,7 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void cleanBillingBuffer_ignoreValidEntries() {
-    BillingProjectBufferEntry creating = new BillingProjectBufferEntry();
+    DbBillingProjectBufferEntry creating = new DbBillingProjectBufferEntry();
     creating.setStatusEnum(CREATING, this::getCurrentTimestamp);
     creating.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(creating);
@@ -517,7 +517,7 @@ public class BillingProjectBufferServiceTest {
     assertThat(billingProjectBufferEntryDao.findOne(creating.getId()).getStatusEnum())
         .isEqualTo(CREATING);
 
-    BillingProjectBufferEntry assigning = new BillingProjectBufferEntry();
+    DbBillingProjectBufferEntry assigning = new DbBillingProjectBufferEntry();
     assigning.setStatusEnum(ASSIGNING, this::getCurrentTimestamp);
     assigning.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(assigning);

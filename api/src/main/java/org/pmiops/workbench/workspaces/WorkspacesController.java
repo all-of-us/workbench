@@ -40,7 +40,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.User;
@@ -224,7 +224,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     User user = userProvider.get();
     String workspaceNamespace;
-    BillingProjectBufferEntry bufferedBillingProject;
+    DbBillingProjectBufferEntry bufferedBillingProject;
     try {
       bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
     } catch (EmptyBufferException e) {
@@ -369,7 +369,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     User user = userProvider.get();
 
     String toWorkspaceName;
-    BillingProjectBufferEntry bufferedBillingProject;
+    DbBillingProjectBufferEntry bufferedBillingProject;
     try {
       bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
     } catch (EmptyBufferException e) {

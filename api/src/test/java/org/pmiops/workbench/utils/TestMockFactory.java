@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 
 import java.util.UUID;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
@@ -53,7 +53,7 @@ public class TestMockFactory {
   public void stubBufferBillingProject(BillingProjectBufferService billingProjectBufferService) {
     doAnswer(
             invocation -> {
-              BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
+              DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
               doReturn(UUID.randomUUID().toString()).when(entry).getFireCloudProjectName();
               return entry;
             })

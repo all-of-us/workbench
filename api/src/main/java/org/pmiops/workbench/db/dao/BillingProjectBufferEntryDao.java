@@ -2,8 +2,8 @@ package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
 import java.util.List;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus;
 import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -14,21 +14,21 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BillingProjectBufferEntryDao
-    extends CrudRepository<BillingProjectBufferEntry, Long> {
+    extends CrudRepository<DbBillingProjectBufferEntry, Long> {
 
   String ASSIGNING_LOCK = "ASSIGNING_LOCK";
 
-  BillingProjectBufferEntry findByFireCloudProjectName(String fireCloudProjectName);
+  DbBillingProjectBufferEntry findByFireCloudProjectName(String fireCloudProjectName);
 
-  @Query("SELECT COUNT(*) FROM BillingProjectBufferEntry WHERE status IN (0, 2)")
+  @Query("SELECT COUNT(*) FROM DbBillingProjectBufferEntry WHERE status IN (0, 2)")
   Long getCurrentBufferSize();
 
-  List<BillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(
+  List<DbBillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(
       short status, Timestamp timestamp);
 
-  BillingProjectBufferEntry findFirstByStatusOrderByLastSyncRequestTimeAsc(short status);
+  DbBillingProjectBufferEntry findFirstByStatusOrderByLastSyncRequestTimeAsc(short status);
 
-  BillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
+  DbBillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
 
   Long countByStatus(short status);
 
@@ -49,7 +49,7 @@ public interface BillingProjectBufferEntryDao
 
   @Query(
       "SELECT p.fireCloudProjectName "
-          + "FROM BillingProjectBufferEntry p "
+          + "FROM DbBillingProjectBufferEntry p "
           + "JOIN Workspace w "
           + "ON w.workspaceNamespace = p.fireCloudProjectName "
           + "AND p.status = :billingStatus "
