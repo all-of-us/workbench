@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.DemographicSurvey;
@@ -65,11 +66,11 @@ public class ProfileService {
             }
           };
 
-  private static final Function<org.pmiops.workbench.db.model.Address, Address>
+  private static final Function<DbAddress, Address>
       TO_CLIENT_ADDRESS_SURVEY =
-          new Function<org.pmiops.workbench.db.model.Address, Address>() {
+          new Function<DbAddress, Address>() {
             @Override
-            public Address apply(org.pmiops.workbench.db.model.Address address) {
+            public Address apply(DbAddress address) {
               Address result = new Address();
               if (address != null) {
                 result.setStreetAddress1(address.getStreetAddress1());

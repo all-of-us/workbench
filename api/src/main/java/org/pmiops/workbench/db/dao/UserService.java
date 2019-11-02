@@ -15,7 +15,7 @@ import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.Address;
+import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.AdminActionHistory;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DemographicSurvey;
@@ -250,7 +250,7 @@ public class UserService {
       String currentPosition,
       String organization,
       String areaOfResearch,
-      Address address,
+      DbAddress address,
       DemographicSurvey demographicSurvey,
       List<InstitutionalAffiliation> institutionalAffiliations) {
     User user = new User();

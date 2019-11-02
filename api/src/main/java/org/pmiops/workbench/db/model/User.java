@@ -97,7 +97,7 @@ public class User {
   private Timestamp twoFactorAuthCompletionTime;
   private Timestamp twoFactorAuthBypassTime;
   private DemographicSurvey demographicSurvey;
-  private Address address;
+  private DbAddress address;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -588,11 +588,11 @@ public class User {
       orphanRemoval = true,
       fetch = FetchType.LAZY,
       mappedBy = "user")
-  public Address getAddress() {
+  public DbAddress getAddress() {
     return address;
   }
 
-  public void setAddress(Address address) {
+  public void setAddress(DbAddress address) {
     this.address = address;
   }
 }

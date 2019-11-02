@@ -24,6 +24,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -124,13 +125,13 @@ public class ProfileController implements ProfileApiDelegate {
             }
           };
 
-  private static final Function<Address, org.pmiops.workbench.db.model.Address>
+  private static final Function<Address, DbAddress>
       FROM_CLIENT_ADDRESS =
-          new Function<Address, org.pmiops.workbench.db.model.Address>() {
+          new Function<Address, DbAddress>() {
             @Override
-            public org.pmiops.workbench.db.model.Address apply(Address address) {
-              org.pmiops.workbench.db.model.Address result =
-                  new org.pmiops.workbench.db.model.Address();
+            public DbAddress apply(Address address) {
+              DbAddress result =
+                  new DbAddress();
               result.setStreetAddress1(address.getStreetAddress1());
               result.setStreetAddress2(address.getStreetAddress2());
               result.setCity(address.getCity());
