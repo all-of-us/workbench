@@ -8,17 +8,17 @@ enum class ProfileTargetProperty
 constructor(override val propertyName: String, override val extractor: (Profile) -> String?): TargetProperty<Profile> {
     USER_NAME("user_name", Profile::getUsername),
     CONTACT_EMAIL("contact_email", Profile::getContactEmail),
-    DATA_ACCESS_LEVEL("data_access_level", { it.dataAccessLevel.toString() }),
+    DATA_ACCESS_LEVEL("data_access_level", { it.dataAccessLevel?.toString() }),
     GIVEN_NAME("given_name", Profile::getGivenName),
     FAMILY_NAME("family_name", Profile::getFamilyName),
     PHONE_NUMBER("phone_number", Profile::getPhoneNumber),
     CURRENT_POSITION("current_position", Profile::getCurrentPosition),
     ORGANIZATION("organization", Profile::getOrganization),
-    DISABLED("disabled", { it.disabled.toString() }),
+    DISABLED("disabled", { it.disabled?.toString() }),
     ABOUT_YOU("about_you", Profile::getAboutYou),
     AREA_OF_RESEARCH("area_of_research", Profile::getAreaOfResearch),
     INSTITUTIONAL_AFFILIATIONS("institutional_affiliations",
-            { it.institutionalAffiliations.joinToString(", ") }),
-    DEMOGRAPHIC_SURVEY("demographic_survey", { it.demographicSurvey.toString() }),
+            { it.institutionalAffiliations?.joinToString(", ") }),
+    DEMOGRAPHIC_SURVEY("demographic_survey", { it.demographicSurvey?.toString() }),
     ADDRESS("address", { it.address?.toString() });
 }
