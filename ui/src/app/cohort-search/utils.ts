@@ -99,6 +99,9 @@ export function typeToTitle(_type: string): string {
     case CriteriaType[CriteriaType.AGE]:
       _type = 'Current Age/Deceased';
       break;
+    case CriteriaType[CriteriaType.DECEASED]:
+      _type = 'Current Age/Deceased';
+      break;
     case CriteriaType[CriteriaType.ETHNICITY]:
       _type = 'Ethnicity';
       break;
