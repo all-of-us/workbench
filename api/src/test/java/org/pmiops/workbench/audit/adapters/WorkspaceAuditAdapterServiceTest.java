@@ -71,6 +71,7 @@ public class WorkspaceAuditAdapterServiceTest {
     user1.setGivenName("Fred");
     user1.setFamilyName("Flintstone");
     doReturn(user1).when(mockUserProvider).get();
+    doReturn("BIG-LONG-GUID").when(mockActionAuditService).newActionId();
     workspaceAuditAdapterService =
         new WorkspaceAuditAdapterServiceImpl(mockUserProvider, mockActionAuditService, mockClock);
 

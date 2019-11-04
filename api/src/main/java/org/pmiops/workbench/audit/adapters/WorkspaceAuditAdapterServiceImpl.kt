@@ -18,9 +18,8 @@ import org.pmiops.workbench.workspaces.WorkspaceConversionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
-@VisibleForTesting
 @Service
-open class WorkspaceAuditAdapterServiceImpl @Autowired
+class WorkspaceAuditAdapterServiceImpl @Autowired
 constructor(
     private val userProvider: Provider<User>,
     private val actionAuditService: ActionAuditService,
@@ -29,7 +28,7 @@ constructor(
 
     override fun fireCreateAction(createdWorkspace: Workspace, dbWorkspaceId: Long) {
         try {
-            val actionId = ActionAuditEvent.newActionId()
+            val actionId = actionAuditService.newActionId()
             val userId = userProvider.get().userId
             val userEmail = userProvider.get().email
             val propertyValues = WorkspaceTargetProperty.getPropertyValuesByName(createdWorkspace)
@@ -63,7 +62,7 @@ constructor(
     // consistent across actions somewhat challenging.
     override fun fireDeleteAction(dbWorkspace: org.pmiops.workbench.db.model.Workspace) {
         try {
-            val actionId = ActionAuditEvent.newActionId()
+            val actionId = actionAuditService.newActionId()
             val userId = userProvider.get().userId
             val userEmail = userProvider.get().email
             val timestamp = clock.millis()
@@ -92,7 +91,7 @@ constructor(
             // ActionTypes: DUPLICATE_FROM and DUPLICATE_TO. The latter action generates many events
             // (similar to how CREATE is handled) for all the properties. I'm not (currently) filtering
             // out values that are the same.
-            val actionId = ActionAuditEvent.newActionId()
+            val actionId = actionAuditService.newActionId()
             val userId = userProvider.get().userId
             val userEmail = userProvider.get().email
             val timestamp = clock.millis()
@@ -141,7 +140,7 @@ constructor(
                 return
             }
 
-            val actionId = ActionAuditEvent.newActionId()
+            val actionId = actionAuditService.newActionId()
             val sharingUserId = userProvider.get().userId
             val userEmail = userProvider.get().email
             val timestamp = clock.millis()

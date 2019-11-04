@@ -1,8 +1,6 @@
 package org.pmiops.workbench.audit
 
-import java.util.UUID.randomUUID
-
-class ActionAuditEvent(
+data class ActionAuditEvent(
     val timestamp: Long,
     val agentType: AgentType,
     val agentId: Long,
@@ -14,9 +12,4 @@ class ActionAuditEvent(
     val targetIdMaybe: Long? = null,
     val previousValueMaybe: String? = null,
     val newValueMaybe: String? = null
-) {
-
-    companion object {
-        fun newActionId(): String = randomUUID().toString()
-    }
-}
+)

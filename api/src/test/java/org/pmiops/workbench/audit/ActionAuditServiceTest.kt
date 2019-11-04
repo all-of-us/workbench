@@ -50,7 +50,7 @@ class ActionAuditServiceTest {
         doReturn(workbenchConfig).`when`<Provider<WorkbenchConfig>>(mockConfigProvider).get()
 
         actionAuditService = ActionAuditServiceImpl(mockConfigProvider!!, mockLogging!!)
-        val actionId = ActionAuditEvent.newActionId()
+        val actionId = actionAuditService?.newActionId()!!
 
         // ordinarily events sharing an action would have more things in common than this,
         // but the schema doesn't require it
