@@ -4,7 +4,6 @@ import org.pmiops.workbench.model.Profile
 
 enum class ProfileTargetProperty(val propertyName: String, private val extractor: (Profile) -> String?) {
     USER_NAME("user_name", Profile::getUsername),
-    CREATION_NONCE("creation_nonce", Profile::getCreationNonce),
     CONTACT_EMAIL("contact_email", Profile::getContactEmail),
     DATA_ACCESS_LEVEL("data_access_level", { it.dataAccessLevel.toString() }),
     GIVEN_NAME("given_name", Profile::getGivenName),
