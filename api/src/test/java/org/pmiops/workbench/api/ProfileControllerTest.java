@@ -3,8 +3,10 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -211,6 +213,7 @@ public class ProfileControllerTest {
   @Test
   public void testCreateAccount_success() throws Exception {
     createUser();
+    verify(mockProfileAuditAdapterService).fireCreateAction(any(Profile.class));
     User user = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(user).isNotNull();
     assertThat(user.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
@@ -227,6 +230,7 @@ public class ProfileControllerTest {
     exception.expectMessage(
         "Username should be at least 3 characters and not more than 64 characters");
     profileController.createAccount(accountRequest);
+    verify(mockProfileAuditAdapterService).fireCreateAction(any(Profile.class));
   }
 
   @Test
@@ -591,6 +595,14 @@ public class ProfileControllerTest {
     verify(userService, times(1)).setDataUseAgreementBypassTime(any(), any());
   }
 
+  @Test
+  public void testDeleteProfile() throws Exception {
+    createUser();
+
+    profileController.deleteProfile();
+    verify(mockProfileAuditAdapterService).fireDeleteAction(user.getUserId(), user.getEmail());
+  }
+
   private Profile createUser() throws Exception {
     when(cloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
@@ -653,6 +665,7 @@ public class ProfileControllerTest {
     config.access.enableBetaAccess = true;
     config.access.enableEraCommons = true;
     config.access.enableDataUseAgreement = true;
+    config.featureFlags.unsafeAllowDeleteUser = true;
     return config;
   }
 }
