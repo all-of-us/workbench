@@ -78,7 +78,6 @@ public class WorkspaceTargetPropertyTest {
   @Test
   public void testEmptyWorkspaceGivesEmptyMap() {
     assertThat(WorkspaceTargetProperty.getPropertyValuesByName(emptyWorkspace)).isEmpty();
-    assertThat(WorkspaceTargetProperty.getPropertyValuesByName(null)).isEmpty();
   }
 
   @Test
@@ -134,11 +133,5 @@ public class WorkspaceTargetPropertyTest {
   @Test
   public void testComparisonToSelfIsEmpty() {
     assertThat(WorkspaceTargetProperty.getChangedValuesByName(workspace1, workspace1)).isEmpty();
-    assertThat(WorkspaceTargetProperty.getChangedValuesByName(null, null)).isEmpty();
-  }
-
-  @Test
-  public void testComparisonToNullMatchesAllProperties() {
-    assertThat(WorkspaceTargetProperty.getChangedValuesByName(workspace1, null)).hasSize(6);
   }
 }
