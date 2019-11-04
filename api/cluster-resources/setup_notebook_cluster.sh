@@ -39,9 +39,7 @@ apt-get update
 apt-get -t stretch-cran35 install -y --no-install-recommends libmagick++-dev gfortran-6
 
 for v in "2.7" "3"; do
-  "pip${v}" install --upgrade \
-    plotnine \
-    'https://github.com/all-of-us/pyclient/archive/pyclient-v1-17.zip#egg=aou_workbench_client&subdirectory=py'
+  "pip${v}" install --upgrade plotnine
 done
 
 # Install wondershaper for basic egress throttling.
@@ -49,5 +47,8 @@ apt-get install -y --no-install-recommends iproute
 (cd /usr/local/share &&
  git clone https://github.com/magnific0/wondershaper.git &&
  cd wondershaper &&
- ./wondershaper -a eth0 -u 2048 # 2Mbit maximum upload
+ make install
+
+ # TODO(RW-3784): This approach does not outlive cluster pause/resumes.
+ wondershaper -a "eth0" -u 16384
 )

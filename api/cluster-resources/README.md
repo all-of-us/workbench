@@ -11,7 +11,7 @@ To manually test updates to this script locally:
 - Push the script to GCS (username-suffixed):
 
   ```
-  api$ gsutil cp cluster-resources/setup_notebook_cluster.sh "gs://all-of-us-workbench-test-cluster-resources/setup_notebook_cluster-${USER}.sh""
+  api$ gsutil cp cluster-resources/setup_notebook_cluster.sh "gs://all-of-us-workbench-test-cluster-resources/setup_notebook_cluster-${USER}.sh"
   ```
 
 - (**Disclaimer**: local code change, do not submit) Temporarily update your
