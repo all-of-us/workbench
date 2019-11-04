@@ -280,10 +280,10 @@ export const ParticipantsTable = withCurrentWorkspace()(
           cohortBuilderApi().getParticipantDemographics(+cdrVersionId).then(data => {
             const extract = (arr, _type?) => fp.uniq([
               ...arr.map(i => {
-                filters[_type].push(i.conceptName);
+                filters[_type].push(i.conceptId.toString());
                 return {
                   name: i.conceptName,
-                  value: i.conceptName
+                  value: i.conceptId.toString()
                 };
               }),
               {name: 'Select All', value: 'Select All'}
