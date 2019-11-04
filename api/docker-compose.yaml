@@ -40,7 +40,7 @@ services:
     working_dir: /w/api
     volumes:
       - src-sync:/w:nocopy
-      - gradle-cache:/.gradle
+      - gradle-cache:/.gradle:cached
       - ~/.config:/.config:cached
       - ~/.gsutil:/.gsutil:cached
     command: ./project.rb start-api-and-incremental-build

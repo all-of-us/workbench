@@ -181,43 +181,27 @@ def dev_up()
 
   overall_bm = Benchmark.measure {
     common.status "Database startup..."
-    bm = Benchmark.measure { common.run_inline %W{docker-compose up -d db} }
+    bm = Benchmark.measure {
+      common.run_inline %W{docker-compose up -d db}
+    }
     common.status "Database startup complete (#{format_benchmark(bm)})"
 
     common.status "Database init & migrations..."
     bm = Benchmark.measure {
-      common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
+      common.run_inline %W{
+        docker-compose run db-scripts ./run-migrations.sh main
+      }
       init_new_cdr_db %W{--cdr-db-name cdr}
     }
     common.status "Database init & migrations complete (#{format_benchmark(bm)})"
 
-    common.status "Pushing configs & data..."
+    common.status "Loading configs & data..."
     bm = Benchmark.measure {
-      common.status "  --> Updating CDR versions"
-      common.run_inline %W{docker-compose run api-scripts ./gradlew updateCdrVersions -PappArgs=['/w/api/config/cdr_versions_local.json',false]}
-
-      common.status "  --> Loading Workbench config"
       common.run_inline %W{
-        docker-compose run api-scripts
-        ./gradlew loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json
+        docker-compose run api-scripts ./load_local_data_and_configs.sh
       }
-
-      common.status "  --> Loading CDR BigQuery Schema config"
-      common.run_inline %W{
-        docker-compose run api-scripts
-        ./gradlew loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
-      }
-
-      common.status "  --> Loading Featured Workspaces config"
-      common.run_inline %W{
-        docker-compose run api-scripts
-        ./gradlew loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
-      }
-
-      common.status "  --> Loading Data Dictionary data"
-      common.run_inline %W{docker-compose run api-scripts ./gradlew loadDataDictionary -PappArgs=false}
     }
-    common.status "Pushing configs complete (#{format_benchmark(bm)})"
+    common.status "Loading configs complete (#{format_benchmark(bm)})"
 
   }
   common.status "Total dev-env setup time: #{format_benchmark(overall_bm)}"
