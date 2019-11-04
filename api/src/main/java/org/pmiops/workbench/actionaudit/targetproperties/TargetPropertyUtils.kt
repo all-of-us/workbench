@@ -17,8 +17,8 @@ class TargetPropertyUtils {
 //            val enumClass = getTargetPropertyEnumByTargetClass()[T::class]
 //            val targetPropertyEnum = getTargetPropertyEnum(T::class)
             return valuesGetter.invoke()
-                    .filter { it.extract(target) != null }
-                    .map { it.propertyName to it.extract(target)!! }
+                    .filter { it.extractor.invoke(target) != null }
+                    .map { it.propertyName to it.extractor.invoke(target)!! }
                     .toMap()
         }
 
@@ -30,8 +30,8 @@ class TargetPropertyUtils {
         ): Map<String, PreviousNewValuePair> {
             return valuesGetter.invoke()
                     .map { it.propertyName to PreviousNewValuePair(
-                            previousValue = it.extract(previousTarget),
-                            newValue = it.extract(newTarget)) }
+                            previousValue = it.extractor.invoke(previousTarget),
+                            newValue = it.extractor.invoke(newTarget)) }
                     .filter { it.second.valueChanged }
                     .toMap()
         }

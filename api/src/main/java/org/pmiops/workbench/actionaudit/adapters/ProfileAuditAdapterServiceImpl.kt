@@ -9,10 +9,13 @@ import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
 import org.pmiops.workbench.actionaudit.AgentType
 import org.pmiops.workbench.actionaudit.TargetType
+import org.pmiops.workbench.actionaudit.targetproperties.ProfileTargetProperty
+import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyUtils
 import org.pmiops.workbench.db.model.User
 import org.pmiops.workbench.model.Profile
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.lang.Exception
 
 @Service
 class ProfileAuditAdapterServiceImpl @Autowired
@@ -24,26 +27,56 @@ constructor(
 
     override fun fireCreateAction(createdProfile: Profile) {
         try {
-            val createProfileEvent = ActionAuditEvent(
-                    timestamp = clock.millis(),
-                    actionId = ActionAuditEvent.newActionId(),
-                    actionType = ActionType.CREATE,
-                    agentType = AgentType.USER,
-                    agentId = userProvider.get().userId,
-                    agentEmailMaybe = userProvider.get().email,
-                    targetType = TargetType.PROFILE,
-                    targetIdMaybe = userProvider.get().userId,
-                    targetPropertyMaybe = null,
-                    previousValueMaybe = null,
-                    newValueMaybe = null
-            )
-            actionAuditService.send(createProfileEvent)
+            val propertiesByName: Map<String, String?> = TargetPropertyUtils
+                    .getPropertyValuesByName(ProfileTargetProperty::values, createdProfile)
+            val createEvents = propertiesByName.entries
+                    .map {
+                        ActionAuditEvent(
+                            timestamp = clock.millis(),
+                            actionId = ActionAuditEvent.newActionId(),
+                            actionType = ActionType.CREATE,
+                            agentType = AgentType.USER,
+                            agentId = userProvider.get().userId,
+                            agentEmailMaybe = userProvider.get().email,
+                            targetType = TargetType.PROFILE,
+                            targetIdMaybe = userProvider.get().userId,
+                            targetPropertyMaybe = it.key,
+                            previousValueMaybe = null,
+                            newValueMaybe = it.value)
+                    }
+            actionAuditService.send(createEvents)
         } catch (e: RuntimeException) {
             logAndSwallow(e)
         }
     }
 
-    override fun fireUpdateAction(previousProfile: Profile, updatedProfile: Profile) {}
+    override fun fireUpdateAction(previousProfile: Profile, updatedProfile: Profile) {
+        try {
+            // determine changed fields
+            val changesByProperty = TargetPropertyUtils.getChangedValuesByName(
+                    ProfileTargetProperty::values,
+                    previousProfile,
+                    updatedProfile)
+            val events = changesByProperty.entries
+                    .map {
+                        ActionAuditEvent(
+                                timestamp = clock.millis(),
+                                actionId = ActionAuditEvent.newActionId(),
+                                actionType = ActionType.EDIT,
+                                agentType = AgentType.USER,
+                                agentId = userProvider.get().userId,
+                                agentEmailMaybe = userProvider.get().email,
+                                targetType = TargetType.PROFILE,
+                                targetIdMaybe = userProvider.get().userId,
+                                targetPropertyMaybe = it.key,
+                                previousValueMaybe = it.value.previousValue,
+                                newValueMaybe = it.value.newValue)
+                    }
+            actionAuditService.send(events)
+        } catch(e: java.lang.RuntimeException) {
+            logAndSwallow(e)
+        }
+    }
 
     // Each user is assumed to have only one profile, but we can't rely on
     // the userProvider if the user is deleted before the profile.

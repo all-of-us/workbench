@@ -566,7 +566,7 @@ public class ProfileController implements ProfileApiDelegate {
     com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
     checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
-    if (!userNeverLoggedIn(googleUser, user)) {
+    if (userHasEverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
     String newEmail = updateContactEmailRequest.getContactEmail();
@@ -586,15 +586,15 @@ public class ProfileController implements ProfileApiDelegate {
     com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
     User user = userDao.findUserByEmail(username);
     checkUserCreationNonce(user, resendRequest.getCreationNonce());
-    if (!userNeverLoggedIn(googleUser, user)) {
+    if (userHasEverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
     return resetPasswordAndSendWelcomeEmail(username, user);
   }
 
-  private boolean userNeverLoggedIn(
+  private boolean userHasEverLoggedIn(
       com.google.api.services.directory.model.User googleUser, User user) {
-    return user.getFirstSignInTime() == null && googleUser.getChangePasswordAtNextLogin();
+    return user.getFirstSignInTime() != null || !googleUser.getChangePasswordAtNextLogin();
   }
 
   private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, User user) {
@@ -634,6 +634,8 @@ public class ProfileController implements ProfileApiDelegate {
     validateProfileFields(updatedProfile);
     User user = userProvider.get();
 
+    // save previous profile for audit trail
+    final Profile previousProfile = profileService.getProfile(user);
     if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
         || !userProvider.get().getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
       userService.setDataUseAgreementNameOutOfDate(
@@ -690,6 +692,10 @@ public class ProfileController implements ProfileApiDelegate {
 
     // This does not update the name in Google.
     saveUserWithConflictHandling(user);
+
+    final Profile appliedUpdatedProfile = profileService.getProfile(user);
+    profileAuditAdapterService.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
