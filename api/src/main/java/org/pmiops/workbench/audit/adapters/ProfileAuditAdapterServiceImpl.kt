@@ -23,6 +23,24 @@ constructor(
 ) : ProfileAuditAdapterService {
 
     override fun fireCreateAction(createdProfile: Profile) {
+        try {
+            val createProfileEvent = ActionAuditEvent(
+                    timestamp = clock.millis(),
+                    actionId = ActionAuditEvent.newActionId(),
+                    actionType = ActionType.CREATE,
+                    agentType = AgentType.USER,
+                    agentId = userProvider.get().userId,
+                    agentEmailMaybe = userProvider.get().email,
+                    targetType = TargetType.PROFILE,
+                    targetIdMaybe = userProvider.get().userId,
+                    targetPropertyMaybe = null,
+                    previousValueMaybe = null,
+                    newValueMaybe = null
+            )
+            actionAuditService.send(createProfileEvent)
+        } catch (e: RuntimeException) {
+            logAndSwallow(e)
+        }
     }
 
     override fun fireUpdateAction(previousProfile: Profile, updatedProfile: Profile) {}
