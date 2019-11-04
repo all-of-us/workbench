@@ -560,7 +560,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     userRecentResourceService.updateCohortEntry(
-        cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId, now);
+        cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId);
     return ResponseEntity.ok(responseReview);
   }
 
