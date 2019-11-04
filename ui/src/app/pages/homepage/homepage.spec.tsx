@@ -104,4 +104,8 @@ describe('HomepageComponent', () => {
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();
   });
 
+  it('should not display the zero workspace UI while workspaces are being fetched', async () => {
+    const wrapper = component();
+    expect(wrapper.html().includes("Here are some tips to get you started")).toBeFalsy();
+  });
 });
