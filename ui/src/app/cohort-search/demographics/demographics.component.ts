@@ -67,20 +67,17 @@ export class DemographicsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     wizardStore.subscribe(wizard => this.wizard = wizard);
-    selectionsStore
-      .subscribe(selections => {
-        this.selections = selections;
-        if (this.wizard && this.wizard.type !== CriteriaType.AGE) {
-          this.calculate();
-        }
-      });
+    selectionsStore.subscribe(selections => {
+      this.selections = selections;
+      if (this.wizard && this.wizard.type !== CriteriaType.AGE) {
+        this.calculate();
+      }
+    });
     if (this.wizard.type === CriteriaType.AGE) {
       this.initAgeControls();
       this.initDeceased();
       this.initAgeRange();
       this.loadNodesFromApi(CriteriaType[CriteriaType.DECEASED]);
-    } else if (this.selections.length) {
-      this.calculate();
     }
     this.loadNodesFromApi();
   }
@@ -132,11 +129,11 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         const paramId = `age-param${this.ageNode.id}`;
         this.selectedNode = {
           ...this.ageNode,
-          name: `Age In Range ${minAge.toString()} - ${maxAge.toString()}`,
+          name: `Age In Range ${minAge} - ${maxAge}`,
           parameterId: paramId,
           attributes: [attr],
         };
-        if (!this.wizard.item.searchParameters.find(s => s.type === CriteriaType[CriteriaType.DECEASED])) {
+        if (!this.wizard.item.searchParameters.length) {
           const wizard = this.wizard;
           wizard.item.searchParameters.push(this.selectedNode);
           const selections = [paramId, ...this.selections];
@@ -149,6 +146,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         break;
       default:
         this.nodes = nodes;
+        if (this.wizard.item.searchParameters.length) {
+          this.calculate(true);
+        }
         this.loading = false;
     }
   }
@@ -231,7 +231,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     const max = this.demoForm.get('ageMax');
     const params = this.wizard.item.searchParameters;
     if (params.length && params[0].type === CriteriaType.AGE) {
-      const range = params[0].attributes[0].operands;
+      const range = params[0].attributes[0].operands.map(op => parseInt(op, 10));
       this.ageRange.setValue(range);
       min.setValue(range[0]);
       max.setValue(range[1]);
@@ -244,7 +244,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         const attr = {
           name: AttrName.AGE,
           operator: Operator.BETWEEN,
-          operands: [lo, hi]
+          operands: [lo.toString(), hi.toString()]
         };
         const paramId = `age-param${this.ageNode.id}`;
         return {
@@ -324,17 +324,31 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     triggerEvent('Cohort Builder Search', 'Click', `Demo - ${typeToTitle(opt.type)} - ${opt.name}`);
     if (!this.selections.includes(opt.parameterId)) {
       const wizard = this.wizard;
-      wizard.item.searchParameters.push(opt);
+      wizard.item.searchParameters.push({...opt, name: `${typeToTitle(opt.type)} - ${opt.name}`});
       const selections = [...this.selections, opt.parameterId];
       wizardStore.next(wizard);
       selectionsStore.next(selections);
     }
   }
 
-  calculate() {
+  calculate(init?: boolean) {
     this.count = 0;
-    this.wizard.item.searchParameters.forEach(selection => {
-      this.count += selection.count;
+    this.wizard.item.searchParameters.forEach(sp => {
+      if (init) {
+        const node = this.nodes.find(n => n.conceptId === sp.conceptId);
+        if (node) {
+          sp.count = node.count;
+        }
+      }
+      this.count += sp.count;
     });
+  }
+
+  get noSexData() {
+    return !this.loading && this.wizard.type === CriteriaType.SEX && this.nodes.length === 0;
+  }
+
+  get showPreview() {
+    return !this.loading && (this.selections && this.selections.length) && this.wizard.type !== CriteriaType.AGE;
   }
 }

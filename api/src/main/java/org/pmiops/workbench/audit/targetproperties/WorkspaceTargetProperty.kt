@@ -5,17 +5,20 @@ import org.pmiops.workbench.model.Workspace
 
 internal data class WorkspaceTargetPropertyNameValue(val propertyName: String, val value: String)
 
+
+// N.B. entries will rarely be referred to by name, but are accessed via values(). I.e. they are
+// not safe to remove, even if an IDE indicates otherwise.
 enum class WorkspaceTargetProperty private constructor(val propertyName: String, private val extractor: Function<Workspace, String>) {
-    NAME("name", Function<Workspace, String> { it.name }),
-    INTENDED_STUDY("intended_study", Function<Workspace, String> { it.researchPurpose.intendedStudy }),
-    CREATOR("creator", Function<Workspace, String> { it.creator }),
-    ADDITIONAL_NOTES("additional_notes", Function<Workspace, String> { it.researchPurpose.additionalNotes }),
+    NAME(propertyName = "name", extractor = Function<Workspace, String> { it.name }),
+    INTENDED_STUDY(propertyName = "intended_study", extractor = Function<Workspace, String> { it.researchPurpose.intendedStudy }),
+    CREATOR(propertyName = "creator", extractor = Function<Workspace, String> { it.creator }),
+    ADDITIONAL_NOTES(propertyName = "additional_notes", extractor = Function<Workspace, String> { it.researchPurpose.additionalNotes }),
     ANTICIPATED_FINDINGS(
-            "anticipated_findings", Function<Workspace, String> { w -> w.getResearchPurpose().getAnticipatedFindings() }),
-    DISEASE_OF_FOCUS("disease_of_focus", Function<Workspace, String> { w -> w.getResearchPurpose().getDiseaseOfFocus() }),
-    REASON_FOR_ALL_OF_US("reason_for_all_of_us", Function<Workspace, String> { w -> w.getResearchPurpose().getReasonForAllOfUs() }),
-    NAMESPACE("namespace", Function<Workspace, String> { it.namespace }),
-    CDR_VERSION_ID("cdr_version_id", Function<Workspace, String> { it.cdrVersionId });
+            propertyName = "anticipated_findings", extractor = Function<Workspace, String> { w -> w.getResearchPurpose().getAnticipatedFindings() }),
+    DISEASE_OF_FOCUS(propertyName = "disease_of_focus", extractor = Function<Workspace, String> { w -> w.getResearchPurpose().getDiseaseOfFocus() }),
+    REASON_FOR_ALL_OF_US(propertyName = "reason_for_all_of_us", extractor = Function<Workspace, String> { w -> w.getResearchPurpose().getReasonForAllOfUs() }),
+    NAMESPACE(propertyName = "namespace", extractor = Function<Workspace, String> { it.namespace }),
+    CDR_VERSION_ID(propertyName = "cdr_version_id", extractor = Function<Workspace, String> { it.cdrVersionId });
 
     fun extract(workspace: Workspace?): String? {
         return if (workspace == null) {
