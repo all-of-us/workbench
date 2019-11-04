@@ -62,6 +62,7 @@ public class CBCriteriaDaoTest {
         cbCriteriaDao.save(
             new CBCriteria()
                 .domainId(DomainType.CONDITION.toString())
+                .type(CriteriaType.ICD9CM.toString())
                 .count("100")
                 .standard(false)
                 .code("120"));
@@ -194,7 +195,7 @@ public class CBCriteriaDaoTest {
             .findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
                 DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 0L)
             .get(0);
-    assertEquals(icd9Criteria, actualIcd9);
+    assertEquals(sourceCriteria, actualIcd9);
 
     CBCriteria actualIcd10 =
         cbCriteriaDao
@@ -302,24 +303,32 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findMenuOptionParents() throws Exception {
-    List<MenuOption> options = cbCriteriaDao.findMenuOptionParents();
-    assertEquals(4, options.size());
+  public void findMenuOptions() throws Exception {
+    List<MenuOption> options = cbCriteriaDao.findMenuOptions();
+    assertEquals(6, options.size());
 
     MenuOption option = options.get(0);
     assertEquals(DomainType.CONDITION.toString(), option.getDomain());
-    assertEquals("Conditions", option.getDomainName());
+    assertEquals("ICD10CM", option.getType());
 
     option = options.get(1);
-    assertEquals(DomainType.MEASUREMENT.toString(), option.getDomain());
-    assertEquals("Measurements", option.getDomainName());
+    assertEquals(DomainType.CONDITION.toString(), option.getDomain());
+    assertEquals("ICD9CM", option.getType());
 
     option = options.get(2);
-    assertEquals(DomainType.PERSON.toString(), option.getDomain());
-    assertEquals("Demographics", option.getDomainName());
+    assertEquals(DomainType.CONDITION.toString(), option.getDomain());
+    assertEquals("SNOMED", option.getType());
 
     option = options.get(3);
+    assertEquals(DomainType.MEASUREMENT.toString(), option.getDomain());
+    assertEquals("LOINC", option.getType());
+
+    option = options.get(4);
+    assertEquals(DomainType.PERSON.toString(), option.getDomain());
+    assertEquals("RACE", option.getType());
+
+    option = options.get(5);
     assertEquals(DomainType.SURVEY.toString(), option.getDomain());
-    assertEquals("Surveys", option.getDomainName());
+    assertEquals("PPI", option.getType());
   }
 }
