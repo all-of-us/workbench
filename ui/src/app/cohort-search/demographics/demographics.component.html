@@ -46,6 +46,18 @@
 
   <!-- Gender/Race/Ethnicity -->
     <div *ngSwitchDefault>
+      <div *ngIf="noSexData" class="alert alert-warning">
+        <div class="alert-items">
+          <div class="alert-item static">
+            <div class="alert-icon-wrapper">
+              <clr-icon class="alert-icon is-solid" shape="exclamation-triangle"></clr-icon>
+            </div>
+            <span class="alert-text">
+                This data does not exist in the dataset you’re currently using. To use this data, please create a new workspace with the most recent dataset.
+              </span>
+          </div>
+        </div>
+      </div>
       <div class="control-wrapper">
         <div class="ds-wrapper">
           <div class="ds-options">
@@ -67,7 +79,7 @@
       </div>
     </div>
 </form>
-<div class="container count-preview" *ngIf="(selections && selections.length) && wizard.type !== criteriaType.AGE">
+<div class="container count-preview" *ngIf="showPreview">
   <div class="row">
     <ng-container>
       <div class="col-lg-12 text-padding" *ngIf="count">

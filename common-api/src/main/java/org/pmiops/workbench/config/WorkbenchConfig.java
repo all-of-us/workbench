@@ -31,7 +31,7 @@ public class WorkbenchConfig {
     config.access = new AccessConfig();
     config.admin = new AdminConfig();
     config.auth = new AuthConfig();
-    config.auth.serviceAccountApiUsers = new ArrayList();
+    config.auth.serviceAccountApiUsers = new ArrayList<>();
     config.cdr = new CdrConfig();
     config.cohortbuilder = new CohortBuilderConfig();
     config.elasticsearch = new ElasticsearchConfig();
