@@ -1,14 +1,14 @@
-package org.pmiops.workbench.audit.adapters
+package org.pmiops.workbench.actionaudit.adapters
 
 import java.time.Clock
 import java.util.logging.Level
 import java.util.logging.Logger
 import javax.inject.Provider
-import org.pmiops.workbench.audit.ActionAuditEvent
-import org.pmiops.workbench.audit.ActionAuditService
-import org.pmiops.workbench.audit.ActionType
-import org.pmiops.workbench.audit.AgentType
-import org.pmiops.workbench.audit.TargetType
+import org.pmiops.workbench.actionaudit.ActionAuditEvent
+import org.pmiops.workbench.actionaudit.ActionAuditService
+import org.pmiops.workbench.actionaudit.ActionType
+import org.pmiops.workbench.actionaudit.AgentType
+import org.pmiops.workbench.actionaudit.TargetType
 import org.pmiops.workbench.db.model.User
 import org.pmiops.workbench.model.Profile
 import org.springframework.beans.factory.annotation.Autowired

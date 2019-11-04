@@ -1,4 +1,4 @@
-package org.pmiops.workbench.audit
+package org.pmiops.workbench.actionaudit
 
 interface ActionAuditService {
     fun send(event: ActionAuditEvent)

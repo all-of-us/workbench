@@ -1,17 +1,18 @@
-package org.pmiops.workbench.audit.adapters
+package org.pmiops.workbench.actionaudit.adapters
 
 import com.google.common.annotations.VisibleForTesting
 import java.time.Clock
 import java.util.logging.Level
 import java.util.logging.Logger
 import javax.inject.Provider
-import org.pmiops.workbench.audit.ActionAuditEvent
-import org.pmiops.workbench.audit.ActionAuditService
-import org.pmiops.workbench.audit.ActionType
-import org.pmiops.workbench.audit.AgentType
-import org.pmiops.workbench.audit.TargetType
-import org.pmiops.workbench.audit.targetproperties.AclTargetProperty
-import org.pmiops.workbench.audit.targetproperties.WorkspaceTargetProperty
+import org.pmiops.workbench.actionaudit.ActionAuditEvent
+import org.pmiops.workbench.actionaudit.ActionAuditService
+import org.pmiops.workbench.actionaudit.ActionType
+import org.pmiops.workbench.actionaudit.AgentType
+import org.pmiops.workbench.actionaudit.TargetType
+import org.pmiops.workbench.actionaudit.targetproperties.AclTargetProperty
+import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyUtils
+import org.pmiops.workbench.actionaudit.targetproperties.WorkspaceTargetProperty
 import org.pmiops.workbench.db.model.User
 import org.pmiops.workbench.model.Workspace
 import org.pmiops.workbench.workspaces.WorkspaceConversionUtils
@@ -32,7 +33,8 @@ constructor(
             val actionId = ActionAuditEvent.newActionId()
             val userId = userProvider.get().userId
             val userEmail = userProvider.get().email
-            val propertyValues = WorkspaceTargetProperty.getPropertyValuesByName(createdWorkspace)
+            val propertyValues = TargetPropertyUtils.getPropertyValuesByName(
+                    WorkspaceTargetProperty::values, createdWorkspace)
             val timestamp = clock.millis()
             val events = propertyValues.entries
                     .map { ActionAuditEvent(
@@ -113,7 +115,8 @@ constructor(
                     previousValueMaybe = null,
                     newValueMaybe = null
             )
-            val destinationPropertyValues = WorkspaceTargetProperty.getPropertyValuesByName(
+            val destinationPropertyValues = TargetPropertyUtils.getPropertyValuesByName(
+                    WorkspaceTargetProperty::values,
                     WorkspaceConversionUtils.toApiWorkspace(destinationWorkspaceDbModel))
 
             val destinationEvents: List<ActionAuditEvent> = destinationPropertyValues.entries

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.audit
+package org.pmiops.workbench.actionaudit
 
 import com.google.cloud.MonitoredResource
 import com.google.cloud.logging.LogEntry

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.audit.adapters;
+package org.pmiops.workbench.actionaudit.adapters;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
@@ -22,11 +22,11 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.pmiops.workbench.audit.ActionAuditEvent;
-import org.pmiops.workbench.audit.ActionAuditService;
-import org.pmiops.workbench.audit.ActionType;
-import org.pmiops.workbench.audit.TargetType;
-import org.pmiops.workbench.audit.targetproperties.AclTargetProperty;
+import org.pmiops.workbench.actionaudit.ActionAuditEvent;
+import org.pmiops.workbench.actionaudit.ActionAuditService;
+import org.pmiops.workbench.actionaudit.ActionType;
+import org.pmiops.workbench.actionaudit.TargetType;
+import org.pmiops.workbench.actionaudit.targetproperties.AclTargetProperty;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;

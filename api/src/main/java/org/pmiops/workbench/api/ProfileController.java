@@ -17,7 +17,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.pmiops.workbench.annotations.AuthorityRequired;
-import org.pmiops.workbench.audit.adapters.ProfileAuditAdapterService;
+import org.pmiops.workbench.actionaudit.adapters.ProfileAuditAdapterService;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;

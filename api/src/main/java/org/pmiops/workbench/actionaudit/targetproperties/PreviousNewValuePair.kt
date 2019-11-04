@@ -1,4 +1,4 @@
-package org.pmiops.workbench.audit.targetproperties
+package org.pmiops.workbench.actionaudit.targetproperties
 
 class PreviousNewValuePair constructor(var previousValue: String?, var newValue: String?) {
 

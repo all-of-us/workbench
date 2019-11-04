@@ -1,4 +1,4 @@
-package org.pmiops.workbench.audit.targetproperties;
+package org.pmiops.workbench.actionaudit.targetproperties;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -63,8 +63,11 @@ public class WorkspaceTargetPropertyTest {
 
   @Test
   public void testExtractsStringPropertiesFromWorkspace() {
+    Class c = WorkspaceTargetProperty.class;
     Map<String, String> propertiesByName =
-        WorkspaceTargetProperty.getPropertyValuesByName(workspace1);
+        TargetPropertyUtils.getPropertyValuesByName(
+            WorkspaceTargetProperty::values,
+            workspace1);
 
     assertThat(propertiesByName).hasSize(6);
     assertThat(propertiesByName.get(WorkspaceTargetProperty.INTENDED_STUDY.getPropertyName()))
@@ -77,13 +80,16 @@ public class WorkspaceTargetPropertyTest {
 
   @Test
   public void testEmptyWorkspaceGivesEmptyMap() {
-    assertThat(WorkspaceTargetProperty.getPropertyValuesByName(emptyWorkspace)).isEmpty();
+    assertThat(TargetPropertyUtils.getPropertyValuesByName(
+        WorkspaceTargetProperty::values, emptyWorkspace))
+        .isEmpty();
   }
 
   @Test
   public void testMapsChanges() {
     Map<String, PreviousNewValuePair> changesByPropertyName =
-        WorkspaceTargetProperty.getChangedValuesByName(workspace1, workspace2);
+        TargetPropertyUtils.getChangedValuesByName(
+            WorkspaceTargetProperty::values, workspace1, workspace2);
 
     assertThat(changesByPropertyName).hasSize(5);
 
@@ -104,7 +110,8 @@ public class WorkspaceTargetPropertyTest {
   public void testHandlesMissingValues() {
     workspace2.setCdrVersionId(null);
     Map<String, PreviousNewValuePair> changesByName =
-        WorkspaceTargetProperty.getChangedValuesByName(workspace1, workspace2);
+        TargetPropertyUtils.getChangedValuesByName(
+            WorkspaceTargetProperty::values, workspace1, workspace2);
     assertThat(
             changesByName
                 .get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName())
@@ -117,7 +124,8 @@ public class WorkspaceTargetPropertyTest {
         .isNull();
 
     Map<String, PreviousNewValuePair> reverseChangesByName =
-        WorkspaceTargetProperty.getChangedValuesByName(workspace2, workspace1);
+        TargetPropertyUtils.getChangedValuesByName(
+            WorkspaceTargetProperty::values, workspace2, workspace1);
     assertThat(
             reverseChangesByName
                 .get(WorkspaceTargetProperty.CDR_VERSION_ID.getPropertyName())
@@ -132,6 +140,7 @@ public class WorkspaceTargetPropertyTest {
 
   @Test
   public void testComparisonToSelfIsEmpty() {
-    assertThat(WorkspaceTargetProperty.getChangedValuesByName(workspace1, workspace1)).isEmpty();
+    assertThat(TargetPropertyUtils.getChangedValuesByName(
+        WorkspaceTargetProperty::values, workspace1, workspace1)).isEmpty();
   }
 }

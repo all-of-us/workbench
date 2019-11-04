@@ -1,4 +1,4 @@
-package org.pmiops.workbench.audit
+package org.pmiops.workbench.actionaudit
 
 import com.google.common.truth.Truth.assertThat
 import org.mockito.ArgumentMatchers.anyList
