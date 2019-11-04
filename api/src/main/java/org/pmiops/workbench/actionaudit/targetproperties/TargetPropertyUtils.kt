@@ -11,6 +11,9 @@ class TargetPropertyUtils {
         inline fun <T, E: TargetProperty<T>> getPropertyValuesByName(
                 valuesGetter: () -> Array<E>,
                 target: T): Map<String, String> {
+            // TODO(jaycarlton): find a way to grab the type of the target
+            // and look it up in the map below, so we only need one argument here.
+            // these don't work:
 //            val enumClass = getTargetPropertyEnumByTargetClass()[T::class]
 //            val targetPropertyEnum = getTargetPropertyEnum(T::class)
             return valuesGetter.invoke()
