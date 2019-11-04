@@ -55,30 +55,30 @@ class ActionAuditServiceTest {
         // ordinarily events sharing an action would have more things in common than this,
         // but the schema doesn't require it
         event1 = ActionAuditEvent(
+                timestamp = System.currentTimeMillis(),
+                actionId = actionId,
+                actionType = ActionType.EDIT,
+                agentType = AgentType.USER,
+                agentId = AGENT_ID_1,
                 agentEmailMaybe = "a@b.co",
                 targetType = TargetType.DATASET,
                 targetIdMaybe = 1L,
-                agentType = AgentType.USER,
-                agentId = AGENT_ID_1,
-                actionId = actionId,
-                actionType = ActionType.EDIT,
                 targetPropertyMaybe = "foot",
                 previousValueMaybe = "bare",
-                newValueMaybe = "shod",
-                timestamp = System.currentTimeMillis()
+                newValueMaybe = "shod"
         )
         event2 = ActionAuditEvent(
+                timestamp = System.currentTimeMillis(),
+                actionId = actionId,
+                actionType = ActionType.EDIT,
+                agentType = AgentType.USER,
+                agentId = AGENT_ID_2,
                 agentEmailMaybe = "f@b.co",
                 targetType = TargetType.DATASET,
                 targetIdMaybe = 2L,
-                agentType = AgentType.USER,
-                agentId = AGENT_ID_2,
-                actionId = actionId,
-                actionType = ActionType.EDIT,
                 targetPropertyMaybe = "height",
                 previousValueMaybe = "yay high",
-                newValueMaybe = "about that tall",
-                timestamp = System.currentTimeMillis()
+                newValueMaybe = "about that tall"
         )
     }
 

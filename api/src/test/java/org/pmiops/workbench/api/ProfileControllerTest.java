@@ -177,7 +177,7 @@ public class ProfileControllerTest {
             Providers.of(config),
             environment,
             Providers.of(mailService),
-            mockAct);
+            mockProfileAuditAdapterService);
     this.cloudProfileController =
         new ProfileController(
             profileService,
@@ -192,7 +192,8 @@ public class ProfileControllerTest {
             leonardoNotebooksClient,
             Providers.of(config),
             cloudEnvironment,
-            Providers.of(mailService));
+            Providers.of(mailService),
+            mockProfileAuditAdapterService);
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 

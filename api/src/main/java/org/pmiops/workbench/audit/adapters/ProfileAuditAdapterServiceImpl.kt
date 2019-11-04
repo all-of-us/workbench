@@ -17,11 +17,12 @@ import org.springframework.stereotype.Service
 @Service
 class ProfileAuditAdapterServiceImpl @Autowired
 constructor(
-        private val userProvider: Provider<User>, private val actionAuditService: ActionAuditService, private val clock: Clock) : ProfileAuditAdapterService {
+    private val userProvider: Provider<User>,
+    private val actionAuditService: ActionAuditService,
+    private val clock: Clock
+) : ProfileAuditAdapterService {
 
     override fun fireCreateAction(createdProfile: Profile) {
-
-
     }
 
     override fun fireUpdateAction(previousProfile: Profile, updatedProfile: Profile) {}
@@ -32,13 +33,17 @@ constructor(
         try {
             val deleteProfileEvent = ActionAuditEvent(
                     timestamp = clock.millis(),
+                    actionId = ActionAuditEvent.newActionId(),
+                    actionType = ActionType.DELETE,
                     agentType = AgentType.USER,
                     agentId = userId,
                     agentEmailMaybe = userEmail,
-                    actionId = ActionAuditEvent.newActionId(),
-                    actionType = ActionType.DELETE,
                     targetType = TargetType.PROFILE,
-                    targetIdMaybe = userId)
+                    targetIdMaybe = userId,
+                    targetPropertyMaybe = null,
+                    previousValueMaybe = null,
+                    newValueMaybe = null
+                    )
             actionAuditService.send(deleteProfileEvent)
         } catch (e: RuntimeException) {
             logAndSwallow(e)

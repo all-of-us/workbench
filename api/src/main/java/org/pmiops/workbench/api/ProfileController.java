@@ -463,9 +463,10 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }
-
     // Note: Avoid getProfileResponse() here as this is not an authenticated request.
-    return ResponseEntity.ok(profileService.getProfile(user));
+    final Profile createdProfile = profileService.getProfile(user);
+    profileAuditAdapterService.fireCreateAction(createdProfile);
+    return ResponseEntity.ok(createdProfile);
   }
 
   @Override

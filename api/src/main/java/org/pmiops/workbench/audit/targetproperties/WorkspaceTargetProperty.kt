@@ -5,7 +5,6 @@ import org.pmiops.workbench.model.Workspace
 
 internal data class WorkspaceTargetPropertyNameValue(val propertyName: String, val value: String)
 
-
 // N.B. entries will rarely be referred to by name, but are accessed via values(). I.e. they are
 // not safe to remove, even if an IDE indicates otherwise.
 enum class WorkspaceTargetProperty private constructor(val propertyName: String, private val extractor: Function<Workspace, String>) {
