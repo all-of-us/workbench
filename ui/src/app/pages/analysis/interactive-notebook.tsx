@@ -13,6 +13,7 @@ import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients'
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {isAbortError} from 'app/utils/errors';
 import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -86,6 +87,7 @@ interface State {
 export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     private runClusterTimer: NodeJS.Timeout;
+    private aborter = new AbortController();
 
     constructor(props) {
       super(props);
@@ -117,6 +119,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
 
     componentWillUnmount(): void {
       clearTimeout(this.runClusterTimer);
+      this.aborter.abort();
     }
 
     private runCluster(onClusterReady: Function): void {
@@ -124,8 +127,9 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         this.runClusterTimer = setTimeout(() => this.runCluster(onClusterReady), 5000);
       };
 
-      clusterApi().listClusters(this.props.urlParams.ns, this.props.urlParams.wsid)
-        .then((body) => {
+      clusterApi().listClusters(this.props.urlParams.ns, this.props.urlParams.wsid, {
+        signal: this.aborter.signal
+      }).then((body) => {
           const cluster = body.defaultCluster;
           this.setState({clusterStatus: cluster.status});
 
@@ -140,7 +144,11 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
             retry();
           }
         })
-        .catch(() => {
+        .catch((e: Error) => {
+          if (isAbortError(e)) {
+            return;
+          }
+          // TODO(RW-3097): Backoff, or don't retry forever.
           retry();
         });
     }
