@@ -254,7 +254,8 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
           <Link disabled={!workspace}
                 onClick={() => this.setState({googleBucketModalOpen: true})}>Google Bucket</Link>
           {!!this.workspaceClusterBillingProjectId() &&
-            <ResetClusterButton billingProjectId={this.workspaceClusterBillingProjectId()} workspaceName={this.state.workspace.name}/>}
+            <ResetClusterButton billingProjectId={this.workspaceClusterBillingProjectId()}
+                                workspaceFirecloudName={this.state.workspace.id}/>}
         </div>
       </div>
       {googleBucketModalOpen && <Modal>

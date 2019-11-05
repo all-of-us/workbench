@@ -27,7 +27,7 @@ const styles = {
 
 export interface Props {
   billingProjectId: string;
-  workspaceName: string;
+  workspaceFirecloudName: string;
 }
 
 interface State {
@@ -131,7 +131,7 @@ export class ResetClusterButton extends React.Component<Props, State> {
     const repoll = () => {
       this.pollClusterTimer = setTimeout(() => this.pollCluster(billingProjectId), 15000);
     };
-    clusterApi().listClusters(billingProjectId, this.props.workspaceName)
+    clusterApi().listClusters(billingProjectId, this.props.workspaceFirecloudName)
       .then((body) => {
         const cluster = body.defaultCluster;
         if (TRANSITIONAL_STATUSES.has(cluster.status)) {
