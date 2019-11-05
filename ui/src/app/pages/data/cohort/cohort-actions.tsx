@@ -99,6 +99,10 @@ const CohortActions = withCurrentWorkspace()(
       }
     }
 
+    componentWillUnmount(): void {
+      currentCohortStore.next(undefined);
+    }
+
     navigateTo(action: string): void {
       const {cohort} = this.state;
       const {namespace, id} = this.props.workspace;
@@ -117,7 +121,6 @@ const CohortActions = withCurrentWorkspace()(
           url += 'data/data-sets';
           break;
         case 'newCohort':
-          currentCohortStore.next(undefined);
           url += `data/cohorts/build`;
       }
       navigateByUrl(url);

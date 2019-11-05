@@ -39,6 +39,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,7 +50,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
@@ -73,7 +75,6 @@ import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
@@ -91,6 +92,8 @@ import org.pmiops.workbench.model.Vocabulary;
 import org.pmiops.workbench.model.VocabularyListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -107,11 +110,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       ImmutableList.of(
           FilterColumns.ETHNICITY.name(), FilterColumns.GENDER.name(), FilterColumns.RACE.name());
 
+  private CBCriteriaDao cbCriteriaDao;
   private CohortReviewService cohortReviewService;
   private BigQueryService bigQueryService;
   private CohortQueryBuilder cohortQueryBuilder;
   private ReviewQueryBuilder reviewQueryBuilder;
-  private Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider;
   private UserRecentResourceService userRecentResourceService;
   private Provider<User> userProvider;
   private final Clock clock;
@@ -227,19 +230,19 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
   @Autowired
   CohortReviewController(
+      CBCriteriaDao cbCriteriaDao,
       CohortReviewService cohortReviewService,
       BigQueryService bigQueryService,
       CohortQueryBuilder cohortQueryBuilder,
       ReviewQueryBuilder reviewQueryBuilder,
-      Provider<GenderRaceEthnicityConcept> genderRaceEthnicityConceptProvider,
       UserRecentResourceService userRecentResourceService,
       Provider<User> userProvider,
       Clock clock) {
+    this.cbCriteriaDao = cbCriteriaDao;
     this.cohortReviewService = cohortReviewService;
     this.bigQueryService = bigQueryService;
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.reviewQueryBuilder = reviewQueryBuilder;
-    this.genderRaceEthnicityConceptProvider = genderRaceEthnicityConceptProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -536,7 +539,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     PageRequest pageRequest = createPageRequest(request);
-    convertGenderRaceEthnicityFilters(pageRequest);
     convertGenderRaceEthnicitySortOrder(pageRequest);
 
     List<ParticipantCohortStatus> participantCohortStatuses =
@@ -556,7 +558,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     userRecentResourceService.updateCohortEntry(
-        cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId, now);
+        cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId);
     return ResponseEntity.ok(responseReview);
   }
 
@@ -813,47 +815,21 @@ public class CohortReviewController implements CohortReviewApiDelegate {
    */
   private void lookupGenderRaceEthnicityValues(
       List<ParticipantCohortStatus> participantCohortStatuses) {
-    Map<String, Map<Long, String>> concepts =
-        genderRaceEthnicityConceptProvider.get().getConcepts();
+    List<CBCriteria> criteriaList = cbCriteriaDao.findGenderRaceEthnicity();
     participantCohortStatuses.forEach(
         pcs -> {
-          pcs.setRace(concepts.get(FilterColumns.RACE.name()).get(pcs.getRaceConceptId()));
-          pcs.setGender(concepts.get(FilterColumns.GENDER.name()).get(pcs.getGenderConceptId()));
-          pcs.setEthnicity(
-              concepts.get(FilterColumns.ETHNICITY.name()).get(pcs.getEthnicityConceptId()));
+          pcs.setRace(getName(criteriaList, pcs.getRaceConceptId()));
+          pcs.setGender(getName(criteriaList, pcs.getGenderConceptId()));
+          pcs.setEthnicity(getName(criteriaList, pcs.getEthnicityConceptId()));
         });
   }
 
-  /**
-   * Helper method that generates a list of concept ids per demo
-   *
-   * @param pageRequest
-   */
-  private void convertGenderRaceEthnicityFilters(PageRequest pageRequest) {
-    List<Filter> filters =
-        pageRequest.getFilters().stream()
-            .map(
-                filter -> {
-                  if (GENDER_RACE_ETHNICITY_TYPES.contains(filter.getProperty().name())) {
-                    Map<Long, String> possibleConceptIds =
-                        genderRaceEthnicityConceptProvider
-                            .get()
-                            .getConcepts()
-                            .get(filter.getProperty().name());
-                    List<String> values =
-                        possibleConceptIds.entrySet().stream()
-                            .filter(entry -> filter.getValues().contains(entry.getValue()))
-                            .map(entry -> entry.getKey().toString())
-                            .collect(Collectors.toList());
-                    return new Filter()
-                        .property(filter.getProperty())
-                        .operator(filter.getOperator())
-                        .values(values);
-                  }
-                  return filter;
-                })
+  private String getName(List<CBCriteria> criteriaList, Long conceptId) {
+    List<CBCriteria> returnList =
+        criteriaList.stream()
+            .filter(c -> c.getConceptId().equals(conceptId.toString()))
             .collect(Collectors.toList());
-    pageRequest.filters(filters);
+    return returnList.isEmpty() ? null : returnList.get(0).getName();
   }
 
   /**
@@ -863,12 +839,23 @@ public class CohortReviewController implements CohortReviewApiDelegate {
    */
   private void convertGenderRaceEthnicitySortOrder(PageRequest pageRequest) {
     String sortColumn = pageRequest.getSortColumn();
+    String sortName = pageRequest.getSortOrder().name();
+    Sort sort =
+        sortName.equalsIgnoreCase(Direction.ASC.toString())
+            ? new Sort(Direction.ASC, "name")
+            : new Sort(Direction.DESC, "name");
     if (GENDER_RACE_ETHNICITY_TYPES.contains(sortColumn)) {
-      Map<String, Map<Long, String>> concepts =
-          genderRaceEthnicityConceptProvider.get().getConcepts();
+      List<CBCriteria> criteriaList =
+          cbCriteriaDao.findByDomainIdAndTypeAndParentIdNotIn(
+              DomainType.PERSON.toString(), sortColumn, 0L, sort);
+      Map<String, Map<Long, String>> concepts = new HashMap<>();
       List<String> demoList =
-          concepts.get(sortColumn).entrySet().stream()
-              .map(e -> new ConceptIdName().conceptId(e.getKey()).conceptName(e.getValue()))
+          criteriaList.stream()
+              .map(
+                  c ->
+                      new ConceptIdName()
+                          .conceptId(new Long(c.getConceptId()))
+                          .conceptName(c.getName()))
               .sorted(Comparator.comparing(ConceptIdName::getConceptName))
               .map(c -> c.getConceptId().toString())
               .collect(Collectors.toList());

@@ -5,7 +5,6 @@ import * as React from 'react';
 
 import {getChartObj} from 'app/cohort-search/utils';
 import {ReactWrapperBase} from 'app/utils';
-import {currentWorkspaceStore} from 'app/utils/navigation';
 
 highCharts.setOptions({
   lang: {
@@ -19,20 +18,13 @@ interface Props {
 }
 
 interface State {
-  categories: Array<string>;
   options: any;
 }
 
 export class GenderChart extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    const {cdrVersionId} = currentWorkspaceStore.getValue();
-    this.state = {
-      options: null,
-      categories: +cdrVersionId < 3
-        ? ['Female', 'Male', 'Unknown']
-        : ['Female', 'Male', 'Not man only, not woman only, prefer not to answer, or skipped', 'Unknown']
-    };
+    this.state = {options: null};
   }
 
   componentDidMount(): void {
@@ -40,7 +32,7 @@ export class GenderChart extends React.Component<Props, State> {
   }
 
   getChartOptions() {
-    const {categories} = this.state;
+    const {categories, data} = this.getCategoriesAndData();
     const options = {
       chart: {
         height: 200,
@@ -76,7 +68,7 @@ export class GenderChart extends React.Component<Props, State> {
         }
       },
       series: [{
-        data: this.getSeries(),
+        data,
         tooltip: {
           pointFormat: '<span style="color:{point.color}">\u25CF </span><b> {point.y}</b>'
         }
@@ -85,40 +77,37 @@ export class GenderChart extends React.Component<Props, State> {
     this.setState({options});
   }
 
-  getSeries() {
+  getCategoriesAndData() {
     const {data} = this.props;
-    const {cdrVersionId} = currentWorkspaceStore.getValue();
     const genderCodes = {
       'M': 'Male',
       'F': 'Female',
       'No matching concept': 'Unknown'
     };
-    const defaults = [
-      {y: 0, name: 'Male', color: '#7aa3e5'},
-      {y: 0, name: 'Female', color: '#a8385d'},
-      {y: 0, name: 'Unknown', color: '#a27ea8'},
-    ];
-    if (+cdrVersionId >= 3) {
-      defaults.push({y: 0, name: 'Not man only, not woman only, prefer not to answer, or skipped', color: '#aae3f5'});
-    }
-    return data.reduce((acc, datum) => {
-      const gender = +cdrVersionId < 3 ? genderCodes[datum.gender] : datum.gender;
-      const index = acc.findIndex(d => d.name === gender);
+    const colors = ['#a8385d', '#7aa3e5', '#a27ea8', '#aae3f5'];
+    const chartData = data.reduce((acc, datum) => {
+      const gender = !!genderCodes[datum.gender] ? genderCodes[datum.gender] : datum.gender;
+      if (!acc.categories.includes(gender)) {
+        acc.categories.push(gender);
+      }
+      const index = acc.data.findIndex(d => d.name === gender);
       if (index > -1) {
-        acc[index].y += datum.count;
+        acc.data[index].y += datum.count;
+      } else {
+        acc.data.push({y: datum.count, name: gender, color: colors[acc.data.length]});
       }
       return acc;
-    }, defaults).sort((a, b) => a['name'] > b['name'] ? 1 : -1);
+    }, {categories: [], data: []});
+    return {
+      categories: chartData.categories.sort((a, b) => a > b ? 1 : -1),
+      data: chartData.data.sort((a, b) => a['name'] > b['name'] ? 1 : -1)
+    };
   }
 
   render() {
     const {options} = this.state;
     return <div style={{minHeight: 200}}>
-      {options && <HighchartsReact
-        highcharts={highCharts}
-        options={options}
-        callback={getChartObj}
-      />}
+      {options && <HighchartsReact highcharts={highCharts} options={options} callback={getChartObj} />}
     </div>;
   }
 }

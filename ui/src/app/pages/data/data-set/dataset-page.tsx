@@ -84,7 +84,8 @@ export const styles = {
     borderBottom: `1px solid ${colors.light}`,
     display: 'flex',
     justifyContent: 'space-between',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    minWidth: '15rem'
   } as React.CSSProperties,
 
   listItem: {
@@ -169,7 +170,6 @@ export const styles = {
 
   selectAllContainer: {
     marginLeft: 'auto',
-    width: '5rem',
     display: 'flex',
     alignItems: 'center'
   } as React.CSSProperties,
@@ -346,11 +346,15 @@ const plusLink = (dataTestId: string, path: string, disable?: boolean) => {
   </Clickable></TooltipTrigger>;
 };
 
-const BoxHeader = ({text= '', header =  '', subHeader = '', style= {}, ...props}) => {
+const StepNumber = ({step, style = {}}) => {
+  return <CircleWithText text={step} width='23.78px' height='23.78px'
+                         style={{fill: colorWithWhiteness(colors.primary, 0.5), ...style}}/>;
+};
+
+const BoxHeader = ({step = '', header =  '', subHeader = '', style = {}, ...props}) => {
   return  <div style={styles.selectBoxHeader}>
     <div style={{display: 'flex', marginLeft: '0.2rem'}}>
-      <CircleWithText text={text} width='23.78px' height='23.78px'
-                      style={{fill: colorWithWhiteness(colors.primary, 0.5), marginTop: '0.5rem'}}/>
+      <StepNumber step={step} style={{marginTop: '0.5rem'}}/>
       <label style={{marginLeft: '0.5rem', color: colors.primary, display: 'flex', ...style}}>
         <div style={{fontWeight: 600, marginRight: '0.3rem'}}>{header}</div>
         ({subHeader})
@@ -814,9 +818,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
             variables and values for one or more of your cohorts. Then export the completed dataset
             to Notebooks where you can perform your analysis</div>
           <div style={{display: 'flex', paddingTop: '1rem'}}>
-            <div style={{width: '33%', height: '80%'}}>
+            <div style={{width: '33%', height: '80%', minWidth: styles.selectBoxHeader.minWidth}}>
               <div style={{backgroundColor: 'white', border: `1px solid ${colors.light}`}}>
-                <BoxHeader text='1' header='Select Cohorts' subHeader='Participants'>
+                <BoxHeader step='1' header='Select Cohorts' subHeader='Participants'>
                   {plusLink('cohorts-link', cohortsPath, !this.canWrite)}
                 </BoxHeader>
                 <div style={{height: '9rem', overflowY: 'auto'}}>
@@ -845,7 +849,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
               <div style={{display: 'flex', backgroundColor: colors.white,
                 border: `1px solid ${colors.light}`}}>
                 <div style={{width: '60%', borderRight: `1px solid ${colors.light}`}}>
-                    <BoxHeader text='2' header='Select Concept Sets' subHeader='Rows'
+                    <BoxHeader step='2' header='Select Concept Sets' subHeader='Rows'
                                style={{paddingRight: '1rem'}}>
                       {plusLink('concept-sets-link', conceptSetsPath, !this.canWrite)}
                     </BoxHeader>
@@ -883,7 +887,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                   </div>
                 </div>
                 <div style={{width: '55%'}}>
-                    <BoxHeader text='3' header='Select Values' subHeader='Columns'>
+                    <BoxHeader step='3' header='Select Values' subHeader='Columns'>
                     <div style={styles.selectAllContainer}>
                       <CheckBox style={{height: 17, width: 17}}
                                 disabled={fp.isEmpty(valueSets)}
@@ -935,8 +939,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
               <div style={{display: 'flex', alignItems: 'flex-end'}}>
                 <div style={styles.previewDataHeader}>
                   <div>
-                    <CircleWithText text={4} width='23.78px' height='23.78px'
-                      style={{marignTop: '0.3rem', fill: colorWithWhiteness(colors.primary, 0.5)}}/>
+                    <StepNumber step='4'/>
                   </div>
                   <label style={{marginLeft: '0.5rem', color: colors.primary}}>
                     Preview Dataset

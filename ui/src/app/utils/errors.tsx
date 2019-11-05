@@ -25,3 +25,8 @@ export function reportError(err: Error) {
     });
   }
 }
+
+/** Returns true if the given error is an AbortError, as used in fetch() aborts. */
+export function isAbortError(e: Error) {
+  return (e instanceof DOMException) && e.name === 'AbortError';
+}

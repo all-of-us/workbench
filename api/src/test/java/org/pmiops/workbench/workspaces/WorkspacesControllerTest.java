@@ -62,7 +62,6 @@ import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -75,6 +74,10 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.CohortReviewDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -83,6 +86,8 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DataSet;
+import org.pmiops.workbench.db.model.StorageEnums;
 import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -111,7 +116,6 @@ import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.NotebookLockingMetadataResponse;
 import org.pmiops.workbench.model.NotebookRename;
 import org.pmiops.workbench.model.PageFilterRequest;
@@ -127,6 +131,7 @@ import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
@@ -254,15 +259,6 @@ public class WorkspacesControllerTest {
     }
 
     @Bean
-    GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
-      Map<String, Map<Long, String>> concepts = new HashMap<>();
-      concepts.put(FilterColumns.RACE.name(), new HashMap<>());
-      concepts.put(FilterColumns.GENDER.name(), new HashMap<>());
-      concepts.put(FilterColumns.ETHNICITY.name(), new HashMap<>());
-      return new GenderRaceEthnicityConcept(concepts);
-    }
-
-    @Bean
     @Scope("prototype")
     User user() {
       return currentUser;
@@ -286,8 +282,13 @@ public class WorkspacesControllerTest {
   @Autowired UserDao userDao;
   @Autowired ConceptDao conceptDao;
   @Autowired CdrVersionDao cdrVersionDao;
+  @Autowired CohortDao cohortDao;
+  @Autowired CohortReviewDao cohortReviewDao;
   @Autowired CohortsController cohortsController;
+  @Autowired ConceptSetDao conceptSetDao;
+  @Autowired ConceptSetService conceptSetService;
   @Autowired ConceptSetsController conceptSetsController;
+  @Autowired DataSetDao dataSetDao;
   @Autowired DataSetService dataSetService;
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired CohortReviewController cohortReviewController;
@@ -1262,6 +1263,130 @@ public class WorkspacesControllerTest {
     assertConceptSetClone(conceptSets.get(0), conceptSet1, cloned, 456);
   }
 
+  @Test
+  public void testCloneWorkspace_Dataset() {
+    stubFcGetWorkspaceACL();
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+            workspace.getNamespace(),
+            workspace.getId(),
+            StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+
+    CdrVersion cdrVersion2 = new CdrVersion();
+    cdrVersion2.setName("2");
+    cdrVersion2.setCdrDbName("");
+    cdrVersion2 = cdrVersionDao.save(cdrVersion2);
+
+    final String expectedConceptSetName = "cs1";
+    final String expectedConceptSetDescription = "d1";
+    org.pmiops.workbench.db.model.ConceptSet originalConceptSet =
+        new org.pmiops.workbench.db.model.ConceptSet();
+    originalConceptSet.setName(expectedConceptSetName);
+    originalConceptSet.setDescription(expectedConceptSetDescription);
+    originalConceptSet.setDomainEnum(Domain.CONDITION);
+    originalConceptSet.setConceptIds(Collections.singleton(CLIENT_CONCEPT_1.getConceptId()));
+    originalConceptSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    originalConceptSet = conceptSetDao.save(originalConceptSet);
+
+    final String expectedCohortName = "cohort name";
+    final String expectedCohortDescription = "cohort description";
+    org.pmiops.workbench.db.model.Cohort originalCohort =
+        new org.pmiops.workbench.db.model.Cohort();
+    originalCohort.setName(expectedCohortName);
+    originalCohort.setDescription(expectedCohortDescription);
+    originalCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    originalCohort = cohortDao.save(originalCohort);
+
+    final String expectedCohortReviewName = "cohort review";
+    final String expectedCohortReviewDefinition = "cohort definition";
+    org.pmiops.workbench.db.model.CohortReview originalCohortReview =
+        new org.pmiops.workbench.db.model.CohortReview();
+    originalCohortReview.setCohortName(expectedCohortReviewName);
+    originalCohortReview.setCohortDefinition(expectedCohortReviewDefinition);
+    originalCohortReview.setCohortId(originalCohort.getCohortId());
+    originalCohortReview = cohortReviewDao.save(originalCohortReview);
+
+    originalCohort.setCohortReviews(Collections.singleton(originalCohortReview));
+    originalCohort = cohortDao.save(originalCohort);
+
+    final String expectedDatasetName = "data set name";
+    DataSet originalDataSet = new DataSet();
+    originalDataSet.setName(expectedDatasetName);
+    originalDataSet.setVersion(1);
+    originalDataSet.setConceptSetIds(
+        Collections.singletonList(originalConceptSet.getConceptSetId()));
+    originalDataSet.setCohortIds(Collections.singletonList(originalCohort.getCohortId()));
+    originalDataSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    dataSetDao.save(originalDataSet);
+
+    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setCdrVersionId(String.valueOf(cdrVersion2.getCdrVersionId()));
+
+    ResearchPurpose modPurpose = new ResearchPurpose();
+    modPurpose.setAncestry(true);
+    modWorkspace.setResearchPurpose(modPurpose);
+    req.setWorkspace(modWorkspace);
+
+    stubGetWorkspace(
+        modWorkspace.getNamespace(),
+        modWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL,
+        WorkspaceAccessLevel.OWNER);
+    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+
+    mockBillingProjectBuffer("cloned-ns");
+    Workspace cloned =
+        workspacesController
+            .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+            .getBody()
+            .getWorkspace();
+
+    org.pmiops.workbench.db.model.Workspace clonedDbWorkspace =
+        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+            cloned.getNamespace(),
+            cloned.getId(),
+            StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+
+    List<DataSet> dataSets = dataSetService.getDataSets(clonedDbWorkspace);
+    assertThat(dataSets).hasSize(1);
+    assertThat(dataSets.get(0).getName()).isEqualTo(expectedDatasetName);
+    assertThat(dataSets.get(0).getDataSetId()).isNotEqualTo(originalDataSet.getDataSetId());
+
+    List<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
+        dataSetService.getConceptSetsForDataset(dataSets.get(0));
+    assertThat(conceptSets).hasSize(1);
+    assertThat(conceptSets.get(0).getName()).isEqualTo(expectedConceptSetName);
+    assertThat(conceptSets.get(0).getDescription()).isEqualTo(expectedConceptSetDescription);
+    assertThat(conceptSets.get(0).getDomainEnum()).isEqualTo(Domain.CONDITION);
+    assertThat(conceptSets.get(0).getConceptIds())
+        .isEqualTo(Collections.singleton(CLIENT_CONCEPT_1.getConceptId()));
+    assertThat(conceptSets.get(0).getConceptSetId())
+        .isNotEqualTo(originalConceptSet.getConceptSetId());
+
+    List<org.pmiops.workbench.db.model.Cohort> cohorts =
+        dataSetService.getCohortsForDataset(dataSets.get(0));
+    assertThat(cohorts).hasSize(1);
+    assertThat(cohorts.get(0).getName()).isEqualTo(expectedCohortName);
+    assertThat(cohorts.get(0).getDescription()).isEqualTo(expectedCohortDescription);
+    assertThat(cohorts.get(0).getCohortId()).isNotEqualTo(originalCohort.getCohortId());
+
+    Set<org.pmiops.workbench.db.model.CohortReview> cohortReviews =
+        cohortReviewDao.findAllByCohortId(cohorts.get(0).getCohortId());
+    assertThat(cohortReviews).hasSize(1);
+    assertThat(cohortReviews.iterator().next().getCohortName()).isEqualTo(expectedCohortReviewName);
+    assertThat(cohortReviews.iterator().next().getCohortDefinition())
+        .isEqualTo(expectedCohortReviewDefinition);
+    assertThat(cohortReviews.iterator().next().getCohortReviewId())
+        .isNotEqualTo(originalCohortReview.getCohortReviewId());
+  }
+
   private void assertConceptSetClone(
       ConceptSet clonedConceptSet,
       ConceptSet originalConceptSet,
@@ -2033,8 +2158,7 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService)
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
-    verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
@@ -2058,8 +2182,7 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService)
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
-    verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
@@ -2096,8 +2219,7 @@ public class WorkspacesControllerTest {
             BlobId.of(BUCKET_NAME, "notebooks/" + expectedNotebookName));
 
     verify(userRecentResourceService)
-        .updateNotebookEntry(
-            2l, 1l, "gs://workspace-bucket/notebooks/" + expectedNotebookName, NOW);
+        .updateNotebookEntry(2l, 1l, "gs://workspace-bucket/notebooks/" + expectedNotebookName);
   }
 
   @Test
@@ -2245,8 +2367,7 @@ public class WorkspacesControllerTest {
         workspace.getNamespace(), workspace.getId(), NotebooksService.withNotebookExtension("nb1"));
     verify(cloudStorageService)
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
-    verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
   }
 
   @Test

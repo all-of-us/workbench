@@ -45,6 +45,7 @@ public class WorkspaceAuditAdapterServiceTest {
       Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
   private static final long REMOVED_USER_ID = 301L;
   private static final long ADDED_USER_ID = 401L;
+  private static final String ACTION_ID = "58cbae08-447f-499f-95b9-7bdedc955f4d";
 
   private WorkspaceAuditAdapterService workspaceAuditAdapterService;
   private Workspace workspace1;
@@ -55,6 +56,7 @@ public class WorkspaceAuditAdapterServiceTest {
   @Mock private Provider<User> mockUserProvider;
   @Mock private Clock mockClock;
   @Mock private ActionAuditService mockActionAuditService;
+  @Mock private Provider<String> mockActionIdProvider;
 
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventListCaptor;
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
@@ -72,7 +74,8 @@ public class WorkspaceAuditAdapterServiceTest {
     user1.setFamilyName("Flintstone");
     doReturn(user1).when(mockUserProvider).get();
     workspaceAuditAdapterService =
-        new WorkspaceAuditAdapterServiceImpl(mockUserProvider, mockActionAuditService, mockClock);
+        new WorkspaceAuditAdapterServiceImpl(
+            mockUserProvider, mockActionAuditService, mockClock, mockActionIdProvider);
 
     final ResearchPurpose researchPurpose1 = new ResearchPurpose();
     researchPurpose1.setIntendedStudy("stubbed toes");
@@ -106,6 +109,7 @@ public class WorkspaceAuditAdapterServiceTest {
     dbWorkspace2.setCreator(user1);
 
     doReturn(Y2K_EPOCH_MILLIS).when(mockClock).millis();
+    doReturn(ACTION_ID).when(mockActionIdProvider).get();
   }
 
   @Test
@@ -116,21 +120,13 @@ public class WorkspaceAuditAdapterServiceTest {
     assertThat(eventsSent.size()).isEqualTo(6);
     Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
     assertThat(firstEvent.isPresent()).isTrue();
-    assertThat(firstEvent.get().actionType()).isEqualTo(ActionType.CREATE);
+    assertThat(firstEvent.get().getActionType()).isEqualTo(ActionType.CREATE);
     assertThat(
             eventsSent.stream()
-                .map(ActionAuditEvent::actionType)
+                .map(ActionAuditEvent::getActionType)
                 .collect(Collectors.toSet())
                 .size())
         .isEqualTo(1);
-  }
-
-  @Test
-  public void testFirestNoEventsForNullWorkspace() {
-    workspaceAuditAdapterService.fireCreateAction(null, WORKSPACE_1_DB_ID);
-    verify(mockActionAuditService).send(eventListCaptor.capture());
-    Collection<ActionAuditEvent> eventsSent = eventListCaptor.getValue();
-    assertThat(eventsSent).isEmpty();
   }
 
   @Test
@@ -138,8 +134,8 @@ public class WorkspaceAuditAdapterServiceTest {
     workspaceAuditAdapterService.fireDeleteAction(dbWorkspace1);
     verify(mockActionAuditService).send(eventCaptor.capture());
     final ActionAuditEvent eventSent = eventCaptor.getValue();
-    assertThat(eventSent.actionType()).isEqualTo(ActionType.DELETE);
-    assertThat(eventSent.timestamp()).isEqualTo(Y2K_EPOCH_MILLIS);
+    assertThat(eventSent.getActionType()).isEqualTo(ActionType.DELETE);
+    assertThat(eventSent.getTimestamp()).isEqualTo(Y2K_EPOCH_MILLIS);
   }
 
   @Test
@@ -150,11 +146,12 @@ public class WorkspaceAuditAdapterServiceTest {
     assertThat(eventsSent).hasSize(2);
 
     // need same actionId for all events
-    assertThat(eventsSent.stream().map(ActionAuditEvent::actionId).distinct().count()).isEqualTo(1);
+    assertThat(eventsSent.stream().map(ActionAuditEvent::getActionId).distinct().count())
+        .isEqualTo(1);
 
     assertThat(
             eventsSent.stream()
-                .map(ActionAuditEvent::targetType)
+                .map(ActionAuditEvent::getTargetType)
                 .allMatch(t -> t.equals(TargetType.WORKSPACE)))
         .isTrue();
 
@@ -162,7 +159,7 @@ public class WorkspaceAuditAdapterServiceTest {
         ImmutableSet.of(ActionType.DUPLICATE_FROM, ActionType.DUPLICATE_TO);
     ImmutableSet<ActionType> actualActionTypes =
         eventsSent.stream()
-            .map(ActionAuditEvent::actionType)
+            .map(ActionAuditEvent::getActionType)
             .collect(ImmutableSet.toImmutableSet());
     assertThat(actualActionTypes).containsExactlyElementsIn(expectedActionTypes);
   }
@@ -184,38 +181,40 @@ public class WorkspaceAuditAdapterServiceTest {
 
     Map<String, Long> countByTargetType =
         eventsSent.stream()
-            .collect(Collectors.groupingBy(e -> e.targetType().toString(), Collectors.counting()));
+            .collect(
+                Collectors.groupingBy(e -> e.getTargetType().toString(), Collectors.counting()));
 
     assertThat(countByTargetType.get(TargetType.WORKSPACE.toString())).isEqualTo(1);
     assertThat(countByTargetType.get(TargetType.USER.toString())).isEqualTo(3);
 
     Optional<String> targetPropertyMaybe =
         eventsSent.stream()
-            .filter(e -> e.targetType() == TargetType.USER)
+            .filter(e -> e.getTargetType() == TargetType.USER)
             .findFirst()
-            .flatMap(ActionAuditEvent::targetProperty);
+            .flatMap(e -> Optional.ofNullable(e.getTargetPropertyMaybe()));
 
     assertThat(targetPropertyMaybe.isPresent()).isTrue();
     assertThat(targetPropertyMaybe.get()).isEqualTo(AclTargetProperty.ACCESS_LEVEL.toString());
 
     // need same actionId for all events
-    assertThat(eventsSent.stream().map(ActionAuditEvent::actionId).distinct().count()).isEqualTo(1);
+    assertThat(eventsSent.stream().map(ActionAuditEvent::getActionId).distinct().count())
+        .isEqualTo(1);
 
     Optional<ActionAuditEvent> readerEventMaybe =
         eventsSent.stream()
             .filter(
                 e ->
-                    e.targetType() == TargetType.USER
-                        && e.targetId().isPresent()
-                        && e.targetId().get().equals(ADDED_USER_ID))
+                    e.getTargetType() == TargetType.USER
+                        && e.getTargetIdMaybe() != null
+                        && e.getTargetIdMaybe().equals(ADDED_USER_ID))
             .findFirst();
     assertThat(readerEventMaybe.isPresent()).isTrue();
-    assertThat(readerEventMaybe.get().targetProperty().isPresent()).isTrue();
-    assertThat(readerEventMaybe.get().targetProperty().get())
+    assertThat(readerEventMaybe.get().getTargetPropertyMaybe()).isNotNull();
+    assertThat(readerEventMaybe.get().getTargetPropertyMaybe())
         .isEqualTo(AclTargetProperty.ACCESS_LEVEL.toString());
-    assertThat(readerEventMaybe.get().newValue().get())
+    assertThat(readerEventMaybe.get().getNewValueMaybe())
         .isEqualTo(WorkspaceAccessLevel.READER.toString());
-    assertThat(readerEventMaybe.get().previousValue().isPresent()).isFalse();
+    assertThat(readerEventMaybe.get().getPreviousValueMaybe()).isNull();
   }
 
   @Test

@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -19,7 +18,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +30,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.cdr.cache.GenderRaceEthnicityConcept;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -58,7 +57,9 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FilterColumns;
@@ -117,6 +118,8 @@ public class CohortReviewControllerTest {
   private org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantAnnotation;
 
   @Autowired private CdrVersionDao cdrVersionDao;
+
+  @Autowired private CBCriteriaDao cbCriteriaDao;
 
   @Autowired private WorkspaceDao workspaceDao;
 
@@ -179,29 +182,6 @@ public class CohortReviewControllerTest {
     Clock clock() {
       return CLOCK;
     }
-
-    @Bean
-    public GenderRaceEthnicityConcept getGenderRaceEthnicityConcept() {
-      Map<String, Map<Long, String>> concepts = new HashMap<>();
-      concepts.put(
-          FilterColumns.RACE.name(),
-          ImmutableMap.of(
-              TestDemo.ASIAN.getConceptId(),
-              TestDemo.ASIAN.getName(),
-              TestDemo.WHITE.getConceptId(),
-              TestDemo.WHITE.getName()));
-      concepts.put(
-          FilterColumns.GENDER.name(),
-          ImmutableMap.of(
-              TestDemo.MALE.getConceptId(),
-              TestDemo.MALE.getName(),
-              TestDemo.FEMALE.getConceptId(),
-              TestDemo.FEMALE.getName()));
-      concepts.put(
-          FilterColumns.ETHNICITY.name(),
-          ImmutableMap.of(TestDemo.NOT_HISPANIC.getConceptId(), TestDemo.NOT_HISPANIC.getName()));
-      return new GenderRaceEthnicityConcept(concepts);
-    }
   }
 
   @Before
@@ -214,6 +194,42 @@ public class CohortReviewControllerTest {
     user = userDao.save(user);
     when(userProvider.get()).thenReturn(user);
     cohortReviewController.setUserProvider(userProvider);
+
+    cbCriteriaDao.save(
+        new CBCriteria()
+            .domainId(DomainType.PERSON.toString())
+            .type(CriteriaType.RACE.toString())
+            .parentId(1L)
+            .conceptId(String.valueOf(TestDemo.ASIAN.conceptId))
+            .name(TestDemo.ASIAN.name));
+    cbCriteriaDao.save(
+        new CBCriteria()
+            .domainId(DomainType.PERSON.toString())
+            .type(CriteriaType.GENDER.toString())
+            .parentId(1L)
+            .conceptId(String.valueOf(TestDemo.FEMALE.conceptId))
+            .name(TestDemo.FEMALE.name));
+    cbCriteriaDao.save(
+        new CBCriteria()
+            .domainId(DomainType.PERSON.toString())
+            .type(CriteriaType.GENDER.toString())
+            .parentId(1L)
+            .conceptId(String.valueOf(TestDemo.MALE.conceptId))
+            .name(TestDemo.MALE.name));
+    cbCriteriaDao.save(
+        new CBCriteria()
+            .domainId(DomainType.PERSON.toString())
+            .type(CriteriaType.ETHNICITY.toString())
+            .parentId(1L)
+            .conceptId(String.valueOf(TestDemo.NOT_HISPANIC.conceptId))
+            .name(TestDemo.NOT_HISPANIC.name));
+    cbCriteriaDao.save(
+        new CBCriteria()
+            .domainId(DomainType.PERSON.toString())
+            .type(CriteriaType.RACE.toString())
+            .parentId(1L)
+            .conceptId(String.valueOf(TestDemo.WHITE.conceptId))
+            .name(TestDemo.WHITE.name));
 
     cdrVersion = new CdrVersion();
     cdrVersion.setBigqueryDataset("dataSetId");
@@ -768,8 +784,7 @@ public class CohortReviewControllerTest {
 
     assertParticipantCohortStatuses(
         expectedReview1, page, pageSize, SortOrder.DESC, FilterColumns.STATUS);
-    verify(userRecentResourceService)
-        .updateCohortEntry(anyLong(), anyLong(), anyLong(), any(Timestamp.class));
+    verify(userRecentResourceService).updateCohortEntry(anyLong(), anyLong(), anyLong());
     assertParticipantCohortStatuses(
         expectedReview2, page, pageSize, SortOrder.DESC, FilterColumns.PARTICIPANTID);
     assertParticipantCohortStatuses(expectedReview3, null, null, null, FilterColumns.STATUS);

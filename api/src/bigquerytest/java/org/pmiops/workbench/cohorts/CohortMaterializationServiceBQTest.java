@@ -34,7 +34,6 @@ import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.config.ConceptCacheConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -73,7 +72,6 @@ import org.springframework.context.annotation.Import;
   CohortQueryBuilder.class,
   FieldSetQueryBuilder.class,
   TestJpaConfig.class,
-  ConceptCacheConfiguration.class,
   TestBigQueryCdrSchemaConfig.class,
   AnnotationQueryBuilder.class,
   CdrBigQuerySchemaConfigService.class,

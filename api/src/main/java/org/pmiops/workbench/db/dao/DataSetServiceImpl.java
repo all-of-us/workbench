@@ -562,6 +562,19 @@ public class DataSetServiceImpl implements DataSetService {
     return dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
   }
 
+  @Transactional
+  @Override
+  public List<ConceptSet> getConceptSetsForDataset(DataSet dataSet) {
+    return conceptSetDao.findAllByConceptSetIdIn(
+        dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
+  }
+
+  @Transactional
+  @Override
+  public List<Cohort> getCohortsForDataset(DataSet dataSet) {
+    return cohortDao.findAllByCohortIdIn(dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
+  }
+
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {
     Optional<CdrBigQuerySchemaConfig.ColumnConfig> conceptColumn =
         config.columns.stream().filter(column -> type.equals(column.domainConcept)).findFirst();

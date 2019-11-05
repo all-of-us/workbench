@@ -114,3 +114,23 @@ h3 {
 .badge.badge-info {
   margin-left: 0.25rem;
 }
+.alert.alert-warning {
+  background: #f7981c;
+  color: #ffffff;
+  border: 1px solid #ebafa6;
+  margin: 0.5rem 0.25rem;
+}
+.alert.alert-warning .alert-item {
+  display: table;
+}
+.alert.alert-warning .alert-icon-wrapper {
+  display: table-cell;
+  vertical-align: middle;
+}
+.alert.alert-warning .alert-text {
+  margin-right: 0;
+}
+.alert.alert-warning .alert-icon {
+  color: #ffffff;
+  margin-right: 0.25rem;
+}
