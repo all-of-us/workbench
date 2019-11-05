@@ -24,7 +24,7 @@ constructor(
     private val userProvider: Provider<User>,
     private val actionAuditService: ActionAuditService,
     private val clock: Clock,
-    @Qualifier("ACTION_ID_PROVIDER") private val actionIdProvider: Provider<String>
+    @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : WorkspaceAuditAdapterService {
 
     override fun fireCreateAction(createdWorkspace: Workspace, dbWorkspaceId: Long) {
