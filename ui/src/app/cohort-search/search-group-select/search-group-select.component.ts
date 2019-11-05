@@ -39,20 +39,23 @@ export class SearchGroupSelectComponent implements OnInit {
     const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
     cohortBuilderApi().findCriteriaMenuOptions(+cdrVersionId).then(res => {
       criteriaMenuOptions[cdrVersionId] = res.items.reduce((acc, opt) => {
-        if (PROGRAM_TYPES.includes(DomainType[opt.domain])) {
-          const option = {name: domainToTitle(opt.domain), domain: opt.domain, type: opt.types[0].type};
-          if (opt.domain === DomainType[DomainType.PERSON]) {
-            option['children'] = opt.types
+        const {domain, types} = opt;
+        if (PROGRAM_TYPES.includes(DomainType[domain])) {
+          const option = {name: domainToTitle(domain), domain, type: types[0].type, order: PROGRAM_TYPES.indexOf(DomainType[domain])};
+          if (domain === DomainType[DomainType.PERSON]) {
+            option['children'] = types
               .filter(subopt => subopt.type !== CriteriaType[CriteriaType.DECEASED])
-              .map(subopt => ({name: typeToTitle(subopt.type), domain: opt.domain, type: subopt.type}));
+              .map(subopt => ({name: typeToTitle(subopt.type), domain, type: subopt.type}));
           }
           acc.programTypes.push(option);
         }
-        if (DOMAIN_TYPES.includes(DomainType[opt.domain])) {
-          acc.domainTypes.push({name: domainToTitle(opt.domain), domain: opt.domain, type: opt.types[0].type});
+        if (DOMAIN_TYPES.includes(DomainType[domain])) {
+          acc.domainTypes.push({name: domainToTitle(domain), domain, type: types[0].type, order: DOMAIN_TYPES.indexOf(DomainType[domain])});
         }
         return acc;
       }, {programTypes: [], domainTypes: []});
+      criteriaMenuOptions[cdrVersionId].programTypes.sort((a, b) => a.order - b.order);
+      criteriaMenuOptions[cdrVersionId].domainTypes.sort((a, b) => a.order - b.order);
       criteriaMenuOptionsStore.next(criteriaMenuOptions);
     });
   }
