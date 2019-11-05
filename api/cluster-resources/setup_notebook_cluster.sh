@@ -36,7 +36,7 @@ echo "Sys.setenv(RETICULATE_PYTHON = '$(which python3)')" >> ~/.Rprofile
 # TODO: These steps are quite slow, we could also consider pushing this into the
 # base Leo image or a custom AoU docker image.
 apt-get update
-apt-get -t stretch-cran35 install -y --no-install-recommends libmagick++-dev gfortran-6
+apt-get -t stretch-cran35 install -y --no-install-recommends libmagick++-dev gfortran-6 jq
 
 for v in "2.7" "3"; do
   "pip${v}" install --upgrade \
