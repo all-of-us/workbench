@@ -6,7 +6,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -28,20 +27,19 @@ public class LiquibaseTest {
   }
 
   private List<String> getIndexedChangeLogs() throws Exception {
-    Document doc = DocumentBuilderFactory.newInstance()
-        .newDocumentBuilder()
-        .parse(new File("db/changelog/db.changelog-master.xml"));
+    Document doc =
+        DocumentBuilderFactory.newInstance()
+            .newDocumentBuilder()
+            .parse(new File("db/changelog/db.changelog-master.xml"));
 
     NodeList changeLogs = doc.getElementsByTagName("include");
 
     List<String> changeLogFilenames = new ArrayList<>();
     for (int i = 0; i < changeLogs.getLength(); i++) {
-      changeLogFilenames.add(((Element) changeLogs.item(i))
-          .getAttribute("file")
-          .split("changelog/")[1]);
+      changeLogFilenames.add(
+          ((Element) changeLogs.item(i)).getAttribute("file").split("changelog/")[1]);
     }
 
     return changeLogFilenames;
   }
-
 }
