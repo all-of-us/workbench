@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
+import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {initExisting, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, mapGroup, typeToTitle} from 'app/cohort-search/utils';
 import {integerAndRangeValidator} from 'app/cohort-search/validators';
@@ -36,8 +36,8 @@ export class SearchGroupComponent implements AfterViewInit, OnInit {
     TemporalTime.WITHINXDAYSOF
   ];
   name = this.whichMention[0];
-  readonly domainTypes = LIST_DOMAIN_TYPES;
-  readonly programTypes = LIST_PROGRAM_TYPES;
+  readonly domainTypes = DOMAIN_TYPES;
+  readonly programTypes = PROGRAM_TYPES;
   itemId: any;
   timeForm = new FormGroup({
     inputTimeValue: new FormControl([Validators.required],

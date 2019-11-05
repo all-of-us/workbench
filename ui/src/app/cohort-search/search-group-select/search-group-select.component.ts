@@ -1,27 +1,63 @@
-import {AfterViewInit, Component, Input} from '@angular/core';
-import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
-import {wizardStore} from 'app/cohort-search/search-state.service';
+import {Component, Input, OnInit} from '@angular/core';
+import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
+import {criteriaMenuOptionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {triggerEvent} from 'app/utils/analytics';
-import {DomainType, SearchRequest} from 'generated/fetch';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
 
 @Component({
   selector: 'app-search-group-select',
   templateUrl: './search-group-select.component.html',
   styleUrls: ['./search-group-select.component.css']
 })
-export class SearchGroupSelectComponent implements AfterViewInit {
+export class SearchGroupSelectComponent implements OnInit {
   @Input() role: keyof SearchRequest;
   @Input() index: number;
 
-  readonly domainTypes = LIST_DOMAIN_TYPES;
-  readonly programTypes = LIST_PROGRAM_TYPES;
   position = 'bottom-left';
   demoOpen = false;
   demoMenuHover = false;
   category: string;
+  criteriaMenuOptions: any;
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
+    const {cdrVersionId} = currentWorkspaceStore.getValue();
+    criteriaMenuOptionsStore.subscribe(options => {
+      if (this.role === 'includes' && !options[cdrVersionId]) {
+        this.getMenuOptions();
+      } else if (!!options[cdrVersionId]) {
+        this.criteriaMenuOptions = options[cdrVersionId];
+        setTimeout(() => this.setDemoMenuHover());
+      }
+    });
+  }
+
+  getMenuOptions() {
+    const {cdrVersionId} = currentWorkspaceStore.getValue();
+    const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
+    cohortBuilderApi().findCriteriaMenuOptions(+cdrVersionId).then(res => {
+      criteriaMenuOptions[cdrVersionId] = res.items.reduce((acc, opt) => {
+        if (PROGRAM_TYPES.includes(DomainType[opt.domain])) {
+          const option = {name: domainToTitle(opt.domain), domain: opt.domain, type: opt.types[0].type};
+          if (opt.domain === DomainType[DomainType.PERSON]) {
+            option['children'] = opt.types
+              .filter(subopt => subopt.type !== CriteriaType[CriteriaType.DECEASED])
+              .map(subopt => ({name: typeToTitle(subopt.type), domain: opt.domain, type: subopt.type}));
+          }
+          acc.programTypes.push(option);
+        }
+        if (DOMAIN_TYPES.includes(DomainType[opt.domain])) {
+          acc.domainTypes.push({name: domainToTitle(opt.domain), domain: opt.domain, type: opt.types[0].type});
+        }
+        return acc;
+      }, {programTypes: [], domainTypes: []});
+      criteriaMenuOptionsStore.next(criteriaMenuOptions);
+    });
+  }
+
+  setDemoMenuHover() {
     /* Open nested menu on hover */
     const demoItem = document.getElementById('DEMO-' + this.index);
     if (demoItem) {

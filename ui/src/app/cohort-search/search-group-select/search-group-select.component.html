@@ -6,13 +6,13 @@
     <span>Group {{index}}</span>
   </div>
   <div class="card-block">
-    <clr-dropdown>
+    <clr-dropdown *ngIf="criteriaMenuOptions">
       <button [id]="role + '-button'" type="button" class="btn selection-button" (click)="setMenuPosition()" clrDropdownTrigger>
         ADD Criteria <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu clrPosition="{{position}}">
         <h4 class="dropdown-header">Program Data</h4>
-        <clr-dropdown *ngFor="let criteria of programTypes">
+        <clr-dropdown *ngFor="let criteria of criteriaMenuOptions.programTypes">
           <button
             *ngIf="!criteria.children"
             [id]="criteria.type"
@@ -42,7 +42,7 @@
         <div class="dropdown-divider"></div>
         <h4 class="dropdown-header">Domains</h4>
           <button
-            *ngFor="let criteria of domainTypes"
+            *ngFor="let criteria of criteriaMenuOptions.domainTypes"
             [id]="criteria.type"
             class="dropdown-item"
             type="button"
