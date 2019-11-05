@@ -177,9 +177,18 @@ def dev_up()
     raise("Please run 'gcloud auth login' before starting the server.")
   end
 
-  at_exit { common.run_inline %W{docker-compose down} }
+  at_exit do
+    common.run_inline %W{docker-compose down}
+    common.run_inline %W{docker-sync stop}
+  end
 
   overall_bm = Benchmark.measure {
+    common.status "Docker-sync startup..."
+    bm = Benchmark.measure {
+      common.run_inline %W{docker-sync start}
+    }
+    common.status "Docker-sync startup complete (#{format_benchmark(bm)})"
+
     common.status "Database startup..."
     bm = Benchmark.measure {
       common.run_inline %W{docker-compose up -d db}
