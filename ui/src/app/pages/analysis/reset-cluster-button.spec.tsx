@@ -20,7 +20,7 @@ describe('ResetClusterButton', () => {
   beforeEach(() => {
     props = {
       billingProjectId: "billing-project-123",
-      workspaceName: "workspace name 123"
+      workspaceFirecloudName: "workspace-name-123"
     };
 
     registerApiClient(ClusterApi, new ClusterApiStub());

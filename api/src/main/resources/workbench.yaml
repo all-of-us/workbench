@@ -527,7 +527,7 @@ paths:
 
   # Notebook clusters ####################################################################
 
-  /v1/clusters/{billingProjectId}/{workspaceName}:
+  /v1/clusters/{billingProjectId}/{workspaceFirecloudName}:
     get:
       summary: List available notebook clusters
       description: >
@@ -546,8 +546,8 @@ paths:
           required: true
           type: string
         - in: path
-          name: workspaceName
-          description: The name of the workspace whose notebook we're looking at
+          name: workspaceFirecloudName
+          description: The firecloudName of the workspace whose notebook we're looking at
           required: true
           type: string
       responses:
