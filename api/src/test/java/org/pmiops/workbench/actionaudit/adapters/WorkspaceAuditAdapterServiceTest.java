@@ -45,6 +45,7 @@ public class WorkspaceAuditAdapterServiceTest {
       Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
   private static final long REMOVED_USER_ID = 301L;
   private static final long ADDED_USER_ID = 401L;
+  private static final String ACTION_ID = "58cbae08-447f-499f-95b9-7bdedc955f4d";
 
   private WorkspaceAuditAdapterService workspaceAuditAdapterService;
   private Workspace workspace1;
@@ -55,6 +56,7 @@ public class WorkspaceAuditAdapterServiceTest {
   @Mock private Provider<User> mockUserProvider;
   @Mock private Clock mockClock;
   @Mock private ActionAuditService mockActionAuditService;
+  @Mock private Provider<String> mockActionIdProvider;
 
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventListCaptor;
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
@@ -72,7 +74,8 @@ public class WorkspaceAuditAdapterServiceTest {
     user1.setFamilyName("Flintstone");
     doReturn(user1).when(mockUserProvider).get();
     workspaceAuditAdapterService =
-        new WorkspaceAuditAdapterServiceImpl(mockUserProvider, mockActionAuditService, mockClock);
+        new WorkspaceAuditAdapterServiceImpl(
+            mockUserProvider, mockActionAuditService, mockClock, mockActionIdProvider);
 
     final ResearchPurpose researchPurpose1 = new ResearchPurpose();
     researchPurpose1.setIntendedStudy("stubbed toes");
@@ -106,6 +109,7 @@ public class WorkspaceAuditAdapterServiceTest {
     dbWorkspace2.setCreator(user1);
 
     doReturn(Y2K_EPOCH_MILLIS).when(mockClock).millis();
+    doReturn(ACTION_ID).when(mockActionIdProvider).get();
   }
 
   @Test

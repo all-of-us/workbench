@@ -32,27 +32,31 @@ class ProfileAuditAdapterServiceTest {
     private val mockActionAuditService: ActionAuditService? = null
     @Mock
     private val mockClock: Clock? = null
+    @Mock
+    private val mockActionIdProvider: Provider<String>? = null
 
     @Captor
-    private val eventCollectionCaptor: ArgumentCaptor<Collection<ActionAuditEvent>> = argumentCaptor()
+    private var eventListCaptor: ArgumentCaptor<List<ActionAuditEvent>>? = null
 
     @Captor
-    private val eventCaptor: ArgumentCaptor<ActionAuditEvent> = argumentCaptor()
+    private var eventCaptor: ArgumentCaptor<ActionAuditEvent>? = null
 
     private var profileAuditAdapterService: ProfileAuditAdapterService? = null
     private var user: User? = null
 
-    inline fun <reified T : Any> argumentCaptor() = ArgumentCaptor.forClass(T::class.java)
-
     @Before
     fun setUp() {
-
         user = User()
         user?.userId = 1001
         user?.email = USER_EMAIL
-        profileAuditAdapterService = ProfileAuditAdapterServiceImpl(mockUserProvider!!, mockActionAuditService!!, mockClock!!)
+        profileAuditAdapterService = ProfileAuditAdapterServiceImpl(
+                userProvider = mockUserProvider!!,
+                actionAuditService = mockActionAuditService!!,
+                clock = mockClock!!,
+                actionIdProvider = mockActionIdProvider!!)
         doReturn(Y2K_EPOCH_MILLIS).`when`(mockClock).millis()
         doReturn(user).`when`(mockUserProvider).get()
+        doReturn(ACTION_ID).`when`(mockActionIdProvider).get()
     }
 
     @Test
@@ -60,8 +64,8 @@ class ProfileAuditAdapterServiceTest {
         val createdProfile = buildProfile()
 
         profileAuditAdapterService!!.fireCreateAction(createdProfile)
-        verify<ActionAuditService>(mockActionAuditService).send(eventCollectionCaptor.capture())
-        val sentEvents: List<ActionAuditEvent> = eventCollectionCaptor.value.toList()
+        verify(mockActionAuditService)?.send(eventListCaptor!!.capture())
+        val sentEvents: List<ActionAuditEvent> = eventListCaptor?.value?.toList().orEmpty()
 
         assertThat(sentEvents).hasSize(10)
     }
@@ -106,8 +110,8 @@ class ProfileAuditAdapterServiceTest {
     @Test
     fun testDeleteUserProfile() {
         profileAuditAdapterService!!.fireDeleteAction(USER_ID, USER_EMAIL)
-        verify<ActionAuditService>(mockActionAuditService).send(eventCaptor.capture())
-        val eventSent = eventCaptor.value
+        verify<ActionAuditService>(mockActionAuditService).send(eventCaptor!!.capture())
+        val eventSent = eventCaptor!!.value
 
         assertThat(eventSent.targetType).isEqualTo(TargetType.PROFILE)
         assertThat(eventSent.agentType).isEqualTo(AgentType.USER)
@@ -122,8 +126,10 @@ class ProfileAuditAdapterServiceTest {
 
     companion object {
 
-        private val USER_ID = 101L
-        private val USER_EMAIL = "a@b.com"
+        private const val USER_ID = 101L
+        private const val USER_EMAIL = "a@b.com"
         private val Y2K_EPOCH_MILLIS = Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli()
+        private const val ACTION_ID = "58cbae08-447f-499f-95b9-7bdedc955f4d"
+
     }
 }

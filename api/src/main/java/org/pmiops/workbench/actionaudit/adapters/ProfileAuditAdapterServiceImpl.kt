@@ -14,6 +14,7 @@ import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyUtils
 import org.pmiops.workbench.db.model.User
 import org.pmiops.workbench.model.Profile
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import java.lang.Exception
 
@@ -22,7 +23,8 @@ class ProfileAuditAdapterServiceImpl @Autowired
 constructor(
     private val userProvider: Provider<User>,
     private val actionAuditService: ActionAuditService,
-    private val clock: Clock
+    private val clock: Clock,
+    @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : ProfileAuditAdapterService {
 
     override fun fireCreateAction(createdProfile: Profile) {
@@ -33,7 +35,7 @@ constructor(
                     .map {
                         ActionAuditEvent(
                             timestamp = clock.millis(),
-                            actionId = ActionAuditEvent.newActionId(),
+                            actionId = actionIdProvider.get(),
                             actionType = ActionType.CREATE,
                             agentType = AgentType.USER,
                             agentId = userProvider.get().userId,
@@ -61,7 +63,7 @@ constructor(
                     .map {
                         ActionAuditEvent(
                                 timestamp = clock.millis(),
-                                actionId = ActionAuditEvent.newActionId(),
+                                actionId = actionIdProvider.get(),
                                 actionType = ActionType.EDIT,
                                 agentType = AgentType.USER,
                                 agentId = userProvider.get().userId,
@@ -84,7 +86,7 @@ constructor(
         try {
             val deleteProfileEvent = ActionAuditEvent(
                     timestamp = clock.millis(),
-                    actionId = ActionAuditEvent.newActionId(),
+                    actionId = actionIdProvider.get(),
                     actionType = ActionType.DELETE,
                     agentType = AgentType.USER,
                     agentId = userId,

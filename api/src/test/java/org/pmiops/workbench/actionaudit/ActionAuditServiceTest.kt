@@ -36,6 +36,7 @@ class ActionAuditServiceTest {
     private var event1: ActionAuditEvent? = null
     private var event2: ActionAuditEvent? = null
     private var actionAuditService: ActionAuditService? = null
+    private val ACTION_ID = "b52a36f6-3e88-4a30-a57f-ae884838bfbf"
 
     @Before
     fun setUp() {
@@ -50,13 +51,12 @@ class ActionAuditServiceTest {
         doReturn(workbenchConfig).`when`<Provider<WorkbenchConfig>>(mockConfigProvider).get()
 
         actionAuditService = ActionAuditServiceImpl(mockConfigProvider!!, mockLogging!!)
-        val actionId = ActionAuditEvent.newActionId()
 
         // ordinarily events sharing an action would have more things in common than this,
         // but the schema doesn't require it
         event1 = ActionAuditEvent(
                 timestamp = System.currentTimeMillis(),
-                actionId = actionId,
+                actionId = ACTION_ID,
                 actionType = ActionType.EDIT,
                 agentType = AgentType.USER,
                 agentId = AGENT_ID_1,
@@ -67,9 +67,10 @@ class ActionAuditServiceTest {
                 previousValueMaybe = "bare",
                 newValueMaybe = "shod"
         )
+
         event2 = ActionAuditEvent(
                 timestamp = System.currentTimeMillis(),
-                actionId = actionId,
+                actionId = ACTION_ID,
                 actionType = ActionType.EDIT,
                 agentType = AgentType.USER,
                 agentId = AGENT_ID_2,
@@ -119,7 +120,7 @@ class ActionAuditServiceTest {
     }
 
     @Test
-    fun testSendsMultipleEventsAsSingleAction() {
+    fun  testSendsMultipleEventsAsSingleAction() {
         actionAuditService!!.send(ImmutableList.of(event1!!, event2!!))
         verify<Logging>(mockLogging).write(logEntryListCaptor!!.capture())
         val entryList = logEntryListCaptor.value
