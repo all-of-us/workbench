@@ -107,10 +107,10 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public Cluster createCluster(String googleProject, String clusterName, String workspaceName) {
+  public Cluster createCluster(String googleProject, String clusterName, String firecloudWorkspaceName) {
     ClusterApi clusterApi = clusterApiProvider.get();
     User user = userProvider.get();
-    Workspace workspace = workspaceService.getRequired(googleProject, workspaceName);
+    Workspace workspace = workspaceService.getRequired(googleProject, firecloudWorkspaceName);
     Map<String, String> customClusterEnvironmentVariables = new HashMap<>();
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
