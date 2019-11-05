@@ -296,8 +296,7 @@ public class UserMetricsControllerTest {
     when(userRecentResourceService.updateNotebookEntry(
             workspace2.getWorkspaceId(),
             user.getUserId(),
-            "gs://newBucket/notebooks/notebook.ipynb",
-            now))
+            "gs://newBucket/notebooks/notebook.ipynb"))
         .thenReturn(mockUserRecentResource);
 
     RecentResourceRequest request = new RecentResourceRequest();

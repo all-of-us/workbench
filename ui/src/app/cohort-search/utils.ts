@@ -13,18 +13,7 @@ import {
 import {idsInUse} from './search-state.service';
 
 export function typeDisplay(parameter): string {
-  const {domainId, type} = parameter;
-  if (domainId === DomainType.PERSON) {
-    return {
-      'GENDER': 'Gender',
-      'RACE': 'Race',
-      'ETHNICITY': 'Ethnicity',
-      'AGE': 'Age',
-      'DECEASED': 'Deceased'
-    }[type] || '';
-  } else if (
-      [DomainType.CONDITION, DomainType.PROCEDURE, DomainType.MEASUREMENT].includes(domainId)
-  ) {
+  if ([DomainType.CONDITION, DomainType.PROCEDURE, DomainType.MEASUREMENT].includes(parameter.domainId)) {
     return parameter.code;
   }
 }
@@ -110,14 +99,20 @@ export function typeToTitle(_type: string): string {
     case CriteriaType[CriteriaType.AGE]:
       _type = 'Current Age/Deceased';
       break;
+    case CriteriaType[CriteriaType.DECEASED]:
+      _type = 'Current Age/Deceased';
+      break;
     case CriteriaType[CriteriaType.ETHNICITY]:
       _type = 'Ethnicity';
       break;
     case CriteriaType[CriteriaType.GENDER]:
-      _type = 'Gender';
+      _type = 'Gender Identity';
       break;
     case CriteriaType[CriteriaType.RACE]:
       _type = 'Race';
+      break;
+    case CriteriaType[CriteriaType.SEX]:
+      _type = 'Sex Assigned at Birth';
       break;
   }
   return _type;

@@ -75,7 +75,6 @@ import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DomainType;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.ModifyCohortStatusRequest;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
@@ -540,7 +539,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     PageRequest pageRequest = createPageRequest(request);
-    convertGenderRaceEthnicityFilters(pageRequest);
     convertGenderRaceEthnicitySortOrder(pageRequest);
 
     List<ParticipantCohortStatus> participantCohortStatuses =
@@ -560,7 +558,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     userRecentResourceService.updateCohortEntry(
-        cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId, now);
+        cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId);
     return ResponseEntity.ok(responseReview);
   }
 
@@ -832,34 +830,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
             .filter(c -> c.getConceptId().equals(conceptId.toString()))
             .collect(Collectors.toList());
     return returnList.isEmpty() ? null : returnList.get(0).getName();
-  }
-
-  /**
-   * Helper method that generates a list of concept ids per demo
-   *
-   * @param pageRequest
-   */
-  private void convertGenderRaceEthnicityFilters(PageRequest pageRequest) {
-    List<Filter> filters =
-        pageRequest.getFilters().stream()
-            .map(
-                filter -> {
-                  if (GENDER_RACE_ETHNICITY_TYPES.contains(filter.getProperty().name())) {
-                    Map<Long, String> possibleConceptIds = new HashMap<>();
-                    List<String> values =
-                        possibleConceptIds.entrySet().stream()
-                            .filter(entry -> filter.getValues().contains(entry.getValue()))
-                            .map(entry -> entry.getKey().toString())
-                            .collect(Collectors.toList());
-                    return new Filter()
-                        .property(filter.getProperty())
-                        .operator(filter.getOperator())
-                        .values(values);
-                  }
-                  return filter;
-                })
-            .collect(Collectors.toList());
-    pageRequest.filters(filters);
   }
 
   /**
