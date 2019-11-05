@@ -267,11 +267,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
       }
     }
 
-    handleChange(e) {
+    handleSearchStringChange(e) {
       this.setState({currentSearchString: e});
     }
 
-    handleSubmit(e) {
+    searchOnEnterKeyPress(e) {
       // search on enter key
       if (e.key === Key.Enter) {
         const searchTermLength = this.state.currentSearchString.trim().length;
@@ -487,8 +487,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
               <TextInput style={styles.searchBar} data-test-id='concept-search-input'
                          placeholder='Search concepts in domain'
                          value={this.state.currentSearchString}
-                         onChange={(e) => this.handleChange(e)}
-                         onKeyPress={(e) => this.handleSubmit(e)}/>
+                         onChange={(e) => this.handleSearchStringChange(e)}
+                         onKeyPress={(e) => this.searchOnEnterKeyPress(e)}/>
               {currentSearchString !== '' && <Clickable onClick={() => this.clearSearch()}
                                                         data-test-id='clear-search'>
                   <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>
