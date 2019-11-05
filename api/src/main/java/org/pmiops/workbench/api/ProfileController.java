@@ -171,7 +171,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   private static final Logger log = Logger.getLogger(ProfileController.class.getName());
 
-  private static final long MAX_BILLING_PROJECT_CREATION_ATTEMPTS = 5;
+  private static final long MAX_BILLING_PROJECT_CREATION_ATTEMPTS = 6;
 
   private final ProfileService profileService;
   private final Provider<User> userProvider;
