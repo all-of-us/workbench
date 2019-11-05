@@ -41,7 +41,12 @@ export class SearchGroupSelectComponent implements OnInit {
       criteriaMenuOptions[cdrVersionId] = res.items.reduce((acc, opt) => {
         const {domain, types} = opt;
         if (PROGRAM_TYPES.includes(DomainType[domain])) {
-          const option = {name: domainToTitle(domain), domain, type: types[0].type, order: PROGRAM_TYPES.indexOf(DomainType[domain])};
+          const option = {
+            name: domainToTitle(domain),
+            domain,
+            type: types[0].type,
+            standard: types[0].standardFlags[0].standard,
+            order: PROGRAM_TYPES.indexOf(DomainType[domain])};
           if (domain === DomainType[DomainType.PERSON]) {
             option['children'] = types
               .filter(subopt => subopt.type !== CriteriaType[CriteriaType.DECEASED])
@@ -50,7 +55,12 @@ export class SearchGroupSelectComponent implements OnInit {
           acc.programTypes.push(option);
         }
         if (DOMAIN_TYPES.includes(DomainType[domain])) {
-          acc.domainTypes.push({name: domainToTitle(domain), domain, type: types[0].type, order: DOMAIN_TYPES.indexOf(DomainType[domain])});
+          acc.domainTypes.push({
+            name: domainToTitle(domain),
+            domain,
+            type: types[0].type,
+            standard: types[0].standardFlags[0].standard,
+            order: DOMAIN_TYPES.indexOf(DomainType[domain])});
         }
         return acc;
       }, {programTypes: [], domainTypes: []});
