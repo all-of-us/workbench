@@ -233,7 +233,7 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
 
   @Query(
       value =
-          "select domain_id as domain, type from cb_criteria where parent_id = 0 group by domain, type order by domain, type",
+          "select distinct domain_id as domain, type, is_standard as standard from cb_criteria order by domain, type, is_standard",
       nativeQuery = true)
   List<MenuOption> findMenuOptions();
 }

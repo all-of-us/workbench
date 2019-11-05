@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cdr.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -57,6 +58,7 @@ public class CBCriteriaDaoTest {
                 .type(CriteriaType.PPI.toString())
                 .subtype(CriteriaSubType.SURVEY.toString())
                 .group(false)
+                .standard(false)
                 .selectable(true));
     sourceCriteria =
         cbCriteriaDao.save(
@@ -307,25 +309,31 @@ public class CBCriteriaDaoTest {
     MenuOption option = options.get(0);
     assertEquals(DomainType.CONDITION.toString(), option.getDomain());
     assertEquals("ICD10CM", option.getType());
+    assertFalse(option.getStandard());
 
     option = options.get(1);
     assertEquals(DomainType.CONDITION.toString(), option.getDomain());
     assertEquals("ICD9CM", option.getType());
+    assertFalse(option.getStandard());
 
     option = options.get(2);
     assertEquals(DomainType.CONDITION.toString(), option.getDomain());
     assertEquals("SNOMED", option.getType());
+    assertTrue(option.getStandard());
 
     option = options.get(3);
     assertEquals(DomainType.MEASUREMENT.toString(), option.getDomain());
     assertEquals("LOINC", option.getType());
+    assertTrue(option.getStandard());
 
     option = options.get(4);
     assertEquals(DomainType.PERSON.toString(), option.getDomain());
     assertEquals("RACE", option.getType());
+    assertTrue(option.getStandard());
 
     option = options.get(5);
     assertEquals(DomainType.SURVEY.toString(), option.getDomain());
     assertEquals("PPI", option.getType());
+    assertFalse(option.getStandard());
   }
 }

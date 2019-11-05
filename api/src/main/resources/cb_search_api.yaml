@@ -475,11 +475,24 @@ definitions:
     type: object
     required:
       - type
+      - standardFlags
     properties:
       type:
-        description: The criteria domains that are searchable in Cohort Builder
+        description: The criteria types that are searchable in Cohort Builder
         type: string
+      standardFlags:
+        type: array
+        items:
+          $ref: "#/definitions/StandardFlag"
 
+  StandardFlag:
+    type: object
+    required:
+      - standard
+    properties:
+      standard:
+        description: flag that determines standard or source
+        type: boolean
 
   CriteriaAttributeListResponse:
     type: object
