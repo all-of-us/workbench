@@ -18,8 +18,8 @@ public class LiquibaseTest {
   List<String> whitelist = Arrays.asList("db.changelog-master.xml");
 
   @Test
-  public void allChangelogFilesAreInMaster() throws Exception {
-    List<String> indexedChangeLogs = getChangeLogIndexes();
+  public void allChangeLogFilesAreIndexed() throws Exception {
+    List<String> indexedChangeLogs = getIndexedChangeLogs();
     for (File f : new File("db/changelog").listFiles()) {
       if (!whitelist.contains(f.getName()) && !indexedChangeLogs.contains(f.getName())) {
         fail(f.getName() + " is in the db/changelog directory but not in db.changelog-master.xml");
@@ -27,7 +27,7 @@ public class LiquibaseTest {
     }
   }
 
-  private List<String> getChangeLogIndexes() throws Exception {
+  private List<String> getIndexedChangeLogs() throws Exception {
     File fXmlFile = new File("db/changelog/db.changelog-master.xml");
     DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -38,7 +38,7 @@ public class LiquibaseTest {
 
     List<String> changeLogFilenames = new ArrayList<>();
     for (int i = 0; i < changeLogs.getLength(); i++) {
-      changeLogFilenames.add(((Element) changeLogs.item(i)).getAttribute("file").substring(10));
+      changeLogFilenames.add(((Element) changeLogs.item(i)).getAttribute("file").split("changelog/")[1]);
     }
 
     return changeLogFilenames;
