@@ -28,17 +28,17 @@ public class LiquibaseTest {
   }
 
   private List<String> getIndexedChangeLogs() throws Exception {
-    File fXmlFile = new File("db/changelog/db.changelog-master.xml");
-    DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-    DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-    Document doc = dBuilder.parse(fXmlFile);
-    doc.getDocumentElement().normalize();
+    Document doc = DocumentBuilderFactory.newInstance()
+        .newDocumentBuilder()
+        .parse(new File("db/changelog/db.changelog-master.xml"));
 
     NodeList changeLogs = doc.getElementsByTagName("include");
 
     List<String> changeLogFilenames = new ArrayList<>();
     for (int i = 0; i < changeLogs.getLength(); i++) {
-      changeLogFilenames.add(((Element) changeLogs.item(i)).getAttribute("file").split("changelog/")[1]);
+      changeLogFilenames.add(((Element) changeLogs.item(i))
+          .getAttribute("file")
+          .split("changelog/")[1]);
     }
 
     return changeLogFilenames;
