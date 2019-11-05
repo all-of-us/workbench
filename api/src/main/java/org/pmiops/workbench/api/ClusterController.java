@@ -116,7 +116,7 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Override
   public ResponseEntity<ClusterListResponse> listClusters(
-      String billingProjectId, String firecloudWorkspaceName) {
+      String billingProjectId, String workspaceFirecloudName) {
     if (billingProjectId == null) {
       throw new BadRequestException("Must specify billing project");
     }
@@ -131,7 +131,7 @@ public class ClusterController implements ClusterApiDelegate {
     } catch (NotFoundException e) {
       fcCluster =
           this.leonardoNotebooksClient.createCluster(
-              billingProjectId, clusterName, firecloudWorkspaceName);
+              billingProjectId, clusterName, workspaceFirecloudName);
     }
 
     int retries = Optional.ofNullable(user.getClusterCreateRetries()).orElse(0);

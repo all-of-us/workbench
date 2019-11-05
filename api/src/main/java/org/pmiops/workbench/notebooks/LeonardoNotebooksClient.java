@@ -16,10 +16,10 @@ public interface LeonardoNotebooksClient {
    *
    * @param googleProject the google project that will be used for this notebooks cluster
    * @param clusterName the user assigned/auto-generated name for this notebooks cluster
-   * @param firecloudWorkspaceName the firecloudName of the workspace this cluster is associated
+   * @param workspaceFirecloudName the firecloudName of the workspace this cluster is associated
    *     with
    */
-  Cluster createCluster(String googleProject, String clusterName, String firecloudWorkspaceName)
+  Cluster createCluster(String googleProject, String clusterName, String workspaceFirecloudName)
       throws WorkbenchException;
 
   /** Deletes a notebook cluster */
