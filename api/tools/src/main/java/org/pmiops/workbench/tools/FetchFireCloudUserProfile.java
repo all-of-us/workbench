@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
@@ -42,7 +42,7 @@ public class FetchFireCloudUserProfile {
       }
 
       String userEmail = args[0];
-      User user = userDao.findUserByEmail(userEmail);
+      DbUser user = userDao.findUserByEmail(userEmail);
       if (user == null) {
         throw new RuntimeException(
             String.format("Error fetching AoU user with email %s", userEmail));

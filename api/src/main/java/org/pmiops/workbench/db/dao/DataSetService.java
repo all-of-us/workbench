@@ -5,11 +5,11 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.ConceptSet;
-import org.pmiops.workbench.db.model.DataSet;
-import org.pmiops.workbench.db.model.DataSetValue;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbDatasetValue;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
@@ -17,14 +17,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface DataSetService {
-  DataSet saveDataSet(
+  DbDataset saveDataSet(
       String name,
       Boolean includesAllParticipants,
       String description,
       long workspaceId,
       List<Long> cohortIdList,
       List<Long> conceptIdList,
-      List<DataSetValue> values,
+      List<DbDatasetValue> values,
       PrePackagedConceptSetEnum prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime);
@@ -38,12 +38,12 @@ public interface DataSetService {
       String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);
 
-  DataSet cloneDataSetToWorkspace(
-      DataSet fromDataSet, Workspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds);
+  DbDataset cloneDataSetToWorkspace(
+      DbDataset fromDataSet, DbWorkspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds);
 
-  List<DataSet> getDataSets(Workspace workspace);
+  List<DbDataset> getDataSets(DbWorkspace workspace);
 
-  List<ConceptSet> getConceptSetsForDataset(DataSet dataSet);
+  List<DbConceptSet> getConceptSetsForDataset(DbDataset dataSet);
 
-  List<Cohort> getCohortsForDataset(DataSet dataSet);
+  List<DbCohort> getCohortsForDataset(DbDataset dataSet);
 }

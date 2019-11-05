@@ -7,7 +7,7 @@ import javax.persistence.Embeddable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Embeddable
-public class ParticipantCohortStatusKey implements Serializable {
+public class DbParticipantCohortStatusKey implements Serializable {
 
   @Column(name = "cohort_review_id")
   private long cohortReviewId;
@@ -15,9 +15,9 @@ public class ParticipantCohortStatusKey implements Serializable {
   @Column(name = "participant_id")
   private long participantId;
 
-  public ParticipantCohortStatusKey() {}
+  public DbParticipantCohortStatusKey() {}
 
-  public ParticipantCohortStatusKey(long cohortReviewId, long participantId) {
+  public DbParticipantCohortStatusKey(long cohortReviewId, long participantId) {
     this.cohortReviewId = cohortReviewId;
     this.participantId = participantId;
   }
@@ -30,7 +30,7 @@ public class ParticipantCohortStatusKey implements Serializable {
     this.cohortReviewId = cohortReviewId;
   }
 
-  public ParticipantCohortStatusKey cohortReviewId(long cohortReviewId) {
+  public DbParticipantCohortStatusKey cohortReviewId(long cohortReviewId) {
     this.cohortReviewId = cohortReviewId;
     return this;
   }
@@ -43,7 +43,7 @@ public class ParticipantCohortStatusKey implements Serializable {
     this.participantId = participantId;
   }
 
-  public ParticipantCohortStatusKey participantId(long participantId) {
+  public DbParticipantCohortStatusKey participantId(long participantId) {
     this.participantId = participantId;
     return this;
   }
@@ -52,7 +52,7 @@ public class ParticipantCohortStatusKey implements Serializable {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    ParticipantCohortStatusKey that = (ParticipantCohortStatusKey) o;
+    DbParticipantCohortStatusKey that = (DbParticipantCohortStatusKey) o;
     return cohortReviewId == that.cohortReviewId && participantId == that.participantId;
   }
 

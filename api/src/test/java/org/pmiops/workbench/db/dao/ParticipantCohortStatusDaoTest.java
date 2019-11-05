@@ -15,8 +15,8 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.Concept;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Filter;
@@ -50,11 +50,13 @@ public class ParticipantCohortStatusDaoTest {
     cdrVersion.setCdrDbName("");
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    ParticipantCohortStatus status1 =
-        new ParticipantCohortStatus()
+    DbParticipantCohortStatus status1 =
+        new DbParticipantCohortStatus()
             .statusEnum(CohortStatus.INCLUDED)
             .participantKey(
-                new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1))
+                new DbParticipantCohortStatusKey()
+                    .cohortReviewId(COHORT_REVIEW_ID)
+                    .participantId(1))
             .genderConceptId(8507L)
             .birthDate(birthDate)
             .raceConceptId(8515L)
@@ -62,11 +64,13 @@ public class ParticipantCohortStatusDaoTest {
             .deceased(false);
     participantCohortStatusDao.save(status1);
 
-    ParticipantCohortStatus status2 =
-        new ParticipantCohortStatus()
+    DbParticipantCohortStatus status2 =
+        new DbParticipantCohortStatus()
             .statusEnum(CohortStatus.EXCLUDED)
             .participantKey(
-                new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2))
+                new DbParticipantCohortStatusKey()
+                    .cohortReviewId(COHORT_REVIEW_ID)
+                    .participantId(2))
             .genderConceptId(8507L)
             .birthDate(birthDate)
             .raceConceptId(8515L)
@@ -116,11 +120,11 @@ public class ParticipantCohortStatusDaoTest {
 
   @Test
   public void findByParticipantKeyCohortReviewIdAndParticipantKeyParticipantId() throws Exception {
-    ParticipantCohortStatus participant1 =
+    DbParticipantCohortStatus participant1 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
             CohortStatus.INCLUDED);
-    ParticipantCohortStatus actualParticipant =
+    DbParticipantCohortStatus actualParticipant =
         participantCohortStatusDao
             .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                 COHORT_REVIEW_ID, participant1.getParticipantKey().getParticipantId());
@@ -130,12 +134,12 @@ public class ParticipantCohortStatusDaoTest {
 
   @Test
   public void findAllSaveParticipantCohortStatuses() throws Exception {
-    ParticipantCohortStatusKey key1 =
-        new ParticipantCohortStatusKey().cohortReviewId(2).participantId(3);
-    ParticipantCohortStatusKey key2 =
-        new ParticipantCohortStatusKey().cohortReviewId(2).participantId(4);
-    ParticipantCohortStatus pcs1 =
-        new ParticipantCohortStatus()
+    DbParticipantCohortStatusKey key1 =
+        new DbParticipantCohortStatusKey().cohortReviewId(2).participantId(3);
+    DbParticipantCohortStatusKey key2 =
+        new DbParticipantCohortStatusKey().cohortReviewId(2).participantId(4);
+    DbParticipantCohortStatus pcs1 =
+        new DbParticipantCohortStatus()
             .participantKey(key1)
             .statusEnum(CohortStatus.INCLUDED)
             .birthDate(new Date(System.currentTimeMillis()))
@@ -143,8 +147,8 @@ public class ParticipantCohortStatusDaoTest {
             .genderConceptId(1L)
             .raceConceptId(1L)
             .deceased(false);
-    ParticipantCohortStatus pcs2 =
-        new ParticipantCohortStatus()
+    DbParticipantCohortStatus pcs2 =
+        new DbParticipantCohortStatus()
             .participantKey(key2)
             .statusEnum(CohortStatus.EXCLUDED)
             .birthDate(new Date(System.currentTimeMillis()))
@@ -170,7 +174,7 @@ public class ParticipantCohortStatusDaoTest {
             .pageSize(PAGE_SIZE)
             .sortOrder(SortOrder.ASC)
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
-    List<ParticipantCohortStatus> results =
+    List<DbParticipantCohortStatus> results =
         participantCohortStatusDao.findAll(COHORT_REVIEW_ID, pageRequest);
 
     assertEquals(2, results.size());
@@ -184,18 +188,18 @@ public class ParticipantCohortStatusDaoTest {
             .pageSize(PAGE_SIZE)
             .sortOrder(SortOrder.ASC)
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
-    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
+    List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(2, results.size());
 
-    ParticipantCohortStatus participant1 =
+    DbParticipantCohortStatus participant1 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
             CohortStatus.INCLUDED);
     participant1.setBirthDate(results.get(0).getBirthDate());
-    ParticipantCohortStatus participant2 =
+    DbParticipantCohortStatus participant2 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
             CohortStatus.EXCLUDED);
     participant2.setBirthDate(results.get(1).getBirthDate());
 
@@ -243,13 +247,13 @@ public class ParticipantCohortStatusDaoTest {
             .operator(Operator.EQUAL)
             .values(Arrays.asList("38003564")));
     pageRequest.filters(filters);
-    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
+    List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(1, results.size());
 
-    ParticipantCohortStatus expectedPCS =
+    DbParticipantCohortStatus expectedPCS =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
             CohortStatus.INCLUDED);
     expectedPCS.setBirthDate(results.get(0).getBirthDate());
 
@@ -297,18 +301,18 @@ public class ParticipantCohortStatusDaoTest {
             .operator(Operator.IN)
             .values(Arrays.asList("38003564", "38003563")));
     pageRequest.filters(filters);
-    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
+    List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(2, results.size());
 
-    ParticipantCohortStatus expectedPCS1 =
+    DbParticipantCohortStatus expectedPCS1 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
             CohortStatus.INCLUDED);
     expectedPCS1.setBirthDate(results.get(0).getBirthDate());
-    ParticipantCohortStatus expectedPCS2 =
+    DbParticipantCohortStatus expectedPCS2 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
             CohortStatus.EXCLUDED);
     expectedPCS2.setBirthDate(results.get(0).getBirthDate());
 
@@ -324,13 +328,13 @@ public class ParticipantCohortStatusDaoTest {
             .pageSize(1)
             .sortOrder(SortOrder.ASC)
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
-    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
+    List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(1, results.size());
 
-    ParticipantCohortStatus expectedPCS =
+    DbParticipantCohortStatus expectedPCS =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
             CohortStatus.INCLUDED);
     expectedPCS.setBirthDate(results.get(0).getBirthDate());
 
@@ -348,7 +352,7 @@ public class ParticipantCohortStatusDaoTest {
 
     expectedPCS =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
             CohortStatus.EXCLUDED);
     expectedPCS.setBirthDate(results.get(0).getBirthDate());
 
@@ -376,18 +380,18 @@ public class ParticipantCohortStatusDaoTest {
             .pageSize(2)
             .sortOrder(SortOrder.ASC)
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
-    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
+    List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(2, results.size());
 
-    ParticipantCohortStatus expectedPCS1 =
+    DbParticipantCohortStatus expectedPCS1 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
             CohortStatus.INCLUDED);
     expectedPCS1.setBirthDate(results.get(0).getBirthDate());
-    ParticipantCohortStatus expectedPCS2 =
+    DbParticipantCohortStatus expectedPCS2 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
             CohortStatus.EXCLUDED);
     expectedPCS2.setBirthDate(results.get(1).getBirthDate());
 
@@ -406,12 +410,12 @@ public class ParticipantCohortStatusDaoTest {
 
     expectedPCS1 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
             CohortStatus.EXCLUDED);
     expectedPCS1.setBirthDate(results.get(0).getBirthDate());
     expectedPCS2 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
             CohortStatus.INCLUDED);
     expectedPCS2.setBirthDate(results.get(1).getBirthDate());
 
@@ -427,18 +431,18 @@ public class ParticipantCohortStatusDaoTest {
             .pageSize(2)
             .sortOrder(SortOrder.ASC)
             .sortColumn(FilterColumns.STATUS.toString());
-    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
+    List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(2, results.size());
 
-    ParticipantCohortStatus expectedPCS1 =
+    DbParticipantCohortStatus expectedPCS1 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
             CohortStatus.EXCLUDED);
     expectedPCS1.setBirthDate(results.get(0).getBirthDate());
-    ParticipantCohortStatus expectedPCS2 =
+    DbParticipantCohortStatus expectedPCS2 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
             CohortStatus.INCLUDED);
     expectedPCS2.setBirthDate(results.get(1).getBirthDate());
 
@@ -457,12 +461,12 @@ public class ParticipantCohortStatusDaoTest {
 
     expectedPCS1 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
             CohortStatus.INCLUDED);
     expectedPCS1.setBirthDate(results.get(0).getBirthDate());
     expectedPCS2 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
             CohortStatus.EXCLUDED);
     expectedPCS2.setBirthDate(results.get(1).getBirthDate());
 
@@ -550,9 +554,9 @@ public class ParticipantCohortStatusDaoTest {
     }
   }
 
-  private ParticipantCohortStatus createExpectedPCS(
-      ParticipantCohortStatusKey key, CohortStatus status) {
-    return new ParticipantCohortStatus()
+  private DbParticipantCohortStatus createExpectedPCS(
+      DbParticipantCohortStatusKey key, CohortStatus status) {
+    return new DbParticipantCohortStatus()
         .participantKey(key)
         .statusEnum(status)
         .ethnicityConceptId(38003564L)

@@ -39,12 +39,12 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
@@ -107,7 +107,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
     @Bean
     @Scope("prototype")
-    User user() {
+    DbUser user() {
       return currentUser;
     }
 
@@ -123,7 +123,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private static final Long PARTICIPANT_ID2 = 102247L;
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private CdrVersion cdrVersion;
-  private Workspace workspace;
+  private DbWorkspace workspace;
 
   @Autowired private CohortReviewController controller;
 
@@ -145,11 +145,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private UserDao userDao;
 
-  @Mock private Provider<User> userProvider;
+  @Mock private Provider<DbUser> userProvider;
 
-  private Cohort cohort;
-  private CohortReview review;
-  private static User currentUser;
+  private DbCohort cohort;
+  private DbCohortReview review;
+  private static DbUser currentUser;
 
   @Override
   public List<String> getTableNames() {
@@ -164,7 +164,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() throws Exception {
-    User user = new User();
+    DbUser user = new DbUser();
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
     user.setDisabled(false);
@@ -186,7 +186,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     cdrVersionDao.save(cdrVersion);
 
-    workspace = new Workspace();
+    workspace = new DbWorkspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setWorkspaceNamespace(NAMESPACE);
     workspace.setFirecloudName(NAME);
@@ -195,13 +195,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     stubMockFirecloudGetWorkspaceAcl();
 
     Gson gson = new Gson();
-    cohort = new Cohort();
+    cohort = new DbCohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohort.setCriteria(gson.toJson(SearchRequests.males()));
     cohortDao.save(cohort);
 
     review =
-        new CohortReview()
+        new DbCohortReview()
             .cdrVersionId(cdrVersion.getCdrVersionId())
             .matchedParticipantCount(212)
             .creationTime(new Timestamp(new Date().getTime()))
@@ -209,20 +209,20 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .cohortId(cohort.getCohortId());
     cohortReviewDao.save(review);
 
-    ParticipantCohortStatusKey key =
-        new ParticipantCohortStatusKey()
+    DbParticipantCohortStatusKey key =
+        new DbParticipantCohortStatusKey()
             .participantId(PARTICIPANT_ID)
             .cohortReviewId(review.getCohortReviewId());
-    ParticipantCohortStatus participantCohortStatus =
-        new ParticipantCohortStatus().participantKey(key);
+    DbParticipantCohortStatus participantCohortStatus =
+        new DbParticipantCohortStatus().participantKey(key);
     participantCohortStatusDao.save(participantCohortStatus);
 
-    ParticipantCohortStatusKey key2 =
-        new ParticipantCohortStatusKey()
+    DbParticipantCohortStatusKey key2 =
+        new DbParticipantCohortStatusKey()
             .participantId(PARTICIPANT_ID2)
             .cohortReviewId(review.getCohortReviewId());
-    ParticipantCohortStatus participantCohortStatus2 =
-        new ParticipantCohortStatus().participantKey(key2);
+    DbParticipantCohortStatus participantCohortStatus2 =
+        new DbParticipantCohortStatus().participantKey(key2);
     participantCohortStatusDao.save(participantCohortStatus2);
   }
 
@@ -355,7 +355,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void createCohortReview() throws Exception {
-    Cohort cohortWithoutReview = new Cohort();
+    DbCohort cohortWithoutReview = new DbCohort();
     cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
     String criteria =
         "{\"includes\":[{\"id\":\"includes_kl4uky6kh\",\"items\":[{\"id\":\"items_58myrn9iz\",\"type\":\"CONDITION\",\"searchParameters\":[{"

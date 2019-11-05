@@ -11,7 +11,7 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.CdrVersionListResponse;
@@ -45,14 +45,14 @@ public class CdrVersionsControllerTest {
 
   private CdrVersion defaultCdrVersion;
   private CdrVersion protectedCdrVersion;
-  private User user;
+  private DbUser user;
 
   @TestConfiguration
   @Import({CdrVersionService.class, CdrVersionsController.class})
   @MockBean({FireCloudService.class})
   static class Configuration {
     @Bean
-    public User user() {
+    public DbUser user() {
       // Allows for wiring of the initial Provider<User>; actual mocking of the
       // user is achieved via setUserProvider().
       return null;
@@ -66,7 +66,7 @@ public class CdrVersionsControllerTest {
 
   @Before
   public void setUp() {
-    user = new User();
+    user = new DbUser();
     user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
     cdrVersionsController.setUserProvider(Providers.of(user));
     defaultCdrVersion =

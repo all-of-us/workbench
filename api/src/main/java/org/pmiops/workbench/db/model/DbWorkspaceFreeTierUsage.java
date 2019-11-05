@@ -14,16 +14,16 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "workspace_free_tier_usage")
-public class WorkspaceFreeTierUsage {
+public class DbWorkspaceFreeTierUsage {
   private long id;
-  private User user;
-  private Workspace workspace;
+  private DbUser user;
+  private DbWorkspace workspace;
   private double cost;
   private Timestamp lastUpdateTime;
 
-  public WorkspaceFreeTierUsage() {}
+  public DbWorkspaceFreeTierUsage() {}
 
-  public WorkspaceFreeTierUsage(Workspace workspace) {
+  public DbWorkspaceFreeTierUsage(DbWorkspace workspace) {
     this.user = workspace.getCreator();
     this.workspace = workspace;
   }
@@ -41,21 +41,21 @@ public class WorkspaceFreeTierUsage {
 
   @ManyToOne
   @JoinColumn(name = "user_id")
-  public User getUser() {
+  public DbUser getUser() {
     return user;
   }
 
-  public void setUser(User user) {
+  public void setUser(DbUser user) {
     this.user = user;
   }
 
   @OneToOne
   @JoinColumn(name = "workspace_id")
-  public Workspace getWorkspace() {
+  public DbWorkspace getWorkspace() {
     return workspace;
   }
 
-  public void setWorkspace(Workspace workspace) {
+  public void setWorkspace(DbWorkspace workspace) {
     this.workspace = workspace;
   }
 

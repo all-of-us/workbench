@@ -27,12 +27,12 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.db.model.Cohort;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
-import org.pmiops.workbench.db.model.ConceptSet;
-import org.pmiops.workbench.db.model.DataSet;
-import org.pmiops.workbench.db.model.DataSetValue;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbDatasetValue;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -160,18 +160,18 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
-  public DataSet saveDataSet(
+  public DbDataset saveDataSet(
       String name,
       Boolean includesAllParticipants,
       String description,
       long workspaceId,
       List<Long> cohortIdList,
       List<Long> conceptIdList,
-      List<DataSetValue> values,
+      List<DbDatasetValue> values,
       PrePackagedConceptSetEnum prePackagedConceptSetEnum,
       long creatorId,
       Timestamp creationTime) {
-    final DataSet dataSetModel = new DataSet();
+    final DbDataset dataSetModel = new DbDataset();
     dataSetModel.setName(name);
     dataSetModel.setVersion(DATA_SET_VERSION);
     dataSetModel.setIncludesAllParticipants(includesAllParticipants);
@@ -211,12 +211,12 @@ public class DataSetServiceImpl implements DataSetService {
       DataSetRequest dataSetRequest) {
     final boolean includesAllParticipants =
         getBuiltinBooleanFromNullable(dataSetRequest.getIncludesAllParticipants());
-    final ImmutableList<Cohort> cohortsSelected =
+    final ImmutableList<DbCohort> cohortsSelected =
         ImmutableList.copyOf(this.cohortDao.findAllByCohortIdIn(dataSetRequest.getCohortIds()));
     final ImmutableList<DomainValuePair> domainValuePairs =
         ImmutableList.copyOf(dataSetRequest.getDomainValuePairs());
 
-    final ImmutableList<org.pmiops.workbench.db.model.ConceptSet> expandedSelectedConceptSets =
+    final ImmutableList<DbConceptSet> expandedSelectedConceptSets =
         getExpandedConceptSetSelections(
             dataSetRequest.getPrePackagedConceptSet(),
             dataSetRequest.getConceptSetIds(),
@@ -258,13 +258,13 @@ public class DataSetServiceImpl implements DataSetService {
 
   // note: ImmutableList is OK return type on private methods, but should be avoided in public
   // signatures.
-  private ImmutableList<ConceptSet> getExpandedConceptSetSelections(
+  private ImmutableList<DbConceptSet> getExpandedConceptSetSelections(
       PrePackagedConceptSetEnum prePackagedConceptSet,
       List<Long> conceptSetIds,
-      List<Cohort> selectedCohorts,
+      List<DbCohort> selectedCohorts,
       boolean includesAllParticipants,
       List<DomainValuePair> domainValuePairs) {
-    final ImmutableList<org.pmiops.workbench.db.model.ConceptSet> initialSelectedConceptSets =
+    final ImmutableList<DbConceptSet> initialSelectedConceptSets =
         ImmutableList.copyOf(this.conceptSetDao.findAllByConceptSetIdIn(conceptSetIds));
     final boolean noCohortsIncluded = selectedCohorts.isEmpty() && !includesAllParticipants;
     if (noCohortsIncluded
@@ -272,8 +272,7 @@ public class DataSetServiceImpl implements DataSetService {
       throw new BadRequestException("Data Sets must include at least one cohort and concept.");
     }
 
-    final ImmutableList.Builder<org.pmiops.workbench.db.model.ConceptSet>
-        selectedConceptSetsBuilder = ImmutableList.builder();
+    final ImmutableList.Builder<DbConceptSet> selectedConceptSetsBuilder = ImmutableList.builder();
     selectedConceptSetsBuilder.addAll(initialSelectedConceptSets);
 
     // If pre packaged all survey concept set is selected create a temp concept set with concept ids
@@ -287,14 +286,14 @@ public class DataSetServiceImpl implements DataSetService {
   private static boolean hasNoConcepts(
       PrePackagedConceptSetEnum prePackagedConceptSet,
       List<DomainValuePair> domainValuePairs,
-      ImmutableList<ConceptSet> initialSelectedConceptSets) {
+      ImmutableList<DbConceptSet> initialSelectedConceptSets) {
     return initialSelectedConceptSets.isEmpty()
         && domainValuePairs.isEmpty()
         && prePackagedConceptSet.equals(PrePackagedConceptSetEnum.NONE);
   }
 
   @VisibleForTesting
-  public QueryAndParameters getCohortQueryStringAndCollectNamedParameters(Cohort cohortDbModel) {
+  public QueryAndParameters getCohortQueryStringAndCollectNamedParameters(DbCohort cohortDbModel) {
     String cohortDefinition = cohortDbModel.getCriteria();
     if (cohortDefinition == null) {
       throw new NotFoundException(
@@ -325,7 +324,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   // Build a snake_case parameter key from this named parameter key and cohort ID.
-  private String buildReplacementKey(Cohort cohort, String npKey) {
+  private String buildReplacementKey(DbCohort cohort, String npKey) {
     return String.format("%s_%d", npKey, cohort.getCohortId());
   }
 
@@ -334,7 +333,7 @@ public class DataSetServiceImpl implements DataSetService {
       ImmutableList<DomainValuePair> domainValuePairs,
       ImmutableMap<String, QueryParameterValue> cohortParameters,
       boolean includesAllParticipants,
-      ImmutableList<ConceptSet> conceptSetsSelected,
+      ImmutableList<DbConceptSet> conceptSetsSelected,
       String cohortQueries) {
     final CdrBigQuerySchemaConfig bigQuerySchemaConfig = cdrBigQuerySchemaConfigService.getConfig();
 
@@ -358,7 +357,7 @@ public class DataSetServiceImpl implements DataSetService {
       List<DomainValuePair> domainValuePairs,
       Map<String, QueryParameterValue> cohortParameters,
       boolean includesAllParticipants,
-      List<ConceptSet> conceptSetsSelected,
+      List<DbConceptSet> conceptSetsSelected,
       String cohortQueries,
       CdrBigQuerySchemaConfig bigQuerySchemaConfig) {
     validateConceptSetSelection(domain, conceptSetsSelected);
@@ -435,7 +434,7 @@ public class DataSetServiceImpl implements DataSetService {
     return buildQueryJobConfiguration(cohortParameters, completeQuery);
   }
 
-  private void validateConceptSetSelection(Domain domain, List<ConceptSet> conceptSetsSelected) {
+  private void validateConceptSetSelection(Domain domain, List<DbConceptSet> conceptSetsSelected) {
     if (supportsConceptSets(domain)
         && !conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(conceptSetsSelected)) {
       throw new BadRequestException("Concept Sets must contain at least one concept");
@@ -446,7 +445,7 @@ public class DataSetServiceImpl implements DataSetService {
   // Even if Concept IDs have been selected, these don't work with all domains.
   @VisibleForTesting
   public Optional<String> buildConceptIdListClause(
-      Domain domain, List<ConceptSet> conceptSetsSelected) {
+      Domain domain, List<DbConceptSet> conceptSetsSelected) {
     final Optional<String> conceptSetSqlInClauseMaybe;
     if (supportsConceptSets(domain)) {
       conceptSetSqlInClauseMaybe = buildConceptIdSqlInClause(domain, conceptSetsSelected);
@@ -462,7 +461,8 @@ public class DataSetServiceImpl implements DataSetService {
 
   // Gather all the concept IDs from the ConceptSets provided, taking account of
   // domain-specific rules.
-  private Optional<String> buildConceptIdSqlInClause(Domain domain, List<ConceptSet> conceptSets) {
+  private Optional<String> buildConceptIdSqlInClause(
+      Domain domain, List<DbConceptSet> conceptSets) {
     final String conceptSetIDs =
         conceptSets.stream()
             .filter(cs -> domain == cs.getDomainEnum())
@@ -486,12 +486,12 @@ public class DataSetServiceImpl implements DataSetService {
 
   @VisibleForTesting
   public boolean conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
-      List<ConceptSet> conceptSetsSelected) {
+      List<DbConceptSet> conceptSetsSelected) {
     if (conceptSetsSelected.isEmpty()) {
       return false;
     }
     return conceptSetsSelected.stream()
-        .collect(Collectors.groupingBy(ConceptSet::getDomain, Collectors.toList()))
+        .collect(Collectors.groupingBy(DbConceptSet::getDomain, Collectors.toList()))
         .values()
         .stream()
         .map(csl -> csl.stream().mapToLong(cs -> cs.getConceptIds().size()).sum())
@@ -542,9 +542,12 @@ public class DataSetServiceImpl implements DataSetService {
 
   @Override
   @Transactional
-  public DataSet cloneDataSetToWorkspace(
-      DataSet fromDataSet, Workspace toWorkspace, Set<Long> cohortIds, Set<Long> conceptSetIds) {
-    DataSet toDataSet = new DataSet(fromDataSet);
+  public DbDataset cloneDataSetToWorkspace(
+      DbDataset fromDataSet,
+      DbWorkspace toWorkspace,
+      Set<Long> cohortIds,
+      Set<Long> conceptSetIds) {
+    DbDataset toDataSet = new DbDataset(fromDataSet);
     toDataSet.setWorkspaceId(toWorkspace.getWorkspaceId());
     toDataSet.setCreatorId(toWorkspace.getCreator().getUserId());
     toDataSet.setLastModifiedTime(toWorkspace.getLastModifiedTime());
@@ -556,7 +559,7 @@ public class DataSetServiceImpl implements DataSetService {
   }
 
   @Override
-  public List<DataSet> getDataSets(Workspace workspace) {
+  public List<DbDataset> getDataSets(DbWorkspace workspace) {
     // Allows for fetching data sets for a workspace once its collection is no longer
     // bound to a session.
     return dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
@@ -564,14 +567,14 @@ public class DataSetServiceImpl implements DataSetService {
 
   @Transactional
   @Override
-  public List<ConceptSet> getConceptSetsForDataset(DataSet dataSet) {
+  public List<DbConceptSet> getConceptSetsForDataset(DbDataset dataSet) {
     return conceptSetDao.findAllByConceptSetIdIn(
         dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
   }
 
   @Transactional
   @Override
-  public List<Cohort> getCohortsForDataset(DataSet dataSet) {
+  public List<DbCohort> getCohortsForDataset(DbDataset dataSet) {
     return cohortDao.findAllByCohortIdIn(dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
   }
 
@@ -813,10 +816,10 @@ public class DataSetServiceImpl implements DataSetService {
     return Optional.ofNullable(boo).orElse(false);
   }
 
-  private ConceptSet buildPrePackagedSurveyConceptSet() {
+  private DbConceptSet buildPrePackagedSurveyConceptSet() {
     final ImmutableList<Long> conceptIds =
         ImmutableList.copyOf(conceptBigQueryService.getSurveyQuestionConceptIds());
-    final ConceptSet surveyConceptSet = new ConceptSet();
+    final DbConceptSet surveyConceptSet = new DbConceptSet();
     surveyConceptSet.setName("All Surveys");
     surveyConceptSet.setDomain(CommonStorageEnums.domainToStorage(Domain.SURVEY));
     surveyConceptSet.setConceptIds(ImmutableSet.copyOf(conceptIds));

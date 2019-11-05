@@ -21,8 +21,8 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.User.ClusterConfig;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUser.ClusterConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -83,7 +83,7 @@ public class ClusterController implements ClusterApiDelegate {
           };
 
   private final LeonardoNotebooksClient leonardoNotebooksClient;
-  private final Provider<User> userProvider;
+  private final Provider<DbUser> userProvider;
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -95,7 +95,7 @@ public class ClusterController implements ClusterApiDelegate {
   @Autowired
   ClusterController(
       LeonardoNotebooksClient leonardoNotebooksClient,
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
@@ -121,7 +121,7 @@ public class ClusterController implements ClusterApiDelegate {
       throw new BadRequestException("Must specify billing project");
     }
 
-    User user = this.userProvider.get();
+    DbUser user = this.userProvider.get();
 
     String clusterName = clusterNameForUser(user);
 
@@ -249,7 +249,7 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   @AuthorityRequired({Authority.DEVELOPER})
   public ResponseEntity<EmptyResponse> updateClusterConfig(UpdateClusterConfigRequest body) {
-    User user = userDao.findUserByEmail(body.getUserEmail());
+    DbUser user = userDao.findUserByEmail(body.getUserEmail());
     if (user == null) {
       throw new NotFoundException("User '" + body.getUserEmail() + "' not found");
     }
@@ -271,7 +271,7 @@ public class ClusterController implements ClusterApiDelegate {
     return ResponseEntity.ok(new EmptyResponse());
   }
 
-  private static String clusterNameForUser(User user) {
+  private static String clusterNameForUser(DbUser user) {
     return "all-of-us-" + user.getUserId();
   }
 

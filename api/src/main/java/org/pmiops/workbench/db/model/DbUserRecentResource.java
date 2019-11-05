@@ -12,14 +12,14 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "user_recent_resource")
-public class UserRecentResource {
+public class DbUserRecentResource {
   private Timestamp lastAccessDate;
   private int id;
   private String notebookName;
   private Long userId;
   private Long workspaceId;
-  private Cohort cohort;
-  private ConceptSet conceptSet;
+  private DbCohort cohort;
+  private DbConceptSet conceptSet;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -74,27 +74,27 @@ public class UserRecentResource {
 
   @ManyToOne
   @JoinColumn(name = "cohort_id")
-  public Cohort getCohort() {
+  public DbCohort getCohort() {
     return cohort;
   }
 
-  public void setCohort(Cohort cohort) {
+  public void setCohort(DbCohort cohort) {
     this.cohort = cohort;
   }
 
   @ManyToOne
   @JoinColumn(name = "concept_set_id")
-  public ConceptSet getConceptSet() {
+  public DbConceptSet getConceptSet() {
     return conceptSet;
   }
 
-  public void setConceptSet(ConceptSet conceptSet) {
+  public void setConceptSet(DbConceptSet conceptSet) {
     this.conceptSet = conceptSet;
   }
 
-  public UserRecentResource() {}
+  public DbUserRecentResource() {}
 
-  public UserRecentResource(
+  public DbUserRecentResource(
       long workspaceId, long userId, String notebookName, Timestamp lastAccessDate) {
     this.workspaceId = workspaceId;
     this.userId = userId;
@@ -104,7 +104,7 @@ public class UserRecentResource {
     this.conceptSet = null;
   }
 
-  public UserRecentResource(long workspaceId, long userId, Timestamp lastAccessDate) {
+  public DbUserRecentResource(long workspaceId, long userId, Timestamp lastAccessDate) {
     this.workspaceId = workspaceId;
     this.userId = userId;
     this.notebookName = null;

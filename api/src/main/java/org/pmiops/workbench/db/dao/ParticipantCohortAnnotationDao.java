@@ -1,26 +1,26 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.List;
-import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
+import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ParticipantCohortAnnotationDao
-    extends JpaRepository<ParticipantCohortAnnotation, Long> {
+    extends JpaRepository<DbParticipantCohortAnnotation, Long> {
 
-  ParticipantCohortAnnotation findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(
+  DbParticipantCohortAnnotation findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(
       @Param("cohortReviewId") long cohortReviewId,
       @Param("cohortAnnotationDefinitionId") long cohortAnnotationDefinitionId,
       @Param("participantId") long participantId);
 
-  ParticipantCohortAnnotation findByAnnotationIdAndCohortReviewIdAndParticipantId(
+  DbParticipantCohortAnnotation findByAnnotationIdAndCohortReviewIdAndParticipantId(
       @Param("annotationId") long annotationId,
       @Param("cohortReviewId") long cohortReviewId,
       @Param("participantId") long participantId);
 
-  List<ParticipantCohortAnnotation> findByCohortReviewIdAndParticipantId(
+  List<DbParticipantCohortAnnotation> findByCohortReviewIdAndParticipantId(
       @Param("cohortReviewId") long cohortReviewId, @Param("participantId") long participantId);
 
   // We use native SQL here as there may be a large number of rows within a

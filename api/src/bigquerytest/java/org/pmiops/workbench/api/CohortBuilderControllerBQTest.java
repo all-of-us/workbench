@@ -28,7 +28,7 @@ import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -80,8 +80,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @MockBean({FireCloudService.class})
   static class Configuration {
     @Bean
-    public User user() {
-      User user = new User();
+    public DbUser user() {
+      DbUser user = new DbUser();
       user.setEmail("bob@gmail.com");
       return user;
     }

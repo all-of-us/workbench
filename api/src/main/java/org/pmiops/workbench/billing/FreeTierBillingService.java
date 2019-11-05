@@ -13,9 +13,9 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.BillingStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,9 +44,9 @@ public class FreeTierBillingService {
   }
 
   public void checkFreeTierBillingUsage() {
-    final Map<Workspace, Double> workspaceCosts = getFreeTierWorkspaceCosts();
+    final Map<DbWorkspace, Double> workspaceCosts = getFreeTierWorkspaceCosts();
 
-    final Set<User> expiredCreditsUsers =
+    final Set<DbUser> expiredCreditsUsers =
         workspaceCosts.entrySet().stream()
             .collect(
                 Collectors.groupingBy(
@@ -57,7 +57,7 @@ public class FreeTierBillingService {
             .map(Entry::getKey)
             .collect(Collectors.toSet());
 
-    for (User expiredUser : expiredCreditsUsers) {
+    for (DbUser expiredUser : expiredCreditsUsers) {
       notificationService.alertUser(expiredUser, "You have exceeded your free tier credits.");
     }
 
@@ -73,12 +73,12 @@ public class FreeTierBillingService {
         });
   }
 
-  private Map<Workspace, Double> getFreeTierWorkspaceCosts() {
+  private Map<DbWorkspace, Double> getFreeTierWorkspaceCosts() {
 
-    final Map<String, Workspace> workspacesIndexedByProject =
+    final Map<String, DbWorkspace> workspacesIndexedByProject =
         // don't record cost for OLD or MIGRATED workspaces - only NEW
         workspaceDao.findAllByBillingMigrationStatus(BillingMigrationStatus.NEW).stream()
-            .collect(Collectors.toMap(Workspace::getWorkspaceNamespace, Function.identity()));
+            .collect(Collectors.toMap(DbWorkspace::getWorkspaceNamespace, Function.identity()));
 
     final QueryJobConfiguration queryConfig =
         QueryJobConfiguration.newBuilder(
@@ -88,7 +88,7 @@ public class FreeTierBillingService {
                     + "GROUP BY project.id ORDER BY cost desc;")
             .build();
 
-    final Map<Workspace, Double> workspaceCosts = new HashMap<>();
+    final Map<DbWorkspace, Double> workspaceCosts = new HashMap<>();
     for (FieldValueList tableRow : bigQueryService.executeQuery(queryConfig).getValues()) {
       final String project = tableRow.get("id").getStringValue();
       if (workspacesIndexedByProject.containsKey(project)) {
@@ -103,11 +103,11 @@ public class FreeTierBillingService {
   // Retrieve the user's total free tier usage from the DB by summing across Workspaces.
   // This is not live BigQuery data: it is only as recent as the last
   // checkFreeTierBillingUsage Cron job, recorded as last_update_time in the DB.
-  public Double getUserCachedFreeTierUsage(User user) {
+  public Double getUserCachedFreeTierUsage(DbUser user) {
     return workspaceFreeTierUsageDao.totalCostByUser(user);
   }
 
-  public Double getUserFreeTierLimit(User user) {
+  public Double getUserFreeTierLimit(DbUser user) {
     if (user.getFreeTierCreditsLimitOverride() != null) {
       return user.getFreeTierCreditsLimitOverride();
     }

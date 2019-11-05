@@ -3,11 +3,11 @@ package org.pmiops.workbench.db.dao;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import java.util.List;
-import org.pmiops.workbench.db.model.ConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.data.repository.CrudRepository;
 
-public interface ConceptSetDao extends CrudRepository<ConceptSet, Long> {
+public interface ConceptSetDao extends CrudRepository<DbConceptSet, Long> {
 
   // TODO: consider putting this in CDM config, fetching it from there
   static final ImmutableMap<Domain, String> DOMAIN_TO_TABLE_NAME =
@@ -24,12 +24,12 @@ public interface ConceptSetDao extends CrudRepository<ConceptSet, Long> {
           .put(Domain.SURVEY, "observation")
           .build();
 
-  List<ConceptSet> findByWorkspaceId(long workspaceId);
+  List<DbConceptSet> findByWorkspaceId(long workspaceId);
 
-  List<ConceptSet> findByWorkspaceIdAndSurvey(long workspaceId, short surveyId);
+  List<DbConceptSet> findByWorkspaceIdAndSurvey(long workspaceId, short surveyId);
 
   /** Returns the concept set in the workspace with the specified name, or null if there is none. */
-  ConceptSet findConceptSetByNameAndWorkspaceId(String name, long workspaceId);
+  DbConceptSet findConceptSetByNameAndWorkspaceId(String name, long workspaceId);
 
-  List<ConceptSet> findAllByConceptSetIdIn(Collection<Long> conceptSetIds);
+  List<DbConceptSet> findAllByConceptSetIdIn(Collection<Long> conceptSetIds);
 }

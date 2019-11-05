@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.User.ClusterConfig;
-import org.pmiops.workbench.db.model.Workspace;
-import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUser.ClusterConfig;
+import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.api.StatusApi;
@@ -42,7 +42,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private final Provider<ClusterApi> clusterApiProvider;
   private final Provider<NotebooksApi> notebooksApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final Provider<User> userProvider;
+  private final Provider<DbUser> userProvider;
   private final NotebooksRetryHandler retryHandler;
   private final WorkspaceService workspaceService;
 
@@ -51,7 +51,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       @Qualifier(NotebooksConfig.USER_CLUSTER_API) Provider<ClusterApi> clusterApiProvider,
       Provider<NotebooksApi> notebooksApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       NotebooksRetryHandler retryHandler,
       WorkspaceService workspaceService) {
     this.clusterApiProvider = clusterApiProvider;
@@ -110,8 +110,9 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   public Cluster createCluster(
       String googleProject, String clusterName, String workspaceFirecloudName) {
     ClusterApi clusterApi = clusterApiProvider.get();
-    User user = userProvider.get();
-    Workspace workspace = workspaceService.getRequired(googleProject, workspaceFirecloudName);
+
+    DbUser user = userProvider.get();
+    DbWorkspace workspace = workspaceService.getRequired(googleProject, workspaceFirecloudName);
     Map<String, String> customClusterEnvironmentVariables = new HashMap<>();
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
@@ -121,6 +122,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
               + "."
               + workspace.getCdrVersion().getBigqueryDataset());
     }
+
     return retryHandler.run(
         (context) ->
             clusterApi.createClusterV2(

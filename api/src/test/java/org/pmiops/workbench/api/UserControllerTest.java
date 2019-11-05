@@ -22,7 +22,7 @@ import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
@@ -54,7 +54,7 @@ public class UserControllerTest {
 
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private static WorkbenchConfig config = new WorkbenchConfig();
-  private static User user = new User();
+  private static DbUser user = new DbUser();
   private static long incrementedUserId = 1;
 
   @TestConfiguration
@@ -80,7 +80,7 @@ public class UserControllerTest {
 
     @Bean
     @Scope("prototype")
-    User user() {
+    DbUser user() {
       return user;
     }
 
@@ -111,7 +111,7 @@ public class UserControllerTest {
   @Test
   public void testUserSearch() {
     when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
-    User john = userDao.findUserByEmail("john@lis.org");
+    DbUser john = userDao.findUserByEmail("john@lis.org");
 
     UserResponse response = userController.user("John", null, null, null).getBody();
     assertThat(response.getUsers()).hasSize(1);
@@ -121,7 +121,7 @@ public class UserControllerTest {
   @Test
   public void testUserPartialStringSearch() {
     when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
-    List<User> allUsers = Lists.newArrayList(userDao.findAll());
+    List<DbUser> allUsers = Lists.newArrayList(userDao.findAll());
 
     UserResponse response = userController.user("obin", null, null, null).getBody();
 
@@ -253,7 +253,7 @@ public class UserControllerTest {
 
   @SuppressWarnings("SameParameterValue")
   private void saveUser(String email, String givenName, String familyName, boolean registered) {
-    User user = new User();
+    DbUser user = new DbUser();
     user.setEmail(email);
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
@@ -272,7 +272,7 @@ public class UserControllerTest {
 
   private void saveUserNotInFirecloud(
       String email, String givenName, String familyName, boolean registered) {
-    User user = new User();
+    DbUser user = new DbUser();
     user.setEmail(email);
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);

@@ -11,7 +11,8 @@ import org.pmiops.workbench.audit.AgentType
 import org.pmiops.workbench.audit.TargetType
 import org.pmiops.workbench.audit.targetproperties.AclTargetProperty
 import org.pmiops.workbench.audit.targetproperties.WorkspaceTargetProperty
-import org.pmiops.workbench.db.model.User
+import org.pmiops.workbench.db.model.DbUser
+import org.pmiops.workbench.db.model.DbWorkspace
 import org.pmiops.workbench.model.Workspace
 import org.pmiops.workbench.workspaces.WorkspaceConversionUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Service
 @Service
 class WorkspaceAuditAdapterServiceImpl @Autowired
 constructor(
-    private val userProvider: Provider<User>,
+    private val userProvider: Provider<DbUser>,
     private val actionAuditService: ActionAuditService,
     private val clock: Clock,
     @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
@@ -61,7 +62,7 @@ constructor(
     // Because the deleteWorkspace() method operates at the DB level, this method
     // has a different signature than for the create action. This makes keeping the properties
     // consistent across actions somewhat challenging.
-    override fun fireDeleteAction(dbWorkspace: org.pmiops.workbench.db.model.Workspace) {
+    override fun fireDeleteAction(dbWorkspace: DbWorkspace) {
         try {
             val actionId = actionIdProvider.get()
             val userId = userProvider.get().userId
@@ -84,8 +85,8 @@ constructor(
     }
 
     override fun fireDuplicateAction(
-        sourceWorkspaceDbModel: org.pmiops.workbench.db.model.Workspace,
-        destinationWorkspaceDbModel: org.pmiops.workbench.db.model.Workspace
+        sourceWorkspaceDbModel: DbWorkspace,
+        destinationWorkspaceDbModel: DbWorkspace
     ) {
         try {
             // We represent the duplication as a single action with events with different

@@ -7,10 +7,10 @@ import java.util.Calendar;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -33,13 +33,13 @@ public class CohortReviewDaoTest {
   @Autowired WorkspaceDao workspaceDao;
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewDao cohortReviewDao;
-  private CohortReview cohortReview;
+  private DbCohortReview cohortReview;
   private long cohortId;
 
   @Before
   public void setUp() throws Exception {
-    Cohort cohort = new Cohort();
-    Workspace workspace = new Workspace();
+    DbCohort cohort = new DbCohort();
+    DbWorkspace workspace = new DbWorkspace();
     workspace.setWorkspaceNamespace("namespace");
     workspace.setFirecloudName("firecloudName");
     workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -77,12 +77,12 @@ public class CohortReviewDaoTest {
             .findByFirecloudNameAndActiveStatus(
                 "namespace",
                 "firecloudName",
-                StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE))
+                DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE))
             .get(0));
   }
 
-  private CohortReview createCohortReview() {
-    return new CohortReview()
+  private DbCohortReview createCohortReview() {
+    return new DbCohortReview()
         .cohortId(cohortId)
         .cdrVersionId(CDR_VERSION_ID)
         .creationTime(new Timestamp(Calendar.getInstance().getTimeInMillis()))

@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.api.Etags;
-import org.pmiops.workbench.db.model.UserRecentWorkspace;
-import org.pmiops.workbench.db.model.Workspace.FirecloudWorkspaceId;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -26,7 +28,7 @@ public class WorkspaceConversionUtils {
     }
   }
 
-  public static Workspace toApiWorkspace(org.pmiops.workbench.db.model.Workspace workspace) {
+  public static Workspace toApiWorkspace(DbWorkspace workspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
 
@@ -52,8 +54,7 @@ public class WorkspaceConversionUtils {
   }
 
   public static Workspace toApiWorkspace(
-      org.pmiops.workbench.db.model.Workspace workspace,
-      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
+      DbWorkspace workspace, org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     if (workspace.getPopulation()) {
       researchPurpose.setPopulationDetails(new ArrayList<>(workspace.getSpecificPopulationsEnum()));
@@ -81,8 +82,8 @@ public class WorkspaceConversionUtils {
     return result;
   }
 
-  public static org.pmiops.workbench.db.model.Workspace toDbWorkspace(Workspace workspace) {
-    org.pmiops.workbench.db.model.Workspace result = new org.pmiops.workbench.db.model.Workspace();
+  public static DbWorkspace toDbWorkspace(Workspace workspace) {
+    DbWorkspace result = new DbWorkspace();
 
     if (workspace.getDataAccessLevel() != null) {
       result.setDataAccessLevelEnum(workspace.getDataAccessLevel());
@@ -102,8 +103,7 @@ public class WorkspaceConversionUtils {
     return result;
   }
 
-  public static UserRole toApiUserRole(
-      org.pmiops.workbench.db.model.User user, WorkspaceAccessEntry aclEntry) {
+  public static UserRole toApiUserRole(DbUser user, WorkspaceAccessEntry aclEntry) {
     UserRole result = new UserRole();
     result.setEmail(user.getEmail());
     result.setGivenName(user.getGivenName());
@@ -116,8 +116,7 @@ public class WorkspaceConversionUtils {
    * This probably doesn't belong in a mapper service but it makes the refactoring easier atm. Sets
    * user-editable research purpose detail fields.
    */
-  public static void setResearchPurposeDetails(
-      org.pmiops.workbench.db.model.Workspace dbWorkspace, ResearchPurpose purpose) {
+  public static void setResearchPurposeDetails(DbWorkspace dbWorkspace, ResearchPurpose purpose) {
     dbWorkspace.setDiseaseFocusedResearch(purpose.getDiseaseFocusedResearch());
     dbWorkspace.setDiseaseOfFocus(purpose.getDiseaseOfFocus());
     dbWorkspace.setMethodsDevelopment(purpose.getMethodsDevelopment());
@@ -141,8 +140,7 @@ public class WorkspaceConversionUtils {
     dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
   }
 
-  private static ResearchPurpose createResearchPurpose(
-      org.pmiops.workbench.db.model.Workspace workspace) {
+  private static ResearchPurpose createResearchPurpose(DbWorkspace workspace) {
     ResearchPurpose researchPurpose =
         new ResearchPurpose()
             .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())
@@ -172,8 +170,8 @@ public class WorkspaceConversionUtils {
   }
 
   public static RecentWorkspace buildRecentWorkspace(
-      UserRecentWorkspace userRecentWorkspace,
-      org.pmiops.workbench.db.model.Workspace dbWorkspace,
+      DbUserRecentWorkspace userRecentWorkspace,
+      DbWorkspace dbWorkspace,
       WorkspaceAccessLevel accessLevel) {
     return new RecentWorkspace()
         .workspace(toApiWorkspace(dbWorkspace))
@@ -182,8 +180,8 @@ public class WorkspaceConversionUtils {
   }
 
   public static List<RecentWorkspace> buildRecentWorkspaceList(
-      List<UserRecentWorkspace> userRecentWorkspaces,
-      Map<Long, org.pmiops.workbench.db.model.Workspace> dbWorkspacesByWorkspaceId,
+      List<DbUserRecentWorkspace> userRecentWorkspaces,
+      Map<Long, DbWorkspace> dbWorkspacesByWorkspaceId,
       Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsByWorkspaceId) {
     return userRecentWorkspaces.stream()
         .map(

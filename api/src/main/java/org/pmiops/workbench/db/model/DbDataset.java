@@ -18,7 +18,7 @@ import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 
 @Entity
 @Table(name = "data_set")
-public class DataSet {
+public class DbDataset {
   private static final int INITIAL_VERSION = 1;
 
   private long dataSetId;
@@ -33,14 +33,14 @@ public class DataSet {
   private Boolean includesAllParticipants;
   private List<Long> conceptSetIds;
   private List<Long> cohortIds;
-  private List<DataSetValue> values;
+  private List<DbDatasetValue> values;
   private short prePackagedConceptSet;
 
-  public DataSet() {
-    setVersion(DataSet.INITIAL_VERSION);
+  public DbDataset() {
+    setVersion(DbDataset.INITIAL_VERSION);
   }
 
-  public DataSet(
+  public DbDataset(
       long dataSetId,
       long workspaceId,
       String name,
@@ -51,20 +51,20 @@ public class DataSet {
     this.dataSetId = dataSetId;
     this.workspaceId = workspaceId;
     this.name = name;
-    this.version = DataSet.INITIAL_VERSION;
+    this.version = DbDataset.INITIAL_VERSION;
     this.description = description;
     this.creatorId = creatorId;
     this.creationTime = creationTime;
     this.invalid = invalid;
   }
 
-  public DataSet(DataSet dataSet) {
+  public DbDataset(DbDataset dataSet) {
     setName(dataSet.getName());
-    setVersion(DataSet.INITIAL_VERSION);
+    setVersion(DbDataset.INITIAL_VERSION);
     setDescription(dataSet.getDescription());
     setInvalid(dataSet.getInvalid());
     setIncludesAllParticipants(dataSet.getIncludesAllParticipants());
-    setValues(dataSet.getValues().stream().map(DataSetValue::new).collect(Collectors.toList()));
+    setValues(dataSet.getValues().stream().map(DbDatasetValue::new).collect(Collectors.toList()));
     setPrePackagedConceptSet(dataSet.getPrePackagedConceptSet());
   }
 
@@ -186,11 +186,11 @@ public class DataSet {
   @ElementCollection
   @CollectionTable(name = "data_set_values", joinColumns = @JoinColumn(name = "data_set_id"))
   @Column(name = "values")
-  public List<DataSetValue> getValues() {
+  public List<DbDatasetValue> getValues() {
     return values;
   }
 
-  public void setValues(List<DataSetValue> values) {
+  public void setValues(List<DbDatasetValue> values) {
     this.values = values;
   }
 

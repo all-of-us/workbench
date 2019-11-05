@@ -2,19 +2,19 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.List;
 import java.util.Set;
-import org.pmiops.workbench.db.model.CohortReview;
+import org.pmiops.workbench.db.model.DbCohortReview;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface CohortReviewDao extends JpaRepository<CohortReview, Long> {
+public interface CohortReviewDao extends JpaRepository<DbCohortReview, Long> {
 
-  Set<CohortReview> findAllByCohortId(long cohortId);
+  Set<DbCohortReview> findAllByCohortId(long cohortId);
 
-  CohortReview findCohortReviewByCohortIdAndCdrVersionId(
+  DbCohortReview findCohortReviewByCohortIdAndCdrVersionId(
       @Param("cohortId") long cohortId, @Param("cdrVersionId") long cdrVersionId);
 
-  CohortReview findCohortReviewByCohortReviewId(@Param("cohortReviewId") long cohortReviewId);
+  DbCohortReview findCohortReviewByCohortReviewId(@Param("cohortReviewId") long cohortReviewId);
 
   @Query(
       value =
@@ -25,7 +25,7 @@ public interface CohortReviewDao extends JpaRepository<CohortReview, Long> {
               + "and ws.firecloud_name = :fcName "
               + "and ws.active_status = :status",
       nativeQuery = true)
-  List<CohortReview> findByFirecloudNameAndActiveStatus(
+  List<DbCohortReview> findByFirecloudNameAndActiveStatus(
       @Param("ns") String workspaceNamespace,
       @Param("fcName") String fcName,
       @Param("status") short status);
@@ -39,7 +39,7 @@ public interface CohortReviewDao extends JpaRepository<CohortReview, Long> {
               + "and ws.firecloud_name = :fcName "
               + "and cr.cohort_review_id = :cohortReviewId",
       nativeQuery = true)
-  CohortReview findByNamespaceAndFirecloudNameAndCohortReviewId(
+  DbCohortReview findByNamespaceAndFirecloudNameAndCohortReviewId(
       @Param("ns") String workspaceNamespace,
       @Param("fcName") String fcName,
       @Param("cohortReviewId") long cohortReviewId);

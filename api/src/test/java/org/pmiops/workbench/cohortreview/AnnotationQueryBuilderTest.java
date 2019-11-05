@@ -25,14 +25,14 @@ import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
-import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
-import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortStatus;
@@ -89,13 +89,13 @@ public class AnnotationQueryBuilderTest {
 
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
-  private CohortReview cohortReview;
-  private CohortAnnotationDefinition integerAnnotation;
-  private CohortAnnotationDefinition stringAnnotation;
-  private CohortAnnotationDefinition booleanAnnotation;
-  private CohortAnnotationDefinition dateAnnotation;
-  private CohortAnnotationDefinition enumAnnotation;
-  private Map<String, CohortAnnotationEnumValue> enumValueMap;
+  private DbCohortReview cohortReview;
+  private DbCohortAnnotationDefinition integerAnnotation;
+  private DbCohortAnnotationDefinition stringAnnotation;
+  private DbCohortAnnotationDefinition booleanAnnotation;
+  private DbCohortAnnotationDefinition dateAnnotation;
+  private DbCohortAnnotationDefinition enumAnnotation;
+  private Map<String, DbCohortAnnotationEnumValue> enumValueMap;
   private ImmutableMap<String, Object> expectedResult1;
   private ImmutableMap<String, Object> expectedResult2;
   private List<String> allColumns;
@@ -106,20 +106,20 @@ public class AnnotationQueryBuilderTest {
     cdrVersionDao.save(cdrVersion);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    Workspace workspace = new Workspace();
+    DbWorkspace workspace = new DbWorkspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
-    Cohort cohort = new Cohort();
+    DbCohort cohort = new DbCohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohort.setName("males");
     cohort.setType("AOU");
     cohort.setCriteria("blah");
     cohortDao.save(cohort);
 
-    cohortReview = new CohortReview();
+    cohortReview = new DbCohortReview();
     cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
     cohortReview.setCohortId(cohort.getCohortId());
     cohortReview.setMatchedParticipantCount(3);
@@ -147,7 +147,7 @@ public class AnnotationQueryBuilderTest {
             makeAnnotationDefinition(
                 cohort.getCohortId(), "enum annotation", AnnotationType.ENUM, "zebra", "aardvark"));
     enumValueMap =
-        Maps.uniqueIndex(enumAnnotation.getEnumValues(), CohortAnnotationEnumValue::getName);
+        Maps.uniqueIndex(enumAnnotation.getEnumValues(), DbCohortAnnotationEnumValue::getName);
 
     expectedResult1 =
         ImmutableMap.<String, Object>builder()
@@ -171,15 +171,15 @@ public class AnnotationQueryBuilderTest {
     allColumns = ImmutableList.copyOf(expectedResult1.keySet());
   }
 
-  private CohortAnnotationDefinition makeAnnotationDefinition(
+  private DbCohortAnnotationDefinition makeAnnotationDefinition(
       long cohortId, String columnName, AnnotationType annotationType, String... enumValues) {
-    CohortAnnotationDefinition cohortAnnotationDefinition = new CohortAnnotationDefinition();
+    DbCohortAnnotationDefinition cohortAnnotationDefinition = new DbCohortAnnotationDefinition();
     cohortAnnotationDefinition.setAnnotationTypeEnum(annotationType);
     cohortAnnotationDefinition.setCohortId(cohortId);
     cohortAnnotationDefinition.setColumnName(columnName);
     if (enumValues.length > 0) {
       for (int i = 0; i < enumValues.length; i++) {
-        CohortAnnotationEnumValue enumValue = new CohortAnnotationEnumValue();
+        DbCohortAnnotationEnumValue enumValue = new DbCohortAnnotationEnumValue();
         enumValue.setOrder(i);
         enumValue.setName(enumValues[i]);
         cohortAnnotationDefinition.getEnumValues().add(enumValue);
@@ -188,12 +188,12 @@ public class AnnotationQueryBuilderTest {
     return cohortAnnotationDefinition;
   }
 
-  private ParticipantCohortStatus makeStatus(
+  private DbParticipantCohortStatus makeStatus(
       long cohortReviewId, long participantId, CohortStatus status) {
-    ParticipantCohortStatusKey key = new ParticipantCohortStatusKey();
+    DbParticipantCohortStatusKey key = new DbParticipantCohortStatusKey();
     key.setCohortReviewId(cohortReviewId);
     key.setParticipantId(participantId);
-    ParticipantCohortStatus result = new ParticipantCohortStatus();
+    DbParticipantCohortStatus result = new DbParticipantCohortStatus();
     result.setStatusEnum(status);
     result.setParticipantKey(key);
     return result;
@@ -435,7 +435,7 @@ public class AnnotationQueryBuilderTest {
       String enumValue)
       throws ParseException {
     if (integerValue != null) {
-      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      DbParticipantCohortAnnotation annotation = new DbParticipantCohortAnnotation();
       annotation.setCohortAnnotationDefinitionId(
           integerAnnotation.getCohortAnnotationDefinitionId());
       annotation.setParticipantId(personId);
@@ -444,7 +444,7 @@ public class AnnotationQueryBuilderTest {
       participantCohortAnnotationDao.save(annotation);
     }
     if (stringValue != null) {
-      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      DbParticipantCohortAnnotation annotation = new DbParticipantCohortAnnotation();
       annotation.setCohortAnnotationDefinitionId(
           stringAnnotation.getCohortAnnotationDefinitionId());
       annotation.setParticipantId(personId);
@@ -453,7 +453,7 @@ public class AnnotationQueryBuilderTest {
       participantCohortAnnotationDao.save(annotation);
     }
     if (booleanValue != null) {
-      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      DbParticipantCohortAnnotation annotation = new DbParticipantCohortAnnotation();
       annotation.setCohortAnnotationDefinitionId(
           booleanAnnotation.getCohortAnnotationDefinitionId());
       annotation.setParticipantId(personId);
@@ -462,7 +462,7 @@ public class AnnotationQueryBuilderTest {
       participantCohortAnnotationDao.save(annotation);
     }
     if (dateValue != null) {
-      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      DbParticipantCohortAnnotation annotation = new DbParticipantCohortAnnotation();
       annotation.setCohortAnnotationDefinitionId(dateAnnotation.getCohortAnnotationDefinitionId());
       annotation.setParticipantId(personId);
       annotation.setCohortReviewId(cohortReview.getCohortReviewId());
@@ -471,7 +471,7 @@ public class AnnotationQueryBuilderTest {
       participantCohortAnnotationDao.save(annotation);
     }
     if (enumValue != null) {
-      ParticipantCohortAnnotation annotation = new ParticipantCohortAnnotation();
+      DbParticipantCohortAnnotation annotation = new DbParticipantCohortAnnotation();
       annotation.setCohortAnnotationDefinitionId(enumAnnotation.getCohortAnnotationDefinitionId());
       annotation.setParticipantId(personId);
       annotation.setCohortReviewId(cohortReview.getCohortReviewId());

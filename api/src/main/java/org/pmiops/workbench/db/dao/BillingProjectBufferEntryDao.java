@@ -2,10 +2,10 @@ package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
 import java.util.List;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
-import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus;
+import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -14,21 +14,21 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BillingProjectBufferEntryDao
-    extends CrudRepository<BillingProjectBufferEntry, Long> {
+    extends CrudRepository<DbBillingProjectBufferEntry, Long> {
 
   String ASSIGNING_LOCK = "ASSIGNING_LOCK";
 
-  BillingProjectBufferEntry findByFireCloudProjectName(String fireCloudProjectName);
+  DbBillingProjectBufferEntry findByFireCloudProjectName(String fireCloudProjectName);
 
-  @Query("SELECT COUNT(*) FROM BillingProjectBufferEntry WHERE status IN (0, 2)")
+  @Query("SELECT COUNT(*) FROM DbBillingProjectBufferEntry WHERE status IN (0, 2)")
   Long getCurrentBufferSize();
 
-  List<BillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(
+  List<DbBillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(
       short status, Timestamp timestamp);
 
-  BillingProjectBufferEntry findFirstByStatusOrderByLastSyncRequestTimeAsc(short status);
+  DbBillingProjectBufferEntry findFirstByStatusOrderByLastSyncRequestTimeAsc(short status);
 
-  BillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
+  DbBillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
 
   Long countByStatus(short status);
 
@@ -42,15 +42,15 @@ public interface BillingProjectBufferEntryDao
   // Billing Migration Status.  These are ready to be garbage-collected
   default List<String> findBillingProjectsForGarbageCollection() {
     return findByStatusAndActiveStatusAndBillingMigrationStatus(
-        StorageEnums.billingProjectBufferStatusToStorage(BillingProjectBufferStatus.ASSIGNED),
-        StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.DELETED),
-        StorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.NEW));
+        DbStorageEnums.billingProjectBufferStatusToStorage(BillingProjectBufferStatus.ASSIGNED),
+        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.DELETED),
+        DbStorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.NEW));
   }
 
   @Query(
       "SELECT p.fireCloudProjectName "
-          + "FROM BillingProjectBufferEntry p "
-          + "JOIN Workspace w "
+          + "FROM DbBillingProjectBufferEntry p "
+          + "JOIN DbWorkspace w "
           + "ON w.workspaceNamespace = p.fireCloudProjectName "
           + "AND p.status = :billingStatus "
           + "AND w.activeStatus = :workspaceStatus "

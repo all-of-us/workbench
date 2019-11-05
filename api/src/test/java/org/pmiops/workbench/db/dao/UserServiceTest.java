@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.NihStatus;
@@ -58,7 +58,7 @@ public class UserServiceTest {
 
   private UserService userService;
 
-  private User testUser;
+  private DbUser testUser;
 
   @Before
   public void setUp() {
@@ -80,8 +80,8 @@ public class UserServiceTest {
             directoryService);
   }
 
-  private User insertUser(String email) {
-    User user = new User();
+  private DbUser insertUser(String email) {
+    DbUser user = new DbUser();
     user.setEmail(email);
     user.setUserId(incrementedUserId);
     incrementedUserId++;
@@ -101,7 +101,7 @@ public class UserServiceTest {
     userService.syncComplianceTrainingStatus();
 
     // The user should be updated in the database with a non-empty completion and expiration time.
-    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getComplianceTrainingCompletionTime())
         .isEqualTo(new Timestamp(TIMESTAMP_MSECS));
     assertThat(user.getComplianceTrainingExpirationTime()).isEqualTo(new Timestamp(12345));
@@ -119,14 +119,14 @@ public class UserServiceTest {
     userService.syncComplianceTrainingStatus();
 
     verify(complianceService, never()).getUserBadge(anyInt());
-    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test
   public void testSyncComplianceTrainingStatusNullBadge() throws Exception {
     // When Moodle returns an empty badge response, we should clear the completion bit.
-    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
     user.setComplianceTrainingCompletionTime(new Timestamp(12345));
     userDao.save(user);
 
@@ -159,7 +159,7 @@ public class UserServiceTest {
 
     userService.syncEraCommonsStatus();
 
-    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getEraCommonsCompletionTime()).isEqualTo(new Timestamp(TIMESTAMP_MSECS));
     assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(new Timestamp(TIMESTAMP_MSECS / 1000));
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
@@ -183,7 +183,7 @@ public class UserServiceTest {
 
     userService.syncEraCommonsStatus();
 
-    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getEraCommonsCompletionTime()).isNull();
   }
 
@@ -197,7 +197,7 @@ public class UserServiceTest {
     when(directoryService.getUser(EMAIL_ADDRESS)).thenReturn(googleUser);
     userService.syncTwoFactorAuthStatus();
     // twoFactorAuthCompletionTime should now be set
-    User user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getTwoFactorAuthCompletionTime()).isNotNull();
 
     // twoFactorAuthCompletionTime should not change when already set

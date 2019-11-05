@@ -11,8 +11,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.cohortreview.util.ParticipantCohortStatusDbInfo;
-import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.model.Filter;
 import org.pmiops.workbench.model.FilterColumns;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +67,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
 
   @Override
   public void saveParticipantCohortStatusesCustom(
-      List<ParticipantCohortStatus> participantCohortStatuses) {
+      List<DbParticipantCohortStatus> participantCohortStatuses) {
     Statement statement = null;
     Connection connection = null;
     int index = 0;
@@ -78,7 +78,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
       statement = connection.createStatement();
       connection.setAutoCommit(false);
 
-      for (ParticipantCohortStatus pcs : participantCohortStatuses) {
+      for (DbParticipantCohortStatus pcs : participantCohortStatuses) {
         String birthDate =
             pcs.getBirthDate() == null ? "NULL" : "'" + pcs.getBirthDate().toString() + "'";
         String nextSql =
@@ -122,7 +122,7 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
   }
 
   @Override
-  public List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
+  public List<DbParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
     MapSqlParameterSource parameters = new MapSqlParameterSource();
     parameters.addValue("cohortReviewId", cohortReviewId);
 
@@ -181,14 +181,14 @@ public class ParticipantCohortStatusDaoImpl implements ParticipantCohortStatusDa
     return (!sqlParts.isEmpty()) ? String.join(" and ", sqlParts) : "";
   }
 
-  private class ParticipantCohortStatusRowMapper implements RowMapper<ParticipantCohortStatus> {
+  private class ParticipantCohortStatusRowMapper implements RowMapper<DbParticipantCohortStatus> {
 
     @Override
-    public ParticipantCohortStatus mapRow(ResultSet rs, int rowNum) throws SQLException {
-      ParticipantCohortStatusKey key =
-          (new BeanPropertyRowMapper<>(ParticipantCohortStatusKey.class)).mapRow(rs, rowNum);
-      ParticipantCohortStatus participantCohortStatus =
-          (new BeanPropertyRowMapper<>(ParticipantCohortStatus.class)).mapRow(rs, rowNum);
+    public DbParticipantCohortStatus mapRow(ResultSet rs, int rowNum) throws SQLException {
+      DbParticipantCohortStatusKey key =
+          (new BeanPropertyRowMapper<>(DbParticipantCohortStatusKey.class)).mapRow(rs, rowNum);
+      DbParticipantCohortStatus participantCohortStatus =
+          (new BeanPropertyRowMapper<>(DbParticipantCohortStatus.class)).mapRow(rs, rowNum);
       participantCohortStatus.setParticipantKey(key);
       return participantCohortStatus;
     }

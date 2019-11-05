@@ -17,7 +17,7 @@ import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
 import org.pmiops.workbench.google.DirectoryService;
@@ -53,7 +53,7 @@ public class AuthDomainControllerTest {
 
   @Mock private AdminActionHistoryDao adminActionHistoryDao;
   @Mock private FireCloudService fireCloudService;
-  @Mock private Provider<User> userProvider;
+  @Mock private Provider<DbUser> userProvider;
   @Mock private ComplianceService complianceService;
   @Mock private DirectoryService directoryService;
   @Autowired private UserDao userDao;
@@ -63,7 +63,7 @@ public class AuthDomainControllerTest {
 
   @Before
   public void setUp() {
-    User adminUser = new User();
+    DbUser adminUser = new DbUser();
     adminUser.setUserId(0L);
     doNothing().when(fireCloudService).addUserToBillingProject(any(), any());
     doNothing().when(fireCloudService).removeUserFromBillingProject(any(), any());
@@ -103,7 +103,7 @@ public class AuthDomainControllerTest {
         new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(true);
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    User updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
+    DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled());
   }
 
@@ -114,12 +114,12 @@ public class AuthDomainControllerTest {
         new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(false);
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    User updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
+    DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(!updatedUser.getDisabled());
   }
 
   private void createUser(boolean disabled) {
-    User user = new User();
+    DbUser user = new DbUser();
     user.setGivenName(GIVEN_NAME);
     user.setFamilyName(FAMILY_NAME);
     user.setEmail(PRIMARY_EMAIL);

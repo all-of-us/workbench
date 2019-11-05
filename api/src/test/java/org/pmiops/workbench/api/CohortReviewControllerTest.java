@@ -42,15 +42,16 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
-import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
-import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -101,21 +102,21 @@ public class CohortReviewControllerTest {
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";
   private CdrVersion cdrVersion;
-  private CohortReview cohortReview;
-  private Cohort cohort;
-  private Cohort cohortWithoutReview;
-  private ParticipantCohortStatus participantCohortStatus1;
-  private ParticipantCohortStatus participantCohortStatus2;
-  private Workspace workspace;
+  private DbCohortReview cohortReview;
+  private DbCohort cohort;
+  private DbCohort cohortWithoutReview;
+  private DbParticipantCohortStatus participantCohortStatus1;
+  private DbParticipantCohortStatus participantCohortStatus2;
+  private DbWorkspace workspace;
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
-  private CohortAnnotationDefinition stringAnnotationDefinition;
-  private CohortAnnotationDefinition enumAnnotationDefinition;
-  private CohortAnnotationDefinition dateAnnotationDefinition;
-  private CohortAnnotationDefinition booleanAnnotationDefinition;
-  private CohortAnnotationDefinition integerAnnotationDefinition;
-  private org.pmiops.workbench.db.model.ParticipantCohortAnnotation participantAnnotation;
+  private DbCohortAnnotationDefinition stringAnnotationDefinition;
+  private DbCohortAnnotationDefinition enumAnnotationDefinition;
+  private DbCohortAnnotationDefinition dateAnnotationDefinition;
+  private DbCohortAnnotationDefinition booleanAnnotationDefinition;
+  private DbCohortAnnotationDefinition integerAnnotationDefinition;
+  private DbParticipantCohortAnnotation participantAnnotation;
 
   @Autowired private CdrVersionDao cdrVersionDao;
 
@@ -143,7 +144,7 @@ public class CohortReviewControllerTest {
 
   @Autowired private UserDao userDao;
 
-  @Mock private Provider<User> userProvider;
+  @Mock private Provider<DbUser> userProvider;
 
   private enum TestDemo {
     ASIAN("Asian", 8515),
@@ -186,7 +187,7 @@ public class CohortReviewControllerTest {
 
   @Before
   public void setUp() {
-    User user = new User();
+    DbUser user = new DbUser();
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
     user.setDisabled(false);
@@ -237,7 +238,7 @@ public class CohortReviewControllerTest {
     cdrVersionDao.save(cdrVersion);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    workspace = new Workspace();
+    workspace = new DbWorkspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     workspace.setName(WORKSPACE_NAME);
@@ -245,7 +246,7 @@ public class CohortReviewControllerTest {
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
-    cohort = new Cohort();
+    cohort = new DbCohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     String criteria =
         "{\"includes\":[{\"id\":\"includes_kl4uky6kh\",\"items\":[{\"id\":\"items_58myrn9iz\",\"type\":\"CONDITION\",\"searchParameters\":[{"
@@ -255,7 +256,7 @@ public class CohortReviewControllerTest {
     cohort.setCriteria(criteria);
     cohortDao.save(cohort);
 
-    cohortWithoutReview = new Cohort();
+    cohortWithoutReview = new DbCohort();
     cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
     cohortWithoutReview.setName("test");
     cohortWithoutReview.setDescription("test desc");
@@ -265,23 +266,23 @@ public class CohortReviewControllerTest {
     Timestamp today = new Timestamp(new Date().getTime());
     cohortReview =
         cohortReviewDao.save(
-            new CohortReview()
+            new DbCohortReview()
                 .cohortId(cohort.getCohortId())
                 .cdrVersionId(cdrVersion.getCdrVersionId())
                 .reviewSize(2)
                 .creationTime(today));
 
-    ParticipantCohortStatusKey key1 =
-        new ParticipantCohortStatusKey()
+    DbParticipantCohortStatusKey key1 =
+        new DbParticipantCohortStatusKey()
             .cohortReviewId(cohortReview.getCohortReviewId())
             .participantId(1L);
-    ParticipantCohortStatusKey key2 =
-        new ParticipantCohortStatusKey()
+    DbParticipantCohortStatusKey key2 =
+        new DbParticipantCohortStatusKey()
             .cohortReviewId(cohortReview.getCohortReviewId())
             .participantId(2L);
 
     participantCohortStatus1 =
-        new ParticipantCohortStatus()
+        new DbParticipantCohortStatus()
             .statusEnum(CohortStatus.NOT_REVIEWED)
             .participantKey(key1)
             .genderConceptId(TestDemo.MALE.getConceptId())
@@ -293,7 +294,7 @@ public class CohortReviewControllerTest {
             .birthDate(new java.sql.Date(today.getTime()))
             .deceased(false);
     participantCohortStatus2 =
-        new ParticipantCohortStatus()
+        new DbParticipantCohortStatus()
             .statusEnum(CohortStatus.NOT_REVIEWED)
             .participantKey(key2)
             .genderConceptId(TestDemo.FEMALE.getConceptId())
@@ -309,43 +310,43 @@ public class CohortReviewControllerTest {
     participantCohortStatusDao.save(participantCohortStatus2);
 
     stringAnnotationDefinition =
-        new CohortAnnotationDefinition()
-            .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.STRING))
+        new DbCohortAnnotationDefinition()
+            .annotationType(DbStorageEnums.annotationTypeToStorage(AnnotationType.STRING))
             .columnName("test")
             .cohortId(cohort.getCohortId());
     cohortAnnotationDefinitionDao.save(stringAnnotationDefinition);
     enumAnnotationDefinition =
-        new CohortAnnotationDefinition()
-            .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.ENUM))
+        new DbCohortAnnotationDefinition()
+            .annotationType(DbStorageEnums.annotationTypeToStorage(AnnotationType.ENUM))
             .columnName("test")
             .cohortId(cohort.getCohortId());
-    SortedSet<CohortAnnotationEnumValue> enumValues = new TreeSet<CohortAnnotationEnumValue>();
+    SortedSet<DbCohortAnnotationEnumValue> enumValues = new TreeSet<DbCohortAnnotationEnumValue>();
     enumValues.add(
-        new CohortAnnotationEnumValue()
+        new DbCohortAnnotationEnumValue()
             .name("test")
             .cohortAnnotationDefinition(enumAnnotationDefinition));
     cohortAnnotationDefinitionDao.save(enumAnnotationDefinition.enumValues(enumValues));
     dateAnnotationDefinition =
-        new CohortAnnotationDefinition()
-            .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.DATE))
+        new DbCohortAnnotationDefinition()
+            .annotationType(DbStorageEnums.annotationTypeToStorage(AnnotationType.DATE))
             .columnName("test")
             .cohortId(cohort.getCohortId());
     cohortAnnotationDefinitionDao.save(dateAnnotationDefinition);
     booleanAnnotationDefinition =
-        new CohortAnnotationDefinition()
-            .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.BOOLEAN))
+        new DbCohortAnnotationDefinition()
+            .annotationType(DbStorageEnums.annotationTypeToStorage(AnnotationType.BOOLEAN))
             .columnName("test")
             .cohortId(cohort.getCohortId());
     cohortAnnotationDefinitionDao.save(booleanAnnotationDefinition);
     integerAnnotationDefinition =
-        new CohortAnnotationDefinition()
-            .annotationType(StorageEnums.annotationTypeToStorage(AnnotationType.INTEGER))
+        new DbCohortAnnotationDefinition()
+            .annotationType(DbStorageEnums.annotationTypeToStorage(AnnotationType.INTEGER))
             .columnName("test")
             .cohortId(cohort.getCohortId());
     cohortAnnotationDefinitionDao.save(integerAnnotationDefinition);
 
     participantAnnotation =
-        new org.pmiops.workbench.db.model.ParticipantCohortAnnotation()
+        new DbParticipantCohortAnnotation()
             .cohortReviewId(cohortReview.getCohortReviewId())
             .participantId(participantCohortStatus1.getParticipantKey().getParticipantId())
             .annotationValueString("test")
@@ -639,8 +640,8 @@ public class CohortReviewControllerTest {
 
   @Test
   public void deleteParticipantCohortAnnotation() throws Exception {
-    org.pmiops.workbench.db.model.ParticipantCohortAnnotation annotation =
-        new org.pmiops.workbench.db.model.ParticipantCohortAnnotation()
+    DbParticipantCohortAnnotation annotation =
+        new DbParticipantCohortAnnotation()
             .cohortReviewId(cohortReview.getCohortReviewId())
             .participantId(participantCohortStatus1.getParticipantKey().getParticipantId())
             .annotationValueString("test")
@@ -733,7 +734,7 @@ public class CohortReviewControllerTest {
     assertThat(response.getParticipantId())
         .isEqualTo(participantCohortStatus1.getParticipantKey().getParticipantId());
     assertThat(response.getStatus())
-        .isEqualTo(StorageEnums.cohortStatusFromStorage(participantCohortStatus1.getStatus()));
+        .isEqualTo(DbStorageEnums.cohortStatusFromStorage(participantCohortStatus1.getStatus()));
     assertThat(response.getEthnicityConceptId())
         .isEqualTo(participantCohortStatus1.getEthnicityConceptId());
     assertThat(response.getRaceConceptId()).isEqualTo(participantCohortStatus1.getRaceConceptId());
@@ -1003,15 +1004,15 @@ public class CohortReviewControllerTest {
   }
 
   private org.pmiops.workbench.model.CohortReview createCohortReview(
-      CohortReview actualReview,
-      List<ParticipantCohortStatus> participantCohortStatusList,
+      DbCohortReview actualReview,
+      List<DbParticipantCohortStatus> participantCohortStatusList,
       Integer page,
       Integer pageSize,
       SortOrder sortOrder,
       FilterColumns sortColumn) {
     List<org.pmiops.workbench.model.ParticipantCohortStatus> newParticipantCohortStatusList =
         new ArrayList<>();
-    for (ParticipantCohortStatus participantCohortStatus : participantCohortStatusList) {
+    for (DbParticipantCohortStatus participantCohortStatus : participantCohortStatusList) {
       newParticipantCohortStatusList.add(
           new org.pmiops.workbench.model.ParticipantCohortStatus()
               .birthDate(participantCohortStatus.getBirthDate().toString())
