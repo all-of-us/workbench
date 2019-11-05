@@ -359,6 +359,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     clearSearch() {
       this.setState({
         currentSearchString: '',
+        showSearchError: false,
         searching: false // reset the search result table to show browse/domain cards instead
       });
     }
