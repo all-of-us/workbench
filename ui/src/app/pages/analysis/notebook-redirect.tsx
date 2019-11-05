@@ -244,7 +244,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       const {workspace} = this.props;
 
       try {
-        const resp = await clusterApi().listClusters(billingProjectId, workspace.name);
+        const resp = await clusterApi().listClusters(billingProjectId, workspace.id);
         const cluster = resp.defaultCluster;
         if (!this.state.initialized) {
           if (cluster.status === ClusterStatus.Running) {
