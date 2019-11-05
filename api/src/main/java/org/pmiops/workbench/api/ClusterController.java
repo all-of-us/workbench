@@ -130,7 +130,8 @@ public class ClusterController implements ClusterApiDelegate {
       fcCluster = this.leonardoNotebooksClient.getCluster(billingProjectId, clusterName);
     } catch (NotFoundException e) {
       fcCluster =
-          this.leonardoNotebooksClient.createCluster(billingProjectId, clusterName, firecloudWorkspaceName);
+          this.leonardoNotebooksClient.createCluster(
+              billingProjectId, clusterName, firecloudWorkspaceName);
     }
 
     int retries = Optional.ofNullable(user.getClusterCreateRetries()).orElse(0);

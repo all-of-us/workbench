@@ -107,7 +107,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public Cluster createCluster(String googleProject, String clusterName, String firecloudWorkspaceName) {
+  public Cluster createCluster(
+      String googleProject, String clusterName, String firecloudWorkspaceName) {
     ClusterApi clusterApi = clusterApiProvider.get();
     User user = userProvider.get();
     Workspace workspace = workspaceService.getRequired(googleProject, firecloudWorkspaceName);
