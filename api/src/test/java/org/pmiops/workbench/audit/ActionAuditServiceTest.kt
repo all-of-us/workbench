@@ -36,6 +36,7 @@ class ActionAuditServiceTest {
     private var event1: ActionAuditEvent? = null
     private var event2: ActionAuditEvent? = null
     private var actionAuditService: ActionAuditService? = null
+    private val ACTION_ID = "b52a36f6-3e88-4a30-a57f-ae884838bfbf"
 
     @Before
     fun setUp() {
@@ -50,7 +51,6 @@ class ActionAuditServiceTest {
         doReturn(workbenchConfig).`when`<Provider<WorkbenchConfig>>(mockConfigProvider).get()
 
         actionAuditService = ActionAuditServiceImpl(mockConfigProvider!!, mockLogging!!)
-        val actionId = actionAuditService?.newActionId()!!
 
         // ordinarily events sharing an action would have more things in common than this,
         // but the schema doesn't require it
@@ -60,7 +60,7 @@ class ActionAuditServiceTest {
                 targetIdMaybe = 1L,
                 agentType = AgentType.USER,
                 agentId = AGENT_ID_1,
-                actionId = actionId,
+                actionId = ACTION_ID,
                 actionType = ActionType.EDIT,
                 targetPropertyMaybe = "foot",
                 previousValueMaybe = "bare",
@@ -73,7 +73,7 @@ class ActionAuditServiceTest {
                 targetIdMaybe = 2L,
                 agentType = AgentType.USER,
                 agentId = AGENT_ID_2,
-                actionId = actionId,
+                actionId = ACTION_ID,
                 actionType = ActionType.EDIT,
                 targetPropertyMaybe = "height",
                 previousValueMaybe = "yay high",
