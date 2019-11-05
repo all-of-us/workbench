@@ -24,6 +24,7 @@ import {
   WorkspacesApiStub,
   WorkspaceStubVariables
 } from 'testing/stubs/workspaces-api-stub';
+import {Key} from 'ts-key-enum';
 
 
 function isSelectedDomain(
@@ -45,7 +46,7 @@ function searchTable(searchTerm: string, wrapper) {
   wrapper.find('[data-test-id="concept-search-input"]')
     .find('input').simulate('change', {target: {value: searchTerm}});
   wrapper.find('[data-test-id="concept-search-input"]')
-    .find('input').simulate('keypress', {key: 'Enter'});
+    .find('input').simulate('keypress', {key: Key.Enter});
 }
 
 describe('ConceptHomepage', () => {

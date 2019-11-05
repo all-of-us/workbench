@@ -32,6 +32,7 @@ import {
   SurveyQuestionsResponse,
   VocabularyCount,
 } from 'generated/fetch';
+import { Key } from 'ts-key-enum';
 import {SurveyDetails} from './survey-details';
 
 const styles = reactStyles({
@@ -272,7 +273,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     handleSubmit(e) {
       // search on enter key
-      if (e.key === 'Enter' ) {
+      if (e.key === Key.Enter) {
         const searchTermLength = this.state.currentSearchString.trim().length;
         if (searchTermLength < 3) {
           this.setState({showSearchError: true});
