@@ -12,6 +12,9 @@
       </button>
       <clr-dropdown-menu clrPosition="{{position}}">
         <h4 class="dropdown-header">Program Data</h4>
+        <span *ngIf="!criteriaMenuOptions.programTypes.length" class="spinner spinner-inline">
+          Loading...
+        </span>
         <clr-dropdown *ngFor="let criteria of criteriaMenuOptions.programTypes">
           <button
             *ngIf="!criteria.children"
@@ -41,13 +44,16 @@
         </clr-dropdown>
         <div class="dropdown-divider"></div>
         <h4 class="dropdown-header">Domains</h4>
-          <button
-            *ngFor="let criteria of criteriaMenuOptions.domainTypes"
-            [id]="criteria.type"
-            class="dropdown-item"
-            type="button"
-            (click)="launchWizard(criteria)"
-            clrDropdownItem>{{criteria.name}}</button>
+        <span *ngIf="!criteriaMenuOptions.domainTypes.length" class="spinner spinner-inline">
+          Loading...
+        </span>
+        <button
+          *ngFor="let criteria of criteriaMenuOptions.domainTypes"
+          [id]="criteria.type"
+          class="dropdown-item"
+          type="button"
+          (click)="launchWizard(criteria)"
+          clrDropdownItem>{{criteria.name}}</button>
       </clr-dropdown-menu>
     </clr-dropdown>
   </div>

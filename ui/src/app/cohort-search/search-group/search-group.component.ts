@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
-import {initExisting, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {criteriaMenuOptionsStore, initExisting, searchRequestStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, mapGroup, typeToTitle} from 'app/cohort-search/utils';
 import {integerAndRangeValidator} from 'app/cohort-search/validators';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
@@ -17,7 +17,7 @@ import {DomainType, SearchRequest, TemporalMention, TemporalTime} from 'generate
     '../../styles/buttons.css',
   ]
 })
-export class SearchGroupComponent implements AfterViewInit, OnInit {
+export class SearchGroupComponent implements OnInit {
   @Input() group;
   @Input() index;
   @Input() role: keyof SearchRequest;
@@ -38,7 +38,6 @@ export class SearchGroupComponent implements AfterViewInit, OnInit {
   name = this.whichMention[0];
   readonly domainTypes = DOMAIN_TYPES;
   readonly programTypes = PROGRAM_TYPES;
-  itemId: any;
   timeForm = new FormGroup({
     inputTimeValue: new FormControl([Validators.required],
       [integerAndRangeValidator('Form', 0, 9999)]),
@@ -51,6 +50,7 @@ export class SearchGroupComponent implements AfterViewInit, OnInit {
   loading = false;
   preventInputCalculate = false;
   apiCallCheck = 0;
+  criteriaMenuOptions = {programTypes: [], domainTypes: []};
 
   ngOnInit(): void {
     this.timeForm.valueChanges
@@ -58,9 +58,15 @@ export class SearchGroupComponent implements AfterViewInit, OnInit {
       .distinctUntilChanged((p: any, n: any) => JSON.stringify(p) === JSON.stringify(n))
       .map(({inputTimeValue}) => inputTimeValue)
       .subscribe(this.getTimeValue);
+
+    const {cdrVersionId} = currentWorkspaceStore.getValue();
+    criteriaMenuOptionsStore.filter(options => !!options[cdrVersionId]).subscribe(options => {
+      this.criteriaMenuOptions = options[cdrVersionId];
+      setTimeout(() => this.setDemoMenuHover());
+    });
   }
 
-  ngAfterViewInit() {
+  setDemoMenuHover() {
     if (typeof ResizeObserver === 'function') {
       const ro = new ResizeObserver(() => {
         if (this.status === 'hidden' || this.status === 'pending') {

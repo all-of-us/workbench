@@ -20,7 +20,7 @@ export class SearchGroupSelectComponent implements OnInit {
   demoOpen = false;
   demoMenuHover = false;
   category: string;
-  criteriaMenuOptions: any;
+  criteriaMenuOptions = {programTypes: [], domainTypes: []};
 
   ngOnInit(): void {
     const {cdrVersionId} = currentWorkspaceStore.getValue();
