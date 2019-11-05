@@ -266,14 +266,19 @@ export const ConceptHomepage = withCurrentWorkspace()(
       }
     }
 
-    triggerSearch(e) {
+    handleChange(e) {
+      this.setState({currentSearchString: e});
+    }
+
+    handleSubmit(e) {
       // search on enter key
-      if (e.keyCode === 13) {
-        const searchTermLength = e.target.value.trim().length;
+      if (e.key === 'Enter' ) {
+        const searchTermLength = this.state.currentSearchString.trim().length;
         if (searchTermLength < 3) {
           this.setState({showSearchError: true});
         } else {
-          this.setState({currentSearchString: e.target.value}, this.searchConcepts);
+          this.setState({showSearchError: false});
+          this.searchConcepts().then(/* ignore promise returned */);
         }
       }
     }
@@ -477,7 +482,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
                 fill: colors.accent, left: 'calc(1rem + 4.5%)'}}/>
               <TextInput style={styles.searchBar} data-test-id='concept-search-input'
                          placeholder='Search concepts in domain'
-                         onKeyDown={e => {this.triggerSearch(e); }}/>
+                         value={this.state.currentSearchString}
+                         onChange={(e) => this.handleChange(e)}
+                         onKeyPress={(e) => this.handleSubmit(e)}/>
               {currentSearchString !== '' && <Clickable onClick={() => this.clearSearch()}
                                                         data-test-id='clear-search'>
                   <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>

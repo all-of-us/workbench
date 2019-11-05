@@ -1,9 +1,9 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
+import {ConceptHomepage} from 'app/pages/data/concept/concept-homepage';
 import {conceptsApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {ConceptHomepage} from 'app/pages/data/concept/concept-homepage';
 import {
   ConceptsApi,
   ConceptSetsApi,
@@ -42,11 +42,10 @@ function conceptsCountInDomain(domain: DomainInfo, isStandardConcepts: boolean):
 }
 
 function searchTable(searchTerm: string, wrapper) {
-  const searchInput = wrapper.find('[data-test-id="concept-search-input"]')
-    .find('input').getDOMNode() as HTMLInputElement;
-  searchInput.value = searchTerm;
   wrapper.find('[data-test-id="concept-search-input"]')
-    .find('input').simulate('keydown', {keyCode: 13});
+    .find('input').simulate('change', {target: {value: searchTerm}});
+  wrapper.find('[data-test-id="concept-search-input"]')
+    .find('input').simulate('keypress', {key: 'Enter'});
 }
 
 describe('ConceptHomepage', () => {
@@ -120,7 +119,7 @@ describe('ConceptHomepage', () => {
 
   });
 
-  it('should changes search criteria when standard only not checked', async() => {
+  it('should change search criteria when standard only not checked', async() => {
     const spy = jest.spyOn(conceptsApi(), 'searchConcepts');
     const searchTerm = 'test';
     const selectedDomain = DomainStubVariables.STUB_DOMAINS[1];
@@ -166,7 +165,7 @@ describe('ConceptHomepage', () => {
     expect(wrapper.find('[data-test-id="selectedConcepts"]').text()).toBe('1');
   });
 
-  it('should display the selected concepts on sliding button', async () => {
+  it('should display the selected concepts on sliding button', async() => {
     const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
     searchTable('test', wrapper);
