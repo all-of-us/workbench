@@ -143,34 +143,7 @@ public class WorkbenchConfig {
     public String fromEmail;
     public int sendRetries;
   }
-
-  public static class ElasticsearchConfig {
-    public String baseUrl;
-    public boolean enableBasicAuth;
-    public boolean enableElasticsearchBackend;
-  }
-
-  public static class MoodleConfig {
-    public String host;
-    public boolean enableMoodleBackend;
-  }
-
-  // The access object specifies whether each of the following access requirements block access
-  // to the workbench.
-  public static class AccessConfig {
-    // Allows a user to bypass their own access modules. This is used for testing purposes so that
-    // We can give control over 3rd party access modules
-    public boolean unsafeAllowSelfBypass;
-    public boolean enableComplianceTraining;
-    public boolean enableEraCommons;
-    public boolean enableDataUseAgreement;
-    public boolean enableBetaAccess;
-  }
-
-  public static class CohortBuilderConfig {
-    public boolean enableListSearch;
-  }
-
+  
   public static class FeatureFlagsConfig {
     // Allows a user to delete their own account. This is used for testing purposes so that
     // We can clean up after ourselves. This should never go to prod.
