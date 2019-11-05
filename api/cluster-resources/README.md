@@ -27,7 +27,7 @@ To manually test updates to this script locally:
   - Cluster creation will fail with 500s if the user script is not accessible to your pet SA,
     this should be granted by the registered tier group on the bucket ACL [cloud console UI](
     https://console.cloud.google.com/storage/browser/all-of-us-workbench-test-cluster-resources?project=all-of-us-workbench-test)
-- Revert changes to `config/config_local.json`
+- Revert changes to `LeonardoNotebooksClientImpl.java`
 
 ## Debugging Script Issues
 
