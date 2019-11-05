@@ -116,7 +116,7 @@
     <include file="changelog/db.changelog-106-workspace-billing-account-fields.xml"/>
     <include file="changelog/db.changelog-107-workspace-free-tier-usage-user-index.xml"/>
     <include file="changelog/db.changelog-108-user-data-use-agreement.xml"/>
-    <include file="changelog/db.changelog-109-bla-bla-bla.xml"/>
+    <include file="changelog/db.changelog-109-bla-bla-bla"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`
