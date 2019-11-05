@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Scope
 import java.util.UUID
-import javax.inject.Provider
 
 @Configuration
 open class ActionAuditSpringConfiguration {
