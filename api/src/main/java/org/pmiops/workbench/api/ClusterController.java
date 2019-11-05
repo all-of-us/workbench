@@ -199,10 +199,7 @@ public class ClusterController implements ClusterApiDelegate {
         .forEach(
             notebook ->
                 userRecentResourceService.updateNotebookEntry(
-                    workspaceId,
-                    userProvider.get().getUserId(),
-                    gcsNotebooksDir + "/" + notebook,
-                    now));
+                    workspaceId, userProvider.get().getUserId(), gcsNotebooksDir + "/" + notebook));
     String workspacePath = body.getWorkspaceId();
     if (!projectName.equals(body.getWorkspaceNamespace())) {
       workspacePath =

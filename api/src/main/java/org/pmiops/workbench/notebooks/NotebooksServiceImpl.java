@@ -137,8 +137,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     userRecentResourceService.updateNotebookEntry(
         workspaceService.getRequired(toWorkspaceNamespace, toWorkspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
-        newNotebookLocators.fullPath,
-        now);
+        newNotebookLocators.fullPath);
 
     return fileDetail;
   }

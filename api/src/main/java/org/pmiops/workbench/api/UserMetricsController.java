@@ -147,7 +147,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     }
     DbUserRecentResource recentResource =
         userRecentResourceService.updateNotebookEntry(
-            wId, userProvider.get().getUserId(), notebookPath, now);
+            wId, userProvider.get().getUserId(), notebookPath);
     return ResponseEntity.ok(TO_CLIENT.apply(recentResource));
   }
 

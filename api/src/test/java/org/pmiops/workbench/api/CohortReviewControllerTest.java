@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -786,8 +785,7 @@ public class CohortReviewControllerTest {
 
     assertParticipantCohortStatuses(
         expectedReview1, page, pageSize, SortOrder.DESC, FilterColumns.STATUS);
-    verify(userRecentResourceService)
-        .updateCohortEntry(anyLong(), anyLong(), anyLong(), any(Timestamp.class));
+    verify(userRecentResourceService).updateCohortEntry(anyLong(), anyLong(), anyLong());
     assertParticipantCohortStatuses(
         expectedReview2, page, pageSize, SortOrder.DESC, FilterColumns.PARTICIPANTID);
     assertParticipantCohortStatuses(expectedReview3, null, null, null, FilterColumns.STATUS);

@@ -165,8 +165,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       userRecentResourceService.updateConceptSetEntry(
           workspace.getWorkspaceId(),
           userProvider.get().getUserId(),
-          dbConceptSet.getConceptSetId(),
-          now);
+          dbConceptSet.getConceptSetId());
     } catch (DataIntegrityViolationException e) {
       throw new BadRequestException(
           String.format(
@@ -412,8 +411,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     userRecentResourceService.updateConceptSetEntry(
         toWorkspace.getWorkspaceId(),
         userProvider.get().getUserId(),
-        newConceptSet.getConceptSetId(),
-        now);
+        newConceptSet.getConceptSetId());
     return ResponseEntity.ok(toClientConceptSet(newConceptSet));
   }
 
