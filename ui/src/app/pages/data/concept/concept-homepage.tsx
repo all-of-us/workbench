@@ -357,8 +357,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     clearSearch() {
-      this.setState({currentSearchString: ''});
-      this.searchConcepts();
+      this.setState(
+        {currentSearchString: ''},
+        () => { this.searchConcepts().then(/* ignore promise returned */); });
     }
 
     browseDomain(domain: DomainInfo) {
