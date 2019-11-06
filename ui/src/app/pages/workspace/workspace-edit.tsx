@@ -491,19 +491,21 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         rp.populationHealth || rp.socialBehavioral;
     }
 
-    get specificPopulationSelected() {
+    get isSpecificPopulationValid() {
+      const researchPurpose = this.state.workspace.researchPurpose;
       return (
-          !this.state.workspace.researchPurpose.population ||
+          !researchPurpose.population ||
           (
-              this.state.workspace.researchPurpose.populationDetails &&
-              this.state.workspace.researchPurpose.populationDetails.length !== 0
-           )
+              researchPurpose.populationDetails &&
+              researchPurpose.populationDetails.length !== 0
+          )
       );
     }
 
-    get diseaseOfFocusSpecified() {
-      return !this.state.workspace.researchPurpose.diseaseFocusedResearch ||
-        this.state.workspace.researchPurpose.diseaseOfFocus;
+    get isDiseaseOfFocusValid() {
+      const researchPurpose = this.state.workspace.researchPurpose;
+      return !researchPurpose.diseaseFocusedResearch ||
+        researchPurpose.diseaseOfFocus;
     }
 
     updateResearchPurpose(category, value) {
@@ -651,8 +653,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         intendedStudy,
         reasonForAllOfUs,
         'primaryPurpose': this.categoryIsSelected,
-        'specificPopulation': this.specificPopulationSelected,
-        'diseaseOfFocus': this.diseaseOfFocusSpecified
+        'specificPopulation': this.isSpecificPopulationValid,
+        'diseaseOfFocus': this.isDiseaseOfFocusValid
       }, {
         name: {
           length: { minimum: 1, maximum: 80 }
@@ -660,9 +662,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         intendedStudy: { presence: true },
         anticipatedFindings: {presence: true },
         reasonForAllOfUs: { presence: true },
-        primaryPurpose: { truthiness: true },
-        specificPopulation: { truthiness: true },
-        diseaseOfFocus: { truthiness: true }
+        primaryPurpose: { truthiness: { expected: true } },
+        specificPopulation: { truthiness: { expected: true } },
+        diseaseOfFocus: { truthiness: { expected: true } }
       });
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '95%'}}>

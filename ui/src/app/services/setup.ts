@@ -5,9 +5,9 @@ export const setupCustomValidators = () => {
     return options.fn(value, key, attributes);
   };
 
-  validate.validators.truthiness = (actualTruthiness, expectedTruthiness) => {
-    if (actualTruthiness !== expectedTruthiness) {
-      return `must be ${expectedTruthiness}`;
+  validate.validators.truthiness = (actualTruthiness, options) => {
+    if (actualTruthiness !== options.expected) {
+      return `must be ${options.expected}`;
     } else {
       return undefined;
     }
