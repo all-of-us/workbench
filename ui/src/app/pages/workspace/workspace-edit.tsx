@@ -662,9 +662,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         intendedStudy: { presence: true },
         anticipatedFindings: {presence: true },
         reasonForAllOfUs: { presence: true },
-        primaryPurpose: { truthiness: { expected: true } },
-        specificPopulation: { truthiness: { expected: true } },
-        diseaseOfFocus: { truthiness: { expected: true } }
+        primaryPurpose: { truthiness: true },
+        specificPopulation: { truthiness: true },
+        diseaseOfFocus: { truthiness: true }
       });
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '95%'}}>
