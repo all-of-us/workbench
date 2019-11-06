@@ -39,7 +39,9 @@ apt-get update
 apt-get -t stretch-cran35 install -y --no-install-recommends libmagick++-dev gfortran-6
 
 for v in "2.7" "3"; do
-  "pip${v}" install --upgrade plotnine
+  "pip${v}" install --upgrade \
+    plotnine \
+    'https://github.com/all-of-us/pyclient/archive/pyclient-v1-17.zip#egg=aou_workbench_client&subdirectory=py'
 done
 
 # Install wondershaper for basic egress throttling.
