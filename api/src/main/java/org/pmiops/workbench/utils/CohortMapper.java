@@ -11,16 +11,16 @@ import org.pmiops.workbench.model.Cohort;
     uses = {CommonMappers.class},
     unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CohortMapper {
-  DbCohort sourceToDestination(Cohort source);
-  Cohort destinationToSource(DbCohort destination);
+  DbCohort clientToDbModel(Cohort source);
+  Cohort dbModelToClient(DbCohort destination);
 
-  default DbUser map(String creator) {
+  default DbUser DbUserToCreatorEmail(String creator) {
     final DbUser result = new DbUser();
     result.setEmail(creator);
     return result;
   }
 
-  default String map(DbUser creator) {
+  default String DbUserToCreatorEmail(DbUser creator) {
     return creator.getEmail();
   }
 }
