@@ -3,9 +3,9 @@ package org.pmiops.workbench.db.dao;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.ConceptSet;
-import org.pmiops.workbench.db.model.UserRecentResource;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,16 +36,16 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
    * a new entry
    */
   @Override
-  public UserRecentResource updateNotebookEntry(
+  public DbUserRecentResource updateNotebookEntry(
       long workspaceId, long userId, String notebookNameWithPath) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
-    UserRecentResource recentResource =
+    DbUserRecentResource recentResource =
         userRecentResourceDao.findByUserIdAndWorkspaceIdAndNotebookName(
             userId, workspaceId, notebookNameWithPath);
     if (recentResource == null) {
       handleUserLimit(userId);
-      recentResource = new UserRecentResource(workspaceId, userId, notebookNameWithPath, now);
+      recentResource = new DbUserRecentResource(workspaceId, userId, notebookNameWithPath, now);
     }
     recentResource.setLastAccessDate(now);
     userRecentResourceDao.save(recentResource);
@@ -62,12 +62,12 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   public void updateCohortEntry(long workspaceId, long userId, long cohortId) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
-    Cohort cohort = cohortDao.findOne(cohortId);
-    UserRecentResource resource =
+    DbCohort cohort = cohortDao.findOne(cohortId);
+    DbUserRecentResource resource =
         userRecentResourceDao.findByUserIdAndWorkspaceIdAndCohort(userId, workspaceId, cohort);
     if (resource == null) {
       handleUserLimit(userId);
-      resource = new UserRecentResource(workspaceId, userId, now);
+      resource = new DbUserRecentResource(workspaceId, userId, now);
       resource.setCohort(cohort);
     }
     resource.setLastAccessDate(now);
@@ -78,13 +78,13 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   public void updateConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
-    ConceptSet conceptSet = conceptSetDao.findOne(conceptSetId);
-    UserRecentResource resource =
+    DbConceptSet conceptSet = conceptSetDao.findOne(conceptSetId);
+    DbUserRecentResource resource =
         userRecentResourceDao.findByUserIdAndWorkspaceIdAndConceptSet(
             userId, workspaceId, conceptSet);
     if (resource == null) {
       handleUserLimit(userId);
-      resource = new UserRecentResource(workspaceId, userId, now);
+      resource = new DbUserRecentResource(workspaceId, userId, now);
       resource.setConceptSet(conceptSet);
     }
     resource.setLastAccessDate(now);
@@ -94,7 +94,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   /** Deletes notebook entry from user_recent_resource */
   @Override
   public void deleteNotebookEntry(long workspaceId, long userId, String notebookPath) {
-    UserRecentResource resource =
+    DbUserRecentResource resource =
         userRecentResourceDao.findByUserIdAndWorkspaceIdAndNotebookName(
             userId, workspaceId, notebookPath);
     if (resource != null) {
@@ -109,7 +109,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
    * @param userId : User id for whom the resources are returned
    */
   @Override
-  public List<UserRecentResource> findAllResourcesByUser(long userId) {
+  public List<DbUserRecentResource> findAllResourcesByUser(long userId) {
     return userRecentResourceDao.findUserRecentResourcesByUserIdOrderByLastAccessDateDesc(userId);
   }
 
@@ -120,7 +120,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   private void handleUserLimit(long userId) {
     long count = userRecentResourceDao.countUserRecentResourceByUserId(userId);
     while (count-- >= USER_ENTRY_COUNT) {
-      UserRecentResource resource =
+      DbUserRecentResource resource =
           userRecentResourceDao.findTopByUserIdOrderByLastAccessDate(userId);
       userRecentResourceDao.delete(resource);
     }

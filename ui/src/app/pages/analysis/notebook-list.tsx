@@ -61,7 +61,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
       this.setState({loading: true});
       const notebookList = await workspacesApi().getNoteBookList(namespace, id);
       this.setState({notebookList});
-      const notebookNameList = notebookList.map(fd => fd.name.slice(0, -6)); // remove '.ipynb'
+      const notebookNameList = notebookList.map(fd => fd.name.slice(0, -('.ipynb'.length)));
       this.setState({notebookNameList});
     } catch (error) {
       console.error(error);

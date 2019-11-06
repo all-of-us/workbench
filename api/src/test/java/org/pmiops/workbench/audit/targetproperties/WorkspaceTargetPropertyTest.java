@@ -32,7 +32,7 @@ public class WorkspaceTargetPropertyTest {
     final long now = System.currentTimeMillis();
 
     workspace1 = new Workspace();
-    workspace1.setName("Workspace 1");
+    workspace1.setName("DbWorkspace 1");
     workspace1.setId("fc-id-1");
     workspace1.setNamespace("aou-rw-local1-c4be869a");
     workspace1.setCreator("user@fake-research-aou.org");
@@ -45,7 +45,7 @@ public class WorkspaceTargetPropertyTest {
     workspace1.setPublished(false);
 
     workspace2 = new Workspace();
-    workspace2.setName("Workspace 2");
+    workspace2.setName("DbWorkspace 2");
     workspace2.setId("fc-id-1");
     workspace2.setNamespace("aou-rw-local1-c4be869a");
     workspace2.setCreator("user@fake-research-aou.org");

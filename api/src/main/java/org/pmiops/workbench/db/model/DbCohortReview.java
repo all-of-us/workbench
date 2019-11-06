@@ -18,7 +18,7 @@ import org.pmiops.workbench.model.ReviewStatus;
 
 @Entity
 @Table(name = "cohort_review")
-public class CohortReview {
+public class DbCohortReview {
 
   private long cohortReviewId;
   private int version;
@@ -33,7 +33,7 @@ public class CohortReview {
   private long reviewSize;
   private long reviewedCount;
   private Short reviewStatus;
-  private User creator;
+  private DbUser creator;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,7 +46,7 @@ public class CohortReview {
     this.cohortReviewId = cohortReviewId;
   }
 
-  public CohortReview cohortReviewId(long cohortReviewId) {
+  public DbCohortReview cohortReviewId(long cohortReviewId) {
     this.cohortReviewId = cohortReviewId;
     return this;
   }
@@ -61,7 +61,7 @@ public class CohortReview {
     this.version = version;
   }
 
-  public CohortReview version(int version) {
+  public DbCohortReview version(int version) {
     this.version = version;
     return this;
   }
@@ -75,7 +75,7 @@ public class CohortReview {
     this.cohortId = cohortId;
   }
 
-  public CohortReview cohortId(long cohortId) {
+  public DbCohortReview cohortId(long cohortId) {
     this.cohortId = cohortId;
     return this;
   }
@@ -89,7 +89,7 @@ public class CohortReview {
     this.cdrVersionId = cdrVersionId;
   }
 
-  public CohortReview cdrVersionId(long cdrVersionId) {
+  public DbCohortReview cdrVersionId(long cdrVersionId) {
     this.cdrVersionId = cdrVersionId;
     return this;
   }
@@ -103,7 +103,7 @@ public class CohortReview {
     this.cohortName = cohortName;
   }
 
-  public CohortReview cohortName(String cohortName) {
+  public DbCohortReview cohortName(String cohortName) {
     this.cohortName = cohortName;
     return this;
   }
@@ -117,7 +117,7 @@ public class CohortReview {
     this.description = description;
   }
 
-  public CohortReview description(String description) {
+  public DbCohortReview description(String description) {
     this.description = description;
     return this;
   }
@@ -132,7 +132,7 @@ public class CohortReview {
     this.cohortDefinition = cohortDefinition;
   }
 
-  public CohortReview cohortDefinition(String cohortDefinition) {
+  public DbCohortReview cohortDefinition(String cohortDefinition) {
     this.cohortDefinition = cohortDefinition;
     return this;
   }
@@ -146,7 +146,7 @@ public class CohortReview {
     this.creationTime = creationTime;
   }
 
-  public CohortReview creationTime(Timestamp creationTime) {
+  public DbCohortReview creationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
     return this;
   }
@@ -160,7 +160,7 @@ public class CohortReview {
     this.lastModifiedTime = lastModifiedTime;
   }
 
-  public CohortReview lastModifiedTime(Timestamp lastModifiedTime) {
+  public DbCohortReview lastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
     return this;
   }
@@ -174,7 +174,7 @@ public class CohortReview {
     this.matchedParticipantCount = matchedParticipantCount;
   }
 
-  public CohortReview matchedParticipantCount(long matchedParticipantCount) {
+  public DbCohortReview matchedParticipantCount(long matchedParticipantCount) {
     this.matchedParticipantCount = matchedParticipantCount;
     return this;
   }
@@ -188,7 +188,7 @@ public class CohortReview {
     this.reviewSize = reviewSize;
   }
 
-  public CohortReview reviewSize(long reviewSize) {
+  public DbCohortReview reviewSize(long reviewSize) {
     this.reviewSize = reviewSize;
     return this;
   }
@@ -206,7 +206,7 @@ public class CohortReview {
     this.reviewedCount = reviewedCount;
   }
 
-  public CohortReview reviewedCount(long reviewedCount) {
+  public DbCohortReview reviewedCount(long reviewedCount) {
     this.reviewedCount = reviewedCount;
     return this;
   }
@@ -220,35 +220,35 @@ public class CohortReview {
     this.reviewStatus = reviewStatus;
   }
 
-  public CohortReview reviewStatus(Short reviewStatus) {
+  public DbCohortReview reviewStatus(Short reviewStatus) {
     this.reviewStatus = reviewStatus;
     return this;
   }
 
   @Transient
   public ReviewStatus getReviewStatusEnum() {
-    return StorageEnums.reviewStatusFromStorage(getReviewStatus());
+    return DbStorageEnums.reviewStatusFromStorage(getReviewStatus());
   }
 
   public void setReviewStatusEnum(ReviewStatus reviewStatus) {
-    setReviewStatus(StorageEnums.reviewStatusToStorage(reviewStatus));
+    setReviewStatus(DbStorageEnums.reviewStatusToStorage(reviewStatus));
   }
 
-  public CohortReview reviewStatusEnum(ReviewStatus reviewStatus) {
-    return this.reviewStatus(StorageEnums.reviewStatusToStorage(reviewStatus));
+  public DbCohortReview reviewStatusEnum(ReviewStatus reviewStatus) {
+    return this.reviewStatus(DbStorageEnums.reviewStatusToStorage(reviewStatus));
   }
 
   @ManyToOne
   @JoinColumn(name = "creator_id")
-  public User getCreator() {
+  public DbUser getCreator() {
     return creator;
   }
 
-  public void setCreator(User creator) {
+  public void setCreator(DbUser creator) {
     this.creator = creator;
   }
 
-  public CohortReview creator(User creator) {
+  public DbCohortReview creator(DbUser creator) {
     this.creator = creator;
     return this;
   }
@@ -261,7 +261,7 @@ public class CohortReview {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CohortReview that = (CohortReview) o;
+    DbCohortReview that = (DbCohortReview) o;
     return version == that.version
         && cohortId == that.cohortId
         && cdrVersionId == that.cdrVersionId

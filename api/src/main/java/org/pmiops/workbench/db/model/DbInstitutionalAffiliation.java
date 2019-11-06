@@ -13,10 +13,10 @@ import org.pmiops.workbench.model.NonAcademicAffiliation;
 
 @Entity
 @Table(name = "institutional_affiliation")
-public class InstitutionalAffiliation {
+public class DbInstitutionalAffiliation {
 
   private long institutionalAffiliationId;
-  private User user;
+  private DbUser user;
   private int orderIndex;
   private String institution;
   private String role;
@@ -36,11 +36,11 @@ public class InstitutionalAffiliation {
 
   @ManyToOne
   @JoinColumn(name = "user_id")
-  public User getUser() {
+  public DbUser getUser() {
     return user;
   }
 
-  public void setUser(User user) {
+  public void setUser(DbUser user) {
     this.user = user;
   }
 

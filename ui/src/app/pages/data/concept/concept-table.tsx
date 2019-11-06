@@ -161,7 +161,7 @@ export class ConceptTable extends React.Component<Props, State> {
 
   highlightWithSearchTerm(stringToHighlight: string) {
     const {searchTerm} = this.props;
-    if (!searchTerm) {
+    if (!searchTerm || searchTerm.trim() === '') {
       return stringToHighlight;
     }
     const words: string[] = [];

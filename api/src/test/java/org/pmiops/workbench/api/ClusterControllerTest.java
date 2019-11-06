@@ -30,8 +30,8 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -87,7 +87,7 @@ public class ClusterControllerTest {
   private static final String BIGQUERY_DATASET = "dataset-name";
 
   private static WorkbenchConfig config = new WorkbenchConfig();
-  private static User user = new User();
+  private static DbUser user = new DbUser();
 
   @TestConfiguration
   @Import({ClusterController.class, UserService.class})
@@ -115,7 +115,7 @@ public class ClusterControllerTest {
 
     @Bean
     @Scope("prototype")
-    User user() {
+    DbUser user() {
       return user;
     }
 
@@ -138,7 +138,7 @@ public class ClusterControllerTest {
   private CdrVersion cdrVersion;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
   private Cluster testCluster;
-  private Workspace testWorkspace;
+  private DbWorkspace testWorkspace;
 
   @Before
   public void setUp() {
@@ -153,7 +153,7 @@ public class ClusterControllerTest {
     config.access.enableComplianceTraining = true;
     config.featureFlags = new FeatureFlagsConfig();
 
-    user = new User();
+    user = new DbUser();
     user.setEmail(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
 
@@ -180,7 +180,7 @@ public class ClusterControllerTest {
             .status(ClusterStatus.DELETING)
             .createdDate(createdDate);
 
-    testWorkspace = new Workspace();
+    testWorkspace = new DbWorkspace();
     testWorkspace.setWorkspaceNamespace(WORKSPACE_NS);
     testWorkspace.setName(WORKSPACE_NAME);
     testWorkspace.setCdrVersion(cdrVersion);
@@ -196,7 +196,7 @@ public class ClusterControllerTest {
   }
 
   private void stubGetWorkspace(String ns, String name, String creator) throws Exception {
-    Workspace w = new Workspace();
+    DbWorkspace w = new DbWorkspace();
     w.setWorkspaceNamespace(ns);
     w.setFirecloudName(name);
     w.setCdrVersion(cdrVersion);
@@ -289,7 +289,7 @@ public class ClusterControllerTest {
                     new ClusterConfig().machineType("n1-standard-16").masterDiskSize(100)));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
-    User updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
+    DbUser updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
     assertThat(updatedUser.getClusterConfigDefault().machineType).isEqualTo("n1-standard-16");
     assertThat(updatedUser.getClusterConfigDefault().masterDiskSize).isEqualTo(100);
   }
@@ -309,7 +309,7 @@ public class ClusterControllerTest {
             new UpdateClusterConfigRequest().userEmail(OTHER_USER_EMAIL).clusterConfig(null));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
-    User updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
+    DbUser updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
     assertThat(updatedUser.getClusterConfigDefault()).isNull();
   }
 
@@ -422,7 +422,7 @@ public class ClusterControllerTest {
   }
 
   private void createUser(String email) {
-    User user = new User();
+    DbUser user = new DbUser();
     user.setGivenName("first");
     user.setFamilyName("last");
     user.setEmail(email);

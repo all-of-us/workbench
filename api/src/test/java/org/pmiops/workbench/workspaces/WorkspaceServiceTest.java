@@ -27,8 +27,9 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.UserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.Workspace;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
@@ -61,14 +62,14 @@ public class WorkspaceServiceTest {
   @Mock private CohortCloningService mockCohortCloningService;
   @Mock private ConceptSetService mockConceptSetService;
   @Mock private DataSetService mockDataSetService;
-  @Mock private Provider<User> mockUserProvider;
+  @Mock private Provider<DbUser> mockUserProvider;
   @Mock private FireCloudService mockFireCloudService;
   @Mock private Clock mockClock;
 
   private WorkspaceService workspaceService;
 
   private List<WorkspaceResponse> mockWorkspaceResponses = new ArrayList<>();
-  private List<org.pmiops.workbench.db.model.Workspace> mockWorkspaces = new ArrayList<>();
+  private List<DbWorkspace> mockWorkspaces = new ArrayList<>();
   private AtomicLong workspaceIdIncrementer = new AtomicLong(1);
   private Instant NOW = Instant.now();
   private long USER_ID = 1L;
@@ -124,7 +125,7 @@ public class WorkspaceServiceTest {
         WorkspaceActiveStatus.ACTIVE);
 
     doReturn(mockWorkspaceResponses).when(mockFireCloudService).getWorkspaces(any());
-    User mockUser = mock(User.class);
+    DbUser mockUser = mock(DbUser.class);
     doReturn(mockUser).when(mockUserProvider).get();
     doReturn(DEFAULT_USER_EMAIL).when(mockUser).getEmail();
     doReturn(USER_ID).when(mockUser).getUserId();
@@ -145,10 +146,9 @@ public class WorkspaceServiceTest {
     return mockWorkspaceResponse;
   }
 
-  private org.pmiops.workbench.db.model.Workspace buildDbWorkspace(
+  private DbWorkspace buildDbWorkspace(
       long dbId, String name, String namespace, WorkspaceActiveStatus activeStatus) {
-    org.pmiops.workbench.db.model.Workspace workspace =
-        new org.pmiops.workbench.db.model.Workspace();
+    DbWorkspace workspace = new DbWorkspace();
     Timestamp nowTimestamp = Timestamp.from(NOW);
     workspace.setLastModifiedTime(nowTimestamp);
     workspace.setCreationTime(nowTimestamp);
@@ -161,7 +161,7 @@ public class WorkspaceServiceTest {
     return workspace;
   }
 
-  private org.pmiops.workbench.db.model.Workspace addMockedWorkspace(
+  private DbWorkspace addMockedWorkspace(
       long workspaceId,
       String workspaceName,
       String workspaceNamespace,
@@ -183,7 +183,7 @@ public class WorkspaceServiceTest {
         .getWorkspaceAcl(workspaceNamespace, workspaceName);
     mockWorkspaceResponses.add(mockWorkspaceResponse);
 
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+    DbWorkspace dbWorkspace =
         workspaceDao.save(
             buildDbWorkspace(
                 workspaceId,
@@ -252,12 +252,12 @@ public class WorkspaceServiceTest {
               USER_ID,
               Timestamp.from(NOW.minusSeconds(mockWorkspaces.size() - workspace.getWorkspaceId())));
         });
-    List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
+    List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT);
 
     List<Long> actualIds =
         recentWorkspaces.stream()
-            .map(UserRecentWorkspace::getWorkspaceId)
+            .map(DbUserRecentWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
     List<Long> expectedIds =
         mockWorkspaces
@@ -265,7 +265,7 @@ public class WorkspaceServiceTest {
                 mockWorkspaces.size() - WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT,
                 mockWorkspaces.size())
             .stream()
-            .map(org.pmiops.workbench.db.model.Workspace::getWorkspaceId)
+            .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
     assertThat(actualIds).containsAll(expectedIds);
   }
@@ -284,7 +284,7 @@ public class WorkspaceServiceTest {
               USER_ID,
               Timestamp.from(NOW.minusSeconds(mockWorkspaces.size() - workspace.getWorkspaceId())));
         });
-    List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
+    List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
 
     assertThat(recentWorkspaces.size()).isEqualTo(4);
     recentWorkspaces.forEach(
@@ -294,7 +294,7 @@ public class WorkspaceServiceTest {
 
     List<Long> actualIds =
         recentWorkspaces.stream()
-            .map(UserRecentWorkspace::getWorkspaceId)
+            .map(DbUserRecentWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
     List<Long> expectedIds =
         mockWorkspaces
@@ -302,15 +302,15 @@ public class WorkspaceServiceTest {
                 mockWorkspaces.size() - WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT,
                 mockWorkspaces.size())
             .stream()
-            .map(org.pmiops.workbench.db.model.Workspace::getWorkspaceId)
+            .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
     assertThat(actualIds).containsAll(expectedIds);
 
-    User mockUser = mock(User.class);
+    DbUser mockUser = mock(DbUser.class);
     doReturn(mockUser).when(mockUserProvider).get();
     doReturn(DEFAULT_USER_EMAIL).when(mockUser).getEmail();
     doReturn(OTHER_USER_ID).when(mockUser).getUserId();
-    List<UserRecentWorkspace> otherRecentWorkspaces = workspaceService.getRecentWorkspaces();
+    List<DbUserRecentWorkspace> otherRecentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(otherRecentWorkspaces.size()).isEqualTo(1);
     assertThat(otherRecentWorkspaces.get(0).getWorkspaceId())
         .isEqualTo(mockWorkspaces.get(0).getWorkspaceId());
@@ -328,11 +328,11 @@ public class WorkspaceServiceTest {
         mockWorkspaces.get(1), USER_ID, Timestamp.from(NOW.minusSeconds(1)));
     workspaceService.updateRecentWorkspaces(mockWorkspaces.get(0), USER_ID, Timestamp.from(NOW));
 
-    List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
+    List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(2);
     List<Long> actualIds =
         recentWorkspaces.stream()
-            .map(UserRecentWorkspace::getWorkspaceId)
+            .map(DbUserRecentWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
     assertThat(actualIds).contains(1L, 2L);
   }
@@ -340,7 +340,7 @@ public class WorkspaceServiceTest {
   @Test
   public void enforceFirecloudAclsInRecentWorkspaces() {
     long ownedId = workspaceIdIncrementer.getAndIncrement();
-    org.pmiops.workbench.db.model.Workspace ownedWorkspace =
+    DbWorkspace ownedWorkspace =
         addMockedWorkspace(
             ownedId,
             "owned",
@@ -349,7 +349,7 @@ public class WorkspaceServiceTest {
             WorkspaceActiveStatus.ACTIVE);
     workspaceService.updateRecentWorkspaces(ownedWorkspace, USER_ID, Timestamp.from(NOW));
 
-    org.pmiops.workbench.db.model.Workspace sharedWorkspace =
+    DbWorkspace sharedWorkspace =
         addMockedWorkspace(
             workspaceIdIncrementer.getAndIncrement(),
             "shared",
@@ -358,7 +358,7 @@ public class WorkspaceServiceTest {
             WorkspaceActiveStatus.ACTIVE);
     workspaceService.updateRecentWorkspaces(sharedWorkspace, USER_ID, Timestamp.from(NOW));
 
-    List<UserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
+    List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(1);
     assertThat(recentWorkspaces.get(0).getWorkspaceId()).isEqualTo(ownedId);
   }

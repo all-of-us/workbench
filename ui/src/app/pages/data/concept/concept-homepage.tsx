@@ -266,14 +266,19 @@ export const ConceptHomepage = withCurrentWorkspace()(
       }
     }
 
-    triggerSearch(e) {
+    handleSearchStringChange(e) {
+      this.setState({currentSearchString: e});
+    }
+
+    handleSearchKeyPress(e) {
       // search on enter key
-      if (e.keyCode === 13) {
-        const searchTermLength = e.target.value.trim().length;
+      if (e.key === 'Enter' ) {
+        const searchTermLength = this.state.currentSearchString.trim().length;
         if (searchTermLength < 3) {
           this.setState({showSearchError: true});
         } else {
-          this.setState({currentSearchString: e.target.value}, this.searchConcepts);
+          this.setState({showSearchError: false});
+          this.searchConcepts().then(/* ignore promise returned */);
         }
       }
     }
@@ -352,8 +357,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     clearSearch() {
-      this.setState({currentSearchString: ''});
-      this.searchConcepts();
+      this.setState({
+        currentSearchString: '',
+        showSearchError: false,
+        searching: false // reset the search result table to show browse/domain cards instead
+      });
     }
 
     browseDomain(domain: DomainInfo) {
@@ -477,7 +485,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
                 fill: colors.accent, left: 'calc(1rem + 4.5%)'}}/>
               <TextInput style={styles.searchBar} data-test-id='concept-search-input'
                          placeholder='Search concepts in domain'
-                         onKeyDown={e => {this.triggerSearch(e); }}/>
+                         value={this.state.currentSearchString}
+                         onChange={(e) => this.handleSearchStringChange(e)}
+                         onKeyPress={(e) => this.handleSearchKeyPress(e)}/>
               {currentSearchString !== '' && <Clickable onClick={() => this.clearSearch()}
                                                         data-test-id='clear-search'>
                   <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>

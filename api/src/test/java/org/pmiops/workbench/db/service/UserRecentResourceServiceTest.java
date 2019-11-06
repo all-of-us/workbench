@@ -17,11 +17,11 @@ import org.pmiops.workbench.db.dao.UserRecentResourceDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.ConceptSet;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.UserRecentResource;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserRecentResource;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -45,13 +45,12 @@ public class UserRecentResourceServiceTest {
   @Autowired CohortDao cohortDao;
   @Autowired UserRecentResourceDao userRecentResourceDao;
   @Autowired ConceptSetDao conceptSetDao;
-
   @Autowired UserRecentResourceService userRecentResourceService;
 
-  private User user;
-  private Workspace workspace;
-  private Cohort cohort;
-  private ConceptSet conceptSet;
+  private DbUser user;
+  private DbWorkspace workspace;
+  private DbCohort cohort;
+  private DbConceptSet conceptSet;
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
@@ -67,15 +66,15 @@ public class UserRecentResourceServiceTest {
 
   @Before
   public void setUp() {
-    user = userDao.save(new User());
+    user = userDao.save(new DbUser());
 
-    workspace = workspaceDao.save(new Workspace());
+    workspace = workspaceDao.save(new DbWorkspace());
 
-    cohort = new Cohort();
+    cohort = new DbCohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohort = cohortDao.save(cohort);
 
-    conceptSet = new ConceptSet();
+    conceptSet = new DbConceptSet();
     conceptSet.setWorkspaceId(workspace.getWorkspaceId());
     conceptSet = conceptSetDao.save(conceptSet);
   }
@@ -86,9 +85,11 @@ public class UserRecentResourceServiceTest {
         workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
     long rowsCount = userRecentResourceDao.count();
     assertEquals(rowsCount, 1);
-    Cohort newCohort = new Cohort();
+
+    DbCohort newCohort = new DbCohort();
     newCohort.setWorkspaceId(workspace.getWorkspaceId());
     newCohort = cohortDao.save(newCohort);
+
     userRecentResourceService.updateCohortEntry(
         workspace.getWorkspaceId(), user.getUserId(), newCohort.getCohortId());
     rowsCount = userRecentResourceDao.count();
@@ -101,7 +102,7 @@ public class UserRecentResourceServiceTest {
         workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
     long rowsCount = userRecentResourceDao.count();
     assertEquals(rowsCount, 1);
-    ConceptSet newConceptSet = new ConceptSet();
+    DbConceptSet newConceptSet = new DbConceptSet();
     newConceptSet.setWorkspaceId(workspace.getWorkspaceId());
     newConceptSet = conceptSetDao.save(newConceptSet);
     userRecentResourceService.updateConceptSetEntry(
@@ -164,7 +165,7 @@ public class UserRecentResourceServiceTest {
 
   @Test
   public void testUserLimit() {
-    Workspace newWorkspace = new Workspace();
+    DbWorkspace newWorkspace = new DbWorkspace();
     newWorkspace.setWorkspaceId(2l);
     workspaceDao.save(newWorkspace);
     userRecentResourceService.updateNotebookEntry(
@@ -192,11 +193,12 @@ public class UserRecentResourceServiceTest {
         "gs://someDirectory/notebooks/notebookExtra");
     rowsCount = userRecentResourceDao.count();
     assertEquals(rowsCount, UserRecentResourceService.USER_ENTRY_COUNT);
-    UserRecentResource cache =
+    DbUserRecentResource cache =
         userRecentResourceDao.findByUserIdAndWorkspaceIdAndNotebookName(
             newWorkspace.getWorkspaceId(),
             user.getUserId(),
             "gs://someDirectory1/notebooks/notebook");
+
     assertNull(cache);
   }
 
@@ -238,8 +240,9 @@ public class UserRecentResourceServiceTest {
     userRecentResourceService.updateNotebookEntry(
         workspace.getWorkspaceId(), user.getUserId(), "gs://someDirectory1/notebooks/notebook2");
 
-    List<UserRecentResource> resources =
+    List<DbUserRecentResource> resources =
         userRecentResourceService.findAllResourcesByUser(user.getUserId());
+
     assertEquals(resources.size(), 3);
     assertEquals(resources.get(0).getNotebookName(), "gs://someDirectory1/notebooks/notebook2");
     assertEquals(resources.get(1).getCohort().getCohortId(), cohort.getCohortId());

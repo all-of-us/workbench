@@ -8,19 +8,19 @@ import org.pmiops.workbench.model.Domain;
 
 @Embeddable
 @Table(name = "data_set_cohort_id")
-public class DataSetValue {
+public class DbDatasetValue {
 
   private String domainId;
   private String value;
 
-  public DataSetValue() {}
+  public DbDatasetValue() {}
 
-  public DataSetValue(String domainId, String value) {
+  public DbDatasetValue(String domainId, String value) {
     this.domainId = domainId;
     this.value = value;
   }
 
-  public DataSetValue(DataSetValue dataSetValue) {
+  public DbDatasetValue(DbDatasetValue dataSetValue) {
     setDomainId(dataSetValue.getDomainId());
     setValue(dataSetValue.getValue());
   }
@@ -48,7 +48,7 @@ public class DataSetValue {
     this.value = value;
   }
 
-  public boolean equals(DataSetValue dataSetValue) {
+  public boolean equals(DbDatasetValue dataSetValue) {
     return getValue().equals(dataSetValue.getValue())
         && getDomainEnum().equals(dataSetValue.getDomainEnum());
   }

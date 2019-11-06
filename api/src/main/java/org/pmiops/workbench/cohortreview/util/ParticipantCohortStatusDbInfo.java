@@ -4,7 +4,7 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Filter;
@@ -155,7 +155,7 @@ public enum ParticipantCohortStatusDbInfo {
   }
 
   private static Object parseShort(String v) {
-    return StorageEnums.cohortStatusToStorage(CohortStatus.valueOf(v));
+    return DbStorageEnums.cohortStatusToStorage(CohortStatus.valueOf(v));
   }
 
   private static Object parseDate(String v) {

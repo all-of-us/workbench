@@ -19,9 +19,11 @@ import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.UserRecentResource;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserRecentResource;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -43,7 +45,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private static final Logger logger = Logger.getLogger(UserMetricsController.class.getName());
   private static final int MAX_RECENT_NOTEBOOKS = 8;
   private static final Logger log = Logger.getLogger(UserMetricsController.class.getName());
-  private final Provider<User> userProvider;
+  private final Provider<DbUser> userProvider;
   private final UserRecentResourceService userRecentResourceService;
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
@@ -52,7 +54,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private Clock clock;
 
   // Converts DB model to client Model
-  private final Function<UserRecentResource, RecentResource> TO_CLIENT =
+  private final Function<DbUserRecentResource, RecentResource> TO_CLIENT =
       userRecentResource -> {
         RecentResource resource = new RecentResource();
         resource.setCohort(TO_CLIENT_COHORT.apply(userRecentResource.getCohort()));
@@ -64,10 +66,10 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         return resource;
       };
 
-  private static final Function<org.pmiops.workbench.db.model.Cohort, Cohort> TO_CLIENT_COHORT =
-      new Function<org.pmiops.workbench.db.model.Cohort, Cohort>() {
+  private static final Function<DbCohort, Cohort> TO_CLIENT_COHORT =
+      new Function<DbCohort, Cohort>() {
         @Override
-        public Cohort apply(org.pmiops.workbench.db.model.Cohort cohort) {
+        public Cohort apply(DbCohort cohort) {
           if (cohort == null) {
             return null;
           }
@@ -88,29 +90,28 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         }
       };
 
-  private static final Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>
-      TO_CLIENT_CONCEPT_SET =
-          new Function<org.pmiops.workbench.db.model.ConceptSet, ConceptSet>() {
-            @Override
-            public ConceptSet apply(org.pmiops.workbench.db.model.ConceptSet conceptSet) {
-              if (conceptSet == null) {
-                return null;
-              }
-              ConceptSet result =
-                  new ConceptSet()
-                      .etag(Etags.fromVersion(conceptSet.getVersion()))
-                      .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
-                      .creationTime(conceptSet.getCreationTime().getTime())
-                      .description(conceptSet.getDescription())
-                      .id(conceptSet.getConceptSetId())
-                      .name(conceptSet.getName());
-              return result;
-            }
-          };
+  private static final Function<DbConceptSet, ConceptSet> TO_CLIENT_CONCEPT_SET =
+      new Function<DbConceptSet, ConceptSet>() {
+        @Override
+        public ConceptSet apply(DbConceptSet conceptSet) {
+          if (conceptSet == null) {
+            return null;
+          }
+          ConceptSet result =
+              new ConceptSet()
+                  .etag(Etags.fromVersion(conceptSet.getVersion()))
+                  .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
+                  .creationTime(conceptSet.getCreationTime().getTime())
+                  .description(conceptSet.getDescription())
+                  .id(conceptSet.getConceptSetId())
+                  .name(conceptSet.getName());
+          return result;
+        }
+      };
 
   @Autowired
   UserMetricsController(
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
@@ -148,7 +149,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
               .getBucketName();
       notebookPath = "gs://" + bucket + "/notebooks/" + recentResourceRequest.getNotebookName();
     }
-    UserRecentResource recentResource =
+    DbUserRecentResource recentResource =
         userRecentResourceService.updateNotebookEntry(
             wId, userProvider.get().getUserId(), notebookPath);
     return ResponseEntity.ok(TO_CLIENT.apply(recentResource));
@@ -167,11 +168,11 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   @Override
   public ResponseEntity<RecentResourceResponse> getUserRecentResources() {
     long userId = userProvider.get().getUserId();
-    List<UserRecentResource> userRecentResourceList =
+    List<DbUserRecentResource> userRecentResourceList =
         userRecentResourceService.findAllResourcesByUser(userId);
     List<Long> workspaceIdList =
         userRecentResourceList.stream()
-            .map(UserRecentResource::getWorkspaceId)
+            .map(DbUserRecentResource::getWorkspaceId)
             .distinct()
             .limit(distinctWorkspacelimit)
             .collect(Collectors.toList());
@@ -179,17 +180,16 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // RW-1298
     // This needs to be refactored to only use namespace and FC ID
     // The purpose of this Map, is to check what is actually still present in FC
-
     ImmutableMap.Builder<Long, WorkspaceResponse> liveWorkspacesByIdBuilder = new Builder<>();
     for (long workspaceId : workspaceIdList) {
-      final Optional<Workspace> workspaceMaybe = workspaceService.getWorkspaceMaybe(workspaceId);
+      final Optional<DbWorkspace> workspaceMaybe = workspaceService.getWorkspaceMaybe(workspaceId);
       if (!workspaceMaybe.isPresent()) {
         logger.log(
             Level.WARNING,
             String.format("Workspace ID %d still in recent list but not found", workspaceId));
         continue;
       }
-      final Workspace workspace = workspaceMaybe.get();
+      final DbWorkspace workspace = workspaceMaybe.get();
       final WorkspaceResponse workspaceResponse =
           fireCloudService.getWorkspace(
               workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
@@ -199,7 +199,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     }
     ImmutableMap<Long, WorkspaceResponse> liveWorkspacesById = liveWorkspacesByIdBuilder.build();
 
-    List<UserRecentResource> workspaceFilteredResources =
+    List<DbUserRecentResource> workspaceFilteredResources =
         userRecentResourceList.stream()
             .filter(r -> liveWorkspacesById.containsKey(r.getWorkspaceId()))
             // Drop any invalid notebook resources - parseBlobId will log errors.
@@ -242,7 +242,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   // Retrieves Database workspace ID
   private long getWorkspaceId(String workspaceNamespace, String workspaceId) {
-    Workspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     return dbWorkspace.getWorkspaceId();
   }
 

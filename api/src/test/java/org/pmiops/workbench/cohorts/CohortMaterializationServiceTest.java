@@ -31,11 +31,11 @@ import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantCohortStatusKey;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.CdrQuery;
 import org.pmiops.workbench.model.CohortAnnotationsRequest;
@@ -114,7 +114,7 @@ public class CohortMaterializationServiceTest {
     }
   }
 
-  private CohortReview cohortReview;
+  private DbCohortReview cohortReview;
 
   @Before
   public void setUp() {
@@ -124,13 +124,13 @@ public class CohortMaterializationServiceTest {
     cdrVersionDao.save(cdrVersion);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    Workspace workspace = new Workspace();
+    DbWorkspace workspace = new DbWorkspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
     workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
-    Cohort cohort = new Cohort();
+    DbCohort cohort = new DbCohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohort.setName("males");
     cohort.setType("AOU");
@@ -138,14 +138,14 @@ public class CohortMaterializationServiceTest {
     cohort.setCriteria(gson.toJson(SearchRequests.males()));
     cohortDao.save(cohort);
 
-    Cohort cohort2 = new Cohort();
+    DbCohort cohort2 = new DbCohort();
     cohort2.setWorkspaceId(workspace.getWorkspaceId());
     cohort2.setName("all genders");
     cohort2.setType("AOU");
     cohort2.setCriteria(gson.toJson(SearchRequests.allGenders()));
     cohortDao.save(cohort2);
 
-    cohortReview = new CohortReview();
+    cohortReview = new DbCohortReview();
     cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
     cohortReview.setCohortId(cohort2.getCohortId());
     cohortReview.setMatchedParticipantCount(3);
@@ -313,14 +313,14 @@ public class CohortMaterializationServiceTest {
     return makeRequest(pageSize).fieldSet(fieldSet);
   }
 
-  private ParticipantCohortStatus makeStatus(
+  private DbParticipantCohortStatus makeStatus(
       long cohortReviewId, long participantId, CohortStatus status) {
-    ParticipantCohortStatusKey key =
-        new ParticipantCohortStatusKey()
+    DbParticipantCohortStatusKey key =
+        new DbParticipantCohortStatusKey()
             .cohortReviewId(cohortReviewId)
             .participantId(participantId);
-    ParticipantCohortStatus result =
-        new ParticipantCohortStatus().statusEnum(status).participantKey(key);
+    DbParticipantCohortStatus result =
+        new DbParticipantCohortStatus().statusEnum(status).participantKey(key);
     return result;
   }
 

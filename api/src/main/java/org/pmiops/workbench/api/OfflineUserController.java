@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
@@ -60,13 +60,13 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     int changeCount = 0;
     int accessLevelChangeCount = 0;
 
-    for (User user : userService.getAllUsers()) {
+    for (DbUser user : userService.getAllUsers()) {
       userCount++;
       try {
         Timestamp oldTime = user.getComplianceTrainingCompletionTime();
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 
-        User updatedUser = userService.syncComplianceTrainingStatus(user);
+        DbUser updatedUser = userService.syncComplianceTrainingStatus(user);
 
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
         DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();
@@ -119,13 +119,13 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     int changeCount = 0;
     int accessLevelChangeCount = 0;
 
-    for (User user : userService.getAllUsers()) {
+    for (DbUser user : userService.getAllUsers()) {
       userCount++;
       try {
         Timestamp oldTime = user.getEraCommonsCompletionTime();
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 
-        User updatedUser = userService.syncEraCommonsStatusUsingImpersonation(user);
+        DbUser updatedUser = userService.syncEraCommonsStatusUsingImpersonation(user);
 
         Timestamp newTime = updatedUser.getEraCommonsCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
@@ -183,13 +183,13 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     int changeCount = 0;
     int accessLevelChangeCount = 0;
 
-    for (User user : userService.getAllUsers()) {
+    for (DbUser user : userService.getAllUsers()) {
       userCount++;
       try {
         Timestamp oldTime = user.getTwoFactorAuthCompletionTime();
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 
-        User updatedUser = userService.syncTwoFactorAuthStatus(user);
+        DbUser updatedUser = userService.syncTwoFactorAuthStatus(user);
 
         Timestamp newTime = updatedUser.getTwoFactorAuthCompletionTime();
         DataAccessLevel newLevel = user.getDataAccessLevelEnum();
@@ -236,7 +236,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
    */
   @Override
   public ResponseEntity<Void> bulkAuditProjectAccess() {
-    for (User user : userService.getAllUsers()) {
+    for (DbUser user : userService.getAllUsers()) {
       // TODO(RW-2062): Move to using the gcloud api for list all resources when it is available.
       List<String> unauthorizedLogs =
           cloudResourceManagerService.getAllProjectsForUser(user).stream()

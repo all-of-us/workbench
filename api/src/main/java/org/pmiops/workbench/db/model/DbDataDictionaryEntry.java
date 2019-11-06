@@ -13,7 +13,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "data_dictionary_entry")
-public class DataDictionaryEntry {
+public class DbDataDictionaryEntry {
 
   // Metadata fields
   private long dataDictionaryEntryId;
@@ -32,7 +32,7 @@ public class DataDictionaryEntry {
   private String sourcePpiModule;
   private Boolean transformedByRegisteredTierPrivacyMethods;
 
-  public DataDictionaryEntry() {}
+  public DbDataDictionaryEntry() {}
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -141,7 +141,7 @@ public class DataDictionaryEntry {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    DataDictionaryEntry that = (DataDictionaryEntry) o;
+    DbDataDictionaryEntry that = (DbDataDictionaryEntry) o;
     return dataDictionaryEntryId == that.dataDictionaryEntryId
         && Objects.equals(cdrVersion, that.cdrVersion)
         && Objects.equals(definedTime, that.definedTime)

@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.UserRecentWorkspace;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
@@ -20,13 +20,13 @@ public interface WorkspaceService {
 
   WorkspaceDao getDao();
 
-  Workspace findByWorkspaceId(long workspaceId);
+  DbWorkspace findByWorkspaceId(long workspaceId);
 
-  Optional<Workspace> getWorkspaceMaybe(long workspaceId);
+  Optional<DbWorkspace> getWorkspaceMaybe(long workspaceId);
 
   FireCloudService getFireCloudService();
 
-  Workspace get(String ns, String firecloudName);
+  DbWorkspace get(String ns, String firecloudName);
 
   List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces();
 
@@ -36,31 +36,31 @@ public interface WorkspaceService {
 
   List<WorkspaceResponse> getPublishedWorkspaces();
 
-  Workspace getByName(String ns, String name);
+  DbWorkspace getByName(String ns, String name);
 
-  Workspace getRequired(String ns, String firecloudName);
+  DbWorkspace getRequired(String ns, String firecloudName);
 
-  Workspace getRequiredWithCohorts(String ns, String firecloudName);
+  DbWorkspace getRequiredWithCohorts(String ns, String firecloudName);
 
-  Workspace saveWithLastModified(Workspace workspace);
+  DbWorkspace saveWithLastModified(DbWorkspace workspace);
 
-  List<Workspace> findForReview();
+  List<DbWorkspace> findForReview();
 
   void setResearchPurposeApproved(String ns, String firecloudName, boolean approved);
 
-  Workspace updateWorkspaceAcls(
-      Workspace workspace,
+  DbWorkspace updateWorkspaceAcls(
+      DbWorkspace workspace,
       Map<String, WorkspaceAccessLevel> userRoleMap,
       String registeredUsersGroup);
 
-  Workspace saveAndCloneCohortsConceptSetsAndDataSets(Workspace from, Workspace to);
+  DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to);
 
   WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId);
 
   WorkspaceAccessLevel enforceWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess);
 
-  Workspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+  DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel);
 
   Map<String, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(
@@ -71,14 +71,14 @@ public interface WorkspaceService {
   WorkspaceACLUpdate updateFirecloudAclsOnUser(
       WorkspaceAccessLevel updatedAccess, WorkspaceACLUpdate currentUpdate);
 
-  Workspace setPublished(Workspace workspace, String publishedWorkspaceGroup, boolean publish);
+  DbWorkspace setPublished(DbWorkspace workspace, String publishedWorkspaceGroup, boolean publish);
 
-  List<UserRecentWorkspace> getRecentWorkspaces();
+  List<DbUserRecentWorkspace> getRecentWorkspaces();
 
-  UserRecentWorkspace updateRecentWorkspaces(
-      Workspace workspace, long userId, Timestamp lastAccessDate);
+  DbUserRecentWorkspace updateRecentWorkspaces(
+      DbWorkspace workspace, long userId, Timestamp lastAccessDate);
 
-  UserRecentWorkspace updateRecentWorkspaces(Workspace workspace);
+  DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace);
 
   boolean maybeDeleteRecentWorkspace(long workspaceId);
 }

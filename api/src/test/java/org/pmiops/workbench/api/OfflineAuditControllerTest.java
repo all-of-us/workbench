@@ -23,7 +23,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -71,7 +71,7 @@ public class OfflineAuditControllerTest {
 
   @Before
   public void setUp() {
-    User user = new User();
+    DbUser user = new DbUser();
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);

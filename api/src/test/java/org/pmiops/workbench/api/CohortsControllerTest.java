@@ -44,8 +44,8 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -143,7 +143,7 @@ public class CohortsControllerTest {
       makeConcept(CLIENT_CONCEPT_1);
   private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
       makeConcept(CLIENT_CONCEPT_2);
-  private static User currentUser;
+  private static DbUser currentUser;
 
   @Autowired WorkspacesController workspacesController;
   @Autowired CohortsController cohortsController;
@@ -166,7 +166,7 @@ public class CohortsControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired UserDao userDao;
   @Autowired CohortMaterializationService cohortMaterializationService;
-  @Mock Provider<User> userProvider;
+  @Mock Provider<DbUser> userProvider;
   @Autowired FireCloudService fireCloudService;
   @Autowired UserService userService;
   @Autowired CloudStorageService cloudStorageService;
@@ -214,7 +214,7 @@ public class CohortsControllerTest {
 
     @Bean
     @Scope("prototype")
-    User user() {
+    DbUser user() {
       return currentUser;
     }
 
@@ -231,7 +231,7 @@ public class CohortsControllerTest {
     testMockFactory = new TestMockFactory();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
-    User user = new User();
+    DbUser user = new DbUser();
     user.setEmail(CREATOR_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);
@@ -698,7 +698,7 @@ public class CohortsControllerTest {
         cohortsController
             .createCohort(workspace.getNamespace(), workspace.getId(), cohort)
             .getBody();
-    CohortReview cohortReview = new CohortReview();
+    DbCohortReview cohortReview = new DbCohortReview();
     cohortReview.setCohortId(cohort.getId());
     cohortReview.setCdrVersionId(cdrVersion.getCdrVersionId());
     cohortReview.setReviewSize(2);

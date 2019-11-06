@@ -24,7 +24,11 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbAddress;
+import org.pmiops.workbench.db.model.DbDemographicSurvey;
+import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
+import org.pmiops.workbench.db.model.DbPageVisit;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.EmailException;
@@ -99,16 +103,13 @@ public class ProfileController implements ProfileApiDelegate {
               return result;
             }
           };
-  private static final Function<
-          InstitutionalAffiliation, org.pmiops.workbench.db.model.InstitutionalAffiliation>
+  private static final Function<InstitutionalAffiliation, DbInstitutionalAffiliation>
       FROM_CLIENT_INSTITUTIONAL_AFFILIATION =
-          new Function<
-              InstitutionalAffiliation, org.pmiops.workbench.db.model.InstitutionalAffiliation>() {
+          new Function<InstitutionalAffiliation, DbInstitutionalAffiliation>() {
             @Override
-            public org.pmiops.workbench.db.model.InstitutionalAffiliation apply(
+            public DbInstitutionalAffiliation apply(
                 InstitutionalAffiliation institutionalAffiliation) {
-              org.pmiops.workbench.db.model.InstitutionalAffiliation result =
-                  new org.pmiops.workbench.db.model.InstitutionalAffiliation();
+              DbInstitutionalAffiliation result = new DbInstitutionalAffiliation();
               if (institutionalAffiliation.getInstitution() != null) {
                 result.setInstitution(institutionalAffiliation.getInstitution());
               }
@@ -124,31 +125,27 @@ public class ProfileController implements ProfileApiDelegate {
             }
           };
 
-  private static final Function<Address, org.pmiops.workbench.db.model.Address>
-      FROM_CLIENT_ADDRESS =
-          new Function<Address, org.pmiops.workbench.db.model.Address>() {
-            @Override
-            public org.pmiops.workbench.db.model.Address apply(Address address) {
-              org.pmiops.workbench.db.model.Address result =
-                  new org.pmiops.workbench.db.model.Address();
-              result.setStreetAddress1(address.getStreetAddress1());
-              result.setStreetAddress2(address.getStreetAddress2());
-              result.setCity(address.getCity());
-              result.setState(address.getState());
-              result.setZipCode(address.getZipCode());
-              result.setCountry(address.getCountry());
-              return result;
-            }
-          };
+  private static final Function<Address, DbAddress> FROM_CLIENT_ADDRESS =
+      new Function<Address, DbAddress>() {
+        @Override
+        public DbAddress apply(Address address) {
+          DbAddress result = new DbAddress();
+          result.setStreetAddress1(address.getStreetAddress1());
+          result.setStreetAddress2(address.getStreetAddress2());
+          result.setCity(address.getCity());
+          result.setState(address.getState());
+          result.setZipCode(address.getZipCode());
+          result.setCountry(address.getCountry());
+          return result;
+        }
+      };
 
-  private static final Function<DemographicSurvey, org.pmiops.workbench.db.model.DemographicSurvey>
+  private static final Function<DemographicSurvey, DbDemographicSurvey>
       FROM_CLIENT_DEMOGRAPHIC_SURVEY =
-          new Function<DemographicSurvey, org.pmiops.workbench.db.model.DemographicSurvey>() {
+          new Function<DemographicSurvey, DbDemographicSurvey>() {
             @Override
-            public org.pmiops.workbench.db.model.DemographicSurvey apply(
-                DemographicSurvey demographicSurvey) {
-              org.pmiops.workbench.db.model.DemographicSurvey result =
-                  new org.pmiops.workbench.db.model.DemographicSurvey();
+            public DbDemographicSurvey apply(DemographicSurvey demographicSurvey) {
+              DbDemographicSurvey result = new DbDemographicSurvey();
               if (demographicSurvey.getRace() != null)
                 result.setRaceEnum(demographicSurvey.getRace());
               if (demographicSurvey.getEthnicity() != null)
@@ -174,7 +171,7 @@ public class ProfileController implements ProfileApiDelegate {
   private static final long MAX_BILLING_PROJECT_CREATION_ATTEMPTS = 5;
 
   private final ProfileService profileService;
-  private final Provider<User> userProvider;
+  private final Provider<DbUser> userProvider;
   private final Provider<UserAuthentication> userAuthenticationProvider;
   private final UserDao userDao;
   private final Clock clock;
@@ -190,7 +187,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Autowired
   ProfileController(
       ProfileService profileService,
-      Provider<User> userProvider,
+      Provider<DbUser> userProvider,
       Provider<UserAuthentication> userAuthenticationProvider,
       UserDao userDao,
       Clock clock,
@@ -227,7 +224,7 @@ public class ProfileController implements ProfileApiDelegate {
             .collect(Collectors.toList()));
   }
 
-  private String createFirecloudUserAndBillingProject(User user) {
+  private String createFirecloudUserAndBillingProject(DbUser user) {
     // If the user is already registered, their profile will get updated.
     fireCloudService.registerUser(
         user.getContactEmail(), user.getGivenName(), user.getFamilyName());
@@ -267,7 +264,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private User saveUserWithConflictHandling(User user) {
+  private DbUser saveUserWithConflictHandling(DbUser user) {
     try {
       return userDao.save(user);
     } catch (ObjectOptimisticLockingFailureException e) {
@@ -276,7 +273,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private String createFirecloudBillingProject(User user) {
+  private String createFirecloudBillingProject(DbUser user) {
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     long suffix;
     if (workbenchEnvironment.isDevelopment()) {
@@ -343,9 +340,9 @@ public class ProfileController implements ProfileApiDelegate {
     return billingProjectName;
   }
 
-  private User initializeUserIfNeeded() {
+  private DbUser initializeUserIfNeeded() {
     UserAuthentication userAuthentication = userAuthenticationProvider.get();
-    User user = userAuthentication.getUser();
+    DbUser user = userAuthentication.getUser();
     if (userAuthentication.getUserType() == UserType.SERVICE_ACCOUNT) {
       // Service accounts don't need further initialization.
       return user;
@@ -368,7 +365,7 @@ public class ProfileController implements ProfileApiDelegate {
     return user;
   }
 
-  private ResponseEntity<Profile> getProfileResponse(User user) {
+  private ResponseEntity<Profile> getProfileResponse(DbUser user) {
     Profile profile = profileService.getProfile(user);
     // Note: The following requires that the current request is authenticated.
     return ResponseEntity.ok(profile);
@@ -382,7 +379,7 @@ public class ProfileController implements ProfileApiDelegate {
     // the CDR); we will probably need a job that deactivates accounts after some period of
     // not accepting the terms of use.
 
-    User user = initializeUserIfNeeded();
+    DbUser user = initializeUserIfNeeded();
     return getProfileResponse(user);
   }
 
@@ -436,7 +433,7 @@ public class ProfileController implements ProfileApiDelegate {
     // profile, since it can be edited in our UI as well as the Google UI,  and we're fine with
     // that; the expectation is their profile in AofU will be managed in AofU, not in Google.
 
-    User user =
+    DbUser user =
         userService.createUser(
             request.getProfile().getGivenName(),
             request.getProfile().getFamilyName(),
@@ -467,7 +464,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> requestBetaAccess() {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    User user = userProvider.get();
+    DbUser user = userProvider.get();
     if (user.getBetaAccessRequestTime() == null) {
       log.log(Level.INFO, "Sending beta access request email.");
       try {
@@ -490,7 +487,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> submitDataUseAgreement(
       Integer dataUseAgreementSignedVersion, String initials) {
-    User user =
+    DbUser user =
         userService.submitDataUseAgreement(
             userProvider.get(), dataUseAgreementSignedVersion, initials);
     return getProfileResponse(saveUserWithConflictHandling(user));
@@ -540,7 +537,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private void checkUserCreationNonce(User user, String nonce) {
+  private void checkUserCreationNonce(DbUser user, String nonce) {
     if (Strings.isNullOrEmpty(nonce)) {
       throw new BadRequestException("missing required creationNonce");
     }
@@ -559,7 +556,7 @@ public class ProfileController implements ProfileApiDelegate {
       UpdateContactEmailRequest updateContactEmailRequest) {
     String username = updateContactEmailRequest.getUsername().toLowerCase();
     com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
-    User user = userDao.findUserByEmail(username);
+    DbUser user = userDao.findUserByEmail(username);
     checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
     if (!userNeverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -579,7 +576,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
     String username = resendRequest.getUsername().toLowerCase();
     com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
-    User user = userDao.findUserByEmail(username);
+    DbUser user = userDao.findUserByEmail(username);
     checkUserCreationNonce(user, resendRequest.getCreationNonce());
     if (!userNeverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -588,11 +585,11 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   private boolean userNeverLoggedIn(
-      com.google.api.services.directory.model.User googleUser, User user) {
+      com.google.api.services.directory.model.User googleUser, DbUser user) {
     return user.getFirstSignInTime() == null && googleUser.getChangePasswordAtNextLogin();
   }
 
-  private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, User user) {
+  private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, DbUser user) {
     com.google.api.services.directory.model.User googleUser =
         directoryService.resetUserPassword(username);
     try {
@@ -607,14 +604,13 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> updatePageVisits(PageVisit newPageVisit) {
-    User user = userProvider.get();
+    DbUser user = userProvider.get();
     user = userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
     Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     boolean shouldAdd =
         user.getPageVisits().stream().noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
     if (shouldAdd) {
-      org.pmiops.workbench.db.model.PageVisit firstPageVisit =
-          new org.pmiops.workbench.db.model.PageVisit();
+      DbPageVisit firstPageVisit = new DbPageVisit();
       firstPageVisit.setPageId(newPageVisit.getPage());
       firstPageVisit.setUser(user);
       firstPageVisit.setFirstVisit(timestamp);
@@ -627,7 +623,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
     validateProfileFields(updatedProfile);
-    User user = userProvider.get();
+    DbUser user = userProvider.get();
 
     if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
         || !userProvider.get().getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
@@ -647,23 +643,22 @@ public class ProfileController implements ProfileApiDelegate {
       // See RW-1488.
       throw new BadRequestException("Changing email is not currently supported");
     }
-    List<org.pmiops.workbench.db.model.InstitutionalAffiliation> newAffiliations =
+    List<DbInstitutionalAffiliation> newAffiliations =
         updatedProfile.getInstitutionalAffiliations().stream()
             .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
             .collect(Collectors.toList());
     int i = 0;
-    ListIterator<org.pmiops.workbench.db.model.InstitutionalAffiliation> oldAffilations =
+    ListIterator<DbInstitutionalAffiliation> oldAffilations =
         user.getInstitutionalAffiliations().listIterator();
     boolean shouldAdd = false;
     if (newAffiliations.size() == 0) {
       shouldAdd = true;
     }
-    for (org.pmiops.workbench.db.model.InstitutionalAffiliation affiliation : newAffiliations) {
+    for (DbInstitutionalAffiliation affiliation : newAffiliations) {
       affiliation.setOrderIndex(i);
       affiliation.setUser(user);
       if (oldAffilations.hasNext()) {
-        org.pmiops.workbench.db.model.InstitutionalAffiliation oldAffilation =
-            oldAffilations.next();
+        DbInstitutionalAffiliation oldAffilation = oldAffilations.next();
         if (!oldAffilation.getRole().equals(affiliation.getRole())
             || !oldAffilation.getInstitution().equals(affiliation.getInstitution())) {
           shouldAdd = true;
@@ -678,7 +673,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
     if (shouldAdd) {
       user.clearInstitutionalAffiliations();
-      for (org.pmiops.workbench.db.model.InstitutionalAffiliation affiliation : newAffiliations) {
+      for (DbInstitutionalAffiliation affiliation : newAffiliations) {
         user.addInstitutionalAffiliation(affiliation);
       }
     }
@@ -693,7 +688,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<UserListResponse> getAllUsers() {
     UserListResponse response = new UserListResponse();
     List<Profile> responseList = new ArrayList<>();
-    for (User user : userDao.findUsers()) {
+    for (DbUser user : userDao.findUsers()) {
       responseList.add(profileService.getProfile(user));
     }
     response.setProfileList(responseList);
@@ -703,7 +698,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<Profile> getUser(Long userId) {
-    User user = userDao.findUserByUserId(userId);
+    DbUser user = userDao.findUserByUserId(userId);
     return ResponseEntity.ok(profileService.getProfile(user));
   }
 
@@ -745,7 +740,7 @@ public class ProfileController implements ProfileApiDelegate {
     Timestamp valueToSet;
     Timestamp previousValue;
     Boolean bypassed = request.getIsBypassed();
-    User user = userDao.findUserByUserId(userId);
+    DbUser user = userDao.findUserByUserId(userId);
     if (bypassed) {
       valueToSet = new Timestamp(clock.instant().toEpochMilli());
     } else {
@@ -788,7 +783,7 @@ public class ProfileController implements ProfileApiDelegate {
     if (!workbenchConfigProvider.get().featureFlags.unsafeAllowDeleteUser) {
       throw new ForbiddenException("Self account deletion is disallowed in this environment.");
     }
-    User user = userProvider.get();
+    DbUser user = userProvider.get();
     log.log(Level.WARNING, "Deleting profile: user email: " + user.getEmail());
     directoryService.deleteUser(user.getEmail().split("@")[0]);
     userDao.delete(user.getUserId());

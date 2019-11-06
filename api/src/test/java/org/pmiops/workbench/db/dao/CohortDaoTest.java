@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.model.Cohort;
+import org.pmiops.workbench.db.model.DbCohort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -33,7 +33,7 @@ public class CohortDaoTest {
             + "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":"
             + "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
 
-    Cohort cohort = new Cohort();
+    DbCohort cohort = new DbCohort();
     cohort.setWorkspaceId(WORKSPACE_ID);
     cohort.setCriteria(cohortJson);
 

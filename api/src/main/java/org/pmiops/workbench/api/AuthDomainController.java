@@ -3,7 +3,7 @@ package org.pmiops.workbench.api;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -38,9 +38,9 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<Void> updateUserDisabledStatus(UpdateUserDisabledRequest request) {
-    User user = userDao.findUserByEmail(request.getEmail());
+    DbUser user = userDao.findUserByEmail(request.getEmail());
     Boolean previousDisabled = user.getDisabled();
-    User updatedUser = userService.setDisabledStatus(user.getUserId(), request.getDisabled());
+    DbUser updatedUser = userService.setDisabledStatus(user.getUserId(), request.getDisabled());
     userService.logAdminUserAction(
         user.getUserId(), "updated user disabled state", previousDisabled, request.getDisabled());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

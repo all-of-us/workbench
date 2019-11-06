@@ -19,7 +19,7 @@ import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
@@ -120,7 +120,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       // Whitelisted service accounts are able to make API calls, too.
       // TODO: stop treating service accounts as normal users, have a separate table for them,
       // administrators.
-      User user = userDao.findUserByEmail(userEmail);
+      DbUser user = userDao.findUserByEmail(userEmail);
       if (user == null) {
         user = userService.createServiceAccountUser(userEmail);
       }
@@ -150,7 +150,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
         return false;
       }
     }
-    User user = userDao.findUserByEmail(userEmail);
+    DbUser user = userDao.findUserByEmail(userEmail);
     if (user == null) {
       // TODO(danrodney): start populating contact email in Google account, use it here.
       user =
@@ -212,11 +212,11 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
    * @param handlerMethod The HandlerMethod for this request.
    * @param user Database details of the authenticated user.
    */
-  boolean hasRequiredAuthority(HandlerMethod handlerMethod, User user) {
+  boolean hasRequiredAuthority(HandlerMethod handlerMethod, DbUser user) {
     return hasRequiredAuthority(InterceptorUtils.getControllerMethod(handlerMethod), user);
   }
 
-  boolean hasRequiredAuthority(Method controllerMethod, User user) {
+  boolean hasRequiredAuthority(Method controllerMethod, DbUser user) {
     String controllerMethodName =
         controllerMethod.getDeclaringClass().getName() + "." + controllerMethod.getName();
     AuthorityRequired req = controllerMethod.getAnnotation(AuthorityRequired.class);

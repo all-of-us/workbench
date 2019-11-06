@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "address")
-public class Address {
+public class DbAddress {
   private long id;
   private String streetAddress1;
   private String streetAddress2;
@@ -19,9 +19,9 @@ public class Address {
   private String city;
   private String state;
   private String country;
-  private User user;
+  private DbUser user;
 
-  public Address() {}
+  public DbAddress() {}
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -90,11 +90,11 @@ public class Address {
 
   @ManyToOne
   @JoinColumn(name = "user_id")
-  public User getUser() {
+  public DbUser getUser() {
     return user;
   }
 
-  public void setUser(User user) {
+  public void setUser(DbUser user) {
     this.user = user;
   }
 }

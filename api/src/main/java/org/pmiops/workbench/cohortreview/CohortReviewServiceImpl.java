@@ -12,14 +12,14 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
-import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
-import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
-import org.pmiops.workbench.db.model.ParticipantCohortStatus;
-import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
+import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
+import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.AnnotationType;
@@ -60,8 +60,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   public CohortReviewServiceImpl() {}
 
   @Override
-  public Cohort findCohort(long cohortId) {
-    Cohort cohort = cohortDao.findOne(cohortId);
+  public DbCohort findCohort(long cohortId) {
+    DbCohort cohort = cohortDao.findOne(cohortId);
     if (cohort == null) {
       throw new NotFoundException(
           String.format("Not Found: No Cohort exists for cohortId: %s", cohortId));
@@ -70,12 +70,12 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public Workspace validateMatchingWorkspaceAndSetCdrVersion(
+  public DbWorkspace validateMatchingWorkspaceAndSetCdrVersion(
       String workspaceNamespace,
       String workspaceName,
       long workspaceId,
       WorkspaceAccessLevel accessRequired) {
-    Workspace workspace =
+    DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceName, accessRequired);
     if (workspace == null || workspace.getWorkspaceId() != workspaceId) {
@@ -95,8 +95,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public CohortReview findCohortReview(Long cohortId, Long cdrVersionId) {
-    CohortReview cohortReview =
+  public DbCohortReview findCohortReview(Long cohortId, Long cdrVersionId) {
+    DbCohortReview cohortReview =
         cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(cohortId, cdrVersionId);
 
     if (cohortReview == null) {
@@ -109,8 +109,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public CohortReview findCohortReview(Long cohortReviewId) {
-    CohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortReviewId(cohortReviewId);
+  public DbCohortReview findCohortReview(Long cohortReviewId) {
+    DbCohortReview cohortReview = cohortReviewDao.findCohortReviewByCohortReviewId(cohortReviewId);
 
     if (cohortReview == null) {
       throw new NotFoundException(
@@ -121,8 +121,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public CohortReview findCohortReview(String ns, String firecloudName, Long cohortReviewId) {
-    CohortReview cohortReview =
+  public DbCohortReview findCohortReview(String ns, String firecloudName, Long cohortReviewId) {
+    DbCohortReview cohortReview =
         cohortReviewDao.findByNamespaceAndFirecloudNameAndCohortReviewId(
             ns, firecloudName, cohortReviewId);
 
@@ -136,41 +136,41 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public void deleteCohortReview(CohortReview cohortReview) {
+  public void deleteCohortReview(DbCohortReview cohortReview) {
     cohortReviewDao.delete(cohortReview);
   }
 
   @Override
-  public List<CohortReview> getRequiredWithCohortReviews(String ns, String firecloudName) {
+  public List<DbCohortReview> getRequiredWithCohortReviews(String ns, String firecloudName) {
     return cohortReviewDao.findByFirecloudNameAndActiveStatus(
         ns,
         firecloudName,
-        StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   @Override
-  public CohortReview saveCohortReview(CohortReview cohortReview) {
+  public DbCohortReview saveCohortReview(DbCohortReview cohortReview) {
     return cohortReviewDao.save(cohortReview);
   }
 
   @Override
   @Transactional
   public void saveFullCohortReview(
-      CohortReview cohortReview, List<ParticipantCohortStatus> participantCohortStatuses) {
+      DbCohortReview cohortReview, List<DbParticipantCohortStatus> participantCohortStatuses) {
     saveCohortReview(cohortReview);
     participantCohortStatusDao.saveParticipantCohortStatusesCustom(participantCohortStatuses);
   }
 
   @Override
-  public ParticipantCohortStatus saveParticipantCohortStatus(
-      ParticipantCohortStatus participantCohortStatus) {
+  public DbParticipantCohortStatus saveParticipantCohortStatus(
+      DbParticipantCohortStatus participantCohortStatus) {
     return participantCohortStatusDao.save(participantCohortStatus);
   }
 
   @Override
-  public ParticipantCohortStatus findParticipantCohortStatus(
+  public DbParticipantCohortStatus findParticipantCohortStatus(
       Long cohortReviewId, Long participantId) {
-    ParticipantCohortStatus participantCohortStatus =
+    DbParticipantCohortStatus participantCohortStatus =
         participantCohortStatusDao
             .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                 cohortReviewId, participantId);
@@ -183,7 +183,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
     return participantCohortStatus;
   }
 
-  public List<ParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
+  public List<DbParticipantCohortStatus> findAll(Long cohortReviewId, PageRequest pageRequest) {
     return participantCohortStatusDao.findAll(cohortReviewId, pageRequest);
   }
 
@@ -193,9 +193,9 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public ParticipantCohortAnnotation saveParticipantCohortAnnotation(
-      Long cohortReviewId, ParticipantCohortAnnotation participantCohortAnnotation) {
-    CohortAnnotationDefinition cohortAnnotationDefinition =
+  public DbParticipantCohortAnnotation saveParticipantCohortAnnotation(
+      Long cohortReviewId, DbParticipantCohortAnnotation participantCohortAnnotation) {
+    DbCohortAnnotationDefinition cohortAnnotationDefinition =
         findCohortAnnotationDefinition(
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
 
@@ -215,12 +215,12 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public ParticipantCohortAnnotation updateParticipantCohortAnnotation(
+  public DbParticipantCohortAnnotation updateParticipantCohortAnnotation(
       Long annotationId,
       Long cohortReviewId,
       Long participantId,
       ModifyParticipantCohortAnnotationRequest modifyRequest) {
-    ParticipantCohortAnnotation participantCohortAnnotation =
+    DbParticipantCohortAnnotation participantCohortAnnotation =
         participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(
             annotationId, cohortReviewId, participantId);
     if (participantCohortAnnotation == null) {
@@ -235,7 +235,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
         .annotationValueDateString(modifyRequest.getAnnotationValueDate())
         .annotationValueBoolean(modifyRequest.getAnnotationValueBoolean())
         .annotationValueInteger(modifyRequest.getAnnotationValueInteger());
-    CohortAnnotationDefinition cohortAnnotationDefinition =
+    DbCohortAnnotationDefinition cohortAnnotationDefinition =
         findCohortAnnotationDefinition(
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
 
@@ -245,9 +245,9 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public CohortAnnotationDefinition findCohortAnnotationDefinition(
+  public DbCohortAnnotationDefinition findCohortAnnotationDefinition(
       Long cohortAnnotationDefinitionId) {
-    CohortAnnotationDefinition cohortAnnotationDefinition =
+    DbCohortAnnotationDefinition cohortAnnotationDefinition =
         cohortAnnotationDefinitionDao.findOne(cohortAnnotationDefinitionId);
 
     if (cohortAnnotationDefinition == null) {
@@ -262,7 +262,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   @Override
   public void deleteParticipantCohortAnnotation(
       Long annotationId, Long cohortReviewId, Long participantId) {
-    ParticipantCohortAnnotation participantCohortAnnotation =
+    DbParticipantCohortAnnotation participantCohortAnnotation =
         participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(
             annotationId, cohortReviewId, participantId);
     if (participantCohortAnnotation == null) {
@@ -276,7 +276,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public ParticipantCohortAnnotation findParticipantCohortAnnotation(
+  public DbParticipantCohortAnnotation findParticipantCohortAnnotation(
       Long cohortReviewId, Long cohortAnnotationDefinitionId, Long participantId) {
     return participantCohortAnnotationDao
         .findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(
@@ -284,7 +284,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
   }
 
   @Override
-  public List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(
+  public List<DbParticipantCohortAnnotation> findParticipantCohortAnnotations(
       Long cohortReviewId, Long participantId) {
     return participantCohortAnnotationDao.findByCohortReviewIdAndParticipantId(
         cohortReviewId, participantId);
@@ -296,8 +296,8 @@ public class CohortReviewServiceImpl implements CohortReviewService {
    * @param participantCohortAnnotation
    */
   private void validateParticipantCohortAnnotation(
-      ParticipantCohortAnnotation participantCohortAnnotation,
-      CohortAnnotationDefinition cohortAnnotationDefinition) {
+      DbParticipantCohortAnnotation participantCohortAnnotation,
+      DbCohortAnnotationDefinition cohortAnnotationDefinition) {
 
     if (cohortAnnotationDefinition.getAnnotationTypeEnum().equals(AnnotationType.BOOLEAN)) {
       if (participantCohortAnnotation.getAnnotationValueBoolean() == null) {
@@ -343,7 +343,7 @@ public class CohortReviewServiceImpl implements CohortReviewService {
             AnnotationType.ENUM.name(),
             participantCohortAnnotation.getCohortAnnotationDefinitionId());
       }
-      List<CohortAnnotationEnumValue> enumValues =
+      List<DbCohortAnnotationEnumValue> enumValues =
           cohortAnnotationDefinition.getEnumValues().stream()
               .filter(
                   enumValue ->

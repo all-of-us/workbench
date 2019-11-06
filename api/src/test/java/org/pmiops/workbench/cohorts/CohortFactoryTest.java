@@ -9,10 +9,10 @@ import java.time.Clock;
 import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReviewStatus;
 
 public class CohortFactoryTest {
@@ -32,11 +32,11 @@ public class CohortFactoryTest {
     apiCohort.setType("type");
     apiCohort.setCriteria("criteria");
 
-    User user = mock(User.class);
+    DbUser user = mock(DbUser.class);
 
     long workspaceId = 1l;
 
-    Cohort dbCohort = cohortFactory.createCohort(apiCohort, user, workspaceId);
+    DbCohort dbCohort = cohortFactory.createCohort(apiCohort, user, workspaceId);
 
     assertThat(dbCohort.getDescription()).isEqualTo(apiCohort.getDescription());
     assertThat(dbCohort.getName()).isEqualTo(apiCohort.getName());
@@ -48,18 +48,18 @@ public class CohortFactoryTest {
 
   @Test
   public void duplicateCohort() {
-    Cohort originalCohort = new Cohort();
+    DbCohort originalCohort = new DbCohort();
     originalCohort.setDescription("desc");
     originalCohort.setName("name");
     originalCohort.setType("type");
     originalCohort.setCriteria("criteria");
     originalCohort.setWorkspaceId(1l);
-    originalCohort.setCohortReviews(Collections.singleton(mock(CohortReview.class)));
+    originalCohort.setCohortReviews(Collections.singleton(mock(DbCohortReview.class)));
 
-    User user = mock(User.class);
-    Workspace workspace = mock(Workspace.class);
+    DbUser user = mock(DbUser.class);
+    DbWorkspace workspace = mock(DbWorkspace.class);
     doReturn(1l).when(workspace).getWorkspaceId();
-    Cohort dbCohort = cohortFactory.duplicateCohort("new name", user, workspace, originalCohort);
+    DbCohort dbCohort = cohortFactory.duplicateCohort("new name", user, workspace, originalCohort);
 
     assertThat(dbCohort.getDescription()).isEqualTo(originalCohort.getDescription());
     assertThat(dbCohort.getName()).isEqualTo("new name");
@@ -74,7 +74,7 @@ public class CohortFactoryTest {
   public void duplicateCohortReview() {
     Timestamp now = new Timestamp(Clock.systemUTC().millis());
 
-    CohortReview originalCohortReview = new CohortReview();
+    DbCohortReview originalCohortReview = new DbCohortReview();
     originalCohortReview.setCohortId(1l);
     originalCohortReview.setCdrVersionId(2l);
     originalCohortReview.setMatchedParticipantCount(3l);
@@ -82,11 +82,11 @@ public class CohortFactoryTest {
     originalCohortReview.setReviewedCount(5l);
     originalCohortReview.setReviewStatusEnum(ReviewStatus.CREATED);
 
-    Cohort cohort = mock(Cohort.class);
+    DbCohort cohort = mock(DbCohort.class);
     doReturn(1l).when(cohort).getCohortId();
     doReturn(now).when(cohort).getCreationTime();
     doReturn(now).when(cohort).getLastModifiedTime();
-    CohortReview newReview = cohortFactory.duplicateCohortReview(originalCohortReview, cohort);
+    DbCohortReview newReview = cohortFactory.duplicateCohortReview(originalCohortReview, cohort);
 
     assertThat(newReview.getCohortId()).isEqualTo(originalCohortReview.getCohortId());
     assertThat(newReview.getCreationTime()).isEqualTo(now);

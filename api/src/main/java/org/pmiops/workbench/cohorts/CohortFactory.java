@@ -1,15 +1,17 @@
 package org.pmiops.workbench.cohorts;
 
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 
 public interface CohortFactory {
 
-  Cohort createCohort(org.pmiops.workbench.model.Cohort apiCohort, User creator, long workspaceId);
+  DbCohort createCohort(
+      org.pmiops.workbench.model.Cohort apiCohort, DbUser creator, long workspaceId);
 
-  Cohort duplicateCohort(String newName, User creator, Workspace targetWorkspace, Cohort original);
+  DbCohort duplicateCohort(
+      String newName, DbUser creator, DbWorkspace targetWorkspace, DbCohort original);
 
-  CohortReview duplicateCohortReview(CohortReview original, Cohort targetCohort);
+  DbCohortReview duplicateCohortReview(DbCohortReview original, DbCohort targetCohort);
 }

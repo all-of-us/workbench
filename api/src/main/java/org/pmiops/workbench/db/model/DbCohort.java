@@ -17,7 +17,7 @@ import javax.persistence.Version;
 
 @Entity
 @Table(name = "cohort")
-public class Cohort {
+public class DbCohort {
 
   private long cohortId;
   private int version;
@@ -26,14 +26,14 @@ public class Cohort {
   private String description;
   private long workspaceId;
   private String criteria;
-  private User creator;
+  private DbUser creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
-  private Set<CohortReview> cohortReviews;
+  private Set<DbCohortReview> cohortReviews;
 
-  public Cohort() {}
+  public DbCohort() {}
 
-  public Cohort(Cohort c) {
+  public DbCohort(DbCohort c) {
     setCriteria(c.getCriteria());
     setDescription(c.getDescription());
     setName(c.getName());
@@ -113,11 +113,11 @@ public class Cohort {
 
   @ManyToOne
   @JoinColumn(name = "creator_id")
-  public User getCreator() {
+  public DbUser getCreator() {
     return creator;
   }
 
-  public void setCreator(User creator) {
+  public void setCreator(DbUser creator) {
     this.creator = creator;
   }
 
@@ -140,11 +140,11 @@ public class Cohort {
   }
 
   @OneToMany(mappedBy = "cohortId", orphanRemoval = true, cascade = CascadeType.ALL)
-  public Set<CohortReview> getCohortReviews() {
+  public Set<DbCohortReview> getCohortReviews() {
     return cohortReviews;
   }
 
-  public void setCohortReviews(Set<CohortReview> cohortReviews) {
+  public void setCohortReviews(Set<DbCohortReview> cohortReviews) {
     if (this.cohortReviews == null) {
       this.cohortReviews = cohortReviews;
       return;
@@ -152,7 +152,7 @@ public class Cohort {
     this.cohortReviews.addAll(cohortReviews);
   }
 
-  public void addCohortReview(CohortReview cohortReview) {
+  public void addCohortReview(DbCohortReview cohortReview) {
     this.cohortReviews.add(cohortReview);
   }
 }

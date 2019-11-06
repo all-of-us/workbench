@@ -37,10 +37,10 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus;
-import org.pmiops.workbench.db.model.ParticipantIdAndCohortStatus.Key;
-import org.pmiops.workbench.db.model.StorageEnums;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbParticipantIdAndCohortStatus;
+import org.pmiops.workbench.db.model.DbParticipantIdAndCohortStatus.Key;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CdrQuery;
 import org.pmiops.workbench.model.CohortAnnotationsRequest;
@@ -128,18 +128,20 @@ public class CohortMaterializationService {
   }
 
   private Set<Long> getParticipantIdsWithStatus(
-      @Nullable CohortReview cohortReview, List<CohortStatus> statusFilter) {
+      @Nullable DbCohortReview cohortReview, List<CohortStatus> statusFilter) {
     if (cohortReview == null) {
       return ImmutableSet.of();
     }
     List<Short> dbStatusFilter =
-        statusFilter.stream().map(StorageEnums::cohortStatusToStorage).collect(Collectors.toList());
+        statusFilter.stream()
+            .map(DbStorageEnums::cohortStatusToStorage)
+            .collect(Collectors.toList());
     Set<Long> participantIds =
         participantCohortStatusDao
             .findByParticipantKey_CohortReviewIdAndStatusIn(
                 cohortReview.getCohortReviewId(), dbStatusFilter)
             .stream()
-            .map(ParticipantIdAndCohortStatus::getParticipantKey)
+            .map(DbParticipantIdAndCohortStatus::getParticipantKey)
             .map(Key::getParticipantId)
             .collect(Collectors.toSet());
     return participantIds;
@@ -204,7 +206,7 @@ public class CohortMaterializationService {
 
   private ParticipantCriteria getParticipantCriteria(
       List<CohortStatus> statusFilter,
-      @Nullable CohortReview cohortReview,
+      @Nullable DbCohortReview cohortReview,
       SearchRequest searchRequest) {
     if (statusFilter.contains(CohortStatus.NOT_REVIEWED)) {
       Set<Long> participantIdsToExclude;
@@ -280,7 +282,7 @@ public class CohortMaterializationService {
   CdrQuery getCdrQuery(
       SearchRequest searchRequest,
       DataTableSpecification dataTableSpecification,
-      @Nullable CohortReview cohortReview,
+      @Nullable DbCohortReview cohortReview,
       @Nullable Set<Long> conceptIds) {
     CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     CdrQuery cdrQuery =
@@ -321,7 +323,7 @@ public class CohortMaterializationService {
   public CdrQuery getCdrQuery(
       String cohortSpec,
       DataTableSpecification dataTableSpecification,
-      @Nullable CohortReview cohortReview,
+      @Nullable DbCohortReview cohortReview,
       @Nullable Set<Long> conceptIds) {
     SearchRequest searchRequest;
     try {
@@ -335,7 +337,7 @@ public class CohortMaterializationService {
   /**
    * Materializes a cohort.
    *
-   * @param cohortReview {@link CohortReview} representing a manual review of participants in the
+   * @param cohortReview {@link DbCohortReview} representing a manual review of participants in the
    *     cohort.
    * @param cohortSpec JSON representing the cohort criteria.
    * @param conceptIds an optional set of IDs for concepts used to filter results by (in addition to
@@ -344,7 +346,7 @@ public class CohortMaterializationService {
    * @return {@link MaterializeCohortResponse} containing the results of cohort materialization
    */
   public MaterializeCohortResponse materializeCohort(
-      @Nullable CohortReview cohortReview,
+      @Nullable DbCohortReview cohortReview,
       String cohortSpec,
       @Nullable Set<Long> conceptIds,
       MaterializeCohortRequest request) {
@@ -361,7 +363,7 @@ public class CohortMaterializationService {
   /**
    * Materializes a cohort.
    *
-   * @param cohortReview {@link CohortReview} representing a manual review of participants in the
+   * @param cohortReview {@link DbCohortReview} representing a manual review of participants in the
    *     cohort.
    * @param searchRequest {@link SearchRequest} representing the cohort criteria
    * @param conceptIds an optional set of IDs for concepts used to filter results by * (in addition
@@ -373,7 +375,7 @@ public class CohortMaterializationService {
    */
   @VisibleForTesting
   MaterializeCohortResponse materializeCohort(
-      @Nullable CohortReview cohortReview,
+      @Nullable DbCohortReview cohortReview,
       SearchRequest searchRequest,
       @Nullable Set<Long> conceptIds,
       int requestHash,
@@ -455,7 +457,7 @@ public class CohortMaterializationService {
   }
 
   public CohortAnnotationsResponse getAnnotations(
-      CohortReview cohortReview, CohortAnnotationsRequest request) {
+      DbCohortReview cohortReview, CohortAnnotationsRequest request) {
     List<CohortStatus> statusFilter = request.getStatusFilter();
     if (statusFilter == null) {
       statusFilter = NOT_EXCLUDED;

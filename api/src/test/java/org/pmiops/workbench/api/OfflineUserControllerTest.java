@@ -18,7 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
@@ -55,15 +55,15 @@ public class OfflineUserControllerTest {
     when(userService.getAllUsers()).thenReturn(getUsers());
   }
 
-  private User createUser(String email) {
-    User user = new User();
+  private DbUser createUser(String email) {
+    DbUser user = new DbUser();
     user.setEmail(email);
     user.setUserId(incrementedUserId);
     incrementedUserId++;
     return user;
   }
 
-  private List<User> getUsers() {
+  private List<DbUser> getUsers() {
     return Arrays.asList(
         createUser("a@fake-research-aou.org"),
         createUser("b@fake-research-aou.org"),

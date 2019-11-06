@@ -14,10 +14,10 @@ import org.pmiops.workbench.model.CohortStatus;
 
 @Entity
 @Table(name = "participant_cohort_status")
-public class ParticipantCohortStatus {
+public class DbParticipantCohortStatus {
 
   // Important: Keep fields in sync with ParticipantCohortStatusDao.ALL_COLUMNS_EXCEPT_REVIEW_ID.
-  private ParticipantCohortStatusKey participantKey;
+  private DbParticipantCohortStatusKey participantKey;
   private Short status;
   private Long genderConceptId;
   private String gender;
@@ -33,15 +33,15 @@ public class ParticipantCohortStatus {
     @AttributeOverride(name = "cohortReviewId", column = @Column(name = "cohort_review_id")),
     @AttributeOverride(name = "participantId", column = @Column(name = "participant_id"))
   })
-  public ParticipantCohortStatusKey getParticipantKey() {
+  public DbParticipantCohortStatusKey getParticipantKey() {
     return participantKey;
   }
 
-  public void setParticipantKey(ParticipantCohortStatusKey participantKey) {
+  public void setParticipantKey(DbParticipantCohortStatusKey participantKey) {
     this.participantKey = participantKey;
   }
 
-  public ParticipantCohortStatus participantKey(ParticipantCohortStatusKey participantKey) {
+  public DbParticipantCohortStatus participantKey(DbParticipantCohortStatusKey participantKey) {
     this.participantKey = participantKey;
     return this;
   }
@@ -55,22 +55,22 @@ public class ParticipantCohortStatus {
     this.status = status;
   }
 
-  public ParticipantCohortStatus status(Short status) {
+  public DbParticipantCohortStatus status(Short status) {
     this.status = status;
     return this;
   }
 
   @Transient
   public CohortStatus getStatusEnum() {
-    return StorageEnums.cohortStatusFromStorage(getStatus());
+    return DbStorageEnums.cohortStatusFromStorage(getStatus());
   }
 
   public void setStatusEnum(CohortStatus status) {
-    setStatus(StorageEnums.cohortStatusToStorage(status));
+    setStatus(DbStorageEnums.cohortStatusToStorage(status));
   }
 
-  public ParticipantCohortStatus statusEnum(CohortStatus status) {
-    return this.status(StorageEnums.cohortStatusToStorage(status));
+  public DbParticipantCohortStatus statusEnum(CohortStatus status) {
+    return this.status(DbStorageEnums.cohortStatusToStorage(status));
   }
 
   @Column(name = "gender_concept_id")
@@ -82,7 +82,7 @@ public class ParticipantCohortStatus {
     this.genderConceptId = genderConceptId;
   }
 
-  public ParticipantCohortStatus genderConceptId(Long genderConceptId) {
+  public DbParticipantCohortStatus genderConceptId(Long genderConceptId) {
     this.genderConceptId = genderConceptId;
     return this;
   }
@@ -96,7 +96,7 @@ public class ParticipantCohortStatus {
     this.gender = gender;
   }
 
-  public ParticipantCohortStatus gender(String gender) {
+  public DbParticipantCohortStatus gender(String gender) {
     this.gender = gender;
     return this;
   }
@@ -110,7 +110,7 @@ public class ParticipantCohortStatus {
     this.birthDate = birthDate;
   }
 
-  public ParticipantCohortStatus birthDate(Date birthDate) {
+  public DbParticipantCohortStatus birthDate(Date birthDate) {
     this.birthDate = birthDate;
     return this;
   }
@@ -124,7 +124,7 @@ public class ParticipantCohortStatus {
     this.raceConceptId = raceConceptId;
   }
 
-  public ParticipantCohortStatus raceConceptId(Long raceConceptId) {
+  public DbParticipantCohortStatus raceConceptId(Long raceConceptId) {
     this.raceConceptId = raceConceptId;
     return this;
   }
@@ -138,7 +138,7 @@ public class ParticipantCohortStatus {
     this.race = race;
   }
 
-  public ParticipantCohortStatus race(String race) {
+  public DbParticipantCohortStatus race(String race) {
     this.race = race;
     return this;
   }
@@ -152,7 +152,7 @@ public class ParticipantCohortStatus {
     this.ethnicityConceptId = ethnicityConceptId;
   }
 
-  public ParticipantCohortStatus ethnicityConceptId(Long ethnicityConceptId) {
+  public DbParticipantCohortStatus ethnicityConceptId(Long ethnicityConceptId) {
     this.ethnicityConceptId = ethnicityConceptId;
     return this;
   }
@@ -166,7 +166,7 @@ public class ParticipantCohortStatus {
     this.ethnicity = ethnicity;
   }
 
-  public ParticipantCohortStatus ethnicity(String ethnicity) {
+  public DbParticipantCohortStatus ethnicity(String ethnicity) {
     this.ethnicity = ethnicity;
     return this;
   }
@@ -180,7 +180,7 @@ public class ParticipantCohortStatus {
     this.deceased = deceased;
   }
 
-  public ParticipantCohortStatus deceased(boolean deceased) {
+  public DbParticipantCohortStatus deceased(boolean deceased) {
     this.deceased = deceased;
     return this;
   }
@@ -189,7 +189,7 @@ public class ParticipantCohortStatus {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    ParticipantCohortStatus that = (ParticipantCohortStatus) o;
+    DbParticipantCohortStatus that = (DbParticipantCohortStatus) o;
     return status == that.status
         && Objects.equals(genderConceptId, that.genderConceptId)
         && Objects.equals(gender, that.gender)
