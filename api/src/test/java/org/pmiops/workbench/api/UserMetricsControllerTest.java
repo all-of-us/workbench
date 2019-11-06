@@ -61,7 +61,7 @@ public class UserMetricsControllerTest {
   private static final Instant NOW = Instant.now();
   @Autowired private CohortMapper cohortMapper;
 
-  private FakeClock clock = new FakeClock(NOW);
+  private FakeClock fakeClock = new FakeClock(NOW);
 
   private DbUser user;
   private DbUserRecentResource resource1;
@@ -82,8 +82,8 @@ public class UserMetricsControllerTest {
     dbCohort.setCreator(user);
     dbCohort.setCohortId(1L);
     dbCohort.setDescription("Cohort description");
-    dbCohort.setLastModifiedTime(new Timestamp(clock.millis()));
-    dbCohort.setCreationTime(new Timestamp(clock.millis()));
+    dbCohort.setLastModifiedTime(new Timestamp(fakeClock.millis()));
+    dbCohort.setCreationTime(new Timestamp(fakeClock.millis()));
 
     DbWorkspace workspace1 = new DbWorkspace();
     workspace1.setWorkspaceId(1L);
@@ -98,7 +98,7 @@ public class UserMetricsControllerTest {
     resource1 = new DbUserRecentResource();
     resource1.setNotebookName("gs://bucketFile/notebooks/notebook1.ipynb");
     resource1.setCohort(null);
-    resource1.setLastAccessDate(new Timestamp(clock.millis()));
+    resource1.setLastAccessDate(new Timestamp(fakeClock.millis()));
     resource1.setUserId(user.getUserId());
     resource1.setWorkspaceId(workspace1.getWorkspaceId());
 
@@ -108,7 +108,7 @@ public class UserMetricsControllerTest {
     resource2 = new DbUserRecentResource();
     resource2.setNotebookName(null);
     resource2.setCohort(dbCohort);
-    resource2.setLastAccessDate(new Timestamp(clock.millis() - 10000));
+    resource2.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
     resource2.setUserId(user.getUserId());
     resource2.setWorkspaceId(workspace2.getWorkspaceId());
     when(mockWorkspaceService.getWorkspaceMaybe(resource2.getWorkspaceId()))
@@ -117,7 +117,7 @@ public class UserMetricsControllerTest {
     DbUserRecentResource resource3 = new DbUserRecentResource();
     resource3.setNotebookName("gs://bucketFile/notebooks/notebook2.ipynb");
     resource3.setCohort(null);
-    resource3.setLastAccessDate(new Timestamp(clock.millis() - 10000));
+    resource3.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
     resource3.setUserId(user.getUserId());
     resource3.setWorkspaceId(workspace2.getWorkspaceId());
 
@@ -180,7 +180,7 @@ public class UserMetricsControllerTest {
             mockWorkspaceService,
             mockFireCloudService,
             mockCloudStorageService,
-            clock);
+            fakeClock);
     userMetricsController.setDistinctWorkspaceLimit(5);
 
     cohortMapper = new CohortMapperImpl();
@@ -332,7 +332,7 @@ public class UserMetricsControllerTest {
 
   @Test
   public void testUpdateRecentResource() {
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    Timestamp now = new Timestamp(fakeClock.instant().toEpochMilli());
     DbUserRecentResource mockUserRecentResource = new DbUserRecentResource();
     mockUserRecentResource.setCohort(null);
     mockUserRecentResource.setWorkspaceId(workspace2.getWorkspaceId());

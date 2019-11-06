@@ -189,10 +189,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
             String.format("Workspace ID %d still in recent list but not found", workspaceId));
         continue;
       }
-      final DbWorkspace workspace = workspaceMaybe.get();
-      final WorkspaceResponse workspaceResponse =
-          fireCloudService.getWorkspace(
-              workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+      final DbWorkspace dbWorkspace = workspaceMaybe.get();
+      final WorkspaceResponse workspaceResponse = fireCloudService.getWorkspace(dbWorkspace);
 
       Optional.ofNullable(workspaceResponse)
           .ifPresent(r -> liveWorkspacesByIdBuilder.put(workspaceId, r));

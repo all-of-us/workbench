@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
@@ -341,6 +342,11 @@ public class FireCloudServiceImpl implements FireCloudService {
         (context) ->
             workspacesApi.getWorkspace(
                 projectName, workspaceName, FIRECLOUD_GET_WORKSPACE_REQUIRED_FIELDS));
+  }
+
+  @Override
+  public WorkspaceResponse getWorkspace(DbWorkspace dbWorkspace) {
+    return getWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
   }
 
   @Override

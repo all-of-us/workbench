@@ -2,6 +2,7 @@ package org.pmiops.workbench.firecloud;
 
 import java.io.IOException;
 import java.util.List;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.BillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.JWTWrapper;
@@ -84,6 +85,8 @@ public interface FireCloudService {
    * https://docs.google.com/document/d/1YS95Q7ViRztaCSfPK-NS6tzFPrVpp5KUo0FaWGx7VHw/edit#heading=h.xgjl2srtytjt
    */
   WorkspaceResponse getWorkspace(String projectName, String workspaceName);
+
+  WorkspaceResponse getWorkspace(DbWorkspace dbWorkspace);
 
   List<WorkspaceResponse> getWorkspaces(List<String> fields);
 
