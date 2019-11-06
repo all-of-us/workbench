@@ -91,7 +91,7 @@ export class ComboChart extends React.Component<Props, State> {
         acc.push(key);
       }
       return acc;
-    }, []).sort((a, b) => a > b ? 1 : -1);;
+    }, []).sort((a, b) => a > b ? 1 : -1);
   }
 
   getSeries() {
