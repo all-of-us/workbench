@@ -36,6 +36,7 @@ import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.RecentResourceResponse;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.CohortMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -57,6 +58,8 @@ public class UserMetricsControllerTest {
 
   private UserMetricsController userMetricsController;
   private static final Instant NOW = Instant.now();
+  private CohortMapper cohortMapper;
+
   private FakeClock clock = new FakeClock(NOW);
 
   private DbUser user;
@@ -282,9 +285,11 @@ public class UserMetricsControllerTest {
         userMetricsController.getUserRecentResources().getBody();
     assertEquals(1, recentResources.size());
     RecentResource foundResource = recentResources.get(0);
-    assertEquals(foundResource.getCohort().etag(), resource2.getCohort());
-    assertEquals(Optional.ofNullable(foundResource.getWorkspaceId()), resource2.getWorkspaceId());
+    final Cohort cohort1 = foundResource.getCohort();
+    final Cohort cohort2 = cohortMapper.destinationToSource(resource2.getCohort());
+    assertEquals(cohort1, cohort2);
 
+    assertEquals(Optional.ofNullable(foundResource.getWorkspaceId()), resource2.getWorkspaceId());
   }
 
   @Test
