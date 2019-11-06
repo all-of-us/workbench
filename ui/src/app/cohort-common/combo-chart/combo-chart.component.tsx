@@ -91,17 +91,38 @@ export class ComboChart extends React.Component<Props, State> {
         acc.push(key);
       }
       return acc;
-    }, []);
+    }, []).sort((a, b) => a > b ? 1 : -1);;
   }
 
   getSeries() {
     const {data} = this.props;
+    const categories = this.getCategories();
+    const size = categories.length;
+    let i = 0;
     return data.reduce((acc, datum) => {
-      const index = acc.findIndex(d => d.name === datum.race);
-      if (index === -1) {
-        acc.push({name: datum.race, data: [datum.count]});
-      } else {
-        acc[index].data.push(datum.count);
+      while (i < size) {
+        const index = acc.findIndex(d => d.name === datum.race);
+        const key = categories[i];
+        const missing = !key.includes(datum.ageRange);
+        if (!missing) {
+          if (index === -1) {
+            acc.push({name: datum.race, data: [datum.count]});
+          } else {
+            acc[index].data.push(datum.count);
+          }
+          i++;
+          break;
+        } else {
+          if (index === -1) {
+            acc.push({name: datum.race, data: [0]});
+          } else {
+            acc[index].data.push(0);
+          }
+          i++;
+        }
+      }
+      if (i === size) {
+        i = 0;
       }
       return acc;
     }, []).sort((a, b) => a['name'] < b['name'] ? 1 : -1);
