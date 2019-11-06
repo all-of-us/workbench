@@ -6,11 +6,10 @@ export const setupCustomValidators = () => {
   };
 
   validate.validators.truthiness = (value, options) => {
-    if(value !== options) {
-      return `must be ${options}`
-    }
-    else {
+    if (value !== options) {
+      return `must be ${options}`;
+    } else {
       return undefined;
     }
-  }
+  };
 };

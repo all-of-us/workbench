@@ -650,9 +650,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         anticipatedFindings,
         intendedStudy,
         reasonForAllOfUs,
-        "primaryPurpose": this.categoryIsSelected,
-        "specificPopulation": this.specificPopulationSelected,
-        "diseaseOfFocus": this.diseaseOfFocusSpecified
+        'primaryPurpose': this.categoryIsSelected,
+        'specificPopulation': this.specificPopulationSelected,
+        'diseaseOfFocus': this.diseaseOfFocusSpecified
       }, {
         name: {
           length: { minimum: 1, maximum: 80 }
