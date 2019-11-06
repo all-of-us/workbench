@@ -36,16 +36,17 @@ echo "Sys.setenv(RETICULATE_PYTHON = '$(which python3)')" >> ~/.Rprofile
 # TODO: These steps are quite slow, we could also consider pushing this into the
 # base Leo image or a custom AoU docker image.
 apt-get update
-apt-get -t stretch-cran35 install -y --no-install-recommends libmagick++-dev gfortran-6 jq
+apt-get -t stretch-cran35 install -y --no-install-recommends libmagick++-dev gfortran-6
+apt-get install -y --no-install-recommends jq
 
-for v in "2.7" "3"; do
+for v in "3"; do
   "pip${v}" install --upgrade \
     plotnine \
     'https://github.com/all-of-us/pyclient/archive/pyclient-v1-17.zip#egg=aou_workbench_client&subdirectory=py'
 done
 
 # Install wondershaper for basic egress throttling.
-apt-get install -y --no-install-recommends iproute
+apt-get install -y --no-install-recommends iproute2
 (cd /usr/local/share &&
  git clone https://github.com/magnific0/wondershaper.git &&
  cd wondershaper &&
