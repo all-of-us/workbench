@@ -102,6 +102,15 @@ export class ComboChart extends React.Component<Props, State> {
     return data.reduce((acc, datum) => {
       while (i < size) {
         const index = acc.findIndex(d => d.name === datum.race);
+        if (index === -1 && acc.length) {
+          if (acc[acc.length - 1].data.length < categories.length) {
+            const zeroes = categories.length - acc[acc.length - 1].data.length;
+            for (let z = 0; z < zeroes; z++) {
+              acc[acc.length - 1].data.push(0);
+            }
+            i = 0;
+          }
+        }
         const key = categories[i];
         const missing = !key.includes(datum.ageRange);
         if (!missing) {
