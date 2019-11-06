@@ -12,6 +12,7 @@ import org.pmiops.workbench.model.Cohort;
     unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CohortMapper {
   DbCohort clientToDbModel(Cohort source);
+
   Cohort dbModelToClient(DbCohort destination);
 
   default DbUser DbUserToCreatorEmail(String creator) {

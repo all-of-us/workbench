@@ -104,8 +104,8 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
 
   /**
    * Retrieves the list of all resources recently accessed by user in descending order of last
-   * access date. This list is not filtered by visibility of these resources (for example, it
-   * may contain resources in an inactive workspace.
+   * access date. This list is not filtered by visibility of these resources (for example, it may
+   * contain resources in an inactive workspace.
    *
    * @param userId : User id for whom the resources are returned
    */

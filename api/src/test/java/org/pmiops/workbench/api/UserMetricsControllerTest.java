@@ -3,9 +3,7 @@ package org.pmiops.workbench.api;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,21 +51,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class UserMetricsControllerTest {
 
-  @Mock
-  private CloudStorageService mockCloudStorageService;
-  @Mock
-  private UserRecentResourceService mockUserRecentResourceService;
-  @Mock
-  private Provider<DbUser> mockUserProvider;
-  @Mock
-  private FireCloudService mockFireCloudService;
-  @Mock
-  private WorkspaceService mockWorkspaceService;
+  @Mock private CloudStorageService mockCloudStorageService;
+  @Mock private UserRecentResourceService mockUserRecentResourceService;
+  @Mock private Provider<DbUser> mockUserProvider;
+  @Mock private FireCloudService mockFireCloudService;
+  @Mock private WorkspaceService mockWorkspaceService;
 
   private UserMetricsController userMetricsController;
   private static final Instant NOW = Instant.now();
-  @Autowired
-  private CohortMapper cohortMapper;
+  @Autowired private CohortMapper cohortMapper;
 
   private FakeClock clock = new FakeClock(NOW);
 
@@ -78,9 +70,7 @@ public class UserMetricsControllerTest {
 
   @TestConfiguration
   @Import({CohortMapperImpl.class})
-  static class Configuration {
-
-  }
+  static class Configuration {}
 
   @Before
   public void setUp() {
@@ -162,15 +152,15 @@ public class UserMetricsControllerTest {
         .thenReturn(workspace2);
 
     when(mockWorkspaceService.getRequired(
-        workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName()))
+            workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName()))
         .thenReturn(workspace2);
 
     when(mockFireCloudService.getWorkspace(
-        workspace1.getWorkspaceNamespace(), workspace1.getFirecloudName()))
+            workspace1.getWorkspaceNamespace(), workspace1.getFirecloudName()))
         .thenReturn(workspaceResponse);
 
     when(mockFireCloudService.getWorkspace(
-        workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName()))
+            workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName()))
         .thenReturn(workspaceResponse2);
 
     when(mockCloudStorageService.blobsExist(anyList()))
@@ -350,9 +340,9 @@ public class UserMetricsControllerTest {
     mockUserRecentResource.setNotebookName("gs://newBucket/notebooks/notebook.ipynb");
     mockUserRecentResource.setLastAccessDate(now);
     when(mockUserRecentResourceService.updateNotebookEntry(
-        workspace2.getWorkspaceId(),
-        user.getUserId(),
-        "gs://newBucket/notebooks/notebook.ipynb"))
+            workspace2.getWorkspaceId(),
+            user.getUserId(),
+            "gs://newBucket/notebooks/notebook.ipynb"))
         .thenReturn(mockUserRecentResource);
 
     RecentResourceRequest request = new RecentResourceRequest();
