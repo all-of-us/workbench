@@ -1,9 +1,9 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
+import {ConceptHomepage} from 'app/pages/data/concept/concept-homepage';
 import {conceptsApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {ConceptHomepage} from 'app/pages/data/concept/concept-homepage';
 import {
   ConceptsApi,
   ConceptSetsApi,
@@ -42,12 +42,13 @@ function conceptsCountInDomain(domain: DomainInfo, isStandardConcepts: boolean):
 }
 
 function searchTable(searchTerm: string, wrapper) {
-  const searchInput = wrapper.find('[data-test-id="concept-search-input"]')
-    .find('input').getDOMNode() as HTMLInputElement;
-  searchInput.value = searchTerm;
   wrapper.find('[data-test-id="concept-search-input"]')
-    .find('input').simulate('keydown', {keyCode: 13});
+    .find('input').simulate('change', {target: {value: searchTerm}});
+  wrapper.find('[data-test-id="concept-search-input"]')
+    .find('input').simulate('keypress', {key: 'Enter'});
 }
+
+const defaultSearchTerm = 'test';
 
 describe('ConceptHomepage', () => {
 
@@ -78,17 +79,16 @@ describe('ConceptHomepage', () => {
   });
 
   it('should default to standard concepts only, and performs a full search', async() => {
-    const searchTerm = 'test';
     const spy = jest.spyOn(conceptsApi(), 'searchConcepts');
     const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
-    searchTable(searchTerm, wrapper);
+    searchTable(defaultSearchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
 
     DomainStubVariables.STUB_DOMAINS.forEach((domain) => {
       const includeDomainCounts = isSelectedDomain(domain, wrapper);
       const expectedRequest = {
-        query: searchTerm,
+        query: defaultSearchTerm,
         // Tests that it searches only standard concepts.
         standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
         domain: domain.domain,
@@ -120,9 +120,8 @@ describe('ConceptHomepage', () => {
 
   });
 
-  it('should changes search criteria when standard only not checked', async() => {
+  it('should change search criteria when standard only not checked', async() => {
     const spy = jest.spyOn(conceptsApi(), 'searchConcepts');
-    const searchTerm = 'test';
     const selectedDomain = DomainStubVariables.STUB_DOMAINS[1];
     const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
@@ -130,13 +129,13 @@ describe('ConceptHomepage', () => {
     wrapper.find('[data-test-id="standardConceptsCheckBox"]').first()
       .simulate('change', { target: { checked: true } });
     await waitOneTickAndUpdate(wrapper);
-    searchTable(searchTerm, wrapper);
+    searchTable(defaultSearchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
 
     DomainStubVariables.STUB_DOMAINS.forEach((domain) => {
       const includeDomainCounts = isSelectedDomain(domain, wrapper);
       const expectedRequest = {
-        query: searchTerm,
+        query: defaultSearchTerm,
         // Tests that it searches only standard concepts.
         standardConceptFilter: StandardConceptFilter.ALLCONCEPTS,
         domain: domain.domain,
@@ -158,7 +157,7 @@ describe('ConceptHomepage', () => {
   it('should display the selected concepts on header', async() => {
     const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
-    searchTable('test', wrapper);
+    searchTable(defaultSearchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('span.p-checkbox-icon.p-clickable').at(1).simulate('click');
@@ -166,10 +165,10 @@ describe('ConceptHomepage', () => {
     expect(wrapper.find('[data-test-id="selectedConcepts"]').text()).toBe('1');
   });
 
-  it('should display the selected concepts on sliding button', async () => {
+  it('should display the selected concepts on sliding button', async() => {
     const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
-    searchTable('test', wrapper);
+    searchTable(defaultSearchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
 
     // before anything is selected, the sliding button should be disabled
@@ -186,7 +185,7 @@ describe('ConceptHomepage', () => {
   it('should clear search and selected concepts', async() => {
     const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
-    searchTable('test', wrapper);
+    searchTable(defaultSearchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('span.p-checkbox-icon.p-clickable').at(1).simulate('click');
@@ -195,5 +194,26 @@ describe('ConceptHomepage', () => {
 
     wrapper.find('[data-test-id="clear-search"]').first().simulate('click');
     expect(wrapper.find('[data-test-id="selectedConcepts"]').length).toEqual(0);
+  });
+
+  it('should clear search box and reset page to default view', async() => {
+    const wrapper = mount(<ConceptHomepage />);
+    await waitOneTickAndUpdate(wrapper);
+    searchTable(defaultSearchTerm, wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find('[data-test-id="concept-search-input"]')
+      .find('input').props().value).toBe(defaultSearchTerm);
+    wrapper.find('[data-test-id="clear-search"]').first().simulate('click');
+
+    expect(wrapper.find('[data-test-id="concept-search-input"]')
+      .find('input').props().value).toBe('');
+
+    // Verify that the page resets to show the default view
+    expect(wrapper.find('[data-test-id="domain-box-name"]').length)
+      .toBe(DomainStubVariables.STUB_DOMAINS.length);
+    expect(wrapper.find('[data-test-id="survey-box-name"]').length)
+      .toBe(SurveyStubVariables.STUB_SURVEYS.length);
+
   });
 });
