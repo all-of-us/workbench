@@ -12,7 +12,6 @@ import {cohortAnnotationDefinitionApi} from 'app/services/swagger-fetch-clients'
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withUrlParams} from 'app/utils';
 import {AnnotationType, CohortAnnotationDefinition} from 'generated/fetch';
-import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
   editRow: {
@@ -245,7 +244,7 @@ export const EditAnnotationDefinitionsModal = withUrlParams()(class extends Reac
                     onChange={v => this.setState({editValue: v})}
                     onBlur={() => this.rename()}
                     onKeyPress={e => {
-                      if (e.key === Key.Enter) {
+                      if (e.key === 'Enter') {
                         this.rename();
                       }
                     }}
