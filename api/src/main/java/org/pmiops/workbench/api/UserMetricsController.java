@@ -185,7 +185,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       final Optional<DbWorkspace> workspaceMaybe = workspaceService.getWorkspaceMaybe(workspaceId);
       if (!workspaceMaybe.isPresent()) {
         logger.log(
-            Level.WARNING,
+            Level.INFO,
             String.format("Workspace ID %d still in recent list but not found", workspaceId));
         continue;
       }
