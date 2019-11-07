@@ -38,7 +38,7 @@ class ProfileAuditAdapterServiceTest {
     private val mockClock = mock<Clock>()
     private val mockActionIdProvider = mock<Provider<String>>()
 
-    private var profileAuditAdapterService: ProfileAuditAdapterService? = null
+    private var profileAuditAdapterService: ProfileAuditAdapter? = null
     private var user: DbUser? = null
 
     @Before
@@ -47,7 +47,7 @@ class ProfileAuditAdapterServiceTest {
         user?.userId = 1001
         user?.email = USER_EMAIL
 
-        profileAuditAdapterService = ProfileAuditAdapterServiceImpl(
+        profileAuditAdapterService = ProfileAuditAdapterImpl(
                 userProvider = mockUserProvider,
                 actionAuditService = mockActionAuditService,
                 clock = mockClock,

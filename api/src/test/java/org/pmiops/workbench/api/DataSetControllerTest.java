@@ -34,7 +34,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapterService;
+import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -204,7 +204,8 @@ public class DataSetControllerTest {
 
   @Autowired WorkspaceService workspaceService;
 
-  @Autowired WorkspaceAuditAdapterService workspaceAuditAdapterService;
+  @Autowired
+  WorkspaceAuditAdapter workspaceAuditAdapter;
 
   @TestConfiguration
   @Import({
@@ -233,7 +234,7 @@ public class DataSetControllerTest {
     NotebooksService.class,
     CohortQueryBuilder.class,
     UserRecentResourceService.class,
-    WorkspaceAuditAdapterService.class
+    WorkspaceAuditAdapter.class
   })
   static class Configuration {
     @Bean
@@ -304,7 +305,7 @@ public class DataSetControllerTest {
             notebooksService,
             userService,
             workbenchConfigProvider,
-            workspaceAuditAdapterService);
+            workspaceAuditAdapter);
     CohortsController cohortsController =
         new CohortsController(
             workspaceService,

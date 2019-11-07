@@ -26,7 +26,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.pmiops.workbench.actionaudit.adapters.ProfileAuditAdapterService;
+import org.pmiops.workbench.actionaudit.adapters.ProfileAuditAdapter;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
@@ -109,7 +109,7 @@ public class ProfileControllerTest {
   @Mock private ComplianceService complianceTrainingService;
   @Mock private MailService mailService;
   @Mock private UserService userService;
-  @Mock private ProfileAuditAdapterService mockProfileAuditAdapterService;
+  @Mock private ProfileAuditAdapter mockProfileAuditAdapter;
 
   private ProfileController profileController;
   private ProfileController cloudProfileController;
@@ -177,7 +177,7 @@ public class ProfileControllerTest {
             Providers.of(config),
             environment,
             Providers.of(mailService),
-            mockProfileAuditAdapterService);
+            mockProfileAuditAdapter);
     this.cloudProfileController =
         new ProfileController(
             profileService,
@@ -193,7 +193,7 @@ public class ProfileControllerTest {
             Providers.of(config),
             cloudEnvironment,
             Providers.of(mailService),
-            mockProfileAuditAdapterService);
+            mockProfileAuditAdapter);
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
@@ -211,7 +211,7 @@ public class ProfileControllerTest {
   @Test
   public void testCreateAccount_success() throws Exception {
     createUser();
-    verify(mockProfileAuditAdapterService).fireCreateAction(any(Profile.class));
+    verify(mockProfileAuditAdapter).fireCreateAction(any(Profile.class));
     final DbUser dbUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(dbUser).isNotNull();
     assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
@@ -228,7 +228,7 @@ public class ProfileControllerTest {
     exception.expectMessage(
         "Username should be at least 3 characters and not more than 64 characters");
     profileController.createAccount(accountRequest);
-    verify(mockProfileAuditAdapterService).fireCreateAction(any(Profile.class));
+    verify(mockProfileAuditAdapter).fireCreateAction(any(Profile.class));
   }
 
   @Test
@@ -586,7 +586,7 @@ public class ProfileControllerTest {
             Providers.of(config),
             environment,
             Providers.of(mailService),
-            mockProfileAuditAdapterService);
+            mockProfileAuditAdapter);
     profileController.bypassAccessRequirement(
         profile.getUserId(),
         new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
@@ -598,7 +598,7 @@ public class ProfileControllerTest {
     createUser();
 
     profileController.deleteProfile();
-    verify(mockProfileAuditAdapterService).fireDeleteAction(user.getUserId(), user.getEmail());
+    verify(mockProfileAuditAdapter).fireDeleteAction(user.getUserId(), user.getEmail());
   }
 
   private Profile createUser() throws Exception {

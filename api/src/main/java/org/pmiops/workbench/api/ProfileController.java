@@ -16,7 +16,7 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.pmiops.workbench.actionaudit.adapters.ProfileAuditAdapterService;
+import org.pmiops.workbench.actionaudit.adapters.ProfileAuditAdapter;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -184,7 +184,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
   private final Provider<MailService> mailServiceProvider;
-  private final ProfileAuditAdapterService profileAuditAdapterService;
+  private final ProfileAuditAdapter profileAuditAdapter;
 
   @Autowired
   ProfileController(
@@ -201,7 +201,7 @@ public class ProfileController implements ProfileApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment,
       Provider<MailService> mailServiceProvider,
-      ProfileAuditAdapterService profileAuditAdapterService) {
+      ProfileAuditAdapter profileAuditAdapter) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -215,7 +215,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
     this.mailServiceProvider = mailServiceProvider;
-    this.profileAuditAdapterService = profileAuditAdapterService;
+    this.profileAuditAdapter = profileAuditAdapter;
   }
 
   @Override
@@ -462,7 +462,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
     // Note: Avoid getProfileResponse() here as this is not an authenticated request.
     final Profile createdProfile = profileService.getProfile(user);
-    profileAuditAdapterService.fireCreateAction(createdProfile);
+    profileAuditAdapter.fireCreateAction(createdProfile);
     return ResponseEntity.ok(createdProfile);
   }
 
@@ -689,7 +689,7 @@ public class ProfileController implements ProfileApiDelegate {
     saveUserWithConflictHandling(user);
 
     final Profile appliedUpdatedProfile = profileService.getProfile(user);
-    profileAuditAdapterService.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+    profileAuditAdapter.fireUpdateAction(previousProfile, appliedUpdatedProfile);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -798,7 +798,7 @@ public class ProfileController implements ProfileApiDelegate {
     log.log(Level.WARNING, "Deleting profile: user email: " + user.getEmail());
     directoryService.deleteUser(user.getEmail().split("@")[0]);
     userDao.delete(user.getUserId());
-    profileAuditAdapterService.fireDeleteAction(
+    profileAuditAdapter.fireDeleteAction(
         user.getUserId(), user.getEmail()); // not sure if user profider will survive the next line
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

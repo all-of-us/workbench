@@ -18,18 +18,20 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 
 @Service
-class ProfileAuditAdapterServiceImpl @Autowired
+class ProfileAuditAdapterImpl @Autowired
 constructor(
     private val userProvider: Provider<DbUser>,
     private val actionAuditService: ActionAuditService,
     private val clock: Clock,
     @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
-) : ProfileAuditAdapterService {
+) : ProfileAuditAdapter {
 
     override fun fireCreateAction(createdProfile: Profile) {
         try {
             val propertiesByName: Map<String, String?> = TargetPropertyExtractor
                     .getPropertyValuesByName(ProfileTargetProperty.values(), createdProfile)
+            // We can't rely on the UserProvider here since the user didn't exist when it
+            // got loaded or whatever.
             val createEvents = propertiesByName.entries
                     .map {
                         ActionAuditEvent(
@@ -37,10 +39,10 @@ constructor(
                             actionId = actionIdProvider.get(),
                             actionType = ActionType.CREATE,
                             agentType = AgentType.USER,
-                            agentId = userProvider.get().userId,
-                            agentEmailMaybe = userProvider.get().email,
+                            agentId = createdProfile.userId,
+                            agentEmailMaybe = createdProfile.contactEmail,
                             targetType = TargetType.PROFILE,
-                            targetIdMaybe = userProvider.get().userId,
+                            targetIdMaybe = createdProfile.userId,
                             targetPropertyMaybe = it.key,
                             previousValueMaybe = null,
                             newValueMaybe = it.value)
@@ -108,6 +110,6 @@ constructor(
 
     companion object {
 
-        private val logger = Logger.getLogger(ProfileAuditAdapterServiceImpl::class.java.name)
+        private val logger = Logger.getLogger(ProfileAuditAdapterImpl::class.java.name)
     }
 }
