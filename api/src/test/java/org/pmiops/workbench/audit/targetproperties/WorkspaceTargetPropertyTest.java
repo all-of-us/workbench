@@ -149,10 +149,6 @@ public class WorkspaceTargetPropertyTest {
             TargetPropertyExtractor.getChangedValuesByName(
                 WorkspaceTargetProperty.values(), workspace1, workspace1))
         .isEmpty();
-    assertThat(
-            TargetPropertyExtractor.getChangedValuesByName(
-                WorkspaceTargetProperty.values(), null, null))
-        .isEmpty();
   }
 
   @Test
