@@ -103,6 +103,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                 .masterMachineType(
                     Optional.ofNullable(clusterOverride.machineType)
                         .orElse(config.firecloud.clusterDefaultMachineType)))
+        .jupyterDockerImage(workbenchConfigProvider.get().firecloud.jupyterDockerImage)
         .customClusterEnvironmentVariables(customClusterEnvironmentVariables);
   }
 

@@ -42,7 +42,7 @@
       margin-left: 6px;
     }
     .card {
-      line-height: 38px;
+      line-height: 22px;
       margin-bottom: 27px;
       text-decoration: none;
     }
@@ -50,30 +50,22 @@
       padding-top: 15px;
     }
 
-    .bullet {
+    .bullet img {
       display: inline-block;
       height: 31px;
+      width: 31px;
       margin-left: 1rem;
       margin-right: 1rem;
-      width: 31px;
       border-radius: 15px;
       background-color: #302C71;
       color: #FFFFFF;
       vertical-align: middle;
     }
 
-    .card-text {
-      color: rgba(0,0,0,0.87);
-      display: inline-block;
-      line-height: 22px;
-      font-size: 16px;
-      font-weight: 300;
-      vertical-align: middle;
+    .bullet {
+      padding-top: .5em;
     }
-    .link {
-      display: inline;
-      color: #2691D0;
-    }
+
     .button {
       height: 52px;
       width: 178px;
@@ -97,9 +89,9 @@
     th.long {
       width: 60%
     }
-    a.unstyled {
-      text-decoration: inherit;
-      color: inherit;
+    a.text-link {
+      text-decoration: none;
+      color: #2691D0;
     }
   </style>
 </head>
@@ -119,7 +111,7 @@
     </tr>
     <tr>
       <td colspan="3">
-        <div class="welcome-message">Welcome to the All of Us Researcher Workbench!</div>
+        <div class="welcome-message">Welcome to the <i>All of Us</i> Researcher Workbench!</div>
       </td>
     </tr>
     <tr>
@@ -140,28 +132,43 @@
     </tr>
     <tr>
       <td colspan="3">
-        <div class="text">Quick guide on how to get started:</div>
+        <div class="text">Helpful tips before you get started:</div>
       </td>
     </tr>
     <tr class="card">
-      <td>
-        <a class="unstyled" href="https://myaccount.google.com/signinoptions/two-step-verification"><img class="bullet" src="${BULLET_1}"></a>
-      </td>
-      <td colspan="2">
-        <a class="unstyled" href="https://myaccount.google.com/signinoptions/two-step-verification"><span class=" card-text link">Sign into Google</span><span> with your new account, change your password, and set up 2-Step Verification</span></a>
+      <td colspan="3">
+        <div style="display: flex">
+          <div class="bullet">
+            <img src="${BULLET_1}">
+          </div>
+          <div class="text">
+            <a class="text-link" href="https://support.google.com/chrome/answer/95346">Chrome</a>
+            <span> is the primary browser we currently support for the Researcher Workbench.
+            We highly recommend using Chrome for the best user experience.
+          </span>
+          </div>
+        </div>
       </td>
     </tr>
+    <tr style="height: 1em"></tr>
     <tr class="card">
-      <td>
-        <a class="unstyled" href="https://myaccount.google.com/intro/recovery/email?hl=en-US"><img class="bullet" src="${BULLET_2}"></a>
-      </td>
-      <td colspan="2">
-        <a class="unstyled" href="https://myaccount.google.com/intro/recovery/email?hl=en-US"><span class="card-text link">Add</span><span> your recovery email address</span></a>
+      <td colspan="3">
+        <div style="display: flex">
+          <div class="bullet">
+            <img src="${BULLET_2}">
+          </div>
+          <div class="text">
+            <span>
+              We recommend creating a <a class="text-link" href="https://support.google.com/chrome/answer/2364824">Chrome Profile </a>
+              with your <i>All of Us</i> Researcher Workbench Google account. This will keep your Workbench browser sessions isolated if you use other Google accounts.
+            </span>
+          </div>
+        </div>
       </td>
     </tr>
     <tr>
       <td colspan="3">
-        <div class="after text">After these steps are completed, you are ready to use the Researcher Workbench: </div>
+        <div class="after text"> Click on the link below to get started with the Workbench! </div>
       </td>
     </tr>
     <tr>
