@@ -39,12 +39,10 @@ apt-get update
 apt-get -t stretch-cran35 install -y --no-install-recommends libmagick++-dev gfortran-6
 apt-get install -y --no-install-recommends jq
 
-for v in "3"; do
-  "pip${v}" install --upgrade \
-    plotnine \
-    'https://github.com/all-of-us/pyclient/archive/pyclient-v1-17.zip#egg=aou_workbench_client&subdirectory=py' \
-    statsmodels==0.10.0rc2
-done
+"pip3" install --upgrade \
+  plotnine \
+  'https://github.com/all-of-us/pyclient/archive/pyclient-v1-17.zip#egg=aou_workbench_client&subdirectory=py' \
+  statsmodels==0.10.0rc2
 
 # Install wondershaper for basic egress throttling.
 apt-get install -y --no-install-recommends iproute2
