@@ -13,11 +13,7 @@ import org.mockito.ArgumentMatchers.anyList
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.*
-import org.pmiops.workbench.actionaudit.ActionAuditEvent
-import org.pmiops.workbench.actionaudit.ActionAuditService
-import org.pmiops.workbench.actionaudit.ActionType
-import org.pmiops.workbench.actionaudit.AgentType
-import org.pmiops.workbench.actionaudit.TargetType
+import org.pmiops.workbench.actionaudit.*
 import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.model.*
 import org.springframework.test.context.junit4.SpringRunner
@@ -46,7 +42,7 @@ class ProfileAuditAdapterServiceTest {
 
     @Before
     fun setUp() {
-        reset(mockActionAuditService)
+        reset(mockActionAuditService) // try to help with flakiness
         user = DbUser()
         user?.userId = 1001
         user?.email = USER_EMAIL
@@ -63,13 +59,11 @@ class ProfileAuditAdapterServiceTest {
     @Test
     fun testCreateUserProfile() {
         val createdProfile = buildProfile()
-
         profileAuditAdapterService!!.fireCreateAction(createdProfile)
-        verify(mockActionAuditService)?.send(anyList())
-//        verify(mockActionAuditService)?.send(eventListCaptor?.capture()!!)
-//        val sentEvents: List<ActionAuditEvent> = eventListCaptor?.value?.toList().orEmpty()
-//
-//        assertThat(sentEvents).hasSize(10)
+        verify<ActionAuditService>(mockActionAuditService!!).send(eventListCaptor?.capture()!!)
+        val sentEvents: List<ActionAuditEvent> = eventListCaptor?.value?.toList().orEmpty()
+
+        assertThat(sentEvents).hasSize(10)
     }
 
     private fun buildProfile(): Profile {

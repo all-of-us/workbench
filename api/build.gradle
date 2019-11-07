@@ -188,6 +188,7 @@ buildscript {    // Configuration for building
     HIBERNATE_VERSION = '5.2.10.Final'
     SPRINGFOX_VERSION = '2.6.1'
     KOTLIN_VERSION = '1.3.50'
+    MOCKITO_KOTLIN_VERSION = '2.2.0'
   }
 
   repositories {
@@ -424,7 +425,7 @@ dependencies {
   testCompile 'com.h2database:h2:1.4.194'
   testCompile 'org.liquibase:liquibase-core:3.5.3'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
-
+  testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:${MOCKITO_KOTLIN_VERSION}"
   // For Swagger generation. These should include dependencies found in the Swagger codegen
   // example here:
   // https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml
