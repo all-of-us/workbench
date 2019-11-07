@@ -11,7 +11,8 @@
     "registeredDomainGroup": "all-of-us-registered-perf@perf.test.firecloud.org",
     "xAppIdValue": "perf-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_perf_aou_perf",
-    "timeoutInSeconds": 40
+    "timeoutInSeconds": 60,
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-gatk:0.0.3"
   },
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",
