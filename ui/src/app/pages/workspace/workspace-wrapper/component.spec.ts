@@ -9,7 +9,7 @@ import {ClarityModule} from '@clr/angular';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {urlParamsStore} from 'app/utils/navigation';
 
 import {BugReportComponent} from 'app/components/bug-report';
 import {ConfirmDeleteModalComponent} from 'app/components/confirm-delete-modal';
@@ -18,7 +18,7 @@ import {WorkspaceShareComponent} from 'app/pages/workspace/workspace-share';
 import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/component';
 
 import {UserService, WorkspaceAccessLevel} from 'generated';
-import {WorkspaceAccessLevel as FetchWorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {WorkspaceAccessLevel as FetchWorkspaceAccessLevel, WorkspaceResponse, WorkspacesApi} from 'generated/fetch';
 
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
@@ -35,8 +35,8 @@ import {setupModals, updateAndTick} from 'testing/test-helpers';
 })
 class FakeAppComponent {}
 
-const workspace = {
-  ...workspaceStubs[0],
+const workspaceResponse: WorkspaceResponse = {
+  workspace: {...workspaceStubs[0]},
   accessLevel: FetchWorkspaceAccessLevel.OWNER,
 };
 
@@ -89,7 +89,7 @@ describe('WorkspaceWrapperComponent', () => {
         `WorkspaceStubVariables.DEFAULT_WORKSPACE_ID)/about`);
 
       spyOn(workspacesApi(), 'getWorkspace')
-        .and.returnValue(Promise.resolve(workspace));
+        .and.returnValue(Promise.resolve(workspaceResponse));
 
       urlParamsStore.next({
         ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -100,7 +100,6 @@ describe('WorkspaceWrapperComponent', () => {
       tick();
       updateAndTick(fixture);
       updateAndTick(fixture);
-      currentWorkspaceStore.next(workspace);
     });
   }));
 
