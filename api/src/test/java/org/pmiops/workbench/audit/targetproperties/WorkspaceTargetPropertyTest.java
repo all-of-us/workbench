@@ -85,9 +85,6 @@ public class WorkspaceTargetPropertyTest {
             TargetPropertyExtractor.getPropertyValuesByName(
                 WorkspaceTargetProperty.values(), emptyWorkspace))
         .isEmpty();
-    assertThat(
-            TargetPropertyExtractor.getPropertyValuesByName(WorkspaceTargetProperty.values(), null))
-        .isEmpty();
   }
 
   @Test
@@ -149,13 +146,5 @@ public class WorkspaceTargetPropertyTest {
             TargetPropertyExtractor.getChangedValuesByName(
                 WorkspaceTargetProperty.values(), workspace1, workspace1))
         .isEmpty();
-  }
-
-  @Test
-  public void testComparisonToNullMatchesAllProperties() {
-    assertThat(
-            TargetPropertyExtractor.getChangedValuesByName(
-                WorkspaceTargetProperty.values(), workspace1, null))
-        .hasSize(6);
   }
 }
