@@ -7,7 +7,12 @@ import com.google.cloud.logging.Logging
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.Payload.Type
 import com.google.common.collect.ImmutableList
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import java.util.Arrays
 import javax.inject.Provider
 import org.junit.Before
@@ -20,14 +25,13 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 class ActionAuditServiceTest {
-    private val mockLogging =  mock<Logging> {}
+    private val mockLogging = mock<Logging>()
 
     private val mockConfigProvider = mock<Provider<WorkbenchConfig>>()
 
     private var event1: ActionAuditEvent? = null
     private var event2: ActionAuditEvent? = null
     private var actionAuditService: ActionAuditService? = null
-    private val ACTION_ID = "b52a36f6-3e88-4a30-a57f-ae884838bfbf"
 
     @Before
     fun setUp() {
@@ -93,7 +97,6 @@ class ActionAuditServiceTest {
             // Logging passes numeric json fields as doubles when building a JsonPayload
             assertThat(payloadMap[AuditColumn.AGENT_ID.name]).isEqualTo(AGENT_ID_1.toDouble())
         }
-
     }
 
     @Test
@@ -145,5 +148,6 @@ class ActionAuditServiceTest {
     companion object {
         private const val AGENT_ID_1 = 101L
         private const val AGENT_ID_2 = 102L
+        private const val ACTION_ID = "b52a36f6-3e88-4a30-a57f-ae884838bfbf"
     }
 }

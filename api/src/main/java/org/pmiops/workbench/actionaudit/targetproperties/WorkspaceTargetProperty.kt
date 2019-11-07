@@ -6,8 +6,9 @@ import org.pmiops.workbench.model.Workspace
 // not safe to remove, even if an IDE indicates otherwise.
 enum class WorkspaceTargetProperty
 constructor(
-        override val propertyName: String,
-        override val extractor: (Workspace) -> String?): TargetProperty<Workspace> {
+    override val propertyName: String,
+    override val extractor: (Workspace) -> String?
+) : TargetProperty<Workspace> {
     NAME("name", Workspace::getName),
     INTENDED_STUDY("intended_study", { it.researchPurpose.intendedStudy }),
     CREATOR("creator", Workspace::getCreator),

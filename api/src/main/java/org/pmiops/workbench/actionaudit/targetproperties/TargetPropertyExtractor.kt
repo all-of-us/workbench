@@ -8,9 +8,10 @@ class TargetPropertyExtractor {
     companion object {
 
         @JvmStatic
-        fun <T, E: TargetProperty<T>> getPropertyValuesByName(
-                values: Array<E>,
-                target: T): Map<String, String> {
+        fun <T, E : TargetProperty<T>> getPropertyValuesByName(
+            values: Array<E>,
+            target: T
+        ): Map<String, String> {
             return values
                     .filter { it.extractor.invoke(target) != null }
                     .map { it.propertyName to it.extractor.invoke(target)!! }
@@ -18,10 +19,10 @@ class TargetPropertyExtractor {
         }
 
         @JvmStatic
-        fun <T, E: TargetProperty<T>> getChangedValuesByName(
-                values: Array<E>,
-                previousTarget: T,
-                newTarget: T
+        fun <T, E : TargetProperty<T>> getChangedValuesByName(
+            values: Array<E>,
+            previousTarget: T,
+            newTarget: T
         ): Map<String, PreviousNewValuePair> {
             return values
                     .map { it.propertyName to PreviousNewValuePair(

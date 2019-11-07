@@ -74,7 +74,7 @@ constructor(
                                 newValueMaybe = it.value.newValue)
                     }
             actionAuditService.send(events)
-        } catch(e: java.lang.RuntimeException) {
+        } catch (e: java.lang.RuntimeException) {
             logAndSwallow(e)
         }
     }

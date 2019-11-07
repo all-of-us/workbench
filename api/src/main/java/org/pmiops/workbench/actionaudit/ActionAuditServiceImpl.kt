@@ -5,7 +5,6 @@ import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.Logging
 import com.google.cloud.logging.Payload.JsonPayload
 import com.google.cloud.logging.Severity
-import org.pmiops.workbench.actionaudit.AuditColumn
 import java.util.HashMap
 import java.util.logging.Level
 import java.util.logging.Logger

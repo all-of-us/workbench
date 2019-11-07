@@ -67,7 +67,8 @@ public class WorkspaceTargetPropertyTest {
   @Test
   public void testExtractsStringPropertiesFromWorkspace() {
     Map<String, String> propertiesByName =
-        TargetPropertyExtractor.getPropertyValuesByName(WorkspaceTargetProperty.values(), workspace1);
+        TargetPropertyExtractor.getPropertyValuesByName(
+            WorkspaceTargetProperty.values(), workspace1);
 
     assertThat(propertiesByName).hasSize(6);
     assertThat(propertiesByName.get(WorkspaceTargetProperty.INTENDED_STUDY.getPropertyName()))
@@ -80,16 +81,20 @@ public class WorkspaceTargetPropertyTest {
 
   @Test
   public void testEmptyWorkspaceGivesEmptyMap() {
-    assertThat(TargetPropertyExtractor
-        .getPropertyValuesByName(WorkspaceTargetProperty.values(), emptyWorkspace)).isEmpty();
-    assertThat(TargetPropertyExtractor.getPropertyValuesByName(WorkspaceTargetProperty.values(),null)).isEmpty();
+    assertThat(
+            TargetPropertyExtractor.getPropertyValuesByName(
+                WorkspaceTargetProperty.values(), emptyWorkspace))
+        .isEmpty();
+    assertThat(
+            TargetPropertyExtractor.getPropertyValuesByName(WorkspaceTargetProperty.values(), null))
+        .isEmpty();
   }
 
   @Test
   public void testMapsChanges() {
     Map<String, PreviousNewValuePair> changesByPropertyName =
-        TargetPropertyExtractor
-            .getChangedValuesByName(WorkspaceTargetProperty.values(), workspace1, workspace2);
+        TargetPropertyExtractor.getChangedValuesByName(
+            WorkspaceTargetProperty.values(), workspace1, workspace2);
 
     assertThat(changesByPropertyName).hasSize(5);
 
@@ -140,12 +145,21 @@ public class WorkspaceTargetPropertyTest {
 
   @Test
   public void testComparisonToSelfIsEmpty() {
-    assertThat(TargetPropertyExtractor.getChangedValuesByName(WorkspaceTargetProperty.values(), workspace1, workspace1)).isEmpty();
-    assertThat(TargetPropertyExtractor.getChangedValuesByName(WorkspaceTargetProperty.values(), null, null)).isEmpty();
+    assertThat(
+            TargetPropertyExtractor.getChangedValuesByName(
+                WorkspaceTargetProperty.values(), workspace1, workspace1))
+        .isEmpty();
+    assertThat(
+            TargetPropertyExtractor.getChangedValuesByName(
+                WorkspaceTargetProperty.values(), null, null))
+        .isEmpty();
   }
 
   @Test
   public void testComparisonToNullMatchesAllProperties() {
-    assertThat(TargetPropertyExtractor.getChangedValuesByName(WorkspaceTargetProperty.values(), workspace1, null)).hasSize(6);
+    assertThat(
+            TargetPropertyExtractor.getChangedValuesByName(
+                WorkspaceTargetProperty.values(), workspace1, null))
+        .hasSize(6);
   }
 }

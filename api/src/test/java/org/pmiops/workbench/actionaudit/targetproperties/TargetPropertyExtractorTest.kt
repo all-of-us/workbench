@@ -19,17 +19,17 @@ class TargetPropertyExtractorTest {
         val now = System.currentTimeMillis()
 
         workspace = Workspace()
-        workspace?.setName("DbWorkspace 1")
-        workspace?.setId("fc-id-1")
-        workspace?.setNamespace("aou-rw-local1-c4be869a")
-        workspace?.setCreator("user@fake-research-aou.org")
-        workspace?.setCdrVersionId("1")
-        workspace?.setResearchPurpose(researchPurpose1)
-        workspace?.setCreationTime(now)
-        workspace?.setLastModifiedTime(now)
-        workspace?.setEtag("etag_1")
-        workspace?.setDataAccessLevel(DataAccessLevel.REGISTERED)
-        workspace?.setPublished(false)
+        workspace?.name = "DbWorkspace 1"
+        workspace?.id = "fc-id-1"
+        workspace?.namespace = "aou-rw-local1-c4be869a"
+        workspace?.creator = "user@fake-research-aou.org"
+        workspace?.cdrVersionId = "1"
+        workspace?.researchPurpose = researchPurpose1
+        workspace?.creationTime = now
+        workspace?.lastModifiedTime = now
+        workspace?.etag = "etag_1"
+        workspace?.dataAccessLevel = DataAccessLevel.REGISTERED
+        workspace?.published = false
     }
 
     @Test fun testGetsWorkspaceProperties() {

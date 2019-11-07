@@ -12,9 +12,21 @@ import javax.inject.Provider
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.pmiops.workbench.actionaudit.*
+import org.pmiops.workbench.actionaudit.ActionAuditEvent
+import org.pmiops.workbench.actionaudit.ActionAuditService
+import org.pmiops.workbench.actionaudit.ActionType
+import org.pmiops.workbench.actionaudit.AgentType
+import org.pmiops.workbench.actionaudit.TargetType
 import org.pmiops.workbench.db.model.DbUser
-import org.pmiops.workbench.model.*
+import org.pmiops.workbench.model.DataAccessLevel
+import org.pmiops.workbench.model.DemographicSurvey
+import org.pmiops.workbench.model.Education
+import org.pmiops.workbench.model.Ethnicity
+import org.pmiops.workbench.model.Gender
+import org.pmiops.workbench.model.InstitutionalAffiliation
+import org.pmiops.workbench.model.NonAcademicAffiliation
+import org.pmiops.workbench.model.Profile
+import org.pmiops.workbench.model.Race
 import org.springframework.test.context.junit4.SpringRunner
 import java.math.BigDecimal
 
@@ -53,8 +65,8 @@ class ProfileAuditAdapterServiceTest {
             verify(mockActionAuditService).send(capture())
             val sentEvents: List<ActionAuditEvent> = firstValue
             assertThat(sentEvents).hasSize(13)
-            assertThat(sentEvents.all {it.actionType == ActionType.CREATE })
-            assertThat(sentEvents.map {ActionAuditEvent::actionId}.distinct().count() == 1)
+            assertThat(sentEvents.all { it.actionType == ActionType.CREATE })
+            assertThat(sentEvents.map { ActionAuditEvent::actionId }.distinct().count() == 1)
         }
     }
 
@@ -120,6 +132,5 @@ class ProfileAuditAdapterServiceTest {
         private const val USER_EMAIL = "a@b.com"
         private val Y2K_EPOCH_MILLIS = Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli()
         private const val ACTION_ID = "58cbae08-447f-499f-95b9-7bdedc955f4d"
-
     }
 }
