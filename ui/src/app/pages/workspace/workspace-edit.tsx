@@ -18,6 +18,7 @@ import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigS
 import {ArchivalStatus, CdrVersion, CdrVersionListResponse, DataAccessLevel, SpecificPopulationEnum, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as validate from 'validate.js';
 
 export const ResearchPurposeDescription =
   <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
@@ -490,26 +491,21 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         rp.populationHealth || rp.socialBehavioral;
     }
 
-    get noSpecificPopulationSelected() {
-      return this.state.workspace.researchPurpose.population &&
-        (!this.state.workspace.researchPurpose.populationDetails ||
-          this.state.workspace.researchPurpose.populationDetails.length === 0);
+    get isSpecificPopulationValid() {
+      const researchPurpose = this.state.workspace.researchPurpose;
+      return (
+          !researchPurpose.population ||
+          (
+              researchPurpose.populationDetails &&
+              researchPurpose.populationDetails.length !== 0
+          )
+      );
     }
 
-    get noDiseaseOfFocusSpecified() {
-      return this.state.workspace.researchPurpose.diseaseFocusedResearch &&
-        !this.state.workspace.researchPurpose.diseaseOfFocus;
-    }
-
-    get disableButton() {
-      const rp = this.state.workspace.researchPurpose;
-      return this.isEmpty(this.state.workspace, 'name') ||
-        this.isEmpty(rp, 'intendedStudy') ||
-        this.isEmpty(rp, 'anticipatedFindings') ||
-        this.isEmpty(rp, 'reasonForAllOfUs') ||
-        !this.categoryIsSelected ||
-        this.noSpecificPopulationSelected ||
-        this.noDiseaseOfFocusSpecified;
+    get isDiseaseOfFocusValid() {
+      const researchPurpose = this.state.workspace.researchPurpose;
+      return !researchPurpose.diseaseFocusedResearch ||
+        researchPurpose.diseaseOfFocus;
     }
 
     updateResearchPurpose(category, value) {
@@ -532,7 +528,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       }
     }
 
-    specificPopulationSelected(populationEnum): boolean {
+    specificPopulationCheckboxSelected(populationEnum): boolean {
       return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
     }
 
@@ -641,6 +637,35 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     render() {
+      const {
+        workspace: {
+          name,
+          researchPurpose: {
+            anticipatedFindings,
+            intendedStudy,
+            reasonForAllOfUs
+          }
+        },
+      } = this.state;
+      const errors = validate({
+        name,
+        anticipatedFindings,
+        intendedStudy,
+        reasonForAllOfUs,
+        'primaryPurpose': this.categoryIsSelected,
+        'specificPopulation': this.isSpecificPopulationValid,
+        'diseaseOfFocus': this.isDiseaseOfFocusValid
+      }, {
+        name: {
+          length: { minimum: 1, maximum: 80 }
+        },
+        intendedStudy: { presence: true },
+        anticipatedFindings: {presence: true },
+        reasonForAllOfUs: { presence: true },
+        primaryPurpose: { truthiness: true },
+        specificPopulation: { truthiness: true },
+        diseaseOfFocus: { truthiness: true }
+      });
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '95%'}}>
           {this.state.loading && <SpinnerOverlay overrideStylesOverlay={{
@@ -788,7 +813,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <FlexColumn>
                 {specificPopulations.slice(0, sliceByHalfLength(specificPopulations) + 1).map(i =>
                   <LabeledCheckBox label={i.label} key={i.label}
-                                   value={this.specificPopulationSelected(i.object)}
+                                   value={this.specificPopulationCheckboxSelected(i.object)}
                                    onChange={v => this.updateSpecificPopulation(i.object, v)}
                                    disabled={!this.state.workspace.researchPurpose.population}/>
                 )}
@@ -796,12 +821,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <FlexColumn>
                 {specificPopulations.slice(sliceByHalfLength(specificPopulations) + 1).map(i =>
                   <LabeledCheckBox label={i.label} key={i.label}
-                                   value={this.specificPopulationSelected(i.object)}
+                                   value={this.specificPopulationCheckboxSelected(i.object)}
                                    onChange={v => this.updateSpecificPopulation(i.object, v)}
                                    disabled={!this.state.workspace.researchPurpose.population}/>
                 )}
                 <LabeledCheckBox label='Other'
-                   value={this.specificPopulationSelected(SpecificPopulationEnum.OTHER)}
+                   value={this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
                    onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
                    disabled={!this.state.workspace.researchPurpose.population}/>
                 <TextInput type='text' autoFocus placeholder='Please specify'
@@ -874,20 +899,19 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     onClick = {() => this.props.cancel()}>
               Cancel
             </Button>
-            <TooltipTrigger content={[<ul>Missing Required Fields:
-              { this.isEmpty(this.state.workspace, 'name') && <li> Name </li> }
-              { this.isEmpty(this.state.workspace.researchPurpose, 'intendedStudy') &&
-              <li>Field of intended study</li>}
-              { this.isEmpty(this.state.workspace.researchPurpose, 'anticipatedFindings') &&
-              <li>Anticipated findings</li>}
-              { this.isEmpty(this.state.workspace.researchPurpose, 'reasonForAllOfUs') &&
-              <li>Reason for choosing <i>All of Us</i></li>}
-              { !this.categoryIsSelected && <li>Research focus</li>}
-              { this.noSpecificPopulationSelected && <li>Population of study</li>}
-              { this.noDiseaseOfFocusSpecified && <li>Disease of focus</li>}
-            </ul>]} disabled={!this.disableButton}>
+            <TooltipTrigger content={
+              errors && <ul>
+                {errors.name && <div>{errors.name}</div>}
+                {errors.primaryPurpose && <div>You must choose at least one primary research purpose</div>}
+                {errors.reasonForAllOfUs && <div>You must specify a reason for using All of Us data</div>}
+                {errors.intendedStudy && <div>You must specify a field of intended study</div>}
+                {errors.anticipatedFindings && <div>You must specify anticipated findings</div>}
+                {errors.specificPopulation && <div>You must specify a population of study</div>}
+                {errors.diseaseOfFocus && <div>You must specify a disease of focus</div>}
+              </ul>
+            } disabled={!errors}>
               <Button type='primary' onClick={() => this.saveWorkspace()}
-                      disabled={this.disableButton || this.state.loading}
+                      disabled={errors || this.state.loading}
                       data-test-id='workspace-save-btn'>
                 {this.renderButtonText()}
               </Button>
