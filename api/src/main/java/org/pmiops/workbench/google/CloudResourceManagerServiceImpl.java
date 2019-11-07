@@ -13,7 +13,7 @@ import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,7 +44,7 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
     this.retryHandler = retryHandler;
   }
 
-  private CloudResourceManager getCloudResourceManagerServiceWithImpersonation(User user)
+  private CloudResourceManager getCloudResourceManagerServiceWithImpersonation(DbUser user)
       throws IOException {
     // Load credentials for the cloud-resource-manager Service Account. This account has been
     // granted
@@ -61,7 +61,7 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
   }
 
   @Override
-  public List<Project> getAllProjectsForUser(User user) {
+  public List<Project> getAllProjectsForUser(DbUser user) {
     try {
       return retryHandler.runAndThrowChecked(
           (context) ->

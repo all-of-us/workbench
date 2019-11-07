@@ -3,7 +3,7 @@ package org.pmiops.workbench.auth;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -16,13 +16,13 @@ public class UserAuthentication implements Authentication {
     SERVICE_ACCOUNT
   }
 
-  private final User user;
+  private final DbUser user;
   private final Userinfoplus userInfo;
   private final String bearerToken;
   private final UserType userType;
 
   public UserAuthentication(
-      User user, Userinfoplus userInfo, String bearerToken, UserType userType) {
+      DbUser user, Userinfoplus userInfo, String bearerToken, UserType userType) {
     this.user = user;
     this.userInfo = userInfo;
     this.bearerToken = bearerToken;
@@ -62,7 +62,7 @@ public class UserAuthentication implements Authentication {
   @Override
   public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {}
 
-  public User getUser() {
+  public DbUser getUser() {
     return user;
   }
 

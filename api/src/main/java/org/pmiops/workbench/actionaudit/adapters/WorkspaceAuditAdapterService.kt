@@ -1,15 +1,16 @@
 package org.pmiops.workbench.actionaudit.adapters
 
+import org.pmiops.workbench.db.model.DbWorkspace
 import org.pmiops.workbench.model.Workspace
 
 interface WorkspaceAuditAdapterService {
     fun fireCreateAction(createdWorkspace: Workspace, dbWorkspaceId: Long)
 
-    fun fireDeleteAction(dbWorkspace: org.pmiops.workbench.db.model.Workspace)
+    fun fireDeleteAction(dbWorkspace: DbWorkspace)
 
     fun fireDuplicateAction(
-        sourceWorkspaceDbModel: org.pmiops.workbench.db.model.Workspace,
-        destinationWorkspaceDbModel: org.pmiops.workbench.db.model.Workspace
+        sourceWorkspaceDbModel: DbWorkspace,
+        destinationWorkspaceDbModel: DbWorkspace
     )
 
     fun fireCollaborateAction(sourceWorkspaceId: Long, aclStringsByUserId: Map<Long, String>)

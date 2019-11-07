@@ -6,9 +6,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
-import org.pmiops.workbench.db.model.CohortAnnotationEnumValue;
-import org.pmiops.workbench.db.model.ParticipantCohortAnnotation;
+import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
+import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
 import org.pmiops.workbench.model.AnnotationType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -30,30 +30,30 @@ public class ParticipantCohortAnnotationDaoTest {
   private static long COHORT_ID = 1;
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
   @Autowired private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
-  private ParticipantCohortAnnotation pca;
-  private ParticipantCohortAnnotation pca1;
+  private DbParticipantCohortAnnotation pca;
+  private DbParticipantCohortAnnotation pca1;
   private long cohortReviewId = 3L;
   private long participantId = 4L;
 
   @Before
   public void setUp() throws Exception {
-    CohortAnnotationDefinition enumAnnotationDefinition =
-        new CohortAnnotationDefinition()
+    DbCohortAnnotationDefinition enumAnnotationDefinition =
+        new DbCohortAnnotationDefinition()
             .cohortId(COHORT_ID)
             .columnName("enum")
             .annotationTypeEnum(AnnotationType.ENUM);
-    CohortAnnotationEnumValue enumValue1 =
-        new CohortAnnotationEnumValue()
+    DbCohortAnnotationEnumValue enumValue1 =
+        new DbCohortAnnotationEnumValue()
             .name("z")
             .order(0)
             .cohortAnnotationDefinition(enumAnnotationDefinition);
-    CohortAnnotationEnumValue enumValue2 =
-        new CohortAnnotationEnumValue()
+    DbCohortAnnotationEnumValue enumValue2 =
+        new DbCohortAnnotationEnumValue()
             .name("r")
             .order(1)
             .cohortAnnotationDefinition(enumAnnotationDefinition);
-    CohortAnnotationEnumValue enumValue3 =
-        new CohortAnnotationEnumValue()
+    DbCohortAnnotationEnumValue enumValue3 =
+        new DbCohortAnnotationEnumValue()
             .name("a")
             .order(2)
             .cohortAnnotationDefinition(enumAnnotationDefinition);
@@ -62,21 +62,21 @@ public class ParticipantCohortAnnotationDaoTest {
     enumAnnotationDefinition.getEnumValues().add(enumValue3);
     cohortAnnotationDefinitionDao.save(enumAnnotationDefinition);
 
-    CohortAnnotationDefinition booleanAnnotationDefinition =
-        new CohortAnnotationDefinition()
+    DbCohortAnnotationDefinition booleanAnnotationDefinition =
+        new DbCohortAnnotationDefinition()
             .cohortId(COHORT_ID)
             .columnName("boolean")
             .annotationTypeEnum(AnnotationType.BOOLEAN);
 
     pca =
-        new ParticipantCohortAnnotation()
+        new DbParticipantCohortAnnotation()
             .cohortAnnotationDefinitionId(
                 booleanAnnotationDefinition.getCohortAnnotationDefinitionId())
             .cohortReviewId(cohortReviewId)
             .participantId(participantId)
             .annotationValueBoolean(Boolean.TRUE);
     pca1 =
-        new ParticipantCohortAnnotation()
+        new DbParticipantCohortAnnotation()
             .cohortAnnotationDefinitionId(
                 enumAnnotationDefinition.getCohortAnnotationDefinitionId())
             .cohortReviewId(cohortReviewId)
@@ -112,7 +112,7 @@ public class ParticipantCohortAnnotationDaoTest {
 
   @Test
   public void findByCohortReviewIdAndParticipantId() throws Exception {
-    List<ParticipantCohortAnnotation> annotations =
+    List<DbParticipantCohortAnnotation> annotations =
         participantCohortAnnotationDao.findByCohortReviewIdAndParticipantId(
             cohortReviewId, participantId);
     assertEquals(2, annotations.size());

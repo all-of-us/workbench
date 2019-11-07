@@ -7,7 +7,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "billing_project_garbage_collection")
-public class BillingProjectGarbageCollection {
+public class DbBillingProjectGarbageCollection {
   private String fireCloudProjectName;
   private String owner;
 

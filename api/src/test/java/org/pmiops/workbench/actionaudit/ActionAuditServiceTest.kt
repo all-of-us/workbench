@@ -2,9 +2,6 @@ package org.pmiops.workbench.actionaudit
 
 import com.google.common.truth.Truth.assertThat
 import org.mockito.ArgumentMatchers.anyList
-import org.mockito.Mockito.doReturn
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
 
 import com.google.cloud.logging.LogEntry
 import com.google.cloud.logging.Logging
@@ -19,6 +16,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.*
 import org.pmiops.workbench.config.WorkbenchConfig
 import org.pmiops.workbench.config.WorkbenchConfig.ActionAuditConfig
 import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig
@@ -55,32 +53,33 @@ class ActionAuditServiceTest {
         // ordinarily events sharing an action would have more things in common than this,
         // but the schema doesn't require it
         event1 = ActionAuditEvent(
-                timestamp = System.currentTimeMillis(),
-                actionId = ACTION_ID,
-                actionType = ActionType.EDIT,
-                agentType = AgentType.USER,
-                agentId = AGENT_ID_1,
                 agentEmailMaybe = "a@b.co",
                 targetType = TargetType.DATASET,
                 targetIdMaybe = 1L,
-                targetPropertyMaybe = "foot",
-                previousValueMaybe = "bare",
-                newValueMaybe = "shod"
-        )
-
-        event2 = ActionAuditEvent(
-                timestamp = System.currentTimeMillis(),
+                agentType = AgentType.USER,
+                agentId = AGENT_ID_1,
                 actionId = ACTION_ID,
                 actionType = ActionType.EDIT,
-                agentType = AgentType.USER,
-                agentId = AGENT_ID_2,
+                targetPropertyMaybe = "foot",
+                previousValueMaybe = "bare",
+                newValueMaybe = "shod",
+                timestamp = System.currentTimeMillis()
+        )
+        event2 = ActionAuditEvent(
                 agentEmailMaybe = "f@b.co",
                 targetType = TargetType.DATASET,
                 targetIdMaybe = 2L,
+                agentType = AgentType.USER,
+                agentId = AGENT_ID_2,
+                actionId = ACTION_ID,
+                actionType = ActionType.EDIT,
                 targetPropertyMaybe = "height",
                 previousValueMaybe = "yay high",
-                newValueMaybe = "about that tall"
+                newValueMaybe = "about that tall",
+                timestamp = System.currentTimeMillis()
         )
+
+        reset(mockLogging)
     }
 
     @Test
@@ -120,8 +119,9 @@ class ActionAuditServiceTest {
     }
 
     @Test
-    fun  testSendsMultipleEventsAsSingleAction() {
+    fun testSendsMultipleEventsAsSingleAction() {
         actionAuditService!!.send(ImmutableList.of(event1!!, event2!!))
+        verify(mockLogging)?.write(anyList())
         verify<Logging>(mockLogging).write(logEntryListCaptor!!.capture())
         val entryList = logEntryListCaptor.value
         assertThat(entryList.size).isEqualTo(2)

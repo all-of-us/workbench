@@ -84,11 +84,15 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.DataSet;
-import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
@@ -260,7 +264,7 @@ public class WorkspacesControllerTest {
 
     @Bean
     @Scope("prototype")
-    User user() {
+    DbUser user() {
       return currentUser;
     }
 
@@ -272,7 +276,7 @@ public class WorkspacesControllerTest {
     }
   }
 
-  private static User currentUser;
+  private static DbUser currentUser;
   private static WorkspaceACL fcWorkspaceAcl;
   @Autowired FireCloudService fireCloudService;
   @Autowired private WorkspaceService workspaceService;
@@ -338,8 +342,8 @@ public class WorkspacesControllerTest {
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
   }
 
-  private User createUser(String email) {
-    User user = new User();
+  private DbUser createUser(String email) {
+    DbUser user = new DbUser();
     user.setEmail(email);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
@@ -373,7 +377,7 @@ public class WorkspacesControllerTest {
   }
 
   private void mockBillingProjectBuffer(String projectName) {
-    BillingProjectBufferEntry entry = mock(BillingProjectBufferEntry.class);
+    DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
     doReturn(projectName).when(entry).getFireCloudProjectName();
     doReturn(entry).when(billingProjectBufferService).assignBillingProject(any());
   }
@@ -640,8 +644,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
-    verify(mockWorkspaceAuditAdapterService)
-        .fireDeleteAction(any(org.pmiops.workbench.db.model.Workspace.class));
+    verify(mockWorkspaceAuditAdapterService).fireDeleteAction(any(DbWorkspace.class));
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");
@@ -844,7 +847,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     // The original workspace is shared with one other user.
-    User writerUser = new User();
+    DbUser writerUser = new DbUser();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setDisabled(false);
@@ -888,9 +891,7 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
     verify(mockWorkspaceAuditAdapterService)
-        .fireDuplicateAction(
-            any(org.pmiops.workbench.db.model.Workspace.class),
-            any(org.pmiops.workbench.db.model.Workspace.class));
+        .fireDuplicateAction(any(DbWorkspace.class), any(DbWorkspace.class));
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
@@ -1270,11 +1271,11 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
+    DbWorkspace dbWorkspace =
         workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
             workspace.getNamespace(),
             workspace.getId(),
-            StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
 
     CdrVersion cdrVersion2 = new CdrVersion();
     cdrVersion2.setName("2");
@@ -1283,8 +1284,7 @@ public class WorkspacesControllerTest {
 
     final String expectedConceptSetName = "cs1";
     final String expectedConceptSetDescription = "d1";
-    org.pmiops.workbench.db.model.ConceptSet originalConceptSet =
-        new org.pmiops.workbench.db.model.ConceptSet();
+    DbConceptSet originalConceptSet = new DbConceptSet();
     originalConceptSet.setName(expectedConceptSetName);
     originalConceptSet.setDescription(expectedConceptSetDescription);
     originalConceptSet.setDomainEnum(Domain.CONDITION);
@@ -1294,8 +1294,7 @@ public class WorkspacesControllerTest {
 
     final String expectedCohortName = "cohort name";
     final String expectedCohortDescription = "cohort description";
-    org.pmiops.workbench.db.model.Cohort originalCohort =
-        new org.pmiops.workbench.db.model.Cohort();
+    DbCohort originalCohort = new DbCohort();
     originalCohort.setName(expectedCohortName);
     originalCohort.setDescription(expectedCohortDescription);
     originalCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
@@ -1303,8 +1302,7 @@ public class WorkspacesControllerTest {
 
     final String expectedCohortReviewName = "cohort review";
     final String expectedCohortReviewDefinition = "cohort definition";
-    org.pmiops.workbench.db.model.CohortReview originalCohortReview =
-        new org.pmiops.workbench.db.model.CohortReview();
+    DbCohortReview originalCohortReview = new DbCohortReview();
     originalCohortReview.setCohortName(expectedCohortReviewName);
     originalCohortReview.setCohortDefinition(expectedCohortReviewDefinition);
     originalCohortReview.setCohortId(originalCohort.getCohortId());
@@ -1314,7 +1312,7 @@ public class WorkspacesControllerTest {
     originalCohort = cohortDao.save(originalCohort);
 
     final String expectedDatasetName = "data set name";
-    DataSet originalDataSet = new DataSet();
+    DbDataset originalDataSet = new DbDataset();
     originalDataSet.setName(expectedDatasetName);
     originalDataSet.setVersion(1);
     originalDataSet.setConceptSetIds(
@@ -1348,19 +1346,18 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
 
-    org.pmiops.workbench.db.model.Workspace clonedDbWorkspace =
+    DbWorkspace clonedDbWorkspace =
         workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
             cloned.getNamespace(),
             cloned.getId(),
-            StorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
 
-    List<DataSet> dataSets = dataSetService.getDataSets(clonedDbWorkspace);
+    List<DbDataset> dataSets = dataSetService.getDataSets(clonedDbWorkspace);
     assertThat(dataSets).hasSize(1);
     assertThat(dataSets.get(0).getName()).isEqualTo(expectedDatasetName);
     assertThat(dataSets.get(0).getDataSetId()).isNotEqualTo(originalDataSet.getDataSetId());
 
-    List<org.pmiops.workbench.db.model.ConceptSet> conceptSets =
-        dataSetService.getConceptSetsForDataset(dataSets.get(0));
+    List<DbConceptSet> conceptSets = dataSetService.getConceptSetsForDataset(dataSets.get(0));
     assertThat(conceptSets).hasSize(1);
     assertThat(conceptSets.get(0).getName()).isEqualTo(expectedConceptSetName);
     assertThat(conceptSets.get(0).getDescription()).isEqualTo(expectedConceptSetDescription);
@@ -1370,14 +1367,13 @@ public class WorkspacesControllerTest {
     assertThat(conceptSets.get(0).getConceptSetId())
         .isNotEqualTo(originalConceptSet.getConceptSetId());
 
-    List<org.pmiops.workbench.db.model.Cohort> cohorts =
-        dataSetService.getCohortsForDataset(dataSets.get(0));
+    List<DbCohort> cohorts = dataSetService.getCohortsForDataset(dataSets.get(0));
     assertThat(cohorts).hasSize(1);
     assertThat(cohorts.get(0).getName()).isEqualTo(expectedCohortName);
     assertThat(cohorts.get(0).getDescription()).isEqualTo(expectedCohortDescription);
     assertThat(cohorts.get(0).getCohortId()).isNotEqualTo(originalCohort.getCohortId());
 
-    Set<org.pmiops.workbench.db.model.CohortReview> cohortReviews =
+    Set<DbCohortReview> cohortReviews =
         cohortReviewDao.findAllByCohortId(cohorts.get(0).getCohortId());
     assertThat(cohortReviews).hasSize(1);
     assertThat(cohortReviews.iterator().next().getCohortName()).isEqualTo(expectedCohortReviewName);
@@ -1488,7 +1484,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
-    User cloner = new User();
+    DbUser cloner = new DbUser();
     cloner.setEmail("cloner@gmail.com");
     cloner.setUserId(456L);
     cloner.setDisabled(false);
@@ -1584,9 +1580,9 @@ public class WorkspacesControllerTest {
   @Test
   public void testCloneWorkspaceIncludeUserRoles() throws Exception {
     stubFcGetGroup();
-    User cloner = createUser("cloner@gmail.com");
-    User reader = createUser("reader@gmail.com");
-    User writer = createUser("writer@gmail.com");
+    DbUser cloner = createUser("cloner@gmail.com");
+    DbUser reader = createUser("reader@gmail.com");
+    DbUser writer = createUser("writer@gmail.com");
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
     List<UserRole> collaborators =
         new ArrayList<>(
@@ -1692,7 +1688,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     // Clone with a different user.
-    User cloner = new User();
+    DbUser cloner = new DbUser();
     cloner.setEmail("cloner@gmail.com");
     cloner.setUserId(456L);
     cloner.setDisabled(false);
@@ -1745,13 +1741,13 @@ public class WorkspacesControllerTest {
   @Test
   public void testShareWorkspace() throws Exception {
     stubFcGetGroup();
-    User writerUser = new User();
+    DbUser writerUser = new DbUser();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setDisabled(false);
 
     writerUser = userDao.save(writerUser);
-    User readerUser = new User();
+    DbUser readerUser = new DbUser();
     readerUser.setEmail("readerfriend@gmail.com");
     readerUser.setUserId(125L);
     readerUser.setDisabled(false);
@@ -1799,13 +1795,13 @@ public class WorkspacesControllerTest {
   @Test
   public void testShareWorkspaceAddBillingProjectUser() throws Exception {
     stubFcGetGroup();
-    User writerUser = new User();
+    DbUser writerUser = new DbUser();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setDisabled(false);
 
     writerUser = userDao.save(writerUser);
-    User ownerUser = new User();
+    DbUser ownerUser = new DbUser();
     ownerUser.setEmail("ownerfriend@gmail.com");
     ownerUser.setUserId(125L);
     ownerUser.setDisabled(false);
@@ -1836,13 +1832,13 @@ public class WorkspacesControllerTest {
   @Test
   public void testShareWorkspaceRemoveBillingProjectUser() throws Exception {
     stubFcGetGroup();
-    User writerUser = new User();
+    DbUser writerUser = new DbUser();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setDisabled(false);
 
     writerUser = userDao.save(writerUser);
-    User ownerUser = new User();
+    DbUser ownerUser = new DbUser();
     ownerUser.setEmail("ownerfriend@gmail.com");
     ownerUser.setUserId(125L);
     ownerUser.setDisabled(false);
@@ -1894,7 +1890,7 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testShareWorkspaceNoRoleFailure() throws Exception {
-    User writerUser = new User();
+    DbUser writerUser = new DbUser();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setDisabled(false);
@@ -1928,12 +1924,12 @@ public class WorkspacesControllerTest {
   @Test
   public void testUnshareWorkspace() throws Exception {
     stubFcGetGroup();
-    User writerUser = new User();
+    DbUser writerUser = new DbUser();
     writerUser.setEmail("writerfriend@gmail.com");
     writerUser.setUserId(124L);
     writerUser.setDisabled(false);
     writerUser = userDao.save(writerUser);
-    User readerUser = new User();
+    DbUser readerUser = new DbUser();
     readerUser.setEmail("readerfriend@gmail.com");
     readerUser.setUserId(125L);
     readerUser.setDisabled(false);
@@ -2158,8 +2154,7 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService)
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
-    verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
@@ -2183,8 +2178,7 @@ public class WorkspacesControllerTest {
     verify(cloudStorageService)
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
     verify(cloudStorageService).deleteBlob(BlobId.of(BUCKET_NAME, nb1));
-    verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
   }
@@ -2221,8 +2215,7 @@ public class WorkspacesControllerTest {
             BlobId.of(BUCKET_NAME, "notebooks/" + expectedNotebookName));
 
     verify(userRecentResourceService)
-        .updateNotebookEntry(
-            2l, 1l, "gs://workspace-bucket/notebooks/" + expectedNotebookName, NOW);
+        .updateNotebookEntry(2l, 1l, "gs://workspace-bucket/notebooks/" + expectedNotebookName);
   }
 
   @Test
@@ -2370,8 +2363,7 @@ public class WorkspacesControllerTest {
         workspace.getNamespace(), workspace.getId(), NotebooksService.withNotebookExtension("nb1"));
     verify(cloudStorageService)
         .copyBlob(BlobId.of(BUCKET_NAME, nb1), BlobId.of(BUCKET_NAME, newPath));
-    verify(userRecentResourceService)
-        .updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath, NOW);
+    verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
   }
 
   @Test
@@ -2635,7 +2627,7 @@ public class WorkspacesControllerTest {
             .put("extraMetadata", "is not a problem")
             .build();
 
-    // This user is not listed in the Workspace ACL so I don't know them
+    // This user is not listed in the DbWorkspace ACL so I don't know them
 
     final NotebookLockingMetadataResponse expectedResponse =
         new NotebookLockingMetadataResponse()
@@ -2694,8 +2686,7 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubFcGetWorkspaceACL();
-    org.pmiops.workbench.db.model.Workspace dbWorkspace =
-        workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
     workspaceService.updateRecentWorkspaces(dbWorkspace, currentUser.getUserId(), NOW);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();

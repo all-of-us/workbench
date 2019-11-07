@@ -10,18 +10,17 @@ import org.pmiops.workbench.actionaudit.ActionType
 import org.pmiops.workbench.actionaudit.AgentType
 import org.pmiops.workbench.actionaudit.TargetType
 import org.pmiops.workbench.actionaudit.targetproperties.ProfileTargetProperty
-import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyUtils
-import org.pmiops.workbench.db.model.User
+import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor
+import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.model.Profile
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
-import java.lang.Exception
 
 @Service
 class ProfileAuditAdapterServiceImpl @Autowired
 constructor(
-    private val userProvider: Provider<User>,
+    private val userProvider: Provider<DbUser>,
     private val actionAuditService: ActionAuditService,
     private val clock: Clock,
     @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
@@ -29,8 +28,8 @@ constructor(
 
     override fun fireCreateAction(createdProfile: Profile) {
         try {
-            val propertiesByName: Map<String, String?> = TargetPropertyUtils
-                    .getPropertyValuesByName(ProfileTargetProperty::values, createdProfile)
+            val propertiesByName: Map<String, String?> = TargetPropertyExtractor
+                    .getPropertyValuesByName(ProfileTargetProperty.values(), createdProfile)
             val createEvents = propertiesByName.entries
                     .map {
                         ActionAuditEvent(
@@ -55,8 +54,8 @@ constructor(
     override fun fireUpdateAction(previousProfile: Profile, updatedProfile: Profile) {
         try {
             // determine changed fields
-            val changesByProperty = TargetPropertyUtils.getChangedValuesByName(
-                    ProfileTargetProperty::values,
+            val changesByProperty = TargetPropertyExtractor.getChangedValuesByName(
+                    ProfileTargetProperty.values(),
                     previousProfile,
                     updatedProfile)
             val events = changesByProperty.entries

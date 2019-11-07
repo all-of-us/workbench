@@ -35,8 +35,8 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceACL;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
@@ -230,7 +230,7 @@ public class ConceptsControllerTest {
   private static final String WORKSPACE_NAMESPACE = "ns";
   private static final String WORKSPACE_NAME = "name";
   private static final String USER_EMAIL = "bob@gmail.com";
-  private static User currentUser;
+  private static DbUser currentUser;
 
   @TestConfiguration
   @Import({WorkspaceServiceImpl.class})
@@ -246,7 +246,7 @@ public class ConceptsControllerTest {
   static class Configuration {
     @Bean
     @Scope("prototype")
-    User user() {
+    DbUser user() {
       return currentUser;
     }
   }
@@ -262,7 +262,7 @@ public class ConceptsControllerTest {
   @Autowired private DomainVocabularyInfoDao domainVocabularyInfoDao;
   @Autowired FireCloudService fireCloudService;
   @Autowired UserDao userDao;
-  @Mock Provider<User> userProvider;
+  @Mock Provider<DbUser> userProvider;
   @Autowired SurveyModuleDao surveyModuleDao;
 
   @PersistenceContext private EntityManager entityManager;
@@ -286,7 +286,7 @@ public class ConceptsControllerTest {
             conceptDao,
             surveyModuleDao);
 
-    User user = new User();
+    DbUser user = new DbUser();
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);
@@ -302,7 +302,7 @@ public class ConceptsControllerTest {
     cdrVersion.setCdrDbName("");
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
-    Workspace workspace = new Workspace();
+    DbWorkspace workspace = new DbWorkspace();
     workspace.setWorkspaceId(1L);
     workspace.setName("name");
     workspace.setFirecloudName("name");

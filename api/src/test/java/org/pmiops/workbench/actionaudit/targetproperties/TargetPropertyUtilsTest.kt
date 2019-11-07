@@ -11,7 +11,7 @@ class TargetPropertyUtilsTest {
 
     @Test fun testGetTargetPropertyEnumByTargetClass() {
         val result: Map<KClass<out Any>, KClass<out Any>> =
-                TargetPropertyUtils.getTargetPropertyEnumByTargetClass()
+                TargetPropertyExtractor.getTargetPropertyEnumByTargetClass()
         assert(result.size == 2)
 
         assert(result[Workspace::class] == WorkspaceTargetProperty::class)
@@ -19,7 +19,7 @@ class TargetPropertyUtilsTest {
 
     @Test fun testGetPropertyEnum() {
         val result: KClass<out Any> =
-                TargetPropertyUtils.getTargetPropertyEnum(Workspace::class)
+                TargetPropertyExtractor.getTargetPropertyEnum(Workspace::class)
         assert(result == WorkspaceTargetProperty::class)
     }
 }

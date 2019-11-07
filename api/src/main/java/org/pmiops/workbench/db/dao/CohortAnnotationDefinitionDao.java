@@ -1,21 +1,21 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.List;
-import org.pmiops.workbench.db.model.CohortAnnotationDefinition;
+import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface CohortAnnotationDefinitionDao
-    extends JpaRepository<CohortAnnotationDefinition, Long> {
+    extends JpaRepository<DbCohortAnnotationDefinition, Long> {
 
-  CohortAnnotationDefinition findByCohortIdAndColumnName(
+  DbCohortAnnotationDefinition findByCohortIdAndColumnName(
       @Param("cohortId") long cohortId, @Param("ColumnName") String ColumnName);
 
-  List<CohortAnnotationDefinition> findByCohortId(@Param("cohortId") long cohortId);
+  List<DbCohortAnnotationDefinition> findByCohortId(@Param("cohortId") long cohortId);
 
-  CohortAnnotationDefinition findByCohortIdAndCohortAnnotationDefinitionId(
+  DbCohortAnnotationDefinition findByCohortIdAndCohortAnnotationDefinitionId(
       @Param("cohortId") long cohortId,
       @Param("cohortAnnotationDefinitionId") long cohortAnnotationDefinitionId);
 

@@ -12,12 +12,12 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "page_visit")
-public class PageVisit {
+public class DbPageVisit {
 
   private long pageVisitId;
   private String pageId;
   private Timestamp firstVisit;
-  private User user;
+  private DbUser user;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,11 +32,11 @@ public class PageVisit {
 
   @ManyToOne
   @JoinColumn(name = "user_id")
-  public User getUser() {
+  public DbUser getUser() {
     return user;
   }
 
-  public void setUser(User user) {
+  public void setUser(DbUser user) {
     this.user = user;
   }
 

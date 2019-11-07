@@ -36,7 +36,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -166,7 +166,7 @@ public class ConceptSetsControllerTest {
   private static final String WORKSPACE_NAME_2 = "name2";
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
-  private static User currentUser;
+  private static DbUser currentUser;
   private Workspace workspace;
   private Workspace workspace2;
   private TestMockFactory testMockFactory;
@@ -201,7 +201,7 @@ public class ConceptSetsControllerTest {
 
   @Autowired ConceptBigQueryService conceptBigQueryService;
 
-  @Mock Provider<User> userProvider;
+  @Mock Provider<DbUser> userProvider;
 
   @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
 
@@ -243,7 +243,7 @@ public class ConceptSetsControllerTest {
 
     @Bean
     @Scope("prototype")
-    User user() {
+    DbUser user() {
       return currentUser;
     }
 
@@ -286,7 +286,7 @@ public class ConceptSetsControllerTest {
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
 
-    User user = new User();
+    DbUser user = new DbUser();
     user.setEmail(USER_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);

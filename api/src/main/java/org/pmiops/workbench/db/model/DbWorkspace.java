@@ -28,7 +28,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 @Entity
 @Table(name = "workspace")
-public class Workspace {
+public class DbWorkspace {
   private String firecloudUuid;
 
   public static class FirecloudWorkspaceId {
@@ -67,7 +67,7 @@ public class Workspace {
   // see https://precisionmedicineinitiative.atlassian.net/browse/RW-2705
   public enum BillingMigrationStatus {
     OLD, // pre-1PPW; this billing project may be associated with multiple workspaces
-    NEW, // a One Project Per Workspace (1PPW) billing project
+    NEW, // a One Project Per DbWorkspace (1PPW) billing project
     MIGRATED // a pre-1PPW billing project which has been cloned and is now ready to be deleted
   }
 
@@ -78,16 +78,16 @@ public class Workspace {
   private String firecloudName;
   private Short dataAccessLevel;
   private CdrVersion cdrVersion;
-  private User creator;
+  private DbUser creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private Timestamp lastAccessedTime;
-  private Set<Cohort> cohorts = new HashSet<>();
-  private Set<ConceptSet> conceptSets = new HashSet<>();
-  private Set<DataSet> dataSets = new HashSet<>();
+  private Set<DbCohort> cohorts = new HashSet<>();
+  private Set<DbConceptSet> conceptSets = new HashSet<>();
+  private Set<DbDataset> dataSets = new HashSet<>();
   private Short activeStatus;
   private Short billingMigrationStatus =
-      StorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.OLD);
+      DbStorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.OLD);
   private boolean published;
 
   private boolean diseaseFocusedResearch;
@@ -113,11 +113,11 @@ public class Workspace {
   private Boolean reviewRequested;
   private Boolean approved;
   private Timestamp timeRequested;
-  private Short billingStatus = StorageEnums.billingStatusToStorage(BillingStatus.ACTIVE);
+  private Short billingStatus = DbStorageEnums.billingStatusToStorage(BillingStatus.ACTIVE);
   private Short billingAccountType =
-      StorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
+      DbStorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
 
-  public Workspace() {
+  public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
 
@@ -199,11 +199,11 @@ public class Workspace {
 
   @ManyToOne
   @JoinColumn(name = "creator_id")
-  public User getCreator() {
+  public DbUser getCreator() {
     return creator;
   }
 
-  public void setCreator(User creator) {
+  public void setCreator(DbUser creator) {
     this.creator = creator;
   }
 
@@ -378,14 +378,14 @@ public class Workspace {
       return null;
     }
     return from.stream()
-        .map(StorageEnums::specificPopulationFromStorage)
+        .map(DbStorageEnums::specificPopulationFromStorage)
         .collect(Collectors.toSet());
   }
 
   public void setSpecificPopulationsEnum(Set<SpecificPopulationEnum> newPopulationDetails) {
     setPopulationDetails(
         newPopulationDetails.stream()
-            .map(StorageEnums::specificPopulationToStorage)
+            .map(DbStorageEnums::specificPopulationToStorage)
             .collect(Collectors.toSet()));
   }
 
@@ -465,37 +465,37 @@ public class Workspace {
   }
 
   @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
-  public Set<Cohort> getCohorts() {
+  public Set<DbCohort> getCohorts() {
     return cohorts;
   }
 
-  public void setCohorts(Set<Cohort> cohorts) {
+  public void setCohorts(Set<DbCohort> cohorts) {
     this.cohorts = cohorts;
   }
 
-  public void addCohort(Cohort cohort) {
+  public void addCohort(DbCohort cohort) {
     this.cohorts.add(cohort);
   }
 
   @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
-  public Set<ConceptSet> getConceptSets() {
+  public Set<DbConceptSet> getConceptSets() {
     return conceptSets;
   }
 
-  public void setConceptSets(Set<ConceptSet> conceptSets) {
+  public void setConceptSets(Set<DbConceptSet> conceptSets) {
     this.conceptSets = conceptSets;
   }
 
   @OneToMany(mappedBy = "workspaceId", orphanRemoval = true, cascade = CascadeType.ALL)
-  public Set<DataSet> getDataSets() {
+  public Set<DbDataset> getDataSets() {
     return dataSets;
   }
 
-  public void setDataSets(Set<DataSet> dataSets) {
+  public void setDataSets(Set<DbDataset> dataSets) {
     this.dataSets = dataSets;
   }
 
-  public void addDataSet(DataSet dataSet) {
+  public void addDataSet(DbDataset dataSet) {
     this.dataSets.add(dataSet);
   }
 
@@ -524,20 +524,20 @@ public class Workspace {
 
   @Transient
   public WorkspaceActiveStatus getWorkspaceActiveStatusEnum() {
-    return StorageEnums.workspaceActiveStatusFromStorage(getActiveStatus());
+    return DbStorageEnums.workspaceActiveStatusFromStorage(getActiveStatus());
   }
 
   public void setWorkspaceActiveStatusEnum(WorkspaceActiveStatus activeStatus) {
-    setActiveStatus(StorageEnums.workspaceActiveStatusToStorage(activeStatus));
+    setActiveStatus(DbStorageEnums.workspaceActiveStatusToStorage(activeStatus));
   }
 
   @Transient
   public BillingMigrationStatus getBillingMigrationStatusEnum() {
-    return StorageEnums.billingMigrationStatusFromStorage(billingMigrationStatus);
+    return DbStorageEnums.billingMigrationStatusFromStorage(billingMigrationStatus);
   }
 
   public void setBillingMigrationStatusEnum(BillingMigrationStatus status) {
-    this.billingMigrationStatus = StorageEnums.billingMigrationStatusToStorage(status);
+    this.billingMigrationStatus = DbStorageEnums.billingMigrationStatusToStorage(status);
   }
 
   @Column(name = "billing_migration_status")
@@ -551,19 +551,19 @@ public class Workspace {
 
   @Column(name = "billing_status")
   public BillingStatus getBillingStatus() {
-    return StorageEnums.billingStatusFromStorage(billingStatus);
+    return DbStorageEnums.billingStatusFromStorage(billingStatus);
   }
 
   public void setBillingStatus(BillingStatus billingStatus) {
-    this.billingStatus = StorageEnums.billingStatusToStorage(billingStatus);
+    this.billingStatus = DbStorageEnums.billingStatusToStorage(billingStatus);
   }
 
   @Column(name = "billing_account_type")
   public BillingAccountType getBillingAccountType() {
-    return StorageEnums.billingAccountTypeFromStorage(billingAccountType);
+    return DbStorageEnums.billingAccountTypeFromStorage(billingAccountType);
   }
 
   public void setBillingAccountType(BillingAccountType billingAccountType) {
-    this.billingAccountType = StorageEnums.billingAccountTypeToStorage(billingAccountType);
+    this.billingAccountType = DbStorageEnums.billingAccountTypeToStorage(billingAccountType);
   }
 }

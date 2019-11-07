@@ -11,7 +11,7 @@ import org.junit.Test;
 public class StorageEnumsTest {
   @Test
   public void noMissingMapEntries() throws Exception {
-    for (Field f : StorageEnums.class.getDeclaredFields()) {
+    for (Field f : DbStorageEnums.class.getDeclaredFields()) {
       if (f.getType() != BiMap.class) {
         continue;
       }
@@ -21,7 +21,7 @@ public class StorageEnumsTest {
 
       Method enumToShort = null;
       Method shortToEnum = null;
-      for (Method m : StorageEnums.class.getDeclaredMethods()) {
+      for (Method m : DbStorageEnums.class.getDeclaredMethods()) {
         if (m.getParameterTypes()[0].equals(enumClass)) {
           enumToShort = m;
         }

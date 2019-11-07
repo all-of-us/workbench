@@ -2,14 +2,14 @@ package org.pmiops.workbench.actionaudit
 
 data class ActionAuditEvent(
     val timestamp: Long,
-    val actionId: String,
-    val actionType: ActionType,
     val agentType: AgentType,
     val agentId: Long,
     val agentEmailMaybe: String?,
+    val actionId: String,
+    val actionType: ActionType,
     val targetType: TargetType,
-    val targetIdMaybe: Long?,
-    val targetPropertyMaybe: String?,
-    val previousValueMaybe: String?,
-    val newValueMaybe: String?
+    val targetPropertyMaybe: String? = null,
+    val targetIdMaybe: Long? = null,
+    val previousValueMaybe: String? = null,
+    val newValueMaybe: String? = null
 )

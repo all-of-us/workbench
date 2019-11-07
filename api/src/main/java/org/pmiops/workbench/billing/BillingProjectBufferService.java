@@ -1,10 +1,10 @@
 package org.pmiops.workbench.billing;
 
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNING;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
-import static org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNING;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
 
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
@@ -17,9 +17,9 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.StorageEnums;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -77,7 +77,7 @@ public class BillingProjectBufferService {
 
     final String projectName = createBillingProjectName();
 
-    BillingProjectBufferEntry entry = new BillingProjectBufferEntry();
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setFireCloudProjectName(projectName);
     entry.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
     entry.setStatusEnum(CREATING, this::getCurrentTimestamp);
@@ -88,9 +88,9 @@ public class BillingProjectBufferService {
 
   public void syncBillingProjectStatus() {
     for (int i = 0; i < SYNCS_PER_INVOCATION; i++) {
-      BillingProjectBufferEntry entry =
+      DbBillingProjectBufferEntry entry =
           billingProjectBufferEntryDao.findFirstByStatusOrderByLastSyncRequestTimeAsc(
-              StorageEnums.billingProjectBufferStatusToStorage(CREATING));
+              DbStorageEnums.billingProjectBufferStatusToStorage(CREATING));
 
       if (entry == null) {
         return;
@@ -138,14 +138,14 @@ public class BillingProjectBufferService {
   public void cleanBillingBuffer() {
     Iterables.concat(
             billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
-                StorageEnums.billingProjectBufferStatusToStorage(CREATING),
+                DbStorageEnums.billingProjectBufferStatusToStorage(CREATING),
                 new Timestamp(
                     clock
                         .instant()
                         .minus(CREATING_TIMEOUT_MINUTES, ChronoUnit.MINUTES)
                         .toEpochMilli())),
             billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
-                StorageEnums.billingProjectBufferStatusToStorage(ASSIGNING),
+                DbStorageEnums.billingProjectBufferStatusToStorage(ASSIGNING),
                 new Timestamp(
                     clock
                         .instant()
@@ -163,8 +163,8 @@ public class BillingProjectBufferService {
             });
   }
 
-  public BillingProjectBufferEntry assignBillingProject(User user) {
-    BillingProjectBufferEntry entry = consumeBufferEntryForAssignment();
+  public DbBillingProjectBufferEntry assignBillingProject(DbUser user) {
+    DbBillingProjectBufferEntry entry = consumeBufferEntryForAssignment();
 
     fireCloudService.addUserToBillingProject(user.getEmail(), entry.getFireCloudProjectName());
     entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
@@ -174,15 +174,15 @@ public class BillingProjectBufferService {
     return entry;
   }
 
-  private BillingProjectBufferEntry consumeBufferEntryForAssignment() {
+  private DbBillingProjectBufferEntry consumeBufferEntryForAssignment() {
     // Each call to acquire the lock will timeout in 1s if it is currently held
     while (billingProjectBufferEntryDao.acquireAssigningLock() != 1) {}
 
-    BillingProjectBufferEntry entry;
+    DbBillingProjectBufferEntry entry;
     try {
       entry =
           billingProjectBufferEntryDao.findFirstByStatusOrderByCreationTimeAsc(
-              StorageEnums.billingProjectBufferStatusToStorage(AVAILABLE));
+              DbStorageEnums.billingProjectBufferStatusToStorage(AVAILABLE));
 
       if (entry == null) {
         log.log(Level.SEVERE, "Consume Buffer call made while Billing Project Buffer was empty");

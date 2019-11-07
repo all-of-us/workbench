@@ -4,19 +4,14 @@ import org.pmiops.workbench.model.Profile
 import org.pmiops.workbench.model.Workspace
 import kotlin.reflect.KClass
 
-class TargetPropertyUtils {
+class TargetPropertyExtractor {
     companion object {
 
         @JvmStatic
-        inline fun <T, E: TargetProperty<T>> getPropertyValuesByName(
-                valuesGetter: () -> Array<E>,
+        fun <T, E: TargetProperty<T>> getPropertyValuesByName(
+                values: Array<E>,
                 target: T): Map<String, String> {
-            // TODO(jaycarlton): find a way to grab the type of the target
-            // and look it up in the map below, so we only need one argument here.
-            // these don't work:
-//            val enumClass = getTargetPropertyEnumByTargetClass()[T::class]
-//            val targetPropertyEnum = getTargetPropertyEnum(T::class)
-            return valuesGetter.invoke()
+            return values
                     .filter { it.extractor.invoke(target) != null }
                     .map { it.propertyName to it.extractor.invoke(target)!! }
                     .toMap()
@@ -24,11 +19,11 @@ class TargetPropertyUtils {
 
         @JvmStatic
         fun <T, E: TargetProperty<T>> getChangedValuesByName(
-                valuesGetter: () -> Array<E>,
+                values: Array<E>,
                 previousTarget: T,
                 newTarget: T
         ): Map<String, PreviousNewValuePair> {
-            return valuesGetter.invoke()
+            return values
                     .map { it.propertyName to PreviousNewValuePair(
                             previousValue = it.extractor.invoke(previousTarget),
                             newValue = it.extractor.invoke(newTarget)) }

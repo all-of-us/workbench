@@ -15,13 +15,13 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
 @Table(name = "participant_cohort_annotations")
-public class ParticipantCohortAnnotation {
+public class DbParticipantCohortAnnotation {
   private Long annotationId;
   private Long cohortAnnotationDefinitionId;
   private Long cohortReviewId;
   private Long participantId;
   private String annotationValueString;
-  private CohortAnnotationEnumValue cohortAnnotationEnumValue;
+  private DbCohortAnnotationEnumValue cohortAnnotationEnumValue;
   private String annotationValueEnum;
   private Date annotationValueDate;
   private String annotationValueDateString;
@@ -39,7 +39,7 @@ public class ParticipantCohortAnnotation {
     this.annotationId = annotationId;
   }
 
-  public ParticipantCohortAnnotation annotationId(Long annotationId) {
+  public DbParticipantCohortAnnotation annotationId(Long annotationId) {
     this.annotationId = annotationId;
     return this;
   }
@@ -53,7 +53,7 @@ public class ParticipantCohortAnnotation {
     this.cohortAnnotationDefinitionId = cohortAnnotationDefinitionId;
   }
 
-  public ParticipantCohortAnnotation cohortAnnotationDefinitionId(
+  public DbParticipantCohortAnnotation cohortAnnotationDefinitionId(
       Long cohortAnnotationDefinitionId) {
     this.cohortAnnotationDefinitionId = cohortAnnotationDefinitionId;
     return this;
@@ -68,7 +68,7 @@ public class ParticipantCohortAnnotation {
     this.cohortReviewId = cohortReviewId;
   }
 
-  public ParticipantCohortAnnotation cohortReviewId(Long cohortReviewId) {
+  public DbParticipantCohortAnnotation cohortReviewId(Long cohortReviewId) {
     this.cohortReviewId = cohortReviewId;
     return this;
   }
@@ -82,7 +82,7 @@ public class ParticipantCohortAnnotation {
     this.participantId = participantId;
   }
 
-  public ParticipantCohortAnnotation participantId(Long participantId) {
+  public DbParticipantCohortAnnotation participantId(Long participantId) {
     this.participantId = participantId;
     return this;
   }
@@ -96,23 +96,23 @@ public class ParticipantCohortAnnotation {
     this.annotationValueString = annotationValueString;
   }
 
-  public ParticipantCohortAnnotation annotationValueString(String annotationValueString) {
+  public DbParticipantCohortAnnotation annotationValueString(String annotationValueString) {
     this.annotationValueString = annotationValueString;
     return this;
   }
 
   @OneToOne
   @JoinColumn(name = "cohort_annotation_enum_value_id")
-  public CohortAnnotationEnumValue getCohortAnnotationEnumValue() {
+  public DbCohortAnnotationEnumValue getCohortAnnotationEnumValue() {
     return cohortAnnotationEnumValue;
   }
 
-  public void setCohortAnnotationEnumValue(CohortAnnotationEnumValue cohortAnnotationEnumValue) {
+  public void setCohortAnnotationEnumValue(DbCohortAnnotationEnumValue cohortAnnotationEnumValue) {
     this.cohortAnnotationEnumValue = cohortAnnotationEnumValue;
   }
 
-  public ParticipantCohortAnnotation cohortAnnotationEnumValue(
-      CohortAnnotationEnumValue cohortAnnotationEnumValue) {
+  public DbParticipantCohortAnnotation cohortAnnotationEnumValue(
+      DbCohortAnnotationEnumValue cohortAnnotationEnumValue) {
     this.cohortAnnotationEnumValue = cohortAnnotationEnumValue;
     return this;
   }
@@ -126,7 +126,7 @@ public class ParticipantCohortAnnotation {
     this.annotationValueEnum = annotationValueEnum;
   }
 
-  public ParticipantCohortAnnotation annotationValueEnum(String annotationValueEnum) {
+  public DbParticipantCohortAnnotation annotationValueEnum(String annotationValueEnum) {
     this.annotationValueEnum = annotationValueEnum;
     return this;
   }
@@ -140,7 +140,7 @@ public class ParticipantCohortAnnotation {
     this.annotationValueDate = annotationValueDate;
   }
 
-  public ParticipantCohortAnnotation annotationValueDate(Date annotationValueDate) {
+  public DbParticipantCohortAnnotation annotationValueDate(Date annotationValueDate) {
     this.annotationValueDate = annotationValueDate;
     return this;
   }
@@ -154,7 +154,7 @@ public class ParticipantCohortAnnotation {
     this.annotationValueDateString = annotationValueDateString;
   }
 
-  public ParticipantCohortAnnotation annotationValueDateString(String annotationValueDateString) {
+  public DbParticipantCohortAnnotation annotationValueDateString(String annotationValueDateString) {
     this.annotationValueDateString = annotationValueDateString;
     return this;
   }
@@ -168,7 +168,7 @@ public class ParticipantCohortAnnotation {
     this.annotationValueBoolean = annotationValueBoolean;
   }
 
-  public ParticipantCohortAnnotation annotationValueBoolean(Boolean annotationValueBoolean) {
+  public DbParticipantCohortAnnotation annotationValueBoolean(Boolean annotationValueBoolean) {
     this.annotationValueBoolean = annotationValueBoolean;
     return this;
   }
@@ -182,7 +182,7 @@ public class ParticipantCohortAnnotation {
     this.annotationValueInteger = annotationValueInteger;
   }
 
-  public ParticipantCohortAnnotation annotationValueInteger(Integer annotationValueInteger) {
+  public DbParticipantCohortAnnotation annotationValueInteger(Integer annotationValueInteger) {
     this.annotationValueInteger = annotationValueInteger;
     return this;
   }
@@ -191,7 +191,7 @@ public class ParticipantCohortAnnotation {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    ParticipantCohortAnnotation that = (ParticipantCohortAnnotation) o;
+    DbParticipantCohortAnnotation that = (DbParticipantCohortAnnotation) o;
     return Objects.equals(cohortAnnotationDefinitionId, that.cohortAnnotationDefinitionId)
         && Objects.equals(cohortReviewId, that.cohortReviewId)
         && Objects.equals(participantId, that.participantId)

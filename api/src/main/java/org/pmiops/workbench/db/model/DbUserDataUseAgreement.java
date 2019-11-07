@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "user_data_use_agreement")
-public class UserDataUseAgreement {
+public class DbUserDataUseAgreement {
   private long userDataUseAgreementId;
   private long userId;
   private String userGivenName;
@@ -105,7 +105,7 @@ public class UserDataUseAgreement {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    UserDataUseAgreement that = (UserDataUseAgreement) o;
+    DbUserDataUseAgreement that = (DbUserDataUseAgreement) o;
     return userDataUseAgreementId == that.userDataUseAgreementId
         && userId == that.userId
         && userNameOutOfDate == that.userNameOutOfDate

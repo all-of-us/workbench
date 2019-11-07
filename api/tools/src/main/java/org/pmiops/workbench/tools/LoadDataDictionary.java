@@ -17,7 +17,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.CdrVersion;
-import org.pmiops.workbench.db.model.DataDictionaryEntry;
+import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -72,7 +72,7 @@ public class LoadDataDictionary {
         }
 
         for (AvailableField field : dd.getTransformations()[0].getAvailable_fields()) {
-          Optional<DataDictionaryEntry> entry =
+          Optional<DbDataDictionaryEntry> entry =
               dataDictionaryEntryDao.findByRelevantOmopTableAndFieldNameAndCdrVersion(
                   field.getRelevant_omop_table(), field.getField_name(), cdrVersion);
 
@@ -82,9 +82,9 @@ public class LoadDataDictionary {
             continue;
           }
 
-          DataDictionaryEntry targetEntry;
+          DbDataDictionaryEntry targetEntry;
           if (!entry.isPresent()) {
-            targetEntry = new DataDictionaryEntry();
+            targetEntry = new DbDataDictionaryEntry();
             targetEntry.setRelevantOmopTable(field.getRelevant_omop_table());
             targetEntry.setFieldName(field.getField_name());
             targetEntry.setCdrVersion(cdrVersion);

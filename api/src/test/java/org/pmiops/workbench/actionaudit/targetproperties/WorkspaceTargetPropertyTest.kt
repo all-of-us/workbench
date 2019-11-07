@@ -61,8 +61,8 @@ class WorkspaceTargetPropertyTest {
 
     @Test
     fun testExtractsStringPropertiesFromWorkspace() {
-        val propertiesByName = TargetPropertyUtils.getPropertyValuesByName(
-                { WorkspaceTargetProperty.values() },
+        val propertiesByName = TargetPropertyExtractor.getPropertyValuesByName(
+                WorkspaceTargetProperty.values(),
                 workspace1!!)
 
         assertThat(propertiesByName).hasSize(6)
@@ -76,15 +76,15 @@ class WorkspaceTargetPropertyTest {
 
     @Test
     fun testEmptyWorkspaceGivesEmptyMap() {
-        assertThat(TargetPropertyUtils.getPropertyValuesByName(
-                { WorkspaceTargetProperty.values() }, emptyWorkspace!!))
+        assertThat(TargetPropertyExtractor.getPropertyValuesByName(
+                WorkspaceTargetProperty.values(), emptyWorkspace!!))
                 .isEmpty()
     }
 
     @Test
     fun testMapsChanges() {
-        val changesByPropertyName = TargetPropertyUtils.getChangedValuesByName(
-                { WorkspaceTargetProperty.values() }, workspace1!!, workspace2!!)
+        val changesByPropertyName = TargetPropertyExtractor.getChangedValuesByName(
+                WorkspaceTargetProperty.values(), workspace1!!, workspace2!!)
 
         assertThat(changesByPropertyName).hasSize(5)
 
@@ -102,8 +102,8 @@ class WorkspaceTargetPropertyTest {
     @Test
     fun testHandlesMissingValues() {
         workspace2!!.cdrVersionId = null
-        val changesByName = TargetPropertyUtils.getChangedValuesByName(
-                { WorkspaceTargetProperty.values() }, workspace1!!, workspace2!!)
+        val changesByName = TargetPropertyExtractor.getChangedValuesByName(
+                WorkspaceTargetProperty.values(), workspace1!!, workspace2!!)
         assertThat(
                 changesByName[WorkspaceTargetProperty.CDR_VERSION_ID.propertyName]
                         ?.previousValue)
@@ -113,8 +113,8 @@ class WorkspaceTargetPropertyTest {
                         ?.newValue)
                 .isNull()
 
-        val reverseChangesByName = TargetPropertyUtils.getChangedValuesByName(
-                { WorkspaceTargetProperty.values() }, workspace2!!, workspace1!!)
+        val reverseChangesByName = TargetPropertyExtractor.getChangedValuesByName(
+                WorkspaceTargetProperty.values(), workspace2!!, workspace1!!)
         assertThat(
                 reverseChangesByName[WorkspaceTargetProperty.CDR_VERSION_ID.propertyName]
                         ?.previousValue)
@@ -127,7 +127,7 @@ class WorkspaceTargetPropertyTest {
 
     @Test
     fun testComparisonToSelfIsEmpty() {
-        assertThat(TargetPropertyUtils.getChangedValuesByName(
-                { WorkspaceTargetProperty.values() }, workspace1!!, workspace1!!)).isEmpty()
+        assertThat(TargetPropertyExtractor.getChangedValuesByName(
+                WorkspaceTargetProperty.values(), workspace1!!, workspace1!!)).isEmpty()
     }
 }

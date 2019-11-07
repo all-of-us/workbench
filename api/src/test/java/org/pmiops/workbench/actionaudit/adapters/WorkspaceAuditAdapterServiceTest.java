@@ -27,7 +27,10 @@ import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AclTargetProperty;
-import org.pmiops.workbench.db.model.User;
+import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapterService;
+import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapterServiceImpl;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
@@ -49,11 +52,11 @@ public class WorkspaceAuditAdapterServiceTest {
 
   private WorkspaceAuditAdapterService workspaceAuditAdapterService;
   private Workspace workspace1;
-  private User user1;
-  private org.pmiops.workbench.db.model.Workspace dbWorkspace1;
-  private org.pmiops.workbench.db.model.Workspace dbWorkspace2;
+  private DbUser user1;
+  private DbWorkspace dbWorkspace1;
+  private DbWorkspace dbWorkspace2;
 
-  @Mock private Provider<User> mockUserProvider;
+  @Mock private Provider<DbUser> mockUserProvider;
   @Mock private Clock mockClock;
   @Mock private ActionAuditService mockActionAuditService;
   @Mock private Provider<String> mockActionIdProvider;
@@ -67,7 +70,7 @@ public class WorkspaceAuditAdapterServiceTest {
 
   @Before
   public void setUp() {
-    user1 = new User();
+    user1 = new DbUser();
     user1.setUserId(101L);
     user1.setEmail("fflinstone@slate.com");
     user1.setGivenName("Fred");
@@ -83,7 +86,7 @@ public class WorkspaceAuditAdapterServiceTest {
     final long now = System.currentTimeMillis();
 
     workspace1 = new Workspace();
-    workspace1.setName("Workspace 1");
+    workspace1.setName("DbWorkspace 1");
     workspace1.setId("fc-id-1");
     workspace1.setNamespace("aou-rw-local1-c4be869a");
     workspace1.setCreator("user@fake-research-aou.org");
@@ -101,7 +104,7 @@ public class WorkspaceAuditAdapterServiceTest {
     dbWorkspace1.setLastModifiedTime(new Timestamp(now));
     dbWorkspace1.setCreationTime(new Timestamp(now));
 
-    dbWorkspace2 = new org.pmiops.workbench.db.model.Workspace();
+    dbWorkspace2 = new DbWorkspace();
     dbWorkspace2.setWorkspaceId(201L);
     dbWorkspace2.setPublished(false);
     dbWorkspace2.setLastModifiedTime(new Timestamp(now));

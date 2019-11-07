@@ -2,8 +2,8 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import org.pmiops.workbench.db.model.BillingProjectBufferEntry.BillingProjectBufferStatus;
-import org.pmiops.workbench.db.model.Workspace.BillingMigrationStatus;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus;
+import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingAccountType;
@@ -36,7 +36,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
  *
  * <p>See RW-872 for more details.
  */
-public final class StorageEnums {
+public final class DbStorageEnums {
   private static final BiMap<Authority, Short> CLIENT_TO_STORAGE_AUTHORITY =
       ImmutableBiMap.<Authority, Short>builder()
           .put(Authority.REVIEW_RESEARCH_PURPOSE, (short) 0)
@@ -235,5 +235,5 @@ public final class StorageEnums {
   }
 
   /** Utility class. */
-  private StorageEnums() {}
+  private DbStorageEnums() {}
 }

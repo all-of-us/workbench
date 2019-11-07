@@ -5,9 +5,9 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortAnnotationDao;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.CohortReview;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbCohortReview;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,24 +25,24 @@ public class CohortCloningService {
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
   @Transactional
-  public Cohort cloneCohortAndReviews(Cohort fromCohort, Workspace targetWorkspace) {
-    final Cohort duplicatedCohort =
+  public DbCohort cloneCohortAndReviews(DbCohort fromCohort, DbWorkspace targetWorkspace) {
+    final DbCohort duplicatedCohort =
         cohortFactory.duplicateCohort(
             fromCohort.getName(), targetWorkspace.getCreator(), targetWorkspace, fromCohort);
-    final Cohort toCohort = cohortDao.save(duplicatedCohort);
+    final DbCohort toCohort = cohortDao.save(duplicatedCohort);
     copyCohortAnnotations(fromCohort, toCohort);
 
-    for (CohortReview fromReview : fromCohort.getCohortReviews()) {
-      final CohortReview duplicatedReview =
+    for (DbCohortReview fromReview : fromCohort.getCohortReviews()) {
+      final DbCohortReview duplicatedReview =
           cohortFactory.duplicateCohortReview(fromReview, toCohort);
-      final CohortReview toReview = cohortReviewDao.save(duplicatedReview);
+      final DbCohortReview toReview = cohortReviewDao.save(duplicatedReview);
       copyCohortReviewAnnotations(fromCohort, fromReview, toCohort, toReview);
     }
 
     return toCohort;
   }
 
-  private void copyCohortAnnotations(Cohort from, Cohort to) {
+  private void copyCohortAnnotations(DbCohort from, DbCohort to) {
     cohortAnnotationDefinitionDao.bulkCopyCohortAnnotationDefinitionByCohort(
         from.getCohortId(), to.getCohortId());
     // Important: this must follow the above method
@@ -52,7 +52,7 @@ public class CohortCloningService {
   }
 
   private void copyCohortReviewAnnotations(
-      Cohort fromCohort, CohortReview fromReview, Cohort toCohort, CohortReview toReview) {
+      DbCohort fromCohort, DbCohortReview fromReview, DbCohort toCohort, DbCohortReview toReview) {
     participantCohortStatusDao.bulkCopyByCohortReview(
         fromReview.getCohortReviewId(), toReview.getCohortReviewId());
     participantCohortAnnotationDao.bulkCopyEnumAnnotationsByCohortReviewAndCohort(

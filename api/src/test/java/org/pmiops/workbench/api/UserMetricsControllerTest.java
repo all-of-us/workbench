@@ -21,10 +21,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.model.Cohort;
-import org.pmiops.workbench.db.model.User;
-import org.pmiops.workbench.db.model.UserRecentResource;
-import org.pmiops.workbench.db.model.Workspace;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserRecentResource;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -47,7 +47,7 @@ public class UserMetricsControllerTest {
 
   @Mock private CloudStorageService cloudStorageService;
   @Mock private UserRecentResourceService userRecentResourceService;
-  @Mock private Provider<User> userProvider;
+  @Mock private Provider<DbUser> userProvider;
   @Mock private FireCloudService fireCloudService;
   @Mock private WorkspaceService workspaceService;
 
@@ -55,48 +55,48 @@ public class UserMetricsControllerTest {
   private static final Instant NOW = Instant.now();
   private FakeClock clock = new FakeClock(NOW);
 
-  private User user;
-  private UserRecentResource resource1;
-  private UserRecentResource resource2;
-  private Workspace workspace2;
+  private DbUser user;
+  private DbUserRecentResource resource1;
+  private DbUserRecentResource resource2;
+  private DbWorkspace workspace2;
 
   @Before
   public void setUp() {
-    user = new User();
+    user = new DbUser();
     user.setUserId(123L);
 
-    Cohort cohort = new Cohort();
+    DbCohort cohort = new DbCohort();
     cohort.setName("Cohort Name");
     cohort.setCohortId(1L);
     cohort.setDescription("Cohort description");
     cohort.setLastModifiedTime(new Timestamp(clock.millis()));
     cohort.setCreationTime(new Timestamp(clock.millis()));
 
-    Workspace workspace1 = new Workspace();
+    DbWorkspace workspace1 = new DbWorkspace();
     workspace1.setWorkspaceId(1L);
     workspace1.setWorkspaceNamespace("workspaceNamespace1");
     workspace1.setFirecloudName("firecloudname1");
 
-    workspace2 = new Workspace();
+    workspace2 = new DbWorkspace();
     workspace2.setWorkspaceId(2L);
     workspace2.setWorkspaceNamespace("workspaceNamespace2");
     workspace2.setFirecloudName("firecloudName2");
 
-    resource1 = new UserRecentResource();
+    resource1 = new DbUserRecentResource();
     resource1.setNotebookName("gs://bucketFile/notebooks/notebook1.ipynb");
     resource1.setCohort(null);
     resource1.setLastAccessDate(new Timestamp(clock.millis()));
     resource1.setUserId(user.getUserId());
     resource1.setWorkspaceId(workspace1.getWorkspaceId());
 
-    resource2 = new UserRecentResource();
+    resource2 = new DbUserRecentResource();
     resource2.setNotebookName(null);
     resource2.setCohort(cohort);
     resource2.setLastAccessDate(new Timestamp(clock.millis() - 10000));
     resource2.setUserId(user.getUserId());
     resource2.setWorkspaceId(workspace2.getWorkspaceId());
 
-    UserRecentResource resource3 = new UserRecentResource();
+    DbUserRecentResource resource3 = new DbUserRecentResource();
     resource3.setNotebookName("gs://bucketFile/notebooks/notebook2.ipynb");
     resource3.setCohort(null);
     resource3.setLastAccessDate(new Timestamp(clock.millis() - 10000));
@@ -287,7 +287,7 @@ public class UserMetricsControllerTest {
   @Test
   public void testUpdateRecentResource() {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    UserRecentResource mockUserRecentResource = new UserRecentResource();
+    DbUserRecentResource mockUserRecentResource = new DbUserRecentResource();
     mockUserRecentResource.setCohort(null);
     mockUserRecentResource.setWorkspaceId(workspace2.getWorkspaceId());
     mockUserRecentResource.setUserId(user.getUserId());
@@ -296,8 +296,7 @@ public class UserMetricsControllerTest {
     when(userRecentResourceService.updateNotebookEntry(
             workspace2.getWorkspaceId(),
             user.getUserId(),
-            "gs://newBucket/notebooks/notebook.ipynb",
-            now))
+            "gs://newBucket/notebooks/notebook.ipynb"))
         .thenReturn(mockUserRecentResource);
 
     RecentResourceRequest request = new RecentResourceRequest();

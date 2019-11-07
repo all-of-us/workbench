@@ -21,7 +21,7 @@ import org.pmiops.workbench.model.Surveys;
 
 @Entity
 @Table(name = "concept_set")
-public class ConceptSet {
+public class DbConceptSet {
   private static final int INITIAL_VERSION = 1;
 
   private long conceptSetId;
@@ -31,23 +31,23 @@ public class ConceptSet {
   private Short survey;
   private String description;
   private long workspaceId;
-  private User creator;
+  private DbUser creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private int participantCount;
   private Set<Long> conceptIds = new HashSet<>();
 
-  public ConceptSet() {
-    setVersion(ConceptSet.INITIAL_VERSION);
+  public DbConceptSet() {
+    setVersion(DbConceptSet.INITIAL_VERSION);
   }
 
-  public ConceptSet(ConceptSet cs) {
+  public DbConceptSet(DbConceptSet cs) {
     setDescription(cs.getDescription());
     setName(cs.getName());
     setDomain(cs.getDomain());
     setSurvey(cs.getSurvey());
     setCreator(cs.getCreator());
-    setVersion(ConceptSet.INITIAL_VERSION);
+    setVersion(DbConceptSet.INITIAL_VERSION);
     setWorkspaceId(cs.getWorkspaceId());
     setCreationTime(cs.getCreationTime());
     setLastModifiedTime(cs.getLastModifiedTime());
@@ -141,11 +141,11 @@ public class ConceptSet {
 
   @ManyToOne
   @JoinColumn(name = "creator_id")
-  public User getCreator() {
+  public DbUser getCreator() {
     return creator;
   }
 
-  public void setCreator(User creator) {
+  public void setCreator(DbUser creator) {
     this.creator = creator;
   }
 
