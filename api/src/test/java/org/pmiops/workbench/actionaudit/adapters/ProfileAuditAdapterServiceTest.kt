@@ -1,6 +1,10 @@
 package org.pmiops.workbench.actionaudit.adapters
 
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 
 import java.time.Clock
 import java.time.Instant
@@ -8,11 +12,6 @@ import javax.inject.Provider
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.anyList
-import org.mockito.Captor
-import org.mockito.Mock
-import org.mockito.Mockito.*
 import org.pmiops.workbench.actionaudit.*
 import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.model.*
@@ -22,48 +21,41 @@ import java.math.BigDecimal
 @RunWith(SpringRunner::class)
 class ProfileAuditAdapterServiceTest {
 
-    @Mock
-    private val mockUserProvider: Provider<DbUser>? = null
-    @Mock
-    private val mockActionAuditService: ActionAuditService? = null
-    @Mock
-    private val mockClock: Clock? = null
-    @Mock
-    private val mockActionIdProvider: Provider<String>? = null
-
-    @Captor
-    private var eventListCaptor: ArgumentCaptor<List<ActionAuditEvent>>? = null
-
-    @Captor
-    private var eventCaptor: ArgumentCaptor<ActionAuditEvent>? = null
+    private val mockUserProvider = mock<Provider<DbUser>>()
+    private val mockActionAuditService = mock<ActionAuditService>()
+    private val mockClock = mock<Clock>()
+    private val mockActionIdProvider = mock<Provider<String>>()
 
     private var profileAuditAdapterService: ProfileAuditAdapterService? = null
     private var user: DbUser? = null
 
     @Before
     fun setUp() {
-        reset(mockActionAuditService) // try to help with flakiness
         user = DbUser()
         user?.userId = 1001
         user?.email = USER_EMAIL
+
         profileAuditAdapterService = ProfileAuditAdapterServiceImpl(
-                userProvider = mockUserProvider!!,
-                actionAuditService = mockActionAuditService!!,
-                clock = mockClock!!,
-                actionIdProvider = mockActionIdProvider!!)
-        doReturn(Y2K_EPOCH_MILLIS).`when`(mockClock).millis()
-        doReturn(user).`when`(mockUserProvider).get()
-        doReturn(ACTION_ID).`when`(mockActionIdProvider).get()
+                userProvider = mockUserProvider,
+                actionAuditService = mockActionAuditService,
+                clock = mockClock,
+                actionIdProvider = mockActionIdProvider)
+        whenever(mockClock.millis()).thenReturn(Y2K_EPOCH_MILLIS)
+        whenever(mockUserProvider.get()).thenReturn(user)
+        whenever(mockActionIdProvider.get()).thenReturn(ACTION_ID)
     }
 
     @Test
     fun testCreateUserProfile() {
         val createdProfile = buildProfile()
         profileAuditAdapterService!!.fireCreateAction(createdProfile)
-        verify<ActionAuditService>(mockActionAuditService!!).send(eventListCaptor?.capture()!!)
-        val sentEvents: List<ActionAuditEvent> = eventListCaptor?.value?.toList().orEmpty()
-
-        assertThat(sentEvents).hasSize(10)
+        argumentCaptor<List<ActionAuditEvent>>().apply {
+            verify(mockActionAuditService).send(capture())
+            val sentEvents: List<ActionAuditEvent> = firstValue
+            assertThat(sentEvents).hasSize(13)
+            assertThat(sentEvents.all {it.actionType == ActionType.CREATE })
+            assertThat(sentEvents.map {ActionAuditEvent::actionId}.distinct().count() == 1)
+        }
     }
 
     private fun buildProfile(): Profile {
@@ -106,18 +98,20 @@ class ProfileAuditAdapterServiceTest {
     @Test
     fun testDeleteUserProfile() {
         profileAuditAdapterService!!.fireDeleteAction(USER_ID, USER_EMAIL)
-//        verify<ActionAuditService>(mockActionAuditService).send(eventCaptor!!.capture())
-//        val eventSent = eventCaptor!!.value
-//
-//        assertThat(eventSent.targetType).isEqualTo(TargetType.PROFILE)
-//        assertThat(eventSent.agentType).isEqualTo(AgentType.USER)
-//        assertThat(eventSent.agentId).isEqualTo(USER_ID)
-//        assertThat(eventSent.targetIdMaybe).isEqualTo(USER_ID)
-//        assertThat(eventSent.actionType).isEqualTo(ActionType.DELETE)
-//        assertThat(eventSent.timestamp).isEqualTo(Y2K_EPOCH_MILLIS)
-//        assertThat(eventSent.targetPropertyMaybe).isNull()
-//        assertThat(eventSent.newValueMaybe).isNull()
-//        assertThat(eventSent.previousValueMaybe).isNull()
+        argumentCaptor<ActionAuditEvent>().apply {
+            verify(mockActionAuditService).send(capture())
+            val eventSent = firstValue
+
+            assertThat(eventSent.targetType).isEqualTo(TargetType.PROFILE)
+            assertThat(eventSent.agentType).isEqualTo(AgentType.USER)
+            assertThat(eventSent.agentId).isEqualTo(USER_ID)
+            assertThat(eventSent.targetIdMaybe).isEqualTo(USER_ID)
+            assertThat(eventSent.actionType).isEqualTo(ActionType.DELETE)
+            assertThat(eventSent.timestamp).isEqualTo(Y2K_EPOCH_MILLIS)
+            assertThat(eventSent.targetPropertyMaybe).isNull()
+            assertThat(eventSent.newValueMaybe).isNull()
+            assertThat(eventSent.previousValueMaybe).isNull()
+        }
     }
 
     companion object {
