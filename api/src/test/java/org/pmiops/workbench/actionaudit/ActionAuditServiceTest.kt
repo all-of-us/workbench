@@ -41,7 +41,7 @@ class ActionAuditServiceTest {
         workbenchConfig.server = serverConfig
         whenever(mockConfigProvider.get()).thenReturn(workbenchConfig)
 
-        actionAuditService = ActionAuditServiceImpl(mockConfigProvider!!, mockLogging!!)
+        actionAuditService = ActionAuditServiceImpl(mockConfigProvider, mockLogging)
 
         // ordinarily events sharing an action would have more things in common than this,
         // but the schema doesn't require it
@@ -96,49 +96,53 @@ class ActionAuditServiceTest {
 
     }
 
-//    @Test
-//    fun testSendsExpectedColumnNames() {
-//        actionAuditService!!.send(event1!!)
-//        verify<Logging>(mockLogging).write(logEntryListCaptor!!.capture())
-//        val entryList = logEntryListCaptor.value
-//        assertThat(entryList.size).isEqualTo(1)
-//        val entry = entryList[0]
-//        val jsonPayload = entry.getPayload<JsonPayload>()
-//
-//        for (key in jsonPayload.dataAsMap.keys) {
-//            assertThat(Arrays.stream(AuditColumn.values()).anyMatch { col -> col.toString() == key })
-//                    .isTrue()
-//        }
-//    }
-//
-//    @Test
-//    fun testSendsMultipleEventsAsSingleAction() {
-//        actionAuditService!!.send(ImmutableList.of(event1!!, event2!!))
-//        verify(mockLogging)?.write(any())
-//        verify<Logging>(mockLogging).write(logEntryListCaptor!!.capture())
-//        val entryList = logEntryListCaptor.value
-//        assertThat(entryList.size).isEqualTo(2)
-//
-//        val payloads = entryList
-//                .map { it.getPayload<JsonPayload>() }
-//
-//        assertThat(
-//                payloads
-//                        .map { it.dataAsMap }
-//                        .map { it[AuditColumn.ACTION_ID.name] }
-//                        .distinct()
-//                        .count())
-//                .isEqualTo(1)
-//    }
-//
-//    @Test
-//    fun testSendWithEmptyCollectionDoesNotCallCloudLoggingApi() {
-//        actionAuditService!!.send(emptySet())
-//        verify<Logging>(mockLogging, never()).write(anyList())
-//    }
+    @Test
+    fun testSendsExpectedColumnNames() {
+        actionAuditService!!.send(event1!!)
+        argumentCaptor<List<LogEntry>>().apply {
+            verify(mockLogging).write(capture())
+            val entryList = firstValue
+            assertThat(entryList.size).isEqualTo(1)
+            val entry = entryList[0]
+            val jsonPayload = entry.getPayload<JsonPayload>()
+
+            for (key in jsonPayload.dataAsMap.keys) {
+                assertThat(Arrays.stream(AuditColumn.values()).anyMatch { col -> col.toString() == key })
+                        .isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun testSendsMultipleEventsAsSingleAction() {
+        actionAuditService!!.send(ImmutableList.of(event1!!, event2!!))
+        argumentCaptor<List<LogEntry>>().apply {
+            verify(mockLogging).write(capture())
+            val entryList = firstValue
+            assertThat(entryList.size).isEqualTo(2)
+
+            val payloads = entryList
+                    .map { it.getPayload<JsonPayload>() }
+
+            assertThat(
+                    payloads
+                            .map { it.dataAsMap }
+                            .map { it[AuditColumn.ACTION_ID.name] }
+                            .distinct()
+                            .count())
+                    .isEqualTo(1)
+        }
+    }
+
+    @Test
+    fun testSendWithEmptyCollectionDoesNotCallCloudLoggingApi() {
+        actionAuditService!!.send(emptySet())
+        argumentCaptor<List<LogEntry>>().apply {
+            verify(mockLogging, never()).write(any())
+        }
+    }
 
     companion object {
-
         private const val AGENT_ID_1 = 101L
         private const val AGENT_ID_2 = 102L
     }
