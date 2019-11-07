@@ -155,11 +155,9 @@ public class UserMetricsControllerTest {
             workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName()))
         .thenReturn(workspace2);
 
-    when(mockFireCloudService.getWorkspace(workspace1))
-        .thenReturn(workspaceResponse);
+    when(mockFireCloudService.getWorkspace(workspace1)).thenReturn(workspaceResponse);
 
-    when(mockFireCloudService.getWorkspace(workspace2))
-        .thenReturn(workspaceResponse2);
+    when(mockFireCloudService.getWorkspace(workspace2)).thenReturn(workspaceResponse2);
 
     when(mockCloudStorageService.blobsExist(anyList()))
         .then(
