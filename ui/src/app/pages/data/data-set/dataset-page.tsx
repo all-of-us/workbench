@@ -516,7 +516,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       if (!selected) {
         const existingSameDomainCS = selectedConceptSetIds.filter(
           conceptId => conceptSetList.filter(
-              conceptSet => conceptSet.id === conceptId && conceptSet.domain === domain));
+            conceptSet => conceptSet.id === conceptId && conceptSet.domain === domain));
         if (existingSameDomainCS.length > 0) {
           return;
         }
