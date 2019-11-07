@@ -1727,13 +1727,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     DemoChartInfoListResponse response =
         controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
-    assertEquals(2, response.getItems().size());
+    assertEquals(4, response.getItems().size());
     assertEquals(
-        new DemoChartInfo().gender("MALE").race("Asian").ageRange("45-64").count(1L),
+        new DemoChartInfo().gender("MALE").race("Asian").ageRange("19-44").count(0L),
         response.getItems().get(0));
     assertEquals(
-        new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("19-44").count(1L),
+        new DemoChartInfo().gender("MALE").race("Asian").ageRange("45-64").count(1L),
         response.getItems().get(1));
+    assertEquals(
+        new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("19-44").count(1L),
+        response.getItems().get(2));
+    assertEquals(
+        new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("45-64").count(0L),
+        response.getItems().get(3));
   }
 
   @Test
