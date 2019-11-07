@@ -42,7 +42,8 @@ apt-get install -y --no-install-recommends jq
 for v in "3"; do
   "pip${v}" install --upgrade \
     plotnine \
-    'https://github.com/all-of-us/pyclient/archive/pyclient-v1-17.zip#egg=aou_workbench_client&subdirectory=py'
+    'https://github.com/all-of-us/pyclient/archive/pyclient-v1-17.zip#egg=aou_workbench_client&subdirectory=py' \
+    statsmodels==0.10.0rc2
 done
 
 # Install wondershaper for basic egress throttling.
