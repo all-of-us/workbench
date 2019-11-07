@@ -11,7 +11,8 @@
     "registeredDomainGroup": "all-of-us-registered-prod@firecloud.org",
     "xAppIdValue": "AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_prod",
-    "timeoutInSeconds": 40
+    "timeoutInSeconds": 40,
+    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-gatk:0.0.3"
   },
   "billing": {
     "accountId": "015EAA-E95687-1F8614",
