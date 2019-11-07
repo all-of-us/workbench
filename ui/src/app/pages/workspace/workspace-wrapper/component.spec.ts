@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
-import {Router} from '@angular/router';
 import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
@@ -9,7 +8,7 @@ import {ClarityModule} from '@clr/angular';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
+import {urlParamsStore} from 'app/utils/navigation';
 
 import {BugReportComponent} from 'app/components/bug-report';
 import {ConfirmDeleteModalComponent} from 'app/components/confirm-delete-modal';
@@ -18,13 +17,13 @@ import {WorkspaceShareComponent} from 'app/pages/workspace/workspace-share';
 import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/component';
 
 import {UserService, WorkspaceAccessLevel} from 'generated';
-import {WorkspaceAccessLevel as FetchWorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {WorkspacesApi} from 'generated/fetch';
 
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {UserServiceStub} from 'testing/stubs/user-service-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
-import {WorkspacesApiStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
+import {WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
 import {findElements} from 'testing/react-testing-utility';
 import {setupModals, updateAndTick} from 'testing/test-helpers';
@@ -35,14 +34,8 @@ import {setupModals, updateAndTick} from 'testing/test-helpers';
 })
 class FakeAppComponent {}
 
-const workspace = {
-  ...workspaceStubs[0],
-  accessLevel: FetchWorkspaceAccessLevel.OWNER,
-};
-
 describe('WorkspaceWrapperComponent', () => {
   let fixture: ComponentFixture<WorkspaceWrapperComponent>;
-  let router: Router;
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -82,25 +75,11 @@ describe('WorkspaceWrapperComponent', () => {
       registerApiClient(WorkspacesApi, new WorkspacesApiStub());
       fixture = TestBed.createComponent(WorkspaceWrapperComponent);
       setupModals(fixture);
-      router = TestBed.get(Router);
-
-      router.navigateByUrl(
-        `/workspaces/${WorkspaceStubVariables.DEFAULT_WORKSPACE_NS}/` +
-        `WorkspaceStubVariables.DEFAULT_WORKSPACE_ID)/about`);
-
-      spyOn(workspacesApi(), 'getWorkspace')
-        .and.returnValue(Promise.resolve(workspace));
 
       urlParamsStore.next({
         ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
         wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
       });
-
-      // Clarity needs several ticks/redraw cycles to render its button group.
-      tick();
-      updateAndTick(fixture);
-      updateAndTick(fixture);
-      currentWorkspaceStore.next(workspace);
     });
   }));
 
