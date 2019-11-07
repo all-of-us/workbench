@@ -100,6 +100,8 @@ public class WorkbenchConfig {
     public String vpcServicePerimeterName;
     // The length of our API HTTP client timeouts to firecloud
     public Integer timeoutInSeconds;
+    // The image in GCR that we use for our jupyter dockers
+    public String jupyterDockerImage;
   }
 
   public static class AuthConfig {
