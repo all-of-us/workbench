@@ -67,7 +67,12 @@ describe('DataSetPage', () => {
         .find('input').first();
     condition_concept.simulate('change');
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="value-list-items"]').length).toBe(2);
+    let valueListItems = wrapper.find('[data-test-id="value-list-items"]');
+    expect(valueListItems.length).toBe(2);
+    let selectedValue = valueListItems.forEach(value =>
+        value.props().checked)
+
+    expect(selectedValue.length).toBe(valueListItems.length);
 
     // Second Concept set in concept set list has domain "Measurement"
     const measurement_concept = wrapper.find('[data-test-id="concept-set-list-item"]').at(1)
@@ -75,7 +80,11 @@ describe('DataSetPage', () => {
     measurement_concept.simulate('change');
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="value-list-items"]').length).toBe(5);
+    valueListItems = wrapper.find('[data-test-id="value-list-items"]');
+    selectedValue = valueListItems.forEach(value =>
+        value.props().checked);
+    expect(valueListItems.length).toBe(5);
+    expect(selectedValue.length).toBe(5);
   });
 
   it('should enable save button and preview button once cohorts, concepts and values are selected',

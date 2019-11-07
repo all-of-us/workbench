@@ -512,8 +512,14 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     handlePrePackagedConceptSets(domain, selected) {
-      const {valueSets, selectedDomainValuePairs} = this.state;
+      const {conceptSetList, valueSets, selectedDomainValuePairs, selectedConceptSetIds} = this.state;
       if (!selected) {
+        const existingSameDomainCS = selectedConceptSetIds.filter(
+          conceptId => conceptSetList.filter(
+              conceptSet => conceptSet.id === conceptId && conceptSet.domain === domain));
+        if (existingSameDomainCS.length > 0) {
+          return;
+        }
         const updatedValueSets =
             valueSets.filter(valueSet => !(fp.contains(valueSet.domain, domain)));
         const updatedSelectedDomainValuePairs =
@@ -534,10 +540,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
       this.setState({valuesLoading: true});
       this.getValuesList(newDomains)
-        .then(newValueSets => this.setState({
-          valueSets: valueSets.concat(newValueSets),
-          valuesLoading: false
-        }));
+        .then(newValueSets => this.updateValueSets(valueSets, newDomains));
     }
 
     select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
@@ -564,16 +567,10 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           const cSet = resource as ConceptSet;
           if (cSet.survey != null ) {
             this.getValuesList(newDomains, cSet.survey)
-                .then(newValueSets => this.setState({
-                  valueSets: updatedValueSets.concat(newValueSets),
-                  valuesLoading: false
-                }));
+                .then(newValueSets => this.updateValueSets(updatedValueSets, newValueSets));
           } else {
             this.getValuesList(newDomains)
-                .then(newValueSets => this.setState({
-                  valueSets: updatedValueSets.concat(newValueSets),
-                  valuesLoading: false
-                }));
+                .then(newValueSets => this.updateValueSets(updatedValueSets, newValueSets));
           }
         } else {
           this.setState({valueSets: updatedValueSets});
@@ -605,8 +602,32 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       this.setState({selectedDomainValuePairs: valuesSelected, dataSetTouched: true});
     }
 
+    // Add the values to the valueSet as well as the selectedDomain list so that they are
+    // all selected by default
+    updateValueSets(updatedValueSets, newValueSets) {
+      this.setState({
+        valueSets: updatedValueSets.concat(newValueSets),
+        valuesLoading: false
+      });
+      const allValuesSelected = [];
+
+      newValueSets.map(valueSet => {
+        valueSet.values.items.map(value => {
+          allValuesSelected.push({domain: valueSet.domain, value: value.value});
+        });
+      });
+      this.setState({selectedDomainValuePairs: allValuesSelected});
+    }
+
     get selectAll() {
-      return fp.isEmpty(this.state.selectedDomainValuePairs);
+      return fp.isEmpty(this.state.selectedDomainValuePairs) ||
+          this.state.selectedDomainValuePairs.length !== this.valuesCount;
+    }
+
+    get valuesCount() {
+      let count = 0 ;
+      this.state.valueSets.map(value => count += value.values.items.length);
+      return count;
     }
 
     selectAllValues() {
