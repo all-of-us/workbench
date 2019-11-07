@@ -8293,6 +8293,11 @@ ts-jest@^23.10.5:
     semver "^5.5"
     yargs-parser "10.x"
 
+ts-key-enum@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/ts-key-enum/-/ts-key-enum-3.0.0.tgz#82ec990b90bb9a51352e2e6a654f234d3e907811"
+  integrity sha512-ld+vqp6GgJ4rDtaDSZwXQraBznklEO/lkpQn/SSUx2RLNWthxamdUtti/GdnQSUhB/OR46XVpNb0eBoMtnPtuw==
+
 ts-node@~3.0.4:
   version "3.0.6"
   resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-3.0.6.tgz#55127ff790c7eebf6ba68c1e6dde94b09aaa21e0"
