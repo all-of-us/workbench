@@ -8,7 +8,7 @@ class TargetPropertyExtractor {
     companion object {
 
         @JvmStatic
-        fun <T: Any, E : TargetProperty<T>> getPropertyValuesByName(
+        fun <T : Any, E : TargetProperty<T>> getPropertyValuesByName(
             values: Array<E>,
             target: T
         ): Map<String, String> {
@@ -19,7 +19,7 @@ class TargetPropertyExtractor {
         }
 
         @JvmStatic
-        fun <T: Any, E : TargetProperty<T>> getChangedValuesByName(
+        fun <T : Any, E : TargetProperty<T>> getChangedValuesByName(
             values: Array<E>,
             previousTarget: T,
             newTarget: T

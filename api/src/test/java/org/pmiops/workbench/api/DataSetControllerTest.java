@@ -204,8 +204,7 @@ public class DataSetControllerTest {
 
   @Autowired WorkspaceService workspaceService;
 
-  @Autowired
-  WorkspaceAuditAdapter workspaceAuditAdapter;
+  @Autowired WorkspaceAuditAdapter workspaceAuditAdapter;
 
   @TestConfiguration
   @Import({

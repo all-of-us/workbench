@@ -205,8 +205,7 @@ public class ConceptSetsControllerTest {
 
   @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  @Autowired
-  WorkspaceAuditAdapter workspaceAuditAdapter;
+  @Autowired WorkspaceAuditAdapter workspaceAuditAdapter;
 
   @TestConfiguration
   @Import({
