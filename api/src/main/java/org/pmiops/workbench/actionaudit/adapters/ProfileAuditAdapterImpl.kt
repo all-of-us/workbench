@@ -30,13 +30,14 @@ constructor(
         try {
             val propertiesByName: Map<String, String?> = TargetPropertyExtractor
                     .getPropertyValuesByName(ProfileTargetProperty.values(), createdProfile)
+            val actionId = actionIdProvider.get()
             // We can't rely on the UserProvider here since the user didn't exist when it
             // got loaded or whatever.
             val createEvents = propertiesByName.entries
                     .map {
                         ActionAuditEvent(
                             timestamp = clock.millis(),
-                            actionId = actionIdProvider.get(),
+                            actionId = actionId,
                             actionType = ActionType.CREATE,
                             agentType = AgentType.USER,
                             agentId = createdProfile.userId,
