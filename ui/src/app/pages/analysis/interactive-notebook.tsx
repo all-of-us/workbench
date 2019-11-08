@@ -122,9 +122,14 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       this.aborter.abort();
     }
 
+    clearAndSetTimeout(f, millis) {
+      clearTimeout(this.runClusterTimer);
+      this.runClusterTimer = setTimeout(f, millis);
+    }
+
     private runCluster(onClusterReady: Function): void {
       const retry = () => {
-        this.runClusterTimer = setTimeout(() => this.runCluster(onClusterReady), 5000);
+        this.clearAndSetTimeout(() => this.runCluster(onClusterReady), 5000);
       };
 
       clusterApi().listClusters(this.props.urlParams.ns, this.props.urlParams.wsid, {
