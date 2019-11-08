@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {withContentRect} from 'react-measure';
 
+import {SmallHeader} from 'app/components/headers';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {Scroll} from 'app/icons/scroll';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
@@ -10,7 +11,6 @@ import {ResourceCard} from 'app/components/resource-card';
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
 import {RecentResource} from 'generated/fetch';
-import {SmallHeader} from "../../components/headers";
 
 export const RecentResources = (fp.flow as any)(
   withContentRect('client'),
