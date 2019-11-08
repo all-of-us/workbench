@@ -1,6 +1,7 @@
 package org.pmiops.workbench.utils;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbUser;
@@ -8,11 +9,17 @@ import org.pmiops.workbench.model.Cohort;
 
 @Mapper(
     componentModel = "spring",
-    uses = {CommonMappers.class},
-    unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    uses = {CommonMappers.class})
 public interface CohortMapper {
+
+  @Mapping(target = "cohortReviews", ignore = true)
+  @Mapping(target = "version", ignore = true)
+  @Mapping(target = "workspaceId", ignore = true)
+  @Mapping(target = "cohortId", source = "id")
   DbCohort clientToDbModel(Cohort source);
 
+  @Mapping(target = "id", source = "cohortId")
+  @Mapping(target = "etag", ignore = true)
   Cohort dbModelToClient(DbCohort destination);
 
   default DbUser DbUserToCreatorEmail(String creator) {
