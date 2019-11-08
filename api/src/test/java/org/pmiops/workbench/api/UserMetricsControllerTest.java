@@ -172,8 +172,6 @@ public class UserMetricsControllerTest {
             mockCloudStorageService,
             fakeClock);
     userMetricsController.setDistinctWorkspaceLimit(5);
-
-    cohortMapper = new CohortMapperImpl();
   }
 
   @Test
