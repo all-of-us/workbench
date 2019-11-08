@@ -20,9 +20,7 @@ public interface WorkspaceService {
 
   WorkspaceDao getDao();
 
-  DbWorkspace findByWorkspaceId(long workspaceId);
-
-  Optional<DbWorkspace> getWorkspaceMaybe(long workspaceId);
+  Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId);
 
   FireCloudService getFireCloudService();
 
@@ -35,8 +33,6 @@ public interface WorkspaceService {
   List<WorkspaceResponse> getWorkspaces();
 
   List<WorkspaceResponse> getPublishedWorkspaces();
-
-  DbWorkspace getByName(String ns, String name);
 
   DbWorkspace getRequired(String ns, String firecloudName);
 

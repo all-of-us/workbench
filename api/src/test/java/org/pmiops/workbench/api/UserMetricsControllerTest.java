@@ -102,7 +102,7 @@ public class UserMetricsControllerTest {
     resource1.setUserId(user.getUserId());
     resource1.setWorkspaceId(workspace1.getWorkspaceId());
 
-    when(mockWorkspaceService.getWorkspaceMaybe(resource1.getWorkspaceId()))
+    when(mockWorkspaceService.findActiveByWorkspaceId(resource1.getWorkspaceId()))
         .thenReturn(Optional.of(workspace1));
 
     resource2 = new DbUserRecentResource();
@@ -111,7 +111,7 @@ public class UserMetricsControllerTest {
     resource2.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
     resource2.setUserId(user.getUserId());
     resource2.setWorkspaceId(workspace2.getWorkspaceId());
-    when(mockWorkspaceService.getWorkspaceMaybe(resource2.getWorkspaceId()))
+    when(mockWorkspaceService.findActiveByWorkspaceId(resource2.getWorkspaceId()))
         .thenReturn(Optional.of(workspace2));
 
     DbUserRecentResource resource3 = new DbUserRecentResource();
@@ -121,7 +121,7 @@ public class UserMetricsControllerTest {
     resource3.setUserId(user.getUserId());
     resource3.setWorkspaceId(workspace2.getWorkspaceId());
 
-    when(mockWorkspaceService.getWorkspaceMaybe(resource3.getWorkspaceId()))
+    when(mockWorkspaceService.findActiveByWorkspaceId(resource3.getWorkspaceId()))
         .thenReturn(Optional.of(workspace2));
 
     org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
@@ -144,12 +144,6 @@ public class UserMetricsControllerTest {
 
     when(mockUserRecentResourceService.findAllResourcesByUser(user.getUserId()))
         .thenReturn(Arrays.asList(resource1, resource2, resource3));
-
-    when(mockWorkspaceService.findByWorkspaceId(workspace1.getWorkspaceId()))
-        .thenReturn(workspace1);
-
-    when(mockWorkspaceService.findByWorkspaceId(workspace2.getWorkspaceId()))
-        .thenReturn(workspace2);
 
     when(mockWorkspaceService.getRequired(
             workspace2.getWorkspaceNamespace(), workspace2.getFirecloudName()))
@@ -296,7 +290,6 @@ public class UserMetricsControllerTest {
 
     // Clear out fields that aren't included in the DB Cohort class so
     // direct equals comparison can be used.
-    cohort1.setId(null);
     cohort1.setEtag(null);
     assertEquals(cohort1, cohort2);
 

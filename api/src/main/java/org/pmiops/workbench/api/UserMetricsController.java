@@ -182,7 +182,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // The purpose of this Map, is to check what is actually still present in FC
     ImmutableMap.Builder<Long, WorkspaceResponse> liveWorkspacesByIdBuilder = new Builder<>();
     for (long workspaceId : workspaceIdList) {
-      final Optional<DbWorkspace> workspaceMaybe = workspaceService.getWorkspaceMaybe(workspaceId);
+      final Optional<DbWorkspace> workspaceMaybe = workspaceService.findActiveByWorkspaceId(workspaceId);
       if (!workspaceMaybe.isPresent()) {
         logger.log(
             Level.INFO,

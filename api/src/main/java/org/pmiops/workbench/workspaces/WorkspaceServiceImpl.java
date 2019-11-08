@@ -216,17 +216,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return gson.fromJson(gson.toJson(aclResp.getAcl(), accessEntryType), accessEntryType);
   }
 
-  /**
-   * This is an internal method used by createWorkspace and cloneWorkspace endpoints, to check the
-   * existence of ws name. Currently does not return a conflict if user is checking the name of a
-   * deleted ws.
-   */
-  @Override
-  public DbWorkspace getByName(String ns, String name) {
-    return workspaceDao.findByWorkspaceNamespaceAndNameAndActiveStatus(
-        ns, name, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-  }
-
   @Override
   public DbWorkspace getRequired(String ns, String firecloudName) {
     DbWorkspace workspace = get(ns, firecloudName);
@@ -481,16 +470,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public DbWorkspace findByWorkspaceId(long workspaceId) {
-    return getWorkspaceMaybe(workspaceId)
-        .orElseThrow(
-            () -> new NotFoundException(String.format("Workspace %s not found.", workspaceId)));
-  }
-
-  // Handling the NotFoundException is awkward when calling these methods from other services.
-  // I'd much rather treat this as optional since it's a soft delete anyway.
-  @Override
-  public Optional<DbWorkspace> getWorkspaceMaybe(long workspaceId) {
+  public Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
     DbWorkspace workspace = getDao().findOne(workspaceId);
     if (workspace == null
         || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
