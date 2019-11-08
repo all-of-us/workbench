@@ -368,7 +368,7 @@ export const ListOverview = withCurrentWorkspace()(
             <div style={styles.cardContainer}>
               <div style={styles.card}>
                 <div style={styles.cardHeader}>
-                  Results by Gender
+                  Results by Gender Identity
                 </div>
                 <div style={{padding: '0.5rem 0.75rem'}} onMouseEnter={() => triggerEvent(
                   'Graphs',
@@ -380,7 +380,7 @@ export const ListOverview = withCurrentWorkspace()(
               </div>
               <div style={styles.card}>
                 <div style={styles.cardHeader}>
-                  Results By Gender, Age Range, and Race
+                  Results By Gender Identity, Age Range, and Race
                   <ClrIcon shape='sort-by'
                     className={stackChart ? 'is-info' : ''}
                     onClick={() => this.toggleChartMode()} />
