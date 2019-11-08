@@ -198,7 +198,7 @@ interface Props {
 export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(),
   withQueryParams())(class extends React.Component<Props, State> {
 
-    private pollClusterTimer: NodeJS.Timer;
+    private timeoutReference: NodeJS.Timer;
 
     constructor(props) {
       super(props);
@@ -221,9 +221,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     componentWillUnmount() {
-      if (this.pollClusterTimer) {
-        clearTimeout(this.pollClusterTimer);
-      }
+      clearTimeout(this.timeoutReference);
     }
 
     isClusterInProgress(cluster: Cluster): boolean {
@@ -232,9 +230,14 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         cluster.status === ClusterStatus.Stopped;
     }
 
+    clearAndSetTimeout(timeoutCallback, timeoutMillis) {
+      clearTimeout(this.timeoutReference);
+      this.timeoutReference = setTimeout(() => timeoutCallback(), timeoutMillis);
+    }
+
     async pollCluster(billingProjectId) {
       const repoll = () => {
-        this.pollClusterTimer = setTimeout(() => this.pollCluster(billingProjectId), 15000);
+        this.clearAndSetTimeout(() => this.pollCluster(billingProjectId), 15000);
       };
       const {workspace} = this.props;
       const {initialized, creatingNewNotebook, fullNotebookName} = this.state;
@@ -266,10 +269,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
           this.incrementProgress(Progress.Redirecting);
 
           // give it a second to "redirect"
-          setTimeout(() => {
-            this.incrementProgress(Progress.Loaded);
-          }, 1000);
-
+          this.clearAndSetTimeout(() => this.incrementProgress(Progress.Loaded), 1000);
         } else {
           // If cluster is not running, keep re-polling until it is.
           if (cluster.status === ClusterStatus.Stopped) {
