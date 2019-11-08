@@ -2,6 +2,7 @@ import {Component, OnDestroy, OnInit } from '@angular/core';
 import {
   attributesStore,
   autocompleteStore,
+  groupSelectionsStore,
   scrollStore,
   searchRequestStore,
   selectionsStore,
@@ -105,6 +106,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     selectionsStore.next([]);
     subtreePathStore.next([]);
     attributesStore.next( undefined);
+    groupSelectionsStore.next([]);
     this.hierarchyNode = undefined;
     this.loadingSubtree = false;
     this.open = false;

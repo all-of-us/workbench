@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -36,6 +37,8 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.CloudStorageServiceImpl;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.CriteriaMenuOption;
+import org.pmiops.workbench.model.CriteriaMenuSubOption;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DemoChartInfo;
@@ -48,6 +51,7 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.StandardFlag;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
@@ -495,6 +499,65 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .selectable(true)
         .ancestorData(false)
         .conceptId("1");
+  }
+
+  @Test
+  public void findCriteriaMenuOptions() throws Exception {
+    cbCriteriaDao.save(
+        new CBCriteria()
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .standard(false));
+    cbCriteriaDao.save(
+        new CBCriteria()
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD10CM.toString())
+            .standard(false));
+    cbCriteriaDao.save(
+        new CBCriteria()
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.SNOMED.toString())
+            .standard(true));
+    cbCriteriaDao.save(
+        new CBCriteria()
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.SNOMED.toString())
+            .standard(false));
+    cbCriteriaDao.save(
+        new CBCriteria()
+            .domainId(DomainType.PROCEDURE.toString())
+            .type(CriteriaType.CPT4.toString())
+            .standard(false));
+    List<CriteriaMenuOption> options =
+        controller.findCriteriaMenuOptions(cdrVersion.getCdrVersionId()).getBody().getItems();
+    assertEquals(2, options.size());
+    CriteriaMenuOption option1 =
+        new CriteriaMenuOption()
+            .domain(DomainType.CONDITION.toString())
+            .addTypesItem(
+                new CriteriaMenuSubOption()
+                    .type(CriteriaType.ICD10CM.toString())
+                    .standardFlags(Arrays.asList(new StandardFlag().standard(false))))
+            .addTypesItem(
+                new CriteriaMenuSubOption()
+                    .type(CriteriaType.ICD9CM.toString())
+                    .standardFlags(Arrays.asList(new StandardFlag().standard(false))))
+            .addTypesItem(
+                new CriteriaMenuSubOption()
+                    .type(CriteriaType.SNOMED.toString())
+                    .standardFlags(
+                        Arrays.asList(
+                            new StandardFlag().standard(false),
+                            new StandardFlag().standard(true))));
+    CriteriaMenuOption option2 =
+        new CriteriaMenuOption()
+            .domain(DomainType.PROCEDURE.toString())
+            .addTypesItem(
+                new CriteriaMenuSubOption()
+                    .type(CriteriaType.CPT4.toString())
+                    .standardFlags(Arrays.asList(new StandardFlag().standard(false))));
+    assertTrue(options.contains(option1));
+    assertTrue(options.contains(option2));
   }
 
   @Test
