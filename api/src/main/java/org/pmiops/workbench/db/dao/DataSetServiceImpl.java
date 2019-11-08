@@ -661,8 +661,10 @@ public class DataSetServiceImpl implements DataSetService {
             .append("\"")
             .toString();
     String sqlLimitSection =
-        new StringBuilder("# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n")
-            .append("# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n")
+        new StringBuilder(
+                "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n")
+            .append(
+                "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n")
             .append("max_number_of_rows = '1000000'")
             .toString();
     String sqlSection;
@@ -672,7 +674,11 @@ public class DataSetServiceImpl implements DataSetService {
 
     switch (kernelTypeEnum) {
       case PYTHON:
-        sqlSection = namespace + "sql = \"\"\"" + queryJobConfiguration.getQuery() + " \nLIMIT \"\"\" + max_number_of_rows";
+        sqlSection =
+            namespace
+                + "sql = \"\"\""
+                + queryJobConfiguration.getQuery()
+                + " \nLIMIT \"\"\" + max_number_of_rows";
         namedParamsSection =
             namespace
                 + "query_config = {\n"
@@ -699,7 +705,11 @@ public class DataSetServiceImpl implements DataSetService {
         displayHeadSection = namespace + "df.head(5)";
         break;
       case R:
-        sqlSection = namespace + "sql <- paste(\"" + queryJobConfiguration.getQuery() + " \nLIMIT \", max_number_of_rows)";
+        sqlSection =
+            namespace
+                + "sql <- paste(\""
+                + queryJobConfiguration.getQuery()
+                + " \nLIMIT \", max_number_of_rows)";
         namedParamsSection =
             namespace
                 + "query_config <- list(\n"
