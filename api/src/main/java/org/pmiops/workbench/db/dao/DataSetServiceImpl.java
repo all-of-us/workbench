@@ -657,6 +657,13 @@ public class DataSetServiceImpl implements DataSetService {
             .append(domainAsString)
             .append("\"")
             .toString();
+    String sqlLimitSection =
+        new StringBuilder(
+                "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n")
+            .append(
+                "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n")
+            .append("max_number_of_rows = '1000000'")
+            .toString();
     String sqlSection;
     String namedParamsSection;
     String dataFrameSection;
@@ -664,7 +671,11 @@ public class DataSetServiceImpl implements DataSetService {
 
     switch (kernelTypeEnum) {
       case PYTHON:
-        sqlSection = namespace + "sql = \"\"\"" + queryJobConfiguration.getQuery() + "\"\"\"";
+        sqlSection =
+            namespace
+                + "sql = \"\"\""
+                + queryJobConfiguration.getQuery()
+                + " \nLIMIT \"\"\" + max_number_of_rows";
         namedParamsSection =
             namespace
                 + "query_config = {\n"
@@ -691,7 +702,11 @@ public class DataSetServiceImpl implements DataSetService {
         displayHeadSection = namespace + "df.head(5)";
         break;
       case R:
-        sqlSection = namespace + "sql <- \"" + queryJobConfiguration.getQuery() + "\"";
+        sqlSection =
+            namespace
+                + "sql <- paste(\""
+                + queryJobConfiguration.getQuery()
+                + " \nLIMIT \", max_number_of_rows)";
         namedParamsSection =
             namespace
                 + "query_config <- list(\n"
@@ -721,7 +736,9 @@ public class DataSetServiceImpl implements DataSetService {
         throw new BadRequestException("Language " + kernelTypeEnum.toString() + " not supported.");
     }
 
-    return descriptiveComment
+    return sqlLimitSection
+        + "\n\n"
+        + descriptiveComment
         + "\n"
         + sqlSection
         + "\n\n"
