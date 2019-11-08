@@ -13,7 +13,7 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Cohort;
 
-public class  CohortMapperTest {
+public class CohortMapperTest {
 
   private Cohort sourceClientCohort;
   private DbCohort sourceDbCohort;

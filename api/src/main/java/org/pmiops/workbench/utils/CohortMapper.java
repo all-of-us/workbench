@@ -2,7 +2,6 @@ package org.pmiops.workbench.utils;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Cohort;

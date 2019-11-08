@@ -5,6 +5,7 @@ import com.google.api.client.http.HttpStatusCodes;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -345,8 +346,9 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public WorkspaceResponse getWorkspace(DbWorkspace dbWorkspace) {
-    return getWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+  public Optional<WorkspaceResponse> getWorkspace(DbWorkspace dbWorkspace) {
+    return Optional.ofNullable(
+        getWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()));
   }
 
   @Override

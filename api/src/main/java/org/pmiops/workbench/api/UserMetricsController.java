@@ -4,9 +4,11 @@ import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Streams;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -177,29 +179,33 @@ public class UserMetricsController implements UserMetricsApiDelegate {
             .limit(distinctWorkspacelimit)
             .collect(Collectors.toList());
 
-    // RW-1298
-    // This needs to be refactored to only use namespace and FC ID
-    // The purpose of this Map, is to check what is actually still present in FC
-    ImmutableMap.Builder<Long, WorkspaceResponse> liveWorkspacesByIdBuilder = new Builder<>();
-    for (long workspaceId : workspaceIdList) {
-      final Optional<DbWorkspace> workspaceMaybe = workspaceService.findActiveByWorkspaceId(workspaceId);
-      if (!workspaceMaybe.isPresent()) {
-        logger.log(
-            Level.INFO,
-            String.format("Workspace ID %d still in recent list but not found", workspaceId));
-        continue;
-      }
-      final DbWorkspace dbWorkspace = workspaceMaybe.get();
-      final WorkspaceResponse workspaceResponse = fireCloudService.getWorkspace(dbWorkspace);
-
-      Optional.ofNullable(workspaceResponse)
-          .ifPresent(r -> liveWorkspacesByIdBuilder.put(workspaceId, r));
-    }
-    ImmutableMap<Long, WorkspaceResponse> liveWorkspacesById = liveWorkspacesByIdBuilder.build();
+    final ImmutableMap<Long, WorkspaceResponse> idToLiveWorkspace =
+        workspaceIdList.stream()
+            .map(
+                id ->
+                    workspaceService
+                        .findActiveByWorkspaceId(id)
+                        .map(
+                            dbWorkspace ->
+                                new AbstractMap.SimpleImmutableEntry<>(
+                                    dbWorkspace.getWorkspaceId(), dbWorkspace)))
+            .flatMap(Streams::stream)
+            .map(
+                entry ->
+                    fireCloudService
+                        .getWorkspace(entry.getValue())
+                        .map(
+                            workspaceResponse ->
+                                new AbstractMap.SimpleImmutableEntry<>(
+                                    entry.getKey(), workspaceResponse)))
+            .flatMap(Streams::stream)
+            .collect(
+                ImmutableMap.toImmutableMap(
+                    SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
 
     List<DbUserRecentResource> workspaceFilteredResources =
         userRecentResourceList.stream()
-            .filter(r -> liveWorkspacesById.containsKey(r.getWorkspaceId()))
+            .filter(r -> idToLiveWorkspace.containsKey(r.getWorkspaceId()))
             // Drop any invalid notebook resources - parseBlobId will log errors.
             .filter(r -> r.getNotebookName() == null || parseBlobId(r.getNotebookName()) != null)
             .collect(Collectors.toList());
@@ -220,15 +226,15 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     recentResponse.addAll(
         workspaceFilteredResources.stream()
             .filter(
-                r -> {
-                  return r.getNotebookName() == null
-                      || foundNotebooks.contains(parseBlobId(r.getNotebookName()));
-                })
+                urr ->
+                    Optional.ofNullable(urr.getNotebookName())
+                        .map(name -> foundNotebooks.contains(parseBlobId(name)))
+                        .orElse(true))
             .map(
                 userRecentResource -> {
                   RecentResource resource = TO_CLIENT.apply(userRecentResource);
                   WorkspaceResponse workspaceDetails =
-                      liveWorkspacesById.get(userRecentResource.getWorkspaceId());
+                      idToLiveWorkspace.get(userRecentResource.getWorkspaceId());
                   resource.setPermission(workspaceDetails.getAccessLevel());
                   resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
                   resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
