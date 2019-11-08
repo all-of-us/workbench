@@ -178,14 +178,13 @@ const ProgressCard: React.FunctionComponent<{currentState: Progress, index: numb
   };
 
 interface State {
-  cluster: Cluster;
   creatingNewNotebook: boolean;
+  notebookName: string;
   fullNotebookName: string;
   initialized: boolean;
   jupyterLabMode: boolean;
   leoUrl: string;
   localizationError: boolean;
-  notebookName: string;
   playgroundMode: boolean;
   progress: Progress;
   progressComplete: Map<Progress, boolean>;
@@ -206,7 +205,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     constructor(props) {
       super(props);
       this.state = {
-        cluster: undefined,
         creatingNewNotebook: !!props.queryParams.creating,
         fullNotebookName: undefined,
         initialized: false,
@@ -243,11 +241,11 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         this.pollClusterTimer = setTimeout(() => this.pollCluster(billingProjectId), 15000);
       };
       const {workspace} = this.props;
-
+      const {initialized, creatingNewNotebook, fullNotebookName} = this.state;
       try {
         const resp = await clusterApi().listClusters(billingProjectId, workspace.id);
         const cluster = resp.defaultCluster;
-        if (!this.state.initialized) {
+        if (!initialized) {
           if (cluster.status === ClusterStatus.Running) {
             this.incrementProgress(Progress.Unknown);
           } else if (this.isClusterInProgress(cluster)) {
@@ -259,15 +257,14 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         }
 
         if (cluster.status === ClusterStatus.Running) {
-          this.setState({cluster: cluster});
           this.incrementProgress(Progress.Authenticating);
           await this.initializeNotebookCookies(cluster);
 
-          const notebookLocation = await this.getNotebookPathAndLocalize();
-          if (this.state.creatingNewNotebook) {
+          const notebookLocation = await this.getNotebookPathAndLocalize(cluster);
+          if (creatingNewNotebook) {
             window.history.replaceState({}, 'Notebook', 'workspaces/' + workspace.namespace
               + '/' + workspace.id + '/notebooks/' +
-              encodeURIComponent(this.state.fullNotebookName));
+              encodeURIComponent(fullNotebookName));
           }
           let url;
           if (this.state.jupyterLabMode) {
@@ -300,7 +297,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     incrementProgress(p: Progress): void {
       this.setState({
         progress: p,
-        progressComplete: this.state.progressComplete.set(p, true)
+        progressComplete:  this.state.progressComplete.set(p, true)
       });
     }
 
@@ -331,22 +328,21 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       return notebooksApi().setCookie(c.clusterNamespace, c.clusterName, {withCredentials: true});
     }
 
-    async getNotebookPathAndLocalize() {
-      const {fullNotebookName, playgroundMode} = this.state;
-      if (this.state.creatingNewNotebook) {
+    async getNotebookPathAndLocalize(cluster: Cluster) {
+      const {fullNotebookName, playgroundMode, creatingNewNotebook} = this.state;
+      if (creatingNewNotebook) {
         this.incrementProgress(Progress.Creating);
-        return this.createNotebookAndLocalize();
+        return this.createNotebookAndLocalize(cluster);
       } else {
         this.incrementProgress(Progress.Copying);
         const localizedNotebookDir =
-          await this.localizeNotebooksWithRetry([fullNotebookName], playgroundMode);
+          await this.localizeNotebooksWithRetry(cluster, [fullNotebookName], playgroundMode);
         return `${localizedNotebookDir}/${fullNotebookName}`;
       }
     }
 
-    async localizeNotebooksWithRetry(notebookNames: Array<string>,
+    async localizeNotebooksWithRetry(cluster: Cluster, notebookNames: Array<string>,
       playgroundMode: boolean, retryCount: number = 0) {
-      const cluster = this.state.cluster;
       const {workspace} = this.props;
       try {
         const resp = await clusterApi().localize(cluster.clusterNamespace, cluster.clusterName,
@@ -357,7 +353,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         retryCount += 1;
         if (retryCount <= 3) {
           console.error('retrying notebook localization');
-          return this.localizeNotebooksWithRetry(notebookNames, playgroundMode, retryCount);
+          return this.localizeNotebooksWithRetry(cluster, notebookNames, playgroundMode, retryCount);
         } else {
           console.error(error);
           this.setState({localizationError: true});
@@ -365,8 +361,8 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       }
     }
 
-    async createNotebookAndLocalize() {
-      const {cluster, notebookName} = this.state;
+    async createNotebookAndLocalize(cluster: Cluster) {
+      const {notebookName} = this.state;
       const fileContent = commonNotebookFormat;
       const {kernelType} = this.props.queryParams;
       if (kernelType === Kernels.R.toString()) {
@@ -374,7 +370,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       } else {
         fileContent.metadata = pyNotebookMetadata;
       }
-      const localizedDir = await this.localizeNotebooksWithRetry([], false);
+      const localizedDir = await this.localizeNotebooksWithRetry(cluster, [], false);
       // Use the Jupyter Server API directly to create a new notebook. This
       // API handles notebook name collisions and matches the behavior of
       // clicking 'new notebook' in the Jupyter UI.
@@ -390,14 +386,14 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     render() {
-      const {creatingNewNotebook, localizationError, progress, progressComplete} = this.state;
+      const {creatingNewNotebook, localizationError, progress, progressComplete, notebookName, leoUrl} = this.state;
       return <React.Fragment>
         {progress !== Progress.Loaded ? <div style={styles.main}>
           <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}
                data-test-id='notebook-redirect'>
             <h2 style={{lineHeight: 0}}>
               {creatingNewNotebook ? 'Creating New Notebook: ' : 'Loading Notebook: '}
-              {this.state.notebookName}
+              {notebookName}
             </h2>
             <Button type='secondary' onClick={() => window.history.back()}>Cancel</Button>
           </div>
@@ -417,7 +413,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
           </div>
         </div> : <div style={{height: '100%'}}>
           <div style={{borderBottom: '5px solid #2691D0', width: '100%'}}/>
-          <Iframe frameBorder={0} url={this.state.leoUrl} width='100%' height='100%'/>
+          <Iframe frameBorder={0} url={leoUrl} width='100%' height='100%'/>
         </div>}
         {localizationError && <Modal>
           <ModalTitle>
