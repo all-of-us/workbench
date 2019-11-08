@@ -13,7 +13,7 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Cohort;
 
-public class TestCohortMapper {
+public class  CohortMapperTest {
 
   private Cohort sourceClientCohort;
   private DbCohort sourceDbCohort;
@@ -59,12 +59,18 @@ public class TestCohortMapper {
   public void testConvertsClientCohortToDbCohort() {
     final DbCohort dbModel = cohortMapper.clientToDbModel(sourceClientCohort);
     assertCorrespondingFieldsMatch(sourceClientCohort, dbModel);
+
+    final Cohort roundTrippedCohort = cohortMapper.dbModelToClient(dbModel);
+    assertCorrespondingFieldsMatch(roundTrippedCohort, dbModel);
   }
 
   @Test
   public void testConvertsDbCohortToClientCohort() {
     final Cohort clientCohort = cohortMapper.dbModelToClient(sourceDbCohort);
     assertCorrespondingFieldsMatch(clientCohort, sourceDbCohort);
+
+    final DbCohort roundTrippedDbCohort = cohortMapper.clientToDbModel(clientCohort);
+    assertCorrespondingFieldsMatch(clientCohort, roundTrippedDbCohort);
   }
 
   private void assertCorrespondingFieldsMatch(Cohort clientCohort, DbCohort dbModelCohort) {
