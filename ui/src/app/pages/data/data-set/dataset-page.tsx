@@ -540,7 +540,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
       this.setState({valuesLoading: true});
       this.getValuesList(newDomains)
-        .then(newValueSets => this.updateValueSets(valueSets, newDomains));
+        .then(newValueSets => this.updateValueSets(valueSets, newValueSets));
     }
 
     select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
@@ -609,7 +609,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         valueSets: updatedValueSets.concat(newValueSets),
         valuesLoading: false
       });
-      const allValuesSelected = [];
+      const allValuesSelected = this.state.selectedDomainValuePairs;
 
       newValueSets.map(valueSet => {
         valueSet.values.items.map(value => {
