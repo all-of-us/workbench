@@ -644,6 +644,9 @@ public class DataSetControllerTest {
     assertThat(response.getCode())
         .isEqualTo(
             "import pandas\n\n"
+                + "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n"
+                + "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n"
+                + "max_number_of_rows = '1000000'\n\n"
                 + "# This query represents dataset \"blah\" for domain \"condition\"\n"
                 + prefix
                 + "sql = \"\"\"SELECT PERSON_ID FROM `"
@@ -653,7 +656,9 @@ public class DataSetControllerTest {
                 + "condition_source_concept_id IN (123)) \n"
                 + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
-                + ".person` person))\"\"\"\n"
+                + ".person` person)) "
+                + "\n"
+                + "LIMIT \"\"\" + max_number_of_rows\n"
                 + "\n"
                 + prefix
                 + "query_config = {\n"
@@ -703,16 +708,20 @@ public class DataSetControllerTest {
             "if(! \"reticulate\" %in% installed.packages()) { install.packages(\"reticulate\") }\n"
                 + "library(reticulate)\n"
                 + "pd <- reticulate::import(\"pandas\")\n\n"
+                + "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n"
+                + "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n"
+                + "max_number_of_rows = '1000000'\n\n"
                 + "# This query represents dataset \"blah\" for domain \"condition\"\n"
                 + prefix
-                + "sql <- \"SELECT PERSON_ID FROM `"
+                + "sql <- paste(\"SELECT PERSON_ID FROM `"
                 + TEST_CDR_TABLE
                 + ".condition_occurrence` c_occurrence WHERE \n"
                 + "(condition_concept_id IN (123) OR \n"
                 + "condition_source_concept_id IN (123)) \n"
                 + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
-                + ".person` person))\"\n"
+                + ".person` person)) \n"
+                + "LIMIT \", max_number_of_rows)\n"
                 + "\n"
                 + prefix
                 + "query_config <- list(\n"
