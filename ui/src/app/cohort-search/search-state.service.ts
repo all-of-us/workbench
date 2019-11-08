@@ -15,3 +15,4 @@ export const idsInUse = new BehaviorSubject<any>(new Set());
 export const ppiQuestions = new BehaviorSubject<any>({});
 export const initExisting = new BehaviorSubject<boolean>(false);
 export const encountersStore = new BehaviorSubject<any>(undefined);
+export const criteriaMenuOptionsStore = new BehaviorSubject<any>({});

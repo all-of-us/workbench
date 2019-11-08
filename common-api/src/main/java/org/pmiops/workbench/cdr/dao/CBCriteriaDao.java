@@ -3,6 +3,7 @@ package org.pmiops.workbench.cdr.dao;
 import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.cdr.model.CBCriteria;
+import org.pmiops.workbench.cdr.model.MenuOption;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -229,4 +230,10 @@ public interface CBCriteriaDao extends CrudRepository<CBCriteria, Long> {
       @Param("type") String type,
       @Param("parentId") Long parentId,
       Sort sort);
+
+  @Query(
+      value =
+          "select distinct domain_id as domain, type, is_standard as standard from cb_criteria order by domain, type, is_standard",
+      nativeQuery = true)
+  List<MenuOption> findMenuOptions();
 }
