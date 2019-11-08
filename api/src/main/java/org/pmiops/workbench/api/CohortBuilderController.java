@@ -12,11 +12,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -374,49 +372,14 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     TableResult result = bigQueryService.executeQuery(qjc);
     Map<String, Integer> rm = bigQueryService.getResultMapper(result);
 
-    Set<String> ageSet = new HashSet<>();
-    Set<String> genderSet = new HashSet<>();
-    ListMultimap<String, DemoChartInfo> demoInfoMap = ArrayListMultimap.create();
     for (List<FieldValue> row : result.iterateAll()) {
-      demoInfoMap.put(
-          bigQueryService.getString(row, rm.get("race")),
+      response.addItemsItem(
           new DemoChartInfo()
               .gender(bigQueryService.getString(row, rm.get("gender")))
               .race(bigQueryService.getString(row, rm.get("race")))
               .ageRange(bigQueryService.getString(row, rm.get("ageRange")))
               .count(bigQueryService.getLong(row, rm.get("count"))));
-      ageSet.add(bigQueryService.getString(row, rm.get("ageRange")));
-      genderSet.add(bigQueryService.getString(row, rm.get("gender")));
     }
-
-    List<String> ageRanges = new ArrayList<>();
-    ageSet.stream().sorted().collect(Collectors.toList());
-    for (int i = 0; i < genderSet.size(); i++) {
-      ageRanges.addAll(ageSet.stream().sorted().collect(Collectors.toList()));
-    }
-
-    List<String> sortedRaces = demoInfoMap.keySet().stream().sorted().collect(Collectors.toList());
-    for (String key : sortedRaces) {
-      List<DemoChartInfo> demoInfos = demoInfoMap.get(key);
-      for (int infoIndex = 0, ageIndex = 0; ageIndex < ageRanges.size(); ageIndex++) {
-        DemoChartInfo info = demoInfos.get(infoIndex);
-        String ageRange = ageRanges.get(ageIndex);
-        if (ageRange.equals(info.getAgeRange())) {
-          response.addItemsItem(info);
-          if (infoIndex + 1 < demoInfos.size()) {
-            infoIndex++;
-          }
-        } else {
-          response.addItemsItem(
-              new DemoChartInfo()
-                  .ageRange(ageRange)
-                  .gender(info.getGender())
-                  .race(info.getRace())
-                  .count(0L));
-        }
-      }
-    }
-
     return ResponseEntity.ok(response);
   }
 
