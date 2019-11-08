@@ -17,8 +17,6 @@ import {currentWorkspaceStore, urlParamsStore, userProfileStore} from '../../uti
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
-import {exportFunctions} from 'app/utils/index';
-
 describe('NotebookRedirect', () => {
   const workspace = {
     ...workspaceStubs[0],

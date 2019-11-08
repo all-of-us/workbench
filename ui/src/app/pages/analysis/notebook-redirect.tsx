@@ -182,13 +182,11 @@ interface State {
   notebookName: string;
   fullNotebookName: string;
   initialized: boolean;
-  jupyterLabMode: boolean;
   leoUrl: string;
   localizationError: boolean;
   playgroundMode: boolean;
   progress: Progress;
   progressComplete: Map<Progress, boolean>;
-  useBillingProjectBuffer: boolean;
 }
 
 interface Props {
@@ -208,14 +206,12 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         creatingNewNotebook: !!props.queryParams.creating,
         fullNotebookName: undefined,
         initialized: false,
-        jupyterLabMode: props.queryParams.jupyterLabMode === true,
         leoUrl: undefined,
         localizationError: false,
         notebookName: undefined,
         playgroundMode: props.queryParams.playgroundMode === true,
         progress: Progress.Unknown,
         progressComplete: new Map<Progress, boolean>(),
-        useBillingProjectBuffer: undefined,
       };
     }
 
@@ -266,13 +262,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
               + '/' + workspace.id + '/notebooks/' +
               encodeURIComponent(fullNotebookName));
           }
-          let url;
-          if (this.state.jupyterLabMode) {
-            url = this.jupyterLabUrl(cluster, notebookLocation);
-          } else {
-            url = this.notebookUrl(cluster, notebookLocation);
-          }
-          this.setState({leoUrl: url});
+          this.setState({leoUrl: this.notebookUrl(cluster, notebookLocation)});
           this.incrementProgress(Progress.Redirecting);
 
           // give it a second to "redirect"
@@ -306,13 +296,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         environment.leoApiUrl + '/notebooks/'
         + cluster.clusterNamespace + '/'
         + cluster.clusterName + '/notebooks/' + nbName);
-    }
-
-    jupyterLabUrl(cluster: Cluster, nbName: string): string {
-      return encodeURI(
-        environment.leoApiUrl + '/notebooks/'
-        + cluster.clusterNamespace + '/'
-        + cluster.clusterName + '/lab/tree/' + nbName);
     }
 
     // this maybe overkill, but should handle all situations

@@ -8,8 +8,7 @@ export class NotebooksApiStub extends NotebooksApi {
     });
   }
 
-  public setCookie(googleProject: string, clusterName: string,
-    options?: any): Promise<Response> {
+  public setCookie(googleProject: string, clusterName: string, options?: any): Promise<Response> {
     return new Promise<Response>(resolve => {
       resolve(new Response());
     });
