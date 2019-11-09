@@ -2340,7 +2340,7 @@ public class WorkspacesControllerTest {
 
     doReturn(Collections.singleton(newBlobId))
         .when(cloudStorageService)
-        .blobsExist(Collections.singletonList(newBlobId));
+        .getExistingBlobIdsIn(Collections.singletonList(newBlobId));
 
     workspacesController.copyNotebook(
         fromWorkspace.getNamespace(),

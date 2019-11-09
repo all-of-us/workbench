@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import com.google.cloud.storage.BlobId;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
 import java.sql.Timestamp;
@@ -11,7 +12,6 @@ import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -204,37 +203,51 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 ImmutableMap.toImmutableMap(
                     SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
 
-    List<DbUserRecentResource> workspaceFilteredResources =
+    final ImmutableList<DbUserRecentResource> workspaceFilteredResources =
         userRecentResourceList.stream()
             .filter(r -> idToLiveWorkspace.containsKey(r.getWorkspaceId()))
-            // Drop any invalid notebook resources - parseBlobId will log errors.
-            .filter(r -> r.getNotebookName() == null || parseBlobId(r.getNotebookName()) != null)
-            .collect(Collectors.toList());
+            .filter(this::hasValidBlobIdIfNotebookNamePresent)
+            .collect(ImmutableList.toImmutableList());
 
     // Check for existence of recent notebooks. Notebooks reside in GCS so they may be arbitrarily
     // deleted or renamed without notification to the Workbench. This makes a batch of GCS requests
     // so it will scale fairly well, but limit to the first N notebooks to avoid excess GCS traffic.
     // TODO: If we find a non-existent notebook, expunge from the cache.
-    Set<BlobId> foundNotebooks =
-        cloudStorageService.blobsExist(
+    // TODO(jaycarlton) I'm not sure whether it's right to do this here or in a cron job. I don't
+    // personally like GET endpoints to have side effects, and besides, we're not touching enough
+    // of the notebooks to keep the cache up-to-date from here.
+    final Set<BlobId> foundNotebooks =
+        cloudStorageService.getExistingBlobIdsIn(
             workspaceFilteredResources.stream()
-                .map(r -> parseBlobId(r.getNotebookName()))
-                .filter(Objects::nonNull)
+                .map(DbUserRecentResource::getNotebookName)
+                .map(this::uriToBlobId)
+                .flatMap(Streams::stream)
                 .limit(MAX_RECENT_NOTEBOOKS)
                 .collect(Collectors.toList()));
 
-    RecentResourceResponse recentResponse = new RecentResourceResponse();
-    recentResponse.addAll(
-        workspaceFilteredResources.stream()
-            .filter(
-                urr ->
-                    Optional.ofNullable(urr.getNotebookName())
-                        .map(name -> foundNotebooks.contains(parseBlobId(name)))
-                        .orElse(true))
-            .map(
-                dbUserRecentResource -> buildRecentResource(idToLiveWorkspace, dbUserRecentResource))
-            .collect(Collectors.toList()));
+    final ImmutableList<RecentResource> filteredResources = workspaceFilteredResources.stream()
+            .filter(urr -> foundNotebooksContainsUserRecentResource(foundNotebooks, urr))
+            .map(urr -> buildRecentResource(idToLiveWorkspace, urr))
+            .collect(ImmutableList.toImmutableList());
+    final RecentResourceResponse recentResponse = new RecentResourceResponse();
+    recentResponse.addAll(filteredResources);
+
     return ResponseEntity.ok(recentResponse);
+  }
+
+  private Boolean foundNotebooksContainsUserRecentResource(
+      Set<BlobId> foundNotebooks, DbUserRecentResource urr) {
+      return Optional.ofNullable(urr.getNotebookName())
+          .flatMap(this::uriToBlobId)
+          .map(foundNotebooks::contains)
+          .orElse(true);
+  }
+
+  @VisibleForTesting
+  public boolean hasValidBlobIdIfNotebookNamePresent(DbUserRecentResource dbUserRecentResource) {
+    return Optional.ofNullable(dbUserRecentResource.getNotebookName())
+        .map(name -> uriToBlobId(name).isPresent())
+        .orElse(true);
   }
 
   private RecentResource buildRecentResource(
@@ -255,21 +268,22 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     return dbWorkspace.getWorkspaceId();
   }
 
-  private BlobId parseBlobId(String uri) {
+  private Optional<BlobId> uriToBlobId(String uri) {
     if (uri == null) {
-      return null;
+      return Optional.empty();
     }
     if (!uri.startsWith("gs://")) {
       log.log(Level.SEVERE, String.format("Invalid notebook file path found: %s", uri));
-      return null;
+      return Optional.empty();
     }
     uri = uri.replaceFirst("gs://", "");
     String[] parts = uri.split("/");
     if (parts.length <= 1) {
       log.log(Level.SEVERE, String.format("Invalid notebook file path found: %s", uri));
-      return null;
+      return Optional.empty();
     }
-    return BlobId.of(parts[0], Joiner.on('/').join(Arrays.copyOfRange(parts, 1, parts.length)));
+    final String name = Joiner.on('/').join(Arrays.copyOfRange(parts, 1, parts.length));
+    return Optional.of(BlobId.of(parts[0], name));
   }
 
   private FileDetail convertStringToFileDetail(String str) {
