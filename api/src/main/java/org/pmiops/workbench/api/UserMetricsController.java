@@ -55,6 +55,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private int distinctWorkspacelimit = 5;
   private Clock clock;
 
+  // TODO(jaycarlton): migrate these private functions to MapStruct
   // Converts DB model to client Model
   private final Function<DbUserRecentResource, RecentResource> TO_CLIENT =
       userRecentResource -> {
@@ -69,46 +70,40 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       };
 
   private static final Function<DbCohort, Cohort> TO_CLIENT_COHORT =
-      new Function<DbCohort, Cohort>() {
-        @Override
-        public Cohort apply(DbCohort cohort) {
-          if (cohort == null) {
-            return null;
-          }
-          Cohort result =
-              new Cohort()
-                  .etag(Etags.fromVersion(cohort.getVersion()))
-                  .lastModifiedTime(cohort.getLastModifiedTime().getTime())
-                  .creationTime(cohort.getCreationTime().getTime())
-                  .criteria(cohort.getCriteria())
-                  .description(cohort.getDescription())
-                  .id(cohort.getCohortId())
-                  .name(cohort.getName())
-                  .type(cohort.getType());
-          if (cohort.getCreator() != null) {
-            result.setCreator(cohort.getCreator().getEmail());
-          }
-          return result;
+      cohort -> {
+        if (cohort == null) {
+          return null;
         }
+        Cohort result =
+            new Cohort()
+                .etag(Etags.fromVersion(cohort.getVersion()))
+                .lastModifiedTime(cohort.getLastModifiedTime().getTime())
+                .creationTime(cohort.getCreationTime().getTime())
+                .criteria(cohort.getCriteria())
+                .description(cohort.getDescription())
+                .id(cohort.getCohortId())
+                .name(cohort.getName())
+                .type(cohort.getType());
+        if (cohort.getCreator() != null) {
+          result.setCreator(cohort.getCreator().getEmail());
+        }
+        return result;
       };
 
   private static final Function<DbConceptSet, ConceptSet> TO_CLIENT_CONCEPT_SET =
-      new Function<DbConceptSet, ConceptSet>() {
-        @Override
-        public ConceptSet apply(DbConceptSet conceptSet) {
-          if (conceptSet == null) {
-            return null;
-          }
-          ConceptSet result =
-              new ConceptSet()
-                  .etag(Etags.fromVersion(conceptSet.getVersion()))
-                  .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
-                  .creationTime(conceptSet.getCreationTime().getTime())
-                  .description(conceptSet.getDescription())
-                  .id(conceptSet.getConceptSetId())
-                  .name(conceptSet.getName());
-          return result;
+      conceptSet -> {
+        if (conceptSet == null) {
+          return null;
         }
+        ConceptSet result =
+            new ConceptSet()
+                .etag(Etags.fromVersion(conceptSet.getVersion()))
+                .lastModifiedTime(conceptSet.getLastModifiedTime().getTime())
+                .creationTime(conceptSet.getCreationTime().getTime())
+                .description(conceptSet.getDescription())
+                .id(conceptSet.getConceptSetId())
+                .name(conceptSet.getName());
+        return result;
       };
 
   @Autowired
@@ -225,7 +220,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 .limit(MAX_RECENT_NOTEBOOKS)
                 .collect(Collectors.toList()));
 
-    final ImmutableList<RecentResource> filteredResources = workspaceFilteredResources.stream()
+    final ImmutableList<RecentResource> filteredResources =
+        workspaceFilteredResources.stream()
             .filter(urr -> foundNotebooksContainsUserRecentResource(foundNotebooks, urr))
             .map(urr -> buildRecentResource(idToLiveWorkspace, urr))
             .collect(ImmutableList.toImmutableList());
@@ -237,10 +233,10 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   private Boolean foundNotebooksContainsUserRecentResource(
       Set<BlobId> foundNotebooks, DbUserRecentResource urr) {
-      return Optional.ofNullable(urr.getNotebookName())
-          .flatMap(this::uriToBlobId)
-          .map(foundNotebooks::contains)
-          .orElse(true);
+    return Optional.ofNullable(urr.getNotebookName())
+        .flatMap(this::uriToBlobId)
+        .map(foundNotebooks::contains)
+        .orElse(true);
   }
 
   @VisibleForTesting
@@ -251,11 +247,11 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   }
 
   private RecentResource buildRecentResource(
-      ImmutableMap<Long, WorkspaceResponse> idToLiveWorkspace,
+      ImmutableMap<Long, WorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentResource dbUserRecentResource) {
     RecentResource resource = TO_CLIENT.apply(dbUserRecentResource);
     WorkspaceResponse workspaceDetails =
-        idToLiveWorkspace.get(dbUserRecentResource.getWorkspaceId());
+        idToFcWorkspaceResponse.get(dbUserRecentResource.getWorkspaceId());
     resource.setPermission(workspaceDetails.getAccessLevel());
     resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
     resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());

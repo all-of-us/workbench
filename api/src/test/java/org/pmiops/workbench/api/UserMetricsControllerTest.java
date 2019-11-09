@@ -150,16 +150,18 @@ public class UserMetricsControllerTest {
     when(mockUserProvider.get()).thenReturn(dbUser);
 
     when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
-        .thenReturn(Arrays.asList(dbUserRecentResource1, dbUserRecentResource2,
-            dbUserRecentResource3));
+        .thenReturn(
+            Arrays.asList(dbUserRecentResource1, dbUserRecentResource2, dbUserRecentResource3));
 
     when(mockWorkspaceService.getRequired(
             dbWorkspace2.getWorkspaceNamespace(), dbWorkspace2.getFirecloudName()))
         .thenReturn(dbWorkspace2);
 
-    when(mockFireCloudService.getWorkspace(dbWorkspace1)).thenReturn(Optional.of(workspaceResponse));
+    when(mockFireCloudService.getWorkspace(dbWorkspace1))
+        .thenReturn(Optional.of(workspaceResponse));
 
-    when(mockFireCloudService.getWorkspace(dbWorkspace2)).thenReturn(Optional.of(workspaceResponse2));
+    when(mockFireCloudService.getWorkspace(dbWorkspace2))
+        .thenReturn(Optional.of(workspaceResponse2));
 
     when(mockCloudStorageService.getExistingBlobIdsIn(anyList()))
         .then(
@@ -322,7 +324,9 @@ public class UserMetricsControllerTest {
         dbWorkspace2.getWorkspaceNamespace(), dbWorkspace2.getFirecloudName(), request);
     verify(mockUserRecentResourceService)
         .deleteNotebookEntry(
-            dbWorkspace2.getWorkspaceId(), dbUser.getUserId(), dbUserRecentResource1.getNotebookName());
+            dbWorkspace2.getWorkspaceId(),
+            dbUser.getUserId(),
+            dbUserRecentResource1.getNotebookName());
   }
 
   @Test
@@ -373,5 +377,4 @@ public class UserMetricsControllerTest {
     dbUserRecentResource1.setNotebookName("invalid-notebook@name");
     assertFalse(userMetricsController.hasValidBlobIdIfNotebookNamePresent(dbUserRecentResource1));
   }
-
 }
