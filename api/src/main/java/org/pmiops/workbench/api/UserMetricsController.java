@@ -211,7 +211,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // TODO(jaycarlton) I'm not sure whether it's right to do this here or in a cron job. I don't
     // personally like GET endpoints to have side effects, and besides, we're not touching enough
     // of the notebooks to keep the cache up-to-date from here.
-    final Set<BlobId> foundNotebooks =
+    final Set<BlobId> foundBlobIds =
         cloudStorageService.getExistingBlobIdsIn(
             workspaceFilteredResources.stream()
                 .map(DbUserRecentResource::getNotebookName)
@@ -220,18 +220,18 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 .limit(MAX_RECENT_NOTEBOOKS)
                 .collect(Collectors.toList()));
 
-    final ImmutableList<RecentResource> filteredResources =
+    final ImmutableList<RecentResource> userVisibleRecentResources =
         workspaceFilteredResources.stream()
-            .filter(urr -> foundNotebooksContainsUserRecentResource(foundNotebooks, urr))
+            .filter(urr -> foundBlobIdsContainsUserRecentResource(foundBlobIds, urr))
             .map(urr -> buildRecentResource(idToLiveWorkspace, urr))
             .collect(ImmutableList.toImmutableList());
     final RecentResourceResponse recentResponse = new RecentResourceResponse();
-    recentResponse.addAll(filteredResources);
+    recentResponse.addAll(userVisibleRecentResources);
 
     return ResponseEntity.ok(recentResponse);
   }
 
-  private Boolean foundNotebooksContainsUserRecentResource(
+  private Boolean foundBlobIdsContainsUserRecentResource(
       Set<BlobId> foundNotebooks, DbUserRecentResource urr) {
     return Optional.ofNullable(urr.getNotebookName())
         .flatMap(this::uriToBlobId)
