@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -231,17 +232,21 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                         .map(name -> foundNotebooks.contains(parseBlobId(name)))
                         .orElse(true))
             .map(
-                userRecentResource -> {
-                  RecentResource resource = TO_CLIENT.apply(userRecentResource);
-                  WorkspaceResponse workspaceDetails =
-                      idToLiveWorkspace.get(userRecentResource.getWorkspaceId());
-                  resource.setPermission(workspaceDetails.getAccessLevel());
-                  resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
-                  resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
-                  return resource;
-                })
+                dbUserRecentResource -> buildRecentResource(idToLiveWorkspace, dbUserRecentResource))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(recentResponse);
+  }
+
+  private RecentResource buildRecentResource(
+      ImmutableMap<Long, WorkspaceResponse> idToLiveWorkspace,
+      DbUserRecentResource dbUserRecentResource) {
+    RecentResource resource = TO_CLIENT.apply(dbUserRecentResource);
+    WorkspaceResponse workspaceDetails =
+        idToLiveWorkspace.get(dbUserRecentResource.getWorkspaceId());
+    resource.setPermission(workspaceDetails.getAccessLevel());
+    resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
+    resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
+    return resource;
   }
 
   // Retrieves Database workspace ID
