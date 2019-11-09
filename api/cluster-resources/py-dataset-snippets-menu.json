@@ -2,16 +2,16 @@
   "name": "All of Us Dataset Builder Python snippets",
   "sub-menu": [
     {
-      "name": "Setup",
-      "snippet": "!pip3 install --upgrade --user pandas_profiling statsmodels\n\nimport os\nimport numpy as np\nimport pandas as pd\nimport pandas_profiling\nimport plotnine\nfrom plotnine import *  # Provides a ggplot-like interface to matplotlib.\n\n## Plot setup.\ntheme_set(theme_bw(base_size = 11)) # Default theme for plots.\n\ndef get_boxplot_fun_data(df):\n  \"\"\"Returns a data frame with a y position and a label, for use annotating ggplot boxplots.\n\n  Args:\n    d: A data frame.\n  Returns:\n    A data frame with column y as max and column label as length.\n  \"\"\"\n  d = {'y': max(df), 'label': f'N = {len(df)}'}\n  return(pd.DataFrame(data=d, index=[0]))\n\n# NOTE: if you get any errors from this cell, restart your kernel and run it again.\n"
-    },
-    {
       "name": "Documentation",
       "external-link": "https://github.com/all-of-us/workbench-snippets"
     },
     "---",
     {
-      "name": "Basic operations",
+      "name": "(1) Setup",
+      "snippet": "!pip3 install --upgrade --user pandas_profiling statsmodels\n\nimport os\nimport numpy as np\nimport pandas as pd\nimport pandas_profiling\nimport plotnine\nfrom plotnine import *  # Provides a ggplot-like interface to matplotlib.\n\n## Plot setup.\ntheme_set(theme_bw(base_size = 11)) # Default theme for plots.\n\ndef get_boxplot_fun_data(df):\n  \"\"\"Returns a data frame with a y position and a label, for use annotating ggplot boxplots.\n\n  Args:\n    d: A data frame.\n  Returns:\n    A data frame with column y as max and column label as length.\n  \"\"\"\n  d = {'y': max(df), 'label': f'N = {len(df)}'}\n  return(pd.DataFrame(data=d, index=[0]))\n\n# NOTE: if you get any errors from this cell, restart your kernel and run it again.\n"
+    },
+    {
+      "name": "(2) Basic operations",
       "sub-menu": [
         {
           "name": "join_dataframes.py",
@@ -24,7 +24,7 @@
       ]
     },
     {
-      "name": "Plot measurements",
+      "name": "(3) Plot measurements",
       "sub-menu": [
         {
           "name": "measurement_by_age_and_gender.plotnine",
@@ -32,7 +32,7 @@
         },
         {
           "name": "measurement_by_gender.plotnine",
-          "snippet": "# Use snippet 'measurement_by_gender' to plot joined demographics and measurements dataframes.\n# This plot assumes 'measurement_df' was created using snippet 'Basic operations -> join_dataframes' to\n# join together demographics and measurements dataframes.\n# See also https://plotnine.readthedocs.io/en/stable/\n\n\n# There could be many different measurements in the dataframe. By default, plot the first one.\nmeasurement_to_plot = measurement_df.STANDARD_CONCEPT_NAME.unique()[0]\n\n# meas_filter is a column of True and False.\nmeas_filter = ((measurement_df.STANDARD_CONCEPT_NAME == measurement_to_plot)\n  & (measurement_df.UNIT_CONCEPT_NAME != 'No matching concept')\n  & (measurement_df.UNIT_CONCEPT_NAME.notna())\n  & (measurement_df.VALUE_AS_NUMBER < 9999999)  # Get rid of nonsensical outliers.\n)\n\n(ggplot(measurement_df[meas_filter], aes(x = 'GENDER', y = 'VALUE_AS_NUMBER')) +\n    geom_boxplot() +\n    stat_summary(fun_data = get_boxplot_fun_data, geom = 'text', size = 10,\n                 position = position_dodge(width = 0.9), va = 'top') +\n#    scale_y_log10() +  # Uncomment if the data looks skewed.\n    facet_wrap(('STANDARD_CONCEPT_NAME', 'UNIT_CONCEPT_NAME'), ncol = 2, scales = 'free') +\n    ggtitle(f'Numeric values of measurements, by gender\\nSource: All Of Us Data') +\n    theme(figure_size=(12, 6), panel_spacing = .5))\n"
+          "snippet": "# Use snippet 'measurement_by_gender' to plot joined demographics and measurements dataframes.\n# This plot assumes 'measurement_df' was created using snippet 'Basic operations -> join_dataframes' to\n# join together demographics and measurements dataframes.\n# See also https://plotnine.readthedocs.io/en/stable/\n\n\n# There could be many different measurements in the dataframe. By default, plot the first one.\nmeasurement_to_plot = measurement_df.STANDARD_CONCEPT_NAME.unique()[0]\n\n# meas_filter is a column of True and False.\nmeas_filter = ((measurement_df.STANDARD_CONCEPT_NAME == measurement_to_plot)\n  & (measurement_df.UNIT_CONCEPT_NAME != 'No matching concept')\n  & (measurement_df.UNIT_CONCEPT_NAME.notna())\n  & (measurement_df.VALUE_AS_NUMBER < 9999999)  # Get rid of nonsensical outliers.\n)\n\n(ggplot(measurement_df[meas_filter], aes(x = 'GENDER', y = 'VALUE_AS_NUMBER')) +\n    geom_boxplot() +\n    stat_summary(fun_data = get_boxplot_fun_data, geom = 'text', size = 10,\n                 position = position_dodge(width = 0.9), va = 'top') +\n#    scale_y_log10() +  # Uncomment if the data looks skewed.\n    facet_wrap(('STANDARD_CONCEPT_NAME', 'UNIT_CONCEPT_NAME'), ncol = 2, scales = 'free') +\n    ggtitle(f'Numeric values of measurements, by gender\\nSource: All Of Us Data') +\n    theme(figure_size=(12, 6), panel_spacing = .5, axis_text_x = element_text(angle=25, hjust=1)))\n"
         }
       ]
     }
