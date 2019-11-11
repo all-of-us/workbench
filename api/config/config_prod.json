@@ -19,7 +19,7 @@
     "projectNamePrefix": "aou-rw-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.gcp_billing_export_v1_015EAA_E95687_1F8614",
     "retryCount": 4,
-    "bufferCapacity": 100,
+    "bufferCapacity": 200,
     "bufferRefillProjectsPerTask": 1,
     "defaultFreeCreditsLimit": 100.0,
     "garbageCollectionUserCapacity": 1000,
