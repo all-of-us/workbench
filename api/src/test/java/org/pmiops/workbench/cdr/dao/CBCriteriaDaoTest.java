@@ -1,6 +1,7 @@
 package org.pmiops.workbench.cdr.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -10,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.CBCriteria;
+import org.pmiops.workbench.cdr.model.MenuOption;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
@@ -56,11 +58,13 @@ public class CBCriteriaDaoTest {
                 .type(CriteriaType.PPI.toString())
                 .subtype(CriteriaSubType.SURVEY.toString())
                 .group(false)
+                .standard(false)
                 .selectable(true));
     sourceCriteria =
         cbCriteriaDao.save(
             new CBCriteria()
                 .domainId(DomainType.CONDITION.toString())
+                .type(CriteriaType.ICD9CM.toString())
                 .count("100")
                 .standard(false)
                 .code("120"));
@@ -111,6 +115,7 @@ public class CBCriteriaDaoTest {
                 .domainId(DomainType.PERSON.toString())
                 .type(CriteriaType.RACE.toString())
                 .name("Race")
+                .standard(true)
                 .parentId(0));
     raceAsian =
         cbCriteriaDao.save(
@@ -118,6 +123,7 @@ public class CBCriteriaDaoTest {
                 .domainId(DomainType.PERSON.toString())
                 .type(CriteriaType.RACE.toString())
                 .name("Asian")
+                .standard(true)
                 .parentId(raceParent.getId()));
     raceWhite =
         cbCriteriaDao.save(
@@ -125,6 +131,7 @@ public class CBCriteriaDaoTest {
                 .domainId(DomainType.PERSON.toString())
                 .type(CriteriaType.RACE.toString())
                 .name("White")
+                .standard(true)
                 .parentId(raceParent.getId()));
   }
 
@@ -190,7 +197,7 @@ public class CBCriteriaDaoTest {
             .findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
                 DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 0L)
             .get(0);
-    assertEquals(icd9Criteria, actualIcd9);
+    assertEquals(sourceCriteria, actualIcd9);
 
     CBCriteria actualIcd10 =
         cbCriteriaDao
@@ -295,5 +302,41 @@ public class CBCriteriaDaoTest {
     assertEquals(2, criteriaList.size());
     assertEquals(raceWhite, criteriaList.get(0));
     assertEquals(raceAsian, criteriaList.get(1));
+  }
+
+  @Test
+  public void findMenuOptions() throws Exception {
+    List<MenuOption> options = cbCriteriaDao.findMenuOptions();
+    assertEquals(6, options.size());
+
+    MenuOption option = options.get(0);
+    assertEquals(DomainType.CONDITION.toString(), option.getDomain());
+    assertEquals("ICD10CM", option.getType());
+    assertFalse(option.getStandard());
+
+    option = options.get(1);
+    assertEquals(DomainType.CONDITION.toString(), option.getDomain());
+    assertEquals("ICD9CM", option.getType());
+    assertFalse(option.getStandard());
+
+    option = options.get(2);
+    assertEquals(DomainType.CONDITION.toString(), option.getDomain());
+    assertEquals("SNOMED", option.getType());
+    assertTrue(option.getStandard());
+
+    option = options.get(3);
+    assertEquals(DomainType.MEASUREMENT.toString(), option.getDomain());
+    assertEquals("LOINC", option.getType());
+    assertTrue(option.getStandard());
+
+    option = options.get(4);
+    assertEquals(DomainType.PERSON.toString(), option.getDomain());
+    assertEquals("RACE", option.getType());
+    assertTrue(option.getStandard());
+
+    option = options.get(5);
+    assertEquals(DomainType.SURVEY.toString(), option.getDomain());
+    assertEquals("PPI", option.getType());
+    assertFalse(option.getStandard());
   }
 }

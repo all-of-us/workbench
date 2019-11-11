@@ -34,6 +34,7 @@ export class ComboChart extends React.Component<Props, State> {
   getChartOptions() {
     const {mode} = this.props;
     const normalized = mode === 'normalized';
+    const {categories, series} = this.getCategoriesAndSeries();
     const options = {
       chart: {
         height: 250,
@@ -46,7 +47,7 @@ export class ComboChart extends React.Component<Props, State> {
         text: ''
       },
       xAxis: {
-        categories: this.getCategories(),
+        categories,
         tickLength: 0,
         tickPixelInterval: 50
       },
@@ -72,39 +73,41 @@ export class ComboChart extends React.Component<Props, State> {
           stacking: (normalized ? 'percent' : 'normal')
         }
       },
-      series: this.getSeries()
+      series
     };
     this.setState({options});
   }
 
-  getCategories() {
+  getCategoriesAndSeries() {
     const {data} = this.props;
     const codeMap = {
       'M': 'Male',
       'F': 'Female',
       'No matching concept': 'Unknown'
     };
-    return data.reduce((acc, datum) => {
-      const gender = !!codeMap[datum.gender] ? codeMap[datum.gender] : datum.gender;
-      const key = `${gender} ${datum.ageRange || 'Unknown'}`;
+    const getKey = (dat) => {
+      const gender = !!codeMap[dat.gender] ? codeMap[dat.gender] : dat.gender;
+      return `${gender} ${dat.ageRange || 'Unknown'}`;
+    };
+    const categories = data.reduce((acc, datum) => {
+      const key = getKey(datum);
       if (!acc.includes(key)) {
         acc.push(key);
       }
       return acc;
-    }, []);
-  }
-
-  getSeries() {
-    const {data} = this.props;
-    return data.reduce((acc, datum) => {
+    }, []).sort((a, b) => a > b ? 1 : -1);
+    const series = data.reduce((acc, datum) => {
+      const key = getKey(datum);
+      const obj = {x: categories.indexOf(key), y: datum.count};
       const index = acc.findIndex(d => d.name === datum.race);
       if (index === -1) {
-        acc.push({name: datum.race, data: [datum.count]});
+        acc.push({name: datum.race, data: [obj]});
       } else {
-        acc[index].data.push(datum.count);
+        acc[index].data.push(obj);
       }
       return acc;
     }, []).sort((a, b) => a['name'] < b['name'] ? 1 : -1);
+    return {categories, series};
   }
 
   render() {
