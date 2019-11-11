@@ -181,20 +181,22 @@ export function stripHtml(string: string) {
 }
 
 export function getChartObj(chartObj: any) {
-  this.chart = chartObj;
-  const chartRef = this.chart.container.parentElement;
-  if (this.chart && typeof ResizeObserver === 'function') {
+  if (chartObj && typeof ResizeObserver === 'function') {
     // Unbind window.onresize handler so we don't do double redraws
-    if (this.chart.unbindReflow) {
-      this.chart.unbindReflow();
+    if (chartObj.unbindReflow) {
+      chartObj.unbindReflow();
     }
-    // create observer to redraw charts on div resize
-    const ro = new ResizeObserver(() => {
-      if (this.chart) {
-        this.chart.reflow();
-      }
-    });
-    ro.observe(chartRef);
+    const chartRef = chartObj.container.parentElement;
+    // check that chartRef is of type Element
+    if (chartRef && chartRef.tagName) {
+      // create observer to redraw charts on div resize
+      const ro = new ResizeObserver(() => {
+        if (chartObj) {
+          chartObj.reflow();
+        }
+      });
+      ro.observe(chartRef);
+    }
   }
 }
 
