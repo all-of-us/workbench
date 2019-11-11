@@ -10,7 +10,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -36,6 +35,7 @@ import org.pmiops.workbench.TestLock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -360,11 +360,13 @@ public class BillingProjectBufferServiceTest {
 
     assertThat(
             billingProjectBufferEntryDao.countByStatus(
-                DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.CREATING)))
+                DbStorageEnums.billingProjectBufferEntryStatusToStorage(
+                    BufferEntryStatus.CREATING)))
         .isEqualTo(0);
     assertThat(
             billingProjectBufferEntryDao.countByStatus(
-                DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE)))
+                DbStorageEnums.billingProjectBufferEntryStatusToStorage(
+                    BufferEntryStatus.AVAILABLE)))
         .isEqualTo(2);
     assertThat(
             billingProjectBufferEntryDao.countByStatus(
@@ -528,8 +530,9 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void testGetStatus() {
-    final long numberAvailable = billingProjectBufferEntryDao.countByStatus(
-      DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE));
+    final long numberAvailable =
+        billingProjectBufferEntryDao.countByStatus(
+            DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE));
     final BillingProjectBufferStatus bufferStatus = billingProjectBufferService.getStatus();
     assertThat(bufferStatus.getBufferSize()).isEqualTo(numberAvailable);
   }

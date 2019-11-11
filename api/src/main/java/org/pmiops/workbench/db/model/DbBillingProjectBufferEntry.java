@@ -101,8 +101,7 @@ public class DbBillingProjectBufferEntry {
     return DbStorageEnums.billingProjectBufferEntryStatusFromStorage(status);
   }
 
-  public void setStatusEnum(
-      BufferEntryStatus status, Supplier<Timestamp> currentTimestamp) {
+  public void setStatusEnum(BufferEntryStatus status, Supplier<Timestamp> currentTimestamp) {
     this.setLastStatusChangedTime(currentTimestamp.get());
     this.status = DbStorageEnums.billingProjectBufferEntryStatusToStorage(status);
   }

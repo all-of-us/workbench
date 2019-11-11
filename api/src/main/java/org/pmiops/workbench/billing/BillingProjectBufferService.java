@@ -1,11 +1,5 @@
 package org.pmiops.workbench.billing;
 
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus.ASSIGNED;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus.ASSIGNING;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus.AVAILABLE;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus.CREATING;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus.ERROR;
-
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
@@ -18,6 +12,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -81,7 +76,7 @@ public class BillingProjectBufferService {
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setFireCloudProjectName(projectName);
     entry.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
-    entry.setStatusEnum(CREATING, this::getCurrentTimestamp);
+    entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
 
     fireCloudService.createAllOfUsBillingProject(projectName);
@@ -91,7 +86,7 @@ public class BillingProjectBufferService {
     for (int i = 0; i < SYNCS_PER_INVOCATION; i++) {
       DbBillingProjectBufferEntry entry =
           billingProjectBufferEntryDao.findFirstByStatusOrderByLastSyncRequestTimeAsc(
-              DbStorageEnums.billingProjectBufferEntryStatusToStorage(CREATING));
+              DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.CREATING));
 
       if (entry == null) {
         return;
@@ -104,14 +99,14 @@ public class BillingProjectBufferService {
             .getBillingProjectStatus(entry.getFireCloudProjectName())
             .getCreationStatus()) {
           case READY:
-            entry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
+            entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
             break;
           case ERROR:
             log.warning(
                 String.format(
                     "SyncBillingProjectStatus: BillingProject %s creation failed",
                     entry.getFireCloudProjectName()));
-            entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
+            entry.setStatusEnum(BufferEntryStatus.ERROR, this::getCurrentTimestamp);
             break;
           case CREATING:
           case ADDINGTOPERIMETER:
@@ -139,14 +134,15 @@ public class BillingProjectBufferService {
   public void cleanBillingBuffer() {
     Iterables.concat(
             billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
-                DbStorageEnums.billingProjectBufferEntryStatusToStorage(CREATING),
+                DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.CREATING),
                 new Timestamp(
                     clock
                         .instant()
                         .minus(CREATING_TIMEOUT_MINUTES, ChronoUnit.MINUTES)
                         .toEpochMilli())),
             billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
-                DbStorageEnums.billingProjectBufferEntryStatusToStorage(ASSIGNING),
+                DbStorageEnums.billingProjectBufferEntryStatusToStorage(
+                    BufferEntryStatus.ASSIGNING),
                 new Timestamp(
                     clock
                         .instant()
@@ -159,7 +155,7 @@ public class BillingProjectBufferService {
                       + entry.getFireCloudProjectName()
                       + " to ERROR from "
                       + entry.getStatusEnum());
-              entry.setStatusEnum(ERROR, this::getCurrentTimestamp);
+              entry.setStatusEnum(BufferEntryStatus.ERROR, this::getCurrentTimestamp);
               billingProjectBufferEntryDao.save(entry);
             });
   }
@@ -168,7 +164,7 @@ public class BillingProjectBufferService {
     DbBillingProjectBufferEntry entry = consumeBufferEntryForAssignment();
 
     fireCloudService.addUserToBillingProject(user.getEmail(), entry.getFireCloudProjectName());
-    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
+    entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     entry.setAssignedUser(user);
     billingProjectBufferEntryDao.save(entry);
 
@@ -183,14 +179,14 @@ public class BillingProjectBufferService {
     try {
       entry =
           billingProjectBufferEntryDao.findFirstByStatusOrderByCreationTimeAsc(
-              DbStorageEnums.billingProjectBufferEntryStatusToStorage(AVAILABLE));
+              DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE));
 
       if (entry == null) {
         log.log(Level.SEVERE, "Consume Buffer call made while Billing Project Buffer was empty");
         throw new EmptyBufferException();
       }
 
-      entry.setStatusEnum(ASSIGNING, this::getCurrentTimestamp);
+      entry.setStatusEnum(BufferEntryStatus.ASSIGNING, this::getCurrentTimestamp);
       billingProjectBufferEntryDao.save(entry);
     } finally {
       billingProjectBufferEntryDao.releaseAssigningLock();
@@ -227,8 +223,9 @@ public class BillingProjectBufferService {
   }
 
   public BillingProjectBufferStatus getStatus() {
-    final long bufferSize = billingProjectBufferEntryDao.countByStatus(
-        DbStorageEnums.billingProjectBufferEntryStatusToStorage(AVAILABLE));
+    final long bufferSize =
+        billingProjectBufferEntryDao.countByStatus(
+            DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE));
     final BillingProjectBufferStatus result = new BillingProjectBufferStatus();
     result.setBufferSize(bufferSize);
     return result;

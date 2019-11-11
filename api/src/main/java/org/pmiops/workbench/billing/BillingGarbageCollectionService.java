@@ -108,8 +108,7 @@ public class BillingGarbageCollectionService {
     final DbBillingProjectBufferEntry entry =
         billingProjectBufferEntryDao.findByFireCloudProjectName(projectName);
     entry.setStatusEnum(
-        BufferEntryStatus.GARBAGE_COLLECTED,
-        () -> new Timestamp(clock.instant().toEpochMilli()));
+        BufferEntryStatus.GARBAGE_COLLECTED, () -> new Timestamp(clock.instant().toEpochMilli()));
     billingProjectBufferEntryDao.save(entry);
 
     log.info(
