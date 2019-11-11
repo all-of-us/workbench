@@ -95,8 +95,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.conceptSetService = conceptSetService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
-    this.userProvider = userProvider;
     this.userDao = userDao;
+    this.userProvider = userProvider;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
     this.workspaceDao = workspaceDao;
   }
@@ -423,17 +423,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public WorkspaceAccessLevel getWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId) {
-    WorkspaceACL workspaceACL = fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId);
-    WorkspaceAccessEntry workspaceAccessEntry =
-        Optional.of(workspaceACL.getAcl().get(userProvider.get().getEmail()))
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format(
-                            "DbWorkspace %s/%s not found", workspaceNamespace, workspaceId)));
-    final String userAccess = workspaceAccessEntry.getAccessLevel();
-
-    if (userAccess.equals(PROJECT_OWNER_ACCESS_LEVEL)) {
+    String userAccess =
+        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
+    if (PROJECT_OWNER_ACCESS_LEVEL.equals(userAccess)) {
       return WorkspaceAccessLevel.OWNER;
     }
     WorkspaceAccessLevel result = WorkspaceAccessLevel.fromValue(userAccess);

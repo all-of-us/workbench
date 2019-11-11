@@ -2,7 +2,7 @@ import {
   CohortBuilderApi,
   Criteria,
   CriteriaAttributeListResponse,
-  CriteriaListResponse,
+  CriteriaListResponse, CriteriaMenuOptionsListResponse,
   CriteriaType,
   DemoChartInfoListResponse,
   DomainType,
@@ -70,7 +70,10 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
   }
 
   getParticipantDemographics(): Promise<ParticipantDemographics> {
-    return new Promise<ParticipantDemographics>(resolve =>
-      resolve({genderList: [], ethnicityList: [], raceList: []}));
+    return new Promise<ParticipantDemographics>(resolve => resolve({genderList: [], ethnicityList: [], raceList: []}));
+  }
+
+  findCriteriaMenuOptions(): Promise<CriteriaMenuOptionsListResponse> {
+    return new Promise<CriteriaMenuOptionsListResponse>(resolve => resolve({items: []}));
   }
 }
