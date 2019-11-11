@@ -4,14 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -31,8 +29,6 @@ import org.pmiops.workbench.db.model.User;
 import org.pmiops.workbench.db.model.UserRecentWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.Workspace;
-import org.pmiops.workbench.firecloud.model.WorkspaceACL;
-import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -168,20 +164,13 @@ public class WorkspaceServiceTest {
       WorkspaceAccessLevel accessLevel,
       WorkspaceActiveStatus activeStatus) {
 
-    WorkspaceACL workspaceAccessLevelResponse = spy(WorkspaceACL.class);
-    HashMap<String, WorkspaceAccessEntry> acl = new HashMap<>();
-    WorkspaceAccessEntry accessLevelEntry =
-        new WorkspaceAccessEntry().accessLevel(accessLevel.toString());
-    acl.put(DEFAULT_USER_EMAIL, accessLevelEntry);
-    doReturn(acl).when(workspaceAccessLevelResponse).getAcl();
-    workspaceAccessLevelResponse.setAcl(acl);
     WorkspaceResponse mockWorkspaceResponse =
         mockFirecloudWorkspaceResponse(
             Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
-    doReturn(workspaceAccessLevelResponse)
-        .when(mockFireCloudService)
-        .getWorkspaceAcl(workspaceNamespace, workspaceName);
     mockWorkspaceResponses.add(mockWorkspaceResponse);
+    doReturn(mockWorkspaceResponse)
+        .when(mockFireCloudService)
+        .getWorkspace(workspaceNamespace, workspaceName);
 
     org.pmiops.workbench.db.model.Workspace dbWorkspace =
         workspaceDao.save(
