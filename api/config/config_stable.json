@@ -11,8 +11,7 @@
     "registeredDomainGroup": "GROUP_all-of-us-registered-stable@firecloud.org",
     "xAppIdValue": "stable-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_stable",
-    "timeoutInSeconds": 60,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-gatk:0.0.3"
+    "timeoutInSeconds": 60
   },
   "billing": {
     "accountId": "014D91-FCB792-33D2C0",
@@ -82,6 +81,6 @@
     "enableNewAccountCreation": false
   },
   "actionAudit": {
-    "logName":"workbench-action-audit-stable"
+    "logName": "workbench-action-audit-stable"
   }
 }
