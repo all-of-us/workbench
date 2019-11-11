@@ -24,7 +24,7 @@ public class DbBillingProjectBufferEntry {
   private Short status;
   private DbUser assignedUser;
 
-  public enum Status {
+  public enum BufferEntryStatus {
     // Sent a request to FireCloud to create a BillingProject. Status of BillingProject is TBD
     CREATING,
 
@@ -97,12 +97,12 @@ public class DbBillingProjectBufferEntry {
   }
 
   @Transient
-  public Status getStatusEnum() {
+  public BufferEntryStatus getStatusEnum() {
     return DbStorageEnums.billingProjectBufferEntryStatusFromStorage(status);
   }
 
   public void setStatusEnum(
-      Status status, Supplier<Timestamp> currentTimestamp) {
+      BufferEntryStatus status, Supplier<Timestamp> currentTimestamp) {
     this.setLastStatusChangedTime(currentTimestamp.get());
     this.status = DbStorageEnums.billingProjectBufferEntryStatusToStorage(status);
   }
