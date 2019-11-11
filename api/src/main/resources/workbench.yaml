@@ -1165,6 +1165,25 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/cron/billingProjectBufferStatus:
+    get:
+      security: []
+      tags:
+        - offlineBilling
+      description: If the AoU Billing Project buffer is not full, refill with one or more billing projects.
+      operationId: getBillingProjectBufferStatus
+      responses:
+        200:
+          description: No Error
+          schema:
+            $ref: '#/definitions/BillingProjectBufferStatus'
+        204:
+          description: No Error
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   /v1/cron/syncBillingProjectStatus:
     get:
       security: []
@@ -3775,3 +3794,11 @@ definitions:
       subject to quota checks, or the project has a billing account provided by the user
     enum: [ FREE_TIER, USER_PROVIDED ]
 
+  BillingProjectBufferStatus:
+    type: object
+    properties:
+      bufferSize:
+        description: >
+          Current size of the billing buffer, i.e. the number of projects ready to be claimed.
+        type: integer
+        format: int64

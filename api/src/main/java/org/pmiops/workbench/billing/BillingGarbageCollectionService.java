@@ -16,7 +16,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.dao.BillingProjectGarbageCollectionDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.Status;
 import org.pmiops.workbench.db.model.DbBillingProjectGarbageCollection;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -108,7 +108,7 @@ public class BillingGarbageCollectionService {
     final DbBillingProjectBufferEntry entry =
         billingProjectBufferEntryDao.findByFireCloudProjectName(projectName);
     entry.setStatusEnum(
-        BillingProjectBufferStatus.GARBAGE_COLLECTED,
+        Status.GARBAGE_COLLECTED,
         () -> new Timestamp(clock.instant().toEpochMilli()));
     billingProjectBufferEntryDao.save(entry);
 

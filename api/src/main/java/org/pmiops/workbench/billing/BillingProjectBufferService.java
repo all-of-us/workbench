@@ -1,10 +1,10 @@
 package org.pmiops.workbench.billing;
 
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNING;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.Status.ASSIGNED;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.Status.ASSIGNING;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.Status.AVAILABLE;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.Status.CREATING;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.Status.ERROR;
 
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
@@ -23,6 +23,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -90,7 +91,7 @@ public class BillingProjectBufferService {
     for (int i = 0; i < SYNCS_PER_INVOCATION; i++) {
       DbBillingProjectBufferEntry entry =
           billingProjectBufferEntryDao.findFirstByStatusOrderByLastSyncRequestTimeAsc(
-              DbStorageEnums.billingProjectBufferStatusToStorage(CREATING));
+              DbStorageEnums.billingProjectBufferEntryStatusToStorage(CREATING));
 
       if (entry == null) {
         return;
@@ -138,14 +139,14 @@ public class BillingProjectBufferService {
   public void cleanBillingBuffer() {
     Iterables.concat(
             billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
-                DbStorageEnums.billingProjectBufferStatusToStorage(CREATING),
+                DbStorageEnums.billingProjectBufferEntryStatusToStorage(CREATING),
                 new Timestamp(
                     clock
                         .instant()
                         .minus(CREATING_TIMEOUT_MINUTES, ChronoUnit.MINUTES)
                         .toEpochMilli())),
             billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
-                DbStorageEnums.billingProjectBufferStatusToStorage(ASSIGNING),
+                DbStorageEnums.billingProjectBufferEntryStatusToStorage(ASSIGNING),
                 new Timestamp(
                     clock
                         .instant()
@@ -182,7 +183,7 @@ public class BillingProjectBufferService {
     try {
       entry =
           billingProjectBufferEntryDao.findFirstByStatusOrderByCreationTimeAsc(
-              DbStorageEnums.billingProjectBufferStatusToStorage(AVAILABLE));
+              DbStorageEnums.billingProjectBufferEntryStatusToStorage(AVAILABLE));
 
       if (entry == null) {
         log.log(Level.SEVERE, "Consume Buffer call made while Billing Project Buffer was empty");
@@ -223,5 +224,13 @@ public class BillingProjectBufferService {
 
   private int getBufferMaxCapacity() {
     return workbenchConfigProvider.get().billing.bufferCapacity;
+  }
+
+  public BillingProjectBufferStatus getStatus() {
+    final long bufferSize = billingProjectBufferEntryDao.countByStatus(
+        DbStorageEnums.billingProjectBufferEntryStatusToStorage(AVAILABLE));
+    final BillingProjectBufferStatus result = new BillingProjectBufferStatus();
+    result.setBufferSize(bufferSize);
+    return result;
   }
 }

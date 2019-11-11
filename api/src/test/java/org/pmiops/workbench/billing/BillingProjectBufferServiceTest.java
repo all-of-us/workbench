@@ -10,11 +10,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNING;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.Status.ASSIGNED;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.Status.ASSIGNING;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.Status.AVAILABLE;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.Status.CREATING;
+import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.Status.ERROR;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -363,15 +363,15 @@ public class BillingProjectBufferServiceTest {
 
     assertThat(
             billingProjectBufferEntryDao.countByStatus(
-                DbStorageEnums.billingProjectBufferStatusToStorage(CREATING)))
+                DbStorageEnums.billingProjectBufferEntryStatusToStorage(CREATING)))
         .isEqualTo(0);
     assertThat(
             billingProjectBufferEntryDao.countByStatus(
-                DbStorageEnums.billingProjectBufferStatusToStorage(AVAILABLE)))
+                DbStorageEnums.billingProjectBufferEntryStatusToStorage(AVAILABLE)))
         .isEqualTo(2);
     assertThat(
             billingProjectBufferEntryDao.countByStatus(
-                DbStorageEnums.billingProjectBufferStatusToStorage(ERROR)))
+                DbStorageEnums.billingProjectBufferEntryStatusToStorage(ERROR)))
         .isEqualTo(1);
   }
 

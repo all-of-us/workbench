@@ -2,7 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.Status;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
@@ -53,22 +53,22 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_AUTHORITY.get(authority);
   }
 
-  private static final BiMap<BillingProjectBufferStatus, Short>
+  private static final BiMap<Status, Short>
       CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS =
-          ImmutableBiMap.<BillingProjectBufferStatus, Short>builder()
-              .put(BillingProjectBufferStatus.CREATING, (short) 0)
-              .put(BillingProjectBufferStatus.ERROR, (short) 1)
-              .put(BillingProjectBufferStatus.AVAILABLE, (short) 2)
-              .put(BillingProjectBufferStatus.ASSIGNING, (short) 3)
-              .put(BillingProjectBufferStatus.ASSIGNED, (short) 4)
-              .put(BillingProjectBufferStatus.GARBAGE_COLLECTED, (short) 5)
+          ImmutableBiMap.<Status, Short>builder()
+              .put(Status.CREATING, (short) 0)
+              .put(Status.ERROR, (short) 1)
+              .put(Status.AVAILABLE, (short) 2)
+              .put(Status.ASSIGNING, (short) 3)
+              .put(Status.ASSIGNED, (short) 4)
+              .put(Status.GARBAGE_COLLECTED, (short) 5)
               .build();
 
-  public static BillingProjectBufferStatus billingProjectBufferStatusFromStorage(Short s) {
+  public static Status billingProjectBufferEntryStatusFromStorage(Short s) {
     return CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS.inverse().get(s);
   }
 
-  public static Short billingProjectBufferStatusToStorage(BillingProjectBufferStatus s) {
+  public static Short billingProjectBufferEntryStatusToStorage(Status s) {
     return CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS.get(s);
   }
 
