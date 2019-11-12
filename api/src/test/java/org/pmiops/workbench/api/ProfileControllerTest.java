@@ -26,6 +26,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.pmiops.workbench.actionaudit.adapters.ProfileAuditAdapter;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
@@ -108,6 +109,7 @@ public class ProfileControllerTest {
   @Mock private ComplianceService complianceTrainingService;
   @Mock private MailService mailService;
   @Mock private UserService userService;
+  @Mock private ProfileAuditAdapter mockProfileAuditAdapter;
 
   private ProfileController profileController;
   private ProfileController cloudProfileController;
@@ -174,7 +176,8 @@ public class ProfileControllerTest {
             leonardoNotebooksClient,
             Providers.of(config),
             environment,
-            Providers.of(mailService));
+            Providers.of(mailService),
+            mockProfileAuditAdapter);
     this.cloudProfileController =
         new ProfileController(
             profileService,
@@ -189,7 +192,8 @@ public class ProfileControllerTest {
             leonardoNotebooksClient,
             Providers.of(config),
             cloudEnvironment,
-            Providers.of(mailService));
+            Providers.of(mailService),
+            mockProfileAuditAdapter);
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
@@ -207,9 +211,10 @@ public class ProfileControllerTest {
   @Test
   public void testCreateAccount_success() throws Exception {
     createUser();
-    DbUser user = userDao.findUserByEmail(PRIMARY_EMAIL);
-    assertThat(user).isNotNull();
-    assertThat(user.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    verify(mockProfileAuditAdapter).fireCreateAction(any(Profile.class));
+    final DbUser dbUser = userDao.findUserByEmail(PRIMARY_EMAIL);
+    assertThat(dbUser).isNotNull();
+    assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
   }
 
   @Test
@@ -223,6 +228,7 @@ public class ProfileControllerTest {
     exception.expectMessage(
         "Username should be at least 3 characters and not more than 64 characters");
     profileController.createAccount(accountRequest);
+    verify(mockProfileAuditAdapter).fireCreateAction(any(Profile.class));
   }
 
   @Test
@@ -579,11 +585,20 @@ public class ProfileControllerTest {
             leonardoNotebooksClient,
             Providers.of(config),
             environment,
-            Providers.of(mailService));
+            Providers.of(mailService),
+            mockProfileAuditAdapter);
     profileController.bypassAccessRequirement(
         profile.getUserId(),
         new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
     verify(userService, times(1)).setDataUseAgreementBypassTime(any(), any());
+  }
+
+  @Test
+  public void testDeleteProfile() throws Exception {
+    createUser();
+
+    profileController.deleteProfile();
+    verify(mockProfileAuditAdapter).fireDeleteAction(user.getUserId(), user.getEmail());
   }
 
   private Profile createUser() throws Exception {
@@ -648,6 +663,7 @@ public class ProfileControllerTest {
     config.access.enableBetaAccess = true;
     config.access.enableEraCommons = true;
     config.access.enableDataUseAgreement = true;
+    config.featureFlags.unsafeAllowDeleteUser = true;
     return config;
   }
 }
