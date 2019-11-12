@@ -19,13 +19,13 @@ class WorkspaceTargetPropertyTest {
     @Before
     fun setUp() {
         val researchPurpose1 = ResearchPurpose()
-        researchPurpose1.intendedStudy = "stubbed toes"
-        researchPurpose1.additionalNotes = "I really like the cloud."
+                .apply { intendedStudy = "stubbed toes" }
+                .apply { additionalNotes = "I really like the cloud." }
 
         val researchPurpose2 = ResearchPurpose()
-        researchPurpose2.intendedStudy = "broken dreams"
-        researchPurpose2.additionalNotes = "I changed my mind"
-        researchPurpose2.anticipatedFindings = "a 4-leaf clover"
+                .apply { intendedStudy = "broken dreams" }
+                .apply { additionalNotes = "I changed my mind" }
+                .apply { anticipatedFindings = "a 4-leaf clover" }
 
         val now = System.currentTimeMillis()
 

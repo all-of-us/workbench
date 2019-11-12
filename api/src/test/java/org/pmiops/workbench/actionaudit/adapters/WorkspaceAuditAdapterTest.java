@@ -39,7 +39,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-public class WorkspaceAuditAdapterServiceTest {
+public class WorkspaceAuditAdapterTest {
 
   private static final long WORKSPACE_1_DB_ID = 101L;
   private static final long Y2K_EPOCH_MILLIS =

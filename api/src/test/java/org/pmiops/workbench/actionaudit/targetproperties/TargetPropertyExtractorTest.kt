@@ -14,22 +14,23 @@ class TargetPropertyExtractorTest {
     @Before
     fun setUp() {
         researchPurpose1 = ResearchPurpose()
-        researchPurpose1?.intendedStudy = "stubbed toes"
-        researchPurpose1?.additionalNotes = "I really like the cloud."
+            .apply { intendedStudy = "stubbed toes" }
+            .apply { additionalNotes = "I really like the cloud." }
+
         val now = System.currentTimeMillis()
 
         workspace = Workspace()
-        workspace?.name = "DbWorkspace 1"
-        workspace?.id = "fc-id-1"
-        workspace?.namespace = "aou-rw-local1-c4be869a"
-        workspace?.creator = "user@fake-research-aou.org"
-        workspace?.cdrVersionId = "1"
-        workspace?.researchPurpose = researchPurpose1
-        workspace?.creationTime = now
-        workspace?.lastModifiedTime = now
-        workspace?.etag = "etag_1"
-        workspace?.dataAccessLevel = DataAccessLevel.REGISTERED
-        workspace?.published = false
+            .apply { name = "DbWorkspace 1" }
+            .apply { id = "fc-id-1" }
+            .apply { namespace = "aou-rw-local1-c4be869a" }
+            .apply { creator = "user@fake-research-aou.org" }
+            .apply { cdrVersionId = "1" }
+            .apply { researchPurpose = researchPurpose1 }
+            .apply { creationTime = now }
+            .apply { lastModifiedTime = now }
+            .apply { etag = "etag_1" }
+            .apply { dataAccessLevel = DataAccessLevel.REGISTERED }
+            .apply { published = false }
     }
 
     @Test fun testGetsWorkspaceProperties() {

@@ -31,7 +31,7 @@ import org.springframework.test.context.junit4.SpringRunner
 import java.math.BigDecimal
 
 @RunWith(SpringRunner::class)
-class ProfileAuditAdapterServiceTest {
+class ProfileAuditAdapterTest {
 
     private val mockUserProvider = mock<Provider<DbUser>>()
     private val mockActionAuditService = mock<ActionAuditService>()
@@ -44,8 +44,8 @@ class ProfileAuditAdapterServiceTest {
     @Before
     fun setUp() {
         user = DbUser()
-        user?.userId = 1001
-        user?.email = USER_EMAIL
+            .apply { userId = 1001 }
+            .apply { email = USER_EMAIL }
 
         profileAuditAdapter = ProfileAuditAdapterImpl(
                 userProvider = mockUserProvider,
@@ -72,39 +72,39 @@ class ProfileAuditAdapterServiceTest {
 
     private fun buildProfile(): Profile {
         val caltechAffiliation = InstitutionalAffiliation()
-        caltechAffiliation.institution = "Caltech"
-        caltechAffiliation.role = "T.A."
-        caltechAffiliation.nonAcademicAffiliation = NonAcademicAffiliation.COMMUNITY_SCIENTIST
-        caltechAffiliation.other = "They are all fine houses."
+            .apply { institution = "Caltech" }
+            .apply { role = "T.A."}
+            .apply { nonAcademicAffiliation = NonAcademicAffiliation.COMMUNITY_SCIENTIST }
+            .apply { other = "They are all fine houses." }
 
         val mitAffiliation = InstitutionalAffiliation()
-        mitAffiliation.institution = "MIT"
-        mitAffiliation.role = "Professor"
-        mitAffiliation.nonAcademicAffiliation = NonAcademicAffiliation.EDUCATIONAL_INSTITUTION
+            .apply { institution = "MIT" }
+            .apply { role = "Professor" }
+            .apply { nonAcademicAffiliation = NonAcademicAffiliation.EDUCATIONAL_INSTITUTION }
 
-        val demographicSurvey = DemographicSurvey()
-        demographicSurvey.disability = false
-        demographicSurvey.ethnicity = Ethnicity.NOT_HISPANIC
-        demographicSurvey.gender = listOf(Gender.PREFER_NO_ANSWER)
-        demographicSurvey.yearOfBirth = BigDecimal.valueOf(1999)
-        demographicSurvey.race = listOf(Race.PREFER_NO_ANSWER)
-        demographicSurvey.education = Education.MASTER
+        val demographicSurvey1 = DemographicSurvey()
+            .apply { disability = false }
+            .apply { ethnicity = Ethnicity.NOT_HISPANIC }
+            .apply { gender = listOf(Gender.PREFER_NO_ANSWER) }
+            .apply { yearOfBirth = BigDecimal.valueOf(1999) }
+            .apply { race = listOf(Race.PREFER_NO_ANSWER) }
+            .apply { education = Education.MASTER }
 
-        val createdProfile = Profile()
-        createdProfile.username = "slim_shady"
-        createdProfile.contactEmail = USER_EMAIL
-        createdProfile.dataAccessLevel = DataAccessLevel.REGISTERED
-        createdProfile.givenName = "Robert"
-        createdProfile.familyName = "Paulson"
-        createdProfile.phoneNumber = "867-5309"
-        createdProfile.currentPosition = "Grad Student"
-        createdProfile.organization = "Classified"
-        createdProfile.disabled = false
-        createdProfile.aboutYou = "Nobody in particular"
-        createdProfile.areaOfResearch = "Aliens"
-        createdProfile.institutionalAffiliations = listOf(caltechAffiliation, mitAffiliation)
-        createdProfile.demographicSurvey = demographicSurvey
-        return createdProfile
+        return Profile()
+            .apply { userId = 444 }
+            .apply { username = "slim_shady" }
+            .apply { contactEmail = USER_EMAIL }
+            .apply { dataAccessLevel = DataAccessLevel.REGISTERED }
+            .apply { givenName = "Robert" }
+            .apply { familyName = "Paulson" }
+            .apply { phoneNumber = "867-5309" }
+            .apply { currentPosition = "Grad Student" }
+            .apply { organization = "Classified" }
+            .apply { disabled = false }
+            .apply { aboutYou = "Nobody in particular" }
+            .apply { areaOfResearch = "Aliens" }
+            .apply { institutionalAffiliations = listOf(caltechAffiliation, mitAffiliation) }
+            .apply { demographicSurvey = demographicSurvey1 }
     }
 
     @Test

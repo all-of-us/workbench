@@ -29,57 +29,27 @@ class ActionAuditServiceTest {
 
     private val mockConfigProvider = mock<Provider<WorkbenchConfig>>()
 
-    private var event1: ActionAuditEvent? = null
-    private var event2: ActionAuditEvent? = null
     private var actionAuditService: ActionAuditService? = null
 
     @Before
     fun setUp() {
         val actionAuditConfig = ActionAuditConfig()
-        actionAuditConfig.logName = "log_path_1"
+            .apply { logName = "log_path_1" }
+
         val serverConfig = ServerConfig()
-        serverConfig.projectId = "gcp-project-id"
+            .apply { projectId = "gcp-project-id" }
 
         val workbenchConfig = WorkbenchConfig()
-        workbenchConfig.actionAudit = actionAuditConfig
-        workbenchConfig.server = serverConfig
+            .apply { actionAudit = actionAuditConfig }
+            .apply { server = serverConfig }
         whenever(mockConfigProvider.get()).thenReturn(workbenchConfig)
 
         actionAuditService = ActionAuditServiceImpl(mockConfigProvider, mockLogging)
-
-        // ordinarily events sharing an action would have more things in common than this,
-        // but the schema doesn't require it
-        event1 = ActionAuditEvent(
-                agentEmailMaybe = "a@b.co",
-                targetType = TargetType.DATASET,
-                targetIdMaybe = 1L,
-                agentType = AgentType.USER,
-                agentId = AGENT_ID_1,
-                actionId = ACTION_ID,
-                actionType = ActionType.EDIT,
-                targetPropertyMaybe = "foot",
-                previousValueMaybe = "bare",
-                newValueMaybe = "shod",
-                timestamp = System.currentTimeMillis()
-        )
-        event2 = ActionAuditEvent(
-                agentEmailMaybe = "f@b.co",
-                targetType = TargetType.DATASET,
-                targetIdMaybe = 2L,
-                agentType = AgentType.USER,
-                agentId = AGENT_ID_2,
-                actionId = ACTION_ID,
-                actionType = ActionType.EDIT,
-                targetPropertyMaybe = "height",
-                previousValueMaybe = "yay high",
-                newValueMaybe = "about that tall",
-                timestamp = System.currentTimeMillis()
-        )
     }
 
     @Test
     fun testSendsSingleEvent() {
-        actionAuditService!!.send(event1!!)
+        actionAuditService!!.send(EVENT_1!!)
         argumentCaptor<List<LogEntry>>().apply {
             verify(mockLogging).write(capture())
             val entryList: List<LogEntry> = firstValue
@@ -101,7 +71,7 @@ class ActionAuditServiceTest {
 
     @Test
     fun testSendsExpectedColumnNames() {
-        actionAuditService!!.send(event1!!)
+        actionAuditService!!.send(EVENT_1)
         argumentCaptor<List<LogEntry>>().apply {
             verify(mockLogging).write(capture())
             val entryList = firstValue
@@ -118,7 +88,7 @@ class ActionAuditServiceTest {
 
     @Test
     fun testSendsMultipleEventsAsSingleAction() {
-        actionAuditService!!.send(ImmutableList.of(event1!!, event2!!))
+        actionAuditService!!.send(ImmutableList.of(EVENT_1, EVENT_2))
         argumentCaptor<List<LogEntry>>().apply {
             verify(mockLogging).write(capture())
             val entryList = firstValue
@@ -149,5 +119,31 @@ class ActionAuditServiceTest {
         private const val AGENT_ID_1 = 101L
         private const val AGENT_ID_2 = 102L
         private const val ACTION_ID = "b52a36f6-3e88-4a30-a57f-ae884838bfbf"
+
+        private val EVENT_1 = ActionAuditEvent(
+                agentEmailMaybe = "a@b.co",
+                targetType = TargetType.DATASET,
+                targetIdMaybe = 1L,
+                agentType = AgentType.USER,
+                agentId = AGENT_ID_1,
+                actionId = ACTION_ID,
+                actionType = ActionType.EDIT,
+                targetPropertyMaybe = "foot",
+                previousValueMaybe = "bare",
+                newValueMaybe = "shod",
+                timestamp = System.currentTimeMillis())
+
+        private val EVENT_2 = ActionAuditEvent(
+                agentEmailMaybe = "f@b.co",
+                targetType = TargetType.DATASET,
+                targetIdMaybe = 2L,
+                agentType = AgentType.USER,
+                agentId = AGENT_ID_2,
+                actionId = ACTION_ID,
+                actionType = ActionType.EDIT,
+                targetPropertyMaybe = "height",
+                previousValueMaybe = "yay high",
+                newValueMaybe = "about that tall",
+                timestamp = System.currentTimeMillis())
     }
 }
