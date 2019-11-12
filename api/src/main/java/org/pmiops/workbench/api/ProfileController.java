@@ -257,14 +257,10 @@ public class ProfileController implements ProfileApiDelegate {
     validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
     validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
     if (!workbenchConfigProvider.get().featureFlags.enableNewAccountCreation) {
+      // required for old create account flow
       validateStringLength(profile.getCurrentPosition(), "Current Position", 255, 1);
       validateStringLength(profile.getOrganization(), "Organization", 255, 1);
       validateStringLength(profile.getAreaOfResearch(), "Current Research", 3000, 1);
-    } else {
-      validateStringLength(profile.getAddress().getStreetAddress1(), "Street Address 1", 255, 5);
-      validateStringLength(profile.getAddress().getCity(), "City", 3000, 1);
-      validateStringLength(profile.getAddress().getState(), "State", 3000, 1);
-      validateStringLength(profile.getAddress().getCountry(), "Country", 3000, 2);
     }
   }
 
