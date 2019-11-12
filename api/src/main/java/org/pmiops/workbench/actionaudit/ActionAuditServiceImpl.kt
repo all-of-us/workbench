@@ -62,6 +62,10 @@ constructor(private val configProvider: Provider<WorkbenchConfig>, private val c
         return JsonPayload.of(jsonValuesByColumn)
     }
 
+    override fun logRuntimeException(logger: Logger, exception: RuntimeException) {
+        logger.log(Level.WARNING, exception) { "Exception encountered during audit." }
+    }
+
     companion object {
         private val serviceLogger = Logger.getLogger(ActionAuditServiceImpl::class.java.name)
         private const val MONITORED_RESOURCE_TYPE = "global"

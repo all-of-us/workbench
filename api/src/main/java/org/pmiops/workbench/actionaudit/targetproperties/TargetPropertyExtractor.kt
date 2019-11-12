@@ -9,10 +9,10 @@ class TargetPropertyExtractor {
 
         @JvmStatic
         fun <T : Any, E : TargetProperty<T>> getPropertyValuesByName(
-            values: Array<E>,
+            enumValues: Array<E>,
             target: T
         ): Map<String, String> {
-            return values
+            return enumValues
                     .filter { it.extractor.invoke(target) != null }
                     .map { it.propertyName to it.extractor.invoke(target)!! }
                     .toMap()
@@ -20,11 +20,11 @@ class TargetPropertyExtractor {
 
         @JvmStatic
         fun <T : Any, E : TargetProperty<T>> getChangedValuesByName(
-            values: Array<E>,
+            enumValues: Array<E>,
             previousTarget: T,
             newTarget: T
         ): Map<String, PreviousNewValuePair> {
-            return values
+            return enumValues
                     .map { it.propertyName to PreviousNewValuePair(
                             previousValue = it.extractor.invoke(previousTarget),
                             newValue = it.extractor.invoke(newTarget)) }

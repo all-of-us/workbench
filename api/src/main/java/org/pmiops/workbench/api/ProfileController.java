@@ -630,8 +630,12 @@ public class ProfileController implements ProfileApiDelegate {
     validateProfileFields(updatedProfile);
     DbUser user = userProvider.get();
 
-    // save previous profile for audit trail
+    // Save current profile for audit trail. Continue to use the userProvider (instead
+    // of info on previousProfile) to ensure addition of audit system doesn't change behavior.
+    // That is, in the (rare, hopefully) condition that the old profile gives incorrect information,
+    // the update will still work as well as it would have.
     final Profile previousProfile = profileService.getProfile(user);
+
     if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
         || !userProvider.get().getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
       userService.setDataUseAgreementNameOutOfDate(

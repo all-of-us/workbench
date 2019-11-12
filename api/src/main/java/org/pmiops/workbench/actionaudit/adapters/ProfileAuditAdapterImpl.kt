@@ -1,7 +1,6 @@
 package org.pmiops.workbench.actionaudit.adapters
 
 import java.time.Clock
-import java.util.logging.Level
 import java.util.logging.Logger
 import javax.inject.Provider
 import org.pmiops.workbench.actionaudit.ActionAuditEvent
@@ -106,7 +105,7 @@ constructor(
     }
 
     private fun logAndSwallow(e: RuntimeException) {
-        logger.log(Level.WARNING, e) { "Exception encountered during audit." }
+        actionAuditService.logRuntimeException(logger, e)
     }
 
     companion object {
