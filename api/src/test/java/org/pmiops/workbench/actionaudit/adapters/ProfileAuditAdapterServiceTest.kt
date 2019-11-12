@@ -38,7 +38,7 @@ class ProfileAuditAdapterServiceTest {
     private val mockClock = mock<Clock>()
     private val mockActionIdProvider = mock<Provider<String>>()
 
-    private var profileAuditAdapterService: ProfileAuditAdapter? = null
+    private var profileAuditAdapter: ProfileAuditAdapter? = null
     private var user: DbUser? = null
 
     @Before
@@ -47,7 +47,7 @@ class ProfileAuditAdapterServiceTest {
         user?.userId = 1001
         user?.email = USER_EMAIL
 
-        profileAuditAdapterService = ProfileAuditAdapterImpl(
+        profileAuditAdapter = ProfileAuditAdapterImpl(
                 userProvider = mockUserProvider,
                 actionAuditService = mockActionAuditService,
                 clock = mockClock,
@@ -60,7 +60,7 @@ class ProfileAuditAdapterServiceTest {
     @Test
     fun testCreateUserProfile() {
         val createdProfile = buildProfile()
-        profileAuditAdapterService!!.fireCreateAction(createdProfile)
+        profileAuditAdapter!!.fireCreateAction(createdProfile)
         argumentCaptor<List<ActionAuditEvent>>().apply {
             verify(mockActionAuditService).send(capture())
             val sentEvents: List<ActionAuditEvent> = firstValue
@@ -109,7 +109,7 @@ class ProfileAuditAdapterServiceTest {
 
     @Test
     fun testDeleteUserProfile() {
-        profileAuditAdapterService!!.fireDeleteAction(USER_ID, USER_EMAIL)
+        profileAuditAdapter!!.fireDeleteAction(USER_ID, USER_EMAIL)
         argumentCaptor<ActionAuditEvent>().apply {
             verify(mockActionAuditService).send(capture())
             val eventSent = firstValue

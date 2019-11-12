@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 
 @Service
-class WorkspaceAuditAdapterServiceImpl @Autowired
+class WorkspaceAuditAdapterImpl @Autowired
 constructor(
     private val userProvider: Provider<DbUser>,
     private val actionAuditService: ActionAuditService,
@@ -181,6 +181,6 @@ constructor(
     }
 
     companion object {
-        private val logger = Logger.getLogger(WorkspaceAuditAdapterServiceImpl::class.java.name)
+        private val logger = Logger.getLogger(WorkspaceAuditAdapterImpl::class.java.name)
     }
 }

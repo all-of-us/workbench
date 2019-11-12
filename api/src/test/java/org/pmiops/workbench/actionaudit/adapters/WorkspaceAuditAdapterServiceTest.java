@@ -75,7 +75,7 @@ public class WorkspaceAuditAdapterServiceTest {
     user1.setFamilyName("Flintstone");
     doReturn(user1).when(mockUserProvider).get();
     workspaceAuditAdapter =
-        new WorkspaceAuditAdapterServiceImpl(
+        new WorkspaceAuditAdapterImpl(
             mockUserProvider, mockActionAuditService, mockClock, mockActionIdProvider);
 
     final ResearchPurpose researchPurpose1 = new ResearchPurpose();
