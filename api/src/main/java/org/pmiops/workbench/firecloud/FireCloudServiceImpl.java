@@ -15,6 +15,7 @@ import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
@@ -347,8 +348,20 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public Optional<WorkspaceResponse> getWorkspace(DbWorkspace dbWorkspace) {
-    return Optional.ofNullable(
-        getWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName()));
+    try {
+      final WorkspaceResponse result =
+          getWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+      return Optional.of(result);
+    } catch (WorkbenchException e) {
+      log.log(
+          Level.INFO,
+          e,
+          () ->
+              String.format(
+                  "Exception encountered retrieving workspace with DbWorkspace %s",
+                  dbWorkspace.toString()));
+      return Optional.empty();
+    }
   }
 
   @Override

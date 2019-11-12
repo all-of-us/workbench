@@ -1,45 +1,66 @@
 package org.pmiops.workbench.utils;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.doReturn;
 
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Instant;
 import org.junit.Before;
 import org.junit.Test;
-import org.mapstruct.factory.Mappers;
+import org.junit.runner.RunWith;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Cohort;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit4.SpringRunner;
 
+@RunWith(SpringRunner.class)
 public class CohortMapperTest {
 
   private Cohort sourceClientCohort;
   private DbCohort sourceDbCohort;
-  private final CohortMapper cohortMapper = Mappers.getMapper(CohortMapper.class);;
+
+  @Autowired private CohortMapper cohortMapper;
+  @Autowired private UserDao mockUserDao;
+
+  @TestConfiguration
+  @Import({CohortMapperImpl.class})
+  @MockBean({UserDao.class})
+  static class Configuration {}
 
   @Before
   public void setUp() {
-    sourceClientCohort = new Cohort();
-    sourceClientCohort.setId(101L);
-    sourceClientCohort.setEtag("ETAG_ETAG");
-    sourceClientCohort.setName("All Blue-eyed Blondes");
-    sourceClientCohort.setCriteria("blue eyes and blonde hair");
-    sourceClientCohort.setType("Demographics");
-    sourceClientCohort.setDescription("A cohort I found the other day.");
-    sourceClientCohort.setCreator("jay@all-of.us");
-    sourceClientCohort.setCreationTime(Instant.parse("2018-01-01T23:59:59.00Z").toEpochMilli());
-    sourceClientCohort.setLastModifiedTime(Instant.parse("2019-01-01T23:59:59.00Z").toEpochMilli());
+    sourceClientCohort =
+        new Cohort()
+            .id(101L)
+            .etag("ETAG_ETAG")
+            .name("All Blue-eyed Blondes")
+            .criteria("blue eyes and blonde hair")
+            .type("Demographics")
+            .description("A cohort I found the other day.")
+            .creator("billg@msn.com")
+            .creationTime(Instant.parse("2018-01-01T23:59:59.00Z").toEpochMilli())
+            .lastModifiedTime(Instant.parse("2019-01-01T23:59:59.00Z").toEpochMilli());
 
+    // right now we're using same creator for all tests
     final DbUser creator = new DbUser();
     creator.setEmail("billg@msn.com");
+    creator.setContactEmail("bill@terra.bio");
+    creator.setUserId(888L);
 
-    final DbCohortReview review1 = new DbCohortReview();
-    review1.setCdrVersionId(3);
-    review1.setCohortId(202L);
+    doReturn(creator).when(mockUserDao).findUserByEmail(creator.getEmail());
 
-    final ImmutableSet<DbCohortReview> cohortReviews = ImmutableSet.of(review1);
+    final DbCohortReview review = new DbCohortReview();
+    review.setCdrVersionId(3);
+    review.setCohortId(202L);
+
+    final ImmutableSet<DbCohortReview> cohortReviews = ImmutableSet.of(review);
 
     sourceDbCohort = new DbCohort();
     sourceDbCohort.setCohortId(202L);
