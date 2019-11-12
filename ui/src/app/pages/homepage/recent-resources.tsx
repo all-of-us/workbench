@@ -87,27 +87,29 @@ export const RecentResources = (fp.flow as any)(
     const {contentRect, measureRef} = this.props;
     const {offset, resources, loading} = this.state;
     const limit = (contentRect.client.width - 24) / 224;
-    return (resources !== null && resources.length > 0) || loading ? <React.Fragment>
-      <SmallHeader>Recently Accessed Items</SmallHeader>
-      <div ref={measureRef} style={{display: 'flex', position: 'relative', minHeight: 247}}>
-        <div style={{display: 'flex', position: 'relative', alignItems: 'center',
-          marginTop: '-1rem', marginLeft: '-1rem', paddingLeft: '1rem', opacity: loading ? 0.5 : 1}}>
-          {resources.slice(offset, offset + limit).map((resource, i) => {
-            return <div key={i}> {this.createResourceCard(resource)} </div>;
-          })}
-          {offset > 0 && <Scroll
-            dir='left'
-            onClick={() => this.setState({offset: offset - 1})}
-            style={{position: 'absolute', left: 0, paddingBottom: '0.5rem'}}
-          />}
-          {offset + limit < resources.length && <Scroll
-            dir='right'
-            onClick={() => this.setState({offset: offset + 1})}
-            style={{position: 'absolute', right: 0, paddingBottom: '0.5rem'}}
-          />}
+    return (resources !== null && resources.length > 0) || loading ?
+      <React.Fragment>
+        <SmallHeader>Recently Accessed Items</SmallHeader>
+        <div ref={measureRef} style={{display: 'flex', position: 'relative', minHeight: 247}}>
+          <FlexRow style={{position: 'relative', alignItems: 'center', marginTop: '-1rem',
+            marginLeft: '-1rem', paddingLeft: '1rem', opacity: loading ? 0.5 : 1}}>
+            {resources.slice(offset, offset + limit).map((resource, i) => {
+              return <div key={i}> {this.createResourceCard(resource)} </div>;
+            })}
+            {offset > 0 && <Scroll
+              dir='left'
+              onClick={() => this.setState({offset: offset - 1})}
+              style={{position: 'absolute', left: 0, paddingBottom: '0.5rem'}}
+            />}
+            {offset + limit < resources.length && <Scroll
+              dir='right'
+              onClick={() => this.setState({offset: offset + 1})}
+              style={{position: 'absolute', right: 0, paddingBottom: '0.5rem'}}
+            />}
+          </FlexRow>
+          {loading && <SpinnerOverlay dark={this.props.dark} />}
         </div>
-        {loading && <SpinnerOverlay dark={this.props.dark} />}
-      </div>
-    </React.Fragment> : null;
+      </React.Fragment> :
+      null;
   }
 });
