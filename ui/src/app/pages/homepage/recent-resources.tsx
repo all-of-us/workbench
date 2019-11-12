@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {withContentRect} from 'react-measure';
 
+import {FlexRow} from 'app/components/flex';
 import {SmallHeader} from 'app/components/headers';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {Scroll} from 'app/icons/scroll';
