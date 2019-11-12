@@ -340,11 +340,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
 
                                 <React.Fragment>
                                   {this.state.userHasWorkspaces ?
-
-                                  (<React.Fragment>
-                                    <SmallHeader>Recently Accessed Items</SmallHeader>
-                                    <RecentResources/>
-                                  </React.Fragment>) :
+                                  <RecentResources/> :
 
                                   <div style={{
                                     backgroundColor: addOpacity(colors.primary, .1).toString(),
