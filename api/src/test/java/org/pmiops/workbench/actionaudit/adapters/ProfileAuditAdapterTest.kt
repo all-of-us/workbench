@@ -73,7 +73,7 @@ class ProfileAuditAdapterTest {
     private fun buildProfile(): Profile {
         val caltechAffiliation = InstitutionalAffiliation()
             .apply { institution = "Caltech" }
-            .apply { role = "T.A."}
+            .apply { role = "T.A." }
             .apply { nonAcademicAffiliation = NonAcademicAffiliation.COMMUNITY_SCIENTIST }
             .apply { other = "They are all fine houses." }
 
