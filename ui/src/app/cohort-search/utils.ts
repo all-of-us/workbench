@@ -191,7 +191,7 @@ export function getChartObj(chartObj: any) {
     if (chartRef && chartRef.tagName) {
       // create observer to redraw charts on div resize
       const ro = new ResizeObserver(() => {
-        if (chartObj) {
+        if (chartObj.hasRendered) {
           chartObj.reflow();
         }
       });
