@@ -30,33 +30,32 @@ class WorkspaceTargetPropertyTest {
         val now = System.currentTimeMillis()
 
         workspace1 = Workspace()
-        workspace1!!.name = "Workspace 1"
-        workspace1!!.id = "fc-id-1"
-        workspace1!!.namespace = "aou-rw-local1-c4be869a"
-        workspace1!!.creator = "user@fake-research-aou.org"
-        workspace1!!.cdrVersionId = "1"
-        workspace1!!.researchPurpose = researchPurpose1
-        workspace1!!.creationTime = now
-        workspace1!!.lastModifiedTime = now
-        workspace1!!.etag = "etag_1"
-        workspace1!!.dataAccessLevel = DataAccessLevel.REGISTERED
-        workspace1!!.published = false
+            .apply { name = "Workspace 1" }
+            .apply { id = "fc-id-1" }
+            .apply { namespace = "aou-rw-local1-c4be869a" }
+            .apply { creator = "user@fake-research-aou.org" }
+            .apply { cdrVersionId = "1" }
+            .apply { researchPurpose = researchPurpose1 }
+            .apply { creationTime = now }
+            .apply { lastModifiedTime = now }
+            .apply { etag = "etag_1" }
+            .apply { dataAccessLevel = DataAccessLevel.REGISTERED }
+            .apply { published = false }
 
         workspace2 = Workspace()
-        workspace2!!.name = "Workspace 2"
-        workspace2!!.id = "fc-id-1"
-        workspace2!!.namespace = "aou-rw-local1-c4be869a"
-        workspace2!!.creator = "user@fake-research-aou.org"
-        workspace2!!.cdrVersionId = "33"
-        workspace2!!.researchPurpose = researchPurpose2
-        workspace2!!.creationTime = now
-        workspace2!!.lastModifiedTime = now
-        workspace2!!.etag = "etag_1"
-        workspace2!!.dataAccessLevel = DataAccessLevel.REGISTERED
-        workspace2!!.published = false
+            .apply { name = "Workspace 2" }
+            .apply { id = "fc-id-1" }
+            .apply { namespace = "aou-rw-local1-c4be869a" }
+            .apply { creator = "user@fake-research-aou.org" }
+            .apply { cdrVersionId = "33" }
+            .apply { researchPurpose = researchPurpose2 }
+            .apply { creationTime = now }
+            .apply { lastModifiedTime = now }
+            .apply { etag = "etag_1" }
+            .apply { dataAccessLevel = DataAccessLevel.REGISTERED }
+            .apply { published = false }
 
-        emptyWorkspace = Workspace()
-        emptyWorkspace!!.researchPurpose = ResearchPurpose()
+        emptyWorkspace = Workspace().apply { researchPurpose = ResearchPurpose() }
     }
 
     @Test

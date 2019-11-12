@@ -6,6 +6,4 @@ package org.pmiops.workbench.actionaudit.adapters
  * for the design of this system is that audit failures do not propagate and break instrumented
  * code.
  */
-interface AuditAdapter<T> {
-
-}
+interface AuditAdapter<T>
