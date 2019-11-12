@@ -68,13 +68,17 @@ export class SearchGroupComponent implements OnInit {
 
   setDemoMenuHover() {
     if (typeof ResizeObserver === 'function') {
-      const ro = new ResizeObserver(() => {
-        if (this.status === 'hidden' || this.status === 'pending') {
-          this.setOverlayPosition();
-        }
-      });
       const groupDiv = document.getElementById(this.group.id);
-      ro.observe(groupDiv);
+      // check that groupDiv is of type Element
+      if (groupDiv && groupDiv.tagName) {
+        // create observer to reposition overlays on div resize
+        const ro = new ResizeObserver(() => {
+          if (this.status === 'hidden' || this.status === 'pending') {
+            this.setOverlayPosition();
+          }
+        });
+        ro.observe(groupDiv);
+      }
     }
     const demoItem = document.getElementById('DEMO-' + this.index);
     if (demoItem) {
