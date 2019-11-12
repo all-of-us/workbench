@@ -35,9 +35,10 @@ export class ComboChart extends React.Component<Props, State> {
     const {mode} = this.props;
     const normalized = mode === 'normalized';
     const {categories, series} = this.getCategoriesAndSeries();
+    const height = Math.max(categories.length * 30, 200);
     const options = {
       chart: {
-        height: 250,
+        height,
         type: 'bar'
       },
       credits: {
