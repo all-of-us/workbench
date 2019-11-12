@@ -226,8 +226,6 @@ public class BillingProjectBufferService {
     final long bufferSize =
         billingProjectBufferEntryDao.countByStatus(
             DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE));
-    final BillingProjectBufferStatus result = new BillingProjectBufferStatus();
-    result.setBufferSize(bufferSize);
-    return result;
+    return new BillingProjectBufferStatus().bufferSize(bufferSize);
   }
 }

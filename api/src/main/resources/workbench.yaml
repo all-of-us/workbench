@@ -1170,15 +1170,13 @@ paths:
       security: []
       tags:
         - offlineBilling
-      description: If the AoU Billing Project buffer is not full, refill with one or more billing projects.
+      description: Return statistics about the billing buffer.
       operationId: getBillingProjectBufferStatus
       responses:
         200:
           description: No Error
           schema:
             $ref: '#/definitions/BillingProjectBufferStatus'
-        204:
-          description: No Error
         500:
           description: Internal Error
           schema:

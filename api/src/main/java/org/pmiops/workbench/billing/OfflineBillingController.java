@@ -55,7 +55,6 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
 
   @Override
   public ResponseEntity<BillingProjectBufferStatus> getBillingProjectBufferStatus() {
-    final BillingProjectBufferStatus response = billingProjectBufferService.getStatus();
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(billingProjectBufferService.getStatus());
   }
 }
