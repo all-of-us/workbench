@@ -1,7 +1,6 @@
 package org.pmiops.workbench.billing;
 
 import org.pmiops.workbench.api.OfflineBillingApiDelegate;
-import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,10 +50,5 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
   public ResponseEntity<Void> checkFreeTierBillingUsage() {
     freeTierBillingService.checkFreeTierBillingUsage();
     return ResponseEntity.noContent().build();
-  }
-
-  @Override
-  public ResponseEntity<BillingProjectBufferStatus> getBillingProjectBufferStatus() {
-    return ResponseEntity.ok(billingProjectBufferService.getStatus());
   }
 }

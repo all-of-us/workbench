@@ -1165,11 +1165,11 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  /v1/cron/billingProjectBufferStatus:
+  /v1/monitoring/billingProjectBufferStatus:
     get:
       security: []
       tags:
-        - offlineBilling
+        - monitoring
       description: Return statistics about the billing buffer.
       operationId: getBillingProjectBufferStatus
       responses:
