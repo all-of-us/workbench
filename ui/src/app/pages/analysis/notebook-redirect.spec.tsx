@@ -73,12 +73,6 @@ describe('NotebookRedirect', () => {
 
     // mock timers
     jest.useFakeTimers();
-
-
-    // joel tmp!
-    jest.setTimeout(1000000);
-
-
   });
 
   afterEach(() => {

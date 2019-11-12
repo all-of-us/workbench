@@ -27,8 +27,6 @@ import {environment} from 'environments/environment';
 import {Cluster, ClusterStatus, Profile} from 'generated/fetch';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
 
-// TODO Joel Current Failures: new notebook with R??
-
 enum Progress {
   Unknown,
   Initializing,
