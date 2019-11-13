@@ -24,6 +24,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import org.junit.Before;
@@ -66,6 +68,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class BillingProjectBufferServiceTest {
 
   private static final Instant NOW = Instant.now();
+  private static final Instant BEFORE_CREATING_TIMEOUT_ELAPSES =
+      NOW.plus(BillingProjectBufferService.CREATING_TIMEOUT.minusMinutes(1));
+  private static final Instant AFTER_CREATING_TIMEOUT_ELAPSED =
+      NOW.plus(BillingProjectBufferService.CREATING_TIMEOUT.plusMinutes(1));
+  private static final Instant BEFORE_ASSIGNING_TIMEOUT_ELAPSES =
+      NOW.plus(BillingProjectBufferService.ASSIGNING_TIMEOUT.minusMinutes(1));
+  private static final Instant AFTER_ASSIGNING_TIMEOUT_ELAPSED =
+      NOW.plus(BillingProjectBufferService.ASSIGNING_TIMEOUT.plusMinutes(1));
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   @TestConfiguration
@@ -103,6 +113,8 @@ public class BillingProjectBufferServiceTest {
     workbenchConfig.billing.projectNamePrefix = "test-prefix";
     workbenchConfig.billing.bufferCapacity = (int) BUFFER_CAPACITY;
     workbenchConfig.billing.bufferRefillProjectsPerTask = 1;
+
+    CLOCK.setInstant(NOW);
 
     billingProjectBufferEntryDao = spy(billingProjectBufferEntryDao);
     TestLock lock = new TestLock();
@@ -354,9 +366,6 @@ public class BillingProjectBufferServiceTest {
         .getBillingProjectStatus(capturedProjectNames.get(2));
 
     billingProjectBufferService.syncBillingProjectStatus();
-    billingProjectBufferService.syncBillingProjectStatus();
-    billingProjectBufferService.syncBillingProjectStatus();
-    billingProjectBufferService.syncBillingProjectStatus();
 
     assertThat(
             billingProjectBufferEntryDao.countByStatus(
@@ -478,13 +487,65 @@ public class BillingProjectBufferServiceTest {
   @Test
   public void cleanBillingBuffer_creating() {
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    entry.setFireCloudProjectName("foo");
     entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
-    CLOCK.setInstant(NOW.plus(61, ChronoUnit.MINUTES));
+    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
+        .when(fireCloudService)
+        .getBillingProjectStatus(entry.getFireCloudProjectName());
+
+    CLOCK.setInstant(AFTER_CREATING_TIMEOUT_ELAPSED);
+    billingProjectBufferService.syncBillingProjectStatus();
+    billingProjectBufferService.cleanBillingBuffer();
+    assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
+        .isEqualTo(BufferEntryStatus.ERROR);
+  }
+
+  @Test
+  public void cleanBillingBuffer_creatingNeverSynced() {
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    entry.setFireCloudProjectName("foo");
+    entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
+    entry.setCreationTime(getCurrentTimestamp());
+    billingProjectBufferEntryDao.save(entry);
+
+    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
+        .when(fireCloudService)
+        .getBillingProjectStatus(entry.getFireCloudProjectName());
+
+    CLOCK.setInstant(AFTER_CREATING_TIMEOUT_ELAPSED);
     billingProjectBufferService.cleanBillingBuffer();
 
+    // Time has elapsed but no status sync has occurred, should not transition.
+    assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
+        .isEqualTo(BufferEntryStatus.CREATING);
+  }
+
+  @Test
+  public void cleanBillingBuffer_creatingDelayedSync() {
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    entry.setFireCloudProjectName("foo");
+    entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
+    entry.setCreationTime(getCurrentTimestamp());
+    billingProjectBufferEntryDao.save(entry);
+
+    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
+        .when(fireCloudService)
+        .getBillingProjectStatus(entry.getFireCloudProjectName());
+    billingProjectBufferService.syncBillingProjectStatus();
+
+    CLOCK.setInstant(AFTER_CREATING_TIMEOUT_ELAPSED);
+    billingProjectBufferService.cleanBillingBuffer();
+
+    // Time has elapsed but no status sync has occurred, should not transition.
+    assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
+        .isEqualTo(BufferEntryStatus.CREATING);
+
+    // Sync again, now after the timeout - should transition.
+    billingProjectBufferService.syncBillingProjectStatus();
+    billingProjectBufferService.cleanBillingBuffer();
     assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
         .isEqualTo(BufferEntryStatus.ERROR);
   }
@@ -496,7 +557,7 @@ public class BillingProjectBufferServiceTest {
     entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
-    CLOCK.setInstant(NOW.plus(11, ChronoUnit.MINUTES));
+    CLOCK.setInstant(AFTER_ASSIGNING_TIMEOUT_ELAPSED);
     billingProjectBufferService.cleanBillingBuffer();
 
     assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
@@ -505,27 +566,84 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void cleanBillingBuffer_ignoreValidEntries() {
-    DbBillingProjectBufferEntry creating = new DbBillingProjectBufferEntry();
-    creating.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
-    creating.setCreationTime(getCurrentTimestamp());
-    billingProjectBufferEntryDao.save(creating);
-
-    CLOCK.setInstant(NOW.plus(59, ChronoUnit.MINUTES));
-    billingProjectBufferService.cleanBillingBuffer();
-
-    assertThat(billingProjectBufferEntryDao.findOne(creating.getId()).getStatusEnum())
-        .isEqualTo(BufferEntryStatus.CREATING);
-
     DbBillingProjectBufferEntry assigning = new DbBillingProjectBufferEntry();
     assigning.setStatusEnum(BufferEntryStatus.ASSIGNING, this::getCurrentTimestamp);
     assigning.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(assigning);
 
-    CLOCK.setInstant(NOW.plus(9, ChronoUnit.MINUTES));
+    CLOCK.setInstant(BEFORE_ASSIGNING_TIMEOUT_ELAPSES);
     billingProjectBufferService.cleanBillingBuffer();
 
     assertThat(billingProjectBufferEntryDao.findOne(assigning.getId()).getStatusEnum())
         .isEqualTo(BufferEntryStatus.ASSIGNING);
+
+    DbBillingProjectBufferEntry creating = new DbBillingProjectBufferEntry();
+    creating.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
+    creating.setCreationTime(getCurrentTimestamp());
+    billingProjectBufferEntryDao.save(creating);
+
+    CLOCK.setInstant(BEFORE_CREATING_TIMEOUT_ELAPSES);
+    billingProjectBufferService.cleanBillingBuffer();
+
+    assertThat(billingProjectBufferEntryDao.findOne(creating.getId()).getStatusEnum())
+        .isEqualTo(BufferEntryStatus.CREATING);
+  }
+
+  @Test
+  public void cleanBillingBuffer_multipleCreates() {
+    billingProjectBufferService.bufferBillingProjects();
+
+    CLOCK.setInstant(NOW.plus(30, ChronoUnit.MINUTES));
+    billingProjectBufferService.bufferBillingProjects();
+    billingProjectBufferService.bufferBillingProjects();
+
+    final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    verify(fireCloudService, times(3)).createAllOfUsBillingProject(captor.capture());
+    final List<String> capturedProjectNames = captor.getAllValues();
+    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
+        .when(fireCloudService)
+        .getBillingProjectStatus(capturedProjectNames.get(0));
+    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
+        .when(fireCloudService)
+        .getBillingProjectStatus(capturedProjectNames.get(1));
+    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.ERROR))
+        .when(fireCloudService)
+        .getBillingProjectStatus(capturedProjectNames.get(2));
+
+    // This lambda yields the respective buffer statuses of the captured test projects.
+    Supplier<List<BufferEntryStatus>> statusSupplier =
+        () ->
+            capturedProjectNames.stream()
+                .map(billingProjectBufferEntryDao::findByFireCloudProjectName)
+                .map(DbBillingProjectBufferEntry::getStatusEnum)
+                .collect(Collectors.toList());
+
+    billingProjectBufferService.syncBillingProjectStatus();
+    billingProjectBufferService.cleanBillingBuffer();
+    assertThat(statusSupplier.get())
+        .containsExactly(
+            BufferEntryStatus.CREATING, BufferEntryStatus.CREATING, BufferEntryStatus.ERROR);
+
+    // Time elapses, but no sync yet.
+    CLOCK.setInstant(AFTER_CREATING_TIMEOUT_ELAPSED);
+    billingProjectBufferService.cleanBillingBuffer();
+    assertThat(statusSupplier.get())
+        .containsExactly(
+            BufferEntryStatus.CREATING, BufferEntryStatus.CREATING, BufferEntryStatus.ERROR);
+
+    // Sync expires project 1, project 2 is still pending.
+    billingProjectBufferService.syncBillingProjectStatus();
+    billingProjectBufferService.cleanBillingBuffer();
+    assertThat(statusSupplier.get())
+        .containsExactly(
+            BufferEntryStatus.ERROR, BufferEntryStatus.CREATING, BufferEntryStatus.ERROR);
+
+    // Finally, expire project 2 as well.
+    CLOCK.setInstant(AFTER_CREATING_TIMEOUT_ELAPSED.plus(30, ChronoUnit.MINUTES));
+    billingProjectBufferService.syncBillingProjectStatus();
+    billingProjectBufferService.cleanBillingBuffer();
+    assertThat(statusSupplier.get())
+        .containsExactly(BufferEntryStatus.ERROR, BufferEntryStatus.ERROR, BufferEntryStatus.ERROR);
   }
 
   @Test
