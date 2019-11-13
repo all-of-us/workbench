@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.CBCriteria;
 import org.pmiops.workbench.model.CriteriaSubType;
@@ -238,9 +239,11 @@ public final class CriteriaLookupUtil {
       for (CBCriteria parent : parents) {
         String path = parent.getPath();
         if (c.getPath().startsWith(path)) {
-          long parentConceptId = Long.parseLong(parent.getConceptId());
-          byParent.putIfAbsent(parentConceptId, Sets.newHashSet());
-          byParent.get(parentConceptId).add(Long.parseLong(c.getConceptId()));
+          if (StringUtils.isNotBlank(c.getConceptId())) {
+            long parentConceptId = Long.parseLong(parent.getConceptId());
+            byParent.putIfAbsent(parentConceptId, Sets.newHashSet());
+            byParent.get(parentConceptId).add(Long.parseLong(c.getConceptId()));
+          }
         }
       }
     }
