@@ -296,6 +296,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
 
     getNotebookName() {
       const {nbName} = urlParamsStore.getValue();
+      // safe whether nbName has the standard notebook suffix or not
       return dropNotebookFileSuffix(decodeURIComponent(nbName));
     }
 
