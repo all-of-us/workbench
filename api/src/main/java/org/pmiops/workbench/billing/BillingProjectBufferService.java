@@ -142,7 +142,8 @@ public class BillingProjectBufferService {
             // For the ASSIGNING status monitor, we can simply filter by the current time as this
             // status tracks internal state rather than the Firecloud status.
             billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
-                DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.ASSIGNING),
+                DbStorageEnums.billingProjectBufferEntryStatusToStorage(
+                    BufferEntryStatus.ASSIGNING),
                 new Timestamp(now.minus(ASSIGNING_TIMEOUT).toEpochMilli())))
         .forEach(
             entry -> {
