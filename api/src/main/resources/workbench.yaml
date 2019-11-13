@@ -1167,7 +1167,6 @@ paths:
 
   /v1/monitoring/billingProjectBufferStatus:
     get:
-      security: []
       tags:
         - monitoring
       description: Return statistics about the billing buffer.
