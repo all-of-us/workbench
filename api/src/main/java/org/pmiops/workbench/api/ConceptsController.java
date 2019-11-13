@@ -203,50 +203,6 @@ public class ConceptsController implements ConceptsApiDelegate {
     }
   }
 
-  private void addVocabularyCounts(
-      SearchConceptsRequest request,
-      ConceptListResponse response,
-      String matchExp,
-      StandardConceptFilter standardConceptFilter) {
-    if (request.getDomain() == null
-        || request.getIncludeVocabularyCounts() == null
-        || !request.getIncludeVocabularyCounts()) {
-      return;
-    }
-    String domainId = CommonStorageEnums.domainToDomainId(request.getDomain());
-    List<VocabularyCount> vocabularyCounts;
-    if (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS) {
-      if (matchExp == null) {
-        vocabularyCounts =
-            domainVocabularyInfoDao.findById_DomainIdOrderById_VocabularyId(domainId).stream()
-                .map(TO_VOCABULARY_ALL_CONCEPT_COUNT)
-                .filter(NOT_ZERO)
-                .collect(Collectors.toList());
-      } else {
-        vocabularyCounts =
-            conceptDao.findVocabularyAllConceptCounts(matchExp, domainId).stream()
-                .map(TO_CLIENT_VOCAB_COUNT)
-                .collect(Collectors.toList());
-      }
-    } else if (standardConceptFilter == StandardConceptFilter.STANDARD_CONCEPTS) {
-      if (matchExp == null) {
-        vocabularyCounts =
-            domainVocabularyInfoDao.findById_DomainIdOrderById_VocabularyId(domainId).stream()
-                .map(TO_VOCABULARY_STANDARD_CONCEPT_COUNT)
-                .filter(NOT_ZERO)
-                .collect(Collectors.toList());
-      } else {
-        vocabularyCounts =
-            conceptDao.findVocabularyStandardConceptCounts(matchExp, domainId).stream()
-                .map(TO_CLIENT_VOCAB_COUNT)
-                .collect(Collectors.toList());
-      }
-    } else {
-      return;
-    }
-    response.setVocabularyCounts(vocabularyCounts);
-  }
-
   @Override
   public ResponseEntity<ConceptListResponse> searchConcepts(
       String workspaceNamespace, String workspaceId, SearchConceptsRequest request) {
@@ -278,7 +234,6 @@ public class ConceptsController implements ConceptsApiDelegate {
     // TODO: consider doing these queries in parallel
     ConceptListResponse response = new ConceptListResponse();
     addDomainCounts(request, response, matchExp, standardConceptFilter);
-    addVocabularyCounts(request, response, matchExp, standardConceptFilter);
 
     List<String> domainIds = null;
     if (request.getDomain() != null) {
