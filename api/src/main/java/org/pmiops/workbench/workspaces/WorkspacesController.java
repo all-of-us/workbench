@@ -146,11 +146,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @VisibleForTesting
-  public void setUserProvider(Provider<DbUser> userProvider) {
-    this.userProvider = userProvider;
-  }
-
-  @VisibleForTesting
   void setWorkbenchConfigProvider(Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }

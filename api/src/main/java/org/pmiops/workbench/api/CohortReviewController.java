@@ -28,7 +28,6 @@ import static org.pmiops.workbench.model.FilterColumns.VISIT_TYPE;
 import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -245,11 +244,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
     this.clock = clock;
-  }
-
-  @VisibleForTesting
-  public void setUserProvider(Provider<DbUser> userProvider) {
-    this.userProvider = userProvider;
   }
 
   /**
