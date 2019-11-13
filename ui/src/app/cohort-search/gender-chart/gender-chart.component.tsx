@@ -33,9 +33,10 @@ export class GenderChart extends React.Component<Props, State> {
 
   getChartOptions() {
     const {categories, data} = this.getCategoriesAndData();
+    const height = Math.max(categories.length * 30, 200);
     const options = {
       chart: {
-        height: 200,
+        height,
         type: 'bar'
       },
       credits: {
