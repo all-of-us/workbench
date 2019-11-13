@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
+import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -205,7 +205,7 @@ public class ConceptSetsControllerTest {
 
   @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  @Autowired WorkspaceAuditAdapterService workspaceAuditAdapterService;
+  @Autowired WorkspaceAuditAdapter workspaceAuditAdapter;
 
   @TestConfiguration
   @Import({
@@ -228,7 +228,7 @@ public class ConceptSetsControllerTest {
     FireCloudService.class,
     NotebooksService.class,
     UserRecentResourceService.class,
-    WorkspaceAuditAdapterService.class
+    WorkspaceAuditAdapter.class
   })
   static class Configuration {
     @Bean
@@ -281,7 +281,7 @@ public class ConceptSetsControllerTest {
             notebooksService,
             userService,
             workbenchConfigProvider,
-            workspaceAuditAdapterService);
+            workspaceAuditAdapter);
 
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);

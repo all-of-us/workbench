@@ -30,10 +30,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.api.WorkspacesApiDelegate;
-import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.EmptyBufferException;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -115,7 +115,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final NotebooksService notebooksService;
   private final UserService userService;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private WorkspaceAuditAdapterService workspaceAuditAdapterService;
+  private WorkspaceAuditAdapter workspaceAuditAdapter;
 
   @Autowired
   public WorkspacesController(
@@ -130,7 +130,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       NotebooksService notebooksService,
       UserService userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceAuditAdapterService workspaceAuditAdapterService) {
+      WorkspaceAuditAdapter workspaceAuditAdapter) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -142,7 +142,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.notebooksService = notebooksService;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.workspaceAuditAdapterService = workspaceAuditAdapterService;
+    this.workspaceAuditAdapter = workspaceAuditAdapter;
   }
 
   @VisibleForTesting
@@ -260,7 +260,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
-    workspaceAuditAdapterService.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
+    workspaceAuditAdapter.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
   }
 
@@ -293,7 +293,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     workspaceService.maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
-    workspaceAuditAdapterService.fireDeleteAction(dbWorkspace);
+    workspaceAuditAdapter.fireDeleteAction(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -472,7 +472,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspaceService.updateWorkspaceAcls(
               savedWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
-    workspaceAuditAdapterService.fireDuplicateAction(fromWorkspace, savedWorkspace);
+    workspaceAuditAdapter.fireDuplicateAction(fromWorkspace, savedWorkspace);
     return ResponseEntity.ok(
         new CloneWorkspaceResponse()
             .workspace(WorkspaceConversionUtils.toApiWorkspace(savedWorkspace, toFcWorkspace)));
@@ -535,7 +535,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.convertWorkspaceAclsToUserRoles(updatedWsAcls);
     resp.setItems(updatedUserRoles);
 
-    workspaceAuditAdapterService.fireCollaborateAction(
+    workspaceAuditAdapter.fireCollaborateAction(
         dbWorkspace.getWorkspaceId(), aclStringsByUserIdBuilder.build());
     return ResponseEntity.ok(resp);
   }

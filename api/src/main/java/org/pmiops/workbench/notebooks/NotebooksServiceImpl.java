@@ -123,7 +123,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     workspaceService.enforceWorkspaceAccessLevel(
         toWorkspaceNamespace, toWorkspaceName, WorkspaceAccessLevel.WRITER);
     if (!cloudStorageService
-        .blobsExist(Collections.singletonList(newNotebookLocators.blobId))
+        .getExistingBlobIdsIn(Collections.singletonList(newNotebookLocators.blobId))
         .isEmpty()) {
       throw new BlobAlreadyExistsException();
     }

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.audit
+package org.pmiops.workbench.actionaudit
 
 // do not rename these, as they are serialized as text
 enum class TargetType {

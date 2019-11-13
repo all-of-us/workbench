@@ -5,6 +5,7 @@ import com.google.api.client.http.HttpStatusCodes;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -13,6 +14,8 @@ import org.json.JSONObject;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
@@ -341,6 +344,24 @@ public class FireCloudServiceImpl implements FireCloudService {
         (context) ->
             workspacesApi.getWorkspace(
                 projectName, workspaceName, FIRECLOUD_GET_WORKSPACE_REQUIRED_FIELDS));
+  }
+
+  @Override
+  public Optional<WorkspaceResponse> getWorkspace(DbWorkspace dbWorkspace) {
+    try {
+      final WorkspaceResponse result =
+          getWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
+      return Optional.of(result);
+    } catch (WorkbenchException e) {
+      log.log(
+          Level.INFO,
+          e,
+          () ->
+              String.format(
+                  "Exception encountered retrieving workspace with DbWorkspace %s",
+                  dbWorkspace.toString()));
+      return Optional.empty();
+    }
   }
 
   @Override

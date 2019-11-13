@@ -1,4 +1,4 @@
-package org.pmiops.workbench.audit
+package org.pmiops.workbench.actionaudit
 
 data class ActionAuditEvent(
     val timestamp: Long,

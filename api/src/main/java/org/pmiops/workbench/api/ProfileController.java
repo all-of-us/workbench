@@ -16,6 +16,7 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.pmiops.workbench.actionaudit.adapters.ProfileAuditAdapter;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -183,6 +184,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
   private final Provider<MailService> mailServiceProvider;
+  private final ProfileAuditAdapter profileAuditAdapter;
 
   @Autowired
   ProfileController(
@@ -198,7 +200,8 @@ public class ProfileController implements ProfileApiDelegate {
       LeonardoNotebooksClient leonardoNotebooksClient,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment,
-      Provider<MailService> mailServiceProvider) {
+      Provider<MailService> mailServiceProvider,
+      ProfileAuditAdapter profileAuditAdapter) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -212,6 +215,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
     this.mailServiceProvider = mailServiceProvider;
+    this.profileAuditAdapter = profileAuditAdapter;
   }
 
   @Override
@@ -253,14 +257,10 @@ public class ProfileController implements ProfileApiDelegate {
     validateStringLength(profile.getGivenName(), "Given Name", 80, 1);
     validateStringLength(profile.getFamilyName(), "Family Name", 80, 1);
     if (!workbenchConfigProvider.get().featureFlags.enableNewAccountCreation) {
+      // required for old create account flow
       validateStringLength(profile.getCurrentPosition(), "Current Position", 255, 1);
       validateStringLength(profile.getOrganization(), "Organization", 255, 1);
       validateStringLength(profile.getAreaOfResearch(), "Current Research", 3000, 1);
-    } else {
-      validateStringLength(profile.getAddress().getStreetAddress1(), "Street Address 1", 255, 5);
-      validateStringLength(profile.getAddress().getCity(), "City", 3000, 1);
-      validateStringLength(profile.getAddress().getState(), "State", 3000, 1);
-      validateStringLength(profile.getAddress().getCountry(), "Country", 3000, 2);
     }
   }
 
@@ -456,9 +456,10 @@ public class ProfileController implements ProfileApiDelegate {
     } catch (MessagingException e) {
       throw new WorkbenchException(e);
     }
-
     // Note: Avoid getProfileResponse() here as this is not an authenticated request.
-    return ResponseEntity.ok(profileService.getProfile(user));
+    final Profile createdProfile = profileService.getProfile(user);
+    profileAuditAdapter.fireCreateAction(createdProfile);
+    return ResponseEntity.ok(createdProfile);
   }
 
   @Override
@@ -558,7 +559,7 @@ public class ProfileController implements ProfileApiDelegate {
     com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
     DbUser user = userDao.findUserByEmail(username);
     checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
-    if (!userNeverLoggedIn(googleUser, user)) {
+    if (userHasEverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
     String newEmail = updateContactEmailRequest.getContactEmail();
@@ -578,15 +579,15 @@ public class ProfileController implements ProfileApiDelegate {
     com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
     DbUser user = userDao.findUserByEmail(username);
     checkUserCreationNonce(user, resendRequest.getCreationNonce());
-    if (!userNeverLoggedIn(googleUser, user)) {
+    if (userHasEverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
     return resetPasswordAndSendWelcomeEmail(username, user);
   }
 
-  private boolean userNeverLoggedIn(
+  private boolean userHasEverLoggedIn(
       com.google.api.services.directory.model.User googleUser, DbUser user) {
-    return user.getFirstSignInTime() == null && googleUser.getChangePasswordAtNextLogin();
+    return user.getFirstSignInTime() != null || !googleUser.getChangePasswordAtNextLogin();
   }
 
   private ResponseEntity<Void> resetPasswordAndSendWelcomeEmail(String username, DbUser user) {
@@ -624,6 +625,12 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> updateProfile(Profile updatedProfile) {
     validateProfileFields(updatedProfile);
     DbUser user = userProvider.get();
+
+    // Save current profile for audit trail. Continue to use the userProvider (instead
+    // of info on previousProfile) to ensure addition of audit system doesn't change behavior.
+    // That is, in the (rare, hopefully) condition that the old profile gives incorrect information,
+    // the update will still work as well as it would have.
+    final Profile previousProfile = profileService.getProfile(user);
 
     if (!userProvider.get().getGivenName().equalsIgnoreCase(updatedProfile.getGivenName())
         || !userProvider.get().getFamilyName().equalsIgnoreCase(updatedProfile.getFamilyName())) {
@@ -680,6 +687,10 @@ public class ProfileController implements ProfileApiDelegate {
 
     // This does not update the name in Google.
     saveUserWithConflictHandling(user);
+
+    final Profile appliedUpdatedProfile = profileService.getProfile(user);
+    profileAuditAdapter.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 
@@ -787,6 +798,8 @@ public class ProfileController implements ProfileApiDelegate {
     log.log(Level.WARNING, "Deleting profile: user email: " + user.getEmail());
     directoryService.deleteUser(user.getEmail().split("@")[0]);
     userDao.delete(user.getUserId());
+    profileAuditAdapter.fireDeleteAction(
+        user.getUserId(), user.getEmail()); // not sure if user profider will survive the next line
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
