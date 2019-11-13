@@ -214,26 +214,26 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       clearTimeout(this.timeoutReference);
     }
 
-    isClusterInProgress(cluster: Cluster): boolean {
+    private isClusterInProgress(cluster: Cluster): boolean {
       return cluster.status === ClusterStatus.Starting ||
         cluster.status === ClusterStatus.Stopping ||
         cluster.status === ClusterStatus.Stopped;
     }
 
-    clearAndSetTimeout(timeoutCallback, timeoutMillis) {
+    private clearAndSetTimeout(timeoutCallback, timeoutMillis) {
       clearTimeout(this.timeoutReference);
       this.timeoutReference = setTimeout(() => timeoutCallback(), timeoutMillis);
     }
 
-    isCreatingNewNotebook() {
+    private isCreatingNewNotebook() {
       return !!this.props.queryParams.creating;
     }
 
-    isPlaygroundMode() {
+    private isPlaygroundMode() {
       return !!this.props.queryParams.playgroundMode;
     }
 
-    async pollCluster(billingProjectId) {
+    private async pollCluster(billingProjectId) {
       const repoll = () => {
         this.clearAndSetTimeout(() => this.pollCluster(billingProjectId), 15000);
       };
@@ -280,31 +280,33 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       }
     }
 
-    incrementProgress(p: Progress): void {
+    private incrementProgress(p: Progress): void {
       this.setState({
         progress: p,
         progressComplete:  this.state.progressComplete.set(p, true)
       });
     }
 
-    notebookUrl(cluster: Cluster, nbName: string): string {
+    private notebookUrl(cluster: Cluster, nbName: string): string {
       return encodeURI(
         environment.leoApiUrl + '/notebooks/'
         + cluster.clusterNamespace + '/'
         + cluster.clusterName + '/notebooks/' + nbName);
     }
 
-    getNotebookName() {
+    // get notebook name without file suffix
+    private getNotebookName() {
       const {nbName} = urlParamsStore.getValue();
       // safe whether nbName has the standard notebook suffix or not
       return dropNotebookFileSuffix(decodeURIComponent(nbName));
     }
 
-    getFullNotebookName() {
+    // get notebook name with file suffix
+    private getFullNotebookName() {
       return appendNotebookFileSuffix(this.getNotebookName());
     }
 
-    async initializeNotebookCookies(c: Cluster) {
+    private async initializeNotebookCookies(c: Cluster) {
       return notebooksApi().setCookie(c.clusterNamespace, c.clusterName,
         {
           withCredentials: true,
@@ -313,7 +315,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         });
     }
 
-    async getNotebookPathAndLocalize(cluster: Cluster) {
+    private async getNotebookPathAndLocalize(cluster: Cluster) {
       const fullNotebookName = this.getFullNotebookName();
       if (this.isCreatingNewNotebook()) {
         this.incrementProgress(Progress.Creating);
@@ -326,7 +328,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       }
     }
 
-    async localizeNotebooksWithRetry(cluster: Cluster, notebookNames: Array<string>, retryCount: number = 0) {
+    private async localizeNotebooksWithRetry(cluster: Cluster, notebookNames: Array<string>, retryCount: number = 0) {
       const {workspace} = this.props;
       try {
         const resp = await clusterApi().localize(cluster.clusterNamespace, cluster.clusterName,
@@ -345,7 +347,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       }
     }
 
-    async createNotebookAndLocalize(cluster: Cluster) {
+    private async createNotebookAndLocalize(cluster: Cluster) {
       const fileContent = commonNotebookFormat;
       const {kernelType} = this.props.queryParams;
       if (kernelType === Kernels.R.toString()) {
