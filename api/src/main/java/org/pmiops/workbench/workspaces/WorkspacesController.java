@@ -145,11 +145,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceAuditAdapter = workspaceAuditAdapter;
   }
 
-  @VisibleForTesting
-  void setWorkbenchConfigProvider(Provider<WorkbenchConfig> workbenchConfigProvider) {
-    this.workbenchConfigProvider = workbenchConfigProvider;
-  }
-
   private String getRegisteredUserDomainEmail() {
     ManagedGroupWithMembers registeredDomainGroup =
         fireCloudService.getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);

@@ -7,10 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -19,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -30,22 +31,20 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ConceptSetServiceTest {
 
-  @Autowired private ConceptSetDao conceptSetDao;
+  @Autowired WorkspaceDao workspaceDao;
 
-  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired ConceptSetService conceptSetService;
 
-  private ConceptSetService conceptSetService;
-  private DbWorkspace workspace;
-
-  @Before
-  public void setUp() {
-    conceptSetService = new ConceptSetService();
-    conceptSetService.setConceptSetDao(conceptSetDao);
-    workspace = mockWorkspace();
-  }
+  @TestConfiguration
+  @Import({
+    ConceptSetService.class,
+  })
+  @MockBean({ConceptBigQueryService.class})
+  static class Configuration {}
 
   @Test
   public void testCloneConceptSetWithNoCdrVersionChange() {
+    DbWorkspace workspace = mockWorkspace();
     DbConceptSet fromConceptSet = mockConceptSet();
     DbConceptSet copiedConceptSet =
         conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, workspace, false);
