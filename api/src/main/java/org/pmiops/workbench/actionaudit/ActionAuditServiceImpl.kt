@@ -1,4 +1,4 @@
-package org.pmiops.workbench.audit
+package org.pmiops.workbench.actionaudit
 
 import com.google.cloud.MonitoredResource
 import com.google.cloud.logging.LogEntry
@@ -60,6 +60,10 @@ constructor(private val configProvider: Provider<WorkbenchConfig>, private val c
         jsonValuesByColumn[AuditColumn.PREV_VALUE.name] = auditEvent.previousValueMaybe
         jsonValuesByColumn[AuditColumn.NEW_VALUE.name] = auditEvent.newValueMaybe
         return JsonPayload.of(jsonValuesByColumn)
+    }
+
+    override fun logRuntimeException(logger: Logger, exception: RuntimeException) {
+        logger.log(Level.WARNING, exception) { "Exception encountered during audit." }
     }
 
     companion object {

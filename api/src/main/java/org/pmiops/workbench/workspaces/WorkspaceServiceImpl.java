@@ -60,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class WorkspaceServiceImpl implements WorkspaceService {
+  private static final Logger logger = Logger.getLogger(WorkspaceServiceImpl.class.getName());
 
   private static final String FC_OWNER_ROLE = "OWNER";
   protected static final int RECENT_WORKSPACE_COUNT = 4;
@@ -94,8 +95,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     this.conceptSetService = conceptSetService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
-    this.userProvider = userProvider;
     this.userDao = userDao;
+    this.userProvider = userProvider;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
     this.workspaceDao = workspaceDao;
   }
@@ -213,17 +214,6 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     Type accessEntryType = new TypeToken<Map<String, WorkspaceAccessEntry>>() {}.getType();
     Gson gson = new Gson();
     return gson.fromJson(gson.toJson(aclResp.getAcl(), accessEntryType), accessEntryType);
-  }
-
-  /**
-   * This is an internal method used by createWorkspace and cloneWorkspace endpoints, to check the
-   * existence of ws name. Currently does not return a conflict if user is checking the name of a
-   * deleted ws.
-   */
-  @Override
-  public DbWorkspace getByName(String ns, String name) {
-    return workspaceDao.findByWorkspaceNamespaceAndNameAndActiveStatus(
-        ns, name, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   @Override
@@ -433,17 +423,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public WorkspaceAccessLevel getWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId) {
-    WorkspaceACL workspaceACL = fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId);
-    WorkspaceAccessEntry workspaceAccessEntry =
-        Optional.of(workspaceACL.getAcl().get(userProvider.get().getEmail()))
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format(
-                            "DbWorkspace %s/%s not found", workspaceNamespace, workspaceId)));
-    final String userAccess = workspaceAccessEntry.getAccessLevel();
-
-    if (userAccess.equals(PROJECT_OWNER_ACCESS_LEVEL)) {
+    String userAccess =
+        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
+    if (PROJECT_OWNER_ACCESS_LEVEL.equals(userAccess)) {
       return WorkspaceAccessLevel.OWNER;
     }
     WorkspaceAccessLevel result = WorkspaceAccessLevel.fromValue(userAccess);
@@ -480,13 +462,13 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public DbWorkspace findByWorkspaceId(long workspaceId) {
+  public Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
     DbWorkspace workspace = getDao().findOne(workspaceId);
     if (workspace == null
         || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
-      throw new NotFoundException(String.format("DbWorkspace %s not found.", workspaceId));
+      return Optional.empty();
     }
-    return workspace;
+    return Optional.of(workspace);
   }
 
   @Override

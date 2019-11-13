@@ -20,6 +20,16 @@
       "namespace": "aou-rw-274bb61a",
       "id": "featuredworkspaceworkingwithphysicalmeasurementdatav1",
       "category": "TUTORIAL_WORKSPACES"
+    }, {
+      "name": "Type 2 Diabetes Phenotype",
+      "namespace": "aou-rw-e6084db8",
+      "id": "masterfeaturedworkspacetype2diabetesphenotype",
+      "category": "PHENOTYPE_LIBRARY"
+    }, {
+      "name": "Major Depressive Disorders Phenotype",
+      "namespace": "aou-rw-edae682b",
+      "id": "masterdepressionphenotype",
+      "category": "PHENOTYPE_LIBRARY"
     }
   ]
 }

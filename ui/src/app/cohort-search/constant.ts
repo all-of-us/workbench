@@ -1,36 +1,17 @@
-import {AttrName, CriteriaType, DomainType, ModifierType, Operator} from 'generated/fetch';
+import {AttrName, DomainType, ModifierType, Operator} from 'generated/fetch';
 
-export const LIST_PROGRAM_TYPES = [
-  {
-    name: 'Demographics', domain: DomainType.PERSON, children: [
-      {name: 'Current Age/Deceased', domain: DomainType.PERSON, type: CriteriaType.AGE},
-      {name: 'Gender Identity', domain: DomainType.PERSON, type: CriteriaType.GENDER},
-      {name: 'Sex Assigned at Birth', domain: DomainType.PERSON, type: CriteriaType.SEX},
-      {name: 'Race', domain: DomainType.PERSON, type: CriteriaType.RACE},
-      {name: 'Ethnicity', domain: DomainType.PERSON, type: CriteriaType.ETHNICITY},
-    ]
-  },
-  {
-    name: 'Surveys',
-    domain: DomainType.SURVEY,
-    type: CriteriaType.PPI,
-    standard: false
-  },
-  {
-    name: 'Physical Measurements',
-    domain: DomainType.PHYSICALMEASUREMENT,
-    type: CriteriaType.PPI,
-    standard: false,
-    fullTree: true
-  },
+export const PROGRAM_TYPES = [
+  DomainType[DomainType.PERSON],
+  DomainType[DomainType.SURVEY],
+  DomainType[DomainType.PHYSICALMEASUREMENT]
 ];
 
-export const LIST_DOMAIN_TYPES = [
-  {name: 'Conditions', domain: DomainType.CONDITION},
-  {name: 'Procedures', domain: DomainType.PROCEDURE},
-  {name: 'Drugs', domain: DomainType.DRUG},
-  {name: 'Measurements', domain: DomainType.MEASUREMENT},
-  {name: 'Visits', domain: DomainType.VISIT, type: CriteriaType.VISIT, standard: true, fullTree: true}
+export const DOMAIN_TYPES = [
+  DomainType[DomainType.CONDITION],
+  DomainType[DomainType.PROCEDURE],
+  DomainType[DomainType.DRUG],
+  DomainType[DomainType.MEASUREMENT],
+  DomainType[DomainType.VISIT]
 ];
 
 export const PM_UNITS = {

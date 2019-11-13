@@ -51,13 +51,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.CohortAnnotationDefinitionController;
 import org.pmiops.workbench.api.CohortReviewController;
 import org.pmiops.workbench.api.CohortsController;
 import org.pmiops.workbench.api.ConceptSetsController;
 import org.pmiops.workbench.api.Etags;
-import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -220,7 +220,7 @@ public class WorkspacesControllerTest {
       makeConcept(CLIENT_CONCEPT_3);
 
   @Autowired private BillingProjectBufferService billingProjectBufferService;
-  @Autowired private WorkspaceAuditAdapterService mockWorkspaceAuditAdapterService;
+  @Autowired private WorkspaceAuditAdapter mockWorkspaceAuditAdapter;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
 
@@ -253,7 +253,7 @@ public class WorkspacesControllerTest {
     UserService.class,
     UserRecentResourceService.class,
     ConceptService.class,
-    WorkspaceAuditAdapterService.class
+    WorkspaceAuditAdapter.class
   })
   static class Configuration {
 
@@ -351,22 +351,18 @@ public class WorkspacesControllerTest {
   }
 
   private WorkspaceACL createWorkspaceACL() {
-    return createWorkspaceACLWithPermission(WorkspaceAccessLevel.OWNER);
-  }
-
-  private WorkspaceACL createWorkspaceACL(JSONObject acl) {
-    return new Gson().fromJson(new JSONObject().put("acl", acl).toString(), WorkspaceACL.class);
-  }
-
-  private WorkspaceACL createWorkspaceACLWithPermission(WorkspaceAccessLevel permission) {
     return createWorkspaceACL(
         new JSONObject()
             .put(
                 currentUser.getEmail(),
                 new JSONObject()
-                    .put("accessLevel", permission.toString())
+                    .put("accessLevel", "OWNER")
                     .put("canCompute", true)
                     .put("canShare", true)));
+  }
+
+  private WorkspaceACL createWorkspaceACL(JSONObject acl) {
+    return new Gson().fromJson(new JSONObject().put("acl", acl).toString(), WorkspaceACL.class);
   }
 
   private JSONObject createDemoCriteria() {
@@ -402,11 +398,6 @@ public class WorkspacesControllerTest {
 
   private void stubFcGetWorkspaceACL(WorkspaceACL acl) {
     when(fireCloudService.getWorkspaceAcl(anyString(), anyString())).thenReturn(acl);
-  }
-
-  private void stubFcGetWorkspaceACLForWorkspace(
-      String workspaceNamespace, String workspaceId, WorkspaceACL acl) {
-    when(fireCloudService.getWorkspaceAcl(workspaceNamespace, workspaceId)).thenReturn(acl);
   }
 
   private void stubFcGetGroup() {
@@ -547,7 +538,7 @@ public class WorkspacesControllerTest {
   public void getWorkspaces() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    verify(mockWorkspaceAuditAdapterService).fireCreateAction(any(Workspace.class), anyLong());
+    verify(mockWorkspaceAuditAdapter).fireCreateAction(any(Workspace.class), anyLong());
 
     org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
         new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
@@ -644,7 +635,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
-    verify(mockWorkspaceAuditAdapterService).fireDeleteAction(any(DbWorkspace.class));
+    verify(mockWorkspaceAuditAdapter).fireDeleteAction(any(DbWorkspace.class));
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");
@@ -675,7 +666,7 @@ public class WorkspacesControllerTest {
   public void testUpdateWorkspace() throws Exception {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
-    stubFcGetWorkspaceACL();
+
     ws.setName("updated-name");
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     request.setWorkspace(ws);
@@ -696,7 +687,6 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspaceResearchPurpose() throws Exception {
-    stubFcGetWorkspaceACL();
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -744,17 +734,15 @@ public class WorkspacesControllerTest {
     ws.setName("updated-name");
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     request.setWorkspace(ws);
-    stubFcGetWorkspaceACL(createWorkspaceACLWithPermission(WorkspaceAccessLevel.READER));
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
-    stubFcGetWorkspaceACL(createWorkspaceACLWithPermission(WorkspaceAccessLevel.WRITER));
+
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
   }
 
   @Test(expected = ConflictException.class)
   public void testUpdateWorkspaceStaleThrows() throws Exception {
-    stubFcGetWorkspaceACL();
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
@@ -768,7 +756,6 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testUpdateWorkspaceInvalidEtagsThrow() throws Exception {
-    stubFcGetWorkspaceACL();
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
@@ -843,6 +830,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testCloneWorkspace() throws Exception {
     stubFcGetGroup();
+    stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -865,7 +853,6 @@ public class WorkspacesControllerTest {
     shareWorkspaceRequest.addItemsItem(writer);
 
     stubFcUpdateWorkspaceACL();
-    stubFcGetWorkspaceACL();
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
 
@@ -890,7 +877,7 @@ public class WorkspacesControllerTest {
             .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
             .getBody()
             .getWorkspace();
-    verify(mockWorkspaceAuditAdapterService)
+    verify(mockWorkspaceAuditAdapter)
         .fireDuplicateAction(any(DbWorkspace.class), any(DbWorkspace.class));
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
@@ -1093,9 +1080,12 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+    org.pmiops.workbench.firecloud.model.Workspace clonedWorkspace =
+        stubCloneWorkspace(
+            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     mockBillingProjectBuffer("cloned-ns");
+    stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
     Workspace cloned =
         workspacesController
             .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
@@ -1242,7 +1232,9 @@ public class WorkspacesControllerTest {
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
 
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+    org.pmiops.workbench.firecloud.model.Workspace clonedWorkspace =
+        stubCloneWorkspace(
+            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
             "condition_occurrence",
@@ -1250,6 +1242,7 @@ public class WorkspacesControllerTest {
         .thenReturn(456);
 
     mockBillingProjectBuffer("cloned-ns");
+    stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
     Workspace cloned =
         workspacesController
             .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
@@ -1266,7 +1259,6 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneWorkspace_Dataset() {
-    stubFcGetWorkspaceACL();
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -1286,6 +1278,7 @@ public class WorkspacesControllerTest {
     final String expectedConceptSetDescription = "d1";
     DbConceptSet originalConceptSet = new DbConceptSet();
     originalConceptSet.setName(expectedConceptSetName);
+
     originalConceptSet.setDescription(expectedConceptSetDescription);
     originalConceptSet.setDomainEnum(Domain.CONDITION);
     originalConceptSet.setConceptIds(Collections.singleton(CLIENT_CONCEPT_1.getConceptId()));
@@ -1337,9 +1330,13 @@ public class WorkspacesControllerTest {
         modWorkspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
-    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+    stubFcGetWorkspaceACL();
+    org.pmiops.workbench.firecloud.model.Workspace clonedWorkspace =
+        stubCloneWorkspace(
+            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     mockBillingProjectBuffer("cloned-ns");
+    stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.READER);
     Workspace cloned =
         workspacesController
             .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
@@ -1779,7 +1776,7 @@ public class WorkspacesControllerTest {
         workspacesController
             .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
             .getBody();
-    verify(mockWorkspaceAuditAdapterService).fireCollaborateAction(anyLong(), anyMap());
+    verify(mockWorkspaceAuditAdapter).fireCollaborateAction(anyLong(), anyMap());
     Workspace workspace2 =
         workspacesController
             .getWorkspace(workspace.getNamespace(), workspace.getName())
@@ -2137,7 +2134,6 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testRenameNotebookInWorkspace() throws Exception {
-    stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2161,7 +2157,6 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testRenameNotebookWoExtension() throws Exception {
-    stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2185,7 +2180,6 @@ public class WorkspacesControllerTest {
 
   @Test
   public void copyNotebook() {
-    stubFcGetWorkspaceACL();
     Workspace fromWorkspace = createWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
@@ -2220,7 +2214,6 @@ public class WorkspacesControllerTest {
 
   @Test
   public void copyNotebook_onlyAppendsSuffixIfNeeded() {
-    stubFcGetWorkspaceACL();
     Workspace fromWorkspace = createWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
@@ -2251,7 +2244,6 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ForbiddenException.class)
   public void copyNotebook_onlyHasReadPermissionsToDestination() {
-    stubFcGetWorkspaceACL(createWorkspaceACLWithPermission(WorkspaceAccessLevel.READER));
     Workspace fromWorkspace = createWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
@@ -2287,10 +2279,6 @@ public class WorkspacesControllerTest {
         fromWorkspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.NO_ACCESS);
-    stubFcGetWorkspaceACLForWorkspace(
-        fromWorkspace.getNamespace(),
-        fromWorkspace.getName(),
-        createWorkspaceACLWithPermission(WorkspaceAccessLevel.NO_ACCESS));
     String fromNotebookName = "origin";
 
     Workspace toWorkspace = createWorkspace("toWorkspaceNs", "toworkspace");
@@ -2300,10 +2288,6 @@ public class WorkspacesControllerTest {
         toWorkspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.WRITER);
-    stubFcGetWorkspaceACLForWorkspace(
-        toWorkspace.getNamespace(),
-        toWorkspace.getName(),
-        createWorkspaceACLWithPermission(WorkspaceAccessLevel.WRITER));
     String newNotebookName = "new";
 
     CopyRequest copyNotebookRequest =
@@ -2321,7 +2305,6 @@ public class WorkspacesControllerTest {
 
   @Test(expected = ConflictException.class)
   public void copyNotebook_alreadyExists() {
-    stubFcGetWorkspaceACL();
     Workspace fromWorkspace = createWorkspace();
     fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
     String fromNotebookName = "origin";
@@ -2340,7 +2323,7 @@ public class WorkspacesControllerTest {
 
     doReturn(Collections.singleton(newBlobId))
         .when(cloudStorageService)
-        .blobsExist(Collections.singletonList(newBlobId));
+        .getExistingBlobIdsIn(Collections.singletonList(newBlobId));
 
     workspacesController.copyNotebook(
         fromWorkspace.getNamespace(),
@@ -2351,7 +2334,6 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testCloneNotebook() throws Exception {
-    stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2409,7 +2391,6 @@ public class WorkspacesControllerTest {
   public void testGetPublishedWorkspaces() {
     stubFcGetGroup();
     stubFcUpdateWorkspaceACL();
-    stubFcGetWorkspaceACL();
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -2430,7 +2411,6 @@ public class WorkspacesControllerTest {
   public void testGetWorkspacesGetsPublishedIfOwner() {
     stubFcGetGroup();
     stubFcUpdateWorkspaceACL();
-    stubFcGetWorkspaceACL();
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -2450,7 +2430,6 @@ public class WorkspacesControllerTest {
   public void testGetWorkspacesGetsPublishedIfWriter() {
     stubFcGetGroup();
     stubFcUpdateWorkspaceACL();
-    stubFcGetWorkspaceACL();
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -2470,7 +2449,6 @@ public class WorkspacesControllerTest {
   public void testGetWorkspacesDoesNotGetsPublishedIfReader() {
     stubFcGetGroup();
     stubFcUpdateWorkspaceACL();
-    stubFcGetWorkspaceACL();
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -2685,7 +2663,11 @@ public class WorkspacesControllerTest {
   public void getUserRecentWorkspaces() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    stubFcGetWorkspaceACL();
+    stubGetWorkspace(
+        workspace.getNamespace(),
+        workspace.getName(),
+        LOGGED_IN_USER_EMAIL,
+        WorkspaceAccessLevel.OWNER);
     DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
     workspaceService.updateRecentWorkspaces(dbWorkspace, currentUser.getUserId(), NOW);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
