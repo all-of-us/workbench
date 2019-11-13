@@ -22,7 +22,7 @@ public interface CloudStorageService {
 
   List<Blob> getBlobListForPrefix(String bucketName, String directory);
 
-  Set<BlobId> blobsExist(List<BlobId> id);
+  Set<BlobId> getExistingBlobIdsIn(List<BlobId> id);
 
   void writeFile(String bucketName, String fileName, byte[] bytes);
 

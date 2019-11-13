@@ -178,7 +178,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public Set<BlobId> blobsExist(List<BlobId> ids) {
+  public Set<BlobId> getExistingBlobIdsIn(List<BlobId> ids) {
     if (ids.isEmpty()) {
       return ImmutableSet.of();
     }

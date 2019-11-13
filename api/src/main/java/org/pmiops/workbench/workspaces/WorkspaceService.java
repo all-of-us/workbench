@@ -3,6 +3,7 @@ package org.pmiops.workbench.workspaces;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -19,7 +20,7 @@ public interface WorkspaceService {
 
   WorkspaceDao getDao();
 
-  DbWorkspace findByWorkspaceId(long workspaceId);
+  Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId);
 
   FireCloudService getFireCloudService();
 
@@ -32,8 +33,6 @@ public interface WorkspaceService {
   List<WorkspaceResponse> getWorkspaces();
 
   List<WorkspaceResponse> getPublishedWorkspaces();
-
-  DbWorkspace getByName(String ns, String name);
 
   DbWorkspace getRequired(String ns, String firecloudName);
 
