@@ -5,7 +5,6 @@ import * as React from 'react';
 import {Button, Clickable, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
@@ -1027,7 +1026,6 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                              this.setState({openSaveModal: false});
                                            }}
         />}
-        <HelpSidebar location='datasetBuilder' />
       </React.Fragment>;
     }
   });

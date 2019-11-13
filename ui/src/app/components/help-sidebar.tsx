@@ -13,9 +13,9 @@ const sidebarContent = require('assets/json/help-sidebar.json');
 const styles = reactStyles({
   sidebarContainer: {
     position: 'absolute',
-    top: 0,
-    right: 'calc(-0.6rem - 45px)',
-    height: '100%',
+    top: '60px',
+    right: 0,
+    height: 'calc(100% - 60px)',
     minHeight: 'calc(100vh - 156px)',
     width: 'calc(14rem + 45px)',
     overflow: 'hidden',
@@ -41,9 +41,9 @@ const styles = reactStyles({
   },
   iconContainer: {
     position: 'absolute',
-    top: 0,
-    right: 'calc(-0.6rem - 45px)',
-    height: '100%',
+    top: '60px',
+    right: 0,
+    height: 'calc(100% - 60px)',
     minHeight: 'calc(100vh - 156px)',
     width: '45px',
     background: colorWithWhiteness(colors.primary, 0.4),

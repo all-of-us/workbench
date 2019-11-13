@@ -9,7 +9,6 @@ import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
 import {CopyModal} from 'app/components/copy-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon, SnowmanIcon} from 'app/components/icons';
 import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -381,7 +380,6 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
             saveFunction={(copyRequest: CopyRequest) => this.copyConceptSet(copyRequest)}/>
           }
         </FadeBox>
-        <HelpSidebar location='conceptSets' />
       </React.Fragment>;
     }
   });

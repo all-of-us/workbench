@@ -8,7 +8,6 @@ import {DomainCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
-import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox, TextInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
@@ -563,7 +562,6 @@ export const ConceptHomepage = withCurrentWorkspace()(
                                  onSave={() => this.setState({surveyAddModalOpen: false})}
                                  surveyName={selectedSurvey}/>}
         </FadeBox>
-        <HelpSidebar location='conceptSets' />
       </React.Fragment>;
     }
   }

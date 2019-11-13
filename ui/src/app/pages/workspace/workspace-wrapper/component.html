@@ -25,6 +25,8 @@
   <app-bug-report *ngIf="bugReportOpen"
                   [bugReportDescription]="bugReportDescription"
                   [onClose]="closeBugReport"></app-bug-report>
+  <!-- TODO get actual location to pass in to help sidebar. Hardcoded 'data' for now -->
+  <app-help-sidebar [location]="'data'"></app-help-sidebar>
   <router-outlet *ngIf="workspace"></router-outlet>
 </ng-container>
 <div *ngIf="!workspace" style="position: absolute; top: 50%; left: 50%;" class="spinner"></div>

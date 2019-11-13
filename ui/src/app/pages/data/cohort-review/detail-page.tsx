@@ -3,7 +3,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {from} from 'rxjs/observable/from';
 
-import {HelpSidebar} from 'app/components/help-sidebar';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DetailHeader} from 'app/pages/data/cohort-review/detail-header.component';
 import {DetailTabs} from 'app/pages/data/cohort-review/detail-tabs.component';
@@ -87,8 +86,6 @@ export const DetailPage = withCurrentWorkspace()(
           ? <React.Fragment>
             <DetailHeader participant={participant} />
             <DetailTabs />
-            <HelpSidebar location='reviewParticipantDetail' participant={participant}
-              setParticipant={(p) => this.setParticipant(p)} />
           </React.Fragment>
           : <SpinnerOverlay />
         }

@@ -8,7 +8,6 @@ import {NouisliderModule} from 'ng2-nouislider';
 import {NgxPopperModule} from 'ngx-popper';
 
 /* Components */
-import {HelpSidebarComponent} from 'app/components/help-sidebar';
 import {AttributesPageComponent} from './attributes-page/attributes-page.component';
 import {CohortSearchComponent} from './cohort-search/cohort-search.component';
 import {DemographicsComponent} from './demographics/demographics.component';
@@ -64,7 +63,6 @@ const routes: Routes = [{
     CohortSearchComponent,
     GenderChartComponent,
     DemographicsComponent,
-    HelpSidebarComponent,
     ModalComponent,
     ModifierPageComponent,
     NodeComponent,
