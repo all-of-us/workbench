@@ -1229,6 +1229,22 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/monitoring/billingProjectBufferStatus:
+    get:
+      tags:
+        - monitoring
+      description: Return statistics about the billing buffer.
+      operationId: getBillingProjectBufferStatus
+      responses:
+        200:
+          description: No Error
+          schema:
+            $ref: '#/definitions/BillingProjectBufferStatus'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   # Notebooks ############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename:
@@ -3775,3 +3791,11 @@ definitions:
       subject to quota checks, or the project has a billing account provided by the user
     enum: [ FREE_TIER, USER_PROVIDED ]
 
+  BillingProjectBufferStatus:
+    type: object
+    properties:
+      bufferSize:
+        description: >
+          Current size of the billing buffer, i.e. the number of projects ready to be claimed.
+        type: integer
+        format: int64

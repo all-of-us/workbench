@@ -10,11 +10,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNED;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ASSIGNING;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.AVAILABLE;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.CREATING;
-import static org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus.ERROR;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -41,6 +36,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -48,6 +44,7 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus.CreationStatusEnum;
+import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -141,7 +138,7 @@ public class BillingProjectBufferServiceTest {
             billingProjectBufferEntryDao
                 .findByFireCloudProjectName(billingProjectName)
                 .getStatusEnum())
-        .isEqualTo(CREATING);
+        .isEqualTo(BufferEntryStatus.CREATING);
   }
 
   @Test
@@ -183,7 +180,7 @@ public class BillingProjectBufferServiceTest {
 
     // free up buffer
     DbBillingProjectBufferEntry entry = billingProjectBufferEntryDao.findAll().iterator().next();
-    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
+    entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     expectedCallCount++;
     billingProjectBufferService.bufferBillingProjects();
@@ -220,21 +217,21 @@ public class BillingProjectBufferServiceTest {
     Iterator<DbBillingProjectBufferEntry> bufferEntries =
         billingProjectBufferEntryDao.findAll().iterator();
     DbBillingProjectBufferEntry entry = bufferEntries.next();
-    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
+    entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProjects();
     verify(fireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
 
     // should no op since we're at capacity
     entry = bufferEntries.next();
-    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
+    entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProjects();
     verify(fireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
 
     // should invoke since we're below capacity
     entry = bufferEntries.next();
-    entry.setStatusEnum(ASSIGNED, this::getCurrentTimestamp);
+    entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProjects();
     verify(fireCloudService, times((int) BUFFER_CAPACITY + 1))
@@ -260,7 +257,7 @@ public class BillingProjectBufferServiceTest {
             billingProjectBufferEntryDao
                 .findByFireCloudProjectName(billingProjectName)
                 .getStatusEnum())
-        .isEqualTo(CREATING);
+        .isEqualTo(BufferEntryStatus.CREATING);
 
     billingProjectStatus.setCreationStatus(CreationStatusEnum.ADDINGTOPERIMETER);
     doReturn(billingProjectStatus)
@@ -272,7 +269,7 @@ public class BillingProjectBufferServiceTest {
             billingProjectBufferEntryDao
                 .findByFireCloudProjectName(billingProjectName)
                 .getStatusEnum())
-        .isEqualTo(CREATING);
+        .isEqualTo(BufferEntryStatus.CREATING);
   }
 
   @Test
@@ -293,7 +290,7 @@ public class BillingProjectBufferServiceTest {
             billingProjectBufferEntryDao
                 .findByFireCloudProjectName(billingProjectName)
                 .getStatusEnum())
-        .isEqualTo(AVAILABLE);
+        .isEqualTo(BufferEntryStatus.AVAILABLE);
   }
 
   @Test
@@ -314,7 +311,7 @@ public class BillingProjectBufferServiceTest {
             billingProjectBufferEntryDao
                 .findByFireCloudProjectName(billingProjectName)
                 .getStatusEnum())
-        .isEqualTo(ERROR);
+        .isEqualTo(BufferEntryStatus.ERROR);
   }
 
   @Test
@@ -334,7 +331,7 @@ public class BillingProjectBufferServiceTest {
             billingProjectBufferEntryDao
                 .findByFireCloudProjectName(billingProjectName)
                 .getStatusEnum())
-        .isEqualTo(CREATING);
+        .isEqualTo(BufferEntryStatus.CREATING);
   }
 
   @Test
@@ -363,15 +360,17 @@ public class BillingProjectBufferServiceTest {
 
     assertThat(
             billingProjectBufferEntryDao.countByStatus(
-                DbStorageEnums.billingProjectBufferStatusToStorage(CREATING)))
+                DbStorageEnums.billingProjectBufferEntryStatusToStorage(
+                    BufferEntryStatus.CREATING)))
         .isEqualTo(0);
     assertThat(
             billingProjectBufferEntryDao.countByStatus(
-                DbStorageEnums.billingProjectBufferStatusToStorage(AVAILABLE)))
+                DbStorageEnums.billingProjectBufferEntryStatusToStorage(
+                    BufferEntryStatus.AVAILABLE)))
         .isEqualTo(2);
     assertThat(
             billingProjectBufferEntryDao.countByStatus(
-                DbStorageEnums.billingProjectBufferStatusToStorage(ERROR)))
+                DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.ERROR)))
         .isEqualTo(1);
   }
 
@@ -402,13 +401,13 @@ public class BillingProjectBufferServiceTest {
             billingProjectBufferEntryDao
                 .findByFireCloudProjectName(capturedProjectNames.get(2))
                 .getStatusEnum())
-        .isEqualTo(AVAILABLE);
+        .isEqualTo(BufferEntryStatus.AVAILABLE);
   }
 
   @Test
   public void assignBillingProject() {
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
-    entry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
+    entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
     entry.setFireCloudProjectName("test-project-name");
     entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
@@ -429,7 +428,7 @@ public class BillingProjectBufferServiceTest {
     assertThat(invokedProjectName).isEqualTo("test-project-name");
 
     assertThat(billingProjectBufferEntryDao.findOne(assignedEntry.getId()).getStatusEnum())
-        .isEqualTo(ASSIGNED);
+        .isEqualTo(BufferEntryStatus.ASSIGNED);
   }
 
   @Test
@@ -437,7 +436,7 @@ public class BillingProjectBufferServiceTest {
   @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
   public void assignBillingProject_locking() throws InterruptedException, ExecutionException {
     DbBillingProjectBufferEntry firstEntry = new DbBillingProjectBufferEntry();
-    firstEntry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
+    firstEntry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
     firstEntry.setFireCloudProjectName("test-project-name-1");
     firstEntry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(firstEntry);
@@ -447,7 +446,7 @@ public class BillingProjectBufferServiceTest {
     userDao.save(firstUser);
 
     DbBillingProjectBufferEntry secondEntry = new DbBillingProjectBufferEntry();
-    secondEntry.setStatusEnum(AVAILABLE, this::getCurrentTimestamp);
+    secondEntry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
     secondEntry.setFireCloudProjectName("test-project-name-2");
     secondEntry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(secondEntry);
@@ -479,7 +478,7 @@ public class BillingProjectBufferServiceTest {
   @Test
   public void cleanBillingBuffer_creating() {
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
-    entry.setStatusEnum(CREATING, this::getCurrentTimestamp);
+    entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
@@ -487,13 +486,13 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.cleanBillingBuffer();
 
     assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
-        .isEqualTo(ERROR);
+        .isEqualTo(BufferEntryStatus.ERROR);
   }
 
   @Test
   public void cleanBillingBuffer_assigning() {
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
-    entry.setStatusEnum(ASSIGNING, this::getCurrentTimestamp);
+    entry.setStatusEnum(BufferEntryStatus.ASSIGNING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
@@ -501,13 +500,13 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.cleanBillingBuffer();
 
     assertThat(billingProjectBufferEntryDao.findOne(entry.getId()).getStatusEnum())
-        .isEqualTo(ERROR);
+        .isEqualTo(BufferEntryStatus.ERROR);
   }
 
   @Test
   public void cleanBillingBuffer_ignoreValidEntries() {
     DbBillingProjectBufferEntry creating = new DbBillingProjectBufferEntry();
-    creating.setStatusEnum(CREATING, this::getCurrentTimestamp);
+    creating.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     creating.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(creating);
 
@@ -515,10 +514,10 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.cleanBillingBuffer();
 
     assertThat(billingProjectBufferEntryDao.findOne(creating.getId()).getStatusEnum())
-        .isEqualTo(CREATING);
+        .isEqualTo(BufferEntryStatus.CREATING);
 
     DbBillingProjectBufferEntry assigning = new DbBillingProjectBufferEntry();
-    assigning.setStatusEnum(ASSIGNING, this::getCurrentTimestamp);
+    assigning.setStatusEnum(BufferEntryStatus.ASSIGNING, this::getCurrentTimestamp);
     assigning.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(assigning);
 
@@ -526,7 +525,16 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.cleanBillingBuffer();
 
     assertThat(billingProjectBufferEntryDao.findOne(assigning.getId()).getStatusEnum())
-        .isEqualTo(ASSIGNING);
+        .isEqualTo(BufferEntryStatus.ASSIGNING);
+  }
+
+  @Test
+  public void testGetStatus() {
+    final long numberAvailable =
+        billingProjectBufferEntryDao.countByStatus(
+            DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE));
+    final BillingProjectBufferStatus bufferStatus = billingProjectBufferService.getStatus();
+    assertThat(bufferStatus.getBufferSize()).isEqualTo(numberAvailable);
   }
 
   private Timestamp getCurrentTimestamp() {
