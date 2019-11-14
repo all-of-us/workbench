@@ -26,6 +26,8 @@
                   [bugReportDescription]="bugReportDescription"
                   [onClose]="closeBugReport"></app-bug-report>
   <app-help-sidebar *ngIf="helpContent" [helpContent]="helpContent" [hideSidebar]="hideSidebar"></app-help-sidebar>
-  <div  style="margin-right: 45px;"><router-outlet *ngIf="workspace"></router-outlet></div>
+  <div style="margin-right: 45px;">
+    <router-outlet *ngIf="workspace"></router-outlet>
+  </div>
 </ng-container>
 <div *ngIf="!workspace" style="position: absolute; top: 50%; left: 50%;" class="spinner"></div>

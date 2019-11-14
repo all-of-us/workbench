@@ -8,7 +8,7 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, DatePicker, NumberInput, Select, TextArea} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
 import {AddAnnotationDefinitionModal, EditAnnotationDefinitionsModal} from 'app/pages/data/cohort-review/annotation-definition-modals.component';
-import {cohortReviewStore} from 'app/services/review-state.service';
+import {cohortReviewStore, participantStore, updateParticipant} from 'app/services/review-state.service';
 import {cohortAnnotationDefinitionApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {withCurrentWorkspace, withUrlParams} from 'app/utils';
@@ -257,8 +257,6 @@ export const SidebarContent = fp.flow(
   withCurrentWorkspace(),
 )(class extends React.Component<
   {
-    participant: ParticipantCohortStatus,
-    setParticipant: Function,
     urlParams: any,
     workspace: WorkspaceData,
   },
@@ -269,6 +267,7 @@ export const SidebarContent = fp.flow(
     annotations: ParticipantCohortAnnotation[],
     annotationDefinitions: CohortAnnotationDefinition[],
     annotationDeleted: boolean,
+    participant: ParticipantCohortStatus,
   }
 > {
   constructor(props) {
@@ -279,7 +278,8 @@ export const SidebarContent = fp.flow(
       editingDefinitions: false,
       annotations: null,
       annotationDefinitions: null,
-      annotationDeleted: false
+      annotationDeleted: false,
+      participant: {} as ParticipantCohortStatus
     };
   }
 
@@ -294,6 +294,7 @@ export const SidebarContent = fp.flow(
       .then(({items}) => {
         this.setState({annotationDefinitions: items});
       });
+    participantStore.subscribe(participant => this.setState({participant}));
   }
 
   componentDidUpdate(prevProps: any): void {
@@ -310,17 +311,15 @@ export const SidebarContent = fp.flow(
 
   async saveStatus(v) {
     try {
-      const {
-        setParticipant,
-        urlParams: {ns, wsid, pid},
-      } = this.props;
+      const {urlParams: {ns, wsid, pid}} = this.props;
       this.setState({savingStatus: v});
-      const data = await cohortReviewApi().updateParticipantCohortStatus(
+      const participant = await cohortReviewApi().updateParticipantCohortStatus(
         ns, wsid, cohortReviewStore.getValue().cohortReviewId, pid, {status: v}
       );
       // make sure we're still on the same page before updating
-      if (data.participantId === +this.props.urlParams.pid) {
-        setParticipant(data as any);
+      if (participant.participantId === +this.props.urlParams.pid) {
+        participantStore.next(participant);
+        updateParticipant(participant);
       }
     } catch (error) {
       console.error(error);
@@ -342,12 +341,9 @@ export const SidebarContent = fp.flow(
   }
 
   render() {
-    const {
-      participant: {participantId, birthDate, gender, race, ethnicity, deceased, status},
-      workspace: {accessLevel}
-    } = this.props;
-    const {annotations, annotationDefinitions, annotationDeleted, savingStatus, creatingDefinition,
-      editingDefinitions} = this.state;
+    const {workspace: {accessLevel}} = this.props;
+    const {annotations, annotationDefinitions, annotationDeleted, savingStatus, creatingDefinition, editingDefinitions,
+      participant: {participantId, birthDate, gender, race, ethnicity, deceased, status}} = this.state;
     const disabled = accessLevel === WorkspaceAccessLevel.NOACCESS ||
       accessLevel === WorkspaceAccessLevel.READER;
     const annotationsExist = annotationDefinitions && annotationDefinitions.length > 0;
