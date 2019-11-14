@@ -38,6 +38,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   resourceType: ResourceType = ResourceType.WORKSPACE;
   userRoles?: UserRole[];
   helpContent: string;
+  hideSidebar = 0;
 
   bugReportOpen: boolean;
   bugReportDescription = '';
@@ -64,6 +65,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         .subscribe(event => {
           this.tabPath = this.getTabPath();
           this.setHelpContent();
+          this.hideSidebar++;
         }));
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       this.displayNavBar = !minimizeChrome;

@@ -125,6 +125,7 @@ const iconStyles = {
 
 interface Props {
   helpContent: string;
+  hideSidebar: number;
   profileState: any;
   participant?: any;
   setParticipant?: Function;
@@ -155,6 +156,13 @@ export const HelpSidebar = withUserProfile()(
         this.searchHelpTips(input.trim().toLowerCase());
       }
     });
+
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+      // close the sidebar on each navigation
+      if (this.props.hideSidebar > prevProps.hideSidebar) {
+        this.setState({sidebarOpen: false});
+      }
+    }
 
     searchHelpTips(input: string) {
       // For each object, we check the title first. If it matches, we return the entire content array.
@@ -315,10 +323,11 @@ export const HelpSidebar = withUserProfile()(
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
   @Input('helpContent') helpContent: Props['helpContent'];
+  @Input('hideSidebar') hideSidebar: Props['hideSidebar'];
   @Input('participant') participant: Props['participant'];
   @Input('setParticipant') setParticipant: Props['setParticipant'];
 
   constructor() {
-    super(HelpSidebar, ['helpContent', 'participant', 'setParticipant']);
+    super(HelpSidebar, ['helpContent', 'hideSidebar', 'participant', 'setParticipant']);
   }
 }
