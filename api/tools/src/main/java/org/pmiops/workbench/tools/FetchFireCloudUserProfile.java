@@ -2,7 +2,6 @@ package org.pmiops.workbench.tools;
 
 import java.util.Arrays;
 import java.util.logging.Logger;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.ApiClient;
@@ -34,8 +33,7 @@ public class FetchFireCloudUserProfile {
       Logger.getLogger(org.pmiops.workbench.tools.FetchFireCloudUserProfile.class.getName());
 
   @Bean
-  public CommandLineRunner run(
-      UserDao userDao, FireCloudService fireCloudService) {
+  public CommandLineRunner run(UserDao userDao, FireCloudService fireCloudService) {
     return (args) -> {
       if (args.length != 1) {
         throw new IllegalArgumentException("Expected 1 arg (username). Got " + Arrays.asList(args));

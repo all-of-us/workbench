@@ -13,10 +13,9 @@ public class ServiceAccountAPIClientFactory {
 
   private static final String[] FC_SCOPES =
       new String[] {
-          "https://www.googleapis.com/auth/userinfo.profile",
-          "https://www.googleapis.com/auth/userinfo.email"
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email"
       };
-
 
   public ServiceAccountAPIClientFactory(String apiUrl) {
     this.apiUrl = apiUrl;
@@ -43,5 +42,4 @@ public class ServiceAccountAPIClientFactory {
     api.setApiClient(newApiClient(apiUrl));
     return api;
   }
-
 }
