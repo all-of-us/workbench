@@ -1,7 +1,7 @@
 package org.pmiops.workbench.utils;
 
 /** A few generic utilities to hopefully make Comparators less ugly */
-public class ComparableUtils {
+public class Comparables {
 
   public static <T extends Comparable<T>> Boolean isLessThan(T one, T other) {
     return one.compareTo(other) < 0;

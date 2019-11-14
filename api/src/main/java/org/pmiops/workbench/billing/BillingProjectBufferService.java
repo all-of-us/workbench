@@ -23,7 +23,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
-import org.pmiops.workbench.utils.ComparableUtils;
+import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -174,7 +174,7 @@ public class BillingProjectBufferService {
         .filter(entry -> entry.getLastSyncRequestTime() != null)
         .filter(
             entry ->
-                ComparableUtils.isGreaterThanOrEqualTo(
+                Comparables.isGreaterThanOrEqualTo(
                     Duration.between(
                         entry.getLastStatusChangedTime().toInstant(),
                         entry.getLastSyncRequestTime().toInstant()),
