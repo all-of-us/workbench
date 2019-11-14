@@ -386,7 +386,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
 
 
 @Component({
-  template: '<div #root style="position: relative; margin-right: 45px;"></div>'
+  template: '<div #root></div>'
 })
 export class ConceptSetDetailsComponent extends ReactWrapperBase {
   constructor() {

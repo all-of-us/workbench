@@ -568,7 +568,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
 );
 
 @Component({
-  template: '<div #root style="position: relative; margin-right: 45px;"></div>'
+  template: '<div #root></div>'
 })
 export class ConceptHomepageComponent extends ReactWrapperBase {
   constructor() {

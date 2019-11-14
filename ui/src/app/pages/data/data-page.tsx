@@ -298,13 +298,12 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           {isLoading && <SpinnerOverlay></SpinnerOverlay>}
         </div>
       </FadeBox>
-      {/*<HelpSidebar location='data' />*/}
     </React.Fragment>;
   }
 });
 
 @Component({
-  template: '<div #root style="position: relative; margin-right: 45px;"></div>'
+  template: '<div #root></div>'
 })
 export class DataPageComponent extends ReactWrapperBase {
   constructor() {

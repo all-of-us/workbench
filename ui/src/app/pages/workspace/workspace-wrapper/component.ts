@@ -206,6 +206,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         this.helpContent = child.snapshot.data.helpContent;
         child = null;
       } else {
+        this.helpContent = null;
         child = null;
       }
     }
