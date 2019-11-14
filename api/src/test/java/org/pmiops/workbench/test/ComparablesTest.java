@@ -29,6 +29,7 @@ public class ComparablesTest {
   public void testIsEqualValueTo() {
     assertThat(Comparables.isEqualValueTo(SMALL_DURATION, SMALL_DURATION)).isTrue();
     assertThat(Comparables.isEqualValueTo(SMALL_DURATION, LARGE_DURATION)).isFalse();
+    assertThat(Comparables.isEqualValueTo(LARGE_DURATION, SMALL_DURATION)).isFalse();
   }
 
   @Test

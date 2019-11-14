@@ -12,7 +12,7 @@ public class Comparables {
   }
 
   public static <T extends Comparable<T>> Boolean isEqualValueTo(T one, T other) {
-    return 0 <= one.compareTo(other);
+    return 0 == one.compareTo(other);
   }
 
   public static <T extends Comparable<T>> Boolean isGreaterThanOrEqualTo(T one, T other) {
