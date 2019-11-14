@@ -37,7 +37,7 @@ import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.RecentResourceResponse;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.utils.CohortMapper;
+import org.pmiops.workbench.utils.mappers.CohortMapper;
 import org.pmiops.workbench.utils.CohortMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.utils;
+package org.pmiops.workbench.utils.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -21,8 +21,4 @@ public interface CohortMapper {
   @Mapping(target = "id", source = "cohortId")
   @Mapping(target = "etag", ignore = true)
   Cohort dbModelToClient(DbCohort destination);
-
-  default String dbUserToCreatorEmail(DbUser creator) {
-    return creator.getEmail();
-  }
 }

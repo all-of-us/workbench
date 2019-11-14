@@ -7,7 +7,7 @@ import org.pmiops.workbench.model.Workspace
 interface WorkspaceAuditAdapter {
     fun fireCreateAction(createdWorkspace: Workspace, dbWorkspaceId: Long)
 
-    fun fireEditAction(previousWorkspace: DbWorkspace, editedWorkspace: DbWorkspace)
+    fun fireEditAction(previousWorkspace: Workspace, editedWorkspace: Workspace)
 
     fun fireDeleteAction(dbWorkspace: DbWorkspace)
 
