@@ -72,7 +72,8 @@ describe('DataSetPage', () => {
     let selectedValue = valueListItems.forEach(value =>
         value.props().checked)
 
-    expect(selectedValue.length).toBe(valueListItems.length);
+    // All values should be selected by default
+    expect(selectedValue.length).toBe(2);
 
     // Second Concept set in concept set list has domain "Measurement"
     const measurement_concept = wrapper.find('[data-test-id="concept-set-list-item"]').at(1)
