@@ -23,6 +23,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
+import org.pmiops.workbench.utils.ComparableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -171,13 +172,11 @@ public class BillingProjectBufferService {
         // filter as well as a first pass filter to limit what we pull into memory.
         .filter(entry -> entry.getLastStatusChangedTime() != null)
         .filter(entry -> entry.getLastSyncRequestTime() != null)
-        .filter(
-            entry ->
+        .filter(entry -> ComparableUtils.isGreaterThanOrEqualTo(
                 Duration.between(
                             entry.getLastStatusChangedTime().toInstant(),
-                            entry.getLastSyncRequestTime().toInstant())
-                        .toMillis()
-                    >= CREATING_TIMEOUT.toMillis())
+                            entry.getLastSyncRequestTime().toInstant()),
+                CREATING_TIMEOUT))
         .collect(Collectors.toList());
   }
 
