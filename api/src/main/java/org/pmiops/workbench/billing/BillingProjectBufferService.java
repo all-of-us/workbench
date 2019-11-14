@@ -175,11 +175,13 @@ public class BillingProjectBufferService {
         .filter(
             entry ->
                 Comparables.isGreaterThanOrEqualTo(
-                    Duration.between(
-                        entry.getLastStatusChangedTime().toInstant(),
-                        entry.getLastSyncRequestTime().toInstant()),
-                    CREATING_TIMEOUT))
+                    getStatusChangedToLastSync(entry), CREATING_TIMEOUT))
         .collect(Collectors.toList());
+  }
+
+  private Duration getStatusChangedToLastSync(DbBillingProjectBufferEntry entry) {
+    return Duration.between(
+        entry.getLastStatusChangedTime().toInstant(), entry.getLastSyncRequestTime().toInstant());
   }
 
   public DbBillingProjectBufferEntry assignBillingProject(DbUser user) {
