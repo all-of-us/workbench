@@ -20,6 +20,7 @@ import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -83,6 +84,7 @@ import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -116,6 +118,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final UserService userService;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private WorkspaceAuditAdapter workspaceAuditAdapter;
+  private WorkspaceMapper workspaceMapper;
 
   @Autowired
   public WorkspacesController(
@@ -130,7 +133,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       NotebooksService notebooksService,
       UserService userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceAuditAdapter workspaceAuditAdapter) {
+      WorkspaceAuditAdapter workspaceAuditAdapter,
+      WorkspaceMapper workspaceMapper) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -143,6 +147,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditAdapter = workspaceAuditAdapter;
+    this.workspaceMapper = workspaceMapper;
   }
 
   @VisibleForTesting
@@ -314,6 +319,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<Workspace> updateWorkspace(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    final Workspace originalWorkspace = workspaceMapper.dbModelToClient(dbWorkspace);
+
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
@@ -348,6 +355,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+//    workspaceAuditAdapter.fireEditAction(originalWorkspace, dbWorkspace);
     return ResponseEntity.ok(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 

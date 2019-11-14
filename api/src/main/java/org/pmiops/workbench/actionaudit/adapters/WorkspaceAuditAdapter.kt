@@ -1,10 +1,13 @@
 package org.pmiops.workbench.actionaudit.adapters
 
+import org.hibernate.jdbc.Work
 import org.pmiops.workbench.db.model.DbWorkspace
 import org.pmiops.workbench.model.Workspace
 
-interface WorkspaceAuditAdapter : AuditAdapter<Workspace> {
+interface WorkspaceAuditAdapter {
     fun fireCreateAction(createdWorkspace: Workspace, dbWorkspaceId: Long)
+
+    fun fireEditAction(previousWorkspace: DbWorkspace, editedWorkspace: DbWorkspace)
 
     fun fireDeleteAction(dbWorkspace: DbWorkspace)
 

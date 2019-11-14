@@ -56,6 +56,18 @@ constructor(
         }
     }
 
+    override fun fireEditAction(previousWorkspace: Workspace, editedWorkspace: Workspace) {
+        try {
+            val propertyToChangedValue = TargetPropertyExtractor.getChangedValuesByName(
+                    WorkspaceTargetProperty.values(),
+                    previousWorkspace,
+                    editedWorkspace)
+
+        } catch (e: RuntimeException) {
+            logAndSwallow(e)
+        }
+    }
+
     private fun logAndSwallow(e: RuntimeException) {
         actionAuditService.logRuntimeException(logger, e)
     }
