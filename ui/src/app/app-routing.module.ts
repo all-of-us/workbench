@@ -95,7 +95,8 @@ const routes: Routes = [
                 component: WorkspaceAboutComponent,
                 data: {
                   title: 'View Workspace Details',
-                  breadcrumb: BreadcrumbType.Workspace
+                  breadcrumb: BreadcrumbType.Workspace,
+                  helpContent: 'data'
                 }
               }, {
                 path: 'edit',
@@ -103,7 +104,8 @@ const routes: Routes = [
                 data: {
                   title: 'Edit Workspace',
                   mode: WorkspaceEditMode.Edit,
-                  breadcrumb: BreadcrumbType.WorkspaceEdit
+                  breadcrumb: BreadcrumbType.WorkspaceEdit,
+                  helpContent: 'data'
                 }
               }, {
                 path: 'duplicate',
@@ -111,7 +113,8 @@ const routes: Routes = [
                 data: {
                   title: 'Duplicate Workspace',
                   mode: WorkspaceEditMode.Duplicate,
-                  breadcrumb: BreadcrumbType.WorkspaceDuplicate
+                  breadcrumb: BreadcrumbType.WorkspaceDuplicate,
+                  helpContent: 'data'
                 }
               },
               {
@@ -122,7 +125,8 @@ const routes: Routes = [
                     component: NotebookListComponent,
                     data: {
                       title: 'View Notebooks',
-                      breadcrumb: BreadcrumbType.Workspace
+                      breadcrumb: BreadcrumbType.Workspace,
+                      helpContent: 'data'
                     }
                   }, {
                     path: ':nbName',
@@ -131,7 +135,8 @@ const routes: Routes = [
                       // use the (urldecoded) captured value nbName
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
-                      minimizeChrome: true
+                      minimizeChrome: true,
+                      helpContent: 'data'
                     }
                   }, {
                     path: 'preview/:nbName',
@@ -139,7 +144,8 @@ const routes: Routes = [
                     data: {
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
-                      minimizeChrome: true
+                      minimizeChrome: true,
+                      helpContent: 'data'
                     }
                   }
                 ]
@@ -152,7 +158,8 @@ const routes: Routes = [
                     component: DataPageComponent,
                     data: {
                       title: 'Data Page',
-                      breadcrumb: BreadcrumbType.Workspace
+                      breadcrumb: BreadcrumbType.Workspace,
+                      helpContent: 'data'
                     }
                   },
                   {
@@ -160,7 +167,8 @@ const routes: Routes = [
                     component: DataSetPageComponent,
                     data: {
                       title: 'Dataset Page',
-                      breadcrumb: BreadcrumbType.Dataset
+                      breadcrumb: BreadcrumbType.Dataset,
+                      helpContent: 'datasetBuilder'
                     }
                   },
                   {
@@ -168,7 +176,8 @@ const routes: Routes = [
                     component: DataSetPageComponent,
                     data: {
                       title: 'Edit Dataset',
-                      breadcrumb: BreadcrumbType.Dataset
+                      breadcrumb: BreadcrumbType.Dataset,
+                      helpContent: 'datasetBuilder'
                     }
                   }, {
                     path: 'cohorts',
@@ -178,7 +187,8 @@ const routes: Routes = [
                         component: CohortActionsComponent,
                         data: {
                           title: 'Cohort Actions',
-                          breadcrumb: BreadcrumbType.Cohort
+                          breadcrumb: BreadcrumbType.Cohort,
+                          helpContent: 'cohortBuilder'
                         },
                       },
                       {
@@ -193,21 +203,24 @@ const routes: Routes = [
                             component: CohortReviewComponent,
                             data: {
                               title: 'Review Cohort Participants',
-                              breadcrumb: BreadcrumbType.Cohort
+                              breadcrumb: BreadcrumbType.Cohort,
+                              helpContent: 'reviewParticipants'
                             }
                           }, {
                             path: 'participants',
                             component: TablePage,
                             data: {
                               title: 'Review Cohort Participants',
-                              breadcrumb: BreadcrumbType.Cohort
+                              breadcrumb: BreadcrumbType.Cohort,
+                              helpContent: 'reviewParticipants'
                             }
                           }, {
                             path: 'cohort-description',
                             component: QueryReportComponent,
                             data: {
                               title: 'Review Cohort Description',
-                              breadcrumb: BreadcrumbType.Cohort
+                              breadcrumb: BreadcrumbType.Cohort,
+                              helpContent: 'reviewParticipants'
                             }
                           }, {
                             path: 'participants/:pid',
@@ -215,7 +228,8 @@ const routes: Routes = [
                             data: {
                               title: 'Participant Detail',
                               breadcrumb: BreadcrumbType.Participant,
-                              shouldReuse: true
+                              shouldReuse: true,
+                              helpContent: 'reviewParticipantDetail'
                             }
                           }
                         ],
@@ -227,7 +241,8 @@ const routes: Routes = [
                     component: ConceptHomepageComponent,
                     data: {
                       title: 'Search Concepts',
-                      breadcrumb: BreadcrumbType.SearchConcepts
+                      breadcrumb: BreadcrumbType.SearchConcepts,
+                      helpContent: 'conceptSets'
                     }
                   },
                   {
@@ -237,14 +252,16 @@ const routes: Routes = [
                       component: ConceptSetDetailsComponent,
                       data: {
                         title: 'Concept Set',
-                        breadcrumb: BreadcrumbType.ConceptSet
+                        breadcrumb: BreadcrumbType.ConceptSet,
+                        helpContent: 'conceptSets'
                       },
                     }, {
                       path: ':csid/actions',
                       component: ConceptSetActionsComponent,
                       data: {
                         title: 'Concept Set Actions',
-                        breadcrumb: BreadcrumbType.ConceptSet
+                        breadcrumb: BreadcrumbType.ConceptSet,
+                        helpContent: 'conceptSets'
                       },
                     }, ]
                   }

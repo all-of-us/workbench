@@ -40,7 +40,8 @@ const routes: Routes = [{
   canDeactivate: [CanDeactivateGuard],
   data: {
     title: 'Build Cohort Criteria',
-    breadcrumb: BreadcrumbType.CohortAdd
+    breadcrumb: BreadcrumbType.CohortAdd,
+    helpContent: 'cohortBuilder'
   },
 }];
 

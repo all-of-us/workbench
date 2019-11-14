@@ -124,7 +124,7 @@ const iconStyles = {
 };
 
 interface Props {
-  location: string;
+  helpContent: string;
   profileState: any;
   participant?: any;
   setParticipant?: Function;
@@ -224,9 +224,9 @@ export const HelpSidebar = withUserProfile()(
     }
 
     render() {
-      const {location, participant, setParticipant} = this.props;
+      const {helpContent, participant, setParticipant} = this.props;
       const {activeIcon, filteredContent, searchTerm, sidebarOpen} = this.state;
-      const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[location];
+      const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContent];
       const contentStyle = (tab: string) => ({
         display: activeIcon === tab ? 'block' : 'none',
         height: 'calc(100% - 1rem)',
@@ -245,7 +245,7 @@ export const HelpSidebar = withUserProfile()(
               <ClrIcon className='is-solid' shape='book' size={32} title='Data Dictionary' />
             </a>
           </div>
-          {location === 'reviewParticipantDetail' &&
+          {helpContent === 'reviewParticipantDetail' &&
             <div style={activeIcon === 'annotations' ? iconStyles.active : styles.icon}>
               <ClrIcon shape='note' size={32}  title='Participant Status and Annotations'
                 onClick={() => this.onIconClick('annotations')} />
@@ -269,15 +269,15 @@ export const HelpSidebar = withUserProfile()(
                   onChange={(e) => this.onInputChange(e.target.value)}
                   placeholder={'Search'} />
               </div>
-              {displayContent.length > 0
+              {!!displayContent && displayContent.length > 0
                 ? displayContent.map((section, s) => <div key={s}>
                   <h3 style={styles.sectionTitle}>{this.highlightMatches(section.title)}</h3>
-                  {section.content.map((content, c) => {
-                    return typeof content === 'string'
-                      ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>
+                  {section.content.map((sectionContent, c) => {
+                    return typeof sectionContent === 'string'
+                      ? <p key={c} style={styles.contentItem}>{this.highlightMatches(sectionContent)}</p>
                       : <div key={c}>
-                        <h4 style={styles.contentTitle}>{this.highlightMatches(content.title)}</h4>
-                        {content.content.map((item, i) =>
+                        <h4 style={styles.contentTitle}>{this.highlightMatches(sectionContent.title)}</h4>
+                        {sectionContent.content.map((item, i) =>
                           <p key={i} style={styles.contentItem}>{this.highlightMatches(item)}</p>)
                         }
                       </div>;
@@ -314,11 +314,11 @@ export const HelpSidebar = withUserProfile()(
   template: '<div #root></div>',
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
-  @Input('location') location: Props['location'];
+  @Input('helpContent') helpContent: Props['helpContent'];
   @Input('participant') participant: Props['participant'];
   @Input('setParticipant') setParticipant: Props['setParticipant'];
 
   constructor() {
-    super(HelpSidebar, ['location', 'participant', 'setParticipant']);
+    super(HelpSidebar, ['helpContent', 'participant', 'setParticipant']);
   }
 }
