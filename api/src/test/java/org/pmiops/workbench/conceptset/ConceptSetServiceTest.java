@@ -36,21 +36,19 @@ public class ConceptSetServiceTest {
   @Autowired ConceptSetService conceptSetService;
 
   @TestConfiguration
-  @Import({
-    ConceptSetService.class,
-  })
+  @Import({ConceptSetService.class})
   @MockBean({ConceptBigQueryService.class})
   static class Configuration {}
 
   @Test
   public void testCloneConceptSetWithNoCdrVersionChange() {
-    DbWorkspace workspace = mockWorkspace();
+    DbWorkspace mockDbWorkspace = mockWorkspace();
     DbConceptSet fromConceptSet = mockConceptSet();
     DbConceptSet copiedConceptSet =
-        conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, workspace, false);
+        conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, mockDbWorkspace, false);
     assertNotNull(copiedConceptSet);
     assertEquals(copiedConceptSet.getConceptIds().size(), 5);
-    assertEquals(copiedConceptSet.getWorkspaceId(), workspace.getWorkspaceId());
+    assertEquals(copiedConceptSet.getWorkspaceId(), mockDbWorkspace.getWorkspaceId());
   }
 
   private DbConceptSet mockConceptSet() {
