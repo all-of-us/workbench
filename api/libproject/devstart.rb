@@ -1124,6 +1124,46 @@ Common.register_command({
   :fn => ->(*args) {fetch_firecloud_user_profile("fetch-firecloud-user-profile", *args)}
 })
 
+def fetch_workspace_details(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--projectId=[projectId]",
+      String,
+      ->(opts, v) { opts.projectId = v},
+      "The Workspace to fetch details for (e.g. 'aou-rw-231823128'")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  fc_config = get_fc_config(op.opts.project)
+
+  flags = ([
+      ["--fc-base-url", fc_config["baseUrl"]],
+      ["--projectId", op.opts.projectId]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  flags.map! { |f| "'#{f}'" }
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle fetchWorkspaceDetails
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+Common.register_command({
+    :invocation => "fetch-workspace-details",
+    :description => "Fetch workspace details.\n",
+    :fn => ->(*args) {fetch_workspace_details("fetch-workspace-details", *args)}
+})
+
 def authority_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.remove = false

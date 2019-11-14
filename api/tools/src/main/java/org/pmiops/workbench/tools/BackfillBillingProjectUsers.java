@@ -62,35 +62,7 @@ public class BackfillBillingProjectUsers {
   private static Options options =
       new Options().addOption(fcBaseUrlOpt).addOption(billingProjectPrefixOpt).addOption(dryRunOpt);
 
-  private static final String[] FC_SCOPES =
-      new String[] {
-        "https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/userinfo.email"
-      };
-
   private static final Logger log = Logger.getLogger(BackfillBillingProjectUsers.class.getName());
-
-  private static ApiClient newApiClient(String apiUrl) throws IOException {
-    ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(apiUrl);
-    GoogleCredential credential =
-        GoogleCredential.getApplicationDefault().createScoped(Arrays.asList(FC_SCOPES));
-    credential.refreshToken();
-    apiClient.setAccessToken(credential.getAccessToken());
-    return apiClient;
-  }
-
-  private static WorkspacesApi newWorkspacesApi(String apiUrl) throws IOException {
-    WorkspacesApi api = new WorkspacesApi();
-    api.setApiClient(newApiClient(apiUrl));
-    return api;
-  }
-
-  private static BillingApi newBillingApi(String apiUrl) throws IOException {
-    BillingApi api = new BillingApi();
-    api.setApiClient(newApiClient(apiUrl));
-    return api;
-  }
 
   private static void dryLog(boolean dryRun, String msg) {
     String prefix = "";
@@ -104,7 +76,7 @@ public class BackfillBillingProjectUsers {
    * Swagger Java codegen does not handle the WorkspaceACL model correctly; it returns a GSON map
    * instead. Run this through a typed Gson conversion process to coerce it into the desired type.
    */
-  private static Map<String, WorkspaceAccessEntry> extractAclResponse(WorkspaceACL aclResp) {
+  public static Map<String, WorkspaceAccessEntry> extractAclResponse(WorkspaceACL aclResp) {
     Type accessEntryType = new TypeToken<Map<String, WorkspaceAccessEntry>>() {}.getType();
     Gson gson = new Gson();
     return gson.fromJson(gson.toJson(aclResp.getAcl(), accessEntryType), accessEntryType);
@@ -169,9 +141,12 @@ public class BackfillBillingProjectUsers {
   public CommandLineRunner run() {
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
+
+      ServiceAccountAPIClientFactory apiFactory = new ServiceAccountAPIClientFactory(opts.getOptionValue(fcBaseUrlOpt.getLongOpt()));
+
       backfill(
-          newWorkspacesApi(opts.getOptionValue(fcBaseUrlOpt.getLongOpt())),
-          newBillingApi(opts.getOptionValue(fcBaseUrlOpt.getLongOpt())),
+          apiFactory.workspacesApi(),
+          apiFactory.newBillingApi(),
           opts.getOptionValue(billingProjectPrefixOpt.getLongOpt()),
           opts.hasOption(dryRunOpt.getLongOpt()));
     };

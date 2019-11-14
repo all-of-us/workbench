@@ -35,7 +35,7 @@ public class FetchFireCloudUserProfile {
 
   @Bean
   public CommandLineRunner run(
-      UserDao userDao, WorkbenchConfig workbenchConfig, FireCloudService fireCloudService) {
+      UserDao userDao, FireCloudService fireCloudService) {
     return (args) -> {
       if (args.length != 1) {
         throw new IllegalArgumentException("Expected 1 arg (username). Got " + Arrays.asList(args));
