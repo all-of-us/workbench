@@ -23,11 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
@@ -144,8 +142,6 @@ public class CohortReviewControllerTest {
 
   @Autowired private UserDao userDao;
 
-  @Mock private Provider<DbUser> userProvider;
-
   private enum TestDemo {
     ASIAN("Asian", 8515),
     WHITE("White", 8527),
@@ -170,6 +166,8 @@ public class CohortReviewControllerTest {
     }
   }
 
+  private static DbUser user;
+
   @TestConfiguration
   @Import({CdrVersionService.class, CohortReviewController.class})
   @MockBean({
@@ -183,18 +181,21 @@ public class CohortReviewControllerTest {
     Clock clock() {
       return CLOCK;
     }
+
+    @Bean
+    DbUser user() {
+      return user;
+    }
   }
 
   @Before
   public void setUp() {
-    DbUser user = new DbUser();
+    user = new DbUser();
     user.setEmail("bob@gmail.com");
     user.setUserId(123L);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
-    when(userProvider.get()).thenReturn(user);
-    cohortReviewController.setUserProvider(userProvider);
 
     cbCriteriaDao.save(
         new CBCriteria()

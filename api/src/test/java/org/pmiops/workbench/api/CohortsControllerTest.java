@@ -16,13 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -166,7 +164,6 @@ public class CohortsControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired UserDao userDao;
   @Autowired CohortMaterializationService cohortMaterializationService;
-  @Mock Provider<DbUser> userProvider;
   @Autowired FireCloudService fireCloudService;
   @Autowired UserService userService;
   @Autowired CloudStorageService cloudStorageService;
@@ -238,10 +235,6 @@ public class CohortsControllerTest {
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     currentUser = user;
-    when(userProvider.get()).thenReturn(user);
-    workspacesController.setUserProvider(userProvider);
-    cohortsController.setUserProvider(userProvider);
-    conceptSetsController.setUserProvider(userProvider);
 
     cdrVersion = new CdrVersion();
     cdrVersion.setName(CDR_VERSION_NAME);

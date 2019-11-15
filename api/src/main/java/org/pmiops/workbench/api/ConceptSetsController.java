@@ -127,11 +127,6 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     this.maxConceptsPerSet = MAX_CONCEPTS_PER_SET;
   }
 
-  @VisibleForTesting
-  public void setUserProvider(Provider<DbUser> userProvider) {
-    this.userProvider = userProvider;
-  }
-
   @Override
   public ResponseEntity<ConceptSet> createConceptSet(
       String workspaceNamespace, String workspaceId, CreateConceptSetRequest request) {

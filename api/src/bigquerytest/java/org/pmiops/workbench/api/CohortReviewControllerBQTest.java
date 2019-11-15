@@ -16,13 +16,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import javax.inject.Provider;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
@@ -133,8 +131,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private CohortReviewDao cohortReviewDao;
 
-  @Autowired private DataSetService dataSetService;
-
   @Autowired private WorkspaceDao workspaceDao;
 
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -144,8 +140,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Autowired private FireCloudService mockFireCloudService;
 
   @Autowired private UserDao userDao;
-
-  @Mock private Provider<DbUser> userProvider;
 
   private DbCohort cohort;
   private DbCohortReview review;
@@ -171,8 +165,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     currentUser = user;
-    when(userProvider.get()).thenReturn(user);
-    controller.setUserProvider(userProvider);
 
     when(mockFireCloudService.getWorkspaceAcl(anyString(), anyString()))
         .thenReturn(
@@ -674,7 +666,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     WorkspaceAccessEntry accessLevelEntry =
         new WorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.WRITER.toString());
     Map<String, WorkspaceAccessEntry> userEmailToAccessEntry =
-        ImmutableMap.of(userProvider.get().getEmail(), accessLevelEntry);
+        ImmutableMap.of(currentUser.getEmail(), accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(mockFireCloudService.getWorkspaceAcl(NAMESPACE, NAME))
         .thenReturn(workspaceAccessLevelResponse);

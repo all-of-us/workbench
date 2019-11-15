@@ -39,11 +39,6 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
     this.userProvider = userProvider;
   }
 
-  @VisibleForTesting
-  void setUserProvider(Provider<DbUser> userProvider) {
-    this.userProvider = userProvider;
-  }
-
   @Override
   public ResponseEntity<CdrVersionListResponse> getCdrVersions() {
     // TODO: Consider filtering this based on what is currently instantiated as a data source. Newly
