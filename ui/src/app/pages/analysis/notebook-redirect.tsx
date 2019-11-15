@@ -115,17 +115,16 @@ const pyNotebookMetadata = {
 };
 
 const progressCardStates = [
-  {includes: [Progress.Unknown, Progress.Initializing, Progress.Resuming], icon: 'notebook'},
-  {includes: [Progress.Authenticating], icon: 'success-standard'},
-  {includes: [Progress.Creating, Progress.Copying], icon: 'copy'},
-  {includes: [Progress.Redirecting], icon: 'circle-arrow'}
+  {includesStates: [Progress.Unknown, Progress.Initializing, Progress.Resuming], icon: 'notebook'},
+  {includesStates: [Progress.Authenticating], icon: 'success-standard'},
+  {includesStates: [Progress.Creating, Progress.Copying], icon: 'copy'},
+  {includesStates: [Progress.Redirecting], icon: 'circle-arrow', rotation: 'rotate(90deg)'}
 ];
 
 const ProgressCard: React.FunctionComponent<{currentState: Progress, index: number,
   progressComplete: Map<Progress, boolean>, creatingNewNotebook: boolean}> =
   ({index, currentState, progressComplete, creatingNewNotebook}) => {
-    const includesStates = progressCardStates[index].includes;
-    const icon = progressCardStates[index].icon;
+    const {includesStates, icon, rotation} = progressCardStates[index];
     const isCurrent = includesStates.includes(currentState);
     const isComplete = currentState.valueOf() > includesStates.slice(-1).pop().valueOf();
 
@@ -154,11 +153,6 @@ const ProgressCard: React.FunctionComponent<{currentState: Progress, index: numb
       }
     };
 
-    // The last icon (Redirect) should be rotated 90 degrees
-    const rotateIcon = () => {
-      return icon === 'circle-arrow' ? 'rotate(90deg)' : undefined;
-    };
-
     return <div style={isCurrent ? {...styles.progressCard, backgroundColor: '#F2FBE9'} :
       styles.progressCard}>
       {isCurrent ? <Spinner style={{width: '46px', height: '46px'}}
@@ -167,8 +161,8 @@ const ProgressCard: React.FunctionComponent<{currentState: Progress, index: numb
           {icon === 'notebook' ? <NotebookIcon style={styles.progressIcon}/> :
           <ClrIcon shape={icon} style={isComplete ?
           {...styles.progressIcon, ...styles.progressIconDone,
-            transform: rotateIcon()} :
-            {...styles.progressIcon, transform: rotateIcon()}}/>}
+            transform: rotation} :
+            {...styles.progressIcon, transform: rotation}}/>}
         </React.Fragment>}
         <div style={styles.progressText}>
           {renderText()}
