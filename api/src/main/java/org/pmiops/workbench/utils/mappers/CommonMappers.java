@@ -37,8 +37,4 @@ public class CommonMappers {
   public static Short dataAccessLevelToStorageEnum(DataAccessLevel dataAccessLevel) {
     return CommonStorageEnums.dataAccessLevelToStorage(dataAccessLevel);
   }
-
-  public static DataAccessLevel storageEnumToDataAccessLevel(Short ordinal) {
-    return CommonStorageEnums.dataAccessLevelFromStorage(ordinal);
-  }
 }

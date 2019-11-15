@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Set;
 import org.mapstruct.AfterMapping;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -41,23 +42,20 @@ public interface WorkspaceMapper {
   @Mapping(target = "id", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
   @Mapping(target = "creator", source = "fcWorkspace.createdBy")
-  //  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
+  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace, org.pmiops.workbench.firecloud.model.Workspace fcWorkspace);
 
-  @Mapping(target = "approved", ignore = true)
+
+  // This method is simply merging the research purpose, which covers only a subset of the fields
+  // in the DbWorkspace target
+  @BeanMapping(ignoreByDefault = true)
   @Mapping(target = "specificPopulationsEnum", source = "populationDetails")
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace dbWorkspace, ResearchPurpose researchPurpose);
 
-  @Mapping(target = "populationDetails", ignore = true)
+  @Mapping(target = "timeReviewed", ignore = true)
   ResearchPurpose workspaceToResearchPurpose(DbWorkspace dbWorkspace);
-
-  default Set<Short> map(List<SpecificPopulationEnum> value) {
-    return value.stream()
-        .map(DbStorageEnums::specificPopulationToStorage)
-        .collect(ImmutableSet.toImmutableSet());
-  }
 
   @AfterMapping
   default void afterWorkspaceIntoResearchPurpose(
@@ -75,6 +73,19 @@ public interface WorkspaceMapper {
       dbWorkspace.setSpecificPopulationsEnum(
           ImmutableSet.copyOf(researchPurpose.getPopulationDetails()));
     }
+  }
+
+
+  default Set<Short> map(List<SpecificPopulationEnum> value) {
+    return value.stream()
+        .map(DbStorageEnums::specificPopulationToStorage)
+        .collect(ImmutableSet.toImmutableSet());
+  }
+
+  default List<SpecificPopulationEnum> ordinalsToSpecificPopulationEnumList(Set<Short> ordinals) {
+    return ordinals.stream()
+        .map(DbStorageEnums::specificPopulationFromStorage)
+        .collect(ImmutableList.toImmutableList());
   }
 
   default String cdrVersionId(CdrVersion cdrVersion) {
