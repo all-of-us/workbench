@@ -304,10 +304,10 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     private incrementProgress(p: Progress): void {
-      this.setState({
+      this.setState((state) => ({
         progress: p,
-        progressComplete:  this.state.progressComplete.set(p, true)
-      });
+        progressComplete: new Map(state.progressComplete).set(p, true)
+      }));
     }
 
     private notebookUrl(cluster: Cluster, nbName: string): string {
