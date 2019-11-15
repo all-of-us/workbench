@@ -541,7 +541,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
       this.setState({valuesLoading: true});
       this.getValuesList(newDomains)
-        .then(newValueSets => this.updateValueSets(valueSets, newValueSets));
+        .then(newValueSets => this.updateValueSets(newValueSets));
     }
 
     select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
@@ -555,8 +555,6 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         const origDomains = valueSets.map(valueSet => valueSet.domain);
         const newDomains = fp.without(origDomains, currentDomains) as unknown as Domain[];
         const removedDomains = fp.without(currentDomains, origDomains);
-        const updatedValueSets =
-          valueSets.filter(valueSet => !(fp.contains(valueSet.domain, removedDomains)));
         const updatedSelectedDomainValuePairs =
           selectedDomainValuePairs.filter(selectedDomainValuePair =>
             !fp.contains(selectedDomainValuePair.domain, removedDomains));
@@ -568,12 +566,14 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           const cSet = resource as ConceptSet;
           if (cSet.survey != null ) {
             this.getValuesList(newDomains, cSet.survey)
-                .then(newValueSets => this.updateValueSets(updatedValueSets, newValueSets));
+                .then(newValueSets => this.updateValueSets(newValueSets));
           } else {
             this.getValuesList(newDomains)
-                .then(newValueSets => this.updateValueSets(updatedValueSets, newValueSets));
+                .then(newValueSets => this.updateValueSets(newValueSets));
           }
         } else {
+          const updatedValueSets =
+              valueSets.filter(valueSet => !(fp.contains(valueSet.domain, removedDomains)));
           this.setState({valueSets: updatedValueSets});
         }
       } else {
@@ -603,18 +603,18 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       this.setState({selectedDomainValuePairs: valuesSelected, dataSetTouched: true});
     }
 
-    // Add the values to the valueSet as well as the selectedDomain list so that they are
-    // all selected by default and set valuesLoading to false
-    updateValueSets(updatedValueSets, newValueSets) {
-      const {selectedDomainValuePairs} = this.state;
+    // Append newValueSets (values from API) to state's valueSets and to selectedDomainValuePairs.
+    // Set valuesLoading to false once the state is updated
+    updateValueSets(newValueSets) {
+      const {selectedDomainValuePairs, valueSets} = this.state;
 
-      newValueSets.map(valueSet => {
-        valueSet.values.items.map(value => {
-          selectedDomainValuePairs.push({domain: valueSet.domain, value: value.value});
+      newValueSets.map(newValueSet => {
+        newValueSet.values.items.map(value => {
+          selectedDomainValuePairs.push({domain: newValueSet.domain, value: value.value});
         });
       });
       this.setState({
-        valueSets: updatedValueSets.concat(newValueSets),
+        valueSets: valueSets.concat(newValueSets),
         selectedDomainValuePairs: selectedDomainValuePairs,
         valuesLoading: false
       });
