@@ -195,7 +195,7 @@ public class ConceptSetsControllerTest {
 
   @Autowired FireCloudService fireCloudService;
 
-  private ConceptSetsController conceptSetsController;
+  @Autowired ConceptSetsController conceptSetsController;
 
   @Autowired UserRecentResourceService userRecentResourceService;
 
@@ -204,6 +204,8 @@ public class ConceptSetsControllerTest {
   @Mock Provider<DbUser> userProvider;
 
   @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
+
+  @Autowired WorkspacesController workspacesController;
 
   @Autowired WorkspaceAuditAdapter workspaceAuditAdapter;
 
@@ -259,30 +261,6 @@ public class ConceptSetsControllerTest {
   public void setUp() throws Exception {
     testMockFactory = new TestMockFactory();
 
-    conceptSetsController =
-        new ConceptSetsController(
-            workspaceService,
-            conceptSetDao,
-            conceptDao,
-            conceptBigQueryService,
-            userRecentResourceService,
-            userProvider,
-            CLOCK);
-    WorkspacesController workspacesController =
-        new WorkspacesController(
-            billingProjectBufferService,
-            workspaceService,
-            cdrVersionDao,
-            userDao,
-            userProvider,
-            fireCloudService,
-            cloudStorageService,
-            CLOCK,
-            notebooksService,
-            userService,
-            workbenchConfigProvider,
-            workspaceAuditAdapter);
-
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
 
@@ -293,7 +271,6 @@ public class ConceptSetsControllerTest {
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     currentUser = user;
-    when(userProvider.get()).thenReturn(user);
 
     CdrVersion cdrVersion = new CdrVersion();
     cdrVersion.setName("1");
@@ -315,9 +292,6 @@ public class ConceptSetsControllerTest {
     workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace2.setResearchPurpose(new ResearchPurpose());
     workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-
-    workspacesController.setUserProvider(userProvider);
-    conceptSetsController.setUserProvider(userProvider);
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspace2 = workspacesController.createWorkspace(workspace2).getBody();

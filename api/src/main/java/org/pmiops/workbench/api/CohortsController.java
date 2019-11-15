@@ -118,11 +118,6 @@ public class CohortsController implements CohortsApiDelegate {
     this.userRecentResourceService = userRecentResourceService;
   }
 
-  @VisibleForTesting
-  public void setUserProvider(Provider<DbUser> userProvider) {
-    this.userProvider = userProvider;
-  }
-
   private void checkForDuplicateCohortNameException(String newCohortName, DbWorkspace workspace) {
     if (cohortDao.findCohortByNameAndWorkspaceId(newCohortName, workspace.getWorkspaceId())
         != null) {
