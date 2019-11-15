@@ -245,7 +245,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     private isPlaygroundMode() {
-      return !!this.props.queryParams.playgroundMode;
+      return this.props.queryParams.playgroundMode === 'true';
     }
 
     private async pollCluster(billingProjectId) {
