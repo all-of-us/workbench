@@ -571,7 +571,8 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
             this.getValuesList(newDomains)
                 .then(newValueSets => this.updateValueSets(newValueSets));
           }
-        } else {
+        } else if (removedDomains.length > 0 ) {
+          // if domains are being removed
           const updatedValueSets =
               valueSets.filter(valueSet => !(fp.contains(valueSet.domain, removedDomains)));
           this.setState({valueSets: updatedValueSets});
