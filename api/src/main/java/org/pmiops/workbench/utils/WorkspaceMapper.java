@@ -8,7 +8,6 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -25,11 +24,7 @@ import org.pmiops.workbench.workspaces.WorkspaceService;
 
 @Mapper(
     componentModel = "spring",
-    uses = {
-        CommonMappers.class,
-        WorkspaceDao.class,
-        UserDao.class
-    })
+    uses = {CommonMappers.class, WorkspaceDao.class, UserDao.class})
 public interface WorkspaceMapper {
 
   @Mapping(target = "role", source = "dataAccessLevel")
@@ -46,7 +41,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "id", source = "fcWorkspace.name")
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
   @Mapping(target = "creator", source = "fcWorkspace.createdBy")
-//  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
+  //  @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace, org.pmiops.workbench.firecloud.model.Workspace fcWorkspace);
 
@@ -68,8 +63,8 @@ public interface WorkspaceMapper {
   default void afterWorkspaceIntoResearchPurpose(
       @MappingTarget ResearchPurpose researchPurpose, DbWorkspace dbWorkspace) {
     if (dbWorkspace.getPopulation()) {
-      researchPurpose.setPopulationDetails(ImmutableList.copyOf(
-          dbWorkspace.getSpecificPopulationsEnum()));
+      researchPurpose.setPopulationDetails(
+          ImmutableList.copyOf(dbWorkspace.getSpecificPopulationsEnum()));
     }
   }
 
@@ -77,8 +72,8 @@ public interface WorkspaceMapper {
   default void afterResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace dbWorkspace, ResearchPurpose researchPurpose) {
     if (researchPurpose.getPopulation()) {
-      dbWorkspace.setSpecificPopulationsEnum(ImmutableSet.copyOf(
-          researchPurpose.getPopulationDetails()));
+      dbWorkspace.setSpecificPopulationsEnum(
+          ImmutableSet.copyOf(researchPurpose.getPopulationDetails()));
     }
   }
 
@@ -93,35 +88,36 @@ public interface WorkspaceMapper {
       return WorkspaceAccessLevel.fromValue(firecloudAccessLevel);
     }
   }
-//  @Mapping(source = "id", target = "workspaceId")
-//  @Mapping(source = "namespace", target = "workspaceNamespace")
-//  @Mapping(source = "", target = "firecloudName")
-//    //  "version, firecloudName, dataAccessLevelEnum,
-//    //  cdrVersion, lastAccessedTime, diseaseFocusedResearch,
-//    //  diseaseOfFocus, methodsDevelopment, controlSet, ancestry,
-//    //  commercialPurpose, socialBehavioral, populationHealth,
-//    //  educational, drugDevelopment, otherPurpose, otherPurposeDetails,
-//    //  population, populationDetails, specificPopulationsEnum,
-//    //  otherPopulationDetails, additionalNotes, reasonForAllOfUs,
-//    //  intendedStudy, anticipatedFindings, reviewRequested, approved,
-//    //  timeRequested, cohorts, conceptSets, dataSets, firecloudUuid,
-//    //  workspaceActiveStatusEnum, billingMigrationStatusEnum,
-//    //  billingStatus, billingAccountType".
-//    // I think we need an actual decorator to do the split mapping: https://mapstruct.org/documentation/1.0/reference/html/index.html#customizing-mappers-using-decorators
-//  DbWorkspace clientToDbModel(Workspace clientWorkspace);
-//
-//  @Mapping(source = "workspaceId", target = "id")
-//  @Mapping(target = "etag", ignore = true)
-//  @Mapping(source = "workspaceNamespace", target = "namespace")
-//  @Mapping(source = "cdrVersion", target = "cdrVersionId")
-//  @Mapping(target = "googleBucketName", ignore = true)
-//  @Mapping(target = "researchPurpose", ignore = true) // need to map multiple fields into one...
-//  Workspace dbModelToClient(DbWorkspace dbWorkspace);
-//
-//  @Mapping(target = "populationDetails", ignore = true)
-//  ResearchPurpose dbWorkspaceToResearchPurpose(DbWorkspace workspace);
-//
-//  default String etagFromVersion(int version) {
-//    return Etags.fromVersion(version);
-//  }
+  //  @Mapping(source = "id", target = "workspaceId")
+  //  @Mapping(source = "namespace", target = "workspaceNamespace")
+  //  @Mapping(source = "", target = "firecloudName")
+  //    //  "version, firecloudName, dataAccessLevelEnum,
+  //    //  cdrVersion, lastAccessedTime, diseaseFocusedResearch,
+  //    //  diseaseOfFocus, methodsDevelopment, controlSet, ancestry,
+  //    //  commercialPurpose, socialBehavioral, populationHealth,
+  //    //  educational, drugDevelopment, otherPurpose, otherPurposeDetails,
+  //    //  population, populationDetails, specificPopulationsEnum,
+  //    //  otherPopulationDetails, additionalNotes, reasonForAllOfUs,
+  //    //  intendedStudy, anticipatedFindings, reviewRequested, approved,
+  //    //  timeRequested, cohorts, conceptSets, dataSets, firecloudUuid,
+  //    //  workspaceActiveStatusEnum, billingMigrationStatusEnum,
+  //    //  billingStatus, billingAccountType".
+  //    // I think we need an actual decorator to do the split mapping:
+  // https://mapstruct.org/documentation/1.0/reference/html/index.html#customizing-mappers-using-decorators
+  //  DbWorkspace clientToDbModel(Workspace clientWorkspace);
+  //
+  //  @Mapping(source = "workspaceId", target = "id")
+  //  @Mapping(target = "etag", ignore = true)
+  //  @Mapping(source = "workspaceNamespace", target = "namespace")
+  //  @Mapping(source = "cdrVersion", target = "cdrVersionId")
+  //  @Mapping(target = "googleBucketName", ignore = true)
+  //  @Mapping(target = "researchPurpose", ignore = true) // need to map multiple fields into one...
+  //  Workspace dbModelToClient(DbWorkspace dbWorkspace);
+  //
+  //  @Mapping(target = "populationDetails", ignore = true)
+  //  ResearchPurpose dbWorkspaceToResearchPurpose(DbWorkspace workspace);
+  //
+  //  default String etagFromVersion(int version) {
+  //    return Etags.fromVersion(version);
+  //  }
 }

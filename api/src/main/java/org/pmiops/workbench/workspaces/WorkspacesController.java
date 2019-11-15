@@ -20,7 +20,6 @@ import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -346,8 +345,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
 
-    final Workspace editedWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
-    workspaceAuditAdapter.fireEditAction(originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
+    final Workspace editedWorkspace =
+        WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
+    workspaceAuditAdapter.fireEditAction(
+        originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 

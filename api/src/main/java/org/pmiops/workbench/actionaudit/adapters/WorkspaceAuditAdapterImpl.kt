@@ -54,9 +54,10 @@ constructor(
     }
 
     override fun fireEditAction(
-            previousWorkspace: Workspace,
-            editedWorkspace: Workspace,
-            workspaceId: Long) {
+        previousWorkspace: Workspace,
+        editedWorkspace: Workspace,
+        workspaceId: Long
+    ) {
         try {
             val info = getAuditEventInfo()
             val propertyToChangedValue = TargetPropertyExtractor.getChangedValuesByName(
@@ -77,7 +78,7 @@ constructor(
                             previousValueMaybe = it.value.previousValue,
                             newValueMaybe = it.value.newValue,
                             timestamp = info.timestamp
-                    )}
+                    ) }
         } catch (e: RuntimeException) {
             logAndSwallow(e)
         }
