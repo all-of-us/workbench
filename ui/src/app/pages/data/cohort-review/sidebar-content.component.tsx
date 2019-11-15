@@ -294,7 +294,7 @@ export const SidebarContent = fp.flow(
       .then(({items}) => {
         this.setState({annotationDefinitions: items});
       });
-    participantStore.subscribe(participant => this.setState({participant}));
+    participantStore.subscribe(participant => this.setState({participant: participant || {} as ParticipantCohortStatus}));
   }
 
   componentDidUpdate(prevProps: any): void {
