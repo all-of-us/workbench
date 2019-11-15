@@ -69,11 +69,10 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     let valueListItems = wrapper.find('[data-test-id="value-list-items"]');
     expect(valueListItems.length).toBe(2);
-    let selectedValue = valueListItems.forEach(value =>
-        value.props().checked)
+    let checkedValuesList = valueListItems.filterWhere(value => value.props().checked);
 
     // All values should be selected by default
-    expect(selectedValue.length).toBe(2);
+    expect(checkedValuesList.length).toBe(2);
 
     // Second Concept set in concept set list has domain "Measurement"
     const measurement_concept = wrapper.find('[data-test-id="concept-set-list-item"]').at(1)
@@ -82,10 +81,64 @@ describe('DataSetPage', () => {
     await waitOneTickAndUpdate(wrapper);
     await waitOneTickAndUpdate(wrapper);
     valueListItems = wrapper.find('[data-test-id="value-list-items"]');
-    selectedValue = valueListItems.forEach(value =>
-        value.props().checked);
+    checkedValuesList = valueListItems.filterWhere(value => value.props().checked);
     expect(valueListItems.length).toBe(5);
-    expect(selectedValue.length).toBe(5);
+    expect(checkedValuesList.length).toBe(5);
+  });
+
+  it('should select all values by default on selection on concept set only if the new domain is unique',
+    async() => {
+      const wrapper = mount(<DataSetPage/>);
+      await waitOneTickAndUpdate(wrapper);
+      await waitOneTickAndUpdate(wrapper);
+
+      // Select Condition Concept set
+      const condition_concept = wrapper.find('[data-test-id="concept-set-list-item"]').first()
+          .find('input').first();
+      condition_concept.simulate('change');
+      await waitOneTickAndUpdate(wrapper);
+      let valueListItems = wrapper.find('[data-test-id="value-list-items"]');
+      const conditionValueList = valueListItems.first().find('input').first();
+      expect(valueListItems.length).toBe(2);
+      let checkedValuesList = valueListItems.filterWhere(value => value.props().checked);
+
+
+      // All values should be selected by default
+      expect(checkedValuesList.length).toBe(2);
+
+      // Select second concept set which is Measurement domain
+      const measurement_concept = wrapper.find('[data-test-id="concept-set-list-item"]').at(1)
+          .find('input').first();
+      measurement_concept.simulate('change');
+      await waitOneTickAndUpdate(wrapper);
+      await waitOneTickAndUpdate(wrapper);
+      valueListItems = wrapper.find('[data-test-id="value-list-items"]');
+      checkedValuesList = valueListItems.filterWhere(value => value.props().checked)
+      // All values condition + measurement will be selected
+      expect(valueListItems.length).toBe(5);
+      expect(checkedValuesList.length).toBe(5);
+
+      // Unselect first Conidition value
+      valueListItems.first().find('input').first().simulate('change');
+      valueListItems = wrapper.find('[data-test-id="value-list-items"]');
+      checkedValuesList = valueListItems.filterWhere(value => value.props().checked)
+      expect(checkedValuesList.length).toBe(4);
+
+      // Select another condition concept set
+      const second_condition_concept =
+          wrapper.find('[data-test-id="concept-set-list-item"]').at(2)
+          .find('input').first();
+      second_condition_concept.simulate('change');
+      await waitOneTickAndUpdate(wrapper);
+      await waitOneTickAndUpdate(wrapper);
+      valueListItems = wrapper.find('[data-test-id="value-list-items"]');
+      checkedValuesList = valueListItems.filterWhere(value => value.props().checked);
+
+      // No change in value list since we already had selected condition concept set
+      expect(valueListItems.length).toBe(5);
+
+      // Should be no change in selected values
+      expect(checkedValuesList.length).toBe(4);
   });
 
   it('should enable save button and preview button once cohorts, concepts and values are selected',
