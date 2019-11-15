@@ -127,13 +127,10 @@ public class ConceptService {
   public static final String CLASSIFICATION_CONCEPT_CODE = "C";
 
   public Slice<Concept> searchConcepts(
-      String query,
-      StandardConceptFilter standardConceptFilter,
-      List<String> vocabularyIds,
-      List<String> domainIds,
-      int limit,
-      int minCount,
-      int page) {
+      String query, String standardConceptFilter, List<String> domainIds, int limit, int page) {
+
+    StandardConceptFilter convertedConceptFilter =
+        StandardConceptFilter.valueOf(standardConceptFilter);
 
     Specification<Concept> conceptSpecification =
         (root, criteriaQuery, criteriaBuilder) -> {
@@ -171,16 +168,16 @@ public class ConceptService {
             predicates.add(criteriaBuilder.greaterThan(matchExp, 0.0));
           }
 
-          if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
+          if (convertedConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
             predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
-          } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
+          } else if (convertedConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
             predicates.add(
                 criteriaBuilder.or(
                     criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
                     criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))));
 
-          } else if (standardConceptFilter.equals(
-              StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
+          } else if (convertedConceptFilter.equals(
+              convertedConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
             if (keyword != null) {
               List<Predicate> standardOrCodeOrIdMatch = new ArrayList<>();
               standardOrCodeOrIdMatch.add(
@@ -203,20 +200,12 @@ public class ConceptService {
             }
           }
 
-          if (vocabularyIds != null) {
-            predicates.add(root.get("vocabularyId").in(vocabularyIds));
-          }
-          if (domainIds != null) {
-            predicates.add(root.get("domainId").in(domainIds));
-          }
+          predicates.add(root.get("domainId").in(domainIds));
+          List<Predicate> countPredicates = new ArrayList<>();
+          countPredicates.add(criteriaBuilder.greaterThan(root.get("countValue"), 0));
+          countPredicates.add(criteriaBuilder.greaterThan(root.get("sourceCountValue"), 0));
 
-          if (minCount == 1) {
-            List<Predicate> countPredicates = new ArrayList<>();
-            countPredicates.add(criteriaBuilder.greaterThan(root.get("countValue"), 0));
-            countPredicates.add(criteriaBuilder.greaterThan(root.get("sourceCountValue"), 0));
-
-            predicates.add(criteriaBuilder.or(countPredicates.toArray(new Predicate[0])));
-          }
+          predicates.add(criteriaBuilder.or(countPredicates.toArray(new Predicate[0])));
           criteriaQuery.distinct(true);
           return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
