@@ -69,13 +69,11 @@ describe('NotebookRedirect', () => {
   it('should render', () => {
     const wrapper = mountedComponent();
     expect(wrapper).toBeTruthy();
-    wrapper.unmount();
   });
 
   it('should show redirect display before showing notebook', async() => {
     const wrapper = mountedComponent();
     expect(wrapper.exists('[data-test-id="notebook-redirect"]')).toBeTruthy();
-    wrapper.unmount();
   });
 
   it('should be "Initializing" until a Creating cluster for an existing notebook is running', async() => {
@@ -85,8 +83,6 @@ describe('NotebookRedirect', () => {
     clusterStub.cluster.status = ClusterStatus.Creating;
 
     await expectRedirectingAfterRunning(wrapper);
-
-    wrapper.unmount();
   });
 
   it('should be "Initializing" until a Creating cluster for a new notebook is running', async() => {
@@ -96,8 +92,6 @@ describe('NotebookRedirect', () => {
     clusterStub.cluster.status = ClusterStatus.Creating;
 
     await expectRedirectingAfterRunning(wrapper);
-
-    wrapper.unmount();
   });
 
   it('should be "Resuming" until a Stopped cluster for an existing notebook is running', async() => {
@@ -107,8 +101,6 @@ describe('NotebookRedirect', () => {
     clusterStub.cluster.status = ClusterStatus.Stopped;
 
     await expectRedirectingAfterRunning(wrapper);
-
-    wrapper.unmount();
   });
 
   it('should be "Resuming" until a Stopped cluster for a new notebook is running', async() => {
@@ -118,8 +110,6 @@ describe('NotebookRedirect', () => {
     clusterStub.cluster.status = ClusterStatus.Stopped;
 
     await expectRedirectingAfterRunning(wrapper);
-
-    wrapper.unmount();
   });
 
   async function expectRedirectingAfterRunning(wrapper) {
