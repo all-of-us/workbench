@@ -11,7 +11,7 @@ import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-r
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {HelpSidebar} from './help-sidebar';
 
-describe('SidebarContent', () => {
+describe('HelpSidebar', () => {
   beforeEach(() => {
     registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     registerApiClient(CohortAnnotationDefinitionApi, new CohortAnnotationDefinitionServiceStub());
@@ -20,7 +20,7 @@ describe('SidebarContent', () => {
   });
 
   it('should render', () => {
-    const wrapper = mount(<HelpSidebar location='data' />);
+    const wrapper = mount(<HelpSidebar helpContent='data' hideSidebar={0} />);
     expect(wrapper.exists()).toBeTruthy();
   });
 });

@@ -163,7 +163,7 @@ export const HelpSidebar = withUserProfile()(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      const {helpContent, hideSidebar} = this.props
+      const {helpContent, hideSidebar} = this.props;
       // close the sidebar on each navigation excluding navigating between participants in cohort review
       if (hideSidebar > prevProps.hideSidebar &&
         !(helpContent === 'reviewParticipantDetail' && prevProps.helpContent === 'reviewParticipantDetail')) {
@@ -287,12 +287,12 @@ export const HelpSidebar = withUserProfile()(
               {!!displayContent && displayContent.length > 0
                 ? displayContent.map((section, s) => <div key={s}>
                   <h3 style={styles.sectionTitle}>{this.highlightMatches(section.title)}</h3>
-                  {section.content.map((sectionContent, c) => {
-                    return typeof sectionContent === 'string'
-                      ? <p key={c} style={styles.contentItem}>{this.highlightMatches(sectionContent)}</p>
+                  {section.content.map((content, c) => {
+                    return typeof content === 'string'
+                      ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>
                       : <div key={c}>
-                        <h4 style={styles.contentTitle}>{this.highlightMatches(sectionContent.title)}</h4>
-                        {sectionContent.content.map((item, i) =>
+                        <h4 style={styles.contentTitle}>{this.highlightMatches(content.title)}</h4>
+                        {content.content.map((item, i) =>
                           <p key={i} style={styles.contentItem}>{this.highlightMatches(item)}</p>)
                         }
                       </div>;
