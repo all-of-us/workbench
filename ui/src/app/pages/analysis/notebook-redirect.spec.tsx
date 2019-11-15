@@ -14,7 +14,7 @@ import {NotebooksApiStub} from 'testing/stubs/notebooks-api-stub';
 import {NotebooksClusterApiStub} from 'testing/stubs/notebooks-cluster-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
-import {NotebookRedirect} from './notebook-redirect';
+import {NotebookRedirect, ProgressCardState} from './notebook-redirect';
 
 describe('NotebookRedirect', () => {
   const workspace = {
@@ -27,26 +27,12 @@ describe('NotebookRedirect', () => {
 
   let clusterStub: ClusterApiStub;
 
-  /*
-  NotebookRedirect.progressCardStates:
-  {includes: [Progress.Unknown, Progress.Initializing, Progress.Resuming], icon: 'notebook'},
-  {includes: [Progress.Authenticating], icon: 'success-standard'},
-  {includes: [Progress.Creating, Progress.Copying], icon: 'copy'},
-  {includes: [Progress.Redirecting], icon: 'circle-arrow'}
-   */
-  const progressCardIds = {
-    unknownInitializingResuming: 0,
-    authenticating: 1,
-    creatingCopying: 2,
-    redirecting: 3
-  };
-
   const mountedComponent = () => {
     return mount(<NotebookRedirect/>);
   };
 
-  const getCardSpinnerTestId = (cardId) => {
-    return '[data-test-id="progress-card-spinner-' + cardId + '"]';
+  const getCardSpinnerTestId = (cardState: ProgressCardState) => {
+    return '[data-test-id="progress-card-spinner-' + cardState.valueOf() + '"]';
   };
 
   beforeEach(() => {
@@ -140,7 +126,7 @@ describe('NotebookRedirect', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper
-      .exists(getCardSpinnerTestId(progressCardIds.unknownInitializingResuming)))
+      .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
       .toBeTruthy();
 
     clusterStub.cluster.status = ClusterStatus.Running;
@@ -148,7 +134,7 @@ describe('NotebookRedirect', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper
-      .exists(getCardSpinnerTestId(progressCardIds.redirecting)))
+      .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
       .toBeTruthy();
   }
 });

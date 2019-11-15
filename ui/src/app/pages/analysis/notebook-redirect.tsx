@@ -114,24 +114,44 @@ const pyNotebookMetadata = {
   }
 };
 
-const progressCardStates = [
-  {includesStates: [Progress.Unknown, Progress.Initializing, Progress.Resuming], icon: 'notebook'},
-  {includesStates: [Progress.Authenticating], icon: 'success-standard'},
-  {includesStates: [Progress.Creating, Progress.Copying], icon: 'copy'},
-  {includesStates: [Progress.Redirecting], icon: 'circle-arrow', rotation: 'rotate(90deg)'}
-];
+export enum ProgressCardState {
+  UnknownInitializingResuming,
+  Authenticating,
+  CopyingCreating,
+  Redirecting,
+  Loaded
+}
 
-const ProgressCard: React.FunctionComponent<{currentState: Progress, index: number,
+interface Icon {
+  shape: string;
+  rotation?: string;
+}
+
+const progressCardIcons: Map<ProgressCardState, Icon> = new Map([
+  [ProgressCardState.UnknownInitializingResuming, {shape: 'notebook'}],
+  [ProgressCardState.Authenticating, {shape: 'success-standard'}],
+  [ProgressCardState.CopyingCreating, {shape: 'copy'}],
+  [ProgressCardState.Redirecting, {shape: 'circle-arrow', rotation: 'rotate(90deg)'}],
+]);
+
+const progressCardStates: Map<ProgressCardState, Array<Progress>> = new Map([
+  [ProgressCardState.UnknownInitializingResuming, [Progress.Unknown, Progress.Initializing, Progress.Resuming]],
+  [ProgressCardState.Authenticating, [Progress.Authenticating]],
+  [ProgressCardState.CopyingCreating, [Progress.Creating, Progress.Copying]],
+  [ProgressCardState.Redirecting, [Progress.Redirecting]]
+]);
+
+const ProgressCard: React.FunctionComponent<{currentState: Progress, index: ProgressCardState,
   progressComplete: Map<Progress, boolean>, creatingNewNotebook: boolean}> =
   ({currentState, index, progressComplete, creatingNewNotebook}) => {
-    const {includesStates, icon, rotation} = progressCardStates[index];
+    const includesStates = progressCardStates.get(index);
     const isCurrent = includesStates.includes(currentState);
     const isComplete = currentState.valueOf() > includesStates.slice(-1).pop().valueOf();
 
     // Conditionally render card text
     const renderText = () => {
       switch (index) {
-        case 0:
+        case ProgressCardState.UnknownInitializingResuming:
           if (currentState === Progress.Unknown || progressComplete[Progress.Unknown]) {
             return 'Connecting to the notebook server';
           } else if (currentState === Progress.Initializing ||
@@ -140,29 +160,30 @@ const ProgressCard: React.FunctionComponent<{currentState: Progress, index: numb
           } else {
             return 'Resuming notebook server, may take up to 1 minute';
           }
-        case 1:
+        case ProgressCardState.Authenticating:
           return 'Authenticating with the notebook server';
-        case 2:
+        case ProgressCardState.CopyingCreating:
           if (creatingNewNotebook) {
             return 'Creating the new notebook';
           } else {
             return 'Copying the notebook onto the server';
           }
-        case 3:
+        case ProgressCardState.Redirecting:
           return 'Redirecting to the notebook server';
       }
     };
 
+    const icon = progressCardIcons.get(index);
     return <div style={isCurrent ? {...styles.progressCard, backgroundColor: '#F2FBE9'} :
       styles.progressCard}>
       {isCurrent ? <Spinner style={{width: '46px', height: '46px'}}
-                            data-test-id={'progress-card-spinner-' + index}/> :
+                            data-test-id={'progress-card-spinner-' + index.valueOf()}/> :
         <React.Fragment>
-          {icon === 'notebook' ? <NotebookIcon style={styles.progressIcon}/> :
-          <ClrIcon shape={icon} style={isComplete ?
+          {icon.shape === 'notebook' ? <NotebookIcon style={styles.progressIcon}/> :
+          <ClrIcon shape={icon.shape} style={isComplete ?
           {...styles.progressIcon, ...styles.progressIconDone,
-            transform: rotation} :
-            {...styles.progressIcon, transform: rotation}}/>}
+            transform: icon.rotation} :
+            {...styles.progressIcon, transform: icon.rotation}}/>}
         </React.Fragment>}
         <div style={styles.progressText}>
           {renderText()}
@@ -378,8 +399,8 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
             <Button type='secondary' onClick={() => window.history.back()}>Cancel</Button>
           </div>
           <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem'}}>
-            {progressCardStates.map((_, i) => {
-              return <ProgressCard currentState={progress} index={i} key={i}
+            {Array.from(progressCardStates, ([key, _]) => {
+              return <ProgressCard currentState={progress} index={key}
                                    creatingNewNotebook={creatingNewNotebook} progressComplete={progressComplete}/>;
             })}
           </div>
