@@ -146,7 +146,7 @@ const ProgressCard: React.FunctionComponent<{currentState: Progress, index: Prog
   ({currentState, index, progressComplete, creatingNewNotebook}) => {
     const includesStates = progressCardStates.get(index);
     const isCurrent = includesStates.includes(currentState);
-    const isComplete = currentState.valueOf() > includesStates.slice(-1).pop().valueOf();
+    const isComplete = includesStates.every(s => s.valueOf() < currentState.valueOf());
 
     // Conditionally render card text
     const renderText = () => {
