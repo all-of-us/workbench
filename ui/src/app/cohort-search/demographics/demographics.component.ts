@@ -41,8 +41,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   loading = false;
   subscription = new Subscription();
   selectedNode: any;
-  ageClicked = false;
-
 
     /* The Demographics form controls and associated convenience lenses */
   demoForm = new FormGroup({
@@ -55,9 +53,18 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   get deceased() { return this.demoForm.get('deceased'); }
 
     /* Storage for the demographics options (fetched via the API) */
-  ageNode: any;
-  ageNodes: Array<any>;
-  ageCount: number;
+  ageNode = {
+    hasAncestorData: false,
+    attributes: [],
+    code: '',
+    domainId: DomainType.PERSON,
+    group: false,
+    name: 'Age',
+    parameterId: 'age-param',
+    isStandard: true,
+    type: CriteriaType.AGE,
+    value: ''
+  };
   deceasedNode;
 
   nodes = [];
@@ -78,8 +85,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       this.initDeceased();
       this.initAgeRange();
       this.loadNodesFromApi(CriteriaType[CriteriaType.DECEASED]);
+    } else {
+      this.loadNodesFromApi();
     }
-    this.loadNodesFromApi();
   }
 
   ngOnDestroy() {
@@ -115,42 +123,32 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   loadOptions(nodes: any, type: string) {
-    switch (type) {
-      /* Age and Deceased are single nodes we use as templates */
-      case CriteriaType[CriteriaType.AGE]:
-        this.ageNode = nodes[0];
-        this.ageNodes = nodes;
-        this.calculateAgeCount();
-        const attr = {
-          name: AttrName.AGE,
-          operator: Operator.BETWEEN,
-          operands: [minAge.toString(), maxAge.toString()]
-        };
-        const paramId = `age-param${this.ageNode.id}`;
-        this.selectedNode = {
-          ...this.ageNode,
-          name: `Age In Range ${minAge} - ${maxAge}`,
-          parameterId: paramId,
-          attributes: [attr],
-        };
-        if (!this.wizard.item.searchParameters.length) {
-          const wizard = this.wizard;
-          wizard.item.searchParameters.push(this.selectedNode);
-          const selections = [paramId, ...this.selections];
-          selectionsStore.next(selections);
-          wizardStore.next(wizard);
-        }
-        break;
-      case CriteriaType[CriteriaType.DECEASED]:
-        this.deceasedNode = nodes[0];
-        break;
-      default:
-        this.nodes = nodes;
-        if (this.wizard.item.searchParameters.length) {
-          this.calculate(true);
-        }
-        this.loading = false;
+    if (type === CriteriaType[CriteriaType.DECEASED]) {
+      const attr = {
+        name: AttrName.AGE,
+        operator: Operator.BETWEEN,
+        operands: [minAge.toString(), maxAge.toString()]
+      };
+      this.selectedNode = {
+        ...this.ageNode,
+        name: `Age In Range ${minAge} - ${maxAge}`,
+        attributes: [attr],
+      };
+      if (!this.wizard.item.searchParameters.length) {
+        const wizard = this.wizard;
+        wizard.item.searchParameters.push(this.selectedNode);
+        const selections = [this.ageNode.parameterId, ...this.selections];
+        selectionsStore.next(selections);
+        wizardStore.next(wizard);
+      }
+      this.deceasedNode = nodes[0];
+    } else {
+      this.nodes = nodes;
+      if (this.wizard.item.searchParameters.length) {
+        this.calculate(true);
+      }
     }
+    this.loading = false;
   }
 
     /*
@@ -166,7 +164,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     this.subscription.add(this.ageRange.valueChanges.subscribe(([lo, hi]) => {
       min.setValue(lo, {emitEvent: false});
       max.setValue(hi, {emitEvent: false});
-      setTimeout(() => this.centerAgeCount(), 300);
     }));
 
     this.subscription.add(min.valueChanges.subscribe(value => {
@@ -246,11 +243,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
           operator: Operator.BETWEEN,
           operands: [lo.toString(), hi.toString()]
         };
-        const paramId = `age-param${this.ageNode.id}`;
         return {
           ...this.ageNode,
           name: `Age In Range ${lo} - ${hi}`,
-          parameterId: paramId,
           attributes: [attr],
         };
       }).subscribe(newNode => {
@@ -277,47 +272,10 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       triggerEvent('Cohort Builder Search', 'Click', 'Demo - Age/Deceased - Deceased Box');
       const wizard = this.wizard;
       wizard.item.searchParameters = [includeDeceased ? this.deceasedNode : this.selectedNode];
-      const selections = [
-        includeDeceased ? this.deceasedNode.parameterId : this.selectedNode.parameterId
-      ];
+      const selections = [includeDeceased ? this.deceasedNode.parameterId : this.selectedNode.parameterId];
       wizardStore.next(wizard);
       selectionsStore.next(selections);
     });
-  }
-
-  calculateAgeCount() {
-    const min = this.demoForm.get('ageMin');
-    const max = this.demoForm.get('ageMax');
-    let count = 0;
-    for (let i = min.value; i <= max.value; i++) {
-      const ageNode = this.ageNodes.find(node => node.name === i.toString());
-      if (ageNode) {
-        count += ageNode.count;
-      }
-    }
-    this.ageCount = count;
-    this.loading = false;
-  }
-
-  centerAgeCount() {
-    if (this.ageNodes) {
-      this.calculateAgeCount();
-      this.ageClicked = false;
-      const slider = <HTMLElement>document.getElementsByClassName('noUi-connect')[0];
-      const wrapper = document.getElementById('count-wrapper');
-      const count = document.getElementById('age-count');
-      wrapper.setAttribute(
-        'style', 'width: ' + slider.offsetWidth + 'px; left: ' + slider.offsetLeft + 'px;'
-      );
-      // set style properties also for cross-browser compatibility
-      wrapper.style.width = slider.offsetWidth.toString();
-      wrapper.style.left = slider.offsetLeft.toString();
-      if (slider.offsetWidth < count.offsetWidth) {
-        const margin = (slider.offsetWidth - count.offsetWidth) / 2;
-        count.setAttribute('style', 'margin-left: ' + margin + 'px;');
-        count.style.marginLeft = margin.toString();
-      }
-    }
   }
 
   selectOption = (opt: any) => {
