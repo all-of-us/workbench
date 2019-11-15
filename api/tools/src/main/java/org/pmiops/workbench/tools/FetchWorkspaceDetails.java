@@ -21,19 +21,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
- * A tool that takes a Workspace namespace / Firecloud Project ID and returns details for
- * any workspaces found.
+ * A tool that takes a Workspace namespace / Firecloud Project ID and returns details for any
+ * workspaces found.
  *
- * Details currently include...
- * - Name
- * - Creator Email
- * - Collaborator Emails and Access Levels
+ * <p>Details currently include... - Name - Creator Email - Collaborator Emails and Access Levels
  */
 @SpringBootApplication
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @EntityScan("org.pmiops.workbench.db.model")
 public class FetchWorkspaceDetails {
-  
+
   private static final Logger log = Logger.getLogger(FetchWorkspaceDetails.class.getName());
 
   private static Option fcBaseUrlOpt =
