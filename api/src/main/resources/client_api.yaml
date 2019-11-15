@@ -102,29 +102,29 @@ paths:
             $ref: "#/definitions/CohortAnnotationsResponse"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/searchConcepts:
-      post:
-        tags:
-          - concepts
-        consumes:
-          - application/json
-        description: >
-          Searches for concepts in concept table by name, and optionally filter on
-          domain, vocabulary IDs, or standard concept status. Uses the CDR version affiliated
-          with the workspace specified in the path.
-        operationId: "searchConcepts"
-        parameters:
-          - $ref: '#/parameters/workspaceNamespace'
-          - $ref: '#/parameters/workspaceId'
-          - in: body
-            name: request
-            description: concept search request
-            schema:
-              $ref: "#/definitions/SearchConceptsRequest"
-        responses:
-          200:
-            description: A collection of concepts
-            schema:
-              $ref: "#/definitions/ConceptListResponse"
+    post:
+      tags:
+        - concepts
+      consumes:
+        - application/json
+      description: >
+        Searches for concepts in concept table by name, and optionally filter on
+        domain, vocabulary IDs, or standard concept status. Uses the CDR version affiliated
+        with the workspace specified in the path.
+      operationId: "searchConcepts"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: body
+          name: request
+          description: concept search request
+          schema:
+            $ref: "#/definitions/SearchConceptsRequest"
+      responses:
+        200:
+          description: A collection of concepts
+          schema:
+            $ref: "#/definitions/ConceptListResponse"
 
 definitions:
 
@@ -133,9 +133,9 @@ definitions:
     properties:
       cohortName:
         description: >
-         The name of a cohort that data should be retrieved for. This and cohortSpec should not
-         be used at the same time. If neither cohortName nor cohortSpec are specified, data will
-         be extracted for everyone in the CDR.
+          The name of a cohort that data should be retrieved for. This and cohortSpec should not
+          be used at the same time. If neither cohortName nor cohortSpec are specified, data will
+          be extracted for everyone in the CDR.
         type: string
       cohortSpec:
         description: >
@@ -158,8 +158,8 @@ definitions:
         type: string
       tableQuery:
         description: >
-            A query specifying how to pull data out of a single table. If tableQuery is not
-            specified, just Person.person_id will be extracted.
+          A query specifying how to pull data out of a single table. If tableQuery is not
+          specified, just Person.person_id will be extracted.
         $ref: "#/definitions/TableQuery"
       maxResults:
         type: integer
@@ -209,7 +209,7 @@ definitions:
     properties:
       cohortName:
         description: >
-         The name of a cohort that annotations should be retrieved for.
+          The name of a cohort that annotations should be retrieved for.
         type: string
       statusFilter:
         description: >
@@ -236,7 +236,7 @@ definitions:
     properties:
       columns:
         description: >
-            An array of columns for the annotations being returned.
+          An array of columns for the annotations being returned.
         type: array
         items:
           type: string
@@ -265,7 +265,7 @@ definitions:
           should be in the OMOP CDM 5.2 schema.
         externalDocs:
           description: OMOP CDM 5.2 schema definition
-          url: https://github.com/OHDSI/CommonDataModel/blob/v5.2.0/PostgreSQL/OMOP%20CDM%20ddl%20-%20PostgreSQL.sql                          
+          url: https://github.com/OHDSI/CommonDataModel/blob/v5.2.0/PostgreSQL/OMOP%20CDM%20ddl%20-%20PostgreSQL.sql
         type: string
       columns:
         description: >
@@ -330,8 +330,8 @@ definitions:
     properties:
       if_not:
         description: >
-         Set to true if a result matching allOf or anyOf below should result in a result *not*
-         being returned.
+          Set to true if a result matching allOf or anyOf below should result in a result *not*
+          being returned.
         type: boolean
       allOf:
         description: >
@@ -496,6 +496,10 @@ definitions:
 
   SearchConceptsRequest:
     type: object
+    required:
+      - standardConceptFilter
+      - domain
+      - includeDomainCounts
     properties:
       query:
         type: string
@@ -510,11 +514,6 @@ definitions:
           concepts should be returned; defaults to ALL_CONCEPTS, meaning both
           standard and non-standard concepts will be returned.
         $ref: "#/definitions/StandardConceptFilter"
-      vocabularyIds:
-        type: array
-        items:
-          type: string
-        description: The vocabulary ID for the concepts returned (e.g. SNOMED, RxNorm)
       domain:
         description: >
           The domain for the concepts returned (e.g. OBSERVATION, DRUG). Note that this may map
@@ -524,16 +523,9 @@ definitions:
         type: integer
         format: int32
         description: The maximum number of results returned. Defaults to 20.
-      minCount:
-        type: integer
-        format: int32
-        description: Determines the concepts to be fetched. Gets all the concepts if 0 or gets concepts with counts if 1.
       includeDomainCounts:
         type: boolean
         description: True if per-domain counts of concepts matching the criteria should be included in the response
-      includeVocabularyCounts:
-        type: boolean
-        description: True if per-vocabulary counts of concepts matching the criteria in the specified domain should be included in the response
       pageNumber:
         type: integer
         default: 0
@@ -552,10 +544,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/DomainCount"
-      vocabularyCounts:
-        type: "array"
-        items:
-          $ref: "#/definitions/VocabularyCount"
 
   DomainCount:
     type: object
@@ -572,20 +560,6 @@ definitions:
         type: string
       conceptCount:
         description: number of concepts matching the search query in this domain
-        type: integer
-        format: int64
-
-  VocabularyCount:
-    type: object
-    required:
-      - vocabularyId
-      - conceptCount
-    properties:
-      vocabularyId:
-        description: ID / display name of the vocabulary
-        type: string
-      conceptCount:
-        description: number of concepts matching the search query in this vocabulary
         type: integer
         format: int64
 

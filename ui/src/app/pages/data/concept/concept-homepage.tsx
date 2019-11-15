@@ -30,7 +30,6 @@ import {
   StandardConceptFilter,
   SurveyModule,
   SurveyQuestionsResponse,
-  VocabularyCount,
 } from 'generated/fetch';
 import { Key } from 'ts-key-enum';
 import {SurveyDetails} from './survey-details';
@@ -92,7 +91,6 @@ const styles = reactStyles({
 
 interface ConceptCacheItem {
   domain: Domain;
-  vocabularyList: Array<VocabularyCount>;
   items: Array<Concept>;
 }
 
@@ -175,8 +173,6 @@ interface State { // Browse survey
   standardConceptsOnly: boolean;
   // Open modal to add survey questions to concept set
   surveyAddModalOpen: boolean;
-  // Array of vocabulary id and number of concepts in vocabulary
-  vocabularies: Array<VocabularyCount>;
   workspacePermissions: WorkspacePermissions;
 }
 
@@ -210,7 +206,6 @@ export const ConceptHomepage = withCurrentWorkspace()(
         },
         showSearchError: false,
         standardConceptsOnly: true,
-        vocabularies: [],
         workspacePermissions: new WorkspacePermissions(props.workspace),
         selectedSurvey: '',
         selectedSurveyQuestions: []
@@ -230,8 +225,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         const conceptsCache: ConceptCacheItem[] = conceptDomainInfo.items.map((domain) => {
           return {
             domain: domain.domain,
-            items: [],
-            vocabularyList: []
+            items: []
           };
         });
         const conceptDomainCounts: DomainCount[] = conceptDomainInfo.items.map((domain) => {
@@ -293,7 +287,6 @@ export const ConceptHomepage = withCurrentWorkspace()(
       const cacheItem = this.state.conceptsCache
         .find(c => c.domain === this.state.selectedDomain.domain);
       this.setState({concepts: cacheItem.items});
-      this.setState({vocabularies: cacheItem.vocabularyList});
     }
 
     async searchConcepts() {
@@ -312,12 +305,10 @@ export const ConceptHomepage = withCurrentWorkspace()(
           standardConceptFilter: standardConceptFilter,
           domain: cacheItem.domain,
           includeDomainCounts: activeTabSearch,
-          includeVocabularyCounts: true,
           maxResults: this.MAX_CONCEPT_FETCH
         });
         completedDomainSearches.push(cacheItem.domain);
         cacheItem.items = resp.items;
-        cacheItem.vocabularyList = resp.vocabularyCounts;
         this.setState({completedDomainSearches: completedDomainSearches});
         if (activeTabSearch) {
           this.setState({
@@ -342,7 +333,6 @@ export const ConceptHomepage = withCurrentWorkspace()(
         standardConceptFilter: standardConceptFilter,
         domain: selectedDomain.domain,
         includeDomainCounts: true,
-        includeVocabularyCounts: true,
         maxResults: this.MAX_CONCEPT_FETCH,
         pageNumber: pageNumber ? pageNumber : 0
       });
