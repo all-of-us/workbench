@@ -38,7 +38,7 @@ import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.RecentResourceResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CohortMapper;
-import org.pmiops.workbench.utils.CohortMapperImpl;
+import org.pmiops.workbench.utils.mappers.CohortMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
