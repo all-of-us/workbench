@@ -3,6 +3,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
 
+import {isAbortError} from 'app/utils/errors';
 import {urlParamsStore} from 'app/utils/navigation';
 
 import {Button} from 'app/components/buttons';
@@ -209,6 +210,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
   withQueryParams())(class extends React.Component<Props, State> {
 
     private timeoutReference: NodeJS.Timer;
+    private aborter = new AbortController();
 
     constructor(props) {
       super(props);
@@ -227,6 +229,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
 
     componentWillUnmount() {
       clearTimeout(this.timeoutReference);
+      this.aborter.abort();
     }
 
     private isClusterInProgress(cluster: Cluster): boolean {
@@ -255,7 +258,8 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       const {workspace} = this.props;
       const {initialized} = this.state;
       try {
-        const resp = await clusterApi().listClusters(billingProjectId, workspace.id);
+        const resp = await clusterApi().listClusters(billingProjectId, workspace.id,
+          {signal: this.aborter.signal});
         const cluster = resp.defaultCluster;
         if (!initialized) {
           if (cluster.status === ClusterStatus.Running) {
@@ -286,11 +290,15 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         } else {
           // If cluster is not running, keep re-polling until it is.
           if (cluster.status === ClusterStatus.Stopped) {
-            await notebooksClusterApi().startCluster(cluster.clusterNamespace, cluster.clusterName);
+            await notebooksClusterApi().startCluster(cluster.clusterNamespace, cluster.clusterName,
+              {signal: this.aborter.signal});
           }
           repoll();
         }
       } catch (e) {
+        if (isAbortError(e)) {
+          return;
+        }
         repoll();
       }
     }
@@ -326,7 +334,8 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         {
           withCredentials: true,
           crossDomain: true,
-          credentials: 'include'
+          credentials: 'include',
+          signal: this.aborter.signal
         });
     }
 
@@ -348,7 +357,8 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       try {
         const resp = await clusterApi().localize(cluster.clusterNamespace, cluster.clusterName,
           {workspaceNamespace: workspace.namespace, workspaceId: workspace.id,
-            notebookNames: notebookNames, playgroundMode: this.isPlaygroundMode()});
+            notebookNames: notebookNames, playgroundMode: this.isPlaygroundMode()},
+          {signal: this.aborter.signal});
         return resp.clusterLocalDirectory;
       } catch (error) {
         retryCount += 1;
@@ -380,7 +390,8 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
           'type': 'file',
           'format': 'text',
           'content': JSON.stringify(fileContent)
-        }
+        },
+        {signal: this.aborter.signal}
       );
       return `${localizedDir}/${jupyterResp.name}`;
     }
