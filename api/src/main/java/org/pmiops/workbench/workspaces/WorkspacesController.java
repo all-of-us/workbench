@@ -319,7 +319,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<Workspace> updateWorkspace(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    final Workspace originalWorkspace = workspaceMapper.dbModelToClient(dbWorkspace);
+    final Workspace originalWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace);
 
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
@@ -355,7 +355,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-//    workspaceAuditAdapter.fireEditAction(originalWorkspace, dbWorkspace);
+
+    final Workspace editedWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
+    workspaceAuditAdapter.fireEditAction(originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 

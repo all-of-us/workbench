@@ -8,6 +8,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 
@@ -35,6 +36,7 @@ public interface WorkspaceMapper {
     //  timeRequested, cohorts, conceptSets, dataSets, firecloudUuid,
     //  workspaceActiveStatusEnum, billingMigrationStatusEnum,
     //  billingStatus, billingAccountType".
+    // I think we need an actual decorator to do the split mapping: https://mapstruct.org/documentation/1.0/reference/html/index.html#customizing-mappers-using-decorators
   DbWorkspace clientToDbModel(Workspace clientWorkspace);
 
   @Mapping(source = "workspaceId", target = "id")
@@ -44,5 +46,8 @@ public interface WorkspaceMapper {
   @Mapping(target = "googleBucketName", ignore = true)
   @Mapping(target = "researchPurpose", ignore = true) // need to map multiple fields into one...
   Workspace dbModelToClient(DbWorkspace dbWorkspace);
+
+  @Mapping(target = "populationDetails", ignore = true)
+  ResearchPurpose dbWorkspaceToResearchPurpose(DbWorkspace workspace);
 
 }
