@@ -123,7 +123,7 @@ const progressCardStates = [
 
 const ProgressCard: React.FunctionComponent<{currentState: Progress, index: number,
   progressComplete: Map<Progress, boolean>, creatingNewNotebook: boolean}> =
-  ({index, currentState, progressComplete, creatingNewNotebook}) => {
+  ({currentState, index, progressComplete, creatingNewNotebook}) => {
     const {includesStates, icon, rotation} = progressCardStates[index];
     const isCurrent = includesStates.includes(currentState);
     const isComplete = currentState.valueOf() > includesStates.slice(-1).pop().valueOf();
