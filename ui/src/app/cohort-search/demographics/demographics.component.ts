@@ -3,7 +3,7 @@ import {FormControl, FormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs/Subscription';
 
 import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
-import {typeToTitle} from 'app/cohort-search/utils';
+import {mapParameter, typeToTitle} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
@@ -39,6 +39,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   readonly minAge = minAge;
   readonly maxAge = maxAge;
   loading = false;
+  calculating = false;
   subscription = new Subscription();
   selectedNode: any;
 
@@ -164,18 +165,21 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     this.subscription.add(this.ageRange.valueChanges.subscribe(([lo, hi]) => {
       min.setValue(lo, {emitEvent: false});
       max.setValue(hi, {emitEvent: false});
+      this.count = null;
     }));
 
     this.subscription.add(min.valueChanges.subscribe(value => {
       const [_, hi] = [...this.ageRange.value];
       if (value <= hi && value >= this.minAge) {
         this.ageRange.setValue([value, hi], {emitEvent: false});
+        this.count = null;
       }
     }));
     this.subscription.add(max.valueChanges.subscribe(value => {
       const [lo, _] = [...this.ageRange.value];
       if (value >= lo) {
         this.ageRange.setValue([lo, value], {emitEvent: false});
+        this.count = null;
       }
     }));
   }
@@ -267,6 +271,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       .find(s => s.type === CriteriaType[CriteriaType.DECEASED]);
     if (existent !== undefined) {
       this.deceased.setValue(true);
+      this.count = this.deceasedNode.count;
     }
     this.subscription = this.deceased.valueChanges.subscribe(includeDeceased => {
       triggerEvent('Cohort Builder Search', 'Click', 'Demo - Age/Deceased - Deceased Box');
@@ -275,6 +280,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       const selections = [includeDeceased ? this.deceasedNode.parameterId : this.selectedNode.parameterId];
       wizardStore.next(wizard);
       selectionsStore.next(selections);
+      this.count = includeDeceased ? this.deceasedNode.count : null;
     });
   }
 
@@ -302,11 +308,34 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     });
   }
 
+  calculateAge() {
+    this.calculating = true;
+    const cdrVersionId = +(currentWorkspaceStore.getValue().cdrVersionId);
+    const request = {
+      excludes: [],
+      includes: [{
+        items: [{
+          type: DomainType[DomainType.PERSON],
+          searchParameters: [mapParameter(this.selectedNode)],
+          modifiers: []
+        }],
+        temporal: false
+      }]
+    };
+    cohortBuilderApi().countParticipants(cdrVersionId, request).then(response => {
+      this.count = response;
+      this.calculating = false;
+    }, (err) => {
+      console.error(err);
+      this.calculating = false;
+    });
+  }
+
   get noSexData() {
     return !this.loading && this.wizard.type === CriteriaType.SEX && this.nodes.length === 0;
   }
 
   get showPreview() {
-    return !this.loading && (this.selections && this.selections.length) && this.wizard.type !== CriteriaType.AGE;
+    return !this.loading && (this.selections && this.selections.length);
   }
 }
