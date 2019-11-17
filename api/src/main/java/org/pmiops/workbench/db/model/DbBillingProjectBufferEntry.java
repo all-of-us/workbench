@@ -1,6 +1,8 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.util.Optional;
 import java.util.function.Supplier;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.jetbrains.annotations.NotNull;
 
 @Entity
 @Table(name = "billing_project_buffer_entry")
@@ -106,6 +109,14 @@ public class DbBillingProjectBufferEntry {
     this.status = DbStorageEnums.billingProjectBufferEntryStatusToStorage(status);
   }
 
+  // Calculate the timespan between creation and sync, to see if this entry has been
+  // stuck in crating too long
+  @Transient
+  public Duration getLastChangedToLastSyncRequestInterval() {
+    return Duration.between(
+        getLastStatusChangedTime().toInstant(), getLastSyncRequestTime().toInstant());
+  }
+
   @Column(name = "status")
   private short getStatus() {
     return this.status;
@@ -113,5 +124,31 @@ public class DbBillingProjectBufferEntry {
 
   private void setStatus(short s) {
     this.status = s;
+  }
+
+  @Override
+  public String toString() {
+    return "DbBillingProjectBufferEntry{"
+        + "id="
+        + id
+        + ", fireCloudProjectName='"
+        + fireCloudProjectName
+        + '\''
+        + ", creationTime="
+        + nullableTimestampToString(creationTime)
+        + ", lastSyncRequestTime="
+        + nullableTimestampToString(lastSyncRequestTime)
+        + ", lastStatusChangedTime="
+        + nullableTimestampToString(lastStatusChangedTime)
+        + ", statusEnum="
+        + getStatusEnum()
+        + ", assignedUser="
+        + Optional.ofNullable(assignedUser).map(u -> Long.toString(u.getUserId())).orElse("n/a")
+        + '}';
+  }
+
+  @NotNull
+  private String nullableTimestampToString(Timestamp timestamp) {
+    return Optional.ofNullable(timestamp).map(Timestamp::toString).orElse("n/a");
   }
 }

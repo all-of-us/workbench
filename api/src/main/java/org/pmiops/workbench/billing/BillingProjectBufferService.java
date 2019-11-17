@@ -1,13 +1,16 @@
 package org.pmiops.workbench.billing;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,6 +25,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.BillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,11 +35,13 @@ public class BillingProjectBufferService {
 
   private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
 
-  private static final int SYNCS_PER_INVOCATION = 5;
   private static final int PROJECT_BILLING_ID_SIZE = 8;
   @VisibleForTesting static final Duration CREATING_TIMEOUT = Duration.ofMinutes(60);
   @VisibleForTesting static final Duration ASSIGNING_TIMEOUT = Duration.ofMinutes(10);
-
+  private static ImmutableMap<BufferEntryStatus, Duration> statusToGracePeriod =
+      ImmutableMap.of(
+          BufferEntryStatus.CREATING, CREATING_TIMEOUT,
+          BufferEntryStatus.ASSIGNING, ASSIGNING_TIMEOUT);
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
@@ -72,6 +78,10 @@ public class BillingProjectBufferService {
    */
   private void bufferBillingProject() {
     if (getUnfilledBufferSpace() <= 0) {
+      log.info(
+          String.format(
+              "Billing buffer is at capacity: size = %d, capacity = %d",
+              getCurrentBufferSize(), getBufferMaxCapacity()));
       return;
     }
 
@@ -81,29 +91,33 @@ public class BillingProjectBufferService {
     entry.setFireCloudProjectName(projectName);
     entry.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
     entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
-    billingProjectBufferEntryDao.save(entry);
+    entry = billingProjectBufferEntryDao.save(entry);
 
     fireCloudService.createAllOfUsBillingProject(projectName);
+    log.info(String.format("Created new project %s", entry.toString()));
   }
 
   public void syncBillingProjectStatus() {
-    for (int i = 0; i < SYNCS_PER_INVOCATION; i++) {
-      DbBillingProjectBufferEntry entry =
-          billingProjectBufferEntryDao.findFirstByStatusOrderByLastSyncRequestTimeAsc(
-              DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.CREATING));
+    List<DbBillingProjectBufferEntry> creatingEntriesToSync =
+        billingProjectBufferEntryDao.findTop5ByStatusOrderByLastSyncRequestTimeAsc(
+            DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.CREATING));
+    int successfulSyncCount = 0;
+    for (DbBillingProjectBufferEntry entry : creatingEntriesToSync) {
 
-      if (entry == null) {
-        return;
-      }
-
-      entry.setLastSyncRequestTime(new Timestamp(clock.instant().toEpochMilli()));
+      entry.setLastSyncRequestTime(Timestamp.from(clock.instant()));
 
       try {
-        switch (fireCloudService
-            .getBillingProjectStatus(entry.getFireCloudProjectName())
-            .getCreationStatus()) {
+        final CreationStatusEnum fireCloudStatus =
+            fireCloudService
+                .getBillingProjectStatus(entry.getFireCloudProjectName())
+                .getCreationStatus();
+        switch (fireCloudStatus) {
           case READY:
             entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
+            log.info(
+                String.format(
+                    "SyncBillingProjectStatus: BillingProject %s available",
+                    entry.getFireCloudProjectName()));
             break;
           case ERROR:
             log.warning(
@@ -115,36 +129,38 @@ public class BillingProjectBufferService {
           case CREATING:
           case ADDINGTOPERIMETER:
           default:
+            log.info(
+                String.format(
+                    "SyncBillingProjectStatus: BillingProject %s status=%s",
+                    entry.getFireCloudProjectName(), fireCloudStatus.toString()));
             break;
         }
       } catch (NotFoundException e) {
         log.log(
             Level.WARNING,
-            "Get BillingProjectStatus call failed for "
-                + entry.getFireCloudProjectName()
-                + ". Project not found.",
+            "Get BillingProjectStatus call failed for " + entry.toString() + ". Project not found.",
             e);
       } catch (WorkbenchException e) {
-        log.log(
-            Level.WARNING,
-            "Get BillingProjectStatus call failed for " + entry.getFireCloudProjectName(),
-            e);
+        log.log(Level.WARNING, "Get BillingProjectStatus call failed for " + entry.toString(), e);
       }
 
       billingProjectBufferEntryDao.save(entry);
+      successfulSyncCount += 1;
     }
+    log.info(
+        String.format(
+            "Synchronized %d billing projects of %d attempted",
+            successfulSyncCount, creatingEntriesToSync.size()));
   }
 
+  /** Update any expired buffer entries in creating or assigning state to ERROR status. */
   public void cleanBillingBuffer() {
     Instant now = clock.instant();
     Iterables.concat(
             findExpiredCreatingEntries(now),
             // For the ASSIGNING status monitor, we can simply filter by the current time as this
             // status tracks internal state rather than the Firecloud status.
-            billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
-                DbStorageEnums.billingProjectBufferEntryStatusToStorage(
-                    BufferEntryStatus.ASSIGNING),
-                new Timestamp(now.minus(ASSIGNING_TIMEOUT).toEpochMilli())))
+            findEntriesWithExpiredGracePeriod(now, BufferEntryStatus.ASSIGNING))
         .forEach(
             entry -> {
               log.warning(
@@ -157,12 +173,25 @@ public class BillingProjectBufferService {
             });
   }
 
+  private List<DbBillingProjectBufferEntry> findEntriesWithExpiredGracePeriod(
+      Instant now, BufferEntryStatus bufferEntryStatus) {
+    final Optional<Duration> gracePeriod =
+        Optional.ofNullable(statusToGracePeriod.get(bufferEntryStatus));
+
+    return gracePeriod
+        .map(p -> findEntriesWithExpiredGracePeriod(now, bufferEntryStatus, p))
+        .orElse(Collections.emptyList());
+  }
+
+  private List<DbBillingProjectBufferEntry> findEntriesWithExpiredGracePeriod(
+      Instant now, BufferEntryStatus bufferEntryStatus, Duration gracePeriod) {
+    return billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
+        DbStorageEnums.billingProjectBufferEntryStatusToStorage(bufferEntryStatus),
+        Timestamp.from(now.minus(gracePeriod)));
+  }
+
   private List<DbBillingProjectBufferEntry> findExpiredCreatingEntries(Instant now) {
-    return billingProjectBufferEntryDao
-        .findAllByStatusAndLastStatusChangedTimeLessThan(
-            DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.CREATING),
-            new Timestamp(now.minus(CREATING_TIMEOUT).toEpochMilli()))
-        .stream()
+    return findEntriesWithExpiredGracePeriod(now, BufferEntryStatus.CREATING).stream()
         // Ensure that we've also synchronized the status since the deadline elapsed. This
         // covers degenerate cases where syncBillingProjectStatus might be backlogged and
         // hasn't caught up to check all the CREATING projects, or covers periods where
@@ -173,22 +202,20 @@ public class BillingProjectBufferService {
         .filter(entry -> entry.getLastSyncRequestTime() != null)
         .filter(
             entry ->
-                Duration.between(
-                            entry.getLastStatusChangedTime().toInstant(),
-                            entry.getLastSyncRequestTime().toInstant())
-                        .toMillis()
+                entry.getLastChangedToLastSyncRequestInterval().toMillis()
                     >= CREATING_TIMEOUT.toMillis())
         .collect(Collectors.toList());
   }
 
-  public DbBillingProjectBufferEntry assignBillingProject(DbUser user) {
+  public DbBillingProjectBufferEntry assignBillingProject(DbUser dbUser) {
     DbBillingProjectBufferEntry entry = consumeBufferEntryForAssignment();
 
-    fireCloudService.addUserToBillingProject(user.getEmail(), entry.getFireCloudProjectName());
+    fireCloudService.addUserToBillingProject(dbUser.getEmail(), entry.getFireCloudProjectName());
     entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
-    entry.setAssignedUser(user);
-    billingProjectBufferEntryDao.save(entry);
+    entry.setAssignedUser(dbUser);
 
+    // return the updated value
+    entry = billingProjectBufferEntryDao.save(entry);
     return entry;
   }
 
