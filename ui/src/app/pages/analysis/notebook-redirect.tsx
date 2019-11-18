@@ -330,13 +330,12 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     private async initializeNotebookCookies(c: Cluster) {
-      return notebooksApi().setCookie(c.clusterNamespace, c.clusterName,
-        {
-          withCredentials: true,
-          crossDomain: true,
-          credentials: 'include',
-          signal: this.aborter.signal
-        });
+      return notebooksApi().setCookie(c.clusterNamespace, c.clusterName, {
+        withCredentials: true,
+        crossDomain: true,
+        credentials: 'include',
+        signal: this.aborter.signal
+      });
     }
 
     private async getNotebookPathAndLocalize(cluster: Cluster) {
