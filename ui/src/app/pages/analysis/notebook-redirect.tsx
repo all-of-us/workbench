@@ -204,7 +204,6 @@ const ProgressCard: React.FunctionComponent<{progressState: Progress, cardState:
   };
 
 interface State {
-  initialized: boolean;
   leoUrl: string;
   localizationError: boolean;
   progress: Progress;
@@ -217,16 +216,18 @@ interface Props {
   profileState: {profile: Profile, reload: Function, updateCache: Function};
 }
 
+const clusterPollingIntervalMillis = 15000;
+
 export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(),
   withQueryParams())(class extends React.Component<Props, State> {
 
+    private intervalReference: NodeJS.Timer;
     private timeoutReference: NodeJS.Timer;
     private aborter = new AbortController();
 
     constructor(props) {
       super(props);
       this.state = {
-        initialized: false,
         leoUrl: undefined,
         localizationError: false,
         progress: Progress.Unknown,
@@ -235,10 +236,11 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     componentDidMount() {
-      this.pollCluster(this.props.workspace.namespace);
+      this.initializeClusterStatusChecking(this.props.workspace.namespace);
     }
 
     componentWillUnmount() {
+      clearInterval(this.intervalReference);
       clearTimeout(this.timeoutReference);
       this.aborter.abort();
     }
@@ -247,6 +249,11 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       return cluster.status === ClusterStatus.Starting ||
         cluster.status === ClusterStatus.Stopping ||
         cluster.status === ClusterStatus.Stopped;
+    }
+
+    private clearAndSetInterval(intervalCallback, intervalMillis) {
+      clearInterval(this.intervalReference);
+      this.intervalReference = setInterval(intervalCallback, intervalMillis);
     }
 
     private clearAndSetTimeout(timeoutCallback, timeoutMillis) {
@@ -262,56 +269,80 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       return this.props.queryParams.playgroundMode === 'true';
     }
 
-    private async pollCluster(billingProjectId) {
-      const repoll = () => {
-        this.clearAndSetTimeout(() => this.pollCluster(billingProjectId), 15000);
-      };
-      const {workspace} = this.props;
-      const {initialized} = this.state;
+    private async initializeClusterStatusChecking(billingProjectId) {
       try {
-        const resp = await clusterApi().listClusters(billingProjectId, workspace.id,
-          {signal: this.aborter.signal});
-        const cluster = resp.defaultCluster;
-        if (!initialized) {
-          if (cluster.status === ClusterStatus.Running) {
-            this.incrementProgress(Progress.Unknown);
-          } else if (this.isClusterInProgress(cluster)) {
+        const cluster = await this.getDefaultCluster(billingProjectId);
+
+        if (cluster.status === ClusterStatus.Running) {
+          this.incrementProgress(Progress.Unknown);
+          await this.connectToRunningCluster(cluster);
+        } else {
+          if (this.isClusterInProgress(cluster)) {
             this.incrementProgress(Progress.Resuming);
           } else {
             this.incrementProgress(Progress.Initializing);
           }
-          this.setState({initialized: true});
+
+          this.scheduleClusterPoll(billingProjectId);
         }
+      } catch (e) {
+        if (!isAbortError(e)) {
+          this.scheduleClusterPoll(billingProjectId);
+          throw e;
+        }
+      }
+    }
 
+    private async getDefaultCluster(billingProjectId) {
+      const resp = await clusterApi().listClusters(
+        billingProjectId, this.props.workspace.id, {signal: this.aborter.signal});
+      return resp.defaultCluster;
+    }
+
+    private scheduleClusterPoll(billingProjectId) {
+      this.clearAndSetInterval(() => this.pollForRunningCluster(billingProjectId), clusterPollingIntervalMillis);
+    }
+
+    private async pollForRunningCluster(billingProjectId) {
+      try {
+        const cluster = await this.getDefaultCluster(billingProjectId);
         if (cluster.status === ClusterStatus.Running) {
-          this.incrementProgress(Progress.Authenticating);
-          await this.initializeNotebookCookies(cluster);
-
-          const notebookLocation = await this.getNotebookPathAndLocalize(cluster);
-          if (this.isCreatingNewNotebook()) {
-            window.history.replaceState({}, 'Notebook', 'workspaces/' + workspace.namespace
-              + '/' + workspace.id + '/notebooks/' +
-              encodeURIComponent(this.getFullNotebookName()));
-          }
-          this.setState({leoUrl: this.notebookUrl(cluster, notebookLocation)});
-          this.incrementProgress(Progress.Redirecting);
-
-          // give it a second to "redirect"
-          this.clearAndSetTimeout(() => this.incrementProgress(Progress.Loaded), 1000);
+          clearInterval(this.intervalReference);
+          await this.connectToRunningCluster(cluster);
         } else {
-          // If cluster is not running, keep re-polling until it is.
+          // re-start cluster if stopped, and try again in the next polling interval
           if (cluster.status === ClusterStatus.Stopped) {
             await notebooksClusterApi().startCluster(cluster.clusterNamespace, cluster.clusterName,
               {signal: this.aborter.signal});
           }
-          repoll();
         }
       } catch (e) {
         if (isAbortError(e)) {
-          return;
+          // stop polling on abort
+          clearInterval(this.intervalReference);
+        } else {
+          throw e;
         }
-        repoll();
       }
+    }
+
+    private async connectToRunningCluster(cluster) {
+      const {namespace, id} = this.props.workspace;
+
+      this.incrementProgress(Progress.Authenticating);
+      await this.initializeNotebookCookies(cluster);
+
+      const notebookLocation = await this.getNotebookPathAndLocalize(cluster);
+      if (this.isCreatingNewNotebook()) {
+        window.history.replaceState({}, 'Notebook', 'workspaces/' + namespace
+          + '/' + id + '/notebooks/' +
+          encodeURIComponent(this.getFullNotebookName()));
+      }
+      this.setState({leoUrl: this.notebookUrl(cluster, notebookLocation)});
+      this.incrementProgress(Progress.Redirecting);
+
+      // give it a second to "redirect"
+      this.clearAndSetTimeout(() => this.incrementProgress(Progress.Loaded), 1000);
     }
 
     private incrementProgress(p: Progress): void {
@@ -350,12 +381,12 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     private async getNotebookPathAndLocalize(cluster: Cluster) {
-      const fullNotebookName = this.getFullNotebookName();
       if (this.isCreatingNewNotebook()) {
         this.incrementProgress(Progress.Creating);
         return this.createNotebookAndLocalize(cluster);
       } else {
         this.incrementProgress(Progress.Copying);
+        const fullNotebookName = this.getFullNotebookName();
         const localizedNotebookDir =
           await this.localizeNotebooksWithRetry(cluster, [fullNotebookName]);
         return `${localizedNotebookDir}/${fullNotebookName}`;
