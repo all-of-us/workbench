@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -416,13 +417,15 @@ public class DataSetController implements DataSetApiDelegate {
     if (field.getType() == LegacySQLTypeName.TIMESTAMP) {
       List<String> queryValues = new ArrayList<>();
       DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
+      dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
       previewValue
           .getQueryValue()
           .forEach(
               value -> {
                 if (!value.equals(EMPTY_CELL_MARKER)) {
                   Double fieldValue = Double.parseDouble(value);
-                  queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
+                  // Bigquery returns time values in seconds, rather than in milliseconds.
+                  queryValues.add(dateFormat.format(new Date(fieldValue.longValue() * 1000)));
                 } else {
                   queryValues.add(value);
                 }
