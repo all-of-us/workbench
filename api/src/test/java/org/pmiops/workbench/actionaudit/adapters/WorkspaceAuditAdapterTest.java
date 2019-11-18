@@ -59,7 +59,7 @@ public class WorkspaceAuditAdapterTest {
   @Mock private ActionAuditService mockActionAuditService;
   @Mock private Provider<String> mockActionIdProvider;
 
-  @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventListCaptor;
+  @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventCollectionCaptor;
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
 
   @TestConfiguration
@@ -116,8 +116,8 @@ public class WorkspaceAuditAdapterTest {
   @Test
   public void testFiresCreateWorkspaceEvents() {
     workspaceAuditAdapter.fireCreateAction(workspace1, WORKSPACE_1_DB_ID);
-    verify(mockActionAuditService).send(eventListCaptor.capture());
-    Collection<ActionAuditEvent> eventsSent = eventListCaptor.getValue();
+    verify(mockActionAuditService).send(eventCollectionCaptor.capture());
+    Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
     assertThat(eventsSent.size()).isEqualTo(6);
     Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
     assertThat(firstEvent.isPresent()).isTrue();
@@ -142,8 +142,8 @@ public class WorkspaceAuditAdapterTest {
   @Test
   public void testFiresDuplicateEvent() {
     workspaceAuditAdapter.fireDuplicateAction(dbWorkspace1, dbWorkspace2);
-    verify(mockActionAuditService).send(eventListCaptor.capture());
-    final Collection<ActionAuditEvent> eventsSent = eventListCaptor.getValue();
+    verify(mockActionAuditService).send(eventCollectionCaptor.capture());
+    final Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
     assertThat(eventsSent).hasSize(2);
 
     // need same actionId for all events
@@ -176,8 +176,8 @@ public class WorkspaceAuditAdapterTest {
             ADDED_USER_ID,
             WorkspaceAccessLevel.READER.toString());
     workspaceAuditAdapter.fireCollaborateAction(dbWorkspace1.getWorkspaceId(), aclsByUserId);
-    verify(mockActionAuditService).send(eventListCaptor.capture());
-    Collection<ActionAuditEvent> eventsSent = eventListCaptor.getValue();
+    verify(mockActionAuditService).send(eventCollectionCaptor.capture());
+    Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
     assertThat(eventsSent).hasSize(4);
 
     Map<String, Long> countByTargetType =
@@ -234,5 +234,40 @@ public class WorkspaceAuditAdapterTest {
   public void testDoesNotThrowWhenUserProviderFails() {
     doReturn(null).when(mockUserProvider).get();
     workspaceAuditAdapter.fireDeleteAction(dbWorkspace1);
+  }
+
+  @Test
+  public void testFireEditAction_sendsNoEventsForSameWorkspace() {
+    workspaceAuditAdapter.fireEditAction(workspace1, workspace1, dbWorkspace1.getWorkspaceId());
+    verify(mockActionAuditService).send(eventCollectionCaptor.capture());
+    assertThat(eventCollectionCaptor.getValue()).isEmpty();
+  }
+
+  @Test
+  public void testFireEditAction_sendsChangedProperties() {
+    final ResearchPurpose editedResearchPurpose = new ResearchPurpose();
+    editedResearchPurpose.setIntendedStudy("stubbed toes");
+    editedResearchPurpose.setAdditionalNotes("I really like the cloud.");
+    editedResearchPurpose.setAnticipatedFindings("I want to find my keys.");
+    editedResearchPurpose.setControlSet(true);
+
+    Workspace editedWorkspace = new Workspace();
+    editedWorkspace.setName("New name");
+    editedWorkspace.setId("fc-id-1");
+    editedWorkspace.setNamespace("aou-rw-local1-c4be869a");
+    editedWorkspace.setCreator("user@fake-research-aou.org");
+    editedWorkspace.setCdrVersionId("1");
+    editedWorkspace.setResearchPurpose(editedResearchPurpose);
+    editedWorkspace.setCreationTime(Y2K_EPOCH_MILLIS);
+    editedWorkspace.setLastModifiedTime(Y2K_EPOCH_MILLIS);
+    editedWorkspace.setEtag("etag_1");
+    editedWorkspace.setDataAccessLevel(DataAccessLevel.REGISTERED);
+    editedWorkspace.setPublished(false);
+
+    workspaceAuditAdapter.fireEditAction(
+        workspace1, editedWorkspace, dbWorkspace1.getWorkspaceId());
+    verify(mockActionAuditService).send(eventCollectionCaptor.capture());
+
+    assertThat(eventCollectionCaptor.getValue()).hasSize(3);
   }
 }
