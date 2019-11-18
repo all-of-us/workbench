@@ -177,4 +177,33 @@ describe('NotebookRedirect', () => {
     expect(currentCardText(wrapper))
       .toContain(progressStrings.get(Progress.Redirecting));
   });
+
+  it('should be "Redirecting" when the cluster is initially Running for an existing notebook', async() => {
+    const wrapper = mountedComponent();
+
+    wrapper.setState({creatingNewNotebook: false});
+    clusterStub.cluster.status = ClusterStatus.Running;
+    await awaitTickAndTimers(wrapper);
+
+    expect(wrapper
+      .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
+      .toBeTruthy();
+    expect(currentCardText(wrapper))
+      .toContain(progressStrings.get(Progress.Redirecting));
+  });
+
+
+  it('should be "Redirecting" when the cluster is initially Running for a new notebook', async() => {
+    const wrapper = mountedComponent();
+
+    wrapper.setState({creatingNewNotebook: true});
+    clusterStub.cluster.status = ClusterStatus.Running;
+    await awaitTickAndTimers(wrapper);
+
+    expect(wrapper
+      .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
+      .toBeTruthy();
+    expect(currentCardText(wrapper))
+      .toContain(progressStrings.get(Progress.Redirecting));
+  });
 });
