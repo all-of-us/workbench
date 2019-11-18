@@ -26,5 +26,4 @@ public interface CohortMapper {
   public static DataAccessLevel storageEnumToDataAccessLevel(Short ordinal) {
     return CommonStorageEnums.dataAccessLevelFromStorage(ordinal);
   }
-
 }

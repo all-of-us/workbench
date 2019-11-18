@@ -10,13 +10,14 @@ constructor(
     override val extractor: (Workspace) -> String?
 ) : TargetProperty<Workspace> {
     NAME("name", Workspace::getName),
-    INTENDED_STUDY("intended_study", { it.researchPurpose.intendedStudy }),
+    NAMESPACE("namespace", Workspace::getNamespace),
+    CDR_VERSION_ID("cdr_version_id", Workspace::getCdrVersionId),
     CREATOR("creator", Workspace::getCreator),
+    DATA_ACCESS_LEVEL("data_access_level", { it.dataAccessLevel.toString() }),
+    INTENDED_STUDY("intended_study", { it.researchPurpose.intendedStudy }),
     ADDITIONAL_NOTES("additional_notes", { it.researchPurpose.additionalNotes }),
     ANTICIPATED_FINDINGS(
             "anticipated_findings", { it.researchPurpose.anticipatedFindings }),
     DISEASE_OF_FOCUS("disease_of_focus", { it.researchPurpose.diseaseOfFocus }),
-    REASON_FOR_ALL_OF_US("reason_for_all_of_us", { it.researchPurpose.reasonForAllOfUs }),
-    NAMESPACE("namespace", Workspace::getNamespace),
-    CDR_VERSION_ID("cdr_version_id", Workspace::getCdrVersionId);
+    REASON_FOR_ALL_OF_US("reason_for_all_of_us", { it.researchPurpose.reasonForAllOfUs });
 }

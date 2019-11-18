@@ -149,7 +149,7 @@ public class CohortsControllerTest {
   @Autowired ConceptSetsController conceptSetsController;
   @Autowired BillingProjectBufferService billingProjectBufferService;
 
-  Workspace  workspace;
+  Workspace workspace;
   Workspace workspace2;
   CdrVersion cdrVersion;
   SearchRequest searchRequest;
@@ -181,7 +181,7 @@ public class CohortsControllerTest {
     WorkspacesController.class,
     CohortsController.class,
     ConceptSetsController.class,
-      WorkspaceMapperImpl.class
+    WorkspaceMapperImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,

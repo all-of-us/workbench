@@ -9,8 +9,6 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -26,7 +24,7 @@ import org.pmiops.workbench.workspaces.WorkspaceService;
 @Mapper(
     componentModel = "spring",
     uses = {CommonMappers.class})
-public interface  WorkspaceMapper {
+public interface WorkspaceMapper {
 
   @Mapping(target = "role", source = "dataAccessLevel")
   UserRole userToUserRole(DbUser user);
@@ -45,7 +43,6 @@ public interface  WorkspaceMapper {
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   Workspace toApiWorkspace(
       DbWorkspace dbWorkspace, org.pmiops.workbench.firecloud.model.Workspace fcWorkspace);
-
 
   // This method is simply merging the research purpose, which covers only a subset of the fields
   // in the DbWorkspace target
@@ -74,7 +71,6 @@ public interface  WorkspaceMapper {
           ImmutableSet.copyOf(researchPurpose.getPopulationDetails()));
     }
   }
-
 
   default Set<Short> map(List<SpecificPopulationEnum> value) {
     return value.stream()
