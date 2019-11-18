@@ -221,7 +221,8 @@ export const AttributesPage = withCurrentWorkspace() (
             }
           }
         });
-        this.setState({form, loading: false});
+        const count = this.isSurvey ? this.nodeCount : null;
+        this.setState({count, form, loading: false});
       });
     }
 
