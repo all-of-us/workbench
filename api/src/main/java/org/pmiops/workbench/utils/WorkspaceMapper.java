@@ -25,7 +25,7 @@ import org.pmiops.workbench.workspaces.WorkspaceService;
 
 @Mapper(
     componentModel = "spring",
-    uses = {CommonMappers.class, WorkspaceDao.class, UserDao.class})
+    uses = {CommonMappers.class})
 public interface WorkspaceMapper {
 
   @Mapping(target = "role", source = "dataAccessLevel")
