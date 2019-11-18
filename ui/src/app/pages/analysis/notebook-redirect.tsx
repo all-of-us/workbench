@@ -357,7 +357,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       try {
         const resp = await clusterApi().localize(cluster.clusterNamespace, cluster.clusterName,
           {workspaceNamespace: workspace.namespace, workspaceId: workspace.id,
-            notebookNames: notebookNames, playgroundMode: this.isPlaygroundMode()},
+            notebookNames, playgroundMode: this.isPlaygroundMode()},
           {signal: this.aborter.signal});
         return resp.clusterLocalDirectory;
       } catch (error) {
