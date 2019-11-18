@@ -499,7 +499,6 @@ export const AttributesPage = withCurrentWorkspace() (
       const {calculating, count, countError, form, loading, options} = this.state;
       const {formErrors, formValid} = this.validateForm();
       const disabled = calculating || form.exists || !formValid || form.num.every(attr => attr.operator === 'ANY');
-      const showRange = this
       return (loading ?
         <SpinnerOverlay/> :
         <div style={{margin: '0.5rem 0 1.5rem'}}>
@@ -545,7 +544,7 @@ export const AttributesPage = withCurrentWorkspace() (
                   </div>
                 </React.Fragment>}
                 {this.hasRange && ![null, 'ANY'].includes(attr.operator) &&
-                  <span style={{paddingTop: '0.2rem'}}>&nbsp;Range: {attr.MIN} - {attr.MAX}</span>
+                  <span style={{paddingTop: '0.2rem'}}>&nbsp;Range: {attr.MIN.toLocaleString()} - {attr.MAX.toLocaleString()}</span>
                 }
               </div>
             </div>)}
