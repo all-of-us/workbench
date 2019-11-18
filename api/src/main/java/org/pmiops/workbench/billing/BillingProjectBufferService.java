@@ -27,6 +27,7 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
+import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -200,11 +201,13 @@ public class BillingProjectBufferService {
         // filter as well as a first pass filter to limit what we pull into memory.
         .filter(entry -> entry.getLastStatusChangedTime() != null)
         .filter(entry -> entry.getLastSyncRequestTime() != null)
-        .filter(
-            entry ->
-                entry.getLastChangedToLastSyncRequestInterval().toMillis()
-                    >= CREATING_TIMEOUT.toMillis())
+        .filter(entry -> Comparables.isLessThan(CREATING_TIMEOUT, entry.getLastChangedToLastSyncRequestInterval()))
         .collect(Collectors.toList());
+  }
+
+  private Duration getStatusChangedToLastSync(DbBillingProjectBufferEntry entry) {
+    return Duration.between(
+        entry.getLastStatusChangedTime().toInstant(), entry.getLastSyncRequestTime().toInstant());
   }
 
   public DbBillingProjectBufferEntry assignBillingProject(DbUser dbUser) {
