@@ -15,6 +15,8 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -422,8 +424,7 @@ public class DataSetController implements DataSetApiDelegate {
               value -> {
                 if (!value.equals(EMPTY_CELL_MARKER)) {
                   Double fieldValue = Double.parseDouble(value);
-                  // Bigquery returns time values in seconds, rather than in milliseconds.
-                  queryValues.add(dateFormat.format(new Date(fieldValue.longValue() * 1000)));
+                  queryValues.add(dateFormat.format(Date.from(Instant.ofEpochSecond(fieldValue.longValue()))));
                 } else {
                   queryValues.add(value);
                 }
