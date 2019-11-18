@@ -307,8 +307,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<Workspace> updateWorkspace(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    final Workspace originalWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace);
 
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
@@ -321,6 +319,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (Strings.isNullOrEmpty(workspace.getEtag())) {
       throw new BadRequestException("Missing required update field 'etag'");
     }
+
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    final Workspace originalWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+
     int version = Etags.toVersion(workspace.getEtag());
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated workspace version");
@@ -345,8 +347,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
 
-    final Workspace editedWorkspace =
-        WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
+    final Workspace editedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+
     workspaceAuditAdapter.fireEditAction(
         originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));

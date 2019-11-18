@@ -18,6 +18,7 @@ import org.pmiops.workbench.workspaces.WorkspaceConversionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import java.util.logging.Level
 
 @Service
 class WorkspaceAuditAdapterImpl @Autowired
@@ -54,18 +55,22 @@ constructor(
     }
 
     override fun fireEditAction(
-        previousWorkspace: Workspace,
-        editedWorkspace: Workspace,
+        previousWorkspace: Workspace?,
+        editedWorkspace: Workspace?,
         workspaceId: Long
     ) {
         try {
+            if (previousWorkspace == null || editedWorkspace == null) {
+                logger.log(Level.WARNING, "Null workspace passed to fireEditAction.")
+                return
+            }
             val info = getAuditEventInfo()
             val propertyToChangedValue = TargetPropertyExtractor.getChangedValuesByName(
                     WorkspaceTargetProperty.values(),
                     previousWorkspace,
                     editedWorkspace)
 
-            propertyToChangedValue.entries
+            val actionAuditEvents = propertyToChangedValue.entries
                     .map { ActionAuditEvent(
                             actionId = info.actionId,
                             agentEmailMaybe = info.userEmail,
@@ -79,6 +84,7 @@ constructor(
                             newValueMaybe = it.value.newValue,
                             timestamp = info.timestamp
                     ) }
+            actionAuditService.send(actionAuditEvents)
         } catch (e: RuntimeException) {
             logAndSwallow(e)
         }

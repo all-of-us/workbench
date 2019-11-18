@@ -7,8 +7,8 @@ interface WorkspaceAuditAdapter {
     fun fireCreateAction(createdWorkspace: Workspace, dbWorkspaceId: Long)
 
     fun fireEditAction(
-        previousWorkspace: Workspace,
-        editedWorkspace: Workspace,
+        previousWorkspace: Workspace?,
+        editedWorkspace: Workspace?,
         workspaceId: Long
     )
 
