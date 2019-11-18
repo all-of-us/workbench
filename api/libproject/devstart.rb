@@ -1135,7 +1135,7 @@ def fetch_workspace_details(cmd_name, *args)
       "--projectId=[projectId]",
       String,
       ->(opts, v) { opts.projectId = v},
-      "The Workspace to fetch details for (e.g. 'aou-rw-231823128'")
+      "Fetches details for workspace(s) that match the given project ID / namespace (e.g. 'aou-rw-231823128'")
 
   # Create a cloud context and apply the DB connection variables to the environment.
   # These will be read by Gradle and passed as Spring Boot properties to the command-line.
