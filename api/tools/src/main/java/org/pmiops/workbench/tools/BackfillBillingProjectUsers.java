@@ -143,7 +143,7 @@ public class BackfillBillingProjectUsers {
 
       backfill(
           apiFactory.workspacesApi(),
-          apiFactory.newBillingApi(),
+          apiFactory.billingApi(),
           opts.getOptionValue(billingProjectPrefixOpt.getLongOpt()),
           opts.hasOption(dryRunOpt.getLongOpt()));
     };

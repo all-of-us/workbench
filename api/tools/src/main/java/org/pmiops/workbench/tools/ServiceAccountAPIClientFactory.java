@@ -37,7 +37,7 @@ public class ServiceAccountAPIClientFactory {
     return api;
   }
 
-  public BillingApi newBillingApi() throws IOException {
+  public BillingApi billingApi() throws IOException {
     BillingApi api = new BillingApi();
     api.setApiClient(newApiClient(apiUrl));
     return api;
