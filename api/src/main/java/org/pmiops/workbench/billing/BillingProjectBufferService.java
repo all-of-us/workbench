@@ -201,7 +201,10 @@ public class BillingProjectBufferService {
         // filter as well as a first pass filter to limit what we pull into memory.
         .filter(entry -> entry.getLastStatusChangedTime() != null)
         .filter(entry -> entry.getLastSyncRequestTime() != null)
-        .filter(entry -> Comparables.isLessThan(CREATING_TIMEOUT, entry.getLastChangedToLastSyncRequestInterval()))
+        .filter(
+            entry ->
+                Comparables.isLessThan(
+                    CREATING_TIMEOUT, entry.getLastChangedToLastSyncRequestInterval()))
         .collect(Collectors.toList());
   }
 

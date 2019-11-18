@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Supplier;
 import javax.persistence.Column;
@@ -110,11 +111,16 @@ public class DbBillingProjectBufferEntry {
   }
 
   // Calculate the timespan between creation and sync, to see if this entry has been
-  // stuck in crating too long
+  // stuck in crating too long. If either timestamp is null, return a huge interval.
   @Transient
   public Duration getLastChangedToLastSyncRequestInterval() {
     return Duration.between(
-        getLastStatusChangedTime().toInstant(), getLastSyncRequestTime().toInstant());
+        Optional.ofNullable(getLastStatusChangedTime())
+            .map(Timestamp::toInstant)
+            .orElse(Instant.EPOCH),
+        Optional.ofNullable(getLastSyncRequestTime())
+            .map(Timestamp::toInstant)
+            .orElse(Instant.MAX));
   }
 
   @Column(name = "status")
