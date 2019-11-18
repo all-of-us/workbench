@@ -28,7 +28,7 @@ import {environment} from 'environments/environment';
 import {Cluster, ClusterStatus, Profile} from 'generated/fetch';
 import {appendNotebookFileSuffix, dropNotebookFileSuffix} from './util';
 
-enum Progress {
+export enum Progress {
   Unknown,
   Initializing,
   Resuming,
@@ -39,7 +39,7 @@ enum Progress {
   Loaded
 }
 
-const progressText: Map<Progress, string> = new Map([
+export const progressStrings: Map<Progress, string> = new Map([
   [Progress.Unknown, 'Connecting to the notebook server'],
   [Progress.Initializing, 'Initializing notebook server, may take up to 10 minutes'],
   [Progress.Resuming, 'Resuming notebook server, may take up to 1 minute'],
@@ -164,28 +164,29 @@ const ProgressCard: React.FunctionComponent<{progressState: Progress, cardState:
       switch (cardState) {
         case ProgressCardState.UnknownInitializingResuming:
           if (progressState === Progress.Unknown || progressComplete[Progress.Unknown]) {
-            return progressText.get(Progress.Unknown);
+            return progressStrings.get(Progress.Unknown);
           } else if (progressState === Progress.Initializing ||
             progressComplete[Progress.Initializing]) {
-            return progressText.get(Progress.Initializing);
+            return progressStrings.get(Progress.Initializing);
           } else {
-            return progressText.get(Progress.Resuming);
+            return progressStrings.get(Progress.Resuming);
           }
         case ProgressCardState.Authenticating:
-          return progressText.get(Progress.Authenticating);
+          return progressStrings.get(Progress.Authenticating);
         case ProgressCardState.CopyingCreating:
           if (creatingNewNotebook) {
-            return progressText.get(Progress.Creating);
+            return progressStrings.get(Progress.Creating);
           } else {
-            return progressText.get(Progress.Copying);
+            return progressStrings.get(Progress.Copying);
           }
         case ProgressCardState.Redirecting:
-          return progressText.get(Progress.Redirecting);
+          return progressStrings.get(Progress.Redirecting);
       }
     };
 
     const icon = progressCardIcons.get(cardState);
-    return <div style={isCurrent ? {...styles.progressCard, backgroundColor: '#F2FBE9'} :
+    return <div data-test-id={isCurrent ? 'current-progress-card' : ''}
+                style={isCurrent ? {...styles.progressCard, backgroundColor: '#F2FBE9'} :
       styles.progressCard}>
       {isCurrent ? <Spinner style={{width: '46px', height: '46px'}}
                             data-test-id={'progress-card-spinner-' + cardState.valueOf()}/> :

@@ -1,4 +1,4 @@
-import {mount} from 'enzyme';
+import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
@@ -14,7 +14,8 @@ import {NotebooksApiStub} from 'testing/stubs/notebooks-api-stub';
 import {NotebooksClusterApiStub} from 'testing/stubs/notebooks-cluster-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
-import {NotebookRedirect, ProgressCardState} from './notebook-redirect';
+
+import {NotebookRedirect, Progress, ProgressCardState, progressStrings} from './notebook-redirect';
 
 describe('NotebookRedirect', () => {
   const workspace = {
@@ -31,9 +32,18 @@ describe('NotebookRedirect', () => {
     return mount(<NotebookRedirect/>);
   };
 
-  const getCardSpinnerTestId = (cardState: ProgressCardState) => {
+  async function awaitTickAndTimers(wrapper: ReactWrapper) {
+    jest.runOnlyPendingTimers();
+    await waitOneTickAndUpdate(wrapper);
+  }
+
+  function currentCardText(wrapper: ReactWrapper) {
+    return wrapper.find('[data-test-id="current-progress-card"]').first().text();
+  }
+
+  function getCardSpinnerTestId(cardState: ProgressCardState) {
     return '[data-test-id="progress-card-spinner-' + cardState.valueOf() + '"]';
-  };
+  }
 
   beforeEach(() => {
     clusterStub = new ClusterApiStub();
@@ -81,48 +91,13 @@ describe('NotebookRedirect', () => {
 
     wrapper.setState({creatingNewNotebook: false});
     clusterStub.cluster.status = ClusterStatus.Creating;
-
-    await expectRedirectingAfterRunning(wrapper);
-  });
-
-  it('should be "Initializing" until a Creating cluster for a new notebook is running', async() => {
-    const wrapper = mountedComponent();
-
-    wrapper.setState({creatingNewNotebook: true});
-    clusterStub.cluster.status = ClusterStatus.Creating;
-
-    await expectRedirectingAfterRunning(wrapper);
-  });
-
-  it('should be "Resuming" until a Stopped cluster for an existing notebook is running', async() => {
-    const wrapper = mountedComponent();
-
-    wrapper.setState({creatingNewNotebook: false});
-    clusterStub.cluster.status = ClusterStatus.Stopped;
-
-    await expectRedirectingAfterRunning(wrapper);
-  });
-
-  it('should be "Resuming" until a Stopped cluster for a new notebook is running', async() => {
-    const wrapper = mountedComponent();
-
-    wrapper.setState({creatingNewNotebook: true});
-    clusterStub.cluster.status = ClusterStatus.Stopped;
-
-    await expectRedirectingAfterRunning(wrapper);
-  });
-
-  async function awaitTickAndTimers(wrapper) {
-    jest.runOnlyPendingTimers();
-    await waitOneTickAndUpdate(wrapper);
-  }
-
-  async function expectRedirectingAfterRunning(wrapper) {
     await awaitTickAndTimers(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
       .toBeTruthy();
+    expect(currentCardText(wrapper))
+      .toContain(progressStrings.get(Progress.Initializing));
 
     clusterStub.cluster.status = ClusterStatus.Running;
     await awaitTickAndTimers(wrapper);
@@ -130,5 +105,76 @@ describe('NotebookRedirect', () => {
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
       .toBeTruthy();
-  }
+    expect(currentCardText(wrapper))
+      .toContain(progressStrings.get(Progress.Redirecting));
+  });
+
+  it('should be "Initializing" until a Creating cluster for a new notebook is running', async() => {
+    const wrapper = mountedComponent();
+
+    wrapper.setState({creatingNewNotebook: true});
+    clusterStub.cluster.status = ClusterStatus.Creating;
+    await awaitTickAndTimers(wrapper);
+
+    expect(wrapper
+      .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
+      .toBeTruthy();
+    expect(currentCardText(wrapper))
+      .toContain(progressStrings.get(Progress.Initializing));
+
+    clusterStub.cluster.status = ClusterStatus.Running;
+    await awaitTickAndTimers(wrapper);
+
+    expect(wrapper
+      .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
+      .toBeTruthy();
+    expect(currentCardText(wrapper))
+      .toContain(progressStrings.get(Progress.Redirecting));
+  });
+
+  it('should be "Resuming" until a Stopped cluster for an existing notebook is running', async() => {
+    const wrapper = mountedComponent();
+
+    wrapper.setState({creatingNewNotebook: false});
+    clusterStub.cluster.status = ClusterStatus.Stopped;
+    await awaitTickAndTimers(wrapper);
+
+    expect(wrapper
+      .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
+      .toBeTruthy();
+    expect(currentCardText(wrapper))
+      .toContain(progressStrings.get(Progress.Resuming));
+
+    clusterStub.cluster.status = ClusterStatus.Running;
+    await awaitTickAndTimers(wrapper);
+
+    expect(wrapper
+      .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
+      .toBeTruthy();
+    expect(currentCardText(wrapper))
+      .toContain(progressStrings.get(Progress.Redirecting));
+  });
+
+  it('should be "Resuming" until a Stopped cluster for a new notebook is running', async() => {
+    const wrapper = mountedComponent();
+
+    wrapper.setState({creatingNewNotebook: true});
+    clusterStub.cluster.status = ClusterStatus.Stopped;
+    await awaitTickAndTimers(wrapper);
+
+    expect(wrapper
+      .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
+      .toBeTruthy();
+    expect(currentCardText(wrapper))
+      .toContain(progressStrings.get(Progress.Resuming));
+
+    clusterStub.cluster.status = ClusterStatus.Running;
+    await awaitTickAndTimers(wrapper);
+
+    expect(wrapper
+      .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
+      .toBeTruthy();
+    expect(currentCardText(wrapper))
+      .toContain(progressStrings.get(Progress.Redirecting));
+  });
 });
