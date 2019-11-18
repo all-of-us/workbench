@@ -142,20 +142,20 @@ const progressCardStates: Map<ProgressCardState, Array<Progress>> = new Map([
   [ProgressCardState.Redirecting, [Progress.Redirecting]]
 ]);
 
-const ProgressCard: React.FunctionComponent<{currentState: Progress, index: ProgressCardState,
+const ProgressCard: React.FunctionComponent<{progressState: Progress, cardState: ProgressCardState,
   progressComplete: Map<Progress, boolean>, creatingNewNotebook: boolean}> =
-  ({currentState, index, progressComplete, creatingNewNotebook}) => {
-    const includesStates = progressCardStates.get(index);
-    const isCurrent = includesStates.includes(currentState);
-    const isComplete = includesStates.every(s => s.valueOf() < currentState.valueOf());
+  ({progressState, cardState, progressComplete, creatingNewNotebook}) => {
+    const includesStates = progressCardStates.get(cardState);
+    const isCurrent = includesStates.includes(progressState);
+    const isComplete = includesStates.every(s => s.valueOf() < progressState.valueOf());
 
     // Conditionally render card text
     const renderText = () => {
-      switch (index) {
+      switch (cardState) {
         case ProgressCardState.UnknownInitializingResuming:
-          if (currentState === Progress.Unknown || progressComplete[Progress.Unknown]) {
+          if (progressState === Progress.Unknown || progressComplete[Progress.Unknown]) {
             return 'Connecting to the notebook server';
-          } else if (currentState === Progress.Initializing ||
+          } else if (progressState === Progress.Initializing ||
             progressComplete[Progress.Initializing]) {
             return 'Initializing notebook server, may take up to 10 minutes';
           } else {
@@ -174,11 +174,11 @@ const ProgressCard: React.FunctionComponent<{currentState: Progress, index: Prog
       }
     };
 
-    const icon = progressCardIcons.get(index);
+    const icon = progressCardIcons.get(cardState);
     return <div style={isCurrent ? {...styles.progressCard, backgroundColor: '#F2FBE9'} :
       styles.progressCard}>
       {isCurrent ? <Spinner style={{width: '46px', height: '46px'}}
-                            data-test-id={'progress-card-spinner-' + index.valueOf()}/> :
+                            data-test-id={'progress-card-spinner-' + cardState.valueOf()}/> :
         <React.Fragment>
           {icon.shape === 'notebook' ? <NotebookIcon style={styles.progressIcon}/> :
           <ClrIcon shape={icon.shape} style={isComplete ?
@@ -410,7 +410,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
           </div>
           <div style={{display: 'flex', flexDirection: 'row', marginTop: '1rem'}}>
             {Array.from(progressCardStates, ([key, _]) => {
-              return <ProgressCard currentState={progress} index={key}
+              return <ProgressCard progressState={progress} cardState={key}
                                    creatingNewNotebook={creatingNewNotebook} progressComplete={progressComplete}/>;
             })}
           </div>
