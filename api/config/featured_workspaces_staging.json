@@ -1,3 +1,13 @@
 {
-  "featuredWorkspaces": []
+  "featuredWorkspaces": [{
+    "name": "Featured1",
+    "namespace": "aou-rw-staging-99bc96d6",
+    "id": "featured1",
+    "category": "TUTORIAL_WORKSPACES"
+  }, {
+    "name": "Featured2",
+    "namespace": "aou-rw-staging-edde2df7",
+    "id": "featured2",
+    "category": "PHENOTYPE_LIBRARY"
+  }]
 }

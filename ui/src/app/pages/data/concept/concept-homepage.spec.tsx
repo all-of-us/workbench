@@ -94,7 +94,6 @@ describe('ConceptHomepage', () => {
         standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
         domain: domain.domain,
         includeDomainCounts: includeDomainCounts,
-        includeVocabularyCounts: true,
         maxResults: 100
       };
       expect(spy).toHaveBeenCalledWith(
@@ -141,7 +140,6 @@ describe('ConceptHomepage', () => {
         standardConceptFilter: StandardConceptFilter.ALLCONCEPTS,
         domain: domain.domain,
         includeDomainCounts: includeDomainCounts,
-        includeVocabularyCounts: true,
         maxResults: 100
       };
       expect(spy).toHaveBeenCalledWith(
