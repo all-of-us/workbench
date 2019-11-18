@@ -183,10 +183,12 @@ export const AttributesPage = withCurrentWorkspace() (
     componentDidMount() {
       const {node: {subtype}} = this.props;
       const{form, options} = this.state;
-      if (this.isMeasurement) {
-        this.getMeasurementAttributes();
-      } else {
+      if (!this.isMeasurement) {
         options.unshift({label: 'Any', value: AttrName[AttrName.ANY]});
+      }
+      if (this.hasRange) {
+        this.getAttributes();
+      } else {
         form.num = subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{name: subtype, operator: 'ANY', operands: []}];
@@ -194,7 +196,7 @@ export const AttributesPage = withCurrentWorkspace() (
       }
     }
 
-    getMeasurementAttributes() {
+    getAttributes() {
       const {node: {conceptId}} = this.props;
       const{form} = this.state;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
@@ -204,7 +206,7 @@ export const AttributesPage = withCurrentWorkspace() (
             if (!form.num.length) {
               form.num.push({
                 name: AttrName.NUM,
-                operator: null,
+                operator: this.isSurvey ? 'ANY' : null,
                 operands: [],
                 conceptId: conceptId,
                 [attr.conceptName]: parseInt(attr.estCount, 10)
@@ -306,7 +308,7 @@ export const AttributesPage = withCurrentWorkspace() (
           formValid = false;
           acc.add('Form cannot accept negative values');
         }
-        if (this.isMeasurement && operands.some(op => op < MIN || op > MAX)) {
+        if (this.hasRange && operands.some(op => op < MIN || op > MAX)) {
           formValid = false;
           acc.add(`Values must be between ${MIN.toLocaleString()} and ${MAX.toLocaleString()}`);
         }
@@ -464,31 +466,40 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     get hasUnits() {
-      return typeof PM_UNITS[this.props.node.subtype] !== 'undefined';
+      const {node: {subtype}} = this.props;
+      return typeof PM_UNITS[subtype] !== 'undefined';
     }
 
     get isMeasurement() {
-      return this.props.node.domainId === DomainType.MEASUREMENT;
+      const {node: {domainId}} = this.props;
+      return domainId === DomainType.MEASUREMENT;
     }
 
     get isPhysicalMeasurement() {
-      return this.props.node.domainId === DomainType.PHYSICALMEASUREMENT;
+      const {node: {domainId}} = this.props;
+      return domainId === DomainType.PHYSICALMEASUREMENT;
     }
 
     get isSurvey() {
-      return this.props.node.domainId === DomainType.SURVEY;
+      const {node: {domainId}} = this.props;
+      return domainId === DomainType.SURVEY;
     }
 
     get isBloodPressure() {
-      return this.props.node.subtype === CriteriaSubType.BP;
+      const {node: {subtype}} = this.props;
+      return subtype === CriteriaSubType.BP;
+    }
+
+    get hasRange() {
+      return this.isMeasurement || this.isSurvey;
     }
 
     render() {
       const {node} = this.props;
       const {calculating, count, countError, form, loading, options} = this.state;
       const {formErrors, formValid} = this.validateForm();
-      const disabled = calculating || form.exists || !formValid
-        || form.num.every(attr => attr.operator === 'ANY');
+      const disabled = calculating || form.exists || !formValid || form.num.every(attr => attr.operator === 'ANY');
+      const showRange = this
       return (loading ?
         <SpinnerOverlay/> :
         <div style={{margin: '0.5rem 0 1.5rem'}}>
@@ -533,8 +544,8 @@ export const AttributesPage = withCurrentWorkspace() (
                     {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
                   </div>
                 </React.Fragment>}
-                {this.isMeasurement && attr.operator !== null &&
-                  <span style={{paddingTop: '0.2rem'}}>&nbsp;Ranges: {attr.MIN} - {attr.MAX}</span>
+                {this.hasRange && ![null, 'ANY'].includes(attr.operator) &&
+                  <span style={{paddingTop: '0.2rem'}}>&nbsp;Range: {attr.MIN} - {attr.MAX}</span>
                 }
               </div>
             </div>)}
