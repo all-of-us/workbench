@@ -39,6 +39,16 @@ enum Progress {
   Loaded
 }
 
+const progressText: Map<Progress, string> = new Map([
+  [Progress.Unknown, 'Connecting to the notebook server'],
+  [Progress.Initializing, 'Initializing notebook server, may take up to 10 minutes'],
+  [Progress.Resuming, 'Resuming notebook server, may take up to 1 minute'],
+  [Progress.Authenticating, 'Authenticating with the notebook server'],
+  [Progress.Copying, 'Copying the notebook onto the server'],
+  [Progress.Creating, 'Creating the new notebook'],
+  [Progress.Redirecting, 'Redirecting to the notebook server'],
+]);
+
 const styles = reactStyles({
   main: {
     display: 'flex', flexDirection: 'column', marginLeft: '3rem', paddingTop: '1rem', width: '780px'
@@ -154,23 +164,23 @@ const ProgressCard: React.FunctionComponent<{progressState: Progress, cardState:
       switch (cardState) {
         case ProgressCardState.UnknownInitializingResuming:
           if (progressState === Progress.Unknown || progressComplete[Progress.Unknown]) {
-            return 'Connecting to the notebook server';
+            return progressText.get(Progress.Unknown);
           } else if (progressState === Progress.Initializing ||
             progressComplete[Progress.Initializing]) {
-            return 'Initializing notebook server, may take up to 10 minutes';
+            return progressText.get(Progress.Initializing);
           } else {
-            return 'Resuming notebook server, may take up to 1 minute';
+            return progressText.get(Progress.Resuming);
           }
         case ProgressCardState.Authenticating:
-          return 'Authenticating with the notebook server';
+          return progressText.get(Progress.Authenticating);
         case ProgressCardState.CopyingCreating:
           if (creatingNewNotebook) {
-            return 'Creating the new notebook';
+            return progressText.get(Progress.Creating);
           } else {
-            return 'Copying the notebook onto the server';
+            return progressText.get(Progress.Copying);
           }
         case ProgressCardState.Redirecting:
-          return 'Redirecting to the notebook server';
+          return progressText.get(Progress.Redirecting);
       }
     };
 
