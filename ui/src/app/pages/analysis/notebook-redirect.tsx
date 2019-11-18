@@ -5,6 +5,7 @@ import Iframe from 'react-iframe';
 
 import {isAbortError} from 'app/utils/errors';
 import {urlParamsStore} from 'app/utils/navigation';
+import {retry} from 'app/utils/retry';
 
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -217,6 +218,8 @@ interface Props {
 }
 
 const clusterPollingIntervalMillis = 15000;
+const clusterApiRetryTimeoutMillis = 10000;
+const clusterApiRetryAttempts = 5;
 
 export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(),
   withQueryParams())(class extends React.Component<Props, State> {
@@ -294,13 +297,17 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     private async getDefaultCluster(billingProjectId) {
-      const resp = await clusterApi().listClusters(
-        billingProjectId, this.props.workspace.id, {signal: this.aborter.signal});
+      const resp = await this.clusterRetry(() => clusterApi().listClusters(
+        billingProjectId, this.props.workspace.id, {signal: this.aborter.signal}));
       return resp.defaultCluster;
     }
 
     private scheduleClusterPoll(billingProjectId) {
       this.clearAndSetInterval(() => this.pollForRunningCluster(billingProjectId), clusterPollingIntervalMillis);
+    }
+
+    private async clusterRetry<T>(f: () => Promise<T>): Promise<T> {
+      return await retry(f, clusterApiRetryTimeoutMillis, clusterApiRetryAttempts);
     }
 
     private async pollForRunningCluster(billingProjectId) {
@@ -312,8 +319,8 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         } else {
           // re-start cluster if stopped, and try again in the next polling interval
           if (cluster.status === ClusterStatus.Stopped) {
-            await notebooksClusterApi().startCluster(cluster.clusterNamespace, cluster.clusterName,
-              {signal: this.aborter.signal});
+            await this.clusterRetry(() => notebooksClusterApi().startCluster(
+              cluster.clusterNamespace, cluster.clusterName, {signal: this.aborter.signal}));
           }
         }
       } catch (e) {
@@ -372,12 +379,12 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     private async initializeNotebookCookies(c: Cluster) {
-      return notebooksApi().setCookie(c.clusterNamespace, c.clusterName, {
+      return await this.clusterRetry(() => notebooksApi().setCookie(c.clusterNamespace, c.clusterName, {
         withCredentials: true,
         crossDomain: true,
         credentials: 'include',
         signal: this.aborter.signal
-      });
+      }));
     }
 
     private async getNotebookPathAndLocalize(cluster: Cluster) {
@@ -388,28 +395,25 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         this.incrementProgress(Progress.Copying);
         const fullNotebookName = this.getFullNotebookName();
         const localizedNotebookDir =
-          await this.localizeNotebooksWithRetry(cluster, [fullNotebookName]);
+          await this.localizeNotebooks(cluster, [fullNotebookName]);
         return `${localizedNotebookDir}/${fullNotebookName}`;
       }
     }
 
-    private async localizeNotebooksWithRetry(cluster: Cluster, notebookNames: Array<string>, retryCount: number = 0) {
+    private async localizeNotebooks(cluster: Cluster, notebookNames: Array<string>) {
       const {workspace} = this.props;
       try {
-        const resp = await clusterApi().localize(cluster.clusterNamespace, cluster.clusterName,
-          {workspaceNamespace: workspace.namespace, workspaceId: workspace.id,
-            notebookNames, playgroundMode: this.isPlaygroundMode()},
-          {signal: this.aborter.signal});
+        const resp = await this.clusterRetry(() => clusterApi().localize(
+          cluster.clusterNamespace, cluster.clusterName, {
+            workspaceNamespace: workspace.namespace, workspaceId: workspace.id,
+            notebookNames, playgroundMode: this.isPlaygroundMode()
+          },
+          {signal: this.aborter.signal}));
         return resp.clusterLocalDirectory;
       } catch (error) {
-        retryCount += 1;
-        if (retryCount <= 3) {
-          console.error('retrying notebook localization');
-          return this.localizeNotebooksWithRetry(cluster, notebookNames, retryCount);
-        } else {
-          console.error(error);
-          this.setState({localizationError: true});
-        }
+        console.error(error);
+        this.setState({localizationError: true});
+        throw error;
       }
     }
 
@@ -421,19 +425,18 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       } else {
         fileContent.metadata = pyNotebookMetadata;
       }
-      const localizedDir = await this.localizeNotebooksWithRetry(cluster, []);
+      const localizedDir = await this.localizeNotebooks(cluster, []);
       // Use the Jupyter Server API directly to create a new notebook. This
       // API handles notebook name collisions and matches the behavior of
       // clicking 'new notebook' in the Jupyter UI.
       const workspaceDir = localizedDir.replace(/^workspaces\//, '');
-      const jupyterResp = await jupyterApi().putContents(
+      const jupyterResp = await this.clusterRetry(() => jupyterApi().putContents(
         cluster.clusterNamespace, cluster.clusterName, workspaceDir, this.getFullNotebookName(), {
           'type': 'file',
           'format': 'text',
           'content': JSON.stringify(fileContent)
         },
-        {signal: this.aborter.signal}
-      );
+        {signal: this.aborter.signal}));
       return `${localizedDir}/${jupyterResp.name}`;
     }
 
