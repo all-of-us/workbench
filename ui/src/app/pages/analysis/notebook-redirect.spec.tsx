@@ -112,16 +112,20 @@ describe('NotebookRedirect', () => {
     await expectRedirectingAfterRunning(wrapper);
   });
 
-  async function expectRedirectingAfterRunning(wrapper) {
+  async function awaitTickAndTimers(wrapper) {
+    jest.runOnlyPendingTimers();
     await waitOneTickAndUpdate(wrapper);
+  }
+
+  async function expectRedirectingAfterRunning(wrapper) {
+    await awaitTickAndTimers(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.UnknownInitializingResuming)))
       .toBeTruthy();
 
     clusterStub.cluster.status = ClusterStatus.Running;
-    jest.runOnlyPendingTimers();
-    await waitOneTickAndUpdate(wrapper);
+    await awaitTickAndTimers(wrapper);
 
     expect(wrapper
       .exists(getCardSpinnerTestId(ProgressCardState.Redirecting)))
