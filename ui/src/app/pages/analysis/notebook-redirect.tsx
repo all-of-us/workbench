@@ -273,20 +273,20 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     private async initializeClusterStatusChecking(billingProjectId) {
+      this.incrementProgress(Progress.Unknown);
       try {
         const cluster = await this.getDefaultCluster(billingProjectId);
 
         if (cluster.status === ClusterStatus.Running) {
-          this.incrementProgress(Progress.Unknown);
           await this.connectToRunningCluster(cluster);
         } else {
+          this.scheduleClusterPoll(billingProjectId);
+
           if (this.isClusterInProgress(cluster)) {
             this.incrementProgress(Progress.Resuming);
           } else {
             this.incrementProgress(Progress.Initializing);
           }
-
-          this.scheduleClusterPoll(billingProjectId);
         }
       } catch (e) {
         if (!isAbortError(e)) {
