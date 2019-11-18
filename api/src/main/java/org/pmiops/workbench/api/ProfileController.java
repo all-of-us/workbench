@@ -264,9 +264,9 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private DbUser saveUserWithConflictHandling(DbUser user) {
+  private DbUser saveUserWithConflictHandling(DbUser dbUser) {
     try {
-      return userDao.save(user);
+      return userDao.save(dbUser);
     } catch (ObjectOptimisticLockingFailureException e) {
       log.log(Level.WARNING, "version conflict for user update", e);
       throw new ConflictException("Failed due to concurrent modification");
@@ -605,20 +605,21 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> updatePageVisits(PageVisit newPageVisit) {
-    DbUser user = userProvider.get();
-    user = userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
-    Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    boolean shouldAdd =
-        user.getPageVisits().stream().noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
+    DbUser dbUser = userProvider.get();
+    dbUser = userDao.findUserWithAuthoritiesAndPageVisits(dbUser.getUserId());
+    Timestamp timestamp = Timestamp.from(clock.instant());
+    final boolean shouldAdd =
+        dbUser.getPageVisits().stream()
+            .noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
     if (shouldAdd) {
-      DbPageVisit firstPageVisit = new DbPageVisit();
+      final DbPageVisit firstPageVisit = new DbPageVisit();
       firstPageVisit.setPageId(newPageVisit.getPage());
-      firstPageVisit.setUser(user);
+      firstPageVisit.setUser(dbUser);
       firstPageVisit.setFirstVisit(timestamp);
-      user.getPageVisits().add(firstPageVisit);
-      userDao.save(user);
+      dbUser.getPageVisits().add(firstPageVisit);
+      dbUser = userDao.save(dbUser);
     }
-    return getProfileResponse(saveUserWithConflictHandling(user));
+    return getProfileResponse(saveUserWithConflictHandling(dbUser));
   }
 
   @Override

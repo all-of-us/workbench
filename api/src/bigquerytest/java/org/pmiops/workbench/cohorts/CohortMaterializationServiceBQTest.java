@@ -1589,24 +1589,14 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Test
   public void testMaterializeCohortConceptSetLotsOfConceptsPaging() {
-    Concept concept = new Concept();
-    concept.setConceptId(1L);
-    conceptDao.save(concept);
-    concept = new Concept();
-    concept.setConceptId(6L);
-    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
-    conceptDao.save(concept);
-    concept = new Concept();
-    concept.setConceptId(7L);
-    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
-    conceptDao.save(concept);
-    concept = new Concept();
-    concept.setConceptId(192819L);
-    concept.setStandardConcept(ConceptService.STANDARD_CONCEPT_CODE);
-    conceptDao.save(concept);
-    concept = new Concept();
-    concept.setConceptId(44829697L);
-    conceptDao.save(concept);
+    conceptDao.save(new Concept().conceptId(1L));
+    conceptDao.save(
+        new Concept().conceptId(6L).standardConcept(ConceptService.STANDARD_CONCEPT_CODE));
+    conceptDao.save(
+        new Concept().conceptId(7L).standardConcept(ConceptService.STANDARD_CONCEPT_CODE));
+    conceptDao.save(
+        new Concept().conceptId(192819L).standardConcept(ConceptService.STANDARD_CONCEPT_CODE));
+    conceptDao.save(new Concept().conceptId(44829697L));
     TableQuery tableQuery = new TableQuery();
     tableQuery.setTableName("condition_occurrence");
     tableQuery.setColumns(ImmutableList.of("condition_occurrence_id"));
@@ -1644,18 +1634,14 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
   private ResultFilters makeAnyOf(ColumnFilter... columnFilters) {
     ResultFilters result = new ResultFilters();
     result.setAnyOf(
-        Arrays.asList(columnFilters).stream()
-            .map(columnFilter -> makeResultFilters(columnFilter))
-            .collect(Collectors.toList()));
+        Arrays.stream(columnFilters).map(this::makeResultFilters).collect(Collectors.toList()));
     return result;
   }
 
   private ResultFilters makeAllOf(ColumnFilter... columnFilters) {
     ResultFilters result = new ResultFilters();
     result.setAllOf(
-        Arrays.asList(columnFilters).stream()
-            .map(columnFilter -> makeResultFilters(columnFilter))
-            .collect(Collectors.toList()));
+        Arrays.stream(columnFilters).map(this::makeResultFilters).collect(Collectors.toList()));
     return result;
   }
 

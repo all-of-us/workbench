@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.inject.Provider;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
@@ -99,22 +100,34 @@ public class BillingGarbageCollectionService {
   }
 
   private void recordGarbageCollection(final String projectName, final String garbageCollectionSA) {
+    billingProjectGarbageCollectionDao.save(
+        makeGarbageCollectionToSave(projectName, garbageCollectionSA));
 
-    final DbBillingProjectGarbageCollection gc = new DbBillingProjectGarbageCollection();
-    gc.setFireCloudProjectName(projectName);
-    gc.setOwner(garbageCollectionSA);
-    billingProjectGarbageCollectionDao.save(gc);
-
-    final DbBillingProjectBufferEntry entry =
-        billingProjectBufferEntryDao.findByFireCloudProjectName(projectName);
-    entry.setStatusEnum(
-        BufferEntryStatus.GARBAGE_COLLECTED, () -> new Timestamp(clock.instant().toEpochMilli()));
-    billingProjectBufferEntryDao.save(entry);
+    billingProjectBufferEntryDao.save(makeGarbageCollectedBufferEntryToSave(projectName));
 
     log.info(
         String.format(
             "Project %s has been garbage-collected and is now owned by %s",
             projectName, garbageCollectionSA));
+  }
+
+  // Utility function to avoid need dangling entity references after save()
+  @NotNull
+  private DbBillingProjectGarbageCollection makeGarbageCollectionToSave(
+      String projectName, String garbageCollectionSA) {
+    final DbBillingProjectGarbageCollection gc = new DbBillingProjectGarbageCollection();
+    gc.setFireCloudProjectName(projectName);
+    gc.setOwner(garbageCollectionSA);
+    return gc;
+  }
+
+  // Utility function to avoid need dangling entity references after save()
+  @NotNull
+  private DbBillingProjectBufferEntry makeGarbageCollectedBufferEntryToSave(String projectName) {
+    final DbBillingProjectBufferEntry entry =
+        billingProjectBufferEntryDao.findByFireCloudProjectName(projectName);
+    entry.setStatusEnum(BufferEntryStatus.GARBAGE_COLLECTED, () -> Timestamp.from(clock.instant()));
+    return entry;
   }
 
   private void transferOwnership(final String projectName) {
