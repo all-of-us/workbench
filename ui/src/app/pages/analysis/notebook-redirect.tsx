@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import Iframe from 'react-iframe';
 
-import {isAbortError} from 'app/utils/errors';
+import {isAbortError, reportError} from 'app/utils/errors';
 import {urlParamsStore} from 'app/utils/navigation';
 import {fetchAbortableRetry} from 'app/utils/retry';
 
@@ -327,7 +327,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         }
       } catch (error) {
         if (!isAbortError(error)) {
-          console.error(error);
+          reportError(error);
           this.setState({showErrorModal: true});
           throw error;
         }
@@ -351,7 +351,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         }
       } catch (error) {
         if (!isAbortError(error)) {
-          console.error(error);
+          reportError(error);
           this.setState({showErrorModal: true});
           throw error;
         }
