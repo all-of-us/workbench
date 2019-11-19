@@ -321,11 +321,12 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       this.aborter.abort();
     }
 
+    // check the cluster's status: if it's Running we can connect the notebook to it
+    // otherwise we need to start polling
     private async initializeClusterStatusChecking(billingProjectId) {
       this.incrementProgress(Progress.Unknown);
       try {
         const cluster = await this.getDefaultCluster(billingProjectId);
-
         if (cluster.status === ClusterStatus.Running) {
           await this.connectToRunningCluster(cluster);
         } else {
@@ -339,7 +340,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         }
       } catch (e) {
         if (!isAbortError(e)) {
-          this.scheduleClusterPoll(billingProjectId);
           throw e;
         }
       }
@@ -400,23 +400,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       }
     }
 
-    private async localizeNotebooks(cluster: Cluster, notebookNames: Array<string>) {
-      const {workspace} = this.props;
-      try {
-        const resp = await this.clusterRetry(() => clusterApi().localize(
-          cluster.clusterNamespace, cluster.clusterName, {
-            workspaceNamespace: workspace.namespace, workspaceId: workspace.id,
-            notebookNames, playgroundMode: this.isPlaygroundMode()
-          },
-          {signal: this.aborter.signal}));
-        return resp.clusterLocalDirectory;
-      } catch (error) {
-        console.error(error);
-        this.setState({localizationError: true});
-        throw error;
-      }
-    }
-
     private async createNotebookAndLocalize(cluster: Cluster) {
       const fileContent = commonNotebookFormat;
       const {kernelType} = this.props.queryParams;
@@ -438,6 +421,23 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         },
         {signal: this.aborter.signal}));
       return `${localizedDir}/${jupyterResp.name}`;
+    }
+
+    private async localizeNotebooks(cluster: Cluster, notebookNames: Array<string>) {
+      const {workspace} = this.props;
+      try {
+        const resp = await this.clusterRetry(() => clusterApi().localize(
+          cluster.clusterNamespace, cluster.clusterName, {
+            workspaceNamespace: workspace.namespace, workspaceId: workspace.id,
+            notebookNames, playgroundMode: this.isPlaygroundMode()
+          },
+          {signal: this.aborter.signal}));
+        return resp.clusterLocalDirectory;
+      } catch (error) {
+        console.error(error);
+        this.setState({localizationError: true});
+        throw error;
+      }
     }
 
     render() {
