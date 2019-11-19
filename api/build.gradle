@@ -396,7 +396,7 @@ dependencies {
 
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
-  compile 'org.apache.commons:commons-lang3:3.0'
+  compile 'org.apache.commons:commons-lang3:3.6'
   compile 'com.google.guava:guava:26.0-jre'
   compile 'com.github.rholder:guava-retrying:2.0.0'
   compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
@@ -415,6 +415,7 @@ dependencies {
   compile 'com.github.fge:json-patch:1.9'
   compile 'com.google.cloud:google-cloud-logging:1.90.0'
   toolsCompile 'commons-cli:commons-cli:1.4'
+  toolsCompile 'com.opencsv:opencsv:4.6'
 
   testCompile 'junit:junit:4.12'
   testCompile 'org.mockito:mockito-core:2.18.3'
@@ -631,6 +632,16 @@ task fetchFireCloudUserProfile(type: JavaExec) {
 task fetchWorkspaceDetails(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.FetchWorkspaceDetails"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// See project.rb command: export-user-data
+task exportUserData(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.ExportUserData"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
