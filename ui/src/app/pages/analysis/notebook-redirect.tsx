@@ -238,16 +238,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       };
     }
 
-    componentDidMount() {
-      this.initializeClusterStatusChecking(this.props.workspace.namespace);
-    }
-
-    componentWillUnmount() {
-      clearInterval(this.intervalReference);
-      clearTimeout(this.timeoutReference);
-      this.aborter.abort();
-    }
-
     private isClusterInProgress(cluster: Cluster): boolean {
       return cluster.status === ClusterStatus.Starting ||
         cluster.status === ClusterStatus.Stopping ||
@@ -272,6 +262,65 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       return this.props.queryParams.playgroundMode === 'true';
     }
 
+    private async getDefaultCluster(billingProjectId) {
+      const resp = await this.clusterRetry(() => clusterApi().listClusters(
+        billingProjectId, this.props.workspace.id, {signal: this.aborter.signal}));
+      return resp.defaultCluster;
+    }
+
+    private scheduleClusterPoll(billingProjectId) {
+      this.clearAndSetInterval(() => this.pollForRunningCluster(billingProjectId), clusterPollingIntervalMillis);
+    }
+
+    private async clusterRetry<T>(f: () => Promise<T>): Promise<T> {
+      return await fetchAbortableRetry(f, clusterApiRetryTimeoutMillis, clusterApiRetryAttempts);
+    }
+
+    private notebookUrl(cluster: Cluster, nbName: string): string {
+      return encodeURI(
+        environment.leoApiUrl + '/notebooks/'
+        + cluster.clusterNamespace + '/'
+        + cluster.clusterName + '/notebooks/' + nbName);
+    }
+
+    // get notebook name without file suffix
+    private getNotebookName() {
+      const {nbName} = urlParamsStore.getValue();
+      // safe whether nbName has the standard notebook suffix or not
+      return dropNotebookFileSuffix(decodeURIComponent(nbName));
+    }
+
+    // get notebook name with file suffix
+    private getFullNotebookName() {
+      return appendNotebookFileSuffix(this.getNotebookName());
+    }
+
+    private async initializeNotebookCookies(c: Cluster) {
+      return await this.clusterRetry(() => notebooksApi().setCookie(c.clusterNamespace, c.clusterName, {
+        withCredentials: true,
+        crossDomain: true,
+        credentials: 'include',
+        signal: this.aborter.signal
+      }));
+    }
+
+    private incrementProgress(p: Progress): void {
+      this.setState((state) => ({
+        progress: p,
+        progressComplete: new Map(state.progressComplete).set(p, true)
+      }));
+    }
+
+    componentDidMount() {
+      this.initializeClusterStatusChecking(this.props.workspace.namespace);
+    }
+
+    componentWillUnmount() {
+      clearInterval(this.intervalReference);
+      clearTimeout(this.timeoutReference);
+      this.aborter.abort();
+    }
+
     private async initializeClusterStatusChecking(billingProjectId) {
       this.incrementProgress(Progress.Unknown);
       try {
@@ -294,20 +343,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
           throw e;
         }
       }
-    }
-
-    private async getDefaultCluster(billingProjectId) {
-      const resp = await this.clusterRetry(() => clusterApi().listClusters(
-        billingProjectId, this.props.workspace.id, {signal: this.aborter.signal}));
-      return resp.defaultCluster;
-    }
-
-    private scheduleClusterPoll(billingProjectId) {
-      this.clearAndSetInterval(() => this.pollForRunningCluster(billingProjectId), clusterPollingIntervalMillis);
-    }
-
-    private async clusterRetry<T>(f: () => Promise<T>): Promise<T> {
-      return await fetchAbortableRetry(f, clusterApiRetryTimeoutMillis, clusterApiRetryAttempts);
     }
 
     private async pollForRunningCluster(billingProjectId) {
@@ -350,41 +385,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
 
       // give it a second to "redirect"
       this.clearAndSetTimeout(() => this.incrementProgress(Progress.Loaded), 1000);
-    }
-
-    private incrementProgress(p: Progress): void {
-      this.setState((state) => ({
-        progress: p,
-        progressComplete: new Map(state.progressComplete).set(p, true)
-      }));
-    }
-
-    private notebookUrl(cluster: Cluster, nbName: string): string {
-      return encodeURI(
-        environment.leoApiUrl + '/notebooks/'
-        + cluster.clusterNamespace + '/'
-        + cluster.clusterName + '/notebooks/' + nbName);
-    }
-
-    // get notebook name without file suffix
-    private getNotebookName() {
-      const {nbName} = urlParamsStore.getValue();
-      // safe whether nbName has the standard notebook suffix or not
-      return dropNotebookFileSuffix(decodeURIComponent(nbName));
-    }
-
-    // get notebook name with file suffix
-    private getFullNotebookName() {
-      return appendNotebookFileSuffix(this.getNotebookName());
-    }
-
-    private async initializeNotebookCookies(c: Cluster) {
-      return await this.clusterRetry(() => notebooksApi().setCookie(c.clusterNamespace, c.clusterName, {
-        withCredentials: true,
-        crossDomain: true,
-        credentials: 'include',
-        signal: this.aborter.signal
-      }));
     }
 
     private async getNotebookPathAndLocalize(cluster: Cluster) {
