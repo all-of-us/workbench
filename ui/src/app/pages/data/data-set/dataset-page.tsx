@@ -606,7 +606,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     // Append newValueSets (values from API) to state's valueSets and to selectedDomainValuePairs.
     // Set valuesLoading to false once the state is updated
-    updateValueSets(newValueSets) {
+    updateValueSets(newValueSets: ValueSet[]) {
       const {selectedDomainValuePairs, valueSets} = this.state;
 
       newValueSets.map(newValueSet => {
@@ -622,9 +622,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     // Returns true if selected values set is empty or is not equal to the total values displayed
-    get partialOrNoneValuesSelected() {
-      return fp.isEmpty(this.state.selectedDomainValuePairs) ||
-          this.state.selectedDomainValuePairs.length !== this.valuesCount;
+    get allValuesSelected() {
+      return !fp.isEmpty(this.state.selectedDomainValuePairs) &&
+          this.state.selectedDomainValuePairs.length === this.valuesCount;
     }
 
     get valuesCount() {
@@ -634,17 +634,17 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     selectAllValues() {
-      if (!this.partialOrNoneValuesSelected) {
+      if (this.allValuesSelected) {
         this.setState({selectedDomainValuePairs: []});
         return;
       } else {
-        const allValuesSelected = [];
+        const selectedValuesList = [];
         this.state.valueSets.map(valueSet => {
           valueSet.values.items.map(value => {
-            allValuesSelected.push({domain: valueSet.domain, value: value.value});
+            selectedValuesList.push({domain: valueSet.domain, value: value.value});
           });
         });
-        this.setState({selectedDomainValuePairs: allValuesSelected});
+        this.setState({selectedDomainValuePairs: selectedValuesList});
       }
     }
 
@@ -917,9 +917,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                 disabled={fp.isEmpty(valueSets)}
                                 data-test-id='select-all'
                                 onChange={() => this.selectAllValues()}
-                                checked={!this.partialOrNoneValuesSelected} />
+                                checked={this.allValuesSelected} />
                       <div style={{marginLeft: '0.25rem', fontSize: '13px', lineHeight: '17px'}}>
-                        {this.partialOrNoneValuesSelected ? 'Select All' : 'Deselect All'}
+                        {this.allValuesSelected ? 'Deselect All' : 'Select All'}
                       </div>
                     </div>
                   </BoxHeader>
