@@ -224,7 +224,6 @@ const clusterApiRetryAttempts = 5;
 export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(),
   withQueryParams())(class extends React.Component<Props, State> {
 
-    private intervalReference: NodeJS.Timer;
     private timeoutReference: NodeJS.Timer;
     private aborter = new AbortController();
 
@@ -244,11 +243,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         cluster.status === ClusterStatus.Stopped;
     }
 
-    private clearAndSetInterval(intervalCallback, intervalMillis) {
-      clearInterval(this.intervalReference);
-      this.intervalReference = setInterval(intervalCallback, intervalMillis);
-    }
-
     private clearAndSetTimeout(timeoutCallback, timeoutMillis) {
       clearTimeout(this.timeoutReference);
       this.timeoutReference = setTimeout(() => timeoutCallback(), timeoutMillis);
@@ -266,10 +260,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       const resp = await this.clusterRetry(() => clusterApi().listClusters(
         billingProjectId, this.props.workspace.id, {signal: this.aborter.signal}));
       return resp.defaultCluster;
-    }
-
-    private scheduleClusterPoll(billingProjectId) {
-      this.clearAndSetInterval(() => this.pollForRunningCluster(billingProjectId), clusterPollingIntervalMillis);
     }
 
     private async clusterRetry<T>(f: () => Promise<T>): Promise<T> {
@@ -316,7 +306,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     componentWillUnmount() {
-      clearInterval(this.intervalReference);
       clearTimeout(this.timeoutReference);
       this.aborter.abort();
     }
@@ -330,13 +319,13 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
         if (cluster.status === ClusterStatus.Running) {
           await this.connectToRunningCluster(cluster);
         } else {
-          this.scheduleClusterPoll(billingProjectId);
-
           if (this.isClusterInProgress(cluster)) {
             this.incrementProgress(Progress.Resuming);
           } else {
             this.incrementProgress(Progress.Initializing);
           }
+
+          this.clearAndSetTimeout(() => this.pollForRunningCluster(billingProjectId), clusterPollingIntervalMillis);
         }
       } catch (e) {
         if (!isAbortError(e)) {
@@ -349,7 +338,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       try {
         const cluster = await this.getDefaultCluster(billingProjectId);
         if (cluster.status === ClusterStatus.Running) {
-          clearInterval(this.intervalReference);
           await this.connectToRunningCluster(cluster);
         } else {
           // re-start cluster if stopped, and try again in the next polling interval
@@ -357,11 +345,14 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
             await this.clusterRetry(() => notebooksClusterApi().startCluster(
               cluster.clusterNamespace, cluster.clusterName, {signal: this.aborter.signal}));
           }
+
+          // TODO(RW-3097): Backoff, or don't retry forever.
+          this.clearAndSetTimeout(() => this.pollForRunningCluster(billingProjectId), clusterPollingIntervalMillis);
         }
       } catch (e) {
         if (isAbortError(e)) {
           // stop polling on abort
-          clearInterval(this.intervalReference);
+          clearTimeout(this.timeoutReference);
         } else {
           throw e;
         }
