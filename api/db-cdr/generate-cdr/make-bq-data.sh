@@ -390,7 +390,7 @@ if [[ "$tables" == *"_ext"* ]]; then
     (select count(distinct person_id) as count
     from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` de
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on de.drug_concept_id = c.concept_id
-    join \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` md on de.drug_exposure_id = pm.drug_exposure_id
+    join \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` md on de.drug_exposure_id = md.drug_exposure_id
     where c.vocabulary_id != 'PPI'
     and md.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` where src_id like '%EHR%')) as r
     where c.concept_id = 13"
@@ -402,7 +402,7 @@ if [[ "$tables" == *"_ext"* ]]; then
     (select count(distinct person_id) as count
     from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on o.observation_concept_id = c.concept_id
-    join \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` od on o.observation_id = om.observation_id
+    join \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` od on o.observation_id = od.observation_id
     where c.vocabulary_id != 'PPI'
     and od.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` where src_id like '%EHR%')) as r
     where c.concept_id = 27"
