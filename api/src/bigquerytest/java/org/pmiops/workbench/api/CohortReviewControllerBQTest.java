@@ -50,6 +50,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
+import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DomainType;
@@ -322,8 +323,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getCohortReviewsInWorkspace() throws Exception {
-    org.pmiops.workbench.model.CohortReview expectedReview =
-        new org.pmiops.workbench.model.CohortReview()
+    CohortReview expectedReview =
+        new CohortReview()
             .cohortReviewId(review.getCohortReviewId())
             .reviewSize(review.getReviewSize())
             .reviewStatus(review.getReviewStatusEnum())
@@ -353,7 +354,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     cohortWithoutReview.setCriteria(criteria);
     cohortWithoutReview = cohortDao.save(cohortWithoutReview);
 
-    org.pmiops.workbench.model.CohortReview cohortReview =
+    CohortReview cohortReview =
         controller
             .createCohortReview(
                 NAMESPACE,
