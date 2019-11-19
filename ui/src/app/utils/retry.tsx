@@ -12,6 +12,7 @@ export async function fetchAbortableRetry<T>(fetchFn: () => Promise<T>, timeoutM
       if (isAbortError(e) || retries >= maxRetries) {
         throw e;
       }
+      // effectively a sleep for timeoutMillis
       await new Promise(resolve => setTimeout(resolve, timeoutMillis));
     }
   }

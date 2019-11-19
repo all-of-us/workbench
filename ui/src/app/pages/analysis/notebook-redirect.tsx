@@ -206,7 +206,7 @@ const ProgressCard: React.FunctionComponent<{progressState: Progress, cardState:
 
 interface State {
   leoUrl: string;
-  localizationError: boolean;
+  showErrorModal: boolean;
   progress: Progress;
   progressComplete: Map<Progress, boolean>;
 }
@@ -217,7 +217,7 @@ interface Props {
   profileState: {profile: Profile, reload: Function, updateCache: Function};
 }
 
-const clusterPollingIntervalMillis = 15000;
+const clusterPollingTimeoutMillis = 15000;
 const clusterApiRetryTimeoutMillis = 10000;
 const clusterApiRetryAttempts = 5;
 
@@ -231,7 +231,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       super(props);
       this.state = {
         leoUrl: undefined,
-        localizationError: false,
+        showErrorModal: false,
         progress: Progress.Unknown,
         progressComplete: new Map<Progress, boolean>(),
       };
@@ -325,11 +325,13 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
             this.incrementProgress(Progress.Initializing);
           }
 
-          this.clearAndSetTimeout(() => this.pollForRunningCluster(billingProjectId), clusterPollingIntervalMillis);
+          this.clearAndSetTimeout(() => this.pollForRunningCluster(billingProjectId), clusterPollingTimeoutMillis);
         }
-      } catch (e) {
-        if (!isAbortError(e)) {
-          throw e;
+      } catch (error) {
+        if (!isAbortError(error)) {
+          console.error(error);
+          this.setState({showErrorModal: true});
+          throw error;
         }
       }
     }
@@ -347,14 +349,13 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
           }
 
           // TODO(RW-3097): Backoff, or don't retry forever.
-          this.clearAndSetTimeout(() => this.pollForRunningCluster(billingProjectId), clusterPollingIntervalMillis);
+          this.clearAndSetTimeout(() => this.pollForRunningCluster(billingProjectId), clusterPollingTimeoutMillis);
         }
-      } catch (e) {
-        if (isAbortError(e)) {
-          // stop polling on abort
-          clearTimeout(this.timeoutReference);
-        } else {
-          throw e;
+      } catch (error) {
+        if (!isAbortError(error)) {
+          console.error(error);
+          this.setState({showErrorModal: true});
+          throw error;
         }
       }
     }
@@ -416,23 +417,17 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
 
     private async localizeNotebooks(cluster: Cluster, notebookNames: Array<string>) {
       const {workspace} = this.props;
-      try {
-        const resp = await this.clusterRetry(() => clusterApi().localize(
-          cluster.clusterNamespace, cluster.clusterName, {
-            workspaceNamespace: workspace.namespace, workspaceId: workspace.id,
-            notebookNames, playgroundMode: this.isPlaygroundMode()
-          },
-          {signal: this.aborter.signal}));
-        return resp.clusterLocalDirectory;
-      } catch (error) {
-        console.error(error);
-        this.setState({localizationError: true});
-        throw error;
-      }
+      const resp = await this.clusterRetry(() => clusterApi().localize(
+        cluster.clusterNamespace, cluster.clusterName, {
+          workspaceNamespace: workspace.namespace, workspaceId: workspace.id,
+          notebookNames, playgroundMode: this.isPlaygroundMode()
+        },
+        {signal: this.aborter.signal}));
+      return resp.clusterLocalDirectory;
     }
 
     render() {
-      const {localizationError, progress, progressComplete, leoUrl} = this.state;
+      const {showErrorModal, progress, progressComplete, leoUrl} = this.state;
       const creatingNewNotebook = this.isCreatingNewNotebook();
       return <React.Fragment>
         {progress !== Progress.Loaded ? <div style={styles.main}>
@@ -462,7 +457,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
           <div style={{borderBottom: '5px solid #2691D0', width: '100%'}}/>
           <Iframe frameBorder={0} url={leoUrl} width='100%' height='100%'/>
         </div>}
-        {localizationError && <Modal>
+        {showErrorModal && <Modal>
           <ModalTitle>
             {creatingNewNotebook ? 'Error creating notebook.' : 'Error fetching notebook'}
           </ModalTitle>
