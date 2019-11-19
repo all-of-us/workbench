@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import org.pmiops.workbench.actionaudit.adapters.AuthDomainAuditAdapter;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -19,13 +20,18 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   private final FireCloudService fireCloudService;
   private final UserService userService;
   private final UserDao userDao;
+  private AuthDomainAuditAdapter authDomainAuditAdapter;
 
   @Autowired
   AuthDomainController(
-      FireCloudService fireCloudService, UserService userService, UserDao userDao) {
+      FireCloudService fireCloudService,
+      UserService userService,
+      UserDao userDao,
+      AuthDomainAuditAdapter authDomainAuditAdapter) {
     this.fireCloudService = fireCloudService;
     this.userService = userService;
     this.userDao = userDao;
+    this.authDomainAuditAdapter = authDomainAuditAdapter;
   }
 
   @AuthorityRequired({Authority.DEVELOPER})
@@ -38,9 +44,10 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<Void> updateUserDisabledStatus(UpdateUserDisabledRequest request) {
-    DbUser user = userDao.findUserByEmail(request.getEmail());
-    Boolean previousDisabled = user.getDisabled();
-    DbUser updatedUser = userService.setDisabledStatus(user.getUserId(), request.getDisabled());
+    final DbUser user = userDao.findUserByEmail(request.getEmail());
+    final Boolean previousDisabled = user.getDisabled();
+    final DbUser updatedUser = userService.setDisabledStatus(user.getUserId(), request.getDisabled());
+    authDomainAuditAdapter.fireSetAccountEnabled(user.getUserId(), !request.getDisabled(), !previousDisabled);
     userService.logAdminUserAction(
         user.getUserId(), "updated user disabled state", previousDisabled, request.getDisabled());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

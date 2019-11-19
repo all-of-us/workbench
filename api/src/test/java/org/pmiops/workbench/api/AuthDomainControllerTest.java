@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.actionaudit.adapters.AuthDomainAuditAdapter;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
@@ -56,8 +57,10 @@ public class AuthDomainControllerTest {
   @Mock private Provider<DbUser> userProvider;
   @Mock private ComplianceService complianceService;
   @Mock private DirectoryService directoryService;
-  @Autowired private UserDao userDao;
   @Mock private UserDataUseAgreementDao userDataUseAgreementDao;
+  @Mock private AuthDomainAuditAdapter mockAuthDomainAuditAdapter;
+
+  @Autowired private UserDao userDao;
 
   private AuthDomainController authDomainController;
 
@@ -87,7 +90,11 @@ public class AuthDomainControllerTest {
             Providers.of(config),
             complianceService,
             directoryService);
-    this.authDomainController = new AuthDomainController(fireCloudService, userService, userDao);
+    this.authDomainController = new AuthDomainController(
+        fireCloudService,
+        userService,
+        userDao,
+        mockAuthDomainAuditAdapter);
   }
 
   @Test
