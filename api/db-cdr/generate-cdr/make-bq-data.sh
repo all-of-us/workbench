@@ -346,7 +346,7 @@ where r.concept_id = c.concept_id"
 
 # We're using *_ext tables to limit the count of people that have EHR specific data. This a an effort to exclude PPI related data.
 # PPI specific data is counted in the survey_module table. The only time the *_ext tables should be absent is in the synthetic datasets.
-if [[ "$tables" == *"_ext" ]]; then
+if [[ "$tables" == *"_ext"* ]]; then
     # Set participant counts for Condition concept
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
@@ -356,7 +356,7 @@ if [[ "$tables" == *"_ext" ]]; then
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on co.condition_concept_id = c.concept_id
     join \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence_ext\` mc on co.condition_occurrence_id = mc.condition_occurrence_id
     where c.vocabulary_id != 'PPI'
-    and mc.src_id=(select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence_ext\` where src_id like '%EHR%')) as r
+    and mc.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence_ext\` where src_id like '%EHR%')) as r
     where c.concept_id = 19"
 
     # Set participant counts for Measurement domain
@@ -368,7 +368,7 @@ if [[ "$tables" == *"_ext" ]]; then
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on m.measurement_concept_id = c.concept_id
     join \`$BQ_PROJECT.$BQ_DATASET.measurement_ext\` mm on m.measurement_id = mm.measurement_id
     where c.vocabulary_id != 'PPI'
-    and mm.src_id=(select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.measurement_ext\` where src_id like '%EHR%')) as r
+    and mm.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.measurement_ext\` where src_id like '%EHR%')) as r
     where c.concept_id = 21"
 
     # Set participant counts for Procedure domain
@@ -380,7 +380,7 @@ if [[ "$tables" == *"_ext" ]]; then
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on po.procedure_concept_id = c.concept_id
     join \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence_ext\` pm on po.procedure_occurrence_id = pm.procedure_occurrence_id
     where c.vocabulary_id != 'PPI'
-    and pm.src_id=(select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence_ext\` where src_id like '%EHR%')) as r
+    and pm.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence_ext\` where src_id like '%EHR%')) as r
     where c.concept_id = 10"
 
     # Set participant counts for Drug domain
@@ -392,8 +392,20 @@ if [[ "$tables" == *"_ext" ]]; then
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on de.drug_concept_id = c.concept_id
     join \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` md on de.drug_exposure_id = pm.drug_exposure_id
     where c.vocabulary_id != 'PPI'
-    and md.src_id=(select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` where src_id like '%EHR%')) as r
+    and md.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` where src_id like '%EHR%')) as r
     where c.concept_id = 13"
+
+    # Set participant counts for Observation domain
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
+    set c.count_value = r.count from
+    (select count(distinct person_id) as count
+    from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
+    join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on o.observation_concept_id = c.concept_id
+    join \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` od on o.observation_id = om.observation_id
+    where c.vocabulary_id != 'PPI'
+    and od.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` where src_id like '%EHR%')) as r
+    where c.concept_id = 27"
 else
     # Set participant counts for Condition domain
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -436,6 +448,16 @@ else
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on de.drug_concept_id = c.concept_id
     where c.vocabulary_id != 'PPI') as r
     where c.concept_id = 13"
+
+    # Set participant counts for Observation domain
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
+    set c.count_value = r.count from
+    (select count(distinct person_id) as count
+    from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
+    join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on o.observation_concept_id = c.concept_id
+    where c.vocabulary_id != 'PPI') as r
+    where c.concept_id = 27"
 fi
 
 #Concept prevalence (based on count value and not on source count value)
@@ -467,7 +489,7 @@ where d.domain_id = c.domain_id"
 # domain_info contains counts for all EHR specific domains (Condition, Measurement, Procedure and Drug Exposure
 # We're using *_ext tables to limit the count of people that have EHR specific data. This a an effort to exclude PPI related data.
 # PPI specific data is counted in the survey_module table. The only time the *_ext tables should be absent is in the synthetic datasets.
-if [[ "$tables" == *"_ext" ]]; then
+if [[ "$tables" == *"_ext"* ]]; then
     # Set participant counts for Condition domain
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
     "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.domain_info\` d
