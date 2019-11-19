@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
+import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
@@ -67,6 +68,7 @@ public class UserService {
   private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
+  private UserServiceAuditAdapter userServiceAuditAdapter;
   private static final Logger log = Logger.getLogger(UserService.class.getName());
 
   @Autowired
@@ -80,7 +82,8 @@ public class UserService {
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
-      DirectoryService directoryService) {
+      DirectoryService directoryService,
+      UserServiceAuditAdapter userServiceAuditAdapter) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
@@ -91,6 +94,7 @@ public class UserService {
     this.configProvider = configProvider;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
+    this.userServiceAuditAdapter = userServiceAuditAdapter;
   }
 
   /**
@@ -151,7 +155,42 @@ public class UserService {
     }
   }
 
-  private void updateDataAccessLevel(DbUser user) {
+  private void updateDataAccessLevel(DbUser dbUser) {
+    final DataAccessLevel previousDataAccessLevel = dbUser.getDataAccessLevelEnum();
+    final DataAccessLevel newDataAccessLevel;
+    if (shouldUserBeRegistered(dbUser)) {
+      addToGroupIdempotent(dbUser);
+      newDataAccessLevel = DataAccessLevel.REGISTERED;
+    } else {
+      removeFromGroupIdempotent(dbUser);
+      newDataAccessLevel = DataAccessLevel.UNREGISTERED;
+    }
+    dbUser.setDataAccessLevelEnum(newDataAccessLevel);
+    userServiceAuditAdapter.fireUpdateDataAccessAction(newDataAccessLevel, previousDataAccessLevel);
+  }
+
+  private void removeFromGroupIdempotent(DbUser dbUser) {
+    if (isUserMemberOfFirecloudGroup(dbUser)) {
+      this.fireCloudService.removeUserFromGroup(
+          dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
+      log.info(String.format("Removed user %s from registered-tier group.", dbUser.getEmail()));
+    }
+  }
+
+  private boolean isUserMemberOfFirecloudGroup(DbUser dbUser) {
+    return this.fireCloudService.isUserMemberOfGroup(
+        dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
+  }
+
+  private void addToGroupIdempotent(DbUser user) {
+    if (!isUserMemberOfFirecloudGroup(user)) {
+      this.fireCloudService.addUserToGroup(
+          user.getEmail(), configProvider.get().firecloud.registeredDomainName);
+      log.info(String.format("Added user %s to registered-tier group.", user.getEmail()));
+    }
+  }
+
+  private boolean shouldUserBeRegistered(DbUser user) {
     boolean dataUseAgreementCompliant =
         user.getDataUseAgreementCompletionTime() != null
             || user.getDataUseAgreementBypassTime() != null
@@ -170,32 +209,13 @@ public class UserService {
         user.getTwoFactorAuthCompletionTime() != null || user.getTwoFactorAuthBypassTime() != null;
 
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
-    boolean shouldBeRegistered =
-        !user.getDisabled()
-            && complianceTrainingCompliant
-            && eraCommonsCompliant
-            && betaAccessGranted
-            && twoFactorAuthComplete
-            && dataUseAgreementCompliant
-            && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
-    boolean isInGroup =
-        this.fireCloudService.isUserMemberOfGroup(
-            user.getEmail(), configProvider.get().firecloud.registeredDomainName);
-    if (shouldBeRegistered) {
-      if (!isInGroup) {
-        this.fireCloudService.addUserToGroup(
-            user.getEmail(), configProvider.get().firecloud.registeredDomainName);
-        log.info(String.format("Added user %s to registered-tier group.", user.getEmail()));
-      }
-      user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
-    } else {
-      if (isInGroup) {
-        this.fireCloudService.removeUserFromGroup(
-            user.getEmail(), configProvider.get().firecloud.registeredDomainName);
-        log.info(String.format("Removed user %s from registered-tier group.", user.getEmail()));
-      }
-      user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
-    }
+    return !user.getDisabled()
+        && complianceTrainingCompliant
+        && eraCommonsCompliant
+        && betaAccessGranted
+        && twoFactorAuthComplete
+        && dataUseAgreementCompliant
+        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
   }
 
   private boolean isServiceAccount(DbUser user) {

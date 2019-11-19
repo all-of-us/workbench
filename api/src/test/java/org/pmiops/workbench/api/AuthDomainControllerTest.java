@@ -90,11 +90,9 @@ public class AuthDomainControllerTest {
             Providers.of(config),
             complianceService,
             directoryService);
-    this.authDomainController = new AuthDomainController(
-        fireCloudService,
-        userService,
-        userDao,
-        mockAuthDomainAuditAdapter);
+    this.authDomainController =
+        new AuthDomainController(
+            fireCloudService, userService, userDao, mockAuthDomainAuditAdapter);
   }
 
   @Test
