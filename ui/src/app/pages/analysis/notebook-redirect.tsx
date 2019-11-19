@@ -220,11 +220,13 @@ interface Props {
 const clusterPollingTimeoutMillis = 15000;
 const clusterApiRetryTimeoutMillis = 10000;
 const clusterApiRetryAttempts = 5;
+const redirectMillis = 1000;
 
 export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(),
   withQueryParams())(class extends React.Component<Props, State> {
 
-    private timeoutReference: NodeJS.Timer;
+    private pollTimer: NodeJS.Timer;
+    private redirectTimer: NodeJS.Timer;
     private aborter = new AbortController();
 
     constructor(props) {
@@ -241,11 +243,6 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       return cluster.status === ClusterStatus.Starting ||
         cluster.status === ClusterStatus.Stopping ||
         cluster.status === ClusterStatus.Stopped;
-    }
-
-    private clearAndSetTimeout(timeoutCallback, timeoutMillis) {
-      clearTimeout(this.timeoutReference);
-      this.timeoutReference = setTimeout(() => timeoutCallback(), timeoutMillis);
     }
 
     private isCreatingNewNotebook() {
@@ -306,7 +303,8 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     componentWillUnmount() {
-      clearTimeout(this.timeoutReference);
+      clearTimeout(this.pollTimer);
+      clearTimeout(this.redirectTimer);
       this.aborter.abort();
     }
 
@@ -325,7 +323,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
             this.incrementProgress(Progress.Initializing);
           }
 
-          this.clearAndSetTimeout(() => this.pollForRunningCluster(billingProjectId), clusterPollingTimeoutMillis);
+          this.pollTimer = setTimeout(() => this.pollForRunningCluster(billingProjectId), clusterPollingTimeoutMillis);
         }
       } catch (error) {
         if (!isAbortError(error)) {
@@ -349,7 +347,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
           }
 
           // TODO(RW-3097): Backoff, or don't retry forever.
-          this.clearAndSetTimeout(() => this.pollForRunningCluster(billingProjectId), clusterPollingTimeoutMillis);
+          this.pollTimer = setTimeout(() => this.pollForRunningCluster(billingProjectId), clusterPollingTimeoutMillis);
         }
       } catch (error) {
         if (!isAbortError(error)) {
@@ -376,7 +374,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
       this.incrementProgress(Progress.Redirecting);
 
       // give it a second to "redirect"
-      this.clearAndSetTimeout(() => this.incrementProgress(Progress.Loaded), 1000);
+      this.redirectTimer = setTimeout(() => this.incrementProgress(Progress.Loaded), redirectMillis);
     }
 
     private async getNotebookPathAndLocalize(cluster: Cluster) {
