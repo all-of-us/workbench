@@ -1795,7 +1795,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new DemoChartInfo().gender("MALE").race("Asian").ageRange("45-64").count(1L),
         response.getItems().get(0));
     assertEquals(
-        new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("19-44").count(1L),
+        new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("18-44").count(1L),
         response.getItems().get(1));
   }
 

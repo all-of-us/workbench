@@ -1,6 +1,6 @@
 package org.pmiops.workbench.elasticsearch;
 
-import static org.pmiops.workbench.elasticsearch.AggregationUtils.RANGE_19_44;
+import static org.pmiops.workbench.elasticsearch.AggregationUtils.RANGE_18_44;
 import static org.pmiops.workbench.elasticsearch.AggregationUtils.RANGE_45_64;
 import static org.pmiops.workbench.elasticsearch.AggregationUtils.RANGE_GT_65;
 import static org.pmiops.workbench.elasticsearch.AggregationUtils.buildDemoChartAggregation;
@@ -86,11 +86,11 @@ public class ElasticSearchService {
                             .size(0) // reduce the payload since were only interested in the
                             // aggregations
                             .query(filter)
-                            .aggregation(buildDemoChartAggregation(RANGE_19_44))
+                            .aggregation(buildDemoChartAggregation(RANGE_18_44))
                             .aggregation(buildDemoChartAggregation(RANGE_45_64))
                             .aggregation(buildDemoChartAggregation(RANGE_GT_65))),
                 RequestOptions.DEFAULT);
-    return unwrapDemoChartBuckets(searchResponse, RANGE_19_44, RANGE_45_64, RANGE_GT_65);
+    return unwrapDemoChartBuckets(searchResponse, RANGE_18_44, RANGE_45_64, RANGE_GT_65);
   }
 
   /**
