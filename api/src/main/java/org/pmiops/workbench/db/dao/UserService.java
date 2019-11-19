@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -110,24 +111,23 @@ public class UserService {
    * <p>Ensures that the data access level for the user reflects the state of other fields on the
    * user; handles conflicts with concurrent updates by retrying.
    */
-  public DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser user) {
+  public DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser) {
     int objectLockingFailureCount = 0;
     int statementClosedCount = 0;
     while (true) {
-      user = userModifier.apply(user);
-      updateDataAccessLevel(user);
+      dbUser = userModifier.apply(dbUser);
+      updateDataAccessLevel(dbUser);
       try {
-        user = userDao.save(user);
-        return user;
+        return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
         if (objectLockingFailureCount < MAX_RETRIES) {
-          user = userDao.findOne(user.getUserId());
+          dbUser = userDao.findOne(dbUser.getUserId());
           objectLockingFailureCount++;
         } else {
           throw new ConflictException(
               String.format(
                   "Could not update user %s after %d object locking failures",
-                  user.getUserId(), objectLockingFailureCount));
+                  dbUser.getUserId(), objectLockingFailureCount));
         }
       } catch (JpaSystemException e) {
         // We don't know why this happens instead of the object locking failure.
@@ -136,13 +136,13 @@ public class UserService {
             .getMessage()
             .equals("Statement closed.")) {
           if (statementClosedCount < MAX_RETRIES) {
-            user = userDao.findOne(user.getUserId());
+            dbUser = userDao.findOne(dbUser.getUserId());
             statementClosedCount++;
           } else {
             throw new ConflictException(
                 String.format(
                     "Could not update user %s after %d statement closes",
-                    user.getUserId(), statementClosedCount));
+                    dbUser.getUserId(), statementClosedCount));
           }
         } else {
           throw e;
@@ -209,16 +209,29 @@ public class UserService {
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     try {
-      userDao.save(user);
+      return userDao.save(user);
     } catch (DataIntegrityViolationException e) {
-      user = userDao.findUserByEmail(email);
-      if (user == null) {
+      final DbUser userByEmail = userDao.findUserByEmail(email);
+      if (userByEmail == null) {
+        log.log(
+            Level.WARNING,
+            String.format(
+                "While creating new user with email %s due to "
+                    + "DataIntegrityViolationException. No user was persisted",
+                email),
+            e);
         throw e;
+      } else {
+        log.log(
+            Level.WARNING,
+            String.format(
+                "While creating new user with email %s due to "
+                    + "DataIntegrityViolationException. However, user %d was persisted",
+                email, userByEmail.getUserId()),
+            e);
+        return userByEmail;
       }
-      // If a user already existed (due to multiple requests trying to create a user simultaneously)
-      // just return it.
     }
-    return user;
   }
 
   public DbUser createUser(

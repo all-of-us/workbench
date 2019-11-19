@@ -13,6 +13,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
@@ -77,13 +78,18 @@ public class BillingProjectBufferService {
 
     final String projectName = createBillingProjectName();
 
-    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
-    entry.setFireCloudProjectName(projectName);
-    entry.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
-    entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
-    billingProjectBufferEntryDao.save(entry);
+    billingProjectBufferEntryDao.save(makeCreatingBufferEntry(projectName));
 
     fireCloudService.createAllOfUsBillingProject(projectName);
+  }
+
+  @NotNull
+  private DbBillingProjectBufferEntry makeCreatingBufferEntry(String projectName) {
+    final DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    entry.setFireCloudProjectName(projectName);
+    entry.setCreationTime(Timestamp.from(clock.instant()));
+    entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
+    return entry;
   }
 
   public void syncBillingProjectStatus() {
@@ -130,8 +136,7 @@ public class BillingProjectBufferService {
             "Get BillingProjectStatus call failed for " + entry.getFireCloudProjectName(),
             e);
       }
-
-      billingProjectBufferEntryDao.save(entry);
+      entry = billingProjectBufferEntryDao.save(entry);
     }
   }
 
@@ -145,16 +150,17 @@ public class BillingProjectBufferService {
                 DbStorageEnums.billingProjectBufferEntryStatusToStorage(
                     BufferEntryStatus.ASSIGNING),
                 new Timestamp(now.minus(ASSIGNING_TIMEOUT).toEpochMilli())))
-        .forEach(
-            entry -> {
-              log.warning(
-                  "CleanBillingBuffer: Setting status of "
-                      + entry.getFireCloudProjectName()
-                      + " to ERROR from "
-                      + entry.getStatusEnum());
-              entry.setStatusEnum(BufferEntryStatus.ERROR, this::getCurrentTimestamp);
-              billingProjectBufferEntryDao.save(entry);
-            });
+        .forEach(this::setBufferEntryErrorStatus);
+  }
+
+  private void setBufferEntryErrorStatus(DbBillingProjectBufferEntry entry) {
+    log.warning(
+        "CleanBillingBuffer: Setting status of "
+            + entry.getFireCloudProjectName()
+            + " to ERROR from "
+            + entry.getStatusEnum());
+    entry.setStatusEnum(BufferEntryStatus.ERROR, this::getCurrentTimestamp);
+    entry = billingProjectBufferEntryDao.save(entry);
   }
 
   private List<DbBillingProjectBufferEntry> findExpiredCreatingEntries(Instant now) {
@@ -187,14 +193,16 @@ public class BillingProjectBufferService {
     fireCloudService.addUserToBillingProject(user.getEmail(), entry.getFireCloudProjectName());
     entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     entry.setAssignedUser(user);
-    billingProjectBufferEntryDao.save(entry);
-
-    return entry;
+    return billingProjectBufferEntryDao.save(entry);
   }
 
   private DbBillingProjectBufferEntry consumeBufferEntryForAssignment() {
     // Each call to acquire the lock will timeout in 1s if it is currently held
-    while (billingProjectBufferEntryDao.acquireAssigningLock() != 1) {}
+    while (true) {
+      if (billingProjectBufferEntryDao.acquireAssigningLock() == 1) {
+        break;
+      }
+    }
 
     DbBillingProjectBufferEntry entry;
     try {
@@ -208,12 +216,10 @@ public class BillingProjectBufferService {
       }
 
       entry.setStatusEnum(BufferEntryStatus.ASSIGNING, this::getCurrentTimestamp);
-      billingProjectBufferEntryDao.save(entry);
+      return billingProjectBufferEntryDao.save(entry);
     } finally {
       billingProjectBufferEntryDao.releaseAssigningLock();
     }
-
-    return entry;
   }
 
   private String createBillingProjectName() {
