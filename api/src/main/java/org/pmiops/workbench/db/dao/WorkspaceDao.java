@@ -43,6 +43,8 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
   List<DbWorkspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
 
+  List<DbWorkspace> findAllByWorkspaceNamespace(String workspaceNamespace);
+
   List<DbWorkspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
 
   default List<DbWorkspace> findAllByBillingMigrationStatus(BillingMigrationStatus status) {

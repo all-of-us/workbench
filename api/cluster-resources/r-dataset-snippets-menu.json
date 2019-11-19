@@ -2,16 +2,16 @@
   "name": "All of Us Dataset Builder R snippets",
   "sub-menu": [
     {
-      "name": "Setup",
-      "snippet": "lapply(c('viridis', 'ggthemes', 'skimr'),\n       function(pkg_name) { if(! pkg_name %in% installed.packages()) { install.packages(pkg_name)} } )\n\nlibrary(viridis)    # A nice color scheme for plots.\nlibrary(ggthemes)   # Common themes to change the look and feel of plots.\nlibrary(scales)     # Graphical scales map data to aesthetics in plots.\nlibrary(skimr)      # Better summaries of data.\nlibrary(lubridate)  # Date library from the tidyverse.\nlibrary(tidyverse)  # Data wrangling packages.\n\n## Plot setup.\ntheme_set(theme_bw(base_size = 14)) # Default theme for plots.\n\n#' Returns a data frame with a y position and a label, for use annotating ggplot boxplots.\n#'\n#' @param d A data frame.\n#' @return A data frame with column y as max and column label as length.\nget_boxplot_fun_data <- function(df) {\n  return(data.frame(y = max(df), label = stringr::str_c('N = ', length(df))))\n}\n"
-    },
-    {
       "name": "Documentation",
       "external-link": "https://github.com/all-of-us/workbench-snippets"
     },
     "---",
     {
-      "name": "Basic operations",
+      "name": "(1) Setup",
+      "snippet": "lapply(c('viridis', 'ggthemes', 'skimr'),\n       function(pkg_name) { if(! pkg_name %in% installed.packages()) { install.packages(pkg_name)} } )\n\nlibrary(viridis)    # A nice color scheme for plots.\nlibrary(ggthemes)   # Common themes to change the look and feel of plots.\nlibrary(scales)     # Graphical scales map data to aesthetics in plots.\nlibrary(skimr)      # Better summaries of data.\nlibrary(lubridate)  # Date library from the tidyverse.\nlibrary(tidyverse)  # Data wrangling packages.\n\n## Plot setup.\ntheme_set(theme_bw(base_size = 14)) # Default theme for plots.\n\n#' Returns a data frame with a y position and a label, for use annotating ggplot boxplots.\n#'\n#' @param d A data frame.\n#' @return A data frame with column y as max and column label as length.\nget_boxplot_fun_data <- function(df) {\n  return(data.frame(y = max(df), label = stringr::str_c('N = ', length(df))))\n}\n"
+    },
+    {
+      "name": "(2) Basic operations",
       "sub-menu": [
         {
           "name": "join_dataframes.R",
@@ -24,7 +24,7 @@
       ]
     },
     {
-      "name": "Plot measurements",
+      "name": "(3) Plot measurements",
       "sub-menu": [
         {
           "name": "measurement_by_age_and_gender.ggplot",
@@ -32,7 +32,7 @@
         },
         {
           "name": "measurement_by_gender.ggplot",
-          "snippet": "# Use snippet 'measurement_by_gender' to plot joined demographics and measurements dataframes.\n# This plot assumes 'measurement_df' was created using snippet 'Basic operations -> join_dataframes' to\n# join together demographics and measurements dataframes.\n# See also https://r4ds.had.co.nz/data-visualisation.html\n\n\noptions(repr.plot.height = 10, repr.plot.width = 16)\n\n# There could be many different measurements in the dataframe. By default, plot the first one.\nmeasurement_to_plot <- unique(measurement_df$STANDARD_CONCEPT_NAME)[1]\n\nmeasurement_df %>%\n    filter(STANDARD_CONCEPT_NAME == measurement_to_plot) %>%\n    filter(!UNIT_CONCEPT_NAME %in% c('No matching concept', 'NULL')) %>%\n    filter(VALUE_AS_NUMBER < 9999999) %>%  # Get rid of nonsensical outliers.\n    ggplot(aes(x = GENDER, y = VALUE_AS_NUMBER)) +\n    geom_boxplot() +\n    stat_summary(fun.data = get_boxplot_fun_data, geom = 'text', size = 4,\n                 position = position_dodge(width = 0.9), vjust = -0.8) +\n#    scale_y_log10() +  # Uncomment if the data looks skewed.\n    facet_wrap(STANDARD_CONCEPT_NAME ~ UNIT_CONCEPT_NAME, ncol = 2, scales = 'free') +\n    labs(title = str_glue('Numeric values of measurements, by gender'), caption = 'Source: All Of Us Data')\n"
+          "snippet": "# Use snippet 'measurement_by_gender' to plot joined demographics and measurements dataframes.\n# This plot assumes 'measurement_df' was created using snippet 'Basic operations -> join_dataframes' to\n# join together demographics and measurements dataframes.\n# See also https://r4ds.had.co.nz/data-visualisation.html\n\n\noptions(repr.plot.height = 10, repr.plot.width = 16)\n\n# There could be many different measurements in the dataframe. By default, plot the first one.\nmeasurement_to_plot <- unique(measurement_df$STANDARD_CONCEPT_NAME)[1]\n\nmeasurement_df %>%\n    filter(STANDARD_CONCEPT_NAME == measurement_to_plot) %>%\n    filter(!UNIT_CONCEPT_NAME %in% c('No matching concept', 'NULL')) %>%\n    filter(VALUE_AS_NUMBER < 9999999) %>%  # Get rid of nonsensical outliers.\n    ggplot(aes(x = GENDER, y = VALUE_AS_NUMBER)) +\n    geom_boxplot() +\n    stat_summary(fun.data = get_boxplot_fun_data, geom = 'text', size = 4,\n                 position = position_dodge(width = 0.9), vjust = -0.8) +\n#    scale_y_log10() +  # Uncomment if the data looks skewed.\n    facet_wrap(STANDARD_CONCEPT_NAME ~ UNIT_CONCEPT_NAME, ncol = 2, scales = 'free') +\n    labs(title = str_glue('Numeric values of measurements, by gender'), caption = 'Source: All Of Us Data') +\n    theme(axis.text.x = element_text(angle=25, hjust=1))\n"
         }
       ]
     }
