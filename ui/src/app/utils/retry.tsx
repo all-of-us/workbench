@@ -1,19 +1,18 @@
 import {isAbortError} from 'app/utils/errors';
 
-export async function retry<T>(f: () => Promise<T>, timeoutMillis: number, maxRetries: number): Promise<T> {
+// Retry a fetch `maxRetries` number of times with a `timeoutMillis` wait between retries
+// Respects fetch aborts
+export async function fetchAbortableRetry<T>(fetchFn: () => Promise<T>, timeoutMillis: number, maxRetries: number): Promise<T> {
   let retries = 0;
-  let timeoutReference;
   while (true) {
     try {
-      return await f();
+      return await fetchFn();
     } catch (e) {
       retries++;
       if (isAbortError(e) || retries >= maxRetries) {
-        clearTimeout(timeoutReference);
         throw e;
       }
-      clearTimeout(timeoutReference);
-      timeoutReference = setTimeout(f, timeoutMillis);
+      await new Promise(resolve => setTimeout(resolve, timeoutMillis));
     }
   }
 }

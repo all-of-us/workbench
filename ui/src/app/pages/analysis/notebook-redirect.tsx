@@ -5,7 +5,7 @@ import Iframe from 'react-iframe';
 
 import {isAbortError} from 'app/utils/errors';
 import {urlParamsStore} from 'app/utils/navigation';
-import {retry} from 'app/utils/retry';
+import {fetchAbortableRetry} from 'app/utils/retry';
 
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -307,7 +307,7 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
     }
 
     private async clusterRetry<T>(f: () => Promise<T>): Promise<T> {
-      return await retry(f, clusterApiRetryTimeoutMillis, clusterApiRetryAttempts);
+      return await fetchAbortableRetry(f, clusterApiRetryTimeoutMillis, clusterApiRetryAttempts);
     }
 
     private async pollForRunningCluster(billingProjectId) {
