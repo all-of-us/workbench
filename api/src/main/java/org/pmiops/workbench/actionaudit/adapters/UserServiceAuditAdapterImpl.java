@@ -36,20 +36,20 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditAdapter {
 
   @Override
   public void fireUpdateDataAccessAction(
-      DataAccessLevel dataAccessLevel, DataAccessLevel previousDataAccessLevel) {
-    // Populate the Agent ID and Agent Email with the target user's info,
-    // since the SYSTEM agent doesn't have those and we need them anyway.
+      DbUser targetUser,
+      DataAccessLevel dataAccessLevel,
+      DataAccessLevel previousDataAccessLevel) {
     ActionAuditEvent event =
         new ActionAuditEvent(
             clock.millis(),
-            AgentType.SYSTEM,
+            AgentType.ADMINISTRATOR,
             dbUserProvider.get().getUserId(),
             dbUserProvider.get().getEmail(),
             actionIdProvider.get(),
             ActionType.EDIT,
             TargetType.ACCOUNT,
-            AccountTargetProperty.IS_ENABLED.toString(),
-            dbUserProvider.get().getUserId(),
+            AccountTargetProperty.REGISTRATION_STATUS.toString(),
+            targetUser.getUserId(),
             previousDataAccessLevel.toString(),
             dataAccessLevel.toString());
     actionAuditService.send(event);

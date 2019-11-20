@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
@@ -55,6 +56,7 @@ public class UserServiceTest {
   @Mock private FireCloudService fireCloudService;
   @Mock private ComplianceService complianceService;
   @Mock private DirectoryService directoryService;
+  @Mock private UserServiceAuditAdapter mockUserServiceAuditAdapter;
 
   private UserService userService;
 
@@ -77,7 +79,8 @@ public class UserServiceTest {
             fireCloudService,
             configProvider,
             complianceService,
-            directoryService);
+            directoryService,
+            mockUserServiceAuditAdapter);
   }
 
   private DbUser insertUser(String email) {

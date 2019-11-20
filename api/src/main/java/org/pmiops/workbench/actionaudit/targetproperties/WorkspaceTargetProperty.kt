@@ -8,7 +8,7 @@ enum class WorkspaceTargetProperty
 constructor(
     override val propertyName: String,
     override val extractor: (Workspace) -> String?
-) : TargetProperty<Workspace> {
+) : ModelBackedTargetProperty<Workspace> {
     NAME("name", Workspace::getName),
     INTENDED_STUDY("intended_study", { it.researchPurpose.intendedStudy }),
     CREATOR("creator", Workspace::getCreator),

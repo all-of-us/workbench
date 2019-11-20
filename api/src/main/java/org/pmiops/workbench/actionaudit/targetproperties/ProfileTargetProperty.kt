@@ -5,7 +5,7 @@ import org.pmiops.workbench.model.Profile
 // N.B. entries will rarely be referred to by name, but are accessed via values(). I.e. they are
 // not safe to remove, even if an IDE indicates otherwise.
 enum class ProfileTargetProperty
-constructor(override val propertyName: String, override val extractor: (Profile) -> String?) : TargetProperty<Profile> {
+constructor(override val propertyName: String, override val extractor: (Profile) -> String?) : ModelBackedTargetProperty<Profile> {
     USER_NAME("user_name", Profile::getUsername),
     CONTACT_EMAIL("contact_email", Profile::getContactEmail),
     DATA_ACCESS_LEVEL("data_access_level", { it.dataAccessLevel?.toString() }),

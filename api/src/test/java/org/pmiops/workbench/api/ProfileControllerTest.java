@@ -27,6 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.adapters.ProfileAuditAdapter;
+import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
@@ -108,8 +109,9 @@ public class ProfileControllerTest {
   @Mock private FreeTierBillingService freeTierBillingService;
   @Mock private ComplianceService complianceTrainingService;
   @Mock private MailService mailService;
-  @Mock private UserService userService;
+  private UserService userService;
   @Mock private ProfileAuditAdapter mockProfileAuditAdapter;
+  @Mock private UserServiceAuditAdapter mockUserServiceAuditAdapter;
 
   private ProfileController profileController;
   private ProfileController cloudProfileController;
@@ -160,7 +162,8 @@ public class ProfileControllerTest {
             fireCloudService,
             Providers.of(config),
             complianceTrainingService,
-            directoryService);
+            directoryService,
+            mockUserServiceAuditAdapter);
     ProfileService profileService = new ProfileService(userDao, freeTierBillingService);
     this.profileController =
         new ProfileController(

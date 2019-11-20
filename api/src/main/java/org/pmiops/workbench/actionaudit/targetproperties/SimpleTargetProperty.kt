@@ -1,6 +1,5 @@
 package org.pmiops.workbench.actionaudit.targetproperties
 
-interface TargetProperty<T> {
+interface SimpleTargetProperty {
     val propertyName: String
-    val extractor: (T) -> String?
 }

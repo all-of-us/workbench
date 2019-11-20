@@ -49,7 +49,7 @@ class ActionAuditServiceTest {
 
     @Test
     fun testSendsSingleEvent() {
-        actionAuditService!!.send(EVENT_1!!)
+        actionAuditService!!.send(EVENT_1)
         argumentCaptor<List<LogEntry>>().apply {
             verify(mockLogging).write(capture())
             val entryList: List<LogEntry> = firstValue

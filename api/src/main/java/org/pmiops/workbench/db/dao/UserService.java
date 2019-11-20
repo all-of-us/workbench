@@ -166,7 +166,8 @@ public class UserService {
       newDataAccessLevel = DataAccessLevel.UNREGISTERED;
     }
     dbUser.setDataAccessLevelEnum(newDataAccessLevel);
-    userServiceAuditAdapter.fireUpdateDataAccessAction(newDataAccessLevel, previousDataAccessLevel);
+    userServiceAuditAdapter.fireUpdateDataAccessAction(
+        dbUser, newDataAccessLevel, previousDataAccessLevel);
   }
 
   private void removeFromGroupIdempotent(DbUser dbUser) {

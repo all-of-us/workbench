@@ -44,14 +44,17 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<Void> updateUserDisabledStatus(UpdateUserDisabledRequest request) {
-    final DbUser user = userDao.findUserByEmail(request.getEmail());
-    final Boolean previousDisabled = user.getDisabled();
-    final DbUser updatedUser =
-        userService.setDisabledStatus(user.getUserId(), request.getDisabled());
+    final DbUser targetDbUser = userDao.findUserByEmail(request.getEmail());
+    final Boolean previousDisabled = targetDbUser.getDisabled();
+    final DbUser updatedTargetUser =
+        userService.setDisabledStatus(targetDbUser.getUserId(), request.getDisabled());
     authDomainAuditAdapter.fireSetAccountEnabled(
-        user.getUserId(), !request.getDisabled(), !previousDisabled);
+        updatedTargetUser.getUserId(), !request.getDisabled(), !previousDisabled);
     userService.logAdminUserAction(
-        user.getUserId(), "updated user disabled state", previousDisabled, request.getDisabled());
+        updatedTargetUser.getUserId(),
+        "updated user disabled state",
+        previousDisabled,
+        request.getDisabled());
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }
