@@ -31,13 +31,11 @@ import {
   CohortsApi,
   ConceptsApi,
   ConceptSetsApi,
-  ConfigApi,  // not currently used
   Configuration as FetchConfiguration,
   DataSetApi,
   FeaturedWorkspacesConfigApi,
   FetchAPI, // internal
   ProfileApi,
-  StatusApi,  // not currently used
   UserApi,
   UserMetricsApi,
   WorkspacesApi,
@@ -88,11 +86,9 @@ export const cohortReviewApi = bindCtor(CohortReviewApi);
 export const cohortsApi = bindCtor(CohortsApi);
 export const conceptsApi = bindCtor(ConceptsApi);
 export const conceptSetsApi = bindCtor(ConceptSetsApi);
-export const configApi = bindCtor(ConfigApi);
 export const dataSetApi = bindCtor(DataSetApi);
 export const featuredWorkspacesConfigApi = bindCtor(FeaturedWorkspacesConfigApi);
 export const profileApi = bindCtor(ProfileApi);
-export const statusApi = bindCtor(StatusApi);
 export const userApi = bindCtor(UserApi);
 export const userMetricsApi = bindCtor(UserMetricsApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
