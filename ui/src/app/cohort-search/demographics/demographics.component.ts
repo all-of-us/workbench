@@ -53,7 +53,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   get ageRange() { return this.demoForm.get('ageRange'); }
   get deceased() { return this.demoForm.get('deceased'); }
 
-    /* Storage for the demographics options (fetched via the API) */
   ageNode = {
     hasAncestorData: false,
     attributes: [],
@@ -101,10 +100,8 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     /*
      * Each subtype's possible criteria is loaded via the API.  Race and Gender
      * criteria nodes become options in their respective dropdowns; deceased
-     * and age are used as templates for constructing relevant seach
-     * parameters.  Upon load we immediately map the criteria to immutable
-     * objects complete with deterministically generated `parameterId`s and
-     * sort them by count, then by name.
+     * and age are used as templates for constructing relevant search
+     * parameters.  Upon load we sort them by count, then by name.
      */
     this.loading = true;
     cohortBuilderApi().getCriteriaBy(cdrid, DomainType[DomainType.PERSON], type).then(response => {
@@ -124,18 +121,21 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   loadOptions(nodes: any, type: string) {
+    const params = this.wizard.item.searchParameters;
     if (type === CriteriaType[CriteriaType.DECEASED]) {
-      const attr = {
-        name: AttrName.AGE,
-        operator: Operator.BETWEEN,
-        operands: [minAge.toString(), maxAge.toString()]
-      };
+      const attributes = params.length && params[0].type === CriteriaType.AGE
+        ? params[0].attributes
+        : [{
+          name: AttrName.AGE,
+          operator: Operator.BETWEEN,
+          operands: [minAge.toString(), maxAge.toString()]
+        }];
       this.selectedNode = {
         ...this.ageNode,
         name: `Age In Range ${minAge} - ${maxAge}`,
-        attributes: [attr],
+        attributes,
       };
-      if (!this.wizard.item.searchParameters.length) {
+      if (!params.length) {
         const wizard = this.wizard;
         wizard.item.searchParameters.push(this.selectedNode);
         const selections = [this.ageNode.parameterId, ...this.selections];
@@ -145,7 +145,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       this.deceasedNode = nodes[0];
     } else {
       this.nodes = nodes;
-      if (this.wizard.item.searchParameters.length) {
+      if (params.length) {
         this.calculate(true);
       }
     }
@@ -202,31 +202,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     }
   }
 
-    /*
-     * The next four initialization methods do the following: if a value exists
-     * for that subtype already (i.e. we're editing), set that value on the
-     * relevant form control.  Also set up a subscriber to the observable stream
-     * coming from that control's `valueChanges` that will fire ADD_PARAMETER or
-     * REMOVE_PARAMETER events as appropriate.
-     *
-     * The exact ordering of these operations is slightly different per type.
-     * For race and gender, we watch the valueChanges stream in pairs so that we
-     * can generate added and removed lists, so they get their initialization
-     * _after_ the change listener is attached (otherwise we would never detect
-     * the _first_ selection, which would be dropped by `pairwise`).
-     *
-     * For Age, since the slider emits an event with every value, and there can
-     * be many values very quickly, we debounce the event emissions by 1/4 of a
-     * second.  Furthermore, we generate the correct parameter ID as a hash from
-     * the given user input so that we can determine if the age range has changed
-     * or not.
-     *
-     * (TODO: can we reduce all age criterion to 'between'?  Or should we be
-     * determining different attributes (operators, really) be examining the
-     * bounds and the diff between low and high?  And should we be generating the
-     * parameterId by stringifying the attribute (which may be more stable than
-     * using a hash?)
-     */
   initAgeRange() {
     const min = this.demoForm.get('ageMin');
     const max = this.demoForm.get('ageMax');
@@ -236,6 +211,10 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       this.ageRange.setValue(range);
       min.setValue(range[0]);
       max.setValue(range[1]);
+    }
+    // Get the item count if editing an existing item
+    if (this.wizard && this.wizard.count) {
+      this.count = this.wizard.count;
     }
 
     const ageDiff = this.ageRange.valueChanges
@@ -267,11 +246,10 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   initDeceased() {
-    const existent = this.wizard.item.searchParameters
-      .find(s => s.type === CriteriaType[CriteriaType.DECEASED]);
+    const existent = this.wizard.item.searchParameters.find(s => s.type === CriteriaType[CriteriaType.DECEASED]);
     if (existent !== undefined) {
       this.deceased.setValue(true);
-      this.count = this.deceasedNode.count;
+      this.count = this.wizard.count;
     }
     this.subscription = this.deceased.valueChanges.subscribe(includeDeceased => {
       triggerEvent('Cohort Builder Search', 'Click', 'Demo - Age/Deceased - Deceased Box');
