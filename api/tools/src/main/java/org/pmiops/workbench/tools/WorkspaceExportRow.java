@@ -218,7 +218,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Review for Stigmatizing research (Y/N)")
-  @CsvBindByPosition(position = 16)
+  @CsvBindByPosition(position = 17)
   private String reviewForStigmatizingResearch;
 
   public String getWorkspaceLastUpdatedDate() {
@@ -230,7 +230,7 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Workspace Last Updated Date")
-  @CsvBindByPosition(position = 17)
+  @CsvBindByPosition(position = 18)
   private String workspaceLastUpdatedDate;
 
   public String getActive() {
@@ -242,6 +242,6 @@ public class WorkspaceExportRow {
   }
 
   @CsvBindByName(column = "Is Workspace active? (Y/N)")
-  @CsvBindByPosition(position = 18)
+  @CsvBindByPosition(position = 19)
   private String active;
 }
