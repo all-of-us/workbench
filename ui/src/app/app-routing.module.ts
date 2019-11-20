@@ -144,7 +144,7 @@ const routes: Routes = [
                     data: {
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
-                      minimizeChrome: true,
+                      minimizeChrome: true
                     }
                   }
                 ]

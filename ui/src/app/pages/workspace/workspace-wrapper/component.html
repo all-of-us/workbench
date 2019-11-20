@@ -25,7 +25,10 @@
   <app-bug-report *ngIf="bugReportOpen"
                   [bugReportDescription]="bugReportDescription"
                   [onClose]="closeBugReport"></app-bug-report>
-  <app-help-sidebar *ngIf="helpContent" [helpContent]="helpContent" [hideSidebar]="hideSidebar"></app-help-sidebar>
+  <app-help-sidebar *ngIf="helpContent"
+                    [helpContent]="helpContent"
+                    [setSidebarState]="setSidebarState"
+                    [sidebarOpen]="sidebarOpen"></app-help-sidebar>
   <div [ngStyle]="helpContent ? {'margin-right': '45px'} : {}">
     <router-outlet *ngIf="workspace"></router-outlet>
   </div>

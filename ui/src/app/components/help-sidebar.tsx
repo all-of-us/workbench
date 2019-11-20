@@ -1,6 +1,7 @@
 import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {Subscription} from 'rxjs/Subscription';
 
 import {ClrIcon} from 'app/components/icons';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
@@ -8,6 +9,7 @@ import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {highlightSearchTerm, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {openZendeskWidget} from 'app/utils/zendesk';
+import {ParticipantCohortStatus} from 'generated/fetch';
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
@@ -126,26 +128,26 @@ const iconStyles = {
 
 interface Props {
   helpContent: string;
-  hideSidebar: number;
+  setSidebarState: Function;
+  sidebarOpen: boolean;
   profileState: any;
 }
 
 interface State {
   activeIcon: string;
-  filteredContent: any;
-  participant: any;
-  sidebarOpen: boolean;
+  filteredContent: Array<any>;
+  participant: ParticipantCohortStatus;
   searchTerm: string;
 }
 export const HelpSidebar = withUserProfile()(
   class extends React.Component<Props, State> {
+    subscription: Subscription;
     constructor(props: Props) {
       super(props);
       this.state = {
         activeIcon: undefined,
         filteredContent: undefined,
         participant: undefined,
-        sidebarOpen: false,
         searchTerm: ''
       };
     }
@@ -159,16 +161,23 @@ export const HelpSidebar = withUserProfile()(
     });
 
     componentDidMount(): void {
-      participantStore.subscribe(participant => this.setState({participant}));
+      this.subscription = participantStore.subscribe(participant => this.setState({participant}));
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      const {helpContent, hideSidebar} = this.props;
       // close the sidebar on each navigation excluding navigating between participants in cohort review
-      if (hideSidebar > prevProps.hideSidebar &&
-        !(helpContent === 'reviewParticipantDetail' && prevProps.helpContent === 'reviewParticipantDetail')) {
-        this.setState({activeIcon: undefined, sidebarOpen: false});
+      if (!this.props.sidebarOpen && prevProps.sidebarOpen) {
+        setTimeout(() => {
+          // check if the sidebar has been opened again before resetting activeIcon
+          if (!this.props.sidebarOpen) {
+            this.setState({activeIcon: undefined});
+          }
+        }, 300);
       }
+    }
+
+    componentWillUnmount(): void {
+      this.subscription.unsubscribe();
     }
 
     searchHelpTips(input: string) {
@@ -202,12 +211,14 @@ export const HelpSidebar = withUserProfile()(
     }
 
     onIconClick(icon: string) {
-      const {activeIcon, sidebarOpen} = this.state;
+      const {setSidebarState, sidebarOpen} = this.props;
+      const {activeIcon} = this.state;
       const newSidebarOpen = !(icon === activeIcon && sidebarOpen);
       if (newSidebarOpen) {
-        this.setState({activeIcon: icon, sidebarOpen: newSidebarOpen});
+        this.setState({activeIcon: icon});
+        setSidebarState(true);
       } else {
-        this.hideSidebar();
+        setSidebarState(false);
       }
     }
 
@@ -222,12 +233,11 @@ export const HelpSidebar = withUserProfile()(
     }
 
     hideSidebar() {
-      this.setState({sidebarOpen: false});
+      this.props.setSidebarState(false);
       // keep activeIcon set while the sidebar transition completes
       setTimeout(() => {
-        const {sidebarOpen} = this.state;
         // check if the sidebar has been opened again before resetting activeIcon
-        if (!sidebarOpen) {
+        if (!this.props.sidebarOpen) {
           this.setState({activeIcon: undefined});
         }
       }, 300);
@@ -239,8 +249,8 @@ export const HelpSidebar = withUserProfile()(
     }
 
     render() {
-      const {helpContent} = this.props;
-      const {activeIcon, filteredContent, participant, searchTerm, sidebarOpen} = this.state;
+      const {helpContent, setSidebarState, sidebarOpen} = this.props;
+      const {activeIcon, filteredContent, participant, searchTerm} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContent];
       const contentStyle = (tab: string) => ({
         display: activeIcon === tab ? 'block' : 'none',
@@ -271,7 +281,7 @@ export const HelpSidebar = withUserProfile()(
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar}>
             <div style={styles.topBar}>
               <ClrIcon shape='caret right' size={22} style={styles.closeIcon}
-                onClick={() => this.hideSidebar()} />
+                onClick={() => setSidebarState(false)} />
             </div>
             <div style={contentStyle('help')}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
@@ -328,9 +338,10 @@ export const HelpSidebar = withUserProfile()(
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
   @Input('helpContent') helpContent: Props['helpContent'];
-  @Input('hideSidebar') hideSidebar: Props['hideSidebar'];
+  @Input('setSidebarState') setSidebarState: Props['setSidebarState'];
+  @Input('sidebarOpen') sidebarOpen: Props['sidebarOpen'];
 
   constructor() {
-    super(HelpSidebar, ['helpContent', 'hideSidebar']);
+    super(HelpSidebar, ['helpContent', 'setSidebarState', 'sidebarOpen']);
   }
 }
