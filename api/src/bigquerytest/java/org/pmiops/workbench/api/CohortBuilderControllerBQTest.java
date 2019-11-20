@@ -1,15 +1,14 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.inject.Provider;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
@@ -530,7 +529,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .standard(false));
     List<CriteriaMenuOption> options =
         controller.findCriteriaMenuOptions(cdrVersion.getCdrVersionId()).getBody().getItems();
-    assertEquals(2, options.size());
+    assertThat(options).hasSize(2);
     CriteriaMenuOption option1 =
         new CriteriaMenuOption()
             .domain(DomainType.CONDITION.toString())
@@ -556,23 +555,23 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 new CriteriaMenuSubOption()
                     .type(CriteriaType.CPT4.toString())
                     .standardFlags(Arrays.asList(new StandardFlag().standard(false))));
-    assertTrue(options.contains(option1));
-    assertTrue(options.contains(option2));
+    assertThat(options).contains(option1);
+    assertThat(options).contains(option2);
   }
 
   @Test
   public void validateAttribute() throws Exception {
     SearchParameter demo = age();
     Attribute attribute = new Attribute().name(AttrName.NUM);
-    demo.attributes(Arrays.asList(attribute));
+    demo.attributes(Collections.singletonList(attribute));
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(demo), new ArrayList<>());
+            DomainType.CONDITION.toString(), Collections.singletonList(demo), new ArrayList<>());
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals("Bad Request: attribute operator null is not valid.", bre.getMessage());
+      assertExceptionMessage(bre, "Bad Request: attribute operator null is not valid.");
     }
 
     attribute.operator(Operator.BETWEEN);
@@ -580,17 +579,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals("Bad Request: attribute operands are empty.", bre.getMessage());
+      assertExceptionMessage(bre, "Bad Request: attribute operands are empty.");
     }
 
-    attribute.operands(Arrays.asList("20"));
+    attribute.operands(Collections.singletonList("20"));
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator",
-          bre.getMessage());
+      assertExceptionMessage(
+          bre,
+          "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator");
     }
 
     attribute.operands(Arrays.asList("s", "20"));
@@ -598,7 +597,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals("Bad Request: attribute NUM operands must be numeric.", bre.getMessage());
+      assertExceptionMessage(bre, "Bad Request: attribute NUM operands must be numeric.");
     }
 
     attribute.operands(Arrays.asList("10", "20"));
@@ -607,10 +606,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: attribute NUM must have one operand when using the EQUAL operator.",
-          bre.getMessage());
+      assertExceptionMessage(
+          bre, "Bad Request: attribute NUM must have one operand when using the EQUAL operator.");
     }
+  }
+
+  private static void assertExceptionMessage(Exception exception, String expectedErrorMessage) {
+    assertThat(exception.getMessage()).isEqualTo(expectedErrorMessage);
   }
 
   @Test
@@ -623,7 +625,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals("Bad Request: modifier operator null is not valid.", bre.getMessage());
+      assertExceptionMessage(bre, "Bad Request: modifier operator null is not valid.");
     }
 
     modifier.operator(Operator.BETWEEN);
@@ -631,7 +633,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals("Bad Request: modifier operands are empty.", bre.getMessage());
+      assertExceptionMessage(bre, "Bad Request: modifier operands are empty.");
     }
 
     modifier.operands(Arrays.asList("20"));
@@ -639,9 +641,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: modifier AGE_AT_EVENT can only have 2 operands when using the BETWEEN operator",
-          bre.getMessage());
+      assertExceptionMessage(
+          bre,
+          "Bad Request: modifier AGE_AT_EVENT can only have 2 operands when using the BETWEEN operator");
     }
 
     modifier.operands(Arrays.asList("s", "20"));
@@ -649,8 +651,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: modifier AGE_AT_EVENT operands must be numeric.", bre.getMessage());
+      assertExceptionMessage(bre, "Bad Request: modifier AGE_AT_EVENT operands must be numeric.");
     }
 
     modifier.operands(Arrays.asList("10", "20"));
@@ -659,9 +660,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: modifier AGE_AT_EVENT must have one operand when using the EQUAL operator.",
-          bre.getMessage());
+      assertExceptionMessage(
+          bre,
+          "Bad Request: modifier AGE_AT_EVENT must have one operand when using the EQUAL operator.");
     }
 
     modifier.name(ModifierType.EVENT_DATE);
@@ -670,7 +671,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals("Bad Request: modifier EVENT_DATE must be a valid date.", bre.getMessage());
+      assertExceptionMessage(bre, "Bad Request: modifier EVENT_DATE must be a valid date.");
     }
   }
 
@@ -695,8 +696,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: search group item temporal group null is not valid.", bre.getMessage());
+      assertExceptionMessage(
+          bre, "Bad Request: search group item temporal group null is not valid.");
     }
 
     icd9SGI.temporalGroup(0);
@@ -704,9 +705,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).",
-          bre.getMessage());
+      assertExceptionMessage(
+          bre,
+          "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).");
     }
   }
 
@@ -1786,17 +1787,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
+            DomainType.PHYSICAL_MEASUREMENT.toString(),
+            Collections.singletonList(pm),
+            new ArrayList<>());
 
     DemoChartInfoListResponse response =
         controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
-    assertEquals(2, response.getItems().size());
-    assertEquals(
-        new DemoChartInfo().gender("MALE").race("Asian").ageRange("45-64").count(1L),
-        response.getItems().get(0));
-    assertEquals(
-        new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("18-44").count(1L),
-        response.getItems().get(1));
+    assertThat(response.getItems()).hasSize(2);
+    assertThat(response.getItems().get(0))
+        .isEqualTo(new DemoChartInfo().gender("MALE").race("Asian").ageRange("45-64").count(1L));
+    assertThat(response.getItems().get(1))
+        .isEqualTo(
+            new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("18-44").count(1L));
   }
 
   @Test
