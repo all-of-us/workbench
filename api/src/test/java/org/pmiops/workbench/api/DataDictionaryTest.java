@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
 import java.time.Clock;

@@ -1,7 +1,6 @@
 package org.pmiops.workbench.billing;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.withinPercentage;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -55,17 +54,25 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import(LiquibaseAutoConfiguration.class)
 public class FreeTierBillingServiceTest {
 
-  @Autowired BigQueryService bigQueryService;
+  private static final double HALF_TOLERANCE_PERCENTAGE = 0.001;
+  private static final double DEFAULT_FREE_CREDITS_LIMIT = 1.0;
+  @Autowired
+  BigQueryService bigQueryService;
 
-  @Autowired FreeTierBillingService freeTierBillingService;
+  @Autowired
+  FreeTierBillingService freeTierBillingService;
 
-  @Autowired UserDao userDao;
+  @Autowired
+  UserDao userDao;
 
-  @Autowired NotificationService notificationService;
+  @Autowired
+  NotificationService notificationService;
 
-  @Autowired WorkspaceDao workspaceDao;
+  @Autowired
+  WorkspaceDao workspaceDao;
 
-  @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
+  @Autowired
+  WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
   private static WorkbenchConfig workbenchConfig;
 
@@ -83,6 +90,7 @@ public class FreeTierBillingServiceTest {
   @Import({FreeTierBillingService.class})
   @MockBean({BigQueryService.class, NotificationService.class})
   static class Configuration {
+
     @Bean
     @Scope("prototype")
     public WorkbenchConfig workbenchConfig() {
@@ -229,8 +237,8 @@ public class FreeTierBillingServiceTest {
       DbWorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(ws);
       assertThat(usage.getUser()).isEqualTo(user);
       assertThat(usage.getWorkspace()).isEqualTo(ws);
-      assertThat(usage.getCost())
-          .isCloseTo(expectedCosts.get(ws.getWorkspaceId()), withinPercentage(0.001));
+
+      assertCloseEnough(usage.getCost(), expectedCosts.get(ws.getWorkspaceId()));
     }
   }
 
@@ -261,8 +269,9 @@ public class FreeTierBillingServiceTest {
       DbWorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(ws);
       assertThat(usage.getUser()).isEqualTo(ws.getCreator());
       assertThat(usage.getWorkspace()).isEqualTo(ws);
-      assertThat(usage.getCost())
-          .isCloseTo(expectedCosts.get(ws.getWorkspaceId()), withinPercentage(0.001));
+      assertWithinPercentage(usage.getCost(),
+          expectedCosts.get(ws.getWorkspaceId()),
+          0.001);
     }
   }
 
@@ -323,24 +332,23 @@ public class FreeTierBillingServiceTest {
     DbWorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
     assertThat(dbEntry.getUser()).isEqualTo(user);
     assertThat(dbEntry.getWorkspace()).isEqualTo(workspace);
-    assertThat(dbEntry.getCost())
-        .isCloseTo(SINGLE_WORKSPACE_TEST_COST * 2, withinPercentage(0.001));
-
+    assertCloseEnough(dbEntry.getCost(), SINGLE_WORKSPACE_TEST_COST * 2.0);
     Timestamp t1 = dbEntry.getLastUpdateTime();
-    assertThat(t1).isAfter(t0);
+    assertThat(t1.after(t0)).isTrue();
   }
 
   @Test
   public void getUserFreeTierLimit_default() {
     DbUser user = createUser("test@test.com");
 
-    workbenchConfig.billing.defaultFreeCreditsLimit = 1.0;
-    assertThat(freeTierBillingService.getUserFreeTierLimit(user))
-        .isCloseTo(1.0, withinPercentage(0.001));
+    workbenchConfig.billing.defaultFreeCreditsLimit = DEFAULT_FREE_CREDITS_LIMIT;
+    assertCloseEnough(freeTierBillingService.getUserFreeTierLimit(user),
+        DEFAULT_FREE_CREDITS_LIMIT);
 
-    workbenchConfig.billing.defaultFreeCreditsLimit = 123.456;
-    assertThat(freeTierBillingService.getUserFreeTierLimit(user))
-        .isCloseTo(123.456, withinPercentage(0.001));
+    final double fractionalFreeCreditsLimit = 123.456;
+    workbenchConfig.billing.defaultFreeCreditsLimit = fractionalFreeCreditsLimit;
+    assertCloseEnough(freeTierBillingService.getUserFreeTierLimit(user),
+        fractionalFreeCreditsLimit);
   }
 
   @Test
@@ -348,17 +356,19 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.defaultFreeCreditsLimit = 123.456;
 
     DbUser user = createUser("test@test.com");
-    user.setFreeTierCreditsLimitOverride(100.0);
-    userDao.save(user);
 
-    assertThat(freeTierBillingService.getUserFreeTierLimit(user))
-        .isCloseTo(100.0, withinPercentage(0.001));
+    final double freeTierCreditsLimitOverride = 100.0;
+    user.setFreeTierCreditsLimitOverride(freeTierCreditsLimitOverride);
+    user = userDao.save(user);
+    assertCloseEnough(freeTierBillingService.getUserFreeTierLimit(user),
+        freeTierCreditsLimitOverride);
 
-    user.setFreeTierCreditsLimitOverride(200.0);
-    userDao.save(user);
+    double doubleFreeTierCreditsLimitOverride1 = 200.0;
+    user.setFreeTierCreditsLimitOverride(doubleFreeTierCreditsLimitOverride1);
+    user = userDao.save(user);
 
-    assertThat(freeTierBillingService.getUserFreeTierLimit(user))
-        .isCloseTo(200.0, withinPercentage(0.001));
+    assertCloseEnough(freeTierBillingService.getUserFreeTierLimit(user),
+        doubleFreeTierCreditsLimitOverride1);
   }
 
   @Test
@@ -373,8 +383,8 @@ public class FreeTierBillingServiceTest {
 
     freeTierBillingService.checkFreeTierBillingUsage();
 
-    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user))
-        .isCloseTo(SINGLE_WORKSPACE_TEST_COST, withinPercentage(0.001));
+    assertCloseEnough(freeTierBillingService.getUserCachedFreeTierUsage(user),
+        SINGLE_WORKSPACE_TEST_COST);
 
     createWorkspace(user, "another project");
     Map<String, Double> newCosts = new HashMap<>();
@@ -383,13 +393,13 @@ public class FreeTierBillingServiceTest {
     doReturn(mockBQTableResult(newCosts)).when(bigQueryService).executeQuery(any());
 
     // we have not yet cached the new workspace costs
-    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user))
-        .isCloseTo(SINGLE_WORKSPACE_TEST_COST, withinPercentage(0.001));
+    assertCloseEnough(freeTierBillingService.getUserCachedFreeTierUsage(user),
+        SINGLE_WORKSPACE_TEST_COST);
 
     freeTierBillingService.checkFreeTierBillingUsage();
 
-    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user))
-        .isCloseTo(1100.0, withinPercentage(0.001));
+    assertCloseEnough(freeTierBillingService.getUserCachedFreeTierUsage(user),
+        1100.0);
 
     DbUser user2 = createUser("another user");
     createWorkspace(user2, "project 3");
@@ -398,10 +408,9 @@ public class FreeTierBillingServiceTest {
 
     freeTierBillingService.checkFreeTierBillingUsage();
 
-    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user))
-        .isCloseTo(1100.0, withinPercentage(0.001));
-    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user2))
-        .isCloseTo(999.9, withinPercentage(0.001));
+    assertCloseEnough(freeTierBillingService.getUserCachedFreeTierUsage(user),
+        1100.0);
+    assertCloseEnough(freeTierBillingService.getUserCachedFreeTierUsage(user2), 999.9);
   }
 
   private TableResult mockBQTableResult(Map<String, Double> costMap) {
@@ -433,7 +442,7 @@ public class FreeTierBillingServiceTest {
     final DbWorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
     assertThat(dbEntry.getUser()).isEqualTo(user);
     assertThat(dbEntry.getWorkspace()).isEqualTo(workspace);
-    assertThat(dbEntry.getCost()).isCloseTo(SINGLE_WORKSPACE_TEST_COST, withinPercentage(0.001));
+    assertCloseEnough(dbEntry.getCost(), SINGLE_WORKSPACE_TEST_COST);
   }
 
   private DbUser createUser(String email) {
@@ -454,5 +463,16 @@ public class FreeTierBillingServiceTest {
     workspace.setWorkspaceNamespace(namespace);
     workspace.setBillingMigrationStatusEnum(billingMigrationStatus);
     return workspaceDao.save(workspace);
+  }
+
+  private void assertCloseEnough(double actualValue, double expectedValue) {
+    assertWithinPercentage(actualValue, expectedValue, HALF_TOLERANCE_PERCENTAGE);
+  }
+
+  private void assertWithinPercentage(double actualValue,
+      double expectedValue,
+      double percentageDelta) {
+    final double tolerance = percentageDelta * expectedValue * 0.01;
+    assertThat(actualValue).isWithin(tolerance).of(expectedValue);
   }
 }
