@@ -117,7 +117,7 @@ public class ProfileControllerTest {
   private InvitationVerificationRequest invitationVerificationRequest;
   private com.google.api.services.directory.model.User googleUser;
   private FakeClock clock;
-  private DbUser user;
+  private DbUser dbUser;
 
   @Rule public final ExpectedException exception = ExpectedException.none();
 
@@ -260,6 +260,7 @@ public class ProfileControllerTest {
         TIMESTAMP,
         null);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+    verify(mockProfileAuditAdapter).fireLoginAction(dbUser);
   }
 
   @Test
@@ -388,50 +389,50 @@ public class ProfileControllerTest {
   @Test
   public void updateContactEmail_forbidden() throws Exception {
     createUser();
-    user.setFirstSignInTime(new Timestamp(new Date().getTime()));
-    String originalEmail = user.getContactEmail();
+    dbUser.setFirstSignInTime(new Timestamp(new Date().getTime()));
+    String originalEmail = dbUser.getContactEmail();
 
     ResponseEntity<Void> response =
         profileController.updateContactEmail(
             new UpdateContactEmailRequest()
                 .contactEmail("newContactEmail@whatever.com")
-                .username(user.getEmail())
+                .username(dbUser.getEmail())
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-    assertThat(user.getContactEmail()).isEqualTo(originalEmail);
+    assertThat(dbUser.getContactEmail()).isEqualTo(originalEmail);
   }
 
   @Test
   public void updateContactEmail_badRequest() throws Exception {
     createUser();
     when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
-    user.setFirstSignInTime(null);
-    String originalEmail = user.getContactEmail();
+    dbUser.setFirstSignInTime(null);
+    String originalEmail = dbUser.getContactEmail();
 
     ResponseEntity<Void> response =
         profileController.updateContactEmail(
             new UpdateContactEmailRequest()
                 .contactEmail("bad email address *(SD&(*D&F&*(DS ")
-                .username(user.getEmail())
+                .username(dbUser.getEmail())
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    assertThat(user.getContactEmail()).isEqualTo(originalEmail);
+    assertThat(dbUser.getContactEmail()).isEqualTo(originalEmail);
   }
 
   @Test
   public void updateContactEmail_OK() throws Exception {
     createUser();
-    user.setFirstSignInTime(null);
+    dbUser.setFirstSignInTime(null);
     when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
 
     ResponseEntity<Void> response =
         profileController.updateContactEmail(
             new UpdateContactEmailRequest()
                 .contactEmail("newContactEmail@whatever.com")
-                .username(user.getEmail())
+                .username(dbUser.getEmail())
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    assertThat(user.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
+    assertThat(dbUser.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
   }
 
   @Test
@@ -489,7 +490,7 @@ public class ProfileControllerTest {
   @Test
   public void resendWelcomeEmail_messagingException() throws Exception {
     createUser();
-    user.setFirstSignInTime(null);
+    dbUser.setFirstSignInTime(null);
     when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doThrow(new MessagingException("exception"))
         .when(mailService)
@@ -497,7 +498,7 @@ public class ProfileControllerTest {
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
-            new ResendWelcomeEmailRequest().username(user.getEmail()).creationNonce(NONCE));
+            new ResendWelcomeEmailRequest().username(dbUser.getEmail()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     // called twice, once during account creation, once on resend
     verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
@@ -512,7 +513,7 @@ public class ProfileControllerTest {
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
-            new ResendWelcomeEmailRequest().username(user.getEmail()).creationNonce(NONCE));
+            new ResendWelcomeEmailRequest().username(dbUser.getEmail()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     // called twice, once during account creation, once on resend
     verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
@@ -598,7 +599,7 @@ public class ProfileControllerTest {
     createUser();
 
     profileController.deleteProfile();
-    verify(mockProfileAuditAdapter).fireDeleteAction(user.getUserId(), user.getEmail());
+    verify(mockProfileAuditAdapter).fireDeleteAction(dbUser.getUserId(), dbUser.getEmail());
   }
 
   private Profile createUser() throws Exception {
@@ -606,12 +607,12 @@ public class ProfileControllerTest {
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
         .thenReturn(googleUser);
     Profile result = profileController.createAccount(createAccountRequest).getBody();
-    user = userDao.findUserByEmail(PRIMARY_EMAIL);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
-    userDao.save(user);
-    when(userProvider.get()).thenReturn(user);
+    dbUser = userDao.findUserByEmail(PRIMARY_EMAIL);
+    dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+    userDao.save(dbUser);
+    when(userProvider.get()).thenReturn(dbUser);
     when(userAuthenticationProvider.get())
-        .thenReturn(new UserAuthentication(user, null, null, UserType.RESEARCHER));
+        .thenReturn(new UserAuthentication(dbUser, null, null, UserType.RESEARCHER));
     return result;
   }
 
