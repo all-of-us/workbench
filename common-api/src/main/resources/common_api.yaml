@@ -118,6 +118,7 @@ definitions:
       - name
       - dataAccessLevel
       - creationTime
+      - numParticipants
     properties:
       cdrVersionId:
         type: string
@@ -131,6 +132,8 @@ definitions:
         type: integer
         format: int64
         description: Milliseconds since the UNIX epoch.
+      numParticipants:
+        type: integer
 
   DomainInfo:
     type: object
