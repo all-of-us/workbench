@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
@@ -86,16 +87,18 @@ public class BillingProjectBufferService {
       return;
     }
 
-    final String projectName = createBillingProjectName();
+    final DbBillingProjectBufferEntry creatingBufferEntry = makeCreatingBufferEntry();
+    fireCloudService.createAllOfUsBillingProject(creatingBufferEntry.getFireCloudProjectName());
+    log.info(String.format("Created new project %s", creatingBufferEntry.toString()));
+  }
 
-    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
-    entry.setFireCloudProjectName(projectName);
-    entry.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
-    entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
-    entry = billingProjectBufferEntryDao.save(entry);
-
-    fireCloudService.createAllOfUsBillingProject(projectName);
-    log.info(String.format("Created new project %s", entry.toString()));
+  @NotNull
+  private DbBillingProjectBufferEntry makeCreatingBufferEntry() {
+    final DbBillingProjectBufferEntry bufferEntry = new DbBillingProjectBufferEntry();
+    bufferEntry.setFireCloudProjectName(createBillingProjectName());
+    bufferEntry.setCreationTime(Timestamp.from(clock.instant()));
+    bufferEntry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
+    return billingProjectBufferEntryDao.save(bufferEntry);
   }
 
   public void syncBillingProjectStatus() {
@@ -103,55 +106,61 @@ public class BillingProjectBufferService {
         billingProjectBufferEntryDao.findTop5ByStatusOrderByLastSyncRequestTimeAsc(
             DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.CREATING));
     int successfulSyncCount = 0;
-    for (DbBillingProjectBufferEntry entry : creatingEntriesToSync) {
-
-      entry.setLastSyncRequestTime(Timestamp.from(clock.instant()));
-
-      try {
-        final CreationStatusEnum fireCloudStatus =
-            fireCloudService
-                .getBillingProjectStatus(entry.getFireCloudProjectName())
-                .getCreationStatus();
-        switch (fireCloudStatus) {
-          case READY:
-            entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
-            log.info(
-                String.format(
-                    "SyncBillingProjectStatus: BillingProject %s available",
-                    entry.getFireCloudProjectName()));
-            break;
-          case ERROR:
-            log.warning(
-                String.format(
-                    "SyncBillingProjectStatus: BillingProject %s creation failed",
-                    entry.getFireCloudProjectName()));
-            entry.setStatusEnum(BufferEntryStatus.ERROR, this::getCurrentTimestamp);
-            break;
-          case CREATING:
-          case ADDINGTOPERIMETER:
-          default:
-            log.info(
-                String.format(
-                    "SyncBillingProjectStatus: BillingProject %s status=%s",
-                    entry.getFireCloudProjectName(), fireCloudStatus.toString()));
-            break;
-        }
-      } catch (NotFoundException e) {
-        log.log(
-            Level.WARNING,
-            "Get BillingProjectStatus call failed for " + entry.toString() + ". Project not found.",
-            e);
-      } catch (WorkbenchException e) {
-        log.log(Level.WARNING, "Get BillingProjectStatus call failed for " + entry.toString(), e);
-      }
-
-      billingProjectBufferEntryDao.save(entry);
+    for (DbBillingProjectBufferEntry bufferEntry : creatingEntriesToSync) {
+      //noinspection UnusedAssignment
+      bufferEntry = syncBufferEntry(bufferEntry);
       successfulSyncCount += 1;
     }
     log.info(
         String.format(
             "Synchronized %d billing projects of %d attempted",
             successfulSyncCount, creatingEntriesToSync.size()));
+  }
+
+  private DbBillingProjectBufferEntry syncBufferEntry(DbBillingProjectBufferEntry bufferEntry) {
+    bufferEntry.setLastSyncRequestTime(Timestamp.from(clock.instant()));
+
+    try {
+      final CreationStatusEnum fireCloudStatus =
+          fireCloudService
+              .getBillingProjectStatus(bufferEntry.getFireCloudProjectName())
+              .getCreationStatus();
+      switch (fireCloudStatus) {
+        case READY:
+          bufferEntry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
+          log.info(
+              String.format(
+                  "SyncBillingProjectStatus: BillingProject %s available",
+                  bufferEntry.getFireCloudProjectName()));
+          break;
+        case ERROR:
+          log.warning(
+              String.format(
+                  "SyncBillingProjectStatus: BillingProject %s creation failed",
+                  bufferEntry.getFireCloudProjectName()));
+          bufferEntry.setStatusEnum(BufferEntryStatus.ERROR, this::getCurrentTimestamp);
+          break;
+        case CREATING:
+        case ADDINGTOPERIMETER:
+        default:
+          log.info(
+              String.format(
+                  "SyncBillingProjectStatus: BillingProject %s status=%s",
+                  bufferEntry.getFireCloudProjectName(), fireCloudStatus.toString()));
+          break;
+      }
+    } catch (NotFoundException e) {
+      log.log(
+          Level.WARNING,
+          "Get BillingProjectStatus call failed for "
+              + bufferEntry.toString()
+              + ". Project not found.",
+          e);
+    } catch (WorkbenchException e) {
+      log.log(
+          Level.WARNING, "Get BillingProjectStatus call failed for " + bufferEntry.toString(), e);
+    }
+    return billingProjectBufferEntryDao.save(bufferEntry);
   }
 
   /** Update any expired buffer entries in creating or assigning state to ERROR status. */
@@ -162,16 +171,18 @@ public class BillingProjectBufferService {
             // For the ASSIGNING status monitor, we can simply filter by the current time as this
             // status tracks internal state rather than the Firecloud status.
             findEntriesWithExpiredGracePeriod(now, BufferEntryStatus.ASSIGNING))
-        .forEach(
-            entry -> {
-              log.warning(
-                  "CleanBillingBuffer: Setting status of "
-                      + entry.getFireCloudProjectName()
-                      + " to ERROR from "
-                      + entry.getStatusEnum());
-              entry.setStatusEnum(BufferEntryStatus.ERROR, this::getCurrentTimestamp);
-              billingProjectBufferEntryDao.save(entry);
-            });
+        .forEach(this::setBufferEntryErrorStatus);
+  }
+
+  private void setBufferEntryErrorStatus(DbBillingProjectBufferEntry bufferEntry) {
+    log.warning(
+        "CleanBillingBuffer: Setting status of "
+            + bufferEntry.getFireCloudProjectName()
+            + " to ERROR from "
+            + bufferEntry.getStatusEnum());
+    bufferEntry.setStatusEnum(BufferEntryStatus.ERROR, this::getCurrentTimestamp);
+    //noinspection UnusedAssignment
+    bufferEntry = billingProjectBufferEntryDao.save(bufferEntry);
   }
 
   private List<DbBillingProjectBufferEntry> findEntriesWithExpiredGracePeriod(
@@ -220,14 +231,18 @@ public class BillingProjectBufferService {
     entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     entry.setAssignedUser(dbUser);
 
-    // return the updated value
+    // Ensure entry reference isn't left in a dirty state by save().
     entry = billingProjectBufferEntryDao.save(entry);
     return entry;
   }
 
   private DbBillingProjectBufferEntry consumeBufferEntryForAssignment() {
     // Each call to acquire the lock will timeout in 1s if it is currently held
-    while (billingProjectBufferEntryDao.acquireAssigningLock() != 1) {}
+    while (true) {
+      if (billingProjectBufferEntryDao.acquireAssigningLock() == 1) {
+        break;
+      }
+    }
 
     DbBillingProjectBufferEntry entry;
     try {
@@ -241,12 +256,10 @@ public class BillingProjectBufferService {
       }
 
       entry.setStatusEnum(BufferEntryStatus.ASSIGNING, this::getCurrentTimestamp);
-      billingProjectBufferEntryDao.save(entry);
+      return billingProjectBufferEntryDao.save(entry);
     } finally {
       billingProjectBufferEntryDao.releaseAssigningLock();
     }
-
-    return entry;
   }
 
   private String createBillingProjectName() {
