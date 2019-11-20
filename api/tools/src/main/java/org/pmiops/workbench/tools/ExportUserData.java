@@ -8,15 +8,23 @@ import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.pmiops.workbench.db.dao.CohortDao;
+import org.pmiops.workbench.db.dao.ConceptSetDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.springframework.boot.CommandLineRunner;
@@ -25,6 +33,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * A tool that takes a Workspace namespace / Firecloud Project ID and returns details for any
@@ -50,7 +59,10 @@ public class ExportUserData {
   private static Options options = new Options().addOption(fcBaseUrlOpt);
 
   @Bean
-  public CommandLineRunner run(WorkspaceDao workspaceDao) {
+  public CommandLineRunner run(WorkspaceDao workspaceDao,
+      CohortDao cohortDao,
+      ConceptSetDao conceptSetDao,
+      DataSetDao dataSetDao) {
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
 
@@ -67,6 +79,38 @@ public class ExportUserData {
         WorkspaceExportRow row = new WorkspaceExportRow();
         row.setCreatorContactEmail(workspace.getCreator().getContactEmail());
         row.setCreatorUsername(workspace.getCreator().getEmail());
+        row.setCreatorFirstSignIn(workspace.getCreator().getFirstSignInTime().toString());
+        row.setCreatorRegistrationState(workspace.getCreator().getDataAccessLevelEnum().toString());
+
+        row.setProjectId(workspace.getWorkspaceNamespace());
+        row.setName(workspace.getName());
+        row.setCreatedDate(workspace.getCreationTime().toString());
+
+        row.setCollaborators("TEMP");
+
+        Collection<DbCohort> cohorts = cohortDao.findByWorkspaceId(workspace.getWorkspaceId());
+        row.setCohortNames(cohorts.stream().map(cohort -> cohort.getName())
+            .collect(Collectors.joining(",\n")));
+        row.setCohortCount(String.valueOf(cohorts.size()));
+
+        Collection<DbConceptSet> conceptSets = conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+        row.setConceptSetNames(conceptSets.stream().map(conceptSet -> conceptSet.getName())
+            .collect(Collectors.joining(",\n")));
+        row.setConceptSetCount(String.valueOf(conceptSets.size()));
+
+        Collection<DbDataset> datasets = dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+        row.setDatasetNames(datasets.stream().map(dataSet -> dataSet.getName())
+            .collect(Collectors.joining(",\n")));
+        row.setDatasetCount(String.valueOf(datasets.size()));
+
+        row.setNotebookNames("TEMP");
+        row.setNotebooksCount("TEMP");
+
+        row.setWorkspaceSpending("TEMP");
+
+        row.setReviewForStigmatizingResearch(toYesNo(workspace.getReviewRequested()));
+        row.setWorkspaceLastUpdatedDate(workspace.getLastModifiedTime().toString());
+        row.setActive(toYesNo(workspace.isActive()));
 
         n++;
         if (n == 10) {
@@ -92,6 +136,10 @@ public class ExportUserData {
 
   public static void main(String[] args) {
     new SpringApplicationBuilder(ExportUserData.class).web(false).run(args);
+  }
+
+  private String toYesNo(boolean b) {
+    return b ? "Yes" : "No";
   }
 }
 

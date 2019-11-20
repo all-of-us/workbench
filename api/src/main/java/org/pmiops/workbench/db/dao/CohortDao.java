@@ -11,4 +11,6 @@ public interface CohortDao extends CrudRepository<DbCohort, Long> {
   DbCohort findCohortByNameAndWorkspaceId(String name, long workspaceId);
 
   List<DbCohort> findAllByCohortIdIn(Collection<Long> cohortIds);
+
+  List<DbCohort> findByWorkspaceId(long workspaceId);
 }
