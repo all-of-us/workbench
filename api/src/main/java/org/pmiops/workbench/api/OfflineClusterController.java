@@ -84,12 +84,15 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
     int activeDeletes = 0;
     int unusedDeletes = 0;
     for (ListClusterResponse listClusterResponse : clusters) {
-      String clusterId = listClusterResponse.getGoogleProject() + "/" + listClusterResponse.getClusterName();
+      String clusterId =
+          listClusterResponse.getGoogleProject() + "/" + listClusterResponse.getClusterName();
       Cluster c;
       try {
         // Refetch the cluster to ensure freshness as this iteration may take
         // some time.
-        c = clusterApi.getCluster(listClusterResponse.getGoogleProject(), listClusterResponse.getClusterName());
+        c =
+            clusterApi.getCluster(
+                listClusterResponse.getGoogleProject(), listClusterResponse.getClusterName());
       } catch (ApiException e) {
         log.log(Level.WARNING, String.format("failed to refetch cluster '%s'", clusterId), e);
         errors++;

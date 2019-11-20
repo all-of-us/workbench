@@ -13,7 +13,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -111,7 +110,8 @@ public class OfflineClusterControllerTest {
   private void stubClusterListResponse(List<ListClusterResponse> clusters) throws Exception {
     when(clusterApi.listClusters(any(), any())).thenReturn(clusters);
     for (ListClusterResponse listClusterResponse : clusters) {
-      when(clusterApi.getCluster(listClusterResponse.getGoogleProject(), listClusterResponse.getClusterName()))
+      when(clusterApi.getCluster(
+              listClusterResponse.getGoogleProject(), listClusterResponse.getClusterName()))
           .thenReturn(toCluster(listClusterResponse));
     }
   }
