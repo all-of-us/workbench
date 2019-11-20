@@ -1,5 +1,8 @@
 package org.pmiops.workbench.tools;
 
+import static org.pmiops.workbench.tools.BackfillBillingProjectUsers.extractAclResponse;
+
+import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.opencsv.bean.BeanField;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvBindByName;
@@ -7,11 +10,15 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
@@ -24,21 +31,34 @@ import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.hibernate.cfg.EJB3NamingStrategy;
 import org.hibernate.cfg.NamingStrategy;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
+import org.pmiops.workbench.firecloud.ApiClient;
+import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
+import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,21 +85,52 @@ public class ExportUserData {
 
   private static Options options = new Options().addOption(fcBaseUrlOpt);
 
+  // Short circuit the DI wiring here with a "mock" WorkspaceService
+  // Importing the real one requires importing a large subtree of dependencies
+  @Bean
+  WorkspaceService workspaceService() {
+    return new WorkspaceServiceImpl(null, null, null, null, null, null, null, null, null);
+  }
+
+  private static WorkspacesApi workspacesApi;
+
+  @Primary
+  @Bean
+  @Scope("prototype")
+  @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
+  WorkspacesApi workspaceApi() {
+    return workspacesApi;
+  }
+
+  private void initializeApis(ServiceAccountAPIClientFactory apiClientFactory) {
+    try {
+      workspacesApi = apiClientFactory.workspacesApi();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Bean
+  ServiceAccountAPIClientFactory serviceAccountAPIClientFactory(Provider<WorkbenchConfig> configProvider) {
+    return new ServiceAccountAPIClientFactory(configProvider.get().firecloud.baseUrl);
+  }
+
   @Bean
   public CommandLineRunner run(WorkspaceDao workspaceDao,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
-      DataSetDao dataSetDao) {
+      DataSetDao dataSetDao,
+      NotebooksService notebooksService,
+      WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
+      Provider<WorkspacesApi> workspacesApiProvider,
+      ServiceAccountAPIClientFactory apiClientFactory) {
     return (args) -> {
-      CommandLine opts = new DefaultParser().parse(options, args);
+      initializeApis(apiClientFactory);
+      WorkspacesApi workspacesApi = workspacesApiProvider.get();
 
       FileWriter writer = new FileWriter("export.csv");
 
       List<WorkspaceExportRow> rows = new ArrayList<>();
-
-      WorkspacesApi workspacesApi =
-          (new ServiceAccountAPIClientFactory(opts.getOptionValue(fcBaseUrlOpt.getLongOpt())))
-              .workspacesApi();
 
       int n = 0;
       for (DbWorkspace workspace : workspaceDao.findAll()) {
@@ -93,7 +144,12 @@ public class ExportUserData {
         row.setName(workspace.getName());
         row.setCreatedDate(workspace.getCreationTime().toString());
 
-        row.setCollaborators("TEMP");
+        row.setCollaborators(extractAclResponse(
+            workspacesApi.getWorkspaceAcl(
+                workspace.getWorkspaceNamespace(),
+                workspace.getFirecloudName())
+        ).keySet().stream().collect(
+            Collectors.joining(",\n")));
 
         Collection<DbCohort> cohorts = cohortDao.findByWorkspaceId(workspace.getWorkspaceId());
         row.setCohortNames(cohorts.stream().map(cohort -> cohort.getName())
@@ -110,17 +166,22 @@ public class ExportUserData {
             .collect(Collectors.joining(",\n")));
         row.setDatasetCount(String.valueOf(datasets.size()));
 
-        row.setNotebookNames("TEMP");
-        row.setNotebooksCount("TEMP");
+        Collection<FileDetail> notebooks = notebooksService.getNotebooks(
+            workspace.getWorkspaceNamespace(),
+            workspace.getFirecloudName());
+        row.setNotebookNames(notebooks.stream().map(notebook -> notebook.getName()).collect(
+            Collectors.joining(",\n")));
+        row.setNotebooksCount(String.valueOf(notebooks.size()));
 
-        row.setWorkspaceSpending("TEMP");
+        DbWorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(workspace);
+        row.setWorkspaceSpending(usage == null ? "0" : String.valueOf(usage.getCost()));
 
         row.setReviewForStigmatizingResearch(toYesNo(workspace.getReviewRequested()));
         row.setWorkspaceLastUpdatedDate(workspace.getLastModifiedTime().toString());
         row.setActive(toYesNo(workspace.isActive()));
 
         n++;
-        if (n == 10) {
+        if (n == 100) {
           break;
         }
 
