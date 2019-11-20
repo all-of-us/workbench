@@ -124,7 +124,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Cluster'
+              $ref: '#/definitions/ListClusterResponse'
         '400':
           description: Bad Request
           schema:
@@ -1257,6 +1257,72 @@ definitions:
         items:
           type: string
         description: The scopes for the cluster.
+
+  ListClusterResponse:
+    description: ''
+    required:
+      - clusterName
+      - googleProject
+      - googleServiceAccount
+      - machineConfig
+      - status
+      - createdDate
+      - labels
+      - dateAccessed
+      - autopauseThreshold
+      - defaultClientId
+    properties:
+      internalId:
+        type: string
+        description: Internal resource ID of the cluster
+      clusterName:
+        type: string
+        description: The user-supplied name for the cluster
+      googleId:
+        type: string
+        description: Google's UUID for the cluster
+      googleProject:
+        type: string
+        description: The Google Project used to create the cluster
+      googleServiceAccount:
+        type: string
+        description: The Google Service Account used to create the cluster
+      machineConfig:
+        description: The machine configurations for the master and worker nodes
+        $ref: '#/definitions/MachineConfig'
+      operationName:
+        type: string
+        description: Google's operation ID for the cluster
+      status:
+        $ref: "#/definitions/ClusterStatus"
+      hostIp:
+        type: string
+        description: The IP address of the cluster master node
+      createdDate:
+        type: string
+        description: The date and time the cluster was created, in ISO-8601 format
+      destroyedDate:
+        type: string
+        description: The date and time the cluster was destroyed, in ISO-8601 format
+      labels:
+        type: object
+        description: The labels to be placed on the cluster. Of type Map[String,String]
+      instances:
+        description: Array of instances belonging to this cluster
+        type: array
+        items:
+          $ref: '#/definitions/Instance'
+      dateAccessed:
+        type: string
+        description: |
+          The date and time the cluster was last accessed, in ISO-8601 format.
+          Date accessed is defined as the last time the cluster was created, modified, or accessed via the proxy.
+      autopauseThreshold:
+        type: integer
+        description: The number of minutes of idle time to elapse before the cluster is autopaused. A value of 0 is equivalent to autopause being turned off.
+      defaultClientId:
+        type: string
+        description: The default Google Client ID.
 
   InstanceKey:
     description: ''

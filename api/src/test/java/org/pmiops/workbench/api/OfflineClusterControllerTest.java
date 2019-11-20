@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +22,7 @@ import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterStatus;
+import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -81,14 +83,14 @@ public class OfflineClusterControllerTest {
     projectIdIndex = 0;
   }
 
-  private Cluster clusterWithAge(Duration age) {
+  private ListClusterResponse clusterWithAge(Duration age) {
     return clusterWithAgeAndIdle(age, Duration.ZERO);
   }
 
-  private Cluster clusterWithAgeAndIdle(Duration age, Duration idleTime) {
+  private ListClusterResponse clusterWithAgeAndIdle(Duration age, Duration idleTime) {
     // There should only be one cluster per project, so increment an index for
     // each cluster created per test.
-    return new Cluster()
+    return new ListClusterResponse()
         .clusterName("all-of-us")
         .googleProject(String.format("proj-%d", projectIdIndex++))
         .status(ClusterStatus.RUNNING)
@@ -96,16 +98,27 @@ public class OfflineClusterControllerTest {
         .dateAccessed(NOW.minus(idleTime).toString());
   }
 
-  private void stubClusters(List<Cluster> clusters) throws Exception {
+  // TODO: this is fragile.  will need a line for each field we want to test
+  private Cluster toCluster(ListClusterResponse listClusterResponse) {
+    return new Cluster()
+        .clusterName(listClusterResponse.getClusterName())
+        .googleProject(listClusterResponse.getGoogleProject())
+        .status(listClusterResponse.getStatus())
+        .createdDate(listClusterResponse.getCreatedDate())
+        .dateAccessed(listClusterResponse.getDateAccessed());
+  }
+
+  private void stubClusterListResponse(List<ListClusterResponse> clusters) throws Exception {
     when(clusterApi.listClusters(any(), any())).thenReturn(clusters);
-    for (Cluster c : clusters) {
-      when(clusterApi.getCluster(c.getGoogleProject(), c.getClusterName())).thenReturn(c);
+    for (ListClusterResponse listClusterResponse : clusters) {
+      when(clusterApi.getCluster(listClusterResponse.getGoogleProject(), listClusterResponse.getClusterName()))
+          .thenReturn(toCluster(listClusterResponse));
     }
   }
 
   @Test
   public void testCheckClustersNoResults() throws Exception {
-    stubClusters(ImmutableList.of());
+    stubClusterListResponse(ImmutableList.of());
     assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(0);
 
     verify(clusterApi, never()).deleteCluster(any(), any());
@@ -113,7 +126,7 @@ public class OfflineClusterControllerTest {
 
   @Test
   public void testCheckClustersActiveCluster() throws Exception {
-    stubClusters(ImmutableList.of(clusterWithAge(Duration.ofHours(10))));
+    stubClusterListResponse(ImmutableList.of(clusterWithAge(Duration.ofHours(10))));
     assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(0);
 
     verify(clusterApi, never()).deleteCluster(any(), any());
@@ -121,7 +134,7 @@ public class OfflineClusterControllerTest {
 
   @Test
   public void testCheckClustersActiveTooOld() throws Exception {
-    stubClusters(ImmutableList.of(clusterWithAge(MAX_AGE.plusMinutes(5))));
+    stubClusterListResponse(ImmutableList.of(clusterWithAge(MAX_AGE.plusMinutes(5))));
     assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(1);
 
     verify(clusterApi, times(1)).deleteCluster(any(), any());
@@ -130,7 +143,7 @@ public class OfflineClusterControllerTest {
   @Test
   public void testCheckClustersIdleYoung() throws Exception {
     // Running for under the IDLE_MAX_AGE, idle for 10 hours
-    stubClusters(
+    stubClusterListResponse(
         ImmutableList.of(
             clusterWithAgeAndIdle(IDLE_MAX_AGE.minusMinutes(10), Duration.ofHours(10))));
     assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(0);
@@ -141,7 +154,7 @@ public class OfflineClusterControllerTest {
   @Test
   public void testCheckClustersIdleOld() throws Exception {
     // Running for >IDLE_MAX_AGE, idle for 10 hours
-    stubClusters(
+    stubClusterListResponse(
         ImmutableList.of(
             clusterWithAgeAndIdle(IDLE_MAX_AGE.plusMinutes(15), Duration.ofHours(10))));
     assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(1);
@@ -152,7 +165,7 @@ public class OfflineClusterControllerTest {
   @Test
   public void testCheckClustersBrieflyIdleOld() throws Exception {
     // Running for >IDLE_MAX_AGE, idle for only 15 minutes
-    stubClusters(
+    stubClusterListResponse(
         ImmutableList.of(
             clusterWithAgeAndIdle(IDLE_MAX_AGE.plusMinutes(15), Duration.ofMinutes(15))));
     assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(0);
@@ -162,7 +175,7 @@ public class OfflineClusterControllerTest {
 
   @Test
   public void testCheckClustersOtherStatusFiltered() throws Exception {
-    stubClusters(
+    stubClusterListResponse(
         ImmutableList.of(clusterWithAge(MAX_AGE.plusDays(10)).status(ClusterStatus.DELETING)));
     assertThat(controller.checkClusters().getBody().getClusterDeletionCount()).isEqualTo(0);
 
