@@ -16,7 +16,7 @@ import javax.persistence.EntityManager;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -65,7 +65,7 @@ public class LoadDataDictionary {
 
         Timestamp newEntryDefinedTime = dd.getMeta_data()[0].getCreated_time();
 
-        CdrVersion cdrVersion = cdrVersionDao.findByName(dd.getMeta_data()[0].getCdr_version());
+        DbCdrVersion cdrVersion = cdrVersionDao.findByName(dd.getMeta_data()[0].getCdr_version());
         if (cdrVersion == null) {
           // Skip over Data Dictionaries for CDR Versions not in the current environment
           continue;

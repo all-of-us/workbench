@@ -1,11 +1,11 @@
 package org.pmiops.workbench.cdr.dao;
 
 import java.util.List;
-import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.DbConcept;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-public interface ConceptDao extends CrudRepository<Concept, Long> {
+public interface ConceptDao extends CrudRepository<DbConcept, Long> {
 
   /**
    * Return the number of standard concepts in each vocabulary for the specified domain matching the
@@ -17,12 +17,12 @@ public interface ConceptDao extends CrudRepository<Concept, Long> {
    */
   @Query(
       value =
-          "select c from Concept c\n"
+          "select c from DbConcept c\n"
               + "where (c.countValue > 0 or c.sourceCountValue > 0) and\n"
               + "matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n"
               + "c.standardConcept IN ('S', 'C') and\n"
               + "c.domainId = ?2\n"
               + "group by c.vocabularyId\n"
               + "order by c.vocabularyId\n")
-  List<Concept> findConcepts(String matchExp, String domainId);
+  List<DbConcept> findConcepts(String matchExp, String domainId);
 }

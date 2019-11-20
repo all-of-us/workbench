@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.db.dao.ConfigDao;
-import org.pmiops.workbench.db.model.Config;
+import org.pmiops.workbench.db.model.DbConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,9 +22,9 @@ public class CacheSpringConfiguration {
   private static final Map<String, Class<?>> CONFIG_CLASS_MAP = new HashMap<>();
 
   static {
-    CONFIG_CLASS_MAP.put(Config.MAIN_CONFIG_ID, WorkbenchConfig.class);
-    CONFIG_CLASS_MAP.put(Config.CDR_BIGQUERY_SCHEMA_CONFIG_ID, CdrBigQuerySchemaConfig.class);
-    CONFIG_CLASS_MAP.put(Config.FEATURED_WORKSPACES_CONFIG_ID, FeaturedWorkspacesConfig.class);
+    CONFIG_CLASS_MAP.put(DbConfig.MAIN_CONFIG_ID, WorkbenchConfig.class);
+    CONFIG_CLASS_MAP.put(DbConfig.CDR_BIGQUERY_SCHEMA_CONFIG_ID, CdrBigQuerySchemaConfig.class);
+    CONFIG_CLASS_MAP.put(DbConfig.FEATURED_WORKSPACES_CONFIG_ID, FeaturedWorkspacesConfig.class);
   }
 
   @Bean
@@ -41,7 +41,7 @@ public class CacheSpringConfiguration {
                 if (configClass == null) {
                   throw new IllegalArgumentException("Invalid config key: " + key);
                 }
-                Config config = configDao.findOne(key);
+                DbConfig config = configDao.findOne(key);
                 if (config == null) {
                   return null;
                 }
@@ -53,17 +53,17 @@ public class CacheSpringConfiguration {
 
   public static WorkbenchConfig lookupWorkbenchConfig(LoadingCache<String, Object> configCache)
       throws ExecutionException {
-    return (WorkbenchConfig) configCache.get(Config.MAIN_CONFIG_ID);
+    return (WorkbenchConfig) configCache.get(DbConfig.MAIN_CONFIG_ID);
   }
 
   public static CdrBigQuerySchemaConfig lookupBigQueryCdrSchemaConfig(
       LoadingCache<String, Object> configCache) throws ExecutionException {
-    return (CdrBigQuerySchemaConfig) configCache.get(Config.CDR_BIGQUERY_SCHEMA_CONFIG_ID);
+    return (CdrBigQuerySchemaConfig) configCache.get(DbConfig.CDR_BIGQUERY_SCHEMA_CONFIG_ID);
   }
 
   public static FeaturedWorkspacesConfig lookupFeaturedWorkspacesConfig(
       LoadingCache<String, Object> configCache) throws ExecutionException {
-    return (FeaturedWorkspacesConfig) configCache.get(Config.FEATURED_WORKSPACES_CONFIG_ID);
+    return (FeaturedWorkspacesConfig) configCache.get(DbConfig.FEATURED_WORKSPACES_CONFIG_ID);
   }
 
   @Bean

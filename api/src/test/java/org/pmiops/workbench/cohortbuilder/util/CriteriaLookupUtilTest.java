@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
-import org.pmiops.workbench.cdr.model.CBCriteria;
+import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
@@ -51,7 +51,7 @@ public class CriteriaLookupUtilTest {
     lookupUtil = new CriteriaLookupUtil(cbCriteriaDao);
   }
 
-  private void saveCriteriaWithPath(String path, CBCriteria criteria) {
+  private void saveCriteriaWithPath(String path, DbCriteria criteria) {
     cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
     criteria.path(path.isEmpty() ? pathEnd : path + "." + pathEnd);
@@ -72,8 +72,8 @@ public class CriteriaLookupUtilTest {
 
   @Test
   public void buildCriteriaLookupMapDrugCriteria_ATC() throws Exception {
-    CBCriteria drugNode1 =
-        new CBCriteria()
+    DbCriteria drugNode1 =
+        new DbCriteria()
             .parentId(99999)
             .domainId(DomainType.DRUG.toString())
             .type(CriteriaType.ATC.toString())
@@ -81,8 +81,8 @@ public class CriteriaLookupUtilTest {
             .group(true)
             .selectable(true);
     saveCriteriaWithPath("0", drugNode1);
-    CBCriteria drugNode2 =
-        new CBCriteria()
+    DbCriteria drugNode2 =
+        new DbCriteria()
             .parentId(drugNode1.getId())
             .domainId(DomainType.DRUG.toString())
             .type(CriteriaType.RXNORM.toString())
@@ -90,8 +90,8 @@ public class CriteriaLookupUtilTest {
             .group(false)
             .selectable(true);
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
-    CBCriteria drugNode3 =
-        new CBCriteria()
+    DbCriteria drugNode3 =
+        new DbCriteria()
             .parentId(drugNode1.getId())
             .domainId(DomainType.DRUG.toString())
             .type(CriteriaType.RXNORM.toString())
@@ -130,8 +130,8 @@ public class CriteriaLookupUtilTest {
 
   @Test
   public void buildCriteriaLookupMapDrugCriteria_RXNORM() throws Exception {
-    CBCriteria drugNode1 =
-        new CBCriteria()
+    DbCriteria drugNode1 =
+        new DbCriteria()
             .parentId(99999)
             .domainId(DomainType.DRUG.toString())
             .type(CriteriaType.ATC.toString())
@@ -139,8 +139,8 @@ public class CriteriaLookupUtilTest {
             .group(true)
             .selectable(true);
     saveCriteriaWithPath("0", drugNode1);
-    CBCriteria drugNode2 =
-        new CBCriteria()
+    DbCriteria drugNode2 =
+        new DbCriteria()
             .parentId(drugNode1.getId())
             .domainId(DomainType.DRUG.toString())
             .type(CriteriaType.RXNORM.toString())
@@ -179,8 +179,8 @@ public class CriteriaLookupUtilTest {
 
   @Test
   public void buildCriteriaLookupMapPPICriteria() throws Exception {
-    CBCriteria surveyNode =
-        new CBCriteria()
+    DbCriteria surveyNode =
+        new DbCriteria()
             .parentId(0)
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
@@ -190,8 +190,8 @@ public class CriteriaLookupUtilTest {
             .standard(false)
             .conceptId("22");
     saveCriteriaWithPath("0", surveyNode);
-    CBCriteria questionNode =
-        new CBCriteria()
+    DbCriteria questionNode =
+        new DbCriteria()
             .parentId(surveyNode.getId())
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
@@ -203,8 +203,8 @@ public class CriteriaLookupUtilTest {
             .conceptId("1586135")
             .synonyms("[SURVEY_rank1]");
     saveCriteriaWithPath(surveyNode.getPath(), questionNode);
-    CBCriteria answerNode =
-        new CBCriteria()
+    DbCriteria answerNode =
+        new DbCriteria()
             .parentId(questionNode.getId())
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
@@ -275,8 +275,8 @@ public class CriteriaLookupUtilTest {
 
   @Test
   public void buildCriteriaLookupMapConditionSnomedCriteria() throws Exception {
-    CBCriteria snomedParent1 =
-        new CBCriteria()
+    DbCriteria snomedParent1 =
+        new DbCriteria()
             .parentId(0)
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.SNOMED.toString())
@@ -286,8 +286,8 @@ public class CriteriaLookupUtilTest {
             .conceptId("132277")
             .synonyms("[CONDITION_rank1]");
     saveCriteriaWithPath("0", snomedParent1);
-    CBCriteria snomedParent2 =
-        new CBCriteria()
+    DbCriteria snomedParent2 =
+        new DbCriteria()
             .parentId(snomedParent1.getId())
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.SNOMED.toString())
@@ -297,8 +297,8 @@ public class CriteriaLookupUtilTest {
             .conceptId("27835")
             .synonyms("[CONDITION_rank1]");
     saveCriteriaWithPath(snomedParent1.getPath(), snomedParent2);
-    CBCriteria snomedChild =
-        new CBCriteria()
+    DbCriteria snomedChild =
+        new DbCriteria()
             .parentId(snomedParent2.getId())
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.SNOMED.toString())
@@ -330,8 +330,8 @@ public class CriteriaLookupUtilTest {
 
   @Test
   public void buildCriteriaLookupMapConditionICD9Criteria() throws Exception {
-    CBCriteria icd9Parent =
-        new CBCriteria()
+    DbCriteria icd9Parent =
+        new DbCriteria()
             .parentId(0)
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.ICD9CM.toString())
@@ -341,8 +341,8 @@ public class CriteriaLookupUtilTest {
             .conceptId("44829696")
             .synonyms("[CONDITION_rank1]");
     saveCriteriaWithPath("0", icd9Parent);
-    CBCriteria icd9Child1 =
-        new CBCriteria()
+    DbCriteria icd9Child1 =
+        new DbCriteria()
             .parentId(icd9Parent.getId())
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.ICD9CM.toString())
@@ -352,8 +352,8 @@ public class CriteriaLookupUtilTest {
             .conceptId("44829697")
             .synonyms("[CONDITION_rank1]");
     saveCriteriaWithPath(icd9Parent.getPath(), icd9Child1);
-    CBCriteria icd9Child2 =
-        new CBCriteria()
+    DbCriteria icd9Child2 =
+        new DbCriteria()
             .parentId(icd9Parent.getId())
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.ICD9CM.toString())

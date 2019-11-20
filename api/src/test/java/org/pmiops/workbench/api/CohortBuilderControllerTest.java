@@ -15,14 +15,16 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.model.CBCriteria;
-import org.pmiops.workbench.cdr.model.CBCriteriaAttribute;
+import org.pmiops.workbench.cdr.model.DbCriteria;
+import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.model.Criteria;
+import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
@@ -91,8 +93,8 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void getCriteriaBy() throws Exception {
-    CBCriteria icd9CriteriaParent =
-        new CBCriteria()
+    DbCriteria icd9CriteriaParent =
+        new DbCriteria()
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.ICD9CM.toString())
             .count("0")
@@ -100,8 +102,8 @@ public class CohortBuilderControllerTest {
             .standard(false)
             .parentId(0L);
     cbCriteriaDao.save(icd9CriteriaParent);
-    CBCriteria icd9Criteria =
-        new CBCriteria()
+    DbCriteria icd9Criteria =
+        new DbCriteria()
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.ICD9CM.toString())
             .count("0")
@@ -173,8 +175,8 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void getCriteriaByDemo() throws Exception {
-    CBCriteria demoCriteria =
-        new CBCriteria()
+    DbCriteria demoCriteria =
+        new DbCriteria()
             .domainId(DomainType.PERSON.toString())
             .type(CriteriaType.AGE.toString())
             .count("0")
@@ -193,8 +195,8 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void getCriteriaAutoCompleteMatchesSynonyms() throws Exception {
-    CBCriteria criteria =
-        new CBCriteria()
+    DbCriteria criteria =
+        new DbCriteria()
             .domainId(DomainType.MEASUREMENT.toString())
             .type(CriteriaType.LOINC.toString())
             .count("0")
@@ -220,8 +222,8 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void getCriteriaAutoCompleteMatchesCode() throws Exception {
-    CBCriteria criteria =
-        new CBCriteria()
+    DbCriteria criteria =
+        new DbCriteria()
             .domainId(DomainType.MEASUREMENT.toString())
             .type(CriteriaType.LOINC.toString())
             .count("0")
@@ -248,8 +250,8 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void getCriteriaAutoCompleteSnomed() throws Exception {
-    CBCriteria criteria =
-        new CBCriteria()
+    DbCriteria criteria =
+        new DbCriteria()
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.SNOMED.toString())
             .count("0")
@@ -315,8 +317,8 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void findCriteriaByDomainAndSearchTermMatchesSourceCode() throws Exception {
-    CBCriteria criteria =
-        new CBCriteria()
+    DbCriteria criteria =
+        new DbCriteria()
             .code("001")
             .count("10")
             .conceptId("123")
@@ -342,8 +344,8 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void findCriteriaByDomainAndSearchTermLikeSourceCode() throws Exception {
-    CBCriteria criteria =
-        new CBCriteria()
+    DbCriteria criteria =
+        new DbCriteria()
             .code("00")
             .count("10")
             .conceptId("123")
@@ -358,7 +360,7 @@ public class CohortBuilderControllerTest {
             .synonyms("+[CONDITION_rank1]");
     cbCriteriaDao.save(criteria);
 
-    List<org.pmiops.workbench.model.Criteria> results =
+    List<Criteria> results =
         controller
             .findCriteriaByDomainAndSearchTerm(1L, DomainType.CONDITION.name(), "00", null)
             .getBody()
@@ -370,8 +372,8 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void findCriteriaByDomainAndSearchTermDrugMatchesStandardCodeBrand() throws Exception {
-    CBCriteria criteria1 =
-        new CBCriteria()
+    DbCriteria criteria1 =
+        new DbCriteria()
             .code("672535")
             .count("-1")
             .conceptId("19001487")
@@ -386,7 +388,7 @@ public class CohortBuilderControllerTest {
             .synonyms("[DRUG_rank1]");
     cbCriteriaDao.save(criteria1);
 
-    List<org.pmiops.workbench.model.Criteria> results =
+    List<Criteria> results =
         controller
             .findCriteriaByDomainAndSearchTerm(1L, DomainType.DRUG.name(), "672535", null)
             .getBody()
@@ -397,8 +399,8 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void findCriteriaByDomainAndSearchTermMatchesStandardCode() throws Exception {
-    CBCriteria criteria =
-        new CBCriteria()
+    DbCriteria criteria =
+        new DbCriteria()
             .code("LP12")
             .count("10")
             .conceptId("123")
@@ -424,8 +426,8 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void findCriteriaByDomainAndSearchTermMatchesSynonyms() throws Exception {
-    CBCriteria criteria =
-        new CBCriteria()
+    DbCriteria criteria =
+        new DbCriteria()
             .code("001")
             .count("10")
             .conceptId("123")
@@ -453,8 +455,8 @@ public class CohortBuilderControllerTest {
   public void findCriteriaByDomainAndSearchTermDrugMatchesSynonyms() throws Exception {
     jdbcTemplate.execute(
         "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
-    CBCriteria criteria =
-        new CBCriteria()
+    DbCriteria criteria =
+        new DbCriteria()
             .code("001")
             .count("10")
             .conceptId("123")
@@ -485,8 +487,8 @@ public class CohortBuilderControllerTest {
         "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
     jdbcTemplate.execute(
         "insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
-    CBCriteria criteria =
-        new CBCriteria()
+    DbCriteria criteria =
+        new DbCriteria()
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.ICD10CM.toString())
             .standard(true)
@@ -506,8 +508,8 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void getDrugBrandOrIngredientByName() throws Exception {
-    CBCriteria drugATCCriteria =
-        new CBCriteria()
+    DbCriteria drugATCCriteria =
+        new DbCriteria()
             .domainId(DomainType.DRUG.toString())
             .type(CriteriaType.ATC.toString())
             .parentId(0L)
@@ -518,8 +520,8 @@ public class CohortBuilderControllerTest {
             .selectable(true)
             .count("12");
     cbCriteriaDao.save(drugATCCriteria);
-    CBCriteria drugBrandCriteria =
-        new CBCriteria()
+    DbCriteria drugBrandCriteria =
+        new DbCriteria()
             .domainId(DomainType.DRUG.toString())
             .type(CriteriaType.BRAND.toString())
             .parentId(0L)
@@ -546,24 +548,24 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void getCriteriaAttributeByConceptId() throws Exception {
-    CBCriteriaAttribute criteriaAttributeMin =
+    DbCriteriaAttribute criteriaAttributeMin =
         cbCriteriaAttributeDao.save(
-            new CBCriteriaAttribute()
+            new DbCriteriaAttribute()
                 .conceptId(1L)
                 .conceptName("MIN")
                 .estCount("10")
                 .type("NUM")
                 .valueAsConceptId(0L));
-    CBCriteriaAttribute criteriaAttributeMax =
+    DbCriteriaAttribute criteriaAttributeMax =
         cbCriteriaAttributeDao.save(
-            new CBCriteriaAttribute()
+            new DbCriteriaAttribute()
                 .conceptId(1L)
                 .conceptName("MAX")
                 .estCount("100")
                 .type("NUM")
                 .valueAsConceptId(0L));
 
-    List<org.pmiops.workbench.model.CriteriaAttribute> attrs =
+    List<CriteriaAttribute> attrs =
         controller
             .getCriteriaAttributeByConceptId(1L, criteriaAttributeMin.getConceptId())
             .getBody()
@@ -618,8 +620,8 @@ public class CohortBuilderControllerTest {
     assertTrue(controller.isApproximate(searchRequest));
   }
 
-  private org.pmiops.workbench.model.Criteria createResponseCriteria(CBCriteria cbCriteria) {
-    return new org.pmiops.workbench.model.Criteria()
+  private Criteria createResponseCriteria(DbCriteria cbCriteria) {
+    return new Criteria()
         .code(cbCriteria.getCode())
         .conceptId(cbCriteria.getConceptId() == null ? null : new Long(cbCriteria.getConceptId()))
         .count(new Long(cbCriteria.getCount()))
@@ -639,9 +641,8 @@ public class CohortBuilderControllerTest {
         .value(cbCriteria.getValue());
   }
 
-  private org.pmiops.workbench.model.CriteriaAttribute createResponseCriteriaAttribute(
-      CBCriteriaAttribute criteriaAttribute) {
-    return new org.pmiops.workbench.model.CriteriaAttribute()
+  private CriteriaAttribute createResponseCriteriaAttribute(DbCriteriaAttribute criteriaAttribute) {
+    return new CriteriaAttribute()
         .id(criteriaAttribute.getId())
         .valueAsConceptId(criteriaAttribute.getValueAsConceptId())
         .conceptName(criteriaAttribute.getConceptName())

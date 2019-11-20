@@ -7,7 +7,7 @@ import javax.persistence.Embeddable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Embeddable
-public class ConceptRelationshipId implements Serializable {
+public class DbConceptRelationshipId implements Serializable {
 
   @Column(name = "concept_id_1")
   long conceptId1;
@@ -18,9 +18,9 @@ public class ConceptRelationshipId implements Serializable {
   @Column(name = "relationship_id")
   String relationshipId;
 
-  public ConceptRelationshipId() {}
+  public DbConceptRelationshipId() {}
 
-  public ConceptRelationshipId(long conceptId1, long conceptId2, String relationshipId) {
+  public DbConceptRelationshipId(long conceptId1, long conceptId2, String relationshipId) {
     this.conceptId1 = conceptId1;
     this.conceptId2 = conceptId2;
     this.relationshipId = relationshipId;
@@ -34,7 +34,7 @@ public class ConceptRelationshipId implements Serializable {
     this.conceptId1 = conceptId1;
   }
 
-  public ConceptRelationshipId conceptId1(long conceptId1) {
+  public DbConceptRelationshipId conceptId1(long conceptId1) {
     this.conceptId1 = conceptId1;
     return this;
   }
@@ -47,7 +47,7 @@ public class ConceptRelationshipId implements Serializable {
     this.conceptId2 = conceptId2;
   }
 
-  public ConceptRelationshipId conceptId2(long conceptId2) {
+  public DbConceptRelationshipId conceptId2(long conceptId2) {
     this.conceptId2 = conceptId2;
     return this;
   }
@@ -60,7 +60,7 @@ public class ConceptRelationshipId implements Serializable {
     this.relationshipId = relationshipId;
   }
 
-  public ConceptRelationshipId relationshipId(String relationshipId) {
+  public DbConceptRelationshipId relationshipId(String relationshipId) {
     this.relationshipId = relationshipId;
     return this;
   }
@@ -69,7 +69,7 @@ public class ConceptRelationshipId implements Serializable {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    ConceptRelationshipId that = (ConceptRelationshipId) o;
+    DbConceptRelationshipId that = (DbConceptRelationshipId) o;
     return conceptId1 == that.conceptId1
         && conceptId2 == that.conceptId2
         && relationshipId == that.relationshipId;

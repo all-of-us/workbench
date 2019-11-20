@@ -10,15 +10,16 @@ import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainInfo;
 
 @Entity
 @Table(name = "domain_info")
-public class DomainInfo {
+public class DbDomainInfo {
 
-  public static final Function<DomainInfo, org.pmiops.workbench.model.DomainInfo>
+  public static final Function<DbDomainInfo, org.pmiops.workbench.model.DomainInfo>
       TO_CLIENT_DOMAIN_INFO =
           (domain) ->
-              new org.pmiops.workbench.model.DomainInfo()
+              new DomainInfo()
                   .domain(domain.getDomainEnum())
                   .name(domain.getName())
                   .description(domain.getDescription())
@@ -35,10 +36,10 @@ public class DomainInfo {
   private long standardConceptCount;
   private long participantCount;
 
-  public DomainInfo() {}
+  public DbDomainInfo() {}
 
   // Used from JQL queries in DomainInfoDao
-  public DomainInfo(
+  public DbDomainInfo(
       short domain,
       String domainId,
       String name,
@@ -66,7 +67,7 @@ public class DomainInfo {
     this.conceptId = conceptId;
   }
 
-  public DomainInfo conceptId(Long conceptId) {
+  public DbDomainInfo conceptId(Long conceptId) {
     this.conceptId = conceptId;
     return this;
   }
@@ -80,7 +81,7 @@ public class DomainInfo {
     this.domain = domain;
   }
 
-  public DomainInfo domain(short domain) {
+  public DbDomainInfo domain(short domain) {
     this.domain = domain;
     return this;
   }
@@ -90,7 +91,7 @@ public class DomainInfo {
     return CommonStorageEnums.domainFromStorage(domain);
   }
 
-  public DomainInfo domainEnum(Domain domain) {
+  public DbDomainInfo domainEnum(Domain domain) {
     this.domain = CommonStorageEnums.domainToStorage(domain);
     return this;
   }
@@ -105,7 +106,7 @@ public class DomainInfo {
     this.domainId = domainId;
   }
 
-  public DomainInfo domainId(String domainId) {
+  public DbDomainInfo domainId(String domainId) {
     this.domainId = domainId;
     return this;
   }
@@ -119,7 +120,7 @@ public class DomainInfo {
     this.name = name;
   }
 
-  public DomainInfo name(String name) {
+  public DbDomainInfo name(String name) {
     this.name = name;
     return this;
   }
@@ -133,7 +134,7 @@ public class DomainInfo {
     this.description = description;
   }
 
-  public DomainInfo description(String description) {
+  public DbDomainInfo description(String description) {
     this.description = description;
     return this;
   }
@@ -147,7 +148,7 @@ public class DomainInfo {
     this.allConceptCount = allConceptCount == null ? 0L : allConceptCount;
   }
 
-  public DomainInfo allConceptCount(long allConceptCount) {
+  public DbDomainInfo allConceptCount(long allConceptCount) {
     this.allConceptCount = allConceptCount;
     return this;
   }
@@ -161,7 +162,7 @@ public class DomainInfo {
     this.standardConceptCount = standardConceptCount == null ? 0L : standardConceptCount;
   }
 
-  public DomainInfo standardConceptCount(long standardConceptCount) {
+  public DbDomainInfo standardConceptCount(long standardConceptCount) {
     this.standardConceptCount = standardConceptCount;
     return this;
   }
@@ -175,7 +176,7 @@ public class DomainInfo {
     this.participantCount = participantCount == null ? 0L : participantCount;
   }
 
-  public DomainInfo participantCount(long participantCount) {
+  public DbDomainInfo participantCount(long participantCount) {
     this.participantCount = participantCount;
     return this;
   }
@@ -184,7 +185,7 @@ public class DomainInfo {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    DomainInfo domainInfo = (DomainInfo) o;
+    DbDomainInfo domainInfo = (DbDomainInfo) o;
     return Objects.equals(domain, domainInfo.domain)
         && Objects.equals(name, domainInfo.name)
         && Objects.equals(description, domainInfo.description)

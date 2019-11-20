@@ -36,7 +36,7 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbParticipantIdAndCohortStatus;
 import org.pmiops.workbench.db.model.DbParticipantIdAndCohortStatus.Key;
@@ -284,7 +284,7 @@ public class CohortMaterializationService {
       DataTableSpecification dataTableSpecification,
       @Nullable DbCohortReview cohortReview,
       @Nullable Set<Long> conceptIds) {
-    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     CdrQuery cdrQuery =
         new CdrQuery()
             .bigqueryDataset(cdrVersion.getBigqueryDataset())

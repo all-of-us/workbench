@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -43,8 +43,8 @@ public class CdrVersionsControllerTest {
 
   @Autowired private CdrVersionsController cdrVersionsController;
 
-  private CdrVersion defaultCdrVersion;
-  private CdrVersion protectedCdrVersion;
+  private DbCdrVersion defaultCdrVersion;
+  private DbCdrVersion protectedCdrVersion;
   private static DbUser user;
 
   @TestConfiguration
@@ -94,7 +94,7 @@ public class CdrVersionsControllerTest {
     cdrVersionsController.getCdrVersions();
   }
 
-  private void assertResponse(CdrVersionListResponse response, CdrVersion... versions) {
+  private void assertResponse(CdrVersionListResponse response, DbCdrVersion... versions) {
     assertThat(response.getItems())
         .containsExactly(
             Arrays.stream(versions).map(CdrVersionsController.TO_CLIENT_CDR_VERSION).toArray())
@@ -103,13 +103,13 @@ public class CdrVersionsControllerTest {
         .isEqualTo(String.valueOf(defaultCdrVersion.getCdrVersionId()));
   }
 
-  private CdrVersion makeCdrVersion(
+  private DbCdrVersion makeCdrVersion(
       long cdrVersionId,
       boolean isDefault,
       String name,
       long creationTime,
       DataAccessLevel dataAccessLevel) {
-    CdrVersion cdrVersion = new CdrVersion();
+    DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setIsDefault(isDefault);
     cdrVersion.setBigqueryDataset("a");
     cdrVersion.setBigqueryProject("b");
