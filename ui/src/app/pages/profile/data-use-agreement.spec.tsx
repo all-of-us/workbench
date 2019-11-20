@@ -18,6 +18,25 @@ describe('DataUseAgreement', () => {
     expect(wrapper).toBeTruthy();
   });
 
+  it('should not allow DataUseAgreement without identical initials', () => {
+    const wrapper = component();
+    expect(wrapper.find('[data-test-id="submit-dua-button"]').prop('disabled')).toBeTruthy();
+
+    // fill required fields
+    wrapper.find('[data-test-id="dua-name-input"]')
+      .simulate('change', {target: {value: 'Fake Name'}});
+    // add initials to just one initials input field.
+    wrapper.find('[data-test-id="dua-initials-input"]').first().simulate('change', {target: {value: 'XX'}});
+
+    expect(wrapper.find('[data-test-id="submit-dua-button"]').prop('disabled')).toBeTruthy();
+
+    wrapper.find('[data-test-id="dua-initials-input"]').forEach((node, index) => {
+      node.simulate('change', {target: {value: 'X' + index.toString()}});
+    });
+
+    expect(wrapper.find('[data-test-id="submit-dua-button"]').prop('disabled')).toBeTruthy();
+  });
+
   it('should submit DataUseAgreement acceptance with version number', () => {
     const wrapper = component();
     const spy = jest.spyOn(profileApi(), 'submitDataUseAgreement');
