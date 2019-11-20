@@ -54,8 +54,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import(LiquibaseAutoConfiguration.class)
 public class FreeTierBillingServiceTest {
 
-  private static final double HALF_TOLERANCE_PERCENTAGE = 0.001;
-  private static final double DEFAULT_FREE_CREDITS_LIMIT = 1.0;
+  private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.001;
+
   @Autowired BigQueryService bigQueryService;
 
   @Autowired FreeTierBillingService freeTierBillingService;
@@ -332,10 +332,10 @@ public class FreeTierBillingServiceTest {
   @Test
   public void getUserFreeTierLimit_default() {
     DbUser user = createUser("test@test.com");
-
-    workbenchConfig.billing.defaultFreeCreditsLimit = DEFAULT_FREE_CREDITS_LIMIT;
+    final double initialFreeCreditsLimit = 1.0;
+    workbenchConfig.billing.defaultFreeCreditsLimit = initialFreeCreditsLimit;
     assertCloseEnough(
-        freeTierBillingService.getUserFreeTierLimit(user), DEFAULT_FREE_CREDITS_LIMIT);
+        freeTierBillingService.getUserFreeTierLimit(user), initialFreeCreditsLimit);
 
     final double fractionalFreeCreditsLimit = 123.456;
     workbenchConfig.billing.defaultFreeCreditsLimit = fractionalFreeCreditsLimit;
@@ -456,7 +456,7 @@ public class FreeTierBillingServiceTest {
   }
 
   private void assertCloseEnough(double actualValue, double expectedValue) {
-    assertWithinPercentage(actualValue, expectedValue, HALF_TOLERANCE_PERCENTAGE);
+    assertWithinPercentage(actualValue, expectedValue, DEFAULT_PERCENTAGE_TOLERANCE);
   }
 
   private void assertWithinPercentage(

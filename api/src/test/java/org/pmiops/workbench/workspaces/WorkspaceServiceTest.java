@@ -256,7 +256,7 @@ public class WorkspaceServiceTest {
             .stream()
             .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).containsExactlyElementsIn(expectedIds);
+    assertThat(actualIds).containsAllIn(expectedIds);
   }
 
   @Test
@@ -293,7 +293,7 @@ public class WorkspaceServiceTest {
             .stream()
             .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).containsExactlyElementsIn(expectedIds);
+    assertThat(actualIds).containsAllIn(expectedIds);
 
     DbUser mockUser = mock(DbUser.class);
     doReturn(mockUser).when(mockUserProvider).get();
