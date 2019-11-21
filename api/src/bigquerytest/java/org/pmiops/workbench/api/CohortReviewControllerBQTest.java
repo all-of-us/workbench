@@ -36,7 +36,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
@@ -121,7 +121,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private static final Long PARTICIPANT_ID = 102246L;
   private static final Long PARTICIPANT_ID2 = 102247L;
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
-  private CdrVersion cdrVersion;
+  private DbCdrVersion cdrVersion;
   private DbWorkspace workspace;
 
   @Autowired private CohortReviewController controller;
@@ -174,7 +174,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                     ImmutableMap.of(
                         currentUser.getEmail(), new WorkspaceAccessEntry().accessLevel("OWNER"))));
 
-    cdrVersion = new CdrVersion();
+    cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     cdrVersion = cdrVersionDao.save(cdrVersion);

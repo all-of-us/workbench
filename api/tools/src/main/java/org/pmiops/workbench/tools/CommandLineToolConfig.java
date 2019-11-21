@@ -13,7 +13,7 @@ import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
-import org.pmiops.workbench.db.model.Config;
+import org.pmiops.workbench.db.model.DbConfig;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -105,7 +105,7 @@ public class CommandLineToolConfig {
   @Bean
   @Lazy
   WorkbenchConfig workbenchConfig(ConfigDao configDao) {
-    Config config = configDao.findOne(Config.MAIN_CONFIG_ID);
+    DbConfig config = configDao.findOne(DbConfig.MAIN_CONFIG_ID);
     Gson gson = new Gson();
     return gson.fromJson(config.getConfiguration(), WorkbenchConfig.class);
   }
