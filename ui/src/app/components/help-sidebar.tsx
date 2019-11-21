@@ -278,10 +278,9 @@ export const HelpSidebar = withUserProfile()(
           }
         </div>
         <div style={activeIcon ? {...styles.sidebarContainer, ...styles.sidebarContainerActive} : styles.sidebarContainer}>
-          <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar}>
+          <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
             <div style={styles.topBar}>
-              <ClrIcon shape='caret right' size={22} style={styles.closeIcon}
-                onClick={() => setSidebarState(false)} />
+              <ClrIcon shape='caret right' size={22} style={styles.closeIcon} onClick={() => setSidebarState(false)} />
             </div>
             <div style={contentStyle('help')}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
@@ -296,7 +295,7 @@ export const HelpSidebar = withUserProfile()(
               </div>
               {!!displayContent && displayContent.length > 0
                 ? displayContent.map((section, s) => <div key={s}>
-                  <h3 style={styles.sectionTitle}>{this.highlightMatches(section.title)}</h3>
+                  <h3 style={styles.sectionTitle} data-test-id={`section-title-${s}`}>{this.highlightMatches(section.title)}</h3>
                   {section.content.map((content, c) => {
                     return typeof content === 'string'
                       ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>
