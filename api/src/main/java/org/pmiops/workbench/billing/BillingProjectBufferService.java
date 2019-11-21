@@ -219,21 +219,17 @@ public class BillingProjectBufferService {
         .collect(Collectors.toList());
   }
 
-  private Duration getStatusChangedToLastSync(DbBillingProjectBufferEntry entry) {
-    return Duration.between(
-        entry.getLastStatusChangedTime().toInstant(), entry.getLastSyncRequestTime().toInstant());
-  }
-
   public DbBillingProjectBufferEntry assignBillingProject(DbUser dbUser) {
-    DbBillingProjectBufferEntry entry = consumeBufferEntryForAssignment();
+    DbBillingProjectBufferEntry bufferEntry = consumeBufferEntryForAssignment();
 
-    fireCloudService.addUserToBillingProject(dbUser.getEmail(), entry.getFireCloudProjectName());
-    entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
-    entry.setAssignedUser(dbUser);
+    fireCloudService.addUserToBillingProject(
+        dbUser.getEmail(), bufferEntry.getFireCloudProjectName());
+    bufferEntry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
+    bufferEntry.setAssignedUser(dbUser);
 
     // Ensure entry reference isn't left in a dirty state by save().
-    entry = billingProjectBufferEntryDao.save(entry);
-    return entry;
+    bufferEntry = billingProjectBufferEntryDao.save(bufferEntry);
+    return bufferEntry;
   }
 
   private DbBillingProjectBufferEntry consumeBufferEntryForAssignment() {
