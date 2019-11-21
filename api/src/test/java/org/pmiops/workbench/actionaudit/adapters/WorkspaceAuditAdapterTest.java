@@ -256,24 +256,26 @@ public class WorkspaceAuditAdapterTest {
 
   @Test
   public void testFireEditAction_sendsChangedProperties() {
-    final ResearchPurpose editedResearchPurpose = new ResearchPurpose();
-    editedResearchPurpose.setIntendedStudy("stubbed toes");
-    editedResearchPurpose.setAdditionalNotes("I really like the cloud.");
-    editedResearchPurpose.setAnticipatedFindings("I want to find my keys.");
-    editedResearchPurpose.setControlSet(true);
+    final ResearchPurpose editedResearchPurpose =
+        new ResearchPurpose()
+            .intendedStudy("stubbed toes")
+            .additionalNotes("I really like the cloud.")
+            .anticipatedFindings("I want to find my keys.")
+            .controlSet(true);
 
-    Workspace editedWorkspace = new Workspace();
-    editedWorkspace.setName("New name");
-    editedWorkspace.setId("fc-id-1");
-    editedWorkspace.setNamespace("aou-rw-local1-c4be869a");
-    editedWorkspace.setCreator("user@fake-research-aou.org");
-    editedWorkspace.setCdrVersionId("1");
-    editedWorkspace.setResearchPurpose(editedResearchPurpose);
-    editedWorkspace.setCreationTime(Y2K_EPOCH_MILLIS);
-    editedWorkspace.setLastModifiedTime(Y2K_EPOCH_MILLIS);
-    editedWorkspace.setEtag("etag_1");
-    editedWorkspace.setDataAccessLevel(DataAccessLevel.REGISTERED);
-    editedWorkspace.setPublished(false);
+    Workspace editedWorkspace =
+        new Workspace()
+            .name("New name")
+            .id("fc-id-1")
+            .namespace("aou-rw-local1-c4be869a")
+            .creator("user@fake-research-aou.org")
+            .cdrVersionId("1")
+            .researchPurpose(editedResearchPurpose)
+            .creationTime(Y2K_EPOCH_MILLIS)
+            .lastModifiedTime(Y2K_EPOCH_MILLIS)
+            .etag("etag_1")
+            .dataAccessLevel(DataAccessLevel.REGISTERED)
+            .published(false);
 
     workspaceAuditAdapter.fireEditAction(
         workspace1, editedWorkspace, dbWorkspace1.getWorkspaceId());
