@@ -260,7 +260,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (conceptSet.getDomain() != null && conceptSet.getDomain() != dbConceptSet.getDomainEnum()) {
       throw new BadRequestException("Cannot modify the domain of an existing concept set");
     }
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    final Timestamp now = Timestamp.from(clock.instant());
     dbConceptSet.setLastModifiedTime(now);
     try {
       dbConceptSet = conceptSetDao.save(dbConceptSet);
@@ -346,11 +346,11 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     dbConceptSet.setLastModifiedTime(now);
     try {
       dbConceptSet = conceptSetDao.save(dbConceptSet);
+      return ResponseEntity.ok(toClientConceptSet(dbConceptSet));
       // TODO: add recent resource entry for concept sets [RW-1129]
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
     }
-    return ResponseEntity.ok(toClientConceptSet(dbConceptSet));
   }
 
   @Override

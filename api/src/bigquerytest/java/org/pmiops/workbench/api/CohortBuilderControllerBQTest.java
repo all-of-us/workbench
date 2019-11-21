@@ -156,7 +156,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    cdrVersionDao.save(cdrVersion);
+    cdrVersion = cdrVersionDao.save(cdrVersion);
   }
 
   private static SearchParameter icd9() {
@@ -1795,7 +1795,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         new DemoChartInfo().gender("MALE").race("Asian").ageRange("45-64").count(1L),
         response.getItems().get(0));
     assertEquals(
-        new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("19-44").count(1L),
+        new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("18-44").count(1L),
         response.getItems().get(1));
   }
 
@@ -1851,7 +1851,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   private void saveCriteriaWithPath(String path, CBCriteria criteria) {
-    cbCriteriaDao.save(criteria);
+    criteria = cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
     criteria.path(path.isEmpty() ? pathEnd : path + "." + pathEnd);
     cbCriteriaDao.save(criteria);

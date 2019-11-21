@@ -82,14 +82,14 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
   }
 
   private void saveConcept(long conceptId, String standardConceptValue) {
-    Concept concept = new Concept();
-    concept.setConceptId(conceptId);
-    concept.setStandardConcept(standardConceptValue);
-    concept.setConceptCode("concept" + conceptId);
-    concept.setConceptName("concept " + conceptId);
-    concept.setVocabularyId("V");
-    concept.setDomainId("D");
-    conceptDao.save(concept);
+    conceptDao.save(
+        new Concept()
+            .conceptId(conceptId)
+            .standardConcept(standardConceptValue)
+            .conceptCode("concept" + conceptId)
+            .conceptName("concept " + conceptId)
+            .vocabularyId("V")
+            .domainId("D"));
   }
 
   @Override

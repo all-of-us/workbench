@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
@@ -48,8 +49,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       recentResource = new DbUserRecentResource(workspaceId, userId, notebookNameWithPath, now);
     }
     recentResource.setLastAccessDate(now);
-    userRecentResourceDao.save(recentResource);
-    return recentResource;
+    return userRecentResourceDao.save(recentResource);
   }
 
   /**
@@ -78,7 +78,13 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
   public void updateConceptSetEntry(long workspaceId, long userId, long conceptSetId) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
-    DbConceptSet conceptSet = conceptSetDao.findOne(conceptSetId);
+    final DbConceptSet conceptSet = conceptSetDao.findOne(conceptSetId);
+    userRecentResourceDao.save(makeUserRecentResource(workspaceId, userId, now, conceptSet));
+  }
+
+  @NotNull
+  private DbUserRecentResource makeUserRecentResource(
+      long workspaceId, long userId, Timestamp now, DbConceptSet conceptSet) {
     DbUserRecentResource resource =
         userRecentResourceDao.findByUserIdAndWorkspaceIdAndConceptSet(
             userId, workspaceId, conceptSet);
@@ -88,7 +94,7 @@ public class UserRecentResourceServiceImpl implements UserRecentResourceService 
       resource.setConceptSet(conceptSet);
     }
     resource.setLastAccessDate(now);
-    userRecentResourceDao.save(resource);
+    return resource;
   }
 
   /** Deletes notebook entry from user_recent_resource */

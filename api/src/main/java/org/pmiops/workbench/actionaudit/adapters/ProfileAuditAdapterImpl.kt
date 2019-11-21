@@ -104,6 +104,26 @@ constructor(
         }
     }
 
+    override fun fireLoginAction(dbUser: DbUser) {
+        try {
+            actionAuditService.send(ActionAuditEvent(
+                    timestamp = clock.millis(),
+                    actionId = actionIdProvider.get(),
+                    actionType = ActionType.LOGIN,
+                    agentType = AgentType.USER,
+                    agentId = dbUser.userId,
+                    agentEmailMaybe = dbUser.email,
+                    targetType = TargetType.WORKBENCH,
+                    targetIdMaybe = null,
+                    targetPropertyMaybe = null,
+                    previousValueMaybe = null,
+                    newValueMaybe = null
+            ))
+        } catch (e: java.lang.RuntimeException) {
+            logAndSwallow(e)
+        }
+    }
+
     private fun logAndSwallow(e: RuntimeException) {
         actionAuditService.logRuntimeException(logger, e)
     }

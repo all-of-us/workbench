@@ -1,12 +1,10 @@
-import {Component, Input} from '@angular/core';
 import colors from 'app/styles/colors';
-import {ReactWrapperBase} from 'app/utils';
 import * as React from 'react';
 
 // tslint:disable:max-line-length
 // We disable the tslint because certain stroke attributes for the SVG cannot be broken
 // up into smaller line length
-export class ReminderIconComponentReact extends React.Component<{style: object}> {
+export class ReminderIcon extends React.Component<{style: object}> {
   render() {
     return <svg id='Layer_1' xmlns='http://www.w3.org/2000/svg'
                 viewBox='0 0 34 55' enableBackground='new 0 0 34 55' style={this.props.style}>
@@ -57,16 +55,3 @@ export class ReminderIconComponentReact extends React.Component<{style: object}>
   }
 }
 // tslint:enable:max-line-length
-
-@Component({
-  selector: 'app-reminder-icon',
-  template: '<div #root></div>'
-})
-export class ReminderComponent extends ReactWrapperBase {
-  @Input('style')
-  style: object;
-
-  constructor() {
-    super(ReminderIconComponentReact, ['style']);
-  }
-}
