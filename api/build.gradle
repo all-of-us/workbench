@@ -639,9 +639,9 @@ task fetchWorkspaceDetails(type: JavaExec) {
 }
 
 // See project.rb command: export-user-data
-task exportUserData(type: JavaExec) {
+task exportWorkspaceData(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath
-  main = "org.pmiops.workbench.tools.ExportUserData"
+  main = "org.pmiops.workbench.tools.ExportWorkspaceData"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
