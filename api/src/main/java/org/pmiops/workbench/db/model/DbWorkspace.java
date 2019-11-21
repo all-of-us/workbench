@@ -533,7 +533,7 @@ public class DbWorkspace {
 
   @Transient
   public boolean isActive() {
-    return getWorkspaceActiveStatusEnum().equals(WorkspaceActiveStatus.ACTIVE) ? true : false;
+    return WorkspaceActiveStatus.ACTIVE.equals(getWorkspaceActiveStatusEnum());
   }
 
   @Transient

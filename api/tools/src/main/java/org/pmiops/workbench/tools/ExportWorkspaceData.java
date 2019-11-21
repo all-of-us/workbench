@@ -86,8 +86,9 @@ public class ExportWorkspaceData {
   WorkspacesApi workspaceApi(Provider<WorkbenchConfig> configProvider) {
     if (workspacesApi == null && configProvider.get() != null) {
       try {
-        workspacesApi = new ServiceAccountAPIClientFactory(configProvider.get().firecloud.baseUrl)
-            .workspacesApi();
+        workspacesApi =
+            new ServiceAccountAPIClientFactory(configProvider.get().firecloud.baseUrl)
+                .workspacesApi();
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
