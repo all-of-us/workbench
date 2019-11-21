@@ -7,21 +7,21 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.pmiops.workbench.model.SurveyModule;
 
 @Entity
 @Table(name = "survey_module")
 public class DbSurveyModule {
 
-  public static final Function<DbSurveyModule, org.pmiops.workbench.model.SurveyModule>
-      TO_CLIENT_SURVEY_MODULE =
-          (surveyModule) ->
-              new org.pmiops.workbench.model.SurveyModule()
-                  .conceptId(surveyModule.getConceptId())
-                  .name(surveyModule.getName())
-                  .description(surveyModule.getDescription())
-                  .questionCount(surveyModule.getQuestionCount())
-                  .participantCount(surveyModule.getParticipantCount())
-                  .orderNumber(surveyModule.getOrderNumber());
+  public static final Function<DbSurveyModule, SurveyModule> TO_CLIENT_SURVEY_MODULE =
+      (surveyModule) ->
+          new org.pmiops.workbench.model.SurveyModule()
+              .conceptId(surveyModule.getConceptId())
+              .name(surveyModule.getName())
+              .description(surveyModule.getDescription())
+              .questionCount(surveyModule.getQuestionCount())
+              .participantCount(surveyModule.getParticipantCount())
+              .orderNumber(surveyModule.getOrderNumber());
 
   private long conceptId;
   private String name;
