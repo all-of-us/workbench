@@ -6,8 +6,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.cdr.model.Concept;
-import org.pmiops.workbench.cdr.model.DomainInfo;
+import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -27,13 +27,13 @@ public class DomainInfoDaoTest {
 
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private ConceptDao conceptDao;
-  private DomainInfo domainInfoObservation;
-  private DomainInfo domainInfoCondition;
+  private DbDomainInfo domainInfoObservation;
+  private DbDomainInfo domainInfoCondition;
 
   @Before
   public void setUp() {
     conceptDao.save(
-        new Concept()
+        new DbConcept()
             .conceptId(1L)
             .domainId("Observation")
             .count(10L)
@@ -41,7 +41,7 @@ public class DomainInfoDaoTest {
             .standardConcept("S")
             .conceptName("name"));
     conceptDao.save(
-        new Concept()
+        new DbConcept()
             .conceptId(2L)
             .domainId("Condition")
             .count(100L)
@@ -50,7 +50,7 @@ public class DomainInfoDaoTest {
             .conceptName("name"));
     domainInfoObservation =
         domainInfoDao.save(
-            new DomainInfo()
+            new DbDomainInfo()
                 .conceptId(27L)
                 .domain((short) 5)
                 .domainId("Observation")
@@ -61,7 +61,7 @@ public class DomainInfoDaoTest {
                 .participantCount(0));
     domainInfoCondition =
         domainInfoDao.save(
-            new DomainInfo()
+            new DbDomainInfo()
                 .conceptId(19L)
                 .domain((short) 0)
                 .domainId("Condition")
@@ -74,7 +74,7 @@ public class DomainInfoDaoTest {
 
   @Test
   public void findByOrderByDomainId() {
-    List<DomainInfo> infos = domainInfoDao.findByOrderByDomainId();
+    List<DbDomainInfo> infos = domainInfoDao.findByOrderByDomainId();
     assertEquals(2, infos.size());
     assertEquals(domainInfoCondition, infos.get(0));
     assertEquals(domainInfoObservation, infos.get(1));
@@ -82,7 +82,7 @@ public class DomainInfoDaoTest {
 
   @Test
   public void findStandardConceptCounts() {
-    List<DomainInfo> infos = domainInfoDao.findStandardConceptCounts("name");
+    List<DbDomainInfo> infos = domainInfoDao.findStandardConceptCounts("name");
     assertEquals(2, infos.size());
     assertEquals(domainInfoCondition.standardConceptCount(1), infos.get(0));
     assertEquals(domainInfoObservation.standardConceptCount(1), infos.get(1));
@@ -90,7 +90,7 @@ public class DomainInfoDaoTest {
 
   @Test
   public void findAllMatchConceptCounts() {
-    List<DomainInfo> infos = domainInfoDao.findAllMatchConceptCounts("name");
+    List<DbDomainInfo> infos = domainInfoDao.findAllMatchConceptCounts("name");
     assertEquals(2, infos.size());
     assertEquals(domainInfoCondition.allConceptCount(1), infos.get(0));
     assertEquals(domainInfoObservation.allConceptCount(1), infos.get(1));

@@ -8,7 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
-import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.DbConcept;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -126,13 +126,13 @@ public class ConceptService {
   public static final String STANDARD_CONCEPT_CODE = "S";
   public static final String CLASSIFICATION_CONCEPT_CODE = "C";
 
-  public Slice<Concept> searchConcepts(
+  public Slice<DbConcept> searchConcepts(
       String query, String standardConceptFilter, List<String> domainIds, int limit, int page) {
 
     StandardConceptFilter convertedConceptFilter =
         StandardConceptFilter.valueOf(standardConceptFilter);
 
-    Specification<Concept> conceptSpecification =
+    Specification<DbConcept> conceptSpecification =
         (root, criteriaQuery, criteriaBuilder) -> {
           List<Predicate> predicates = new ArrayList<>();
           List<Predicate> standardConceptPredicates = new ArrayList<>();
@@ -212,8 +212,8 @@ public class ConceptService {
     // Return up to limit results, sorted in descending count value order.
 
     Pageable pageable = new PageRequest(page, limit, new Sort(Direction.DESC, "countValue"));
-    NoCountFindAllDao<Concept, Long> conceptDao =
-        new NoCountFindAllDao<>(Concept.class, entityManager);
+    NoCountFindAllDao<DbConcept, Long> conceptDao =
+        new NoCountFindAllDao<>(DbConcept.class, entityManager);
     return conceptDao.findAll(conceptSpecification, pageable);
   }
 
@@ -221,8 +221,8 @@ public class ConceptService {
     ImmutableList.Builder<Long> standardConceptIds = ImmutableList.builder();
     ImmutableList.Builder<Long> sourceConceptIds = ImmutableList.builder();
 
-    Iterable<Concept> concepts = conceptDao.findAll(conceptIds);
-    for (Concept concept : concepts) {
+    Iterable<DbConcept> concepts = conceptDao.findAll(conceptIds);
+    for (DbConcept concept : concepts) {
       if (ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept())
           || ConceptService.CLASSIFICATION_CONCEPT_CODE.equals(concept.getStandardConcept())) {
         standardConceptIds.add(concept.getConceptId());

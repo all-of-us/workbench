@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
-import org.pmiops.workbench.cdr.model.CBCriteria;
+import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -39,7 +39,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
@@ -99,7 +99,7 @@ public class CohortReviewControllerTest {
 
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";
-  private CdrVersion cdrVersion;
+  private DbCdrVersion cdrVersion;
   private DbCohortReview cohortReview;
   private DbCohort cohort;
   private DbCohort cohortWithoutReview;
@@ -198,42 +198,42 @@ public class CohortReviewControllerTest {
     user = userDao.save(user);
 
     cbCriteriaDao.save(
-        new CBCriteria()
+        new DbCriteria()
             .domainId(DomainType.PERSON.toString())
             .type(CriteriaType.RACE.toString())
             .parentId(1L)
             .conceptId(String.valueOf(TestDemo.ASIAN.conceptId))
             .name(TestDemo.ASIAN.name));
     cbCriteriaDao.save(
-        new CBCriteria()
+        new DbCriteria()
             .domainId(DomainType.PERSON.toString())
             .type(CriteriaType.GENDER.toString())
             .parentId(1L)
             .conceptId(String.valueOf(TestDemo.FEMALE.conceptId))
             .name(TestDemo.FEMALE.name));
     cbCriteriaDao.save(
-        new CBCriteria()
+        new DbCriteria()
             .domainId(DomainType.PERSON.toString())
             .type(CriteriaType.GENDER.toString())
             .parentId(1L)
             .conceptId(String.valueOf(TestDemo.MALE.conceptId))
             .name(TestDemo.MALE.name));
     cbCriteriaDao.save(
-        new CBCriteria()
+        new DbCriteria()
             .domainId(DomainType.PERSON.toString())
             .type(CriteriaType.ETHNICITY.toString())
             .parentId(1L)
             .conceptId(String.valueOf(TestDemo.NOT_HISPANIC.conceptId))
             .name(TestDemo.NOT_HISPANIC.name));
     cbCriteriaDao.save(
-        new CBCriteria()
+        new DbCriteria()
             .domainId(DomainType.PERSON.toString())
             .type(CriteriaType.RACE.toString())
             .parentId(1L)
             .conceptId(String.valueOf(TestDemo.WHITE.conceptId))
             .name(TestDemo.WHITE.name));
 
-    cdrVersion = new CdrVersion();
+    cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset("dataSetId");
     cdrVersion.setBigqueryProject("projectId");
     cdrVersionDao.save(cdrVersion);

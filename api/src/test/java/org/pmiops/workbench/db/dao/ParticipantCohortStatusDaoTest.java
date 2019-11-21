@@ -12,9 +12,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatusKey;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -46,7 +46,7 @@ public class ParticipantCohortStatusDaoTest {
 
   @Before
   public void onSetup() {
-    CdrVersion cdrVersion = new CdrVersion();
+    DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrDbName("");
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
@@ -78,8 +78,8 @@ public class ParticipantCohortStatusDaoTest {
             .deceased(false);
     participantCohortStatusDao.save(status2);
 
-    Concept male =
-        new Concept()
+    DbConcept male =
+        new DbConcept()
             .conceptId(8507)
             .conceptName("MALE")
             .domainId("3")
@@ -91,8 +91,8 @@ public class ParticipantCohortStatusDaoTest {
             .prevalence(1);
     conceptDao.save(male);
 
-    Concept race =
-        new Concept()
+    DbConcept race =
+        new DbConcept()
             .conceptId(8515)
             .conceptName("Asian")
             .domainId("3")
@@ -104,8 +104,8 @@ public class ParticipantCohortStatusDaoTest {
             .prevalence(1);
     conceptDao.save(race);
 
-    Concept ethnicity =
-        new Concept()
+    DbConcept ethnicity =
+        new DbConcept()
             .conceptId(38003564)
             .conceptName("Not Hispanic or Latino")
             .domainId("3")

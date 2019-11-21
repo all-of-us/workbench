@@ -1,7 +1,13 @@
 package org.pmiops.workbench.cdr.model;
 
 import java.util.Objects;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
@@ -10,11 +16,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 // NOTE: This class and ConceptSynonymDao exist only to make CriteriaDao work in tests;
 // if we stop using concept_synonym there at some point we can get rid of them.
 @Table(name = "concept_synonym")
-public class ConceptSynonym {
+public class DbConceptSynonym {
 
   private long id;
   private long conceptId;
-  private Concept concept;
+  private DbConcept concept;
   private String conceptSynonymName;
 
   @Id
@@ -26,7 +32,7 @@ public class ConceptSynonym {
     this.id = id;
   }
 
-  public ConceptSynonym id(Long val) {
+  public DbConceptSynonym id(Long val) {
     this.id = val;
     return this;
   }
@@ -40,22 +46,22 @@ public class ConceptSynonym {
     this.conceptId = conceptId;
   }
 
-  public ConceptSynonym conceptId(long conceptId) {
+  public DbConceptSynonym conceptId(long conceptId) {
     this.conceptId = conceptId;
     return this;
   }
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "concept_id", insertable = false, updatable = false)
-  public Concept getConcept() {
+  public DbConcept getConcept() {
     return concept;
   }
 
-  public void setConcept(Concept concept) {
+  public void setConcept(DbConcept concept) {
     this.concept = concept;
   }
 
-  public ConceptSynonym conceptSynonym(Concept concept) {
+  public DbConceptSynonym conceptSynonym(DbConcept concept) {
     this.concept = concept;
     return this;
   }
@@ -69,7 +75,7 @@ public class ConceptSynonym {
     this.conceptSynonymName = conceptSynonymName;
   }
 
-  public ConceptSynonym conceptSynonymName(String conceptSynonymName) {
+  public DbConceptSynonym conceptSynonymName(String conceptSynonymName) {
     this.conceptSynonymName = conceptSynonymName;
     return this;
   }
@@ -78,7 +84,7 @@ public class ConceptSynonym {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    ConceptSynonym conceptSynonym = (ConceptSynonym) o;
+    DbConceptSynonym conceptSynonym = (DbConceptSynonym) o;
     return conceptId == conceptSynonym.conceptId
         && Objects.equals(conceptSynonymName, conceptSynonym.conceptSynonymName);
   }

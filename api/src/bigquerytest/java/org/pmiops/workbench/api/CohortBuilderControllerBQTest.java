@@ -23,12 +23,12 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
-import org.pmiops.workbench.cdr.model.CBCriteria;
+import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -93,7 +93,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   private CohortBuilderController controller;
 
-  private CdrVersion cdrVersion;
+  private DbCdrVersion cdrVersion;
 
   @Autowired private BigQueryService bigQueryService;
 
@@ -150,7 +150,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             elasticSearchService,
             configProvider);
 
-    cdrVersion = new CdrVersion();
+    cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
@@ -449,8 +449,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .conceptId(903115L));
   }
 
-  private static CBCriteria drugCriteriaParent() {
-    return new CBCriteria()
+  private static DbCriteria drugCriteriaParent() {
+    return new DbCriteria()
         .parentId(99999)
         .domainId(DomainType.DRUG.toString())
         .type(CriteriaType.ATC.toString())
@@ -460,8 +460,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .selectable(true);
   }
 
-  private static CBCriteria drugCriteriaChild(long parentId) {
-    return new CBCriteria()
+  private static DbCriteria drugCriteriaChild(long parentId) {
+    return new DbCriteria()
         .parentId(parentId)
         .domainId(DomainType.DRUG.toString())
         .type(CriteriaType.RXNORM.toString())
@@ -470,8 +470,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .selectable(true);
   }
 
-  private static CBCriteria icd9CriteriaParent() {
-    return new CBCriteria()
+  private static DbCriteria icd9CriteriaParent() {
+    return new DbCriteria()
         .parentId(99999)
         .domainId(DomainType.CONDITION.toString())
         .type(CriteriaType.ICD9CM.toString())
@@ -486,8 +486,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .synonyms("[CONDITION_rank1]");
   }
 
-  private static CBCriteria icd9CriteriaChild(long parentId) {
-    return new CBCriteria()
+  private static DbCriteria icd9CriteriaChild(long parentId) {
+    return new DbCriteria()
         .parentId(parentId)
         .domainId(DomainType.CONDITION.toString())
         .type(CriteriaType.ICD9CM.toString())
@@ -504,27 +504,27 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void findCriteriaMenuOptions() throws Exception {
     cbCriteriaDao.save(
-        new CBCriteria()
+        new DbCriteria()
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.ICD9CM.toString())
             .standard(false));
     cbCriteriaDao.save(
-        new CBCriteria()
+        new DbCriteria()
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.ICD10CM.toString())
             .standard(false));
     cbCriteriaDao.save(
-        new CBCriteria()
+        new DbCriteria()
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.SNOMED.toString())
             .standard(true));
     cbCriteriaDao.save(
-        new CBCriteria()
+        new DbCriteria()
             .domainId(DomainType.CONDITION.toString())
             .type(CriteriaType.SNOMED.toString())
             .standard(false));
     cbCriteriaDao.save(
-        new CBCriteria()
+        new DbCriteria()
             .domainId(DomainType.PROCEDURE.toString())
             .type(CriteriaType.CPT4.toString())
             .standard(false));
@@ -748,9 +748,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void firstMentionOfDrug5DaysBeforeICD10WithModifiers() throws Exception {
-    CBCriteria drugNode1 = drugCriteriaParent();
+    DbCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
-    CBCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
+    DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
     insertCriteriaAncestor(1520218, 1520218);
     SearchGroupItem drugSGI =
@@ -784,8 +784,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void anyMentionOfCPTParent5DaysAfterICD10Child() throws Exception {
-    CBCriteria icd9Parent =
-        new CBCriteria()
+    DbCriteria icd9Parent =
+        new DbCriteria()
             .ancestorData(false)
             .code("001")
             .conceptId("0")
@@ -795,8 +795,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .standard(false)
             .synonyms("+[CONDITION_rank1]");
     saveCriteriaWithPath("0", icd9Parent);
-    CBCriteria icd9Child =
-        new CBCriteria()
+    DbCriteria icd9Child =
+        new DbCriteria()
             .ancestorData(false)
             .code("001.1")
             .conceptId("1")
@@ -865,7 +865,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void firstMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
-    CBCriteria drugCriteria = drugCriteriaChild(1).conceptId("11");
+    DbCriteria drugCriteria = drugCriteriaChild(1).conceptId("11");
     saveCriteriaWithPath("0", drugCriteria);
     insertCriteriaAncestor(11, 11);
 
@@ -897,7 +897,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void lastMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
-    CBCriteria drugCriteria = drugCriteriaChild(1).conceptId("11");
+    DbCriteria drugCriteria = drugCriteriaChild(1).conceptId("11");
     saveCriteriaWithPath("0", drugCriteria);
     insertCriteriaAncestor(11, 11);
 
@@ -929,8 +929,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void lastMentionOfDrugDuringSameEncounterAsMeasurementOrVisit() throws Exception {
-    CBCriteria drugCriteria =
-        new CBCriteria()
+    DbCriteria drugCriteria =
+        new DbCriteria()
             .domainId(DomainType.DRUG.toString())
             .type(CriteriaType.ATC.toString())
             .group(false)
@@ -973,9 +973,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void lastMentionOfMeasurementOrVisit5DaysAfterDrug() throws Exception {
-    CBCriteria drugCriteria1 = drugCriteriaParent();
+    DbCriteria drugCriteria1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugCriteria1);
-    CBCriteria drugCriteria2 = drugCriteriaChild(drugCriteria1.getId());
+    DbCriteria drugCriteria2 = drugCriteriaChild(drugCriteria1.getId());
     saveCriteriaWithPath(drugCriteria1.getPath(), drugCriteria2);
     insertCriteriaAncestor(1520218, 1520218);
 
@@ -1099,9 +1099,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ConditionParent() throws Exception {
-    CBCriteria criteriaParent = icd9CriteriaParent();
+    DbCriteria criteriaParent = icd9CriteriaParent();
     saveCriteriaWithPath("0", criteriaParent);
-    CBCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
+    DbCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
     saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
 
     SearchRequest searchRequest =
@@ -1222,9 +1222,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ParentAndICD10ChildCondition() throws Exception {
-    CBCriteria criteriaParent = icd9CriteriaParent();
+    DbCriteria criteriaParent = icd9CriteriaParent();
     saveCriteriaWithPath("0", criteriaParent);
-    CBCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
+    DbCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
     saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
 
     SearchRequest searchRequest =
@@ -1264,8 +1264,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsSnomedParentProcedure() throws Exception {
     SearchParameter snomed = snomed().group(true).standard(true).conceptId(4302541L);
 
-    CBCriteria criteriaParent =
-        new CBCriteria()
+    DbCriteria criteriaParent =
+        new DbCriteria()
             .parentId(99999)
             .domainId(DomainType.PROCEDURE.toString())
             .type(CriteriaType.SNOMED.toString())
@@ -1279,8 +1279,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .conceptId("4302541")
             .synonyms("+[PROCEDURE_rank1]");
     saveCriteriaWithPath("0", criteriaParent);
-    CBCriteria criteriaChild =
-        new CBCriteria()
+    DbCriteria criteriaChild =
+        new DbCriteria()
             .parentId(criteriaParent.getId())
             .domainId(DomainType.PROCEDURE.toString())
             .type(CriteriaType.SNOMED.toString())
@@ -1336,9 +1336,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugParent() throws Exception {
-    CBCriteria drugNode1 = drugCriteriaParent();
+    DbCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
-    CBCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
+    DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
 
     insertCriteriaAncestor(1520218, 1520218);
@@ -1356,9 +1356,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugParentAndChild() throws Exception {
-    CBCriteria drugNode1 = drugCriteriaParent();
+    DbCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
-    CBCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
+    DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
 
     insertCriteriaAncestor(1520218, 1520218);
@@ -1697,8 +1697,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsPPI() throws Exception {
-    CBCriteria surveyNode =
-        new CBCriteria()
+    DbCriteria surveyNode =
+        new DbCriteria()
             .parentId(0)
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
@@ -1708,8 +1708,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .standard(false)
             .conceptId("22");
     saveCriteriaWithPath("0", surveyNode);
-    CBCriteria questionNode =
-        new CBCriteria()
+    DbCriteria questionNode =
+        new DbCriteria()
             .parentId(surveyNode.getId())
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
@@ -1721,8 +1721,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .conceptId("1585899")
             .synonyms("[SURVEY_rank1]");
     saveCriteriaWithPath(surveyNode.getPath(), questionNode);
-    CBCriteria answerNode =
-        new CBCriteria()
+    DbCriteria answerNode =
+        new DbCriteria()
             .parentId(questionNode.getId())
             .domainId(DomainType.SURVEY.toString())
             .type(CriteriaType.PPI.toString())
@@ -1810,7 +1810,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   protected String getTablePrefix() {
-    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     return cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset();
   }
 
@@ -1850,7 +1850,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertThat(participantCount).isEqualTo(expectedCount);
   }
 
-  private void saveCriteriaWithPath(String path, CBCriteria criteria) {
+  private void saveCriteriaWithPath(String path, DbCriteria criteria) {
     criteria = cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
     criteria.path(path.isEmpty() ? pathEnd : path + "." + pathEnd);
