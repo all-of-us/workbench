@@ -77,28 +77,23 @@ public class ExportWorkspaceData {
     return new WorkspaceServiceImpl(null, null, null, null, null, null, null, null, null);
   }
 
-  @Bean
-  ServiceAccountAPIClientFactory serviceAccountAPIClientFactory(
-      Provider<WorkbenchConfig> configProvider) {
-    return new ServiceAccountAPIClientFactory(configProvider.get().firecloud.baseUrl);
-  }
-
   private static WorkspacesApi workspacesApi;
 
   @Primary
   @Bean
   @Scope("prototype")
   @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
-  WorkspacesApi workspaceApi() {
-    return workspacesApi;
-  }
-
-  private void initializeApis(ServiceAccountAPIClientFactory apiClientFactory) {
-    try {
-      workspacesApi = apiClientFactory.workspacesApi();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+  WorkspacesApi workspaceApi(Provider<WorkbenchConfig> configProvider) {
+    if (workspacesApi == null && configProvider.get() != null) {
+      try {
+        workspacesApi = new ServiceAccountAPIClientFactory(configProvider.get().firecloud.baseUrl)
+            .workspacesApi();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     }
+
+    return workspacesApi;
   }
 
   @Bean
@@ -109,12 +104,10 @@ public class ExportWorkspaceData {
       DataSetDao dataSetDao,
       NotebooksService notebooksService,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
-      Provider<WorkspacesApi> workspacesApiProvider,
-      ServiceAccountAPIClientFactory apiClientFactory) {
+      Provider<WorkspacesApi> workspacesApiProvider) {
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
 
-      initializeApis(apiClientFactory);
       WorkspacesApi workspacesApi = workspacesApiProvider.get();
 
       FileWriter writer = new FileWriter(opts.getOptionValue(exportFilenameOpt.getLongOpt()));
@@ -186,6 +179,10 @@ public class ExportWorkspaceData {
 
         if (rows.size() % 10 == 0) {
           log.info("Processed " + rows.size() + "/" + workspaceDao.count() + " rows");
+        }
+
+        if (rows.size() == 50) {
+          break;
         }
       }
 

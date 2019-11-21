@@ -22,6 +22,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
@@ -111,8 +112,14 @@ public class CommandLineToolConfig {
    */
   @Bean
   @Lazy
+  @Scope("prototype")
   WorkbenchConfig workbenchConfig(ConfigDao configDao) {
     Config config = configDao.findOne(Config.MAIN_CONFIG_ID);
+
+    if (config == null) {
+      return null;
+    }
+
     Gson gson = new Gson();
     return gson.fromJson(config.getConfiguration(), WorkbenchConfig.class);
   }
