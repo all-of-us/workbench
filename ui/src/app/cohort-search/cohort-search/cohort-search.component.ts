@@ -8,8 +8,9 @@ import {
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import {Observable} from 'rxjs/Observable';
 
-import {idsInUse, initExisting, searchRequestStore} from 'app/cohort-search/search-state.service';
+import {cdrVersionStore, idsInUse, initExisting, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {mapRequest, parseCohortDefinition} from 'app/cohort-search/utils';
+import {CdrVersionStorageService} from 'app/services/cdr-version-storage.service';
 import {currentCohortStore, currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
 import {SearchRequest} from 'generated/fetch';
 
@@ -38,6 +39,8 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
   modalOpen = false;
   saving = false;
 
+  constructor(private cdrVersions: CdrVersionStorageService) {}
+
   ngOnInit() {
     this.subscription = Observable.combineLatest(
       queryParamsStore, currentWorkspaceStore
@@ -61,6 +64,14 @@ export class CohortSearchComponent implements OnInit, OnDestroy {
         this.cohort = {criteria: '{"includes":[],"excludes":[]}'};
       }
     });
+
+    this.subscription.add(this.cdrVersions.cdrVersions$.subscribe(cdrResponse => {
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const cdrVersion = cdrResponse.items.find(cdr => cdr.cdrVersionId === cdrVersionId);
+      if (cdrVersion) {
+        cdrVersionStore.next(cdrVersion);
+      }
+    }));
 
     searchRequestStore.subscribe(sr => {
       this.criteria = sr;
