@@ -204,8 +204,8 @@ public class ExportWorkspaceData {
 class CustomMappingStrategy<T> extends ColumnPositionMappingStrategy<T> {
   @Override
   public String[] generateHeader(T bean) {
-
     super.setColumnMapping(new String[FieldUtils.getAllFields(bean.getClass()).length]);
+
     final int numColumns = findMaxFieldIndex();
 
     String[] header = new String[numColumns + 1];

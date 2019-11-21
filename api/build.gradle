@@ -638,7 +638,7 @@ task fetchWorkspaceDetails(type: JavaExec) {
   }
 }
 
-// See project.rb command: export-user-data
+// See project.rb command: export-workspace-data
 task exportWorkspaceData(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.ExportWorkspaceData"
