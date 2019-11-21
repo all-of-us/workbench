@@ -454,7 +454,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    DbWorkspace savedWorkspace =
+    DbWorkspace savedDbWorkspace =
         workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
 
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
@@ -471,14 +471,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      savedWorkspace =
+      savedDbWorkspace =
           workspaceService.updateWorkspaceAcls(
-              savedWorkspace, clonedRoles, getRegisteredUserDomainEmail());
+              savedDbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
-    workspaceAuditAdapter.fireDuplicateAction(fromWorkspace, savedWorkspace);
+    final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
+    workspaceAuditAdapter.fireDuplicateAction(
+        fromWorkspace.getWorkspaceId(),
+        savedDbWorkspace.getWorkspaceId(),
+        savedWorkspace);
     return ResponseEntity.ok(
         new CloneWorkspaceResponse()
-            .workspace(WorkspaceConversionUtils.toApiWorkspace(savedWorkspace, toFcWorkspace)));
+            .workspace(savedWorkspace));
   }
 
   // A retry period is needed because the permission to copy files into the cloned workspace is not

@@ -20,7 +20,7 @@ constructor(
     CREATOR("creator",
             Workspace::getCreator),
     DATA_ACCESS_LEVEL("data_access_level",
-            { it.dataAccessLevel.toString() }),
+            { it.dataAccessLevel?.toString() }),
     ADDITIONAL_NOTES("additional_notes",
             { it.researchPurpose.additionalNotes }),
     APPROVED("approved",

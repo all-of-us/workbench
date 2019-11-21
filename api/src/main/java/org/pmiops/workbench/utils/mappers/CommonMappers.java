@@ -1,6 +1,7 @@
 package org.pmiops.workbench.utils.mappers;
 
 import java.sql.Timestamp;
+import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
@@ -31,7 +32,10 @@ public class CommonMappers {
   }
 
   public static String cdrVersionToId(CdrVersion cdrVersion) {
-    return Long.toString(cdrVersion.getCdrVersionId());
+    return Optional.ofNullable(cdrVersion)
+        .map(CdrVersion::getCdrVersionId)
+        .map(id -> Long.toString(id))
+        .orElse(null);
   }
 
   public static Short dataAccessLevelToStorageEnum(DataAccessLevel dataAccessLevel) {

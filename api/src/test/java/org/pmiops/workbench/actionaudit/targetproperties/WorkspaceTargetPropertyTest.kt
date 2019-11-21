@@ -14,7 +14,6 @@ class WorkspaceTargetPropertyTest {
 
     private var workspace1: Workspace? = null
     private var workspace2: Workspace? = null
-    private var emptyWorkspace: Workspace? = null
 
     @Before
     fun setUp() {
@@ -54,8 +53,6 @@ class WorkspaceTargetPropertyTest {
             .apply { etag = "etag_1" }
             .apply { dataAccessLevel = DataAccessLevel.REGISTERED }
             .apply { published = false }
-
-        emptyWorkspace = Workspace().apply { researchPurpose = ResearchPurpose() }
     }
 
     @Test
@@ -64,20 +61,13 @@ class WorkspaceTargetPropertyTest {
                 WorkspaceTargetProperty.values(),
                 workspace1!!)
 
-        assertThat(propertiesByName).hasSize(6)
+        assertThat(propertiesByName).hasSize(20)
         assertThat(propertiesByName[WorkspaceTargetProperty.INTENDED_STUDY.propertyName])
                 .isEqualTo("stubbed toes")
         assertThat(propertiesByName[WorkspaceTargetProperty.CDR_VERSION_ID.propertyName])
                 .isEqualTo("1")
         assertThat(propertiesByName[WorkspaceTargetProperty.REASON_FOR_ALL_OF_US.propertyName])
                 .isNull()
-    }
-
-    @Test
-    fun testEmptyWorkspaceGivesEmptyMap() {
-        assertThat(TargetPropertyExtractor.getPropertyValuesByName(
-                WorkspaceTargetProperty.values(), emptyWorkspace!!))
-                .isEmpty()
     }
 
     @Test

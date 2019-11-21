@@ -33,9 +33,13 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.utils.WorkspaceMapper;
+import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -50,9 +54,12 @@ public class WorkspaceAuditAdapterTest {
 
   private WorkspaceAuditAdapter workspaceAuditAdapter;
   private Workspace workspace1;
+  private Workspace workspace2;
   private DbUser user1;
   private DbWorkspace dbWorkspace1;
   private DbWorkspace dbWorkspace2;
+
+  @Autowired private WorkspaceMapper workspaceMapper;
 
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private Clock mockClock;
@@ -63,6 +70,7 @@ public class WorkspaceAuditAdapterTest {
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
 
   @TestConfiguration
+  @Import(value = {WorkspaceMapperImpl.class})
   @MockBean(value = {ActionAuditService.class})
   static class Configuration {}
 
@@ -109,6 +117,7 @@ public class WorkspaceAuditAdapterTest {
     dbWorkspace2.setCreationTime(new Timestamp(now));
     dbWorkspace2.setCreator(user1);
 
+    workspace2 = workspaceMapper.toApiWorkspace(dbWorkspace2, null);
     doReturn(Y2K_EPOCH_MILLIS).when(mockClock).millis();
     doReturn(ACTION_ID).when(mockActionIdProvider).get();
   }
@@ -118,10 +127,11 @@ public class WorkspaceAuditAdapterTest {
     workspaceAuditAdapter.fireCreateAction(workspace1, WORKSPACE_1_DB_ID);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
     Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
-    assertThat(eventsSent.size()).isEqualTo(6);
+    assertThat(eventsSent).hasSize(20);
     Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
     assertThat(firstEvent.isPresent()).isTrue();
-    assertThat(firstEvent.get().getActionType()).isEqualTo(ActionType.CREATE);
+    assertThat(firstEvent.map(ActionAuditEvent::getActionType).orElse(null))
+        .isEqualTo(ActionType.CREATE);
     assertThat(
             eventsSent.stream()
                 .map(ActionAuditEvent::getActionType)
@@ -141,10 +151,10 @@ public class WorkspaceAuditAdapterTest {
 
   @Test
   public void testFiresDuplicateEvent() {
-    workspaceAuditAdapter.fireDuplicateAction(dbWorkspace1, dbWorkspace2);
+    workspaceAuditAdapter.fireDuplicateAction(dbWorkspace1.getWorkspaceId(), dbWorkspace2.getWorkspaceId(), workspace2);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
     final Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
-    assertThat(eventsSent).hasSize(2);
+    assertThat(eventsSent).hasSize(14);
 
     // need same actionId for all events
     assertThat(eventsSent.stream().map(ActionAuditEvent::getActionId).distinct().count())

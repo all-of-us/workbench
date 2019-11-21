@@ -15,8 +15,9 @@ interface WorkspaceAuditAdapter {
     fun fireDeleteAction(dbWorkspace: DbWorkspace)
 
     fun fireDuplicateAction(
-        sourceWorkspaceDbModel: DbWorkspace,
-        destinationWorkspaceDbModel: DbWorkspace
+        sourceWorkspaceId: Long,
+        destinationWorkspaceId: Long,
+        destinationWorkspace: Workspace
     )
 
     fun fireCollaborateAction(sourceWorkspaceId: Long, aclStringsByUserId: Map<Long, String>)

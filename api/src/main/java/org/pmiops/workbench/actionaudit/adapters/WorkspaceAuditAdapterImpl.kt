@@ -117,8 +117,9 @@ constructor(
     }
 
     override fun fireDuplicateAction(
-        sourceWorkspaceDbModel: DbWorkspace,
-        destinationWorkspaceDbModel: DbWorkspace
+            sourceWorkspaceId: Long,
+            destinationWorkspaceId: Long,
+            destinationWorkspace: Workspace
     ) {
         try {
             // We represent the duplication as a single action with events with different
@@ -134,12 +135,11 @@ constructor(
                     agentType = AgentType.USER,
                     agentId = info.userId,
                     targetType = TargetType.WORKSPACE,
-                    targetIdMaybe = sourceWorkspaceDbModel.workspaceId,
+                    targetIdMaybe = sourceWorkspaceId,
                     timestamp = info.timestamp
             )
             val destinationPropertyValues = TargetPropertyExtractor.getPropertyValuesByName(
-                    WorkspaceTargetProperty.values(),
-                    WorkspaceConversionUtils.toApiWorkspace(destinationWorkspaceDbModel))
+                    WorkspaceTargetProperty.values(), destinationWorkspace)
 
             val destinationEvents: List<ActionAuditEvent> = destinationPropertyValues.entries
                     .map { ActionAuditEvent(
@@ -150,7 +150,7 @@ constructor(
                             agentId = info.userId,
                             targetType = TargetType.WORKSPACE,
                             targetPropertyMaybe = it.key,
-                            targetIdMaybe = destinationWorkspaceDbModel.workspaceId,
+                            targetIdMaybe = destinationWorkspaceId,
                             newValueMaybe = it.value,
                             timestamp = info.timestamp
                             ) }

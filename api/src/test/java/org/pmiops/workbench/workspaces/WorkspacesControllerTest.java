@@ -877,7 +877,7 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
     verify(mockWorkspaceAuditAdapter)
-        .fireDuplicateAction(any(DbWorkspace.class), any(DbWorkspace.class));
+        .fireDuplicateAction(anyLong(), anyLong(), any(Workspace.class));
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
     stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
