@@ -7,7 +7,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "config")
-public class Config {
+public class DbConfig {
 
   public static final String MAIN_CONFIG_ID = "main";
   // TODO: consider whether we need different CDR schema config for different CDR versions in future

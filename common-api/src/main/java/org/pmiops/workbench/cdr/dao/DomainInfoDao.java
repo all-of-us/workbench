@@ -1,11 +1,11 @@
 package org.pmiops.workbench.cdr.dao;
 
 import java.util.List;
-import org.pmiops.workbench.cdr.model.DomainInfo;
+import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
+public interface DomainInfoDao extends CrudRepository<DbDomainInfo, Long> {
 
   // TODO: consider not using @Query since it doesn't let us re-use shared SQL expressions for these
   // methods?
@@ -20,17 +20,17 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
    */
   @Query(
       value =
-          "select new org.pmiops.workbench.cdr.model.DomainInfo(\n"
+          "select new org.pmiops.workbench.cdr.model.DbDomainInfo(\n"
               + "d.domain, d.domainId, d.name, d.description,\n"
               + "d.conceptId, 0L, COUNT(*), d.participantCount)\n"
-              + "from DomainInfo d\n"
-              + "join Concept c ON d.domainId = c.domainId\n"
+              + "from DbDomainInfo d\n"
+              + "join DbConcept c ON d.domainId = c.domainId\n"
               + "where (c.countValue > 0 or c.sourceCountValue > 0) \n"
               + "and matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 and\n"
               + "c.standardConcept IN ('S', 'C')\n"
               + "group by d.domain, d.domainId, d.name, d.description, d.conceptId\n"
               + "order by d.domainId")
-  List<DomainInfo> findStandardConceptCounts(String matchExpression);
+  List<DbDomainInfo> findStandardConceptCounts(String matchExpression);
 
   /**
    * Returns domain metadata and concept counts for domains, matching both standard and non-standard
@@ -42,16 +42,16 @@ public interface DomainInfoDao extends CrudRepository<DomainInfo, Long> {
    */
   @Query(
       value =
-          "select new org.pmiops.workbench.cdr.model.DomainInfo(\n"
+          "select new org.pmiops.workbench.cdr.model.DbDomainInfo(\n"
               + "d.domain, d.domainId, d.name, d.description,\n"
               + "d.conceptId, COUNT(*), 0L, d.participantCount)\n"
-              + "from DomainInfo d\n"
-              + "join Concept c ON d.domainId = c.domainId\n"
+              + "from DbDomainInfo d\n"
+              + "join DbConcept c ON d.domainId = c.domainId\n"
               + "where (c.countValue > 0 or c.sourceCountValue > 0) \n"
               + "and matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0\n"
               + "group by d.domain, d.domainId, d.name, d.description, d.conceptId\n"
               + "order by d.domainId")
-  List<DomainInfo> findAllMatchConceptCounts(String matchExpression);
+  List<DbDomainInfo> findAllMatchConceptCounts(String matchExpression);
 
-  List<DomainInfo> findByOrderByDomainId();
+  List<DbDomainInfo> findByOrderByDomainId();
 }

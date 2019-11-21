@@ -29,7 +29,7 @@ import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -135,7 +135,7 @@ public class ClusterControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired Clock clock;
 
-  private CdrVersion cdrVersion;
+  private DbCdrVersion cdrVersion;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
   private Cluster testCluster;
   private DbWorkspace testWorkspace;
@@ -159,7 +159,7 @@ public class ClusterControllerTest {
 
     createUser(OTHER_USER_EMAIL);
 
-    cdrVersion = new CdrVersion();
+    cdrVersion = new DbCdrVersion();
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.

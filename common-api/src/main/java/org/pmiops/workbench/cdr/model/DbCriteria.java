@@ -12,7 +12,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
 @Table(name = "cb_criteria")
-public class CBCriteria {
+public class DbCriteria {
 
   private long id;
   private long parentId;
@@ -44,7 +44,7 @@ public class CBCriteria {
     this.id = id;
   }
 
-  public CBCriteria id(long id) {
+  public DbCriteria id(long id) {
     this.id = id;
     return this;
   }
@@ -58,7 +58,7 @@ public class CBCriteria {
     this.parentId = parentId;
   }
 
-  public CBCriteria parentId(long parentId) {
+  public DbCriteria parentId(long parentId) {
     this.parentId = parentId;
     return this;
   }
@@ -72,7 +72,7 @@ public class CBCriteria {
     this.subtype = subtype;
   }
 
-  public CBCriteria subtype(String subtype) {
+  public DbCriteria subtype(String subtype) {
     this.subtype = subtype;
     return this;
   }
@@ -86,7 +86,7 @@ public class CBCriteria {
     this.type = type;
   }
 
-  public CBCriteria type(String type) {
+  public DbCriteria type(String type) {
     this.type = type;
     return this;
   }
@@ -100,7 +100,7 @@ public class CBCriteria {
     this.code = code;
   }
 
-  public CBCriteria code(String code) {
+  public DbCriteria code(String code) {
     this.code = code;
     return this;
   }
@@ -114,7 +114,7 @@ public class CBCriteria {
     this.name = name;
   }
 
-  public CBCriteria name(String name) {
+  public DbCriteria name(String name) {
     this.name = name;
     return this;
   }
@@ -128,7 +128,7 @@ public class CBCriteria {
     this.group = group;
   }
 
-  public CBCriteria group(boolean group) {
+  public DbCriteria group(boolean group) {
     this.group = group;
     return this;
   }
@@ -142,7 +142,7 @@ public class CBCriteria {
     this.selectable = selectable;
   }
 
-  public CBCriteria selectable(boolean selectable) {
+  public DbCriteria selectable(boolean selectable) {
     this.selectable = selectable;
     return this;
   }
@@ -156,7 +156,7 @@ public class CBCriteria {
     this.count = count;
   }
 
-  public CBCriteria count(String count) {
+  public DbCriteria count(String count) {
     this.count = count;
     return this;
   }
@@ -175,7 +175,7 @@ public class CBCriteria {
     this.conceptId = conceptId;
   }
 
-  public CBCriteria conceptId(String conceptId) {
+  public DbCriteria conceptId(String conceptId) {
     this.conceptId = conceptId;
     return this;
   }
@@ -189,7 +189,7 @@ public class CBCriteria {
     this.domainId = domainId;
   }
 
-  public CBCriteria domainId(String domainId) {
+  public DbCriteria domainId(String domainId) {
     this.domainId = domainId;
     return this;
   }
@@ -203,7 +203,7 @@ public class CBCriteria {
     this.attribute = attribute;
   }
 
-  public CBCriteria attribute(boolean attribute) {
+  public DbCriteria attribute(boolean attribute) {
     this.attribute = attribute;
     return this;
   }
@@ -217,7 +217,7 @@ public class CBCriteria {
     this.path = path;
   }
 
-  public CBCriteria path(String path) {
+  public DbCriteria path(String path) {
     this.path = path;
     return this;
   }
@@ -231,7 +231,7 @@ public class CBCriteria {
     this.synonyms = synonyms;
   }
 
-  public CBCriteria synonyms(String synonyms) {
+  public DbCriteria synonyms(String synonyms) {
     this.synonyms = synonyms;
     return this;
   }
@@ -245,7 +245,7 @@ public class CBCriteria {
     this.value = value;
   }
 
-  public CBCriteria value(String value) {
+  public DbCriteria value(String value) {
     this.value = value;
     return this;
   }
@@ -259,7 +259,7 @@ public class CBCriteria {
     this.hierarchy = hierarchy;
   }
 
-  public CBCriteria hierarchy(boolean hierarchy) {
+  public DbCriteria hierarchy(boolean hierarchy) {
     this.hierarchy = hierarchy;
     return this;
   }
@@ -273,7 +273,7 @@ public class CBCriteria {
     this.ancestorData = ancestorData;
   }
 
-  public CBCriteria ancestorData(boolean ancestorData) {
+  public DbCriteria ancestorData(boolean ancestorData) {
     this.ancestorData = ancestorData;
     return this;
   }
@@ -287,7 +287,7 @@ public class CBCriteria {
     this.standard = standard;
   }
 
-  public CBCriteria standard(boolean standard) {
+  public DbCriteria standard(boolean standard) {
     this.standard = standard;
     return this;
   }
@@ -296,7 +296,7 @@ public class CBCriteria {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    CBCriteria criteria = (CBCriteria) o;
+    DbCriteria criteria = (DbCriteria) o;
     return parentId == criteria.parentId
         && group == criteria.group
         && selectable == criteria.selectable
