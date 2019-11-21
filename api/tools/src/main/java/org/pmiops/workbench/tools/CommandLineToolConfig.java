@@ -7,28 +7,16 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.gson.Gson;
 import java.io.IOException;
-import org.hibernate.boot.model.naming.ImplicitNamingStrategy;
-import org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl;
-import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
-import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
-import org.hibernate.cfg.EJB3NamingStrategy;
-import org.hibernate.cfg.NamingStrategy;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
-import org.pmiops.workbench.cohorts.CohortCloningService;
-import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
-import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.model.Config;
-import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
-import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -50,10 +38,10 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 @Configuration
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @Import({
-    RetryConfig.class,
-    CommonConfig.class,
-    NotebooksServiceImpl.class,
-    UserRecentResourceServiceImpl.class
+  RetryConfig.class,
+  CommonConfig.class,
+  NotebooksServiceImpl.class,
+  UserRecentResourceServiceImpl.class
 })
 // Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")

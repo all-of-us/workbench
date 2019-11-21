@@ -50,9 +50,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-/**
- * A tool that will generate a CSV export of our workspace data
- */
+/** A tool that will generate a CSV export of our workspace data */
 @SpringBootApplication
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @EntityScan("org.pmiops.workbench.db.model")
@@ -61,7 +59,12 @@ public class ExportWorkspaceData {
   private static final Logger log = Logger.getLogger(ExportWorkspaceData.class.getName());
 
   private static Option exportFilenameOpt =
-      Option.builder().longOpt("exportFilename").desc("Filename of export").required().hasArg().build();
+      Option.builder()
+          .longOpt("exportFilename")
+          .desc("Filename of export")
+          .required()
+          .hasArg()
+          .build();
 
   private static Options options = new Options().addOption(exportFilenameOpt);
 
@@ -75,7 +78,8 @@ public class ExportWorkspaceData {
   }
 
   @Bean
-  ServiceAccountAPIClientFactory serviceAccountAPIClientFactory(Provider<WorkbenchConfig> configProvider) {
+  ServiceAccountAPIClientFactory serviceAccountAPIClientFactory(
+      Provider<WorkbenchConfig> configProvider) {
     return new ServiceAccountAPIClientFactory(configProvider.get().firecloud.baseUrl);
   }
 
@@ -97,9 +101,9 @@ public class ExportWorkspaceData {
     }
   }
 
-
   @Bean
-  public CommandLineRunner run(WorkspaceDao workspaceDao,
+  public CommandLineRunner run(
+      WorkspaceDao workspaceDao,
       CohortDao cohortDao,
       ConceptSetDao conceptSetDao,
       DataSetDao dataSetDao,
@@ -129,37 +133,42 @@ public class ExportWorkspaceData {
         row.setCreatedDate(dateFormat.format(workspace.getCreationTime()));
 
         try {
-          row.setCollaborators(extractAclResponse(
-              workspacesApi.getWorkspaceAcl(
-                  workspace.getWorkspaceNamespace(),
-                  workspace.getFirecloudName())
-          ).keySet().stream().collect(
-              Collectors.joining(",\n")));
+          row.setCollaborators(
+              extractAclResponse(
+                      workspacesApi.getWorkspaceAcl(
+                          workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+                  .keySet().stream()
+                  .collect(Collectors.joining(",\n")));
         } catch (ApiException e) {
           row.setCollaborators("Error: Not Found");
         }
 
         Collection<DbCohort> cohorts = cohortDao.findByWorkspaceId(workspace.getWorkspaceId());
-        row.setCohortNames(cohorts.stream().map(cohort -> cohort.getName())
-            .collect(Collectors.joining(",\n")));
+        row.setCohortNames(
+            cohorts.stream().map(cohort -> cohort.getName()).collect(Collectors.joining(",\n")));
         row.setCohortCount(String.valueOf(cohorts.size()));
 
-        Collection<DbConceptSet> conceptSets = conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
-        row.setConceptSetNames(conceptSets.stream().map(conceptSet -> conceptSet.getName())
-            .collect(Collectors.joining(",\n")));
+        Collection<DbConceptSet> conceptSets =
+            conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+        row.setConceptSetNames(
+            conceptSets.stream()
+                .map(conceptSet -> conceptSet.getName())
+                .collect(Collectors.joining(",\n")));
         row.setConceptSetCount(String.valueOf(conceptSets.size()));
 
         Collection<DbDataset> datasets = dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
-        row.setDatasetNames(datasets.stream().map(dataSet -> dataSet.getName())
-            .collect(Collectors.joining(",\n")));
+        row.setDatasetNames(
+            datasets.stream().map(dataSet -> dataSet.getName()).collect(Collectors.joining(",\n")));
         row.setDatasetCount(String.valueOf(datasets.size()));
 
         try {
-          Collection<FileDetail> notebooks = notebooksService.getNotebooks(
-              workspace.getWorkspaceNamespace(),
-              workspace.getFirecloudName());
-          row.setNotebookNames(notebooks.stream().map(notebook -> notebook.getName()).collect(
-              Collectors.joining(",\n")));
+          Collection<FileDetail> notebooks =
+              notebooksService.getNotebooks(
+                  workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+          row.setNotebookNames(
+              notebooks.stream()
+                  .map(notebook -> notebook.getName())
+                  .collect(Collectors.joining(",\n")));
           row.setNotebooksCount(String.valueOf(notebooks.size()));
         } catch (NotFoundException e) {
           row.setNotebookNames("Error: Not Found");
@@ -183,8 +192,8 @@ public class ExportWorkspaceData {
       final CustomMappingStrategy mappingStrategy = new CustomMappingStrategy();
       mappingStrategy.setType(WorkspaceExportRow.class);
 
-      StatefulBeanToCsv beanWriter = new StatefulBeanToCsvBuilder(writer)
-          .withMappingStrategy(mappingStrategy).build();
+      StatefulBeanToCsv beanWriter =
+          new StatefulBeanToCsvBuilder(writer).withMappingStrategy(mappingStrategy).build();
 
       beanWriter.write(rows);
 
@@ -220,7 +229,6 @@ class CustomMappingStrategy<T> extends ColumnPositionMappingStrategy<T> {
   }
 
   private String extractHeaderName(final BeanField<T> beanField) {
-    return beanField.getField()
-        .getDeclaredAnnotationsByType(CsvBindByName.class)[0].column();
+    return beanField.getField().getDeclaredAnnotationsByType(CsvBindByName.class)[0].column();
   }
 }
