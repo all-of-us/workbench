@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +29,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConceptDaoTest {
 
   @Autowired ConceptDao conceptDao;
-  private Concept concept1;
-  private Concept concept2;
+  private DbConcept concept1;
+  private DbConcept concept2;
 
   @Before
   public void setUp() {
 
     concept1 =
         conceptDao.save(
-            new Concept()
+            new DbConcept()
                 .conceptId(1L)
                 .domainId(DomainType.CONDITION.toString())
                 .conceptName("Personal history of malignant neoplasm of breast")
@@ -53,7 +53,7 @@ public class ConceptDaoTest {
                         "Personal history of malignant neoplasm of breast|Personal history of malignant neoplasm of breast")));
     concept2 =
         conceptDao.save(
-            new Concept()
+            new DbConcept()
                 .conceptId(2L)
                 .domainId(DomainType.CONDITION.toString())
                 .conceptName("Personal history of malignant neoplasm")
@@ -72,7 +72,7 @@ public class ConceptDaoTest {
 
   @Test
   public void findAll() throws Exception {
-    List<Concept> concepts = (List<Concept>) conceptDao.findAll();
+    List<DbConcept> concepts = (List<DbConcept>) conceptDao.findAll();
     assertEquals(2, concepts.size());
     assertTrue(concepts.contains(concept1));
     assertTrue(concepts.contains(concept2));

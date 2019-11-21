@@ -13,8 +13,12 @@ import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
+<<<<<<< HEAD
 import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.model.Config;
+=======
+import org.pmiops.workbench.db.model.DbConfig;
+>>>>>>> 24e7f8591536d3f6f59d51410b74e85b43574c5d
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.springframework.context.annotation.Bean;
@@ -114,7 +118,7 @@ public class CommandLineToolConfig {
   @Lazy
   @Scope("prototype")
   WorkbenchConfig workbenchConfig(ConfigDao configDao) {
-    Config config = configDao.findOne(Config.MAIN_CONFIG_ID);
+    DbConfig config = configDao.findOne(DbConfig.MAIN_CONFIG_ID);
 
     if (config == null) {
       return null;

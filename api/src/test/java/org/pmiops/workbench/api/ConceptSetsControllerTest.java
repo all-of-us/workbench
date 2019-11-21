@@ -23,6 +23,7 @@ import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -35,7 +36,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -151,14 +152,10 @@ public class ConceptSetsControllerTest {
           .prevalence(0.2F)
           .conceptSynonyms(new ArrayList<String>());
 
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
-      makeConcept(CLIENT_CONCEPT_1);
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
-      makeConcept(CLIENT_CONCEPT_2);
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_3 =
-      makeConcept(CLIENT_CONCEPT_3);
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_4 =
-      makeConcept(CLIENT_CONCEPT_4);
+  private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
+  private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
+  private static final DbConcept CONCEPT_3 = makeConcept(CLIENT_CONCEPT_3);
+  private static final DbConcept CONCEPT_4 = makeConcept(CLIENT_CONCEPT_4);
 
   private static final String USER_EMAIL = "bob@gmail.com";
   private static final String WORKSPACE_NAMESPACE = "ns";
@@ -272,7 +269,7 @@ public class ConceptSetsControllerTest {
     user = userDao.save(user);
     currentUser = user;
 
-    CdrVersion cdrVersion = new CdrVersion();
+    DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.

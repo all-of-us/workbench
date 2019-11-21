@@ -7,8 +7,8 @@ import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -55,11 +55,11 @@ public class CdrVersionService {
    * Sets the active CDR version, after checking to ensure that the requester is in the appropriate
    * authorization domain. If you have already retrieved a workspace for the requester (and thus
    * implicitly know they are in the authorization domain for its CDR version), you can instead just
-   * call {@link CdrVersionContext#setCdrVersionNoCheckAuthDomain(CdrVersion)} directly.
+   * call {@link CdrVersionContext#setCdrVersionNoCheckAuthDomain(DbCdrVersion)} directly.
    *
    * @param version
    */
-  public void setCdrVersion(CdrVersion version) {
+  public void setCdrVersion(DbCdrVersion version) {
     // TODO: map data access level to authorization domain here (RW-943)
     String authorizationDomain = configProvider.get().firecloud.registeredDomainName;
     if (!fireCloudService.isUserMemberOfGroup(userProvider.get().getEmail(), authorizationDomain)) {
@@ -78,9 +78,9 @@ public class CdrVersionService {
    * {@link DataAccessLevel} values.
    *
    * @param dataAccessLevel the data access level of the user
-   * @return a list of {@link CdrVersion} in descending timestamp, data access level order.
+   * @return a list of {@link DbCdrVersion} in descending timestamp, data access level order.
    */
-  public List<CdrVersion> findAuthorizedCdrVersions(DataAccessLevel dataAccessLevel) {
+  public List<DbCdrVersion> findAuthorizedCdrVersions(DataAccessLevel dataAccessLevel) {
     ImmutableSet<Short> visibleValues = DATA_ACCESS_LEVEL_TO_VISIBLE_VALUES.get(dataAccessLevel);
     if (visibleValues == null) {
       return ImmutableList.of();
