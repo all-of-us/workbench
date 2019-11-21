@@ -41,7 +41,7 @@ class TargetPropertyExtractorTest {
                         workspace!!)
         assertThat(propertyValuesByName[WorkspaceTargetProperty.NAME.propertyName])
                 .isEqualTo("DbWorkspace 1")
-        assertThat(propertyValuesByName).hasSize(20);
+        assertThat(propertyValuesByName).hasSize(20)
     }
 
     @Test fun testGetTargetPropertyEnumByTargetClass() {

@@ -475,14 +475,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspaceService.updateWorkspaceAcls(
               savedDbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
-    final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
+    final Workspace savedWorkspace =
+        workspaceMapper.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
     workspaceAuditAdapter.fireDuplicateAction(
-        fromWorkspace.getWorkspaceId(),
-        savedDbWorkspace.getWorkspaceId(),
-        savedWorkspace);
-    return ResponseEntity.ok(
-        new CloneWorkspaceResponse()
-            .workspace(savedWorkspace));
+        fromWorkspace.getWorkspaceId(), savedDbWorkspace.getWorkspaceId(), savedWorkspace);
+    return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 
   // A retry period is needed because the permission to copy files into the cloned workspace is not

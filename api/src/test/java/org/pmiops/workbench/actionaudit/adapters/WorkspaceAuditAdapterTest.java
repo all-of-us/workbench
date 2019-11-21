@@ -151,7 +151,8 @@ public class WorkspaceAuditAdapterTest {
 
   @Test
   public void testFiresDuplicateEvent() {
-    workspaceAuditAdapter.fireDuplicateAction(dbWorkspace1.getWorkspaceId(), dbWorkspace2.getWorkspaceId(), workspace2);
+    workspaceAuditAdapter.fireDuplicateAction(
+        dbWorkspace1.getWorkspaceId(), dbWorkspace2.getWorkspaceId(), workspace2);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
     final Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
     assertThat(eventsSent).hasSize(14);

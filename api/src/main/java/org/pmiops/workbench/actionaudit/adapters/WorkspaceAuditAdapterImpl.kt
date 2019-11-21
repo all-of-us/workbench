@@ -14,7 +14,6 @@ import org.pmiops.workbench.actionaudit.targetproperties.WorkspaceTargetProperty
 import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.db.model.DbWorkspace
 import org.pmiops.workbench.model.Workspace
-import org.pmiops.workbench.workspaces.WorkspaceConversionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
@@ -117,9 +116,9 @@ constructor(
     }
 
     override fun fireDuplicateAction(
-            sourceWorkspaceId: Long,
-            destinationWorkspaceId: Long,
-            destinationWorkspace: Workspace
+        sourceWorkspaceId: Long,
+        destinationWorkspaceId: Long,
+        destinationWorkspace: Workspace
     ) {
         try {
             // We represent the duplication as a single action with events with different
