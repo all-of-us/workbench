@@ -159,18 +159,20 @@ public class UserService {
     final DataAccessLevel previousDataAccessLevel = dbUser.getDataAccessLevelEnum();
     final DataAccessLevel newDataAccessLevel;
     if (shouldUserBeRegistered(dbUser)) {
-      addToGroupIdempotent(dbUser);
+      addToRegisteredTierGroupIdempotent(dbUser);
       newDataAccessLevel = DataAccessLevel.REGISTERED;
     } else {
-      removeFromGroupIdempotent(dbUser);
+      removeFromRegisteredTierGroupIdempotent(dbUser);
       newDataAccessLevel = DataAccessLevel.UNREGISTERED;
     }
-    dbUser.setDataAccessLevelEnum(newDataAccessLevel);
-    userServiceAuditAdapter.fireUpdateDataAccessAction(
-        dbUser, newDataAccessLevel, previousDataAccessLevel);
+    if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
+      dbUser.setDataAccessLevelEnum(newDataAccessLevel);
+      userServiceAuditAdapter.fireUpdateDataAccessAction(
+          dbUser, newDataAccessLevel, previousDataAccessLevel);
+    }
   }
 
-  private void removeFromGroupIdempotent(DbUser dbUser) {
+  private void removeFromRegisteredTierGroupIdempotent(DbUser dbUser) {
     if (isUserMemberOfFirecloudGroup(dbUser)) {
       this.fireCloudService.removeUserFromGroup(
           dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
@@ -183,7 +185,7 @@ public class UserService {
         dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
   }
 
-  private void addToGroupIdempotent(DbUser user) {
+  private void addToRegisteredTierGroupIdempotent(DbUser user) {
     if (!isUserMemberOfFirecloudGroup(user)) {
       this.fireCloudService.addUserToGroup(
           user.getEmail(), configProvider.get().firecloud.registeredDomainName);

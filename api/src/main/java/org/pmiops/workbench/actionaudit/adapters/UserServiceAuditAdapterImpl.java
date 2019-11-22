@@ -1,6 +1,7 @@
 package org.pmiops.workbench.actionaudit.adapters;
 
 import java.time.Clock;
+import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceAuditAdapterImpl implements UserServiceAuditAdapter {
 
+  private static final Logger log = Logger.getLogger(UserServiceAuditAdapterImpl.class.getName());
   private final ActionAuditService actionAuditService;
   private final Clock clock;
   private Provider<DbUser> dbUserProvider;
@@ -36,22 +38,24 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditAdapter {
 
   @Override
   public void fireUpdateDataAccessAction(
-      DbUser targetUser,
-      DataAccessLevel dataAccessLevel,
-      DataAccessLevel previousDataAccessLevel) {
-    ActionAuditEvent event =
-        new ActionAuditEvent(
-            clock.millis(),
-            AgentType.ADMINISTRATOR,
-            dbUserProvider.get().getUserId(),
-            dbUserProvider.get().getEmail(),
-            actionIdProvider.get(),
-            ActionType.EDIT,
-            TargetType.ACCOUNT,
-            AccountTargetProperty.REGISTRATION_STATUS.toString(),
-            targetUser.getUserId(),
-            previousDataAccessLevel.toString(),
-            dataAccessLevel.toString());
-    actionAuditService.send(event);
+      DbUser targetUser, DataAccessLevel dataAccessLevel, DataAccessLevel previousDataAccessLevel) {
+    try {
+      ActionAuditEvent event =
+          new ActionAuditEvent(
+              clock.millis(),
+              AgentType.ADMINISTRATOR,
+              dbUserProvider.get().getUserId(),
+              dbUserProvider.get().getEmail(),
+              actionIdProvider.get(),
+              ActionType.EDIT,
+              TargetType.ACCOUNT,
+              AccountTargetProperty.REGISTRATION_STATUS.toString(),
+              targetUser.getUserId(),
+              previousDataAccessLevel.toString(),
+              dataAccessLevel.toString());
+      actionAuditService.send(event);
+    } catch (RuntimeException e) {
+      actionAuditService.logRuntimeException(log, e);
+    }
   }
 }
