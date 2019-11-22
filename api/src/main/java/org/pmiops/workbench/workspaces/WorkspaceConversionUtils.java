@@ -2,7 +2,6 @@ package org.pmiops.workbench.workspaces;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -163,9 +162,10 @@ public class WorkspaceConversionUtils {
             .reviewRequested(workspace.getReviewRequested())
             .approved(workspace.getApproved())
             .otherPopulationDetails(workspace.getOtherPopulationDetails())
-        .populationDetails(workspace.getPopulationDetails().stream()
-          .map(DbStorageEnums::specificPopulationFromStorage)
-        .collect(Collectors.toList()));
+            .populationDetails(
+                workspace.getPopulationDetails().stream()
+                    .map(DbStorageEnums::specificPopulationFromStorage)
+                    .collect(Collectors.toList()));
     if (workspace.getTimeRequested() != null) {
       researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
     }

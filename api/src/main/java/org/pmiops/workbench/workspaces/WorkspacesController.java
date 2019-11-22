@@ -479,10 +479,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspaceService.updateWorkspaceAcls(
               savedDbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
-//    final Workspace savedWorkspace =
-//        workspaceMapper.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
     final Workspace savedWorkspace =
-        WorkspaceConversionUtils.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
+        workspaceMapper.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
 
     workspaceAuditAdapter.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), savedDbWorkspace.getWorkspaceId(), savedWorkspace);

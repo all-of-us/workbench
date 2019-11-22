@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -47,6 +48,7 @@ public class WorkspaceMapperTest {
   private static final Timestamp DB_CREATION_TIMESTAMP =
       Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
   private static final int CDR_VERSION_ID = 2;
+  private static final String FIRECLOUD_BUCKET_NAME = "my-favorite-bucket";
 
   private Workspace sourceClientWorkspace;
   private DbWorkspace sourceDbWorkspace;
@@ -65,6 +67,7 @@ public class WorkspaceMapperTest {
     sourceFirecloudWorkspace =
         new org.pmiops.workbench.firecloud.model.Workspace()
             .workspaceId(Long.toString(CREATOR_USER_ID))
+            .bucketName(FIRECLOUD_BUCKET_NAME)
             .createdBy(CREATOR_EMAIL)
             .namespace(FIRECLOUD_NAMESPACE)
             .name(WORKSPACE_FIRECLOUD_NAME);
@@ -102,10 +105,11 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setAncestry(false);
     sourceDbWorkspace.setCommercialPurpose(false);
     sourceDbWorkspace.setPopulation(false);
-    sourceDbWorkspace.setPopulationDetails(ImmutableSet.of(
-        SpecificPopulationEnum.AGE_GROUPS, SpecificPopulationEnum.INCOME_LEVEL).stream()
-        .map(DbStorageEnums::specificPopulationToStorage)
-        .collect(Collectors.toSet()));
+    sourceDbWorkspace.setPopulationDetails(
+        ImmutableSet.of(SpecificPopulationEnum.AGE_GROUPS, SpecificPopulationEnum.INCOME_LEVEL)
+            .stream()
+            .map(DbStorageEnums::specificPopulationToStorage)
+            .collect(Collectors.toSet()));
     sourceDbWorkspace.setSocialBehavioral(false);
     sourceDbWorkspace.setPopulationHealth(true);
     sourceDbWorkspace.setEducational(true);
@@ -129,12 +133,12 @@ public class WorkspaceMapperTest {
     final Workspace ws =
         workspaceMapper.toApiWorkspace(sourceDbWorkspace, sourceFirecloudWorkspace);
     assertThat(ws.getId()).isEqualTo(WORKSPACE_FIRECLOUD_NAME);
-    assertThat(ws.getEtag()).isEqualTo(Long.toString(WORKSPACE_VERSION));
+    assertThat(ws.getEtag()).isEqualTo(Etags.fromVersion(WORKSPACE_VERSION));
     assertThat(ws.getName()).isEqualTo(WORKSPACE_AOU_NAME);
     assertThat(ws.getNamespace()).isEqualTo(FIRECLOUD_NAMESPACE);
     assertThat(ws.getCdrVersionId()).isEqualTo(Long.toString(CDR_VERSION_ID));
     assertThat(ws.getCreator()).isEqualTo(CREATOR_EMAIL);
-    assertThat(ws.getGoogleBucketName()).isNull(); // where does this come from?
+    assertThat(ws.getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
     assertThat(ws.getDataAccessLevel()).isEqualTo(DATA_ACCESS_LEVEL);
 
     final ResearchPurpose rp = ws.getResearchPurpose();
@@ -164,7 +168,7 @@ public class WorkspaceMapperTest {
     assertThat(rp.getOtherPurposeDetails()).isEqualTo(sourceDbWorkspace.getOtherPurposeDetails());
     assertThat(rp.getPopulation()).isEqualTo(sourceDbWorkspace.getPopulation());
     assertThat(rp.getPopulationDetails())
-        .containsExactlyElementsIn(sourceDbWorkspace.getPopulationDetails());
+        .containsExactlyElementsIn(sourceDbWorkspace.getSpecificPopulationsEnum());
     assertThat(rp.getPopulationHealth()).isEqualTo(sourceDbWorkspace.getPopulationHealth());
     assertThat(rp.getReasonForAllOfUs()).isEqualTo(sourceDbWorkspace.getReasonForAllOfUs());
     assertThat(rp.getReviewRequested()).isEqualTo(sourceDbWorkspace.getReviewRequested());

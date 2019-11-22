@@ -840,11 +840,10 @@ public class WorkspacesControllerTest {
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(originalWorkspace.getEtag());
 
-    createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL,
-        WorkspaceAccessLevel.OWNER);
+    createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
-    createUserToShareWith(shareWorkspaceRequest, writerUser.getEmail(),
-        WorkspaceAccessLevel.WRITER);
+    createUserToShareWith(
+        shareWorkspaceRequest, writerUser.getEmail(), WorkspaceAccessLevel.WRITER);
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
@@ -858,9 +857,9 @@ public class WorkspacesControllerTest {
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     modPurpose.setPopulation(true);
-    modPurpose.setPopulationDetails(ImmutableList.of(
-        SpecificPopulationEnum.DISABILITY_STATUS,
-        SpecificPopulationEnum.GEOGRAPHY));
+    modPurpose.setPopulationDetails(
+        ImmutableList.of(
+            SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
@@ -882,10 +881,11 @@ public class WorkspacesControllerTest {
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
     stubGetWorkspace(clonedFirecloudWorkspace, WorkspaceAccessLevel.WRITER);
-    final Workspace retrievedWorkspace = workspacesController
-        .getWorkspace(clonedWorkspace.getNamespace(), clonedWorkspace.getId())
-        .getBody()
-        .getWorkspace();
+    final Workspace retrievedWorkspace =
+        workspacesController
+            .getWorkspace(clonedWorkspace.getNamespace(), clonedWorkspace.getId())
+            .getBody()
+            .getWorkspace();
 
     assertWithMessage("get and clone responses are inconsistent")
         .that(clonedWorkspace)
@@ -896,8 +896,10 @@ public class WorkspacesControllerTest {
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
   }
 
-  private UserRole createUserToShareWith(ShareWorkspaceRequest shareWorkspaceRequest,
-      String email, WorkspaceAccessLevel workspaceAccessLevel) {
+  private UserRole createUserToShareWith(
+      ShareWorkspaceRequest shareWorkspaceRequest,
+      String email,
+      WorkspaceAccessLevel workspaceAccessLevel) {
     final UserRole userRole = new UserRole();
     userRole.setEmail(email);
     userRole.setRole(workspaceAccessLevel);
@@ -1768,10 +1770,10 @@ public class WorkspacesControllerTest {
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
     createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
-    createUserToShareWith(shareWorkspaceRequest, "readerfriend@gmail.com",
-        WorkspaceAccessLevel.READER);
-    createUserToShareWith(shareWorkspaceRequest, "writerfriend@gmail.com",
-        WorkspaceAccessLevel.WRITER);
+    createUserToShareWith(
+        shareWorkspaceRequest, "readerfriend@gmail.com", WorkspaceAccessLevel.READER);
+    createUserToShareWith(
+        shareWorkspaceRequest, "writerfriend@gmail.com", WorkspaceAccessLevel.WRITER);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     CLOCK.increment(1000);
@@ -2011,8 +2013,8 @@ public class WorkspacesControllerTest {
     workspacesController.createWorkspace(workspace);
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    createUserToShareWith(shareWorkspaceRequest, "writerfriend@gmail.com",
-        WorkspaceAccessLevel.WRITER);
+    createUserToShareWith(
+        shareWorkspaceRequest, "writerfriend@gmail.com", WorkspaceAccessLevel.WRITER);
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
   }
