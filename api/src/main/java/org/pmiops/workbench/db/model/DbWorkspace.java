@@ -532,6 +532,11 @@ public class DbWorkspace {
   }
 
   @Transient
+  public boolean isActive() {
+    return WorkspaceActiveStatus.ACTIVE.equals(getWorkspaceActiveStatusEnum());
+  }
+
+  @Transient
   public BillingMigrationStatus getBillingMigrationStatusEnum() {
     return DbStorageEnums.billingMigrationStatusFromStorage(billingMigrationStatus);
   }
