@@ -1,6 +1,7 @@
 import {Link} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {Concept} from 'generated/fetch/api';
@@ -205,8 +206,8 @@ export class ConceptTable extends React.Component<Props, State> {
   render() {
     const {pageConcepts, pageLoading, selectedConcepts} = this.state;
     const {placeholderValue, loading, reactKey} = this.props;
-    return <div data-test-id='conceptTable' key={reactKey}>
-      <DataTable emptyMessage={loading ? '' : placeholderValue}
+    return <div data-test-id='conceptTable' key={reactKey} style={{position: 'relative', minHeight: '10rem'}}>
+      {loading ? <SpinnerOverlay /> : <DataTable emptyMessage={loading ? '' : placeholderValue}
                  value={pageConcepts} scrollable={true}
                  selection={selectedConcepts} style={{minWidth: 1100}}
                  totalRecords={this.state.totalRecords}
@@ -219,14 +220,14 @@ export class ConceptTable extends React.Component<Props, State> {
                  lazy={true} first={this.state.first}
                  data-test-id='conceptRow'
                  onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
-      <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
-              data-test-id='conceptCheckBox' selectionMode='multiple' />
-      <Column bodyStyle={styles.colStyle} field='conceptName' header='Name'
-              data-test-id='conceptName'/>
-      <Column bodyStyle={styles.colStyle} field='conceptCode' header='Code'/>
-      <Column field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle} />
-      <Column style={styles.colStyle} field='countValue' header='Count'/>
-    </DataTable>
+        <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
+                data-test-id='conceptCheckBox' selectionMode='multiple' />
+        <Column bodyStyle={styles.colStyle} field='conceptName' header='Name'
+                data-test-id='conceptName'/>
+        <Column bodyStyle={styles.colStyle} field='conceptCode' header='Code'/>
+        <Column field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle} />
+        <Column style={styles.colStyle} field='countValue' header='Count'/>
+      </DataTable>}
     </div>;
   }
 }
