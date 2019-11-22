@@ -131,6 +131,7 @@ import org.pmiops.workbench.model.RecentWorkspaceResponse;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.ResearchPurposeReviewRequest;
 import org.pmiops.workbench.model.ShareWorkspaceRequest;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.UpdateWorkspaceRequest;
 import org.pmiops.workbench.model.UserRole;
@@ -856,6 +857,10 @@ public class WorkspacesControllerTest {
     final ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
+    modPurpose.setPopulation(true);
+    modPurpose.setPopulationDetails(ImmutableList.of(
+        SpecificPopulationEnum.DISABILITY_STATUS,
+        SpecificPopulationEnum.GEOGRAPHY));
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
@@ -1091,7 +1096,7 @@ public class WorkspacesControllerTest {
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
 
-    ResearchPurpose modPurpose = new ResearchPurpose();
+    final ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
     req.setWorkspace(modWorkspace);
