@@ -10,6 +10,10 @@ import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 
+function formatCounts(concept: any) {
+  concept.countValue = concept.countValue.toLocaleString();
+  return concept;
+}
 
 const styles = reactStyles({
   colStyle: {
@@ -119,7 +123,7 @@ export class ConceptTable extends React.Component<Props, State> {
       first: 0,
       totalRecords: props.concepts.length,
       pageNumber: 0,
-      pageConcepts: props.concepts.slice(0, 10)
+      pageConcepts: props.concepts.slice(0, 10).map(formatCounts)
     };
   }
 
@@ -147,7 +151,7 @@ export class ConceptTable extends React.Component<Props, State> {
       // Update pageConcepts only for the first time/page.
       // onPage() will update for the rest of the pages
       if (this.state.pageNumber === 0 ) {
-        this.setState({pageConcepts: nextProps.concepts.slice(0, 10)});
+        this.setState({pageConcepts: nextProps.concepts.slice(0, 10).map(formatCounts)});
       }
     }
   }
@@ -198,7 +202,7 @@ export class ConceptTable extends React.Component<Props, State> {
 
     this.setState({
       first: event.first,
-      pageConcepts: this.props.concepts.slice(startIndex, endIndex),
+      pageConcepts: this.props.concepts.slice(startIndex, endIndex).map(formatCounts),
       pageLoading: false
     });
   }

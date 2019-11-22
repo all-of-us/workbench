@@ -426,7 +426,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                 {this.domainLoading(domain) ?
                     <Spinner style={{height: '15px', width: '15px'}}/> :
                     <FlexRow style={{justifyContent: 'space-between'}}>
-                      <div>{domain.conceptCount}</div>
+                      <div>{domain.conceptCount.toLocaleString()}</div>
                       {(selectedConceptDomainMap[domain.domain] > 0) &&
                       <div style={styles.selectedConceptsCount} data-test-id='selectedConcepts'>
                         {selectedConceptDomainMap[domain.domain]}
@@ -441,7 +441,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
           })}
         </FlexRow>
         {!searchLoading && <div style={styles.conceptCounts}>
-          Showing top {concepts.length} of {selectedDomain.conceptCount} {selectedDomain.name}
+          Showing top {concepts.length} of {selectedDomain.conceptCount.toLocaleString()} {selectedDomain.name}
         </div>}
         <ConceptTable concepts={concepts}
                       loading={searchLoading}
