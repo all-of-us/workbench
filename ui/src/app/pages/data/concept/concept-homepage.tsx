@@ -286,6 +286,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     setConceptsAndVocabularies() {
       const cacheItem = this.state.conceptsCache
         .find(c => c.domain === this.state.selectedDomain.domain);
+      console.log(this.state.conceptsCache);
       this.setState({concepts: cacheItem.items});
     }
 
@@ -294,7 +295,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         selectedDomain, completedDomainSearches} = this.state;
       const {namespace, id} = this.props.workspace;
       this.setState({concepts: [], searchLoading: true, searching: true, conceptsToAdd: [],
-        selectedConceptDomainMap: new Map<string, number>()});
+        selectedConceptDomainMap: new Map<string, number>(), completedDomainSearches: []});
       const standardConceptFilter = standardConceptsOnly ?
         StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
 
@@ -369,8 +370,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     domainLoading(domain) {
-      return this.state.searchLoading || !this.state.completedDomainSearches
-        .includes(domain.domain);
+      return !this.state.completedDomainSearches.includes(domain.domain);
     }
 
     get noConceptsConstant() {

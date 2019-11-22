@@ -140,15 +140,13 @@ export class ConceptTable extends React.Component<Props, State> {
   }
 
   componentWillReceiveProps(nextProps) {
-    if ((nextProps.concepts !==  this.props.concepts)) {
-      if (nextProps.concepts !== this.props.concepts && nextProps.concepts.length > 0 ) {
-        this.setState({totalRecords: nextProps.concepts.length});
+    if (nextProps.concepts !==  this.props.concepts) {
+      this.setState({totalRecords: nextProps.concepts.length});
 
-        // Update pageConcepts only for the first time/page.
-        // onPage() will update for the rest of the pages
-        if (this.state.pageNumber === 0 ) {
-          this.setState({pageConcepts: nextProps.concepts.slice(0, 10)});
-        }
+      // Update pageConcepts only for the first time/page.
+      // onPage() will update for the rest of the pages
+      if (this.state.pageNumber === 0 ) {
+        this.setState({pageConcepts: nextProps.concepts.slice(0, 10)});
       }
     }
   }
@@ -178,7 +176,7 @@ export class ConceptTable extends React.Component<Props, State> {
       }
       words.push(splits[splits.length - 1]);
     }
-    return words.map(word => <span
+    return words.map((word, w) => <span key={w}
       style={matchString.test(word.toLowerCase()) ? styles.highlighted : {}}>
         {word}
       </span>);
