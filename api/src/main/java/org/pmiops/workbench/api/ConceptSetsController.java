@@ -18,6 +18,7 @@ import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
@@ -173,8 +174,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private ConceptSet toClientConceptSet(DbConceptSet conceptSet) {
     ConceptSet result = TO_CLIENT_CONCEPT_SET.apply(conceptSet);
     if (!conceptSet.getConceptIds().isEmpty()) {
-      Iterable<org.pmiops.workbench.cdr.model.Concept> concepts =
-          conceptDao.findAll(conceptSet.getConceptIds());
+      Iterable<DbConcept> concepts = conceptDao.findAll(conceptSet.getConceptIds());
       result.setConcepts(
           Streams.stream(concepts)
               .map(ConceptsController.TO_CLIENT_CONCEPT)
@@ -260,7 +260,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     if (conceptSet.getDomain() != null && conceptSet.getDomain() != dbConceptSet.getDomainEnum()) {
       throw new BadRequestException("Cannot modify the domain of an existing concept set");
     }
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    final Timestamp now = Timestamp.from(clock.instant());
     dbConceptSet.setLastModifiedTime(now);
     try {
       dbConceptSet = conceptSetDao.save(dbConceptSet);
@@ -273,8 +273,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
   private void addConceptsToSet(DbConceptSet dbConceptSet, List<Long> addedIds) {
     Domain domainEnum = dbConceptSet.getDomainEnum();
-    Iterable<org.pmiops.workbench.cdr.model.Concept> concepts = conceptDao.findAll(addedIds);
-    List<org.pmiops.workbench.cdr.model.Concept> mismatchedConcepts =
+    Iterable<DbConcept> concepts = conceptDao.findAll(addedIds);
+    List<DbConcept> mismatchedConcepts =
         ImmutableList.copyOf(concepts).stream()
             .filter(concept -> !concept.getConceptClassId().equals(CONCEPT_CLASS_ID_QUESTION))
             .filter(
@@ -288,7 +288,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
           Joiner.on(", ")
               .join(
                   mismatchedConcepts.stream()
-                      .map(org.pmiops.workbench.cdr.model.Concept::getConceptId)
+                      .map(DbConcept::getConceptId)
                       .collect(Collectors.toList()));
       throw new BadRequestException(
           String.format("Concepts [%s] are not in domain %s", mismatchedConceptIds, domainEnum));
@@ -346,11 +346,11 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     dbConceptSet.setLastModifiedTime(now);
     try {
       dbConceptSet = conceptSetDao.save(dbConceptSet);
+      return ResponseEntity.ok(toClientConceptSet(dbConceptSet));
       // TODO: add recent resource entry for concept sets [RW-1129]
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent concept set modification");
     }
-    return ResponseEntity.ok(toClientConceptSet(dbConceptSet));
   }
 
   @Override

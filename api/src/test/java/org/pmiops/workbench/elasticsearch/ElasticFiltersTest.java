@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
-import org.pmiops.workbench.cdr.model.CBCriteria;
+import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.CriteriaSubType;
@@ -51,8 +51,8 @@ public class ElasticFiltersTest {
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private JdbcTemplate jdbcTemplate;
 
-  private static CBCriteria icd9Criteria() {
-    return new CBCriteria()
+  private static DbCriteria icd9Criteria() {
+    return new DbCriteria()
         .domainId(DomainType.CONDITION.toString())
         .type(CriteriaType.ICD9CM.toString())
         .attribute(Boolean.FALSE)
@@ -60,16 +60,16 @@ public class ElasticFiltersTest {
         .synonyms("[CONDITION_rank1]");
   }
 
-  private static CBCriteria drugCriteria() {
-    return new CBCriteria()
+  private static DbCriteria drugCriteria() {
+    return new DbCriteria()
         .domainId(DomainType.DRUG.toString())
         .type(CriteriaType.ATC.toString())
         .attribute(Boolean.FALSE)
         .standard(true);
   }
 
-  private static CBCriteria basicsCriteria() {
-    return new CBCriteria()
+  private static DbCriteria basicsCriteria() {
+    return new DbCriteria()
         .domainId(DomainType.SURVEY.toString())
         .type(CriteriaType.PPI.toString())
         .subtype(CriteriaSubType.SURVEY.toString())
@@ -86,11 +86,11 @@ public class ElasticFiltersTest {
     // 1
     // | - 2
     // | - 3
-    CBCriteria icd9Parent =
+    DbCriteria icd9Parent =
         icd9Criteria().code("001").conceptId("771").group(true).selectable(false).parentId(0);
     saveCriteriaWithPath("", icd9Parent);
 
-    CBCriteria icd9Child1 =
+    DbCriteria icd9Child1 =
         icd9Criteria()
             .code("001.002")
             .conceptId("772")
@@ -98,7 +98,7 @@ public class ElasticFiltersTest {
             .selectable(true)
             .parentId(icd9Parent.getId());
     saveCriteriaWithPath(icd9Parent.getPath(), icd9Child1);
-    CBCriteria icd9Child2 =
+    DbCriteria icd9Child2 =
         icd9Criteria()
             .code("001.003")
             .conceptId("773")
@@ -109,7 +109,7 @@ public class ElasticFiltersTest {
 
     // Singleton SNOMED code.
     cbCriteriaDao.save(
-        new CBCriteria()
+        new DbCriteria()
             .code("005")
             .conceptId("775")
             .domainId(DomainType.CONDITION.toString())
@@ -121,11 +121,11 @@ public class ElasticFiltersTest {
             .path(""));
 
     // Four node PPI tree, survey, question, 1 answer.
-    CBCriteria survey =
+    DbCriteria survey =
         basicsCriteria().code("006").group(true).selectable(true).parentId(0).conceptId("77");
     saveCriteriaWithPath("", survey);
 
-    CBCriteria question =
+    DbCriteria question =
         basicsCriteria()
             .code("007")
             .conceptId("777")
@@ -134,7 +134,7 @@ public class ElasticFiltersTest {
             .parentId(survey.getId());
     saveCriteriaWithPath(survey.getPath(), question);
 
-    CBCriteria answer =
+    DbCriteria answer =
         basicsCriteria()
             .code("008")
             // Concept ID matches the question.
@@ -151,10 +151,10 @@ public class ElasticFiltersTest {
         "create table cb_criteria_ancestor(ancestor_id integer, descendant_id integer)");
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (19069022, 21600009)");
-    CBCriteria drugParent =
+    DbCriteria drugParent =
         drugCriteria().code("A").conceptId("21600001").group(true).selectable(false).parentId(0);
     saveCriteriaWithPath("", drugParent);
-    CBCriteria drug1 =
+    DbCriteria drug1 =
         drugCriteria()
             .code("A01")
             .conceptId("21600002")
@@ -162,7 +162,7 @@ public class ElasticFiltersTest {
             .selectable(true)
             .parentId(drugParent.getId());
     saveCriteriaWithPath(drugParent.getPath(), drug1);
-    CBCriteria drug2 =
+    DbCriteria drug2 =
         drugCriteria()
             .code("A01A")
             .conceptId("21600003")
@@ -170,7 +170,7 @@ public class ElasticFiltersTest {
             .selectable(true)
             .parentId(drug1.getId());
     saveCriteriaWithPath(drug1.getPath(), drug2);
-    CBCriteria drug3 =
+    DbCriteria drug3 =
         drugCriteria()
             .code("A01AA")
             .conceptId("21600004")
@@ -178,7 +178,7 @@ public class ElasticFiltersTest {
             .selectable(true)
             .parentId(drug2.getId());
     saveCriteriaWithPath(drug2.getPath(), drug3);
-    CBCriteria drug4 =
+    DbCriteria drug4 =
         drugCriteria()
             .code("9873")
             .conceptId("19069022")
@@ -979,7 +979,7 @@ public class ElasticFiltersTest {
                 QueryBuilders.termsQuery("ethnicity_concept_id", ImmutableList.of(conceptId))));
   }
 
-  private void saveCriteriaWithPath(String path, CBCriteria criteria) {
+  private void saveCriteriaWithPath(String path, DbCriteria criteria) {
     cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
     criteria.path(path.isEmpty() ? pathEnd : path + "." + pathEnd);

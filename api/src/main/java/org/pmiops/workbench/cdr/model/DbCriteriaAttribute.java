@@ -11,7 +11,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
 @Table(name = "cb_criteria_attribute")
-public class CBCriteriaAttribute {
+public class DbCriteriaAttribute {
 
   private long id;
   private long conceptId;
@@ -31,7 +31,7 @@ public class CBCriteriaAttribute {
     this.id = id;
   }
 
-  public CBCriteriaAttribute id(long id) {
+  public DbCriteriaAttribute id(long id) {
     this.id = id;
     return this;
   }
@@ -45,7 +45,7 @@ public class CBCriteriaAttribute {
     this.conceptId = conceptId;
   }
 
-  public CBCriteriaAttribute conceptId(long conceptId) {
+  public DbCriteriaAttribute conceptId(long conceptId) {
     this.conceptId = conceptId;
     return this;
   }
@@ -59,7 +59,7 @@ public class CBCriteriaAttribute {
     this.valueAsConceptId = valueAsConceptId;
   }
 
-  public CBCriteriaAttribute valueAsConceptId(long valueAsConceptId) {
+  public DbCriteriaAttribute valueAsConceptId(long valueAsConceptId) {
     this.valueAsConceptId = valueAsConceptId;
     return this;
   }
@@ -73,7 +73,7 @@ public class CBCriteriaAttribute {
     this.conceptName = conceptName;
   }
 
-  public CBCriteriaAttribute conceptName(String conceptName) {
+  public DbCriteriaAttribute conceptName(String conceptName) {
     this.conceptName = conceptName;
     return this;
   }
@@ -87,7 +87,7 @@ public class CBCriteriaAttribute {
     this.type = type;
   }
 
-  public CBCriteriaAttribute type(String type) {
+  public DbCriteriaAttribute type(String type) {
     this.type = type;
     return this;
   }
@@ -101,7 +101,7 @@ public class CBCriteriaAttribute {
     this.estCount = estCount;
   }
 
-  public CBCriteriaAttribute estCount(String estCount) {
+  public DbCriteriaAttribute estCount(String estCount) {
     this.estCount = estCount;
     return this;
   }
@@ -110,7 +110,7 @@ public class CBCriteriaAttribute {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    CBCriteriaAttribute that = (CBCriteriaAttribute) o;
+    DbCriteriaAttribute that = (DbCriteriaAttribute) o;
     return conceptId == that.conceptId
         && valueAsConceptId == that.valueAsConceptId
         && Objects.equals(conceptName, that.conceptName)

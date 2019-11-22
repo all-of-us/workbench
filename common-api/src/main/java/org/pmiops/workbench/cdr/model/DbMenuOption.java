@@ -1,6 +1,6 @@
 package org.pmiops.workbench.cdr.model;
 
-public interface MenuOption {
+public interface DbMenuOption {
   String getDomain();
 
   String getType();

@@ -264,9 +264,9 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private DbUser saveUserWithConflictHandling(DbUser user) {
+  private DbUser saveUserWithConflictHandling(DbUser dbUser) {
     try {
-      return userDao.save(user);
+      return userDao.save(dbUser);
     } catch (ObjectOptimisticLockingFailureException e) {
       log.log(Level.WARNING, "version conflict for user update", e);
       throw new ConflictException("Failed due to concurrent modification");
@@ -342,27 +342,27 @@ public class ProfileController implements ProfileApiDelegate {
 
   private DbUser initializeUserIfNeeded() {
     UserAuthentication userAuthentication = userAuthenticationProvider.get();
-    DbUser user = userAuthentication.getUser();
+    DbUser dbUser = userAuthentication.getUser();
     if (userAuthentication.getUserType() == UserType.SERVICE_ACCOUNT) {
       // Service accounts don't need further initialization.
-      return user;
+      return dbUser;
     }
 
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
-    if (user.getFirstSignInTime() == null) {
+    if (dbUser.getFirstSignInTime() == null) {
       // If the user is already registered, their profile will get updated.
       fireCloudService.registerUser(
-          user.getContactEmail(), user.getGivenName(), user.getFamilyName());
+          dbUser.getContactEmail(), dbUser.getGivenName(), dbUser.getFamilyName());
 
-      user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
+      dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
       // If the user is logged in, then we know that they have followed the account creation
       // instructions sent to
       // their initial contact email address.
-      user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
-      return saveUserWithConflictHandling(user);
+      dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+      return saveUserWithConflictHandling(dbUser);
     }
 
-    return user;
+    return dbUser;
   }
 
   private ResponseEntity<Profile> getProfileResponse(DbUser user) {
@@ -379,8 +379,9 @@ public class ProfileController implements ProfileApiDelegate {
     // the CDR); we will probably need a job that deactivates accounts after some period of
     // not accepting the terms of use.
 
-    DbUser user = initializeUserIfNeeded();
-    return getProfileResponse(user);
+    DbUser dbUser = initializeUserIfNeeded();
+    profileAuditAdapter.fireLoginAction(dbUser);
+    return getProfileResponse(dbUser);
   }
 
   @Override
@@ -605,20 +606,21 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> updatePageVisits(PageVisit newPageVisit) {
-    DbUser user = userProvider.get();
-    user = userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
-    Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    boolean shouldAdd =
-        user.getPageVisits().stream().noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
+    DbUser dbUser = userProvider.get();
+    dbUser = userDao.findUserWithAuthoritiesAndPageVisits(dbUser.getUserId());
+    Timestamp timestamp = Timestamp.from(clock.instant());
+    final boolean shouldAdd =
+        dbUser.getPageVisits().stream()
+            .noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
     if (shouldAdd) {
-      DbPageVisit firstPageVisit = new DbPageVisit();
+      final DbPageVisit firstPageVisit = new DbPageVisit();
       firstPageVisit.setPageId(newPageVisit.getPage());
-      firstPageVisit.setUser(user);
+      firstPageVisit.setUser(dbUser);
       firstPageVisit.setFirstVisit(timestamp);
-      user.getPageVisits().add(firstPageVisit);
-      userDao.save(user);
+      dbUser.getPageVisits().add(firstPageVisit);
+      dbUser = userDao.save(dbUser);
     }
-    return getProfileResponse(saveUserWithConflictHandling(user));
+    return getProfileResponse(saveUserWithConflictHandling(dbUser));
   }
 
   @Override

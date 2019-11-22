@@ -1,15 +1,14 @@
 import {
-  CdrVersionListResponse,
   Cluster,
   ClusterApi,
   ClusterListResponse,
+  ClusterLocalizeRequest,
+  ClusterLocalizeResponse,
   ClusterStatus,
-  DataAccessLevel
 } from 'generated/fetch';
 
-// TODO: Port functionality from ClusterServiceStub as needed.
 export class ClusterApiStub extends ClusterApi {
-  cluster: Cluster;
+  public cluster: Cluster;
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw Error('cannot fetch in tests'); });
@@ -23,6 +22,7 @@ export class ClusterApiStub extends ClusterApi {
 
   listClusters(extraHttpRequestParams?: any): Promise<ClusterListResponse> {
     return new Promise<ClusterListResponse>(resolve => {
+      console.log(this.cluster);
       resolve({defaultCluster: this.cluster});
     });
   }
@@ -35,31 +35,10 @@ export class ClusterApiStub extends ClusterApi {
     });
   }
 
-
-  getCdrVersions(): Promise<CdrVersionListResponse> {
-    let cdrVersionList: CdrVersionListResponse;
-    cdrVersionList = <CdrVersionListResponse>{
-      items: [{
-        cdrVersionId: '1',
-        name: 'Cdr version1',
-        dataAccessLevel: DataAccessLevel.Registered,
-        creationTime: 123
-      }, {
-        cdrVersionId: '2',
-        name: 'Cdr version2',
-        dataAccessLevel: DataAccessLevel.Unregistered,
-        creationTime: 456
-      }, {
-        cdrVersionId: '3',
-        name: 'Cdr version3',
-        dataAccessLevel: DataAccessLevel.Registered,
-        creationTime: 789
-      }],
-      defaultCdrVersionId: '1',
-    };
-
-    return new Promise<CdrVersionListResponse>(resolve => {
-      resolve(cdrVersionList);
+  localize(projectName: string, clusterName: string, req: ClusterLocalizeRequest,
+    extraHttpRequestParams?: any): Promise<ClusterLocalizeResponse> {
+    return new Promise<ClusterLocalizeResponse>(resolve => {
+      resolve({clusterLocalDirectory: 'workspaces/${req.workspaceId}'});
     });
   }
 }

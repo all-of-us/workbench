@@ -14,7 +14,9 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
-import org.pmiops.workbench.cdr.model.DomainInfo;
+import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdr.model.DbDomainInfo;
+import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
@@ -50,7 +52,7 @@ public class ConceptsController implements ConceptsApiDelegate {
   private final ConceptDao conceptDao;
   private final SurveyModuleDao surveyModuleDao;
 
-  static final Function<org.pmiops.workbench.cdr.model.Concept, Concept> TO_CLIENT_CONCEPT =
+  static final Function<DbConcept, Concept> TO_CLIENT_CONCEPT =
       (concept) ->
           new Concept()
               .conceptClassId(concept.getConceptClassId())
@@ -88,13 +90,12 @@ public class ConceptsController implements ConceptsApiDelegate {
       String workspaceNamespace, String workspaceId) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<org.pmiops.workbench.cdr.model.DomainInfo> domains =
-        ImmutableList.copyOf(domainInfoDao.findByOrderByDomainId());
+    List<DbDomainInfo> domains = ImmutableList.copyOf(domainInfoDao.findByOrderByDomainId());
     DomainInfoResponse response =
         new DomainInfoResponse()
             .items(
                 domains.stream()
-                    .map(org.pmiops.workbench.cdr.model.DomainInfo.TO_CLIENT_DOMAIN_INFO)
+                    .map(DbDomainInfo.TO_CLIENT_DOMAIN_INFO)
                     .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
@@ -122,14 +123,13 @@ public class ConceptsController implements ConceptsApiDelegate {
       String workspaceNamespace, String workspaceId) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<org.pmiops.workbench.cdr.model.SurveyModule> surveyModules =
-        surveyModuleDao.findByOrderByOrderNumberAsc();
+    List<DbSurveyModule> surveyModules = surveyModuleDao.findByOrderByOrderNumberAsc();
 
     SurveysResponse response =
         new SurveysResponse()
             .items(
                 surveyModules.stream()
-                    .map(org.pmiops.workbench.cdr.model.SurveyModule.TO_CLIENT_SURVEY_MODULE)
+                    .map(DbSurveyModule.TO_CLIENT_SURVEY_MODULE)
                     .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
@@ -140,21 +140,21 @@ public class ConceptsController implements ConceptsApiDelegate {
       String matchExp =
           ConceptService.modifyMultipleMatchKeyword(
               request.getQuery(), ConceptService.SearchType.CONCEPT_SEARCH);
-      List<DomainInfo> allDomainInfos = domainInfoDao.findByOrderByDomainId();
-      List<DomainInfo> domainInfos = matchExp == null ? allDomainInfos : new ArrayList<>();
+      List<DbDomainInfo> allDomainInfos = domainInfoDao.findByOrderByDomainId();
+      List<DbDomainInfo> domainInfos = matchExp == null ? allDomainInfos : new ArrayList<>();
       if (matchExp != null) {
         domainInfos =
             standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS
                 ? domainInfoDao.findAllMatchConceptCounts(matchExp)
                 : domainInfoDao.findStandardConceptCounts(matchExp);
       }
-      Map<Domain, DomainInfo> domainCountMap =
-          Maps.uniqueIndex(domainInfos, DomainInfo::getDomainEnum);
+      Map<Domain, DbDomainInfo> domainCountMap =
+          Maps.uniqueIndex(domainInfos, DbDomainInfo::getDomainEnum);
       // Loop through all domains to populate the results (so we get zeros for domains with no
       // matches.)
-      for (DomainInfo domainInfo : allDomainInfos) {
+      for (DbDomainInfo domainInfo : allDomainInfos) {
         Domain domain = domainInfo.getDomainEnum();
-        DomainInfo resultInfo = domainCountMap.get(domain);
+        DbDomainInfo resultInfo = domainCountMap.get(domain);
         response.addDomainCountsItem(
             new DomainCount()
                 .domain(domain)
@@ -180,7 +180,7 @@ public class ConceptsController implements ConceptsApiDelegate {
       throw new BadRequestException("Invalid value for maxResults: " + maxResults);
     }
 
-    Slice<org.pmiops.workbench.cdr.model.Concept> concepts =
+    Slice<DbConcept> concepts =
         conceptService.searchConcepts(
             request.getQuery(),
             request.getStandardConceptFilter().name(),
