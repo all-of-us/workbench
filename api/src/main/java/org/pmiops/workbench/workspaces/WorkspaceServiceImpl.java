@@ -148,9 +148,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     List<DbWorkspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
 
     return dbWorkspaces.stream()
-        .filter(
-            dbWorkspace ->
-                dbWorkspace.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.ACTIVE)
+        .filter(DbWorkspace::isActive)
         .map(
             dbWorkspace -> {
               String fcWorkspaceAccessLevel =
@@ -464,8 +462,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
     DbWorkspace workspace = getDao().findOne(workspaceId);
-    if (workspace == null
-        || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
+    if (workspace == null || !workspace.isActive()) {
       return Optional.empty();
     }
     return Optional.of(workspace);

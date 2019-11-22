@@ -1,7 +1,6 @@
 package org.pmiops.workbench.billing;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.withinPercentage;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -55,6 +54,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import(LiquibaseAutoConfiguration.class)
 public class FreeTierBillingServiceTest {
 
+  private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.001;
+
   @Autowired BigQueryService bigQueryService;
 
   @Autowired FreeTierBillingService freeTierBillingService;
@@ -83,6 +84,7 @@ public class FreeTierBillingServiceTest {
   @Import({FreeTierBillingService.class})
   @MockBean({BigQueryService.class, NotificationService.class})
   static class Configuration {
+
     @Bean
     @Scope("prototype")
     public WorkbenchConfig workbenchConfig() {
@@ -229,8 +231,8 @@ public class FreeTierBillingServiceTest {
       DbWorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(ws);
       assertThat(usage.getUser()).isEqualTo(user);
       assertThat(usage.getWorkspace()).isEqualTo(ws);
-      assertThat(usage.getCost())
-          .isCloseTo(expectedCosts.get(ws.getWorkspaceId()), withinPercentage(0.001));
+
+      assertWithinBillingTolerance(usage.getCost(), expectedCosts.get(ws.getWorkspaceId()));
     }
   }
 
@@ -261,8 +263,7 @@ public class FreeTierBillingServiceTest {
       DbWorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(ws);
       assertThat(usage.getUser()).isEqualTo(ws.getCreator());
       assertThat(usage.getWorkspace()).isEqualTo(ws);
-      assertThat(usage.getCost())
-          .isCloseTo(expectedCosts.get(ws.getWorkspaceId()), withinPercentage(0.001));
+      assertWithinBillingTolerance(usage.getCost(), expectedCosts.get(ws.getWorkspaceId()));
     }
   }
 
@@ -323,24 +324,23 @@ public class FreeTierBillingServiceTest {
     DbWorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
     assertThat(dbEntry.getUser()).isEqualTo(user);
     assertThat(dbEntry.getWorkspace()).isEqualTo(workspace);
-    assertThat(dbEntry.getCost())
-        .isCloseTo(SINGLE_WORKSPACE_TEST_COST * 2, withinPercentage(0.001));
-
+    assertWithinBillingTolerance(dbEntry.getCost(), SINGLE_WORKSPACE_TEST_COST * 2.0);
     Timestamp t1 = dbEntry.getLastUpdateTime();
-    assertThat(t1).isAfter(t0);
+    assertThat(t1.after(t0)).isTrue();
   }
 
   @Test
   public void getUserFreeTierLimit_default() {
     DbUser user = createUser("test@test.com");
+    final double initialFreeCreditsLimit = 1.0;
+    workbenchConfig.billing.defaultFreeCreditsLimit = initialFreeCreditsLimit;
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserFreeTierLimit(user), initialFreeCreditsLimit);
 
-    workbenchConfig.billing.defaultFreeCreditsLimit = 1.0;
-    assertThat(freeTierBillingService.getUserFreeTierLimit(user))
-        .isCloseTo(1.0, withinPercentage(0.001));
-
-    workbenchConfig.billing.defaultFreeCreditsLimit = 123.456;
-    assertThat(freeTierBillingService.getUserFreeTierLimit(user))
-        .isCloseTo(123.456, withinPercentage(0.001));
+    final double fractionalFreeCreditsLimit = 123.456;
+    workbenchConfig.billing.defaultFreeCreditsLimit = fractionalFreeCreditsLimit;
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserFreeTierLimit(user), fractionalFreeCreditsLimit);
   }
 
   @Test
@@ -348,17 +348,19 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.defaultFreeCreditsLimit = 123.456;
 
     DbUser user = createUser("test@test.com");
-    user.setFreeTierCreditsLimitOverride(100.0);
-    userDao.save(user);
 
-    assertThat(freeTierBillingService.getUserFreeTierLimit(user))
-        .isCloseTo(100.0, withinPercentage(0.001));
+    final double freeTierCreditsLimitOverride = 100.0;
+    user.setFreeTierCreditsLimitOverride(freeTierCreditsLimitOverride);
+    user = userDao.save(user);
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserFreeTierLimit(user), freeTierCreditsLimitOverride);
 
-    user.setFreeTierCreditsLimitOverride(200.0);
-    userDao.save(user);
+    double doubleFreeTierCreditsLimitOverride1 = 200.0;
+    user.setFreeTierCreditsLimitOverride(doubleFreeTierCreditsLimitOverride1);
+    user = userDao.save(user);
 
-    assertThat(freeTierBillingService.getUserFreeTierLimit(user))
-        .isCloseTo(200.0, withinPercentage(0.001));
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserFreeTierLimit(user), doubleFreeTierCreditsLimitOverride1);
   }
 
   @Test
@@ -373,8 +375,8 @@ public class FreeTierBillingServiceTest {
 
     freeTierBillingService.checkFreeTierBillingUsage();
 
-    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user))
-        .isCloseTo(SINGLE_WORKSPACE_TEST_COST, withinPercentage(0.001));
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserCachedFreeTierUsage(user), SINGLE_WORKSPACE_TEST_COST);
 
     createWorkspace(user, "another project");
     Map<String, Double> newCosts = new HashMap<>();
@@ -383,25 +385,26 @@ public class FreeTierBillingServiceTest {
     doReturn(mockBQTableResult(newCosts)).when(bigQueryService).executeQuery(any());
 
     // we have not yet cached the new workspace costs
-    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user))
-        .isCloseTo(SINGLE_WORKSPACE_TEST_COST, withinPercentage(0.001));
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserCachedFreeTierUsage(user), SINGLE_WORKSPACE_TEST_COST);
 
     freeTierBillingService.checkFreeTierBillingUsage();
+    final double expectedTotalCachedFreeTierUsage = 1100.0;
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserCachedFreeTierUsage(user), expectedTotalCachedFreeTierUsage);
 
-    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user))
-        .isCloseTo(1100.0, withinPercentage(0.001));
-
+    final double user2Costs = 999.0;
     DbUser user2 = createUser("another user");
     createWorkspace(user2, "project 3");
-    newCosts.put("project 3", 999.9);
+    newCosts.put("project 3", user2Costs);
     doReturn(mockBQTableResult(newCosts)).when(bigQueryService).executeQuery(any());
 
     freeTierBillingService.checkFreeTierBillingUsage();
 
-    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user))
-        .isCloseTo(1100.0, withinPercentage(0.001));
-    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user2))
-        .isCloseTo(999.9, withinPercentage(0.001));
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserCachedFreeTierUsage(user), expectedTotalCachedFreeTierUsage);
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserCachedFreeTierUsage(user2), user2Costs);
   }
 
   private TableResult mockBQTableResult(Map<String, Double> costMap) {
@@ -433,7 +436,7 @@ public class FreeTierBillingServiceTest {
     final DbWorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
     assertThat(dbEntry.getUser()).isEqualTo(user);
     assertThat(dbEntry.getWorkspace()).isEqualTo(workspace);
-    assertThat(dbEntry.getCost()).isCloseTo(SINGLE_WORKSPACE_TEST_COST, withinPercentage(0.001));
+    assertWithinBillingTolerance(dbEntry.getCost(), SINGLE_WORKSPACE_TEST_COST);
   }
 
   private DbUser createUser(String email) {
@@ -454,5 +457,10 @@ public class FreeTierBillingServiceTest {
     workspace.setWorkspaceNamespace(namespace);
     workspace.setBillingMigrationStatusEnum(billingMigrationStatus);
     return workspaceDao.save(workspace);
+  }
+
+  private void assertWithinBillingTolerance(double actualValue, double expectedValue) {
+    final double tolerance = DEFAULT_PERCENTAGE_TOLERANCE * expectedValue * 0.01;
+    assertThat(actualValue).isWithin(tolerance).of(expectedValue);
   }
 }

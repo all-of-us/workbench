@@ -28,6 +28,8 @@ public interface BillingProjectBufferEntryDao
 
   DbBillingProjectBufferEntry findFirstByStatusOrderByLastSyncRequestTimeAsc(short status);
 
+  List<DbBillingProjectBufferEntry> findTop5ByStatusOrderByLastSyncRequestTimeAsc(short status);
+
   DbBillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
 
   Long countByStatus(short status);
