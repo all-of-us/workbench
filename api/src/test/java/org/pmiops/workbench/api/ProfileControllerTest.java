@@ -241,8 +241,18 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitDataUseAgreement_success() throws Exception {
     createUser();
-    assertThat(profileController.submitDataUseAgreement(DUA_VERSION, "NIH").getStatusCode())
+    DbUser dbUser = userProvider.get();
+    String duaInitials = "NIH";
+    assertThat(profileController.submitDataUseAgreement(DUA_VERSION, duaInitials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
+    List<DbUserDataUseAgreement> dbUserDataUseAgreementList =
+        userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(dbUser.getUserId());
+    assertThat(dbUserDataUseAgreementList.size()).isEqualTo(1);
+    DbUserDataUseAgreement dbUserDataUseAgreement = dbUserDataUseAgreementList.get(0);
+    assertThat(dbUserDataUseAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
+    assertThat(dbUserDataUseAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
+    assertThat(dbUserDataUseAgreement.getUserInitials()).isEqualTo(duaInitials);
+    assertThat(dbUserDataUseAgreement.getDataUseAgreementSignedVersion()).isEqualTo(DUA_VERSION);
   }
 
   @Test
