@@ -360,7 +360,7 @@ public class DbWorkspace {
     this.population = population;
   }
 
-  @ElementCollection(fetch = FetchType.LAZY)
+  @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "specific_populations", joinColumns = @JoinColumn(name = "workspace_id"))
   @Column(name = "specific_population")
   public Set<Short> getPopulationDetails() {

@@ -4,11 +4,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -79,9 +82,15 @@ public interface WorkspaceMapper {
   }
 
   default List<SpecificPopulationEnum> ordinalsToSpecificPopulationEnumList(Set<Short> ordinals) {
-    return ordinals.stream()
+    final Stream<Short> ordinalsStream;
+    if (ordinals == null) {
+      ordinalsStream = Stream.of();
+    } else {
+      ordinalsStream = ordinals.stream();
+    }
+    return ordinalsStream
         .map(DbStorageEnums::specificPopulationFromStorage)
-        .collect(ImmutableList.toImmutableList());
+        .collect(Collectors.toList());
   }
 
   default String cdrVersionId(CdrVersion cdrVersion) {
@@ -94,5 +103,13 @@ public interface WorkspaceMapper {
     } else {
       return WorkspaceAccessLevel.fromValue(firecloudAccessLevel);
     }
+  }
+
+  default String cdrVersionToEtag(int cdrVersion) {
+    return Etags.fromVersion(cdrVersion);
+  }
+
+  default int etagToCdrVersion(String etag) {
+    return Etags.toVersion(etag);
   }
 }

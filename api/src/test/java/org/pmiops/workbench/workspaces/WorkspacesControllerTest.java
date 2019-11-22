@@ -143,6 +143,7 @@ import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -237,7 +238,8 @@ public class WorkspacesControllerTest {
     DataSetServiceImpl.class,
     ReviewQueryBuilder.class,
     ConceptSetService.class,
-    ConceptSetsController.class
+    ConceptSetsController.class,
+    WorkspaceMapperImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -494,6 +496,7 @@ public class WorkspacesControllerTest {
     researchPurpose.setEducational(true);
     researchPurpose.setDrugDevelopment(true);
     researchPurpose.setPopulation(false);
+    researchPurpose.setPopulationDetails(Collections.emptyList());
     researchPurpose.setAdditionalNotes("additional notes");
     researchPurpose.setReasonForAllOfUs("reason for aou");
     researchPurpose.setIntendedStudy("intended study");
@@ -828,68 +831,83 @@ public class WorkspacesControllerTest {
   public void testCloneWorkspace() throws Exception {
     stubFcGetGroup();
     stubFcGetWorkspaceACL();
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
+    Workspace originalWorkspace = createWorkspace();
+    originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
     // The original workspace is shared with one other user.
-    DbUser writerUser = new DbUser();
-    writerUser.setEmail("writerfriend@gmail.com");
-    writerUser.setUserId(124L);
-    writerUser.setDisabled(false);
-
-    writerUser = userDao.save(writerUser);
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
-    shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-    UserRole creator = new UserRole();
-    creator.setEmail(LOGGED_IN_USER_EMAIL);
-    creator.setRole(WorkspaceAccessLevel.OWNER);
-    shareWorkspaceRequest.addItemsItem(creator);
-    UserRole writer = new UserRole();
-    writer.setEmail(writerUser.getEmail());
-    writer.setRole(WorkspaceAccessLevel.WRITER);
-    shareWorkspaceRequest.addItemsItem(writer);
+    shareWorkspaceRequest.setWorkspaceEtag(originalWorkspace.getEtag());
+
+    createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL,
+        WorkspaceAccessLevel.OWNER);
+
+    createUserToShareWith(shareWorkspaceRequest, writerUser.getEmail(),
+        WorkspaceAccessLevel.WRITER);
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
-        workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
+        originalWorkspace.getNamespace(), originalWorkspace.getName(), shareWorkspaceRequest);
 
-    CloneWorkspaceRequest req = new CloneWorkspaceRequest();
-    Workspace modWorkspace = new Workspace();
+    final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
-    ResearchPurpose modPurpose = new ResearchPurpose();
+
+    final ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
+
+    final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
-    org.pmiops.workbench.firecloud.model.Workspace clonedWorkspace =
+    final org.pmiops.workbench.firecloud.model.Workspace clonedFirecloudWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
     // Assign the same bucket name as the mock-factory's bucket name, so the clone vs. get equality
     // assertion below will pass.
-    clonedWorkspace.setBucketName(TestMockFactory.BUCKET_NAME);
+    clonedFirecloudWorkspace.setBucketName(TestMockFactory.BUCKET_NAME);
 
     mockBillingProjectBuffer("cloned-ns");
-    Workspace workspace2 =
+    final Workspace clonedWorkspace =
         workspacesController
-            .cloneWorkspace(workspace.getNamespace(), workspace.getId(), req)
+            .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
             .getBody()
             .getWorkspace();
     verify(mockWorkspaceAuditAdapter)
         .fireDuplicateAction(anyLong(), anyLong(), any(Workspace.class));
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
-    stubGetWorkspace(clonedWorkspace, WorkspaceAccessLevel.WRITER);
-    assertWithMessage("get and clone responses are inconsistent")
-        .that(workspace2)
-        .isEqualTo(
-            workspacesController
-                .getWorkspace(workspace2.getNamespace(), workspace2.getId())
-                .getBody()
-                .getWorkspace());
+    stubGetWorkspace(clonedFirecloudWorkspace, WorkspaceAccessLevel.WRITER);
+    final Workspace retrievedWorkspace = workspacesController
+        .getWorkspace(clonedWorkspace.getNamespace(), clonedWorkspace.getId())
+        .getBody()
+        .getWorkspace();
 
-    assertThat(workspace2.getName()).isEqualTo(modWorkspace.getName());
-    assertThat(workspace2.getNamespace()).isEqualTo(modWorkspace.getNamespace());
-    assertThat(workspace2.getResearchPurpose()).isEqualTo(modPurpose);
+    assertWithMessage("get and clone responses are inconsistent")
+        .that(clonedWorkspace)
+        .isEqualTo(retrievedWorkspace);
+
+    assertThat(clonedWorkspace.getName()).isEqualTo(modWorkspace.getName());
+    assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
+    assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
+  }
+
+  private UserRole createUserToShareWith(ShareWorkspaceRequest shareWorkspaceRequest,
+      String email, WorkspaceAccessLevel workspaceAccessLevel) {
+    final UserRole userRole = new UserRole();
+    userRole.setEmail(email);
+    userRole.setRole(workspaceAccessLevel);
+    shareWorkspaceRequest.addItemsItem(userRole);
+    return userRole;
+  }
+
+  private DbUser createAndSaveUser(String email, long userId) {
+    DbUser writerUser = new DbUser();
+    writerUser.setEmail(email);
+    writerUser.setUserId(userId);
+    writerUser.setDisabled(false);
+
+    writerUser = userDao.save(writerUser);
+    return writerUser;
   }
 
   @Test
@@ -1735,36 +1753,20 @@ public class WorkspacesControllerTest {
   @Test
   public void testShareWorkspace() throws Exception {
     stubFcGetGroup();
-    DbUser writerUser = new DbUser();
-    writerUser.setEmail("writerfriend@gmail.com");
-    writerUser.setUserId(124L);
-    writerUser.setDisabled(false);
-
-    writerUser = userDao.save(writerUser);
-    DbUser readerUser = new DbUser();
-    readerUser.setEmail("readerfriend@gmail.com");
-    readerUser.setUserId(125L);
-    readerUser.setDisabled(false);
-    readerUser = userDao.save(readerUser);
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+    DbUser readerUser = createAndSaveUser("readerfriend@gmail.com", 125L);
 
     stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-    UserRole creator = new UserRole();
-    creator.setEmail(LOGGED_IN_USER_EMAIL);
-    creator.setRole(WorkspaceAccessLevel.OWNER);
-    shareWorkspaceRequest.addItemsItem(creator);
+    createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
-    UserRole reader = new UserRole();
-    reader.setEmail("readerfriend@gmail.com");
-    reader.setRole(WorkspaceAccessLevel.READER);
-    shareWorkspaceRequest.addItemsItem(reader);
-    UserRole writer = new UserRole();
-    writer.setEmail("writerfriend@gmail.com");
-    writer.setRole(WorkspaceAccessLevel.WRITER);
-    shareWorkspaceRequest.addItemsItem(writer);
+    createUserToShareWith(shareWorkspaceRequest, "readerfriend@gmail.com",
+        WorkspaceAccessLevel.READER);
+    createUserToShareWith(shareWorkspaceRequest, "writerfriend@gmail.com",
+        WorkspaceAccessLevel.WRITER);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     CLOCK.increment(1000);
@@ -1789,17 +1791,8 @@ public class WorkspacesControllerTest {
   @Test
   public void testShareWorkspaceAddBillingProjectUser() throws Exception {
     stubFcGetGroup();
-    DbUser writerUser = new DbUser();
-    writerUser.setEmail("writerfriend@gmail.com");
-    writerUser.setUserId(124L);
-    writerUser.setDisabled(false);
-
-    writerUser = userDao.save(writerUser);
-    DbUser ownerUser = new DbUser();
-    ownerUser.setEmail("ownerfriend@gmail.com");
-    ownerUser.setUserId(125L);
-    ownerUser.setDisabled(false);
-    ownerUser = userDao.save(ownerUser);
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+    DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
 
     stubFcGetWorkspaceACL();
     Workspace workspace = createWorkspace();
@@ -1826,17 +1819,8 @@ public class WorkspacesControllerTest {
   @Test
   public void testShareWorkspaceRemoveBillingProjectUser() throws Exception {
     stubFcGetGroup();
-    DbUser writerUser = new DbUser();
-    writerUser.setEmail("writerfriend@gmail.com");
-    writerUser.setUserId(124L);
-    writerUser.setDisabled(false);
-
-    writerUser = userDao.save(writerUser);
-    DbUser ownerUser = new DbUser();
-    ownerUser.setEmail("ownerfriend@gmail.com");
-    ownerUser.setUserId(125L);
-    ownerUser.setDisabled(false);
-    ownerUser = userDao.save(ownerUser);
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+    DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
 
     when(fireCloudService.getWorkspaceAcl(anyString(), anyString()))
         .thenReturn(
@@ -1884,21 +1868,13 @@ public class WorkspacesControllerTest {
 
   @Test
   public void testShareWorkspaceNoRoleFailure() throws Exception {
-    DbUser writerUser = new DbUser();
-    writerUser.setEmail("writerfriend@gmail.com");
-    writerUser.setUserId(124L);
-    writerUser.setDisabled(false);
-
-    writerUser = userDao.save(writerUser);
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-    UserRole creator = new UserRole();
-    creator.setEmail(LOGGED_IN_USER_EMAIL);
-    creator.setRole(WorkspaceAccessLevel.OWNER);
-    shareWorkspaceRequest.addItemsItem(creator);
+    createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     UserRole writer = new UserRole();
     writer.setEmail("writerfriend@gmail.com");
     shareWorkspaceRequest.addItemsItem(writer);
@@ -1918,16 +1894,8 @@ public class WorkspacesControllerTest {
   @Test
   public void testUnshareWorkspace() throws Exception {
     stubFcGetGroup();
-    DbUser writerUser = new DbUser();
-    writerUser.setEmail("writerfriend@gmail.com");
-    writerUser.setUserId(124L);
-    writerUser.setDisabled(false);
-    writerUser = userDao.save(writerUser);
-    DbUser readerUser = new DbUser();
-    readerUser.setEmail("readerfriend@gmail.com");
-    readerUser.setUserId(125L);
-    readerUser.setDisabled(false);
-    readerUser = userDao.save(readerUser);
+    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+    DbUser readerUser = createAndSaveUser("readerfriend@gmail.com", 125L);
 
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -2009,10 +1977,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-    UserRole creator = new UserRole();
-    creator.setEmail(LOGGED_IN_USER_EMAIL);
-    creator.setRole(WorkspaceAccessLevel.OWNER);
-    shareWorkspaceRequest.addItemsItem(creator);
+    createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     CLOCK.increment(1000);
@@ -2040,14 +2005,9 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspacesController.createWorkspace(workspace);
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
-    UserRole creator = new UserRole();
-    creator.setEmail(LOGGED_IN_USER_EMAIL);
-    creator.setRole(WorkspaceAccessLevel.OWNER);
-    shareWorkspaceRequest.addItemsItem(creator);
-    UserRole writer = new UserRole();
-    writer.setEmail("writerfriend@gmail.com");
-    writer.setRole(WorkspaceAccessLevel.WRITER);
-    shareWorkspaceRequest.addItemsItem(writer);
+    createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    createUserToShareWith(shareWorkspaceRequest, "writerfriend@gmail.com",
+        WorkspaceAccessLevel.WRITER);
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
   }

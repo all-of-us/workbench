@@ -205,15 +205,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) {
-    if (Strings.isNullOrEmpty(workspace.getName())) {
-      throw new BadRequestException("missing required field 'name'");
-    } else if (workspace.getResearchPurpose() == null) {
-      throw new BadRequestException("missing required field 'researchPurpose'");
-    } else if (workspace.getDataAccessLevel() == null) {
-      throw new BadRequestException("missing required field 'dataAccessLevel'");
-    } else if (workspace.getName().length() > 80) {
-      throw new BadRequestException("DbWorkspace name must be 80 characters or less");
-    }
+    validateWorkspaceApiModel(workspace);
 
     DbUser user = userProvider.get();
     String workspaceNamespace;
@@ -256,6 +248,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditAdapter.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
+  }
+
+  private void validateWorkspaceApiModel(Workspace workspace) {
+    if (Strings.isNullOrEmpty(workspace.getName())) {
+      throw new BadRequestException("missing required field 'name'");
+    } else if (workspace.getResearchPurpose() == null) {
+      throw new BadRequestException("missing required field 'researchPurpose'");
+    } else if (workspace.getDataAccessLevel() == null) {
+      throw new BadRequestException("missing required field 'dataAccessLevel'");
+    } else if (workspace.getName().length() > 80) {
+      throw new BadRequestException("DbWorkspace name must be 80 characters or less");
+    }
   }
 
   private void setDbWorkspaceFields(
@@ -475,8 +479,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           workspaceService.updateWorkspaceAcls(
               savedDbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
+//    final Workspace savedWorkspace =
+//        workspaceMapper.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
     final Workspace savedWorkspace =
-        workspaceMapper.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
+        WorkspaceConversionUtils.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
+
     workspaceAuditAdapter.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), savedDbWorkspace.getWorkspaceId(), savedWorkspace);
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));

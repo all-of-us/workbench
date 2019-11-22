@@ -2,15 +2,18 @@ package org.pmiops.workbench.utils.mappers;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
@@ -18,6 +21,7 @@ import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.utils.WorkspaceMapper;
@@ -70,7 +74,7 @@ public class WorkspaceMapperTest {
     creatorUser.setDataAccessLevelEnum(DATA_ACCESS_LEVEL);
     creatorUser.setUserId(CREATOR_USER_ID);
 
-    final CdrVersion cdrVersion = new CdrVersion();
+    final DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(CDR_VERSION_ID);
 
     sourceDbWorkspace = new DbWorkspace();
@@ -98,7 +102,10 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setAncestry(false);
     sourceDbWorkspace.setCommercialPurpose(false);
     sourceDbWorkspace.setPopulation(false);
-    sourceDbWorkspace.setPopulationDetails(Collections.emptySet());
+    sourceDbWorkspace.setPopulationDetails(ImmutableSet.of(
+        SpecificPopulationEnum.AGE_GROUPS, SpecificPopulationEnum.INCOME_LEVEL).stream()
+        .map(DbStorageEnums::specificPopulationToStorage)
+        .collect(Collectors.toSet()));
     sourceDbWorkspace.setSocialBehavioral(false);
     sourceDbWorkspace.setPopulationHealth(true);
     sourceDbWorkspace.setEducational(true);

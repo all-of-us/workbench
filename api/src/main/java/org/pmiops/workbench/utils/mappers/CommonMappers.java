@@ -3,8 +3,8 @@ package org.pmiops.workbench.utils.mappers;
 import java.sql.Timestamp;
 import java.util.Optional;
 import org.mapstruct.Mapper;
-import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
 
@@ -31,9 +31,9 @@ public class CommonMappers {
     return creator.getEmail();
   }
 
-  public static String cdrVersionToId(CdrVersion cdrVersion) {
+  public static String cdrVersionToId(DbCdrVersion cdrVersion) {
     return Optional.ofNullable(cdrVersion)
-        .map(CdrVersion::getCdrVersionId)
+        .map(DbCdrVersion::getCdrVersionId)
         .map(id -> Long.toString(id))
         .orElse(null);
   }
