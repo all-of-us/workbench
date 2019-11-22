@@ -390,7 +390,8 @@ public class FreeTierBillingServiceTest {
 
     freeTierBillingService.checkFreeTierBillingUsage();
     final double expectedTotalCachedFreeTierUsage = 1100.0;
-    assertWithinBillingTolerance(freeTierBillingService.getUserCachedFreeTierUsage(user), expectedTotalCachedFreeTierUsage);
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserCachedFreeTierUsage(user), expectedTotalCachedFreeTierUsage);
 
     final double user2Costs = 999.0;
     DbUser user2 = createUser("another user");
@@ -400,8 +401,10 @@ public class FreeTierBillingServiceTest {
 
     freeTierBillingService.checkFreeTierBillingUsage();
 
-    assertWithinBillingTolerance(freeTierBillingService.getUserCachedFreeTierUsage(user), expectedTotalCachedFreeTierUsage);
-    assertWithinBillingTolerance(freeTierBillingService.getUserCachedFreeTierUsage(user2), user2Costs);
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserCachedFreeTierUsage(user), expectedTotalCachedFreeTierUsage);
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserCachedFreeTierUsage(user2), user2Costs);
   }
 
   private TableResult mockBQTableResult(Map<String, Double> costMap) {
