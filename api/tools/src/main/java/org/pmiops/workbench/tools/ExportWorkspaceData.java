@@ -21,7 +21,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -143,7 +142,8 @@ public class ExportWorkspaceData {
       final CustomMappingStrategy mappingStrategy = new CustomMappingStrategy();
       mappingStrategy.setType(WorkspaceExportRow.class);
 
-      try (FileWriter writer = new FileWriter(opts.getOptionValue(exportFilenameOpt.getLongOpt()))) {
+      try (FileWriter writer =
+          new FileWriter(opts.getOptionValue(exportFilenameOpt.getLongOpt()))) {
         StatefulBeanToCsv beanWriter =
             new StatefulBeanToCsvBuilder(writer).withMappingStrategy(mappingStrategy).build();
 
@@ -176,9 +176,7 @@ public class ExportWorkspaceData {
 
     Collection<DbCohort> cohorts = cohortDao.findByWorkspaceId(workspace.getWorkspaceId());
     row.setCohortNames(
-        cohorts.stream()
-            .map(cohort -> cohort.getName())
-            .collect(Collectors.joining(",\n")));
+        cohorts.stream().map(cohort -> cohort.getName()).collect(Collectors.joining(",\n")));
     row.setCohortCount(String.valueOf(cohorts.size()));
 
     Collection<DbConceptSet> conceptSets =
