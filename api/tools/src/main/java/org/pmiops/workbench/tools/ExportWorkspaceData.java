@@ -107,19 +107,19 @@ public class ExportWorkspaceData {
 
   @Bean
   public CommandLineRunner run(
-      WorkspaceDao workspaceDaoArg,
-      CohortDao cohortDaoArg,
-      ConceptSetDao conceptSetDaoArg,
-      DataSetDao dataSetDaoArg,
-      NotebooksService notebooksServiceArg,
-      WorkspaceFreeTierUsageDao workspaceFreeTierUsageDaoArg,
+      WorkspaceDao workspaceDao,
+      CohortDao cohortDao,
+      ConceptSetDao conceptSetDao,
+      DataSetDao dataSetDao,
+      NotebooksService notebooksService,
+      WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       Provider<WorkspacesApi> workspacesApiProvider) {
-    workspaceDao = workspaceDaoArg;
-    cohortDao = cohortDaoArg;
-    conceptSetDao = conceptSetDaoArg;
-    dataSetDao = dataSetDaoArg;
-    notebooksService = notebooksServiceArg;
-    workspaceFreeTierUsageDao = workspaceFreeTierUsageDaoArg;
+    this.workspaceDao = workspaceDao;
+    this.cohortDao = cohortDao;
+    this.conceptSetDao = conceptSetDao;
+    this.dataSetDao = dataSetDao;
+    this.notebooksService = notebooksService;
+    this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     workspacesApi = workspacesApiProvider.get();
 
     return (args) -> {
@@ -144,10 +144,10 @@ public class ExportWorkspaceData {
 
       try (FileWriter writer =
           new FileWriter(opts.getOptionValue(exportFilenameOpt.getLongOpt()))) {
-        StatefulBeanToCsv beanWriter =
-            new StatefulBeanToCsvBuilder(writer).withMappingStrategy(mappingStrategy).build();
-
-        beanWriter.write(rows);
+          new StatefulBeanToCsvBuilder(writer)
+              .withMappingStrategy(mappingStrategy)
+              .build()
+              .write(rows);
       }
     };
   }
@@ -176,20 +176,20 @@ public class ExportWorkspaceData {
 
     Collection<DbCohort> cohorts = cohortDao.findByWorkspaceId(workspace.getWorkspaceId());
     row.setCohortNames(
-        cohorts.stream().map(cohort -> cohort.getName()).collect(Collectors.joining(",\n")));
+        cohorts.stream().map(DbCohort::getName).collect(Collectors.joining(",\n")));
     row.setCohortCount(String.valueOf(cohorts.size()));
 
     Collection<DbConceptSet> conceptSets =
         conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
     row.setConceptSetNames(
         conceptSets.stream()
-            .map(conceptSet -> conceptSet.getName())
+            .map(DbConceptSet::getName)
             .collect(Collectors.joining(",\n")));
     row.setConceptSetCount(String.valueOf(conceptSets.size()));
 
     Collection<DbDataset> datasets = dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
     row.setDatasetNames(
-        datasets.stream().map(dataSet -> dataSet.getName()).collect(Collectors.joining(",\n")));
+        datasets.stream().map(DbDataset::getName).collect(Collectors.joining(",\n")));
     row.setDatasetCount(String.valueOf(datasets.size()));
 
     try {
@@ -198,7 +198,7 @@ public class ExportWorkspaceData {
               workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
       row.setNotebookNames(
           notebooks.stream()
-              .map(notebook -> notebook.getName())
+              .map(FileDetail::getName)
               .collect(Collectors.joining(",\n")));
       row.setNotebooksCount(String.valueOf(notebooks.size()));
     } catch (NotFoundException e) {
