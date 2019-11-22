@@ -286,7 +286,6 @@ export const ConceptHomepage = withCurrentWorkspace()(
     setConceptsAndVocabularies() {
       const cacheItem = this.state.conceptsCache
         .find(c => c.domain === this.state.selectedDomain.domain);
-      console.log(this.state.conceptsCache);
       this.setState({concepts: cacheItem.items});
     }
 
