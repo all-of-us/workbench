@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs/Subscription';
 
-import {cdrVersionStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {mapParameter, typeToTitle} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {triggerEvent} from 'app/utils/analytics';
@@ -71,7 +71,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   selections: Array<any>;
   count: any;
   wizard: any;
-  cdrCount: number;
 
   ngOnInit() {
     wizardStore.subscribe(wizard => this.wizard = wizard);
@@ -81,7 +80,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         this.calculate();
       }
     });
-    this.cdrCount = cdrVersionStore.getValue() ? cdrVersionStore.getValue().numParticipants : null;
     if (this.wizard.type === CriteriaType.AGE) {
       this.initAgeControls();
       this.initDeceased();
@@ -138,7 +136,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         attributes,
       };
       if (!params.length) {
-        this.count = this.cdrCount;
         const wizard = this.wizard;
         wizard.item.searchParameters.push(this.selectedNode);
         const selections = [this.ageNode.parameterId, ...this.selections];
@@ -224,9 +221,6 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       .debounceTime(250)
       .distinctUntilChanged()
       .map(([lo, hi]) => {
-        if (lo === minAge && hi === maxAge) {
-          this.count = this.cdrCount;
-        }
         const attr = {
           name: AttrName.AGE,
           operator: Operator.BETWEEN,

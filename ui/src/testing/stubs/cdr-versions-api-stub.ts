@@ -13,8 +13,7 @@ export const cdrVersionListResponse = {
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       dataAccessLevel: DataAccessLevel.Registered,
       archivalStatus: ArchivalStatus.LIVE,
-      creationTime: 0,
-      numParticipants: 1
+      creationTime: 0
     }
   ]
 };

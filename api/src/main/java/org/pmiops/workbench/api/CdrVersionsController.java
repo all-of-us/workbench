@@ -28,7 +28,6 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
               .creationTime(cdrVersion.getCreationTime().getTime())
               .dataAccessLevel(cdrVersion.getDataAccessLevelEnum())
               .archivalStatus(cdrVersion.getArchivalStatusEnum())
-              .numParticipants(cdrVersion.getNumParticipants())
               .name(cdrVersion.getName());
 
   private final CdrVersionService cdrVersionService;
