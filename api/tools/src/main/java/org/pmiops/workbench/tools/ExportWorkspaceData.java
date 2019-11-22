@@ -5,7 +5,6 @@ import static org.pmiops.workbench.tools.BackfillBillingProjectUsers.extractAclR
 import com.opencsv.bean.BeanField;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -144,10 +143,10 @@ public class ExportWorkspaceData {
 
       try (FileWriter writer =
           new FileWriter(opts.getOptionValue(exportFilenameOpt.getLongOpt()))) {
-          new StatefulBeanToCsvBuilder(writer)
-              .withMappingStrategy(mappingStrategy)
-              .build()
-              .write(rows);
+        new StatefulBeanToCsvBuilder(writer)
+            .withMappingStrategy(mappingStrategy)
+            .build()
+            .write(rows);
       }
     };
   }
@@ -175,16 +174,13 @@ public class ExportWorkspaceData {
     }
 
     Collection<DbCohort> cohorts = cohortDao.findByWorkspaceId(workspace.getWorkspaceId());
-    row.setCohortNames(
-        cohorts.stream().map(DbCohort::getName).collect(Collectors.joining(",\n")));
+    row.setCohortNames(cohorts.stream().map(DbCohort::getName).collect(Collectors.joining(",\n")));
     row.setCohortCount(String.valueOf(cohorts.size()));
 
     Collection<DbConceptSet> conceptSets =
         conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
     row.setConceptSetNames(
-        conceptSets.stream()
-            .map(DbConceptSet::getName)
-            .collect(Collectors.joining(",\n")));
+        conceptSets.stream().map(DbConceptSet::getName).collect(Collectors.joining(",\n")));
     row.setConceptSetCount(String.valueOf(conceptSets.size()));
 
     Collection<DbDataset> datasets = dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
@@ -197,9 +193,7 @@ public class ExportWorkspaceData {
           notebooksService.getNotebooks(
               workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
       row.setNotebookNames(
-          notebooks.stream()
-              .map(FileDetail::getName)
-              .collect(Collectors.joining(",\n")));
+          notebooks.stream().map(FileDetail::getName).collect(Collectors.joining(",\n")));
       row.setNotebooksCount(String.valueOf(notebooks.size()));
     } catch (NotFoundException e) {
       row.setNotebookNames("Error: Not Found");
