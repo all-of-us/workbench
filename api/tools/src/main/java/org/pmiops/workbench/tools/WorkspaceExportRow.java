@@ -3,7 +3,7 @@ package org.pmiops.workbench.tools;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvBindByPosition;
 
-public class WorkspaceExportRow {
+public class  WorkspaceExportRow {
 
   public String getCreatorContactEmail() {
     return creatorContactEmail;
@@ -117,6 +117,10 @@ public class WorkspaceExportRow {
     return cohortCount;
   }
 
+  public void setCohortCount(int count) {
+    setCohortCount(String.valueOf(count));
+  }
+
   public void setCohortCount(String cohortCount) {
     this.cohortCount = cohortCount;
   }
@@ -141,6 +145,10 @@ public class WorkspaceExportRow {
     return conceptSetCount;
   }
 
+  public void setConceptSetCount(int count) {
+    setConceptSetCount(String.valueOf(count));
+  }
+
   public void setConceptSetCount(String conceptSetCount) {
     this.conceptSetCount = conceptSetCount;
   }
@@ -163,6 +171,10 @@ public class WorkspaceExportRow {
 
   public String getDatasetCount() {
     return datasetCount;
+  }
+
+  public void setDatasetCount(int count) {
+    setDatasetCount(String.valueOf(count));
   }
 
   public void setDatasetCount(String datasetCount) {

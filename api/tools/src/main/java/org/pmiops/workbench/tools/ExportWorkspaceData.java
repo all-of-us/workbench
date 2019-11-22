@@ -13,6 +13,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -37,6 +39,7 @@ import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -137,23 +140,23 @@ public class ExportWorkspaceData {
           row.setCollaborators("Error: Not Found");
         }
 
-        Collection<DbCohort> cohorts = cohortDao.findByWorkspaceId(workspace.getWorkspaceId());
-        row.setCohortNames(
-            cohorts.stream().map(cohort -> cohort.getName()).collect(Collectors.joining(",\n")));
-        row.setCohortCount(String.valueOf(cohorts.size()));
+         setCollectionAndCount(
+             cohortDao.findByWorkspaceId(workspace.getWorkspaceId()),
+             DbCohort::getName,
+             row::setCohortNames,
+             row::setCohortCount);
 
-        Collection<DbConceptSet> conceptSets =
-            conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
-        row.setConceptSetNames(
-            conceptSets.stream()
-                .map(conceptSet -> conceptSet.getName())
-                .collect(Collectors.joining(",\n")));
-        row.setConceptSetCount(String.valueOf(conceptSets.size()));
+        setCollectionAndCount(
+            conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId()),
+                DbConceptSet::getName,
+                row::setConceptSetNames,
+                row::setConceptSetCount);
 
-        Collection<DbDataset> datasets = dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
-        row.setDatasetNames(
-            datasets.stream().map(dataSet -> dataSet.getName()).collect(Collectors.joining(",\n")));
-        row.setDatasetCount(String.valueOf(datasets.size()));
+        setCollectionAndCount(
+            dataSetDao.findByWorkspaceId(workspace.getWorkspaceId()),
+            DbDataset::getName,
+            row::setDatasetNames,
+            row::setDatasetCount);
 
         try {
           Collection<FileDetail> notebooks =
@@ -197,6 +200,15 @@ public class ExportWorkspaceData {
 
       writer.close();
     };
+  }
+
+  private <T> void setCollectionAndCount(
+    Collection<T> values, Function<T, String> extractor,
+    Consumer<String> valueColumnSetter, Consumer<Integer> countColumnSetter) {
+      valueColumnSetter.accept(values.stream()
+        .map(extractor)
+        .collect(Collectors.joining(",\n")));
+    countColumnSetter.accept(values.size());
   }
 
   public static void main(String[] args) {
