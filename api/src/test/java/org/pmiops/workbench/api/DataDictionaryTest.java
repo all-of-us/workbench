@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -20,7 +20,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -85,7 +85,7 @@ public class DataDictionaryTest {
 
   @Before
   public void setUp() {
-    CdrVersion cdrVersion = new CdrVersion();
+    DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersionDao.save(cdrVersion);
 
     DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
@@ -108,7 +108,7 @@ public class DataDictionaryTest {
     final Domain domain = Domain.DRUG;
     final String domainValue = "FIELD NAME / DOMAIN VALUE";
 
-    CdrVersion cdrVersion = new CdrVersion();
+    DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersionDao.save(cdrVersion);
 
     DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();

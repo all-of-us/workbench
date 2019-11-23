@@ -8,7 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
-import org.pmiops.workbench.cdr.model.Concept;
+import org.pmiops.workbench.cdr.model.DbConcept;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -126,16 +126,13 @@ public class ConceptService {
   public static final String STANDARD_CONCEPT_CODE = "S";
   public static final String CLASSIFICATION_CONCEPT_CODE = "C";
 
-  public Slice<Concept> searchConcepts(
-      String query,
-      StandardConceptFilter standardConceptFilter,
-      List<String> vocabularyIds,
-      List<String> domainIds,
-      int limit,
-      int minCount,
-      int page) {
+  public Slice<DbConcept> searchConcepts(
+      String query, String standardConceptFilter, List<String> domainIds, int limit, int page) {
 
-    Specification<Concept> conceptSpecification =
+    StandardConceptFilter convertedConceptFilter =
+        StandardConceptFilter.valueOf(standardConceptFilter);
+
+    Specification<DbConcept> conceptSpecification =
         (root, criteriaQuery, criteriaBuilder) -> {
           List<Predicate> predicates = new ArrayList<>();
           List<Predicate> standardConceptPredicates = new ArrayList<>();
@@ -171,16 +168,16 @@ public class ConceptService {
             predicates.add(criteriaBuilder.greaterThan(matchExp, 0.0));
           }
 
-          if (standardConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
+          if (convertedConceptFilter.equals(StandardConceptFilter.STANDARD_CONCEPTS)) {
             predicates.add(criteriaBuilder.or(standardConceptPredicates.toArray(new Predicate[0])));
-          } else if (standardConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
+          } else if (convertedConceptFilter.equals(StandardConceptFilter.NON_STANDARD_CONCEPTS)) {
             predicates.add(
                 criteriaBuilder.or(
                     criteriaBuilder.or(criteriaBuilder.isNull(root.get("standardConcept"))),
                     criteriaBuilder.and(nonStandardConceptPredicates.toArray(new Predicate[0]))));
 
-          } else if (standardConceptFilter.equals(
-              StandardConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
+          } else if (convertedConceptFilter.equals(
+              convertedConceptFilter.STANDARD_OR_CODE_ID_MATCH)) {
             if (keyword != null) {
               List<Predicate> standardOrCodeOrIdMatch = new ArrayList<>();
               standardOrCodeOrIdMatch.add(
@@ -203,28 +200,20 @@ public class ConceptService {
             }
           }
 
-          if (vocabularyIds != null) {
-            predicates.add(root.get("vocabularyId").in(vocabularyIds));
-          }
-          if (domainIds != null) {
-            predicates.add(root.get("domainId").in(domainIds));
-          }
+          predicates.add(root.get("domainId").in(domainIds));
+          List<Predicate> countPredicates = new ArrayList<>();
+          countPredicates.add(criteriaBuilder.greaterThan(root.get("countValue"), 0));
+          countPredicates.add(criteriaBuilder.greaterThan(root.get("sourceCountValue"), 0));
 
-          if (minCount == 1) {
-            List<Predicate> countPredicates = new ArrayList<>();
-            countPredicates.add(criteriaBuilder.greaterThan(root.get("countValue"), 0));
-            countPredicates.add(criteriaBuilder.greaterThan(root.get("sourceCountValue"), 0));
-
-            predicates.add(criteriaBuilder.or(countPredicates.toArray(new Predicate[0])));
-          }
+          predicates.add(criteriaBuilder.or(countPredicates.toArray(new Predicate[0])));
           criteriaQuery.distinct(true);
           return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     // Return up to limit results, sorted in descending count value order.
 
     Pageable pageable = new PageRequest(page, limit, new Sort(Direction.DESC, "countValue"));
-    NoCountFindAllDao<Concept, Long> conceptDao =
-        new NoCountFindAllDao<>(Concept.class, entityManager);
+    NoCountFindAllDao<DbConcept, Long> conceptDao =
+        new NoCountFindAllDao<>(DbConcept.class, entityManager);
     return conceptDao.findAll(conceptSpecification, pageable);
   }
 
@@ -232,8 +221,8 @@ public class ConceptService {
     ImmutableList.Builder<Long> standardConceptIds = ImmutableList.builder();
     ImmutableList.Builder<Long> sourceConceptIds = ImmutableList.builder();
 
-    Iterable<Concept> concepts = conceptDao.findAll(conceptIds);
-    for (Concept concept : concepts) {
+    Iterable<DbConcept> concepts = conceptDao.findAll(conceptIds);
+    for (DbConcept concept : concepts) {
       if (ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept())
           || ConceptService.CLASSIFICATION_CONCEPT_CODE.equals(concept.getStandardConcept())) {
         standardConceptIds.add(concept.getConceptId());

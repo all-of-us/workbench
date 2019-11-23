@@ -69,8 +69,8 @@ export class SignInService {
     this.zone.run(() => {
       const isSignedIn = gapi.auth2.getAuthInstance().isSignedIn.get();
       this.isSignedIn.next(isSignedIn);
-      this.nextSignInStore();
       if (isSignedIn) {
+        this.nextSignInStore();
         this.clearIdToken();
       }
       setLoggedInState(isSignedIn);
@@ -78,8 +78,8 @@ export class SignInService {
     gapi.auth2.getAuthInstance().isSignedIn.listen((isSignedIn: boolean) => {
       this.zone.run(() => {
         this.isSignedIn.next(isSignedIn);
-        this.nextSignInStore();
         if (isSignedIn) {
+          this.nextSignInStore();
           this.clearIdToken();
         }
       });

@@ -20,7 +20,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -116,11 +116,6 @@ public class CohortsController implements CohortsApiDelegate {
     this.clock = clock;
     this.cdrVersionService = cdrVersionService;
     this.userRecentResourceService = userRecentResourceService;
-  }
-
-  @VisibleForTesting
-  public void setUserProvider(Provider<DbUser> userProvider) {
-    this.userProvider = userProvider;
   }
 
   private void checkForDuplicateCohortNameException(String newCohortName, DbWorkspace workspace) {
@@ -311,7 +306,7 @@ public class CohortsController implements CohortsApiDelegate {
     DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersion cdrVersion = workspace.getCdrVersion();
+    DbCdrVersion cdrVersion = workspace.getCdrVersion();
 
     if (request.getCdrVersionName() != null) {
       cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
@@ -373,7 +368,7 @@ public class CohortsController implements CohortsApiDelegate {
     DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersion cdrVersion = workspace.getCdrVersion();
+    DbCdrVersion cdrVersion = workspace.getCdrVersion();
 
     if (request.getCdrVersionName() != null) {
       cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
@@ -419,7 +414,7 @@ public class CohortsController implements CohortsApiDelegate {
     DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    CdrVersion cdrVersion = workspace.getCdrVersion();
+    DbCdrVersion cdrVersion = workspace.getCdrVersion();
     if (request.getCdrVersionName() != null) {
       cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
       if (cdrVersion == null) {

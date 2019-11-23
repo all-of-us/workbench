@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -41,8 +43,8 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -239,8 +241,7 @@ public class DataSetController implements DataSetApiDelegate {
   private ConceptSet toClientConceptSet(DbConceptSet conceptSet) {
     ConceptSet result = ConceptSetsController.TO_CLIENT_CONCEPT_SET.apply(conceptSet);
     if (!conceptSet.getConceptIds().isEmpty()) {
-      Iterable<org.pmiops.workbench.cdr.model.Concept> concepts =
-          conceptDao.findAll(conceptSet.getConceptIds());
+      Iterable<DbConcept> concepts = conceptDao.findAll(conceptSet.getConceptIds());
       result.setConcepts(
           StreamSupport.stream(concepts.spliterator(), false)
               .map(ConceptsController.TO_CLIENT_CONCEPT)
@@ -422,7 +423,8 @@ public class DataSetController implements DataSetApiDelegate {
               value -> {
                 if (!value.equals(EMPTY_CELL_MARKER)) {
                   Double fieldValue = Double.parseDouble(value);
-                  queryValues.add(dateFormat.format(new Date(fieldValue.longValue())));
+                  queryValues.add(
+                      dateFormat.format(Date.from(Instant.ofEpochSecond(fieldValue.longValue()))));
                 } else {
                   queryValues.add(value);
                 }
@@ -644,7 +646,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataDictionaryEntry> getDataDictionaryEntry(
       Long cdrVersionId, String domain, String domainValue) {
-    CdrVersion cdrVersion = cdrVersionDao.findByCdrVersionId(cdrVersionId);
+    DbCdrVersion cdrVersion = cdrVersionDao.findByCdrVersionId(cdrVersionId);
     if (cdrVersion == null) {
       throw new BadRequestException("Invalid CDR Version");
     }

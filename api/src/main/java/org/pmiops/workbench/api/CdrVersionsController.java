@@ -7,9 +7,10 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionService;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.CdrVersionListResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,9 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
   private static final Logger log = Logger.getLogger(CdrVersionsController.class.getName());
 
   @VisibleForTesting
-  static final Function<CdrVersion, org.pmiops.workbench.model.CdrVersion> TO_CLIENT_CDR_VERSION =
-      (CdrVersion cdrVersion) ->
-          new org.pmiops.workbench.model.CdrVersion()
+  static final Function<DbCdrVersion, CdrVersion> TO_CLIENT_CDR_VERSION =
+      (DbCdrVersion cdrVersion) ->
+          new CdrVersion()
               .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
               .creationTime(cdrVersion.getCreationTime().getTime())
               .dataAccessLevel(cdrVersion.getDataAccessLevelEnum())
@@ -39,24 +40,19 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
     this.userProvider = userProvider;
   }
 
-  @VisibleForTesting
-  void setUserProvider(Provider<DbUser> userProvider) {
-    this.userProvider = userProvider;
-  }
-
   @Override
   public ResponseEntity<CdrVersionListResponse> getCdrVersions() {
     // TODO: Consider filtering this based on what is currently instantiated as a data source. Newly
     // added CDR versions will not function until a server restart.
     DataAccessLevel accessLevel = userProvider.get().getDataAccessLevelEnum();
-    List<CdrVersion> cdrVersions = cdrVersionService.findAuthorizedCdrVersions(accessLevel);
+    List<DbCdrVersion> cdrVersions = cdrVersionService.findAuthorizedCdrVersions(accessLevel);
     if (cdrVersions.isEmpty()) {
       throw new ForbiddenException("User does not have access to any CDR versions");
     }
     List<Long> defaultVersions =
         cdrVersions.stream()
             .filter(v -> v.getIsDefault())
-            .map(CdrVersion::getCdrVersionId)
+            .map(DbCdrVersion::getCdrVersionId)
             .collect(Collectors.toList());
     if (defaultVersions.isEmpty()) {
       throw new ForbiddenException("User does not have access to a default CDR version");

@@ -84,9 +84,9 @@ export function getDataUseAgreementWidget(submitting, initialWork,
       </div>
     </div>
     <label>Authorized Demonstration User Name</label>
-    <DuaTextInput disabled value={this.props.profileState.profile.username}/>
+    <DuaTextInput disabled data-test-id='dua-username-input' value={this.props.profileState.profile.username}/>
     <label>Contact Email</label>
-    <DuaTextInput disabled value={this.props.profileState.profile.contactEmail}/>
+    <DuaTextInput disabled data-test-id='dua-contact-email-input' value={this.props.profileState.profile.contactEmail}/>
     <label>Date</label>
     <DuaTextInput type='text' disabled value={new Date().toLocaleDateString()}/>
     <TooltipTrigger content={errors && <div>

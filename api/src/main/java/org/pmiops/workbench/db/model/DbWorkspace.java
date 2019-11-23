@@ -77,7 +77,7 @@ public class DbWorkspace {
   private String workspaceNamespace;
   private String firecloudName;
   private Short dataAccessLevel;
-  private CdrVersion cdrVersion;
+  private DbCdrVersion cdrVersion;
   private DbUser creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
@@ -189,11 +189,11 @@ public class DbWorkspace {
 
   @ManyToOne
   @JoinColumn(name = "cdr_version_id")
-  public CdrVersion getCdrVersion() {
+  public DbCdrVersion getCdrVersion() {
     return cdrVersion;
   }
 
-  public void setCdrVersion(CdrVersion cdrVersion) {
+  public void setCdrVersion(DbCdrVersion cdrVersion) {
     this.cdrVersion = cdrVersion;
   }
 
@@ -529,6 +529,11 @@ public class DbWorkspace {
 
   public void setWorkspaceActiveStatusEnum(WorkspaceActiveStatus activeStatus) {
     setActiveStatus(DbStorageEnums.workspaceActiveStatusToStorage(activeStatus));
+  }
+
+  @Transient
+  public boolean isActive() {
+    return WorkspaceActiveStatus.ACTIVE.equals(getWorkspaceActiveStatusEnum());
   }
 
   @Transient

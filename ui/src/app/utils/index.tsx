@@ -16,6 +16,7 @@ import {
   currentCohortStore,
   currentConceptSetStore,
   currentWorkspaceStore,
+  queryParamsStore,
   routeConfigDataStore,
   urlParamsStore,
   userProfileStore
@@ -357,6 +358,11 @@ export const withRouteConfigData = () => {
 // be included last (if multiple HOCs are in use) to minimize this impact.
 export const withCdrVersions = () => {
   return connectReplaySubject(cdrVersionStore, 'cdrVersionListResponse');
+};
+
+// HOC that provides a 'queryParams' prop with current query params
+export const withQueryParams = () => {
+  return connectBehaviorSubject(queryParamsStore, 'queryParams');
 };
 
 // Temporary method for converting generated/models/Domain to generated/models/fetch/Domain

@@ -26,16 +26,15 @@ public class CohortCloningService {
 
   @Transactional
   public DbCohort cloneCohortAndReviews(DbCohort fromCohort, DbWorkspace targetWorkspace) {
-    final DbCohort duplicatedCohort =
-        cohortFactory.duplicateCohort(
-            fromCohort.getName(), targetWorkspace.getCreator(), targetWorkspace, fromCohort);
-    final DbCohort toCohort = cohortDao.save(duplicatedCohort);
+    final DbCohort toCohort =
+        cohortDao.save(
+            cohortFactory.duplicateCohort(
+                fromCohort.getName(), targetWorkspace.getCreator(), targetWorkspace, fromCohort));
     copyCohortAnnotations(fromCohort, toCohort);
 
     for (DbCohortReview fromReview : fromCohort.getCohortReviews()) {
-      final DbCohortReview duplicatedReview =
-          cohortFactory.duplicateCohortReview(fromReview, toCohort);
-      final DbCohortReview toReview = cohortReviewDao.save(duplicatedReview);
+      final DbCohortReview toReview =
+          cohortReviewDao.save(cohortFactory.duplicateCohortReview(fromReview, toCohort));
       copyCohortReviewAnnotations(fromCohort, fromReview, toCohort, toReview);
     }
 

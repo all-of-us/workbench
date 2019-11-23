@@ -1,6 +1,9 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
 import java.util.function.Supplier;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.jetbrains.annotations.NotNull;
 
 @Entity
 @Table(name = "billing_project_buffer_entry")
@@ -24,7 +28,7 @@ public class DbBillingProjectBufferEntry {
   private Short status;
   private DbUser assignedUser;
 
-  public enum BillingProjectBufferStatus {
+  public enum BufferEntryStatus {
     // Sent a request to FireCloud to create a BillingProject. Status of BillingProject is TBD
     CREATING,
 
@@ -97,14 +101,26 @@ public class DbBillingProjectBufferEntry {
   }
 
   @Transient
-  public BillingProjectBufferStatus getStatusEnum() {
-    return DbStorageEnums.billingProjectBufferStatusFromStorage(status);
+  public BufferEntryStatus getStatusEnum() {
+    return DbStorageEnums.billingProjectBufferEntryStatusFromStorage(status);
   }
 
-  public void setStatusEnum(
-      BillingProjectBufferStatus status, Supplier<Timestamp> currentTimestamp) {
+  public void setStatusEnum(BufferEntryStatus status, Supplier<Timestamp> currentTimestamp) {
     this.setLastStatusChangedTime(currentTimestamp.get());
-    this.status = DbStorageEnums.billingProjectBufferStatusToStorage(status);
+    this.status = DbStorageEnums.billingProjectBufferEntryStatusToStorage(status);
+  }
+
+  // Calculate the timespan between creation and sync, to see if this entry has been
+  // stuck in crating too long. If either timestamp is null, return a huge interval.
+  @Transient
+  public Duration getLastChangedToLastSyncRequestInterval() {
+    return Duration.between(
+        Optional.ofNullable(getLastStatusChangedTime())
+            .map(Timestamp::toInstant)
+            .orElse(Instant.EPOCH),
+        Optional.ofNullable(getLastSyncRequestTime())
+            .map(Timestamp::toInstant)
+            .orElse(Instant.MAX));
   }
 
   @Column(name = "status")
@@ -114,5 +130,31 @@ public class DbBillingProjectBufferEntry {
 
   private void setStatus(short s) {
     this.status = s;
+  }
+
+  @Override
+  public String toString() {
+    return "DbBillingProjectBufferEntry{"
+        + "id="
+        + id
+        + ", fireCloudProjectName='"
+        + fireCloudProjectName
+        + '\''
+        + ", creationTime="
+        + nullableTimestampToString(creationTime)
+        + ", lastSyncRequestTime="
+        + nullableTimestampToString(lastSyncRequestTime)
+        + ", lastStatusChangedTime="
+        + nullableTimestampToString(lastStatusChangedTime)
+        + ", statusEnum="
+        + getStatusEnum()
+        + ", assignedUser="
+        + Optional.ofNullable(assignedUser).map(u -> Long.toString(u.getUserId())).orElse("n/a")
+        + '}';
+  }
+
+  @NotNull
+  private String nullableTimestampToString(Timestamp timestamp) {
+    return Optional.ofNullable(timestamp).map(Timestamp::toString).orElse("n/a");
   }
 }

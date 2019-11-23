@@ -10,7 +10,7 @@ import {DataUseAgreementComponent} from 'app/pages/profile/data-use-agreement';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
-import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect/component';
+import {NotebookRedirectComponent} from './pages/analysis/notebook-redirect';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';

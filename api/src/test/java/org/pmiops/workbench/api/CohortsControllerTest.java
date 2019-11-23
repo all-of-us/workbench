@@ -16,19 +16,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
@@ -43,7 +42,7 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -139,10 +138,8 @@ public class CohortsControllerTest {
           .prevalence(0.4F)
           .conceptSynonyms(new ArrayList<String>());
 
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
-      makeConcept(CLIENT_CONCEPT_1);
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
-      makeConcept(CLIENT_CONCEPT_2);
+  private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
+  private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
   private static DbUser currentUser;
 
   @Autowired WorkspacesController workspacesController;
@@ -152,7 +149,7 @@ public class CohortsControllerTest {
 
   Workspace workspace;
   Workspace workspace2;
-  CdrVersion cdrVersion;
+  DbCdrVersion cdrVersion;
   SearchRequest searchRequest;
   String cohortCriteria;
   private TestMockFactory testMockFactory;
@@ -166,7 +163,6 @@ public class CohortsControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired UserDao userDao;
   @Autowired CohortMaterializationService cohortMaterializationService;
-  @Mock Provider<DbUser> userProvider;
   @Autowired FireCloudService fireCloudService;
   @Autowired UserService userService;
   @Autowired CloudStorageService cloudStorageService;
@@ -238,12 +234,8 @@ public class CohortsControllerTest {
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     user = userDao.save(user);
     currentUser = user;
-    when(userProvider.get()).thenReturn(user);
-    workspacesController.setUserProvider(userProvider);
-    cohortsController.setUserProvider(userProvider);
-    conceptSetsController.setUserProvider(userProvider);
 
-    cdrVersion = new CdrVersion();
+    cdrVersion = new DbCdrVersion();
     cdrVersion.setName(CDR_VERSION_NAME);
     cdrVersionDao.save(cdrVersion);
 

@@ -12,9 +12,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 // TODO need to add a way to dynamically switch between database versions
 // this dynamic connection will eliminate the need for the catalog attribute
 @Table(name = "concept_relationship")
-public class ConceptRelationship {
+public class DbConceptRelationship {
 
-  private ConceptRelationshipId conceptRelationshipId;
+  private DbConceptRelationshipId conceptRelationshipId;
 
   @EmbeddedId
   @AttributeOverrides({
@@ -22,15 +22,16 @@ public class ConceptRelationship {
     @AttributeOverride(name = "conceptId2", column = @Column(name = "concept_id_2")),
     @AttributeOverride(name = "relationshipId", column = @Column(name = "relationship_id"))
   })
-  public ConceptRelationshipId getConceptRelationshipId() {
+  public DbConceptRelationshipId getConceptRelationshipId() {
     return conceptRelationshipId;
   }
 
-  public void setConceptRelationshipId(ConceptRelationshipId conceptRelationshipId) {
+  public void setConceptRelationshipId(DbConceptRelationshipId conceptRelationshipId) {
     this.conceptRelationshipId = conceptRelationshipId;
   }
 
-  public ConceptRelationship conceptRelationshipId(ConceptRelationshipId conceptRelationshipId) {
+  public DbConceptRelationship conceptRelationshipId(
+      DbConceptRelationshipId conceptRelationshipId) {
     this.conceptRelationshipId = conceptRelationshipId;
     return this;
   }

@@ -1,6 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -256,7 +256,7 @@ public class WorkspaceServiceTest {
             .stream()
             .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).containsAll(expectedIds);
+    assertThat(actualIds).containsAllIn(expectedIds);
   }
 
   @Test
@@ -293,7 +293,7 @@ public class WorkspaceServiceTest {
             .stream()
             .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).containsAll(expectedIds);
+    assertThat(actualIds).containsAllIn(expectedIds);
 
     DbUser mockUser = mock(DbUser.class);
     doReturn(mockUser).when(mockUserProvider).get();
@@ -323,7 +323,7 @@ public class WorkspaceServiceTest {
         recentWorkspaces.stream()
             .map(DbUserRecentWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).contains(1L, 2L);
+    assertThat(actualIds).containsAllOf(1L, 2L);
   }
 
   @Test
