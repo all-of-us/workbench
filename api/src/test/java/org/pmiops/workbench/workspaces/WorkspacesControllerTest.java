@@ -505,15 +505,14 @@ public class WorkspacesControllerTest {
     researchPurpose.setReviewRequested(true);
     researchPurpose.setApproved(false);
 
-    final Workspace workspace = WorkspaceHelper.getInstance().create()
+    return WorkspaceHelper.getInstance().create()
       .id(workspaceName)
       .name(workspaceName)
       .namespace(workspaceNameSpace)
       .dataAccessLevel(DataAccessLevel.PROTECTED)
       .researchPurpose(researchPurpose)
       .cdrVersionId(cdrVersionId)
-      .googleBucketName(BUCKET_NAME)
-    return workspace;
+      .googleBucketName(BUCKET_NAME);
   }
 
   public Cohort createDefaultCohort(String name) {

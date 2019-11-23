@@ -15,15 +15,15 @@ public class WorkspaceHelper implements GeneratedClassHelper<Workspace> {
 
   @Override
   public Workspace create() {
-    return initialize(new Workspace());
+    return sanitize(new Workspace());
   }
 
   @Override
-  public Workspace initialize(Workspace workspace) {
-    if (workspace.getResearchPurpose() == null) {
+  public Workspace sanitize(Workspace instance) {
+    if (instance.getResearchPurpose() == null) {
       final ResearchPurpose researchPurpose = ResearchPurposeHelper.getInstance().create();
-      workspace.setResearchPurpose(researchPurpose);
+      instance.setResearchPurpose(researchPurpose);
     }
-    return workspace;
+    return instance;
   }
 }

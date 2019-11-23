@@ -18,12 +18,12 @@ public class ResearchPurposeHelper implements GeneratedClassHelper<ResearchPurpo
 
   @Override
   public ResearchPurpose create() {
-    return initialize(new ResearchPurpose());
+    return sanitize(new ResearchPurpose());
   }
 
   @Override
-  public ResearchPurpose initialize(ResearchPurpose defaultConstructedInstance) {
-    return defaultConstructedInstance
+  public ResearchPurpose sanitize(ResearchPurpose instance) {
+    return instance
         .populationDetails(new ArrayList<>());
   }
 }

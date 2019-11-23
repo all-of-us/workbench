@@ -2,9 +2,12 @@ package org.pmiops.workbench.utils.codegenhelpers;
 
 /**
  * Interface defining a wrapper class for a safer constructor for a Swagger-generated
- * (or otherwise dubiously initialized) class. This is useful for setting null lists
- * to new ArrayList instances, nullable integers to zero, etc.
- * @param <T>
+ * (or otherwise dubiously initialized) class. In particular, it doeasn't look like Swagger
+ * Codegen has a way to specify the default initial value for a collection.
+ *
+ * This class is especially useful for setting null lists or required objects
+ * to new ArrayList instances, nullable integers to zero, etc, as appropriate.
+ * @param <T> Generated class to be helped
  */
 public interface GeneratedClassHelper<T> {
 
@@ -17,5 +20,5 @@ public interface GeneratedClassHelper<T> {
   // Take in an instance and apply rules as desired. This should be written so
   // that it only changes values that are null (or some other useless default)
   // to begin with.
-  T initialize(T defaultConstructedInstance);
+  T sanitize(T defaultConstructedInstance);
 }
