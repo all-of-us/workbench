@@ -37,6 +37,7 @@ import org.pmiops.workbench.model.AnnotationQuery;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.utils.codegenhelpers.AnnotationQueryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -203,7 +204,11 @@ public class AnnotationQueryBuilderTest {
   public void testQueryEmptyReview() {
     assertResults(
         annotationQueryBuilder.materializeAnnotationQuery(
-            cohortReview, INCLUDED_ONLY, new AnnotationQuery(), 10, 0),
+            cohortReview,
+            INCLUDED_ONLY,
+            AnnotationQueryHelper.getInstance().create(),
+            10,
+            0),
         allColumns);
   }
 
