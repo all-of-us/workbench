@@ -48,6 +48,7 @@ task generateFireCloudClient {
     config.setOutputDir("$projectDir")
     config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('java')
+    config.setModelNamePrefix("Firecloud")
     config.setAdditionalProperties([
             'invokerPackage'   : 'org.pmiops.workbench.firecloud',
             'modelPackage'     : 'org.pmiops.workbench.firecloud.model',
