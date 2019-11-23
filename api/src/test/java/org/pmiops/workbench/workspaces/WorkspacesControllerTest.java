@@ -143,6 +143,8 @@ import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.codegenhelpers.ResearchPurposeHelper;
+import org.pmiops.workbench.utils.codegenhelpers.WorkspaceHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -482,7 +484,7 @@ public class WorkspacesControllerTest {
 
   // TODO(calbach): Clean up this test file to make better use of chained builders.
   private Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
-    ResearchPurpose researchPurpose = new ResearchPurpose();
+    ResearchPurpose researchPurpose = ResearchPurposeHelper.getInstance().create();
     researchPurpose.setDiseaseFocusedResearch(true);
     researchPurpose.setDiseaseOfFocus("cancer");
     researchPurpose.setMethodsDevelopment(true);
@@ -502,14 +504,15 @@ public class WorkspacesControllerTest {
     researchPurpose.setTimeReviewed(1500L);
     researchPurpose.setReviewRequested(true);
     researchPurpose.setApproved(false);
-    Workspace workspace = new Workspace();
-    workspace.setId(workspaceName);
-    workspace.setName(workspaceName);
-    workspace.setNamespace(workspaceNameSpace);
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
-    workspace.setResearchPurpose(researchPurpose);
-    workspace.setCdrVersionId(cdrVersionId);
-    workspace.setGoogleBucketName(BUCKET_NAME);
+
+    final Workspace workspace = WorkspaceHelper.getInstance().create()
+      .id(workspaceName)
+      .name(workspaceName)
+      .namespace(workspaceNameSpace)
+      .dataAccessLevel(DataAccessLevel.PROTECTED)
+      .researchPurpose(researchPurpose)
+      .cdrVersionId(cdrVersionId)
+      .googleBucketName(BUCKET_NAME)
     return workspace;
   }
 
