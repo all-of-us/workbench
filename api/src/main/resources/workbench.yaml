@@ -3728,7 +3728,6 @@ definitions:
       users:
         description: A list of users matching the provided search query.
         type: array
-        default: []
         items:
           $ref: "#/definitions/User"
       nextPageToken:
