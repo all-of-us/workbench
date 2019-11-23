@@ -23,6 +23,9 @@ public class ResearchPurposeHelper implements GeneratedClassHelper<ResearchPurpo
 
   @Override
   public ResearchPurpose sanitize(ResearchPurpose instance) {
+    if (instance == null) {
+      instance = new ResearchPurpose();
+    }
     return instance
         .populationDetails(new ArrayList<>());
   }

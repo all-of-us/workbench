@@ -5,6 +5,8 @@ import org.junit.Test
 import org.pmiops.workbench.model.DataAccessLevel
 import org.pmiops.workbench.model.ResearchPurpose
 import org.pmiops.workbench.model.Workspace
+import org.pmiops.workbench.utils.codegenhelpers.ResearchPurposeHelper
+import org.pmiops.workbench.utils.codegenhelpers.WorkspaceHelper
 import kotlin.reflect.KClass
 
 class TargetPropertyExtractorTest {
@@ -13,13 +15,13 @@ class TargetPropertyExtractorTest {
 
     @Before
     fun setUp() {
-        researchPurpose1 = ResearchPurpose()
+        researchPurpose1 = ResearchPurposeHelper.getInstance().create()
             .apply { intendedStudy = "stubbed toes" }
             .apply { additionalNotes = "I really like the cloud." }
 
         val now = System.currentTimeMillis()
 
-        workspace = Workspace()
+        workspace = WorkspaceHelper.getInstance().create()
             .apply { name = "DbWorkspace 1" }
             .apply { id = "fc-id-1" }
             .apply { namespace = "aou-rw-local1-c4be869a" }

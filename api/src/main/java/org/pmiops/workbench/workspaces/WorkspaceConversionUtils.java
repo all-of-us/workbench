@@ -17,6 +17,8 @@ import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.utils.codegenhelpers.ResearchPurposeHelper;
+import org.pmiops.workbench.utils.codegenhelpers.WorkspaceHelper;
 
 public class WorkspaceConversionUtils {
 
@@ -142,7 +144,7 @@ public class WorkspaceConversionUtils {
 
   private static ResearchPurpose createResearchPurpose(DbWorkspace workspace) {
     ResearchPurpose researchPurpose =
-        new ResearchPurpose()
+        ResearchPurposeHelper.getInstance().create()
             .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())
             .diseaseOfFocus(workspace.getDiseaseOfFocus())
             .methodsDevelopment(workspace.getMethodsDevelopment())
