@@ -193,8 +193,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return workspaceResponse;
   }
 
-  private Map<String, FirecloudWorkspaceResponse>
-      getFirecloudWorkspaces(List<String> fields) {
+  private Map<String, FirecloudWorkspaceResponse> getFirecloudWorkspaces(List<String> fields) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
     return fireCloudService.getWorkspaces(fields).stream()
@@ -207,7 +206,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName) {
-    FirecloudWorkspaceACL aclResp = fireCloudService.getWorkspaceAcl(workspaceNamespace, firecloudName);
+    FirecloudWorkspaceACL aclResp =
+        fireCloudService.getWorkspaceAcl(workspaceNamespace, firecloudName);
 
     // Swagger Java codegen does not handle the WorkspaceACL model correctly; it returns a GSON map
     // instead. Run this through a typed Gson conversion process to parse into the desired type.
@@ -361,7 +361,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // canCompute to other users. See RW-3009 for details.
     for (String email : Sets.union(updatedAclsMap.keySet(), aclsMap.keySet())) {
       String fromAccess =
-          aclsMap.getOrDefault(email, new FirecloudWorkspaceAccessEntry().accessLevel("")).getAccessLevel();
+          aclsMap
+              .getOrDefault(email, new FirecloudWorkspaceAccessEntry().accessLevel(""))
+              .getAccessLevel();
       WorkspaceAccessLevel toAccess =
           updatedAclsMap.getOrDefault(email, WorkspaceAccessLevel.NO_ACCESS);
       if (FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER != toAccess) {

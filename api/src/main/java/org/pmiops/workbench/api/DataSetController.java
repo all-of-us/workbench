@@ -441,7 +441,8 @@ public class DataSetController implements DataSetApiDelegate {
     // This suppresses 'may not be initialized errors. We will always init to something else before
     // used.
     JSONObject notebookFile = new JSONObject();
-    FirecloudWorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+    FirecloudWorkspaceResponse workspace =
+        fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
     JSONObject metaData = new JSONObject();
 
     if (!dataSetExportRequest.getNewNotebook()) {

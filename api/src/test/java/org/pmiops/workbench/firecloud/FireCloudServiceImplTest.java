@@ -155,7 +155,8 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testNihStatus() throws Exception {
-    FirecloudNihStatus status = new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L);
+    FirecloudNihStatus status =
+        new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L);
     when(nihApi.nihStatus()).thenReturn(status);
     assertThat(service.getNihStatus()).isNotNull();
     assertThat(service.getNihStatus()).isEqualTo(status);

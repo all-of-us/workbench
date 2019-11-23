@@ -285,8 +285,7 @@ public class ConceptsControllerTest {
     workspace.setWorkspaceNamespace("ns");
     workspace.setCdrVersion(cdrVersion);
     workspaceDao.save(workspace);
-    FirecloudWorkspaceResponse fcResponse =
-        new FirecloudWorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
     when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)).thenReturn(fcResponse);
     stubGetWorkspaceAcl(

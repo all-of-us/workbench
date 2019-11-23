@@ -188,8 +188,7 @@ public class ClusterControllerTest {
     testWorkspace.setCdrVersion(cdrVersion);
   }
 
-  private FirecloudWorkspace createFcWorkspace(
-      String ns, String name, String creator) {
+  private FirecloudWorkspace createFcWorkspace(String ns, String name, String creator) {
     return new FirecloudWorkspace()
         .namespace(ns)
         .name(name)
@@ -206,10 +205,8 @@ public class ClusterControllerTest {
     stubGetFcWorkspace(createFcWorkspace(ns, name, creator));
   }
 
-  private void stubGetFcWorkspace(FirecloudWorkspace fcWorkspace)
-      throws Exception {
-    FirecloudWorkspaceResponse fcResponse =
-        new FirecloudWorkspaceResponse();
+  private void stubGetFcWorkspace(FirecloudWorkspace fcWorkspace) throws Exception {
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     when(fireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))

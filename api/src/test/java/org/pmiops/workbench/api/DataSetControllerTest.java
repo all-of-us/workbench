@@ -523,14 +523,12 @@ public class DataSetControllerTest {
 
   private void stubGetWorkspace(String ns, String name, String creator, WorkspaceAccessLevel access)
       throws Exception {
-    FirecloudWorkspace fcWorkspace =
-        new FirecloudWorkspace();
+    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(creator);
     fcWorkspace.setBucketName(WORKSPACE_BUCKET_NAME);
-    FirecloudWorkspaceResponse fcResponse =
-        new FirecloudWorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);

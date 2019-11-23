@@ -303,8 +303,7 @@ public class ConceptSetsControllerTest {
     stubGetWorkspaceAcl(
         workspace2.getNamespace(), WORKSPACE_NAME_2, USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
-    FirecloudWorkspaceResponse fcResponse =
-        new FirecloudWorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
     when(fireCloudService.getWorkspace(workspace.getNamespace(), WORKSPACE_NAME))
         .thenReturn(fcResponse);
@@ -772,13 +771,11 @@ public class ConceptSetsControllerTest {
 
   private void stubGetWorkspace(String ns, String name, String creator, WorkspaceAccessLevel access)
       throws Exception {
-    FirecloudWorkspace fcWorkspace =
-        new FirecloudWorkspace();
+    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(creator);
-    FirecloudWorkspaceResponse fcResponse =
-        new FirecloudWorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);

@@ -172,7 +172,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             new FirecloudWorkspaceACL()
                 .acl(
                     ImmutableMap.of(
-                        currentUser.getEmail(), new FirecloudWorkspaceAccessEntry().accessLevel("OWNER"))));
+                        currentUser.getEmail(),
+                        new FirecloudWorkspaceAccessEntry().accessLevel("OWNER"))));
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);

@@ -194,8 +194,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return new FirecloudWorkspaceId(namespace, strippedName);
   }
 
-  private FirecloudWorkspace attemptFirecloudWorkspaceCreation(
-      FirecloudWorkspaceId workspaceId) {
+  private FirecloudWorkspace attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
     return fireCloudService.createWorkspace(
         workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
   }
@@ -225,8 +224,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId =
         generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
-    FirecloudWorkspace fcWorkspace =
-        attemptFirecloudWorkspaceCreation(workspaceId);
+    FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbWorkspace dbWorkspace = new DbWorkspace();

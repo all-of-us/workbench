@@ -54,8 +54,7 @@ public class WorkspaceConversionUtils {
     return result;
   }
 
-  public static Workspace toApiWorkspace(
-      DbWorkspace workspace, FirecloudWorkspace fcWorkspace) {
+  public static Workspace toApiWorkspace(DbWorkspace workspace, FirecloudWorkspace fcWorkspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     if (workspace.getPopulation()) {
       researchPurpose.setPopulationDetails(new ArrayList<>(workspace.getSpecificPopulationsEnum()));
