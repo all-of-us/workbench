@@ -39,8 +39,9 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
-import org.pmiops.workbench.firecloud.model.JWTWrapper;
+import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
+import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.CreationStatusEnum;
+import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -87,14 +88,14 @@ public class ProfileController implements ProfileApiDelegate {
           .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
           .build();
   private static final Function<
-          org.pmiops.workbench.firecloud.model.BillingProjectMembership, BillingProjectMembership>
+      FirecloudBillingProjectMembership, BillingProjectMembership>
       TO_CLIENT_BILLING_PROJECT_MEMBERSHIP =
           new Function<
-              org.pmiops.workbench.firecloud.model.BillingProjectMembership,
+              FirecloudBillingProjectMembership,
               BillingProjectMembership>() {
             @Override
             public BillingProjectMembership apply(
-                org.pmiops.workbench.firecloud.model.BillingProjectMembership
+                FirecloudBillingProjectMembership
                     billingProjectMembership) {
               BillingProjectMembership result = new BillingProjectMembership();
               result.setProjectName(billingProjectMembership.getProjectName());
@@ -220,7 +221,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<List<BillingProjectMembership>> getBillingProjects() {
-    List<org.pmiops.workbench.firecloud.model.BillingProjectMembership> memberships =
+    List<FirecloudBillingProjectMembership> memberships =
         fireCloudService.getBillingProjectMemberships();
     return ResponseEntity.ok(
         memberships.stream()
@@ -739,7 +740,7 @@ public class ProfileController implements ProfileApiDelegate {
     if (token == null || token.getJwt() == null) {
       throw new BadRequestException("Token is required.");
     }
-    JWTWrapper wrapper = new JWTWrapper().jwt(token.getJwt());
+    FirecloudJWTWrapper wrapper = new FirecloudJWTWrapper().jwt(token.getJwt());
     try {
       fireCloudService.postNihCallback(wrapper);
       userService.syncEraCommonsStatus();

@@ -32,10 +32,10 @@ import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.auth.OAuth;
-import org.pmiops.workbench.firecloud.model.CreateRawlsBillingProjectFullRequest;
-import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
-import org.pmiops.workbench.firecloud.model.NihStatus;
-import org.pmiops.workbench.firecloud.model.SystemStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
+import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudSystemStatus;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 
@@ -87,7 +87,7 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testStatus_success() throws ApiException {
-    when(statusApi.status()).thenReturn(new SystemStatus());
+    when(statusApi.status()).thenReturn(new FirecloudSystemStatus());
     assertThat(service.getFirecloudStatus()).isTrue();
   }
 
@@ -123,13 +123,13 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testIsUserMemberOfGroup_none() throws Exception {
-    when(groupsApi.getGroup("group")).thenReturn(new ManagedGroupWithMembers());
+    when(groupsApi.getGroup("group")).thenReturn(new FirecloudManagedGroupWithMembers());
     assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isFalse();
   }
 
   @Test
   public void testIsUserMemberOfGroup_noNameMatch() throws Exception {
-    ManagedGroupWithMembers group = new ManagedGroupWithMembers();
+    FirecloudManagedGroupWithMembers group = new FirecloudManagedGroupWithMembers();
     group.setMembersEmails(Arrays.asList("asdf@fake-research-aou.org"));
     when(groupsApi.getGroup("group")).thenReturn(group);
     assertThat(service.isUserMemberOfGroup(EMAIL_ADDRESS, "group")).isFalse();
@@ -137,7 +137,7 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testIsUserMemberOfGroup_matchInAdminList() throws Exception {
-    ManagedGroupWithMembers group = new ManagedGroupWithMembers();
+    FirecloudManagedGroupWithMembers group = new FirecloudManagedGroupWithMembers();
     group.setAdminsEmails(Arrays.asList(EMAIL_ADDRESS));
 
     when(groupsApi.getGroup("group")).thenReturn(group);
@@ -146,7 +146,7 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testIsUserMemberOfGroup_matchInMemberList() throws Exception {
-    ManagedGroupWithMembers group = new ManagedGroupWithMembers();
+    FirecloudManagedGroupWithMembers group = new FirecloudManagedGroupWithMembers();
     group.setMembersEmails(Arrays.asList(EMAIL_ADDRESS));
 
     when(groupsApi.getGroup("group")).thenReturn(group);
@@ -155,7 +155,7 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testNihStatus() throws Exception {
-    NihStatus status = new NihStatus().linkedNihUsername("test").linkExpireTime(500L);
+    FirecloudNihStatus status = new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L);
     when(nihApi.nihStatus()).thenReturn(status);
     assertThat(service.getNihStatus()).isNotNull();
     assertThat(service.getNihStatus()).isEqualTo(status);
@@ -176,7 +176,7 @@ public class FireCloudServiceImplTest {
   @Test
   public void testNihCallback() throws Exception {
     when(nihApi.nihCallback(any()))
-        .thenReturn(new NihStatus().linkedNihUsername("test").linkExpireTime(500L));
+        .thenReturn(new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L));
     try {
       service.postNihCallback(any());
     } catch (Exception e) {
@@ -219,10 +219,10 @@ public class FireCloudServiceImplTest {
 
     service.createAllOfUsBillingProject("project-name");
 
-    ArgumentCaptor<CreateRawlsBillingProjectFullRequest> captor =
-        ArgumentCaptor.forClass(CreateRawlsBillingProjectFullRequest.class);
+    ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
+        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
     verify(billingApi).createBillingProjectFull(captor.capture());
-    CreateRawlsBillingProjectFullRequest request = captor.getValue();
+    FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
 
     // N.B. FireCloudServiceImpl doesn't add the project prefix; this is done by callers such
     // as BillingProjectBufferService.
@@ -241,10 +241,10 @@ public class FireCloudServiceImplTest {
 
     service.createAllOfUsBillingProject("project-name");
 
-    ArgumentCaptor<CreateRawlsBillingProjectFullRequest> captor =
-        ArgumentCaptor.forClass(CreateRawlsBillingProjectFullRequest.class);
+    ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
+        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
     verify(billingApi).createBillingProjectFull(captor.capture());
-    CreateRawlsBillingProjectFullRequest request = captor.getValue();
+    FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
 
     assertThat(request.getEnableFlowLogs()).isTrue();
     assertThat(request.getHighSecurityNetwork()).isTrue();
@@ -259,10 +259,10 @@ public class FireCloudServiceImplTest {
 
     service.createAllOfUsBillingProject("project-name");
 
-    ArgumentCaptor<CreateRawlsBillingProjectFullRequest> captor =
-        ArgumentCaptor.forClass(CreateRawlsBillingProjectFullRequest.class);
+    ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
+        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
     verify(billingApi).createBillingProjectFull(captor.capture());
-    CreateRawlsBillingProjectFullRequest request = captor.getValue();
+    FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
 
     assertThat(request.getServicePerimeter()).isEqualTo(servicePerimeter);
   }

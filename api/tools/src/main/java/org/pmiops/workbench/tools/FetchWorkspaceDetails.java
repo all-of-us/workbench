@@ -12,7 +12,7 @@ import org.apache.commons.cli.Options;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -61,7 +61,7 @@ public class FetchWorkspaceDetails {
       for (DbWorkspace workspace :
           workspaceDao.findAllByWorkspaceNamespace(
               opts.getOptionValue(projectIdOpt.getLongOpt()))) {
-        Map<String, WorkspaceAccessEntry> acl =
+        Map<String, FirecloudWorkspaceAccessEntry> acl =
             extractAclResponse(
                 workspacesApi.getWorkspaceAcl(
                     workspace.getWorkspaceNamespace(), workspace.getFirecloudName()));
@@ -70,7 +70,7 @@ public class FetchWorkspaceDetails {
         sb.append("Workspace Namespace: " + workspace.getWorkspaceNamespace() + "\n");
         sb.append("Creator: " + workspace.getCreator().getEmail() + "\n");
         sb.append("Collaborators:\n");
-        for (Map.Entry<String, WorkspaceAccessEntry> aclEntry : acl.entrySet()) {
+        for (Map.Entry<String, FirecloudWorkspaceAccessEntry> aclEntry : acl.entrySet()) {
           sb.append("\t" + aclEntry.getKey() + " (" + aclEntry.getValue().getAccessLevel() + ")\n");
         }
 

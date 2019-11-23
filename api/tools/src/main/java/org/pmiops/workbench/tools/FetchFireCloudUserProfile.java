@@ -8,8 +8,8 @@ import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
-import org.pmiops.workbench.firecloud.model.Me;
-import org.pmiops.workbench.firecloud.model.NihStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudMe;
+import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -50,14 +50,14 @@ public class FetchFireCloudUserProfile {
       ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(userEmail);
 
       ProfileApi profileApi = new ProfileApi(apiClient);
-      Me me = profileApi.me();
+      FirecloudMe me = profileApi.me();
       log.info(
           String.format(
               "Email: %s, subject ID: %s",
               me.getUserInfo().getUserEmail(), me.getUserInfo().getUserSubjectId()));
 
       NihApi nihApi = new NihApi(apiClient);
-      NihStatus nihStatus = nihApi.nihStatus();
+      FirecloudNihStatus nihStatus = nihApi.nihStatus();
       log.info(String.format("NIH linked user: %s", nihStatus.getLinkedNihUsername()));
     };
   }

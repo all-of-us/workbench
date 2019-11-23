@@ -8,8 +8,8 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
@@ -59,13 +59,13 @@ public interface WorkspaceService {
   DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel);
 
-  Map<String, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(
+  Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName);
 
-  List<UserRole> convertWorkspaceAclsToUserRoles(Map<String, WorkspaceAccessEntry> rolesMap);
+  List<UserRole> convertWorkspaceAclsToUserRoles(Map<String, FirecloudWorkspaceAccessEntry> rolesMap);
 
-  WorkspaceACLUpdate updateFirecloudAclsOnUser(
-      WorkspaceAccessLevel updatedAccess, WorkspaceACLUpdate currentUpdate);
+  FirecloudWorkspaceACLUpdate updateFirecloudAclsOnUser(
+      WorkspaceAccessLevel updatedAccess, FirecloudWorkspaceACLUpdate currentUpdate);
 
   DbWorkspace setPublished(DbWorkspace workspace, String publishedWorkspaceGroup, boolean publish);
 

@@ -29,7 +29,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
-import org.pmiops.workbench.firecloud.model.NihStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -575,7 +575,7 @@ public class UserService {
    *
    * <p>This method saves the updated user object to the database and returns it.
    */
-  private DbUser setEraCommonsStatus(DbUser targetUser, NihStatus nihStatus) {
+  private DbUser setEraCommonsStatus(DbUser targetUser, FirecloudNihStatus nihStatus) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     return updateUserWithRetries(
@@ -623,7 +623,7 @@ public class UserService {
   /** Syncs the eraCommons access module status for the current user. */
   public DbUser syncEraCommonsStatus() {
     DbUser user = userProvider.get();
-    NihStatus nihStatus = fireCloudService.getNihStatus();
+    FirecloudNihStatus nihStatus = fireCloudService.getNihStatus();
     return setEraCommonsStatus(user, nihStatus);
   }
 
@@ -645,7 +645,7 @@ public class UserService {
     ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
     NihApi api = new NihApi(apiClient);
     try {
-      NihStatus nihStatus = api.nihStatus();
+      FirecloudNihStatus nihStatus = api.nihStatus();
       return setEraCommonsStatus(user, nihStatus);
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
