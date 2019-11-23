@@ -596,7 +596,7 @@ definitions:
         type: string
       deceased:
         type: boolean
-
+        default: false
   ModifyCohortStatusRequest:
     type: object
     required:
@@ -692,6 +692,7 @@ definitions:
         description: The Value of the annotation if the AnnotationType is DATE
       annotationValueBoolean:
         type: boolean
+        default: false
         description: The Value of the annotation if the AnnotationType is BOOLEAN
       annotationValueInteger:
         type: integer
@@ -737,6 +738,7 @@ definitions:
         description: The Value of the annotation if the AnnotationType is DATE
       annotationValueBoolean:
         type: boolean
+        default: false
         description: The Value of the annotation if the AnnotationType is BOOLEAN
       annotationValueInteger:
         type: integer

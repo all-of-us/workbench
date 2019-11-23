@@ -404,14 +404,12 @@ definitions:
         description: specifies if child or parent
         type: boolean
         default: false
-        default: false
       selectable:
         description: >
           Whether or not a client can specify this criteria in a search request.
           Selecting a group implies selecting all criteria contained within that
           group.
         type: boolean
-        default: false
         default: false
       conceptId:
         description: >
