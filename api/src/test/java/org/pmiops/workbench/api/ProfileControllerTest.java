@@ -285,7 +285,7 @@ public class ProfileControllerTest {
         GIVEN_NAME,
         DataAccessLevel.UNREGISTERED,
         TIMESTAMP,
-        null);
+        false);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
 
     // An additional call to getMe() should have no effect.
@@ -299,7 +299,7 @@ public class ProfileControllerTest {
         GIVEN_NAME,
         DataAccessLevel.UNREGISTERED,
         TIMESTAMP,
-        null);
+        false);
   }
 
   @Test
