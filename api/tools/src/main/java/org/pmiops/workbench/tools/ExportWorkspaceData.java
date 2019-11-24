@@ -60,7 +60,7 @@ public class ExportWorkspaceData {
 
   private static Option exportFilenameOpt =
       Option.builder()
-          .longOpt("exportFilename")
+          .longOpt("export-filename")
           .desc("Filename of export")
           .required()
           .hasArg()
@@ -126,15 +126,11 @@ public class ExportWorkspaceData {
 
       List<WorkspaceExportRow> rows = new ArrayList<>();
 
-      for (DbWorkspace workspace : workspaceDao.findAll()) {
+      for (DbWorkspace workspace : this.workspaceDao.findAll()) {
         rows.add(toWorkspaceExportRow(workspace));
 
         if (rows.size() % 10 == 0) {
-          log.info("Processed " + rows.size() + "/" + workspaceDao.count() + " rows");
-        }
-
-        if (rows.size() == 50) {
-          break;
+          log.info("Processed " + rows.size() + "/" + this.workspaceDao.count() + " rows");
         }
       }
 
