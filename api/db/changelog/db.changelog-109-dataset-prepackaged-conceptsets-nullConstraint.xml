@@ -9,5 +9,7 @@
             columnName="prePackagedConceptSet"
             defaultNullValue="0"
             tableName="data_set"/>
+    <renameColumn newColumnName="pre_packaged_concept_set" oldColumnName="prePackagedConceptSet" columnDataType="tinyint"
+            tableName="data_set"/>
    </changeSet>
 </databaseChangeLog>
