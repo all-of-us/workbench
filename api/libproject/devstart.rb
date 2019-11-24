@@ -1172,7 +1172,7 @@ def export_workspace_data(cmd_name, *args)
   op.opts.project = TEST_PROJECT
 
   op.add_typed_option(
-      "--exportFilename=[exportFilename]",
+      "--export-filename [export-filename]",
       String,
       ->(opts, v) { opts.exportFilename = v},
       "Filename of export file to write to")
@@ -1184,7 +1184,7 @@ def export_workspace_data(cmd_name, *args)
   gcc.validate()
 
   flags = ([
-      ["--exportFilename", op.opts.exportFilename]
+      ["--export-filename", op.opts.exportFilename]
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
