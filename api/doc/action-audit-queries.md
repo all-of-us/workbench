@@ -91,7 +91,7 @@ SELECT
   jsonPayload.prev_value AS prev_value,
   jsonPayload.new_value AS new_value
 FROM `all-of-us-rw-prod.workbench_action_audit_prod.workbench_action_audit_prod`
-ORDER BY event_time, agent_id
+ORDER BY event_time, agent_id, action_type
 LIMIT 1000
 ```
 
