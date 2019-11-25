@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs/Subscription';
 
-import {selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
+import {ageCountStore, selectionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {mapParameter, typeToTitle} from 'app/cohort-search/utils';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {triggerEvent} from 'app/utils/analytics';
@@ -211,10 +211,15 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       this.ageRange.setValue(range);
       min.setValue(range[0]);
       max.setValue(range[1]);
-    }
-    // Get the item count if editing an existing item
-    if (this.wizard && this.wizard.count) {
       this.count = this.wizard.count;
+      console.log(this.count);
+    }
+    const cdrid = currentWorkspaceStore.getValue().cdrVersionId;
+    if (!ageCountStore.getValue()[cdrid]) {
+      this.calculateAge(true);
+    } else if (min.value === minAge && max.value === maxAge && !this.count) {
+      console.log(ageCountStore.getValue());
+      this.count = ageCountStore.getValue()[cdrid];
     }
 
     const ageDiff = this.ageRange.valueChanges
@@ -286,22 +291,40 @@ export class DemographicsComponent implements OnInit, OnDestroy {
     });
   }
 
-  calculateAge() {
+  calculateAge(init?: boolean) {
     this.calculating = true;
-    const cdrVersionId = +(currentWorkspaceStore.getValue().cdrVersionId);
+    const cdrVersionId = currentWorkspaceStore.getValue().cdrVersionId;
+    const parameter = init ? {
+      ...this.ageNode,
+      name: `Age In Range ${minAge} - ${maxAge}`,
+      attributes: [{
+        name: AttrName.AGE,
+        operator: Operator.BETWEEN,
+        operands: [minAge.toString(), maxAge.toString()]
+      }],
+    } : this.selectedNode;
     const request = {
       excludes: [],
       includes: [{
         items: [{
           type: DomainType[DomainType.PERSON],
-          searchParameters: [mapParameter(this.selectedNode)],
+          searchParameters: [mapParameter(parameter)],
           modifiers: []
         }],
         temporal: false
       }]
     };
-    cohortBuilderApi().countParticipants(cdrVersionId, request).then(response => {
-      this.count = response;
+    cohortBuilderApi().countParticipants(+cdrVersionId, request).then(response => {
+      if (init) {
+        const ageCounts = ageCountStore.getValue();
+        ageCounts[cdrVersionId] = response;
+        ageCountStore.next(ageCounts);
+        if (this.demoForm.get('ageMin').value === 18 && this.demoForm.get('ageMax').value === 120) {
+          this.count = response;
+        }
+      } else {
+        this.count = response;
+      }
       this.calculating = false;
     }, (err) => {
       console.error(err);
