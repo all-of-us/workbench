@@ -113,7 +113,7 @@ SELECT
 FROM `all-of-us-rw-prod.workbench_action_audit_prod.workbench_action_audit_prod`
 WHERE jsonPayload.agent_type = 'USER' AND
   jsonPayload.agent_email = 'username@researchallofus.org'
-ORDER BY event_time, agent_id
+ORDER BY event_time, agent_id, action_type
 LIMIT 1000
 ```
 
