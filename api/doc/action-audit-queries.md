@@ -183,7 +183,7 @@ SELECT
   jsonPayload.new_value AS new_value
 FROM `all-of-us-rw-prod.workbench_action_audit_prod.workbench_action_audit_prod`
 WHERE jsonPayload.agent_type = 'USER' AND
-  jsonPayload.agent_email = 'jaycarlton@researchallofus.org' AND
+  jsonPayload.agent_email = 'username@researchallofus.org' AND
   jsonPayload.target_type = 'WORKSPACE'
 ORDER BY target_id, event_time, action_id
 LIMIT 1000
