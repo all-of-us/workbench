@@ -887,6 +887,13 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
 
+    // Hack so lists can be compared in isEqualTo regardless of order. Order doesn't matter
+    // semantically, but I don't want to go down the rabbit hole of an out-of-class equality
+    // method or custom assertion here (which would soon go out of date).
+    sortPopulationDetails(clonedWorkspace.getResearchPurpose());
+    sortPopulationDetails(retrievedWorkspace.getResearchPurpose());
+    sortPopulationDetails(modPurpose);
+
     assertWithMessage("get and clone responses are inconsistent")
         .that(clonedWorkspace)
         .isEqualTo(retrievedWorkspace);
@@ -894,6 +901,12 @@ public class WorkspacesControllerTest {
     assertThat(clonedWorkspace.getName()).isEqualTo(modWorkspace.getName());
     assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
+  }
+
+  private void sortPopulationDetails(ResearchPurpose researchPurpose) {
+    final List<SpecificPopulationEnum> populateionDetailsSorted =
+        researchPurpose.getPopulationDetails().stream().sorted().collect(Collectors.toList());
+    researchPurpose.setPopulationDetails(populateionDetailsSorted);
   }
 
   private UserRole createUserToShareWith(
