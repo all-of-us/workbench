@@ -3,7 +3,10 @@ package org.pmiops.workbench.billing;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
+
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -16,6 +19,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+
+import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
+import io.opencensus.stats.Aggregation;
+import io.opencensus.stats.BucketBoundaries;
+import io.opencensus.stats.Measure;
+import io.opencensus.stats.Stats;
+import io.opencensus.stats.StatsRecorder;
+import io.opencensus.stats.View;
+import io.opencensus.stats.ViewManager;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
@@ -40,6 +52,13 @@ public class BillingProjectBufferService {
   private static final int PROJECT_BILLING_ID_SIZE = 8;
   @VisibleForTesting static final Duration CREATING_TIMEOUT = Duration.ofMinutes(60);
   @VisibleForTesting static final Duration ASSIGNING_TIMEOUT = Duration.ofMinutes(10);
+  private static final Measure.MeasureLong BUFFER_ENTRY_MEASUREMENT = Measure.MeasureLong.create(
+      "buffer_entries",
+      "The number of billing projects in the buffer",
+      "projects");
+  private static final BucketBoundaries PROJECT_BOUNDARIES = BucketBoundaries.create(
+      Lists.newArrayList(0d, 10d, 20d, 50d, 200d));
+  private static final StatsRecorder STATS_RECORDER = Stats.getStatsRecorder();
   private static ImmutableMap<BufferEntryStatus, Duration> statusToGracePeriod =
       ImmutableMap.of(
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
@@ -59,6 +78,20 @@ public class BillingProjectBufferService {
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    View view = View.create(
+        View.Name.create("billing_project_buffer_entries"),
+        "The number of billing project buffer entries.",
+        BUFFER_ENTRY_MEASUREMENT,
+        Aggregation.Distribution.create(PROJECT_BOUNDARIES),
+        Collections.emptyList());
+    ViewManager viewManager = Stats.getViewManager();
+    viewManager.registerView(view);
+    try {
+      StackdriverStatsExporter.createAndRegister();
+    } catch (IOException e) {
+      log.log(Level.WARNING, "Failure to initialize stackdriver stats exporter");
+    }
+
   }
 
   private Timestamp getCurrentTimestamp() {
@@ -67,6 +100,8 @@ public class BillingProjectBufferService {
 
   /** Makes a configurable number of project creation attempts. */
   public void bufferBillingProjects() {
+
+    STATS_RECORDER.newMeasureMap().put(BUFFER_ENTRY_MEASUREMENT, getCurrentBufferSize()).record();
     int creationAttempts = this.workbenchConfigProvider.get().billing.bufferRefillProjectsPerTask;
     for (int i = 0; i < creationAttempts; i++) {
       bufferBillingProject();
