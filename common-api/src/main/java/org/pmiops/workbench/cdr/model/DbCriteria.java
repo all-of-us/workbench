@@ -163,7 +163,7 @@ public class DbCriteria {
   }
 
   @Transient
-  public long getLongCount() {
+  public Long getLongCount() {
     return StringUtils.isEmpty(this.count) ? null : Long.valueOf(this.count);
   }
 
@@ -182,7 +182,7 @@ public class DbCriteria {
   }
 
   @Transient
-  public long getLongConceptId() {
+  public Long getLongConceptId() {
     return StringUtils.isEmpty(this.conceptId) ? null : Long.valueOf(this.conceptId);
   }
 
