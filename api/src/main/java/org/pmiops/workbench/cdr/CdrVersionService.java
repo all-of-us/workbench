@@ -70,6 +70,32 @@ public class CdrVersionService {
   }
 
   /**
+   * Sets the active CDR version, after checking to ensure that the requester is in the appropriate
+   * authorization domain. If you have already retrieved a workspace for the requester (and thus
+   * implicitly know they are in the authorization domain for its CDR version), you can instead just
+   * call {@link CdrVersionContext#setCdrVersionNoCheckAuthDomain(DbCdrVersion)} directly.
+   *
+   * @param cdrVersionId
+   */
+  public void setCdrVersion(Long cdrVersionId) {
+    this.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+  }
+
+  /**
+   * Sets the active CDR version, after checking to ensure that the requester is in the appropriate
+   * authorization domain. If you have already retrieved a workspace for the requester (and thus
+   * implicitly know they are in the authorization domain for its CDR version), you can instead just
+   * call {@link CdrVersionContext#setCdrVersionNoCheckAuthDomain(DbCdrVersion)} directly.
+   *
+   * @param cdrVersionId
+   */
+  public DbCdrVersion findAndSetCdrVersion(Long cdrVersionId) {
+    DbCdrVersion dbCdrVersion = cdrVersionDao.findOne(cdrVersionId);
+    this.setCdrVersion(dbCdrVersion);
+    return dbCdrVersion;
+  }
+
+  /**
    * Retrieve all the CDR versions visible to users with the specified data access level. When
    * {@link DataAccessLevel#PROTECTED} is provided, CDR versions for both {@link
    * DataAccessLevel#REGISTERED} and {@link DataAccessLevel#PROTECTED} are returned. Note: this
