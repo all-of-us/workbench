@@ -87,9 +87,6 @@ h3 {
 .form-container.age clr-checkbox {
   padding-left: 1rem;
 }
-.form-container.age clr-checkbox .badge.badge-info{
-  margin-left: 0.5rem;
-}
 .ds-wrapper {
   display: flex;
   flex-flow: row nowrap;

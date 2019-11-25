@@ -30,10 +30,6 @@
 
       <clr-checkbox formControlName="deceased" [clrDisabled]="!ageNode || !deceasedNode">
         Is Deceased
-<!--        TODO need decision whether to keep this or use same count preview as Age -->
-<!--        <span *ngIf="deceasedNode" class="badge badge-info">-->
-<!--          {{ deceasedNode.count | number }}-->
-<!--        </span>-->
       </clr-checkbox>
     </ng-container>
     <div *ngIf="loading" class="spinner" style="left: 45%"></div>
