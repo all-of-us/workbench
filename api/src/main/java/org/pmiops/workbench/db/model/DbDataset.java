@@ -194,7 +194,7 @@ public class DbDataset {
     this.values = values;
   }
 
-  @Column(name = "prePackagedConceptSet")
+  @Column(name = "pre_packaged_concept_set")
   public short getPrePackagedConceptSet() {
     return prePackagedConceptSet;
   }
