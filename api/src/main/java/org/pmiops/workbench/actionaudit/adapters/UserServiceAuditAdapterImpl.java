@@ -1,6 +1,7 @@
 package org.pmiops.workbench.actionaudit.adapters;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
@@ -9,6 +10,7 @@ import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AccountTargetProperty;
+import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,11 +51,33 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditAdapter {
               actionIdProvider.get(),
               ActionType.EDIT,
               TargetType.ACCOUNT,
-              AccountTargetProperty.REGISTRATION_STATUS.toString(),
+              AccountTargetProperty.REGISTRATION_STATUS.getPropertyName(),
               targetUser.getUserId(),
               previousDataAccessLevel.toString(),
               dataAccessLevel.toString());
       actionAuditService.send(event);
+    } catch (RuntimeException e) {
+      actionAuditService.logRuntimeException(log, e);
+    }
+  }
+
+  @Override
+  public void fireAdministrativeBypassTime(long userId,
+      BypassTimeTargetProperty bypassTimeTargetProperty, Instant bypassTime) {
+    try {
+      actionAuditService.send(new ActionAuditEvent(
+          clock.millis(),
+          AgentType.ADMINISTRATOR,
+          dbUserProvider.get().getUserId(),
+          dbUserProvider.get().getEmail(),
+          actionIdProvider.get(),
+          ActionType.BYPASS,
+          TargetType.ACCOUNT,
+          bypassTimeTargetProperty.getPropertyName(),
+          userId,
+          null,
+          Long.toString(bypassTime.toEpochMilli())
+      ));
     } catch (RuntimeException e) {
       actionAuditService.logRuntimeException(log, e);
     }

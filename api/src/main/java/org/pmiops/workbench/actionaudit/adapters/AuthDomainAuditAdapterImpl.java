@@ -45,7 +45,7 @@ public class AuthDomainAuditAdapterImpl implements AuthDomainAuditAdapter {
             actionIdProvider.get(),
             ActionType.EDIT,
             TargetType.ACCOUNT,
-            AccountTargetProperty.IS_ENABLED.toString(),
+            AccountTargetProperty.IS_ENABLED.getPropertyName(),
             targetUserId,
             Boolean.toString(previousEnabledValue),
             Boolean.toString(newEnabledValue));

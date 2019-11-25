@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
+import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
@@ -152,7 +153,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testSyncEraCommonsStatus() throws Exception {
+  public void testSyncEraCommonsStatus() {
     NihStatus nihStatus = new NihStatus();
     nihStatus.setLinkedNihUsername("nih-user");
     // FireCloud stores the NIH status in seconds, not msecs.
@@ -215,5 +216,56 @@ public class UserServiceTest {
     userService.syncTwoFactorAuthStatus();
     user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getTwoFactorAuthCompletionTime()).isNull();
+  }
+
+  @Test
+  public void testSetBypassTimes() {
+    DbUser dbUser = userDao.findUserByEmail(EMAIL_ADDRESS);
+    assertThat(dbUser.getDataUseAgreementBypassTime()).isNull();
+    assertThat(dbUser.getComplianceTrainingBypassTime()).isNull();
+    assertThat(dbUser.getBetaAccessBypassTime()).isNull();
+    assertThat(dbUser.getEraCommonsBypassTime()).isNull();
+    assertThat(dbUser.getTwoFactorAuthBypassTime()).isNull();
+
+    final Timestamp duaBypassTime = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
+    userService.setDataUseAgreementBypassTime(
+        dbUser.getUserId(), duaBypassTime);
+    verify(mockUserServiceAuditAdapter).fireAdministrativeBypassTime(
+        dbUser.getUserId(),
+        BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME,
+        duaBypassTime.toInstant());
+    assertThat(dbUser.getDataUseAgreementBypassTime()).isEqualTo(duaBypassTime);
+
+    final Timestamp complianceTrainingBypassTime = Timestamp.from(Instant.parse("2001-01-01T00:00:00.00Z"));
+    userService.setComplianceTrainingBypassTime(dbUser.getUserId(), complianceTrainingBypassTime);
+    verify(mockUserServiceAuditAdapter).fireAdministrativeBypassTime(
+        dbUser.getUserId(),
+        BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME,
+        complianceTrainingBypassTime.toInstant());
+    assertThat(dbUser.getComplianceTrainingBypassTime()).isEqualTo(complianceTrainingBypassTime);
+
+    final Timestamp betaAccessBypassTime = Timestamp.from(Instant.parse("2002-01-01T00:00:00.00Z"));
+    userService.setBetaAccessBypassTime(dbUser.getUserId(), betaAccessBypassTime);
+    verify(mockUserServiceAuditAdapter).fireAdministrativeBypassTime(
+        dbUser.getUserId(),
+        BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME,
+        betaAccessBypassTime.toInstant());
+    assertThat(dbUser.getBetaAccessBypassTime()).isEqualTo(betaAccessBypassTime);
+
+    final Timestamp eraCommonsBypassTime = Timestamp.from(Instant.parse("2003-01-01T00:00:00.00Z"));
+    userService.setEraCommonsBypassTime(dbUser.getUserId(), eraCommonsBypassTime);
+    verify(mockUserServiceAuditAdapter).fireAdministrativeBypassTime(
+        dbUser.getUserId(),
+        BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME,
+        eraCommonsBypassTime.toInstant());
+    assertThat(dbUser.getEraCommonsBypassTime()).isEqualTo(eraCommonsBypassTime);
+
+    final Timestamp twoFactorBypassTime = Timestamp.from(Instant.parse("2004-01-01T00:00:00.00Z"));
+    userService.setTwoFactorAuthBypassTime(dbUser.getUserId(), twoFactorBypassTime);
+    verify(mockUserServiceAuditAdapter).fireAdministrativeBypassTime(
+        dbUser.getUserId(),
+        BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+        twoFactorBypassTime.toInstant());
+    assertThat(dbUser.getTwoFactorAuthBypassTime()).isEqualTo(twoFactorBypassTime);
   }
 }

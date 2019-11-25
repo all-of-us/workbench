@@ -7,6 +7,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,6 +17,7 @@ import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
+import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
@@ -364,88 +367,73 @@ public class UserService {
     userDataUseAgreementDao.save(dataUseAgreements);
   }
 
-  public DbUser setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setDataUseAgreementBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  private DbUser setBypassTimeWithRetries(long userId,
+      Timestamp bypassTime,
+      BypassTimeTargetProperty targetProperty,
+      BiFunction<DbUser, Timestamp, DbUser> setter) {
+    return setBypassTimeWithRetries(userDao.findUserByUserId(userId),
+        bypassTime,
+        targetProperty, setter
+    );
   }
 
-  public DbUser setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setComplianceTrainingBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
+      setBypassTimeWithRetries(userId, bypassTime,
+        BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME,
+        DbUser::setDataUseAgreementBypassTime);
+  }
+  public void setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(userId, bypassTime,
+        BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME,
+        DbUser::setComplianceTrainingBypassTime);
   }
 
-  public DbUser setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setBetaAccessBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(userId, bypassTime,
+        BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME,
+        DbUser::setBetaAccessBypassTime);
   }
 
-  public DbUser setEmailVerificationBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setEmailVerificationBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(userId, bypassTime,
+        BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME,
+        DbUser::setEraCommonsBypassTime);
   }
 
-  public DbUser setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setEraCommonsBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(userId, bypassTime,
+        BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+        DbUser::setTwoFactorAuthBypassTime);
   }
 
-  public DbUser setIdVerificationBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setIdVerificationBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  private void setBypassTimeWithRetries(long userId,
+      Timestamp bypassTime,
+      BypassTimeTargetProperty targetProperty,
+      BiConsumer<DbUser, Timestamp> setter) {
+    setBypassTimeWithRetries(userDao.findUserByUserId(userId),
+        bypassTime,
+        targetProperty,
+        (u, t) -> { setter.accept(u, t); return u; });
   }
 
-  public DbUser setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
+  private DbUser setBypassTimeWithRetries(DbUser dbUser,
+      Timestamp bypassTime,
+      BypassTimeTargetProperty targetProperty, BiFunction<DbUser, Timestamp, DbUser> setter) {
     return updateUserWithRetries(
-        (u) -> {
-          u.setTwoFactorAuthBypassTime(bypassTime);
+        (u) -> { u = setter.apply(u, bypassTime);
+          userServiceAuditAdapter.fireAdministrativeBypassTime(
+              dbUser.getUserId(),
+              targetProperty,
+              bypassTime.toInstant());
           return u;
         },
-        user);
+        dbUser);
   }
 
   public DbUser setClusterRetryCount(int clusterRetryCount) {
     return updateUserWithRetries(
         (user) -> {
           user.setClusterCreateRetries(clusterRetryCount);
-          return user;
-        });
-  }
-
-  public DbUser setBillingRetryCount(int billingRetryCount) {
-    return updateUserWithRetries(
-        (user) -> {
-          user.setBillingProjectRetries(billingRetryCount);
           return user;
         });
   }

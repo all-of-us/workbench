@@ -157,7 +157,10 @@ constructor(
                     agentId = sharingUserId,
                     timestamp = timestamp,
                     targetType = TargetType.WORKSPACE,
-                    targetIdMaybe = sourceWorkspaceId
+                    targetIdMaybe = sourceWorkspaceId,
+                    targetPropertyMaybe = null,
+                    previousValueMaybe = null,
+                    newValueMaybe = null
             )
 
             val inviteeEvents = aclStringsByUserId.entries
