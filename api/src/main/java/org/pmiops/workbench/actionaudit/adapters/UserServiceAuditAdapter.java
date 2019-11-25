@@ -1,6 +1,7 @@
 package org.pmiops.workbench.actionaudit.adapters;
 
 import java.time.Instant;
+import java.util.Optional;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -14,5 +15,5 @@ public interface UserServiceAuditAdapter {
   void fireAdministrativeBypassTime(
       long userId,
       BypassTimeTargetProperty bypassTimeTargetProperty,
-      Instant bypassTime);
+      Optional<Instant> bypassTime);
 }

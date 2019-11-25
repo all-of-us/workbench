@@ -1,7 +1,9 @@
 package org.pmiops.workbench.actionaudit.adapters;
 
+import com.google.common.collect.Streams;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
@@ -62,8 +64,10 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditAdapter {
   }
 
   @Override
-  public void fireAdministrativeBypassTime(long userId,
-      BypassTimeTargetProperty bypassTimeTargetProperty, Instant bypassTime) {
+  public void fireAdministrativeBypassTime(
+      long userId,
+      BypassTimeTargetProperty bypassTimeTargetProperty,
+      Optional<Instant> bypassTime) {
     try {
       actionAuditService.send(new ActionAuditEvent(
           clock.millis(),
@@ -76,8 +80,10 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditAdapter {
           bypassTimeTargetProperty.getPropertyName(),
           userId,
           null,
-          Long.toString(bypassTime.toEpochMilli())
-      ));
+          bypassTime
+            .map(Instant::toEpochMilli)
+            .map(String::valueOf)
+            .orElse(null)));
     } catch (RuntimeException e) {
       actionAuditService.logRuntimeException(log, e);
     }
