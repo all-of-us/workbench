@@ -212,13 +212,12 @@ export class DemographicsComponent implements OnInit, OnDestroy {
       min.setValue(range[0]);
       max.setValue(range[1]);
       this.count = this.wizard.count;
-      console.log(this.count);
     }
     const cdrid = currentWorkspaceStore.getValue().cdrVersionId;
     if (!ageCountStore.getValue()[cdrid]) {
+      // Get total age count for this cdr version if it doesn't exist in the store yet
       this.calculateAge(true);
-    } else if (min.value === minAge && max.value === maxAge && !this.count) {
-      console.log(ageCountStore.getValue());
+    } else if (this.setTotalAge) {
       this.count = ageCountStore.getValue()[cdrid];
     }
 
@@ -292,7 +291,9 @@ export class DemographicsComponent implements OnInit, OnDestroy {
   }
 
   calculateAge(init?: boolean) {
-    this.calculating = true;
+    if (!init || this.setTotalAge) {
+      this.calculating = true;
+    }
     const cdrVersionId = currentWorkspaceStore.getValue().cdrVersionId;
     const parameter = init ? {
       ...this.ageNode,
@@ -319,7 +320,7 @@ export class DemographicsComponent implements OnInit, OnDestroy {
         const ageCounts = ageCountStore.getValue();
         ageCounts[cdrVersionId] = response;
         ageCountStore.next(ageCounts);
-        if (this.demoForm.get('ageMin').value === 18 && this.demoForm.get('ageMax').value === 120) {
+        if (this.setTotalAge) {
           this.count = response;
         }
       } else {
@@ -338,5 +339,12 @@ export class DemographicsComponent implements OnInit, OnDestroy {
 
   get showPreview() {
     return !this.loading && (this.selections && this.selections.length);
+  }
+
+  // Checks if form is in its initial state and if a count already exists before setting the total age count
+  get setTotalAge() {
+    const min = this.demoForm.get('ageMin');
+    const max = this.demoForm.get('ageMax');
+    return min.value === minAge && max.value === maxAge && !this.count;
   }
 }
