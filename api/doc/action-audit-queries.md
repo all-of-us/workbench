@@ -65,7 +65,7 @@ supports one or more properties, and these are outlined below:
 | ACL | ACCESS_LEVEL |
 
 ## Example Queries
-These queries are the same for every environment wiht the exception of the BigQuery
+These queries are the same for every environment with the exception of the BigQuery
 Dataset and Table names. The fully qualified table name is of the form
 `$GCP_PROJECT.$BIGQUERY_DATASET.$TABLE`. You'll need appropriate permissions on the
 project, dataset, and BigQuery service for these to work.
