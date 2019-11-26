@@ -75,9 +75,9 @@ describe('WorkspaceShareComponent', () => {
 
   it('displays correct role info', () => {
     const wrapper = component();
-    expect(wrapper.find(getSelectString(harryRole)).text()).toEqual(fp.capitalize(WorkspaceAccessLevel[harryRole.role]));
-    expect(wrapper.find(getSelectString(hermioneRole)).text()).toEqual(fp.capitalize(WorkspaceAccessLevel[hermioneRole.role]));
-    expect(wrapper.find(getSelectString(ronRole)).text()).toEqual(fp.capitalize(WorkspaceAccessLevel[ronRole.role]));
+    expect(wrapper.find(getSelectString(harryRole)).first().text()).toEqual(fp.capitalize(WorkspaceAccessLevel[harryRole.role]));
+    expect(wrapper.find(getSelectString(hermioneRole)).first().text()).toEqual(fp.capitalize(WorkspaceAccessLevel[hermioneRole.role]));
+    expect(wrapper.find(getSelectString(ronRole)).first().text()).toEqual(fp.capitalize(WorkspaceAccessLevel[ronRole.role]));
     expect(wrapper.find(getSelectString(lunaRole)).length).toBe(0);
   });
 
