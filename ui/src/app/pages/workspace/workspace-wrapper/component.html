@@ -29,7 +29,7 @@
                     [helpContent]="helpContent"
                     [setSidebarState]="setSidebarState"
                     [sidebarOpen]="sidebarOpen"></app-help-sidebar>
-  <div [ngStyle]="helpContent ? {'margin-right': '45px'} : {}">
+  <div [style.margin-right]="helpContent ? '45px' : 0" [style.height]="helpContent ? 'auto': '100%'">
     <router-outlet *ngIf="workspace"></router-outlet>
   </div>
 </ng-container>

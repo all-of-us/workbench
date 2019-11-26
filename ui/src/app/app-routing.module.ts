@@ -135,8 +135,7 @@ const routes: Routes = [
                       // use the (urldecoded) captured value nbName
                       pathElementForTitle: 'nbName',
                       breadcrumb: BreadcrumbType.Notebook,
-                      minimizeChrome: true,
-                      helpContent: 'data'
+                      minimizeChrome: true
                     }
                   }, {
                     path: 'preview/:nbName',
