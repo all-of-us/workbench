@@ -2,25 +2,34 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
+import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.adapters.AuthDomainAuditAdapter;
+import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
+import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateUserDisabledRequest;
+import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.test.FakeLongRandom;
+import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -46,23 +55,50 @@ public class AuthDomainControllerTest {
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
 
-  @Mock private FireCloudService mockFireCloudService;
+  @Mock private AdminActionHistoryDao adminActionHistoryDao;
+  @Mock private FireCloudService fireCloudService;
+  @Mock private Provider<DbUser> userProvider;
+  @Mock private ComplianceService complianceService;
+  @Mock private DirectoryService directoryService;
+  @Mock private UserServiceAuditAdapter mockUserServiceAuditAdapter;
   @Mock private AuthDomainAuditAdapter mockAuthDomainAuditAdapter;
-  @Mock private UserService mockUserService;
-
   @Autowired private UserDao userDao;
+  @Mock private UserDataUseAgreementDao userDataUseAgreementDao;
 
   private AuthDomainController authDomainController;
 
   @Before
   public void setUp() {
-    doNothing().when(mockFireCloudService).addUserToBillingProject(any(), any());
-    doNothing().when(mockFireCloudService).removeUserFromBillingProject(any(), any());
-    when(mockFireCloudService.createGroup(any())).thenReturn(new ManagedGroupWithMembers());
-
-    this.authDomainController =
-        new AuthDomainController(
-            mockFireCloudService, mockUserService, userDao, mockAuthDomainAuditAdapter);
+    DbUser adminUser = new DbUser();
+    adminUser.setUserId(0L);
+    doNothing().when(fireCloudService).addUserToBillingProject(any(), any());
+    doNothing().when(fireCloudService).removeUserFromBillingProject(any(), any());
+    when(fireCloudService.createGroup(any())).thenReturn(new ManagedGroupWithMembers());
+    when(userProvider.get()).thenReturn(adminUser);
+    WorkbenchConfig config = new WorkbenchConfig();
+    config.firecloud = new WorkbenchConfig.FireCloudConfig();
+    config.firecloud.registeredDomainName = "";
+    config.access = new WorkbenchConfig.AccessConfig();
+    config.access.enableDataUseAgreement = true;
+    FakeClock clock = new FakeClock(Instant.now());
+    UserService userService =
+        new UserService(
+            userProvider,
+            userDao,
+            adminActionHistoryDao,
+            userDataUseAgreementDao,
+            clock,
+            new FakeLongRandom(12345),
+            fireCloudService,
+            Providers.of(config),
+            complianceService,
+            directoryService,
+            mockUserServiceAuditAdapter);
+    this.authDomainController = new AuthDomainController(
+        fireCloudService,
+        userService,
+        userDao,
+        mockAuthDomainAuditAdapter);
   }
 
   @Test
@@ -73,16 +109,12 @@ public class AuthDomainControllerTest {
 
   @Test
   public void testDisableUser() {
-    DbUser createdUser = createUser(false);
-    doReturn(createdUser).when(mockUserService).setDisabledStatus(createdUser.getUserId(), true);
-
+    final DbUser createdUser = createUser(false);
     UpdateUserDisabledRequest request =
         new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(true);
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
-
-    verify(mockAuthDomainAuditAdapter).fireSetAccountEnabled(
-        createdUser.getUserId(), false, true);
-
+    verify(mockAuthDomainAuditAdapter)
+        .fireSetAccountEnabled(createdUser.getUserId(), false, true);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled()).isTrue();
@@ -90,19 +122,14 @@ public class AuthDomainControllerTest {
 
   @Test
   public void testEnableUser() {
-    DbUser createdUser = createUser(true);
-    DbUser userWithDisabledCleared = createdUser;
-      userWithDisabledCleared.setDisabled(true);
-    doReturn(createdUser)
-        .when(mockUserService)
-        .setDisabledStatus(createdUser.getUserId(), false);
-
-    final UpdateUserDisabledRequest request =
+    final DbUser createdUser = createUser(true);
+    UpdateUserDisabledRequest request =
         new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(false);
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
+    verify(mockAuthDomainAuditAdapter).fireSetAccountEnabled(createdUser.getUserId(), true, false);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
-    assertThat(!updatedUser.getDisabled());
+    assertThat(updatedUser.getDisabled()).isFalse();
   }
 
   private DbUser createUser(boolean disabled) {
