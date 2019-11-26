@@ -9,8 +9,8 @@ import {cohortReviewStore, visitsFilterOptions} from 'app/services/review-state.
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
-import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
-import {CriteriaType, DomainType, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
+import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {Cohort, CriteriaType, DomainType, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = reactStyles({
   title: {
@@ -22,7 +22,7 @@ const styles = reactStyles({
 
 interface State {
   reviewPresent: boolean;
-  cohortLoaded: boolean;
+  cohort: Cohort;
   readonly: boolean;
 }
 
@@ -31,7 +31,7 @@ export class CohortReview extends React.Component<{}, State> {
     super(props);
     this.state = {
       reviewPresent: undefined,
-      cohortLoaded: false,
+      cohort: undefined,
       readonly: false
     };
   }
@@ -53,12 +53,7 @@ export class CohortReview extends React.Component<{}, State> {
         navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);
       }
     });
-    cohortsApi().getCohort(ns, wsid, cid).then(cohort => {
-      // This effectively makes the 'current cohort' available to child components, by using
-      // the `withCurrentCohort` HOC. In addition, this store is used to render the breadcrumb.
-      currentCohortStore.next(cohort);
-      this.setState({cohortLoaded: true});
-    });
+    cohortsApi().getCohort(ns, wsid, cid).then(cohort => this.setState({cohort}));
     if (!visitsFilterOptions.getValue()) {
       cohortBuilderApi().getCriteriaBy(
         +cdrVersionId, DomainType[DomainType.VISIT], CriteriaType[CriteriaType.VISIT]
@@ -82,14 +77,14 @@ export class CohortReview extends React.Component<{}, State> {
   }
 
   render() {
-    const {cohortLoaded, readonly, reviewPresent} = this.state;
-    const loading = !cohortLoaded || reviewPresent === undefined;
-    const ableToReview = cohortLoaded && reviewPresent === false && !readonly;
-    const unableToReview = cohortLoaded && reviewPresent === false && readonly;
+    const {cohort, readonly, reviewPresent} = this.state;
+    const loading = !cohort || reviewPresent === undefined;
+    const ableToReview = !!cohort && reviewPresent === false && !readonly;
+    const unableToReview = !!cohort && reviewPresent === false && readonly;
     return <React.Fragment>
       {loading ? <SpinnerOverlay/>
         : <React.Fragment>
-        {ableToReview && <CreateReviewModal canceled={() => this.goBack()} created={() => this.reviewCreated()}/>}
+        {ableToReview && <CreateReviewModal canceled={() => this.goBack()} cohort={cohort} created={() => this.reviewCreated()}/>}
         {unableToReview && <Modal onRequestClose={() => this.goBack()}>
           <ModalTitle style={styles.title}>Users with read-only access cannot create cohort reviews</ModalTitle>
           <ModalFooter>

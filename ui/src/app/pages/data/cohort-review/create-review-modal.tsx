@@ -10,7 +10,7 @@ import {cohortReviewStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, ReactWrapperBase, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentCohortStore, navigate} from 'app/utils/navigation';
+import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import {CohortReview} from 'generated/fetch';
@@ -50,17 +50,17 @@ const styles = reactStyles({
 });
 
 interface Props {
-  created: Function;
   canceled: Function;
+  cohort: Cohort;
+  created: Function;
   workspace: WorkspaceData;
 }
 
 interface State {
-  cohort: Cohort;
-  review: CohortReview;
   create: boolean;
   creating: boolean;
   numberOfParticipants: string;
+  review: CohortReview;
 }
 
 export const CreateReviewModal = withCurrentWorkspace()(
@@ -69,11 +69,10 @@ export const CreateReviewModal = withCurrentWorkspace()(
     constructor(props: any) {
       super(props);
       this.state = {
-        review: cohortReviewStore.getValue(),
-        cohort: currentCohortStore.getValue(),
         create: true,
         creating: false,
         numberOfParticipants: '',
+        review: cohortReviewStore.getValue()
       };
     }
 
@@ -83,8 +82,8 @@ export const CreateReviewModal = withCurrentWorkspace()(
 
     createReview() {
       this.setState({creating: true});
-      const {workspace: {cdrVersionId, id, namespace}} = this.props;
-      const {cohort, numberOfParticipants} = this.state;
+      const {cohort, workspace: {cdrVersionId, id, namespace}} = this.props;
+      const {numberOfParticipants} = this.state;
       const request = {size: parseInt(numberOfParticipants, 10)};
 
       cohortReviewApi().createCohortReview(namespace, id, cohort.id, +cdrVersionId, request)
@@ -101,7 +100,8 @@ export const CreateReviewModal = withCurrentWorkspace()(
     }
 
     render() {
-      const {cohort, creating, numberOfParticipants, review} = this.state;
+      const {cohort} = this.props;
+      const {creating, numberOfParticipants, review} = this.state;
       const max = Math.min(this.state.review.matchedParticipantCount, 10000);
       const errors = validate({numberOfParticipants}, {
         numberOfParticipants: {
@@ -161,8 +161,9 @@ export const CreateReviewModal = withCurrentWorkspace()(
 })
 export class CreateReviewModalComponent extends ReactWrapperBase {
   @Input('canceled') canceled: Props['canceled'];
+  @Input('cohort') cohort: Props['cohort'];
   @Input('created') created: Props['created'];
   constructor() {
-    super(CreateReviewModal, ['canceled', 'created']);
+    super(CreateReviewModal, ['canceled', 'cohort', 'created']);
   }
 }
