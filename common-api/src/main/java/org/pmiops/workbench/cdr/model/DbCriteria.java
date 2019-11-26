@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cdr.model;
 
+import com.google.common.base.Strings;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,7 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.springframework.util.StringUtils;
 
 @Entity
 @Table(name = "cb_criteria")
@@ -164,7 +164,7 @@ public class DbCriteria {
 
   @Transient
   public Long getLongCount() {
-    return StringUtils.isEmpty(this.count) ? null : Long.valueOf(this.count);
+    return Strings.isNullOrEmpty(this.count) ? null : Long.valueOf(this.count);
   }
 
   @Column(name = "concept_id")
@@ -183,7 +183,7 @@ public class DbCriteria {
 
   @Transient
   public Long getLongConceptId() {
-    return StringUtils.isEmpty(this.conceptId) ? null : Long.valueOf(this.conceptId);
+    return Strings.isNullOrEmpty(this.conceptId) ? null : Long.valueOf(this.conceptId);
   }
 
   @Column(name = "domain_id")
