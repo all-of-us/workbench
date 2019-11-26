@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
-import * as React from 'react';
-import * as Lolex from 'lolex';
 import * as fp from 'lodash/fp';
+import * as Lolex from 'lolex';
+import * as React from 'react';
 import Select from 'react-select';
 
 import {Props, WorkspaceShare} from './workspace-share';
@@ -90,7 +90,7 @@ describe('WorkspaceShareComponent', () => {
   });
 
   it('adds user correctly', async() => {
-    let clock = Lolex.install({shouldAdvanceTime: true});
+    const clock = Lolex.install({shouldAdvanceTime: true});
     const wrapper = component();
     wrapper.find('[data-test-id="search"]').simulate('change', {target: {value: 'luna'}});
     clock.tick(401);
@@ -116,7 +116,7 @@ describe('WorkspaceShareComponent', () => {
   });
 
   it('saves acl correctly after changes made', async() => {
-    let clock = Lolex.install({shouldAdvanceTime: true});
+    const clock = Lolex.install({shouldAdvanceTime: true});
     const wrapper = component();
     wrapper.find('[data-test-id="search"]').simulate('change', {target: {value: 'luna'}});
     clock.tick(401);
@@ -130,7 +130,7 @@ describe('WorkspaceShareComponent', () => {
     wrapper.find('[data-test-id="remove-collab-ron.weasley@hogwarts.edu"]').first()
       .simulate('click');
     // change hermione's access to owner
-    let selectComponent = wrapper.find('[data-test-id="hermione.granger@hogwarts.edu-user-role"]')
+    const selectComponent = wrapper.find('[data-test-id="hermione.granger@hogwarts.edu-user-role"]')
       .find(Select);
     selectComponent.instance().setState({menuIsOpen: true});
     wrapper.update();
