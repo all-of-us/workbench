@@ -52,6 +52,15 @@ h3 {
   width: 95%;
   bottom: 0.5rem;
 }
+.count-preview.age {
+  padding: 0.25rem 1rem;
+  bottom: 0.5rem;
+  width: auto;
+  min-width: 50%;
+}
+.count-preview > div {
+  float: left;
+}
 .count-preview .text-bold {
   font-weight: bold;
   color: #4A4A4A;
@@ -77,9 +86,6 @@ h3 {
 }
 .form-container.age clr-checkbox {
   padding-left: 1rem;
-}
-.form-container.age clr-checkbox .badge.badge-info{
-  margin-left: 0.5rem;
 }
 .ds-wrapper {
   display: flex;

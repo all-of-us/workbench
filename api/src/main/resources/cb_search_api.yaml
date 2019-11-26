@@ -77,7 +77,6 @@ paths:
         - in: query
           name: limit
           type: integer
-          format: int64
           required: false
           description: number of criteria matches to return
       responses:
@@ -183,7 +182,6 @@ paths:
         - in: query
           name: limit
           type: integer
-          format: int64
           required: false
           description: number of criteria matches to return
       responses:
@@ -209,7 +207,6 @@ paths:
         - in: query
           name: limit
           type: integer
-          format: int64
           required: false
           description: number of criteria matches to return
       responses:

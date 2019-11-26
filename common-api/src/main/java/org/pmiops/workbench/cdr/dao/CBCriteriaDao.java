@@ -205,7 +205,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "limit :limit",
       nativeQuery = true)
   List<DbCriteria> findDrugBrandOrIngredientByValue(
-      @Param("value") String value, @Param("limit") Long limit);
+      @Param("value") String value, @Param("limit") Integer limit);
 
   @Query(
       value =
