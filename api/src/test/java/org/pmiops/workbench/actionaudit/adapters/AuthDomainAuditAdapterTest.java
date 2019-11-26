@@ -5,8 +5,6 @@ import static org.mockito.Mockito.verify;
 
 import java.time.Clock;
 import java.time.Instant;
-import javax.inject.Provider;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -22,7 +20,6 @@ import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +28,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
 public class AuthDomainAuditAdapterTest {
 
@@ -41,9 +37,7 @@ public class AuthDomainAuditAdapterTest {
   private static final Instant INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final String ACTION_ID = "9095d2f9-8db2-46c3-8f8e-4f90a62b457f";
 
-  @Autowired private Provider<DbUser> mockUserProvider;
   @Autowired private ActionAuditService mockActionAuditService;
-  @Autowired private Provider<String> mockActionIdProvider;
 
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
 
@@ -71,22 +65,6 @@ public class AuthDomainAuditAdapterTest {
     public Clock getClock() {
       return new FakeClock(INSTANT);
     }
-  }
-
-  @Before
-  public void setup() {
-    //    Clock fakeClock = new FakeClock(INSTANT);
-
-    //    final DbUser administrator = new DbUser();
-    //    administrator.setUserId(ADMINISTRATOR_USER_ID);
-    //    administrator.setEmail(ADMINISTRATOR_EMAIL);
-    //    doReturn(administrator).when(mockUserProvider).get();
-
-    //    doReturn(ACTION_ID).when(mockActionIdProvider).get();
-    //
-    //    authDomainAuditAdapter =
-    //        new AuthDomainAuditAdapterImpl(
-    //            mockActionAuditService, fakeClock, mockUserProvider, mockActionIdProvider);
   }
 
   @Test
