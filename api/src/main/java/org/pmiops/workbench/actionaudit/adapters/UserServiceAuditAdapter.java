@@ -8,12 +8,8 @@ import org.pmiops.workbench.model.DataAccessLevel;
 
 public interface UserServiceAuditAdapter {
   void fireUpdateDataAccessAction(
-      DbUser targetUser,
-      DataAccessLevel dataAccessLevel,
-      DataAccessLevel previousDataAccessLevel);
+      DbUser targetUser, DataAccessLevel dataAccessLevel, DataAccessLevel previousDataAccessLevel);
 
   void fireAdministrativeBypassTime(
-      long userId,
-      BypassTimeTargetProperty bypassTimeTargetProperty,
-      Optional<Instant> bypassTime);
+      long userId, BypassTimeTargetProperty bypassTimeTargetProperty, Optional<Instant> bypassTime);
 }

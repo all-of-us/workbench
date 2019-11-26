@@ -6,7 +6,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
@@ -230,52 +229,57 @@ public class UserServiceTest {
     assertThat(dbUser.getTwoFactorAuthBypassTime()).isNull();
 
     final Timestamp duaBypassTime = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
-    userService.setDataUseAgreementBypassTime(
-        dbUser.getUserId(), duaBypassTime);
-    verify(mockUserServiceAuditAdapter).fireAdministrativeBypassTime(
-        dbUser.getUserId(),
-        BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME,
-        nullableTimestampToOptionalInstant(duaBypassTime));
+    userService.setDataUseAgreementBypassTime(dbUser.getUserId(), duaBypassTime);
+    verify(mockUserServiceAuditAdapter)
+        .fireAdministrativeBypassTime(
+            dbUser.getUserId(),
+            BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME,
+            nullableTimestampToOptionalInstant(duaBypassTime));
     assertThat(dbUser.getDataUseAgreementBypassTime()).isEqualTo(duaBypassTime);
 
-    userService.setDataUseAgreementBypassTime(
-        dbUser.getUserId(), null);
-    verify(mockUserServiceAuditAdapter).fireAdministrativeBypassTime(
-        dbUser.getUserId(),
-        BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME,
-        Optional.empty());
+    userService.setDataUseAgreementBypassTime(dbUser.getUserId(), null);
+    verify(mockUserServiceAuditAdapter)
+        .fireAdministrativeBypassTime(
+            dbUser.getUserId(),
+            BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME,
+            Optional.empty());
     assertThat(dbUser.getDataUseAgreementBypassTime()).isNull();
 
-    final Timestamp complianceTrainingBypassTime = Timestamp.from(Instant.parse("2001-01-01T00:00:00.00Z"));
+    final Timestamp complianceTrainingBypassTime =
+        Timestamp.from(Instant.parse("2001-01-01T00:00:00.00Z"));
     userService.setComplianceTrainingBypassTime(dbUser.getUserId(), complianceTrainingBypassTime);
-    verify(mockUserServiceAuditAdapter).fireAdministrativeBypassTime(
-        dbUser.getUserId(),
-        BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME,
-        nullableTimestampToOptionalInstant(complianceTrainingBypassTime));
+    verify(mockUserServiceAuditAdapter)
+        .fireAdministrativeBypassTime(
+            dbUser.getUserId(),
+            BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME,
+            nullableTimestampToOptionalInstant(complianceTrainingBypassTime));
     assertThat(dbUser.getComplianceTrainingBypassTime()).isEqualTo(complianceTrainingBypassTime);
 
     final Timestamp betaAccessBypassTime = Timestamp.from(Instant.parse("2002-01-01T00:00:00.00Z"));
     userService.setBetaAccessBypassTime(dbUser.getUserId(), betaAccessBypassTime);
-    verify(mockUserServiceAuditAdapter).fireAdministrativeBypassTime(
-        dbUser.getUserId(),
-        BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME,
-        nullableTimestampToOptionalInstant(betaAccessBypassTime));
+    verify(mockUserServiceAuditAdapter)
+        .fireAdministrativeBypassTime(
+            dbUser.getUserId(),
+            BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME,
+            nullableTimestampToOptionalInstant(betaAccessBypassTime));
     assertThat(dbUser.getBetaAccessBypassTime()).isEqualTo(betaAccessBypassTime);
 
     final Timestamp eraCommonsBypassTime = Timestamp.from(Instant.parse("2003-01-01T00:00:00.00Z"));
     userService.setEraCommonsBypassTime(dbUser.getUserId(), eraCommonsBypassTime);
-    verify(mockUserServiceAuditAdapter).fireAdministrativeBypassTime(
-        dbUser.getUserId(),
-        BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME,
-        nullableTimestampToOptionalInstant(eraCommonsBypassTime));
+    verify(mockUserServiceAuditAdapter)
+        .fireAdministrativeBypassTime(
+            dbUser.getUserId(),
+            BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME,
+            nullableTimestampToOptionalInstant(eraCommonsBypassTime));
     assertThat(dbUser.getEraCommonsBypassTime()).isEqualTo(eraCommonsBypassTime);
 
     final Timestamp twoFactorBypassTime = Timestamp.from(Instant.parse("2004-01-01T00:00:00.00Z"));
     userService.setTwoFactorAuthBypassTime(dbUser.getUserId(), twoFactorBypassTime);
-    verify(mockUserServiceAuditAdapter).fireAdministrativeBypassTime(
-        dbUser.getUserId(),
-        BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
-        nullableTimestampToOptionalInstant(twoFactorBypassTime));
+    verify(mockUserServiceAuditAdapter)
+        .fireAdministrativeBypassTime(
+            dbUser.getUserId(),
+            BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
+            nullableTimestampToOptionalInstant(twoFactorBypassTime));
     assertThat(dbUser.getTwoFactorAuthBypassTime()).isEqualTo(twoFactorBypassTime);
   }
 

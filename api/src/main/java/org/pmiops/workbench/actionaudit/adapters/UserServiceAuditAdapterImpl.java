@@ -1,6 +1,5 @@
 package org.pmiops.workbench.actionaudit.adapters;
 
-import com.google.common.collect.Streams;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
@@ -69,21 +68,19 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditAdapter {
       BypassTimeTargetProperty bypassTimeTargetProperty,
       Optional<Instant> bypassTime) {
     try {
-      actionAuditService.send(new ActionAuditEvent(
-          clock.millis(),
-          AgentType.ADMINISTRATOR,
-          dbUserProvider.get().getUserId(),
-          dbUserProvider.get().getEmail(),
-          actionIdProvider.get(),
-          ActionType.BYPASS,
-          TargetType.ACCOUNT,
-          bypassTimeTargetProperty.getPropertyName(),
-          userId,
-          null,
-          bypassTime
-            .map(Instant::toEpochMilli)
-            .map(String::valueOf)
-            .orElse(null)));
+      actionAuditService.send(
+          new ActionAuditEvent(
+              clock.millis(),
+              AgentType.ADMINISTRATOR,
+              dbUserProvider.get().getUserId(),
+              dbUserProvider.get().getEmail(),
+              actionIdProvider.get(),
+              ActionType.BYPASS,
+              TargetType.ACCOUNT,
+              bypassTimeTargetProperty.getPropertyName(),
+              userId,
+              null,
+              bypassTime.map(Instant::toEpochMilli).map(String::valueOf).orElse(null)));
     } catch (RuntimeException e) {
       actionAuditService.logRuntimeException(log, e);
     }

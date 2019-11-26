@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.pmiops.workbench.actionaudit.adapters.AuthDomainAuditAdapter;
 import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -94,11 +93,9 @@ public class AuthDomainControllerTest {
             complianceService,
             directoryService,
             mockUserServiceAuditAdapter);
-    this.authDomainController = new AuthDomainController(
-        fireCloudService,
-        userService,
-        userDao,
-        mockAuthDomainAuditAdapter);
+    this.authDomainController =
+        new AuthDomainController(
+            fireCloudService, userService, userDao, mockAuthDomainAuditAdapter);
   }
 
   @Test
@@ -113,8 +110,7 @@ public class AuthDomainControllerTest {
     UpdateUserDisabledRequest request =
         new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(true);
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
-    verify(mockAuthDomainAuditAdapter)
-        .fireSetAccountEnabled(createdUser.getUserId(), false, true);
+    verify(mockAuthDomainAuditAdapter).fireSetAccountEnabled(createdUser.getUserId(), false, true);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled()).isTrue();
