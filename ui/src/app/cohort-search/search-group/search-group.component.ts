@@ -90,7 +90,7 @@ export class SearchGroupComponent implements OnInit {
           demoMenu.addEventListener('mouseleave', () => this.demoMenuHover = false);
         });
       });
-      demoItem.addEventListener('mouseleave', () => this.demoOpen = false);
+      demoItem.addEventListener('mouseleave', () => setTimeout(() => this.demoOpen = false));
     }
   }
 
