@@ -1,21 +1,24 @@
 import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {Subscription} from 'rxjs/Subscription';
 
 import {ClrIcon} from 'app/components/icons';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
+import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {highlightSearchTerm, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {openZendeskWidget} from 'app/utils/zendesk';
+import {ParticipantCohortStatus} from 'generated/fetch';
 
 const sidebarContent = require('assets/json/help-sidebar.json');
 
 const styles = reactStyles({
   sidebarContainer: {
     position: 'absolute',
-    top: 0,
-    right: 'calc(-0.6rem - 45px)',
-    height: '100%',
+    top: '60px',
+    right: 0,
+    height: 'calc(100% - 60px)',
     minHeight: 'calc(100vh - 156px)',
     width: 'calc(14rem + 45px)',
     overflow: 'hidden',
@@ -41,9 +44,9 @@ const styles = reactStyles({
   },
   iconContainer: {
     position: 'absolute',
-    top: 0,
-    right: 'calc(-0.6rem - 45px)',
-    height: '100%',
+    top: '60px',
+    right: 0,
+    height: 'calc(100% - 60px)',
     minHeight: 'calc(100vh - 156px)',
     width: '45px',
     background: colorWithWhiteness(colors.primary, 0.4),
@@ -124,26 +127,27 @@ const iconStyles = {
 };
 
 interface Props {
-  location: string;
+  helpContent: string;
+  setSidebarState: Function;
+  sidebarOpen: boolean;
   profileState: any;
-  participant?: any;
-  setParticipant?: Function;
 }
 
 interface State {
   activeIcon: string;
-  filteredContent: any;
-  sidebarOpen: boolean;
+  filteredContent: Array<any>;
+  participant: ParticipantCohortStatus;
   searchTerm: string;
 }
 export const HelpSidebar = withUserProfile()(
   class extends React.Component<Props, State> {
+    subscription: Subscription;
     constructor(props: Props) {
       super(props);
       this.state = {
         activeIcon: undefined,
         filteredContent: undefined,
-        sidebarOpen: false,
+        participant: undefined,
         searchTerm: ''
       };
     }
@@ -155,6 +159,26 @@ export const HelpSidebar = withUserProfile()(
         this.searchHelpTips(input.trim().toLowerCase());
       }
     });
+
+    componentDidMount(): void {
+      this.subscription = participantStore.subscribe(participant => this.setState({participant}));
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+      // close the sidebar on each navigation excluding navigating between participants in cohort review
+      if (!this.props.sidebarOpen && prevProps.sidebarOpen) {
+        setTimeout(() => {
+          // check if the sidebar has been opened again before resetting activeIcon
+          if (!this.props.sidebarOpen) {
+            this.setState({activeIcon: undefined});
+          }
+        }, 300);
+      }
+    }
+
+    componentWillUnmount(): void {
+      this.subscription.unsubscribe();
+    }
 
     searchHelpTips(input: string) {
       // For each object, we check the title first. If it matches, we return the entire content array.
@@ -187,12 +211,14 @@ export const HelpSidebar = withUserProfile()(
     }
 
     onIconClick(icon: string) {
-      const {activeIcon, sidebarOpen} = this.state;
+      const {setSidebarState, sidebarOpen} = this.props;
+      const {activeIcon} = this.state;
       const newSidebarOpen = !(icon === activeIcon && sidebarOpen);
       if (newSidebarOpen) {
-        this.setState({activeIcon: icon, sidebarOpen: newSidebarOpen});
+        this.setState({activeIcon: icon});
+        setSidebarState(true);
       } else {
-        this.hideSidebar();
+        setSidebarState(false);
       }
     }
 
@@ -207,12 +233,11 @@ export const HelpSidebar = withUserProfile()(
     }
 
     hideSidebar() {
-      this.setState({sidebarOpen: false});
+      this.props.setSidebarState(false);
       // keep activeIcon set while the sidebar transition completes
       setTimeout(() => {
-        const {sidebarOpen} = this.state;
         // check if the sidebar has been opened again before resetting activeIcon
-        if (!sidebarOpen) {
+        if (!this.props.sidebarOpen) {
           this.setState({activeIcon: undefined});
         }
       }, 300);
@@ -224,9 +249,9 @@ export const HelpSidebar = withUserProfile()(
     }
 
     render() {
-      const {location, participant, setParticipant} = this.props;
-      const {activeIcon, filteredContent, searchTerm, sidebarOpen} = this.state;
-      const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[location];
+      const {helpContent, setSidebarState, sidebarOpen} = this.props;
+      const {activeIcon, filteredContent, participant, searchTerm} = this.state;
+      const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContent];
       const contentStyle = (tab: string) => ({
         display: activeIcon === tab ? 'block' : 'none',
         height: 'calc(100% - 1rem)',
@@ -245,7 +270,7 @@ export const HelpSidebar = withUserProfile()(
               <ClrIcon className='is-solid' shape='book' size={32} title='Data Dictionary' />
             </a>
           </div>
-          {location === 'reviewParticipantDetail' &&
+          {helpContent === 'reviewParticipantDetail' &&
             <div style={activeIcon === 'annotations' ? iconStyles.active : styles.icon}>
               <ClrIcon shape='note' size={32}  title='Participant Status and Annotations'
                 onClick={() => this.onIconClick('annotations')} />
@@ -253,10 +278,9 @@ export const HelpSidebar = withUserProfile()(
           }
         </div>
         <div style={activeIcon ? {...styles.sidebarContainer, ...styles.sidebarContainerActive} : styles.sidebarContainer}>
-          <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar}>
+          <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
             <div style={styles.topBar}>
-              <ClrIcon shape='caret right' size={22} style={styles.closeIcon}
-                onClick={() => this.hideSidebar()} />
+              <ClrIcon shape='caret right' size={22} style={styles.closeIcon} onClick={() => setSidebarState(false)} />
             </div>
             <div style={contentStyle('help')}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Help Tips</h3>
@@ -269,9 +293,9 @@ export const HelpSidebar = withUserProfile()(
                   onChange={(e) => this.onInputChange(e.target.value)}
                   placeholder={'Search'} />
               </div>
-              {displayContent.length > 0
+              {!!displayContent && displayContent.length > 0
                 ? displayContent.map((section, s) => <div key={s}>
-                  <h3 style={styles.sectionTitle}>{this.highlightMatches(section.title)}</h3>
+                  <h3 style={styles.sectionTitle} data-test-id={`section-title-${s}`}>{this.highlightMatches(section.title)}</h3>
                   {section.content.map((content, c) => {
                     return typeof content === 'string'
                       ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>
@@ -287,9 +311,7 @@ export const HelpSidebar = withUserProfile()(
               }
             </div>
             <div style={contentStyle('annotations')}>
-              {!!participant &&
-                <SidebarContent participant={participant} setParticipant={(p) => setParticipant(p)} />
-              }
+              {participant && <SidebarContent />}
             </div>
             <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
@@ -314,11 +336,11 @@ export const HelpSidebar = withUserProfile()(
   template: '<div #root></div>',
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
-  @Input('location') location: Props['location'];
-  @Input('participant') participant: Props['participant'];
-  @Input('setParticipant') setParticipant: Props['setParticipant'];
+  @Input('helpContent') helpContent: Props['helpContent'];
+  @Input('setSidebarState') setSidebarState: Props['setSidebarState'];
+  @Input('sidebarOpen') sidebarOpen: Props['sidebarOpen'];
 
   constructor() {
-    super(HelpSidebar, ['location', 'participant', 'setParticipant']);
+    super(HelpSidebar, ['helpContent', 'setSidebarState', 'sidebarOpen']);
   }
 }
