@@ -14,12 +14,10 @@ import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -58,21 +56,15 @@ public class CohortBuilderControllerTest {
 
   @Mock private CohortQueryBuilder cohortQueryBuilder;
 
-  @Mock private CdrVersionDao cdrVersionDao;
-
   @Mock private CdrVersionService cdrVersionService;
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
 
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
 
-  @Autowired private ConceptDao conceptDao;
-
   @Autowired private JdbcTemplate jdbcTemplate;
 
   @Mock private Provider<WorkbenchConfig> configProvider;
-
-  private WorkbenchConfig testConfig;
 
   @Before
   public void setUp() {
@@ -85,7 +77,6 @@ public class CohortBuilderControllerTest {
             cohortQueryBuilder,
             cbCriteriaDao,
             cbCriteriaAttributeDao,
-            cdrVersionDao,
             cdrVersionService,
             elasticSearchService,
             configProvider);
