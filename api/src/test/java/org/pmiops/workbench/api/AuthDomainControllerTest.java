@@ -115,7 +115,7 @@ public class AuthDomainControllerTest {
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
-    assertThat(!updatedUser.getDisabled()).isTrue();
+    assertThat(updatedUser.getDisabled()).isFalse();
   }
 
   private void createUser(boolean disabled) {
