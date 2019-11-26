@@ -2,8 +2,11 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
@@ -76,15 +79,23 @@ public class AuthDomainControllerTest {
     UpdateUserDisabledRequest request =
         new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(true);
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
+
+    verify(mockAuthDomainAuditAdapter).fireSetAccountEnabled(
+        createdUser.getUserId(), false, true);
+
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
-    assertThat(updatedUser.getDisabled());
+    assertThat(updatedUser.getDisabled()).isTrue();
   }
 
   @Test
   public void testEnableUser() {
     DbUser createdUser = createUser(true);
-    doReturn(createdUser).when(mockUserService).setDisabledStatus(createdUser.getUserId(), false);
+    DbUser userWithDisabledCleared = createdUser;
+      userWithDisabledCleared.setDisabled(true);
+    doReturn(createdUser)
+        .when(mockUserService)
+        .setDisabledStatus(createdUser.getUserId(), false);
 
     final UpdateUserDisabledRequest request =
         new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(false);
