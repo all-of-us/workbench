@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -33,50 +32,76 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
+@Import(LiquibaseAutoConfiguration.class)
 @RunWith(SpringRunner.class)
 public class WorkspaceAuditAdapterTest {
 
   private static final long WORKSPACE_1_DB_ID = 101L;
-  private static final long Y2K_EPOCH_MILLIS =
-      Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
+  private static final Instant INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
+  private static final long Y2K_EPOCH_MILLIS = INSTANT.toEpochMilli();
+  private static final Clock CLOCK = new FakeClock(INSTANT);
   private static final long REMOVED_USER_ID = 301L;
   private static final long ADDED_USER_ID = 401L;
   private static final String ACTION_ID = "58cbae08-447f-499f-95b9-7bdedc955f4d";
 
-  private WorkspaceAuditAdapter workspaceAuditAdapter;
+  @Autowired private WorkspaceAuditAdapter workspaceAuditAdapter;
   private Workspace workspace1;
-  private DbUser user1;
   private DbWorkspace dbWorkspace1;
   private DbWorkspace dbWorkspace2;
 
-  @Mock private Provider<DbUser> mockUserProvider;
-  @Mock private Clock mockClock;
-  @Mock private ActionAuditService mockActionAuditService;
-  @Mock private Provider<String> mockActionIdProvider;
+  @Autowired private Provider<DbUser> fakeUserProvider;
+  @Autowired private ActionAuditService mockActionAuditService;
 
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventListCaptor;
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
 
   @TestConfiguration
+  @Import({WorkspaceAuditAdapterImpl.class})
   @MockBean(value = {ActionAuditService.class})
-  static class Configuration {}
+  static class Configuration {
+
+    @Bean(name = "ACTION_ID")
+    public String getActionId() {
+      return ACTION_ID;
+    }
+
+    @Bean
+    public Clock getClock() {
+      return CLOCK;
+    }
+
+    @Bean
+    public DbUser getUser() {
+      DbUser user1 = new DbUser();
+      user1.setUserId(101L);
+      user1.setEmail("fflinstone@slate.com");
+      user1.setGivenName("Fred");
+      user1.setFamilyName("Flintstone");
+      return user1;
+    }
+  }
 
   @Before
   public void setUp() {
-    user1 = new DbUser();
-    user1.setUserId(101L);
-    user1.setEmail("fflinstone@slate.com");
-    user1.setGivenName("Fred");
-    user1.setFamilyName("Flintstone");
-    doReturn(user1).when(mockUserProvider).get();
-    workspaceAuditAdapter =
-        new WorkspaceAuditAdapterImpl(
-            mockUserProvider, mockActionAuditService, mockClock, mockActionIdProvider);
+//    user1 = new DbUser();
+//    user1.setUserId(101L);
+//    user1.setEmail("fflinstone@slate.com");
+//    user1.setGivenName("Fred");
+//    user1.setFamilyName("Flintstone");
+//    doReturn(user1).when(mockUserProvider).get();
+//    workspaceAuditAdapter =
+//        new WorkspaceAuditAdapterImpl(
+//            mockUserProvider, mockActionAuditService, fakeClock, mockActionIdProvider);
 
     final ResearchPurpose researchPurpose1 = new ResearchPurpose();
     researchPurpose1.setIntendedStudy("stubbed toes");
@@ -107,10 +132,7 @@ public class WorkspaceAuditAdapterTest {
     dbWorkspace2.setPublished(false);
     dbWorkspace2.setLastModifiedTime(new Timestamp(now));
     dbWorkspace2.setCreationTime(new Timestamp(now));
-    dbWorkspace2.setCreator(user1);
-
-    doReturn(Y2K_EPOCH_MILLIS).when(mockClock).millis();
-    doReturn(ACTION_ID).when(mockActionIdProvider).get();
+    dbWorkspace2.setCreator(fakeUserProvider.get());
   }
 
   @Test
@@ -169,7 +191,7 @@ public class WorkspaceAuditAdapterTest {
   public void testFiresCollaborateAction() {
     final ImmutableMap<Long, String> aclsByUserId =
         ImmutableMap.of(
-            user1.getUserId(),
+            fakeUserProvider.get().getUserId(),
             WorkspaceAccessLevel.OWNER.toString(),
             REMOVED_USER_ID,
             WorkspaceAccessLevel.NO_ACCESS.toString(),
@@ -232,7 +254,7 @@ public class WorkspaceAuditAdapterTest {
 
   @Test
   public void testDoesNotThrowWhenUserProviderFails() {
-    doReturn(null).when(mockUserProvider).get();
+    doReturn(null).when(fakeUserProvider).get();
     workspaceAuditAdapter.fireDeleteAction(dbWorkspace1);
   }
 }
