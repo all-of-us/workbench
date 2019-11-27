@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Optional;
@@ -16,7 +15,6 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.omg.CORBA.TIMEOUT;
 import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -52,8 +50,6 @@ public class UserServiceTest {
 
   private static final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
   private static final int MOODLE_ID = 1001;
-
-  private Long incrementedUserId = 1L;
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final long TIMESTAMP_MSECS = 100;
@@ -109,7 +105,10 @@ public class UserServiceTest {
 
   @Before
   public void setUp() {
-    providedDbUser = insertUser();
+    DbUser user = new DbUser();
+    user.setEmail(EMAIL_ADDRESS);
+    userDao.save(user);
+    providedDbUser = user;
 
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
 
@@ -119,15 +118,6 @@ public class UserServiceTest {
     // but it was injecting null clocks giving NPEs long after construction, and so far this
     // is the only working approach I've seen.
     PROVIDED_CLOCK.setInstant(START_INSTANT);
-  }
-
-  private DbUser insertUser() {
-    DbUser user = new DbUser();
-    user.setEmail(EMAIL_ADDRESS);
-//    user.setUserId(incrementedUserId);
-//    incrementedUserId++;
-    userDao.save(user);
-    return user;
   }
 
   @Test
@@ -226,8 +216,8 @@ public class UserServiceTest {
 
   @Test
   public void testClearsEraCommonsStatus() throws Exception {
-    DbUser testUser = insertUser();
-
+//    DbUser testUser = insertUser();
+    DbUser testUser = userDao.findUserByEmail(EMAIL_ADDRESS);
     // Put the test user in a state where eRA commons is completed.
     testUser.setEraCommonsCompletionTime(new Timestamp(TIMESTAMP_MSECS));
     testUser.setEraCommonsLinkedNihUsername("nih-user");
@@ -238,8 +228,8 @@ public class UserServiceTest {
 
     userService.syncEraCommonsStatus();
 
-    DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
-    assertThat(user.getEraCommonsCompletionTime()).isNull();
+    DbUser retrievedUser = userDao.findUserByEmail(EMAIL_ADDRESS);
+    assertThat(retrievedUser.getEraCommonsCompletionTime()).isNull();
   }
 
   @Test
