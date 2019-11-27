@@ -176,20 +176,20 @@ public class UserService {
   }
 
   private void removeFromRegisteredTierGroupIdempotent(DbUser dbUser) {
-    if (isUserMemberOfFirecloudGroup(dbUser)) {
+    if (isUserMemberOfRegisteredTierGroup(dbUser)) {
       this.fireCloudService.removeUserFromGroup(
           dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
       log.info(String.format("Removed user %s from registered-tier group.", dbUser.getEmail()));
     }
   }
 
-  private boolean isUserMemberOfFirecloudGroup(DbUser dbUser) {
+  private boolean isUserMemberOfRegisteredTierGroup(DbUser dbUser) {
     return this.fireCloudService.isUserMemberOfGroup(
         dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
   }
 
   private void addToRegisteredTierGroupIdempotent(DbUser user) {
-    if (!isUserMemberOfFirecloudGroup(user)) {
+    if (!isUserMemberOfRegisteredTierGroup(user)) {
       this.fireCloudService.addUserToGroup(
           user.getEmail(), configProvider.get().firecloud.registeredDomainName);
       log.info(String.format("Added user %s to registered-tier group.", user.getEmail()));
@@ -407,6 +407,15 @@ public class UserService {
         DbUser::setTwoFactorAuthBypassTime);
   }
 
+  /**
+   * Functional bypass time column setter, using retry logic.
+   * @param userId id of user getting bypassed
+   * @param bypassTime type of bypass
+   * @param targetProperty BypassTimeTargetProperty enum value, for auditing
+   * @param setter void-returning method to call to set the particular bypass field. Should
+   *               typically be a method reference on DbUser, e.g.
+   *               DbUser::setTwoFactorAuthBypassTime
+   */
   private void setBypassTimeWithRetries(
       long userId,
       Timestamp bypassTime,
