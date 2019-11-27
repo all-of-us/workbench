@@ -13,7 +13,6 @@ import org.springframework.test.context.junit4.SpringRunner
 @RunWith(SpringRunner::class)
 class WorkspaceTargetPropertyTest {
 
-    private val targetPropertyCount = WorkspaceTargetProperty.values().size
     private var workspace1: Workspace? = null
     private var workspace2: Workspace? = null
 
@@ -70,7 +69,7 @@ class WorkspaceTargetPropertyTest {
         val propertiesByName = TargetPropertyExtractor.getPropertyValuesByName(
                 WorkspaceTargetProperty.values(),
                 workspace1!!)
-        assertThat(propertiesByName).hasSize(targetPropertyCount)
+        assertThat(propertiesByName).hasSize(WorkspaceTargetProperty.values().size)
         assertThat(propertiesByName[WorkspaceTargetProperty.INTENDED_STUDY.propertyName])
                 .isEqualTo("stubbed toes")
         assertThat(propertiesByName[WorkspaceTargetProperty.CDR_VERSION_ID.propertyName])
