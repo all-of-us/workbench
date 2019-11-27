@@ -138,7 +138,7 @@ WHERE jsonPayload.agent_type = 'USER' AND
   jsonPayload.agent_email = 'username@researchallofus.org' AND
   jsonPayload.target_type = 'PROFILE' AND
   jsonPayload.action_type = 'EDIT'
-ORDER BY event_time, agent_id
+ORDER BY event_time, agent_id, action_type
 LIMIT 1000
 ```
 
