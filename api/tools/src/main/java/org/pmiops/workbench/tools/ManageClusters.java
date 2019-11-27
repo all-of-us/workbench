@@ -20,8 +20,8 @@ import javax.annotation.Nullable;
 import org.pmiops.workbench.notebooks.ApiClient;
 import org.pmiops.workbench.notebooks.ApiException;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
-import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterStatus;
+import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
@@ -63,11 +63,11 @@ public class ManageClusters {
     return api;
   }
 
-  private static String clusterId(Cluster c) {
+  private static String clusterId(ListClusterResponse c) {
     return c.getGoogleProject() + "/" + c.getClusterName();
   }
 
-  private static String formatTabular(Cluster c) {
+  private static String formatTabular(ListClusterResponse c) {
     Gson gson = new Gson();
     JsonObject labels = gson.toJsonTree(c.getLabels()).getAsJsonObject();
     String creator = "unknown";
