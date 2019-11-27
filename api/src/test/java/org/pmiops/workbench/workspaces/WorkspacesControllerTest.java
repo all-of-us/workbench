@@ -847,17 +847,17 @@ public class WorkspacesControllerTest {
     workspacesController.shareWorkspace(
         originalWorkspace.getNamespace(), originalWorkspace.getName(), shareWorkspaceRequest);
 
-    final Workspace modWorkspace = new Workspace();
-    modWorkspace.setName("cloned");
-    modWorkspace.setNamespace("cloned-ns");
-
     final ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
-    modWorkspace.setResearchPurpose(modPurpose);
     modPurpose.setPopulation(true);
     modPurpose.setPopulationDetails(
         ImmutableList.of(
             SpecificPopulationEnum.DISABILITY_STATUS, SpecificPopulationEnum.GEOGRAPHY));
+
+    final Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setResearchPurpose(modPurpose);
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);

@@ -427,7 +427,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       return WorkspaceAccessLevel.OWNER;
     }
     return Optional.ofNullable(WorkspaceAccessLevel.fromValue(userAccess))
-        .orElseThrow(() -> new IllegalArgumentException("Unrecognized access level: " + userAccess));
+        .orElseThrow(
+            () -> new IllegalArgumentException("Unrecognized access level: " + userAccess));
   }
 
   @Override
