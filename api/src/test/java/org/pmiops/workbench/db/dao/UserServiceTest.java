@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Optional;
@@ -24,6 +25,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,12 +50,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class UserServiceTest {
 
   private static final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
+  private static final int MOODLE_ID = 1001;
+  private static final Duration CLOCK_INCREMENT = Duration.ofSeconds(1);
 
   private Long incrementedUserId = 1L;
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final long TIMESTAMP_MSECS = 100;
-  private static FakeClock providedClock;
+  private static final FakeClock PROVIDED_CLOCK =
+      new FakeClock(Instant.ofEpochMilli(TIMESTAMP_MSECS));
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
 
@@ -78,9 +83,9 @@ public class UserServiceTest {
   })
   static class Configuration {
     @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     Clock clock() {
-      return providedClock;
+      return PROVIDED_CLOCK;
     }
 
     @Bean
@@ -105,10 +110,7 @@ public class UserServiceTest {
   public void setUp() {
     providedDbUser = insertUser();
 
-    providedClock = new FakeClock(Instant.ofEpochMilli(TIMESTAMP_MSECS));
-
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
-    providedWorkbenchConfig.auth.serviceAccountApiUsers.add(EMAIL_ADDRESS);
   }
 
   private DbUser insertUser() {
@@ -126,8 +128,8 @@ public class UserServiceTest {
     badge.setName("All of us badge");
     badge.setDateexpire("12345");
 
-    when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
-    when(mockComplianceService.getUserBadge(1))
+    when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(MOODLE_ID);
+    when(mockComplianceService.getUserBadge(MOODLE_ID))
         .thenReturn(Collections.singletonList(badge));
 
     userService.syncComplianceTrainingStatus();
@@ -139,10 +141,14 @@ public class UserServiceTest {
     assertThat(user.getComplianceTrainingExpirationTime()).isEqualTo(new Timestamp(12345));
 
     // Completion timestamp should not change when the method is called again.
-    providedClock.increment(1000);
+    incrementClock();
     Timestamp completionTime = user.getComplianceTrainingCompletionTime();
     userService.syncComplianceTrainingStatus();
     assertThat(user.getComplianceTrainingCompletionTime()).isEqualTo(completionTime);
+  }
+
+  private void incrementClock() {
+    PROVIDED_CLOCK.increment(1000);
   }
 
   @Test
@@ -172,12 +178,19 @@ public class UserServiceTest {
   @Test(expected = NotFoundException.class)
   public void testSyncComplianceTrainingStatusBadgeNotFound() throws Exception {
     // We should propagate a NOT_FOUND exception from the compliance service.
-    when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
-    when(mockComplianceService.getUserBadge(1))
+    when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(MOODLE_ID);
+    when(mockComplianceService.getUserBadge(MOODLE_ID))
         .thenThrow(
             new org.pmiops.workbench.moodle.ApiException(
                 HttpStatus.NOT_FOUND.value(), "user not found"));
     userService.syncComplianceTrainingStatus();
+  }
+
+  @Test
+  public void testSyncComplianceTraining_SkippedForServiceAccount() throws ApiException {
+    providedWorkbenchConfig.auth.serviceAccountApiUsers.add(EMAIL_ADDRESS);
+    userService.syncComplianceTrainingStatus();
+    assertThat(providedDbUser.getMoodleId()).isNull();
   }
 
   @Test
@@ -197,7 +210,7 @@ public class UserServiceTest {
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
 
     // Completion timestamp should not change when the method is called again.
-    providedClock.increment(1000);
+    incrementClock();
     Timestamp completionTime = user.getEraCommonsCompletionTime();
     userService.syncEraCommonsStatus();
     assertThat(user.getEraCommonsCompletionTime()).isEqualTo(completionTime);
@@ -235,7 +248,7 @@ public class UserServiceTest {
     assertThat(user.getTwoFactorAuthCompletionTime()).isNotNull();
 
     // twoFactorAuthCompletionTime should not change when already set
-    providedClock.increment(1000);
+    incrementClock();
     Timestamp twoFactorAuthCompletionTime = user.getTwoFactorAuthCompletionTime();
     userService.syncTwoFactorAuthStatus();
     user = userDao.findUserByEmail(EMAIL_ADDRESS);
