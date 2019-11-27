@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Random;
+import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -319,7 +320,7 @@ public class UserServiceTest {
   }
 
   private Optional<Instant> nullableTimestampToOptionalInstant(
-      Timestamp complianceTrainingBypassTime) {
+      @Nullable Timestamp complianceTrainingBypassTime) {
     return Optional.ofNullable(complianceTrainingBypassTime).map(Timestamp::toInstant);
   }
 }

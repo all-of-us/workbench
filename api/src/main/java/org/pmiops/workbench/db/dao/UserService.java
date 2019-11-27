@@ -371,61 +371,57 @@ public class UserService {
     setBypassTimeWithRetries(
         userId,
         bypassTime,
-        BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME,
-        DbUser::setDataUseAgreementBypassTime);
+        DbUser::setDataUseAgreementBypassTime,
+        BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME);
   }
 
   public void setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
     setBypassTimeWithRetries(
         userId,
         bypassTime,
-        BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME,
-        DbUser::setComplianceTrainingBypassTime);
+        DbUser::setComplianceTrainingBypassTime,
+        BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME);
   }
 
   public void setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
     setBypassTimeWithRetries(
         userId,
         bypassTime,
-        BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME,
-        DbUser::setBetaAccessBypassTime);
+        DbUser::setBetaAccessBypassTime,
+        BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME);
   }
 
   public void setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
     setBypassTimeWithRetries(
         userId,
         bypassTime,
-        BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME,
-        DbUser::setEraCommonsBypassTime);
+        DbUser::setEraCommonsBypassTime,
+        BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME);
   }
 
   public void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
     setBypassTimeWithRetries(
         userId,
         bypassTime,
-        BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME,
-        DbUser::setTwoFactorAuthBypassTime);
+        DbUser::setTwoFactorAuthBypassTime,
+        BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME);
   }
 
   /**
    * Functional bypass time column setter, using retry logic.
+   *
    * @param userId id of user getting bypassed
    * @param bypassTime type of bypass
-   * @param targetProperty BypassTimeTargetProperty enum value, for auditing
    * @param setter void-returning method to call to set the particular bypass field. Should
-   *               typically be a method reference on DbUser, e.g.
-   *               DbUser::setTwoFactorAuthBypassTime
+   *     typically be a method reference on DbUser, e.g.
+   * @param targetProperty BypassTimeTargetProperty enum value, for auditing
    */
   private void setBypassTimeWithRetries(
       long userId,
       Timestamp bypassTime,
-      BypassTimeTargetProperty targetProperty,
-      BiConsumer<DbUser, Timestamp> setter) {
-    setBypassTimeWithRetries(
-        userDao.findUserByUserId(userId),
-        bypassTime,
-        targetProperty,
-        setter);
+      BiConsumer<DbUser, Timestamp> setter,
+      BypassTimeTargetProperty targetProperty) {
+    setBypassTimeWithRetries(userDao.findUserByUserId(userId), bypassTime, targetProperty, setter);
   }
 
   private void setBypassTimeWithRetries(
