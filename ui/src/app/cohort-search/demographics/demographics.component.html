@@ -13,16 +13,10 @@
           class="number-display"
           (blur)="checkMin()">
         <div class="slider">
-          <div id="count-wrapper">
-            <span *ngIf="ageCount !== null" id="age-count" class="badge badge-info">
-              {{ ageCount | number }}
-            </span>
-          </div>
           <nouislider
             [min]="minAge" [max]="maxAge" [step]="1"
             [behaviour]="'drag'"
             [connect]="true"
-            (slide)="centerAgeCount()"
             [formControl]="demoForm.controls.ageRange">
           </nouislider>
         </div>
@@ -36,9 +30,6 @@
 
       <clr-checkbox formControlName="deceased" [clrDisabled]="!ageNode || !deceasedNode">
         Is Deceased
-        <span *ngIf="deceasedNode" class="badge badge-info">
-          {{ deceasedNode.count | number }}
-        </span>
       </clr-checkbox>
     </ng-container>
     <div *ngIf="loading" class="spinner" style="left: 45%"></div>
@@ -79,21 +70,22 @@
       </div>
     </div>
 </form>
-<div class="container count-preview" *ngIf="showPreview">
-  <div class="row">
-    <ng-container>
-      <div class="col-lg-12 text-padding" *ngIf="count">
-        <div class="result-text">
-          Results
-        </div>
-        <div>
-          Number Participants:
-          <span class="text-bold">
-            {{count | number}}
-          </span>
-        </div>
-      </div>
-    </ng-container>
+<div class="count-preview" [class.age]="wizard.type === criteriaType.AGE" *ngIf="showPreview">
+  <div *ngIf="wizard.type === criteriaType.AGE" style="margin-right: 0.25rem">
+    <button class="btn btn-primary" [clrLoading]="calculating" [disabled]="calculating || count" (click)="calculateAge()">
+      Calculate
+    </button>
+  </div>
+  <div *ngIf="count || wizard.type === criteriaType.AGE">
+    <div class="result-text">
+      Results
+    </div>
+    <div>
+      Number Participants:
+      <span class="text-bold">
+        {{(count | number) || ' -- '}}
+      </span>
+    </div>
   </div>
 </div>
 

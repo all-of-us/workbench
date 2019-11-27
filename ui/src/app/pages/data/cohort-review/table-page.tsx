@@ -6,7 +6,6 @@ import {OverlayPanel} from 'primereact/overlaypanel';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
-import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewStore, filterStateStore, getVocabOptions, multiOptions, vocabOptions} from 'app/services/review-state.service';
@@ -649,7 +648,6 @@ export const ParticipantsTable = withCurrentWorkspace()(
           </DataTable>
         </React.Fragment>}
         {loading && <SpinnerOverlay />}
-        <HelpSidebar location='reviewParticipants' />
       </div>;
     }
   }

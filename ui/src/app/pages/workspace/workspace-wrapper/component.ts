@@ -37,6 +37,8 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   menuDataLoading = false;
   resourceType: ResourceType = ResourceType.WORKSPACE;
   userRoles?: UserRole[];
+  helpContent: string;
+  sidebarOpen = false;
 
   bugReportOpen: boolean;
   bugReportDescription = '';
@@ -57,10 +59,13 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.tabPath = this.getTabPath();
+    this.setHelpContent();
     this.subscriptions.push(
       this.router.events.filter(event => event instanceof NavigationEnd)
         .subscribe(event => {
           this.tabPath = this.getTabPath();
+          this.setHelpContent();
+          this.sidebarOpen = false;
         }));
     this.subscriptions.push(routeConfigDataStore.subscribe(({minimizeChrome}) => {
       this.displayNavBar = !minimizeChrome;
@@ -190,5 +195,24 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   closeBugReport(): void {
     this.bugReportOpen = false;
+  }
+
+  setHelpContent() {
+    let child = this.route.firstChild;
+    while (child) {
+      if (child.firstChild) {
+        child = child.firstChild;
+      } else if (child.snapshot.data && child.snapshot.data.helpContent) {
+        this.helpContent = child.snapshot.data.helpContent;
+        child = null;
+      } else {
+        this.helpContent = null;
+        child = null;
+      }
+    }
+  }
+
+  setSidebarState = (sidebarOpen: boolean) => {
+    this.sidebarOpen = sidebarOpen;
   }
 }

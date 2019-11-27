@@ -55,7 +55,10 @@ public class ValidationPredicates {
   public static Predicate<Object> operandsNotNumbers() {
     return t ->
         !((t instanceof Attribute) ? ((Attribute) t).getOperands() : ((Modifier) t).getOperands())
-            .stream().filter(o -> !NumberUtils.isNumber(o)).collect(Collectors.toList()).isEmpty();
+            .stream()
+                .filter(o -> !NumberUtils.isCreatable(o))
+                .collect(Collectors.toList())
+                .isEmpty();
   }
 
   public static Predicate<Object> operandsNotOne() {
