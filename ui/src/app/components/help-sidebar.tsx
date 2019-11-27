@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
-import {faBook, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import {faEdit} from '@fortawesome/free-regular-svg-icons';
+import {faCloud, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -55,12 +56,16 @@ const styles = reactStyles({
     zIndex: 101
   },
   icon: {
+    background: colorWithWhiteness(colors.primary, 0.48),
     color: colors.white,
-    marginTop: '1rem',
-    padding: '0.25rem 0',
+    display: 'table-cell',
+    height: '46px',
+    width: '45px',
+    borderBottom: `1px solid ${colorWithWhiteness(colors.primary, 0.4)}`,
     cursor: 'pointer',
     textAlign: 'center',
-    transition: 'background 0.2s linear'
+    transition: 'background 0.2s linear',
+    verticalAlign: 'middle'
   },
   topBar: {
     width: '14rem',
@@ -123,7 +128,6 @@ const iconStyles = {
   },
   disabled: {
     ...styles.icon,
-    opacity: 0.4,
     cursor: 'not-allowed'
   }
 };
@@ -234,17 +238,6 @@ export const HelpSidebar = withUserProfile()(
       openZendeskWidget(givenName, familyName, username, contactEmail);
     }
 
-    hideSidebar() {
-      this.props.setSidebarState(false);
-      // keep activeIcon set while the sidebar transition completes
-      setTimeout(() => {
-        // check if the sidebar has been opened again before resetting activeIcon
-        if (!this.props.sidebarOpen) {
-          this.setState({activeIcon: undefined});
-        }
-      }, 300);
-    }
-
     highlightMatches(content: string) {
       const {searchTerm} = this.state;
       return highlightSearchTerm(searchTerm, content, colors.success);
@@ -262,19 +255,22 @@ export const HelpSidebar = withUserProfile()(
       });
       return <React.Fragment>
         <div style={styles.iconContainer}>
-          <div style={activeIcon === 'help' ? iconStyles.active : styles.icon}>
-            <FontAwesomeIcon icon={faInfoCircle} style={{fontSize: '28px'}} title='Help Tips' onClick={() => this.onIconClick('help')} />
+          <div style={{display: 'table'}}>
+            <div style={activeIcon === 'help' ? iconStyles.active : styles.icon}>
+              <FontAwesomeIcon icon={faInfoCircle} style={{fontSize: '22px'}} title='Help Tips' onClick={() => this.onIconClick('help')} />
+            </div>
           </div>
-          <div style={styles.icon}>
-            <a href='https://docs.google.com/spreadsheets/d/1dsvJV8B7EXQj5EWa2XG-KAhs-l7FsQnyJSSFMstLF2U/edit#gid=183931508'
-              target='_blank' style={{color: colors.white}}>
-              <FontAwesomeIcon icon={faBook} style={{fontSize: '32px'}} title='Data Dictionary' />
-            </a>
+          <div style={{display: 'table'}}>
+            <div style={iconStyles.disabled}>
+              <FontAwesomeIcon icon={faCloud} style={{fontSize: '20px', opacity: 0.5}} title='Compute Configuration' />
+            </div>
           </div>
           {helpContent === 'reviewParticipantDetail' &&
-            <div style={activeIcon === 'annotations' ? iconStyles.active : styles.icon}>
-              <ClrIcon shape='note' size={32}  title='Participant Status and Annotations'
-                onClick={() => this.onIconClick('annotations')} />
+            <div style={{display: 'table'}}>
+              <div style={activeIcon === 'annotations' ? iconStyles.active : styles.icon}>
+                <FontAwesomeIcon icon={faEdit} style={{fontSize: '22px', marginLeft: '5px'}} title='Participant Status and Annotations'
+                  onClick={() => this.onIconClick('annotations')} />
+              </div>
             </div>
           }
         </div>
