@@ -419,8 +419,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public WorkspaceAccessLevel getWorkspaceAccessLevel(
-      String workspaceNamespace, String workspaceId) {
+  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId)
+      throws ServerErrorException {
     String userAccess =
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
     if (PROJECT_OWNER_ACCESS_LEVEL.equals(userAccess)) {

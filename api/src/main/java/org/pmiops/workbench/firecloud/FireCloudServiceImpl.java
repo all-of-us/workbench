@@ -338,7 +338,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public WorkspaceResponse getWorkspace(String projectName, String workspaceName) {
+  public WorkspaceResponse getWorkspace(String projectName, String workspaceName)
+      throws WorkbenchException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     return retryHandler.run(
         (context) ->
@@ -347,7 +348,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public Optional<WorkspaceResponse> getWorkspace(DbWorkspace dbWorkspace) {
+  public Optional<WorkspaceResponse> getWorkspace(DbWorkspace dbWorkspace)
+      throws WorkbenchException {
     try {
       final WorkspaceResponse result =
           getWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
@@ -365,12 +367,12 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public List<WorkspaceResponse> getWorkspaces(List<String> fields) {
+  public List<WorkspaceResponse> getWorkspaces(List<String> fields) throws WorkbenchException {
     return retryHandler.run((context) -> workspacesApiProvider.get().listWorkspaces(fields));
   }
 
   @Override
-  public void deleteWorkspace(String projectName, String workspaceName) {
+  public void deleteWorkspace(String projectName, String workspaceName) throws WorkbenchException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     retryHandler.run(
         (context) -> {
@@ -380,13 +382,13 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public ManagedGroupWithMembers getGroup(String groupName) {
+  public ManagedGroupWithMembers getGroup(String groupName) throws WorkbenchException {
     GroupsApi groupsApi = groupsApiProvider.get();
     return retryHandler.run((context) -> groupsApi.getGroup(groupName));
   }
 
   @Override
-  public ManagedGroupWithMembers createGroup(String groupName) {
+  public ManagedGroupWithMembers createGroup(String groupName) throws WorkbenchException {
     GroupsApi groupsApi = groupsApiProvider.get();
     return retryHandler.run((context) -> groupsApi.createGroup(groupName));
   }

@@ -836,13 +836,11 @@ public class WorkspacesControllerTest {
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
     // The original workspace is shared with one other user.
-    DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
-    ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
+    final DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
+    final ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(originalWorkspace.getEtag());
 
-    createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
-
-    createUserToShareWith(
+    addUserRoleToShareWorkspaceRequest(
         shareWorkspaceRequest, writerUser.getEmail(), WorkspaceAccessLevel.WRITER);
 
     stubFcUpdateWorkspaceACL();
@@ -909,7 +907,14 @@ public class WorkspacesControllerTest {
     researchPurpose.setPopulationDetails(populateionDetailsSorted);
   }
 
-  private UserRole createUserToShareWith(
+  private UserRole buildUserRole(String email, WorkspaceAccessLevel workspaceAccessLevel) {
+    final UserRole userRole = new UserRole();
+    userRole.setEmail(email);
+    userRole.setRole(workspaceAccessLevel);
+    return userRole;
+  }
+
+  private void addUserRoleToShareWorkspaceRequest(
       ShareWorkspaceRequest shareWorkspaceRequest,
       String email,
       WorkspaceAccessLevel workspaceAccessLevel) {
@@ -917,7 +922,6 @@ public class WorkspacesControllerTest {
     userRole.setEmail(email);
     userRole.setRole(workspaceAccessLevel);
     shareWorkspaceRequest.addItemsItem(userRole);
-    return userRole;
   }
 
   private DbUser createAndSaveUser(String email, long userId) {
@@ -1114,7 +1118,9 @@ public class WorkspacesControllerTest {
     final ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
+
     req.setWorkspace(modWorkspace);
+
     org.pmiops.workbench.firecloud.model.Workspace clonedWorkspace =
         stubCloneWorkspace(
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
@@ -1781,11 +1787,12 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-    createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    addUserRoleToShareWorkspaceRequest(
+        shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
-    createUserToShareWith(
+    addUserRoleToShareWorkspaceRequest(
         shareWorkspaceRequest, "readerfriend@gmail.com", WorkspaceAccessLevel.READER);
-    createUserToShareWith(
+    addUserRoleToShareWorkspaceRequest(
         shareWorkspaceRequest, "writerfriend@gmail.com", WorkspaceAccessLevel.WRITER);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
@@ -1894,7 +1901,8 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-    createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    addUserRoleToShareWorkspaceRequest(
+        shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
     UserRole writer = new UserRole();
     writer.setEmail("writerfriend@gmail.com");
     shareWorkspaceRequest.addItemsItem(writer);
@@ -1997,7 +2005,8 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
     shareWorkspaceRequest.setWorkspaceEtag(workspace.getEtag());
-    createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    addUserRoleToShareWorkspaceRequest(
+        shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
     // Simulate time between API calls to trigger last-modified/@Version changes.
     CLOCK.increment(1000);
@@ -2025,8 +2034,9 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspacesController.createWorkspace(workspace);
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
-    createUserToShareWith(shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
-    createUserToShareWith(
+    addUserRoleToShareWorkspaceRequest(
+        shareWorkspaceRequest, LOGGED_IN_USER_EMAIL, WorkspaceAccessLevel.OWNER);
+    addUserRoleToShareWorkspaceRequest(
         shareWorkspaceRequest, "writerfriend@gmail.com", WorkspaceAccessLevel.WRITER);
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);

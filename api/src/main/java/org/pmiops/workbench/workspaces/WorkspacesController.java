@@ -204,7 +204,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Workspace> createWorkspace(Workspace workspace) {
+  public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
     validateWorkspaceApiModel(workspace);
 
     DbUser user = userProvider.get();
@@ -310,8 +310,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Workspace> updateWorkspace(
-      String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
+      String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request)
+      throws NotFoundException {
 
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
@@ -324,7 +326,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("Missing required update field 'etag'");
     }
 
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     final Workspace originalWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
 
     int version = Etags.toVersion(workspace.getEtag());
@@ -360,7 +361,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(
-      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body) {
+      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body)
+      throws BadRequestException, TooManyRequestsException {
     Workspace toWorkspace = body.getWorkspace();
     if (Strings.isNullOrEmpty(toWorkspace.getName())) {
       throw new BadRequestException("missing required field 'workspace.name'");

@@ -128,7 +128,7 @@ public class WorkspaceMapperTest {
   }
 
   @Test
-  public void testConvertsSimpleWorkspace() {
+  public void testConvertsDbToApiWorkspace() {
 
     final Workspace ws =
         workspaceMapper.toApiWorkspace(sourceDbWorkspace, sourceFirecloudWorkspace);

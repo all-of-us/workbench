@@ -6,20 +6,30 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.pmiops.workbench.model.DataAccessLevel
 import org.pmiops.workbench.model.ResearchPurpose
+import org.pmiops.workbench.model.SpecificPopulationEnum
 import org.pmiops.workbench.model.Workspace
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 class WorkspaceTargetPropertyTest {
 
+    private val targetPropertyCount = WorkspaceTargetProperty.values().size
     private var workspace1: Workspace? = null
     private var workspace2: Workspace? = null
 
     @Before
     fun setUp() {
-        val researchPurpose1 = ResearchPurpose()
+        val researchPurposeAllFieldsPopulated = ResearchPurpose()
+                .apply { approved = true }
+                .apply { diseaseOfFocus = "Chicken Pox" }
+                .apply { otherPopulationDetails = "cool people" }
+                .apply { populationDetails = listOf(SpecificPopulationEnum.ACCESS_TO_CARE) }
+                .apply { reasonForAllOfUs = "a triple dog dare" }
                 .apply { intendedStudy = "stubbed toes" }
                 .apply { additionalNotes = "I really like the cloud." }
+                .apply { timeRequested = 101L }
+                .apply { timeReviewed = 111L }
+                .apply { anticipatedFindings = "cool stuff" }
 
         val researchPurpose2 = ResearchPurpose()
                 .apply { intendedStudy = "broken dreams" }
@@ -34,7 +44,7 @@ class WorkspaceTargetPropertyTest {
             .apply { namespace = "aou-rw-local1-c4be869a" }
             .apply { creator = "user@fake-research-aou.org" }
             .apply { cdrVersionId = "1" }
-            .apply { researchPurpose = researchPurpose1 }
+            .apply { researchPurpose = researchPurposeAllFieldsPopulated }
             .apply { creationTime = now }
             .apply { lastModifiedTime = now }
             .apply { etag = "etag_1" }
@@ -60,22 +70,28 @@ class WorkspaceTargetPropertyTest {
         val propertiesByName = TargetPropertyExtractor.getPropertyValuesByName(
                 WorkspaceTargetProperty.values(),
                 workspace1!!)
-
-        assertThat(propertiesByName).hasSize(20)
+        assertThat(propertiesByName).hasSize(targetPropertyCount)
         assertThat(propertiesByName[WorkspaceTargetProperty.INTENDED_STUDY.propertyName])
                 .isEqualTo("stubbed toes")
         assertThat(propertiesByName[WorkspaceTargetProperty.CDR_VERSION_ID.propertyName])
                 .isEqualTo("1")
         assertThat(propertiesByName[WorkspaceTargetProperty.REASON_FOR_ALL_OF_US.propertyName])
-                .isNull()
+                .isEqualTo("a triple dog dare")
     }
 
     @Test
     fun testMapsChanges() {
+
+        val workspace1Properties = TargetPropertyExtractor
+                .getPropertyValuesByName(WorkspaceTargetProperty.values(), workspace1!!)
+        val workspace2Properties = TargetPropertyExtractor
+                .getPropertyValuesByName(WorkspaceTargetProperty.values(), workspace2!!)
         val changesByPropertyName = TargetPropertyExtractor.getChangedValuesByName(
                 WorkspaceTargetProperty.values(), workspace1!!, workspace2!!)
 
-        assertThat(changesByPropertyName).hasSize(5)
+        val allKeys = workspace1Properties.keys union workspace2Properties.keys
+        val matchingEntries = workspace1Properties.entries intersect workspace2Properties.entries
+        assertThat(changesByPropertyName).hasSize(allKeys.size - matchingEntries.size)
 
         assertThat(
                 changesByPropertyName[WorkspaceTargetProperty.ADDITIONAL_NOTES.propertyName]
