@@ -16,6 +16,7 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.omg.CORBA.TIMEOUT;
 import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -51,14 +52,14 @@ public class UserServiceTest {
 
   private static final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
   private static final int MOODLE_ID = 1001;
-  private static final Duration CLOCK_INCREMENT = Duration.ofSeconds(1);
 
   private Long incrementedUserId = 1L;
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final long TIMESTAMP_MSECS = 100;
+  private static final Instant START_INSTANT = Instant.ofEpochMilli(TIMESTAMP_MSECS);
   private static final FakeClock PROVIDED_CLOCK =
-      new FakeClock(Instant.ofEpochMilli(TIMESTAMP_MSECS));
+      new FakeClock(START_INSTANT);
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
 
@@ -111,13 +112,20 @@ public class UserServiceTest {
     providedDbUser = insertUser();
 
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
+
+    // Since we're injecting the same static instance of this FakeClock,
+    // increments and other mutations will carry across tests if we don't reset it here.
+    // I tried easier ways of ensuring this, like creating new instances for every test run,
+    // but it was injecting null clocks giving NPEs long after construction, and so far this
+    // is the only working approach I've seen.
+    PROVIDED_CLOCK.setInstant(START_INSTANT);
   }
 
   private DbUser insertUser() {
     DbUser user = new DbUser();
     user.setEmail(EMAIL_ADDRESS);
-    user.setUserId(incrementedUserId);
-    incrementedUserId++;
+//    user.setUserId(incrementedUserId);
+//    incrementedUserId++;
     userDao.save(user);
     return user;
   }
