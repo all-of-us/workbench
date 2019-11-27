@@ -1,4 +1,6 @@
 import {Component, Input} from '@angular/core';
+import {faBook, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
@@ -261,13 +263,12 @@ export const HelpSidebar = withUserProfile()(
       return <React.Fragment>
         <div style={styles.iconContainer}>
           <div style={activeIcon === 'help' ? iconStyles.active : styles.icon}>
-            <ClrIcon className='is-solid' shape='info-standard' size={28} title='Help Tips'
-              onClick={() => this.onIconClick('help')} />
+            <FontAwesomeIcon icon={faInfoCircle} style={{fontSize: '28px'}} title='Help Tips' onClick={() => this.onIconClick('help')} />
           </div>
           <div style={styles.icon}>
             <a href='https://docs.google.com/spreadsheets/d/1dsvJV8B7EXQj5EWa2XG-KAhs-l7FsQnyJSSFMstLF2U/edit#gid=183931508'
               target='_blank' style={{color: colors.white}}>
-              <ClrIcon className='is-solid' shape='book' size={32} title='Data Dictionary' />
+              <FontAwesomeIcon icon={faBook} style={{fontSize: '32px'}} title='Data Dictionary' />
             </a>
           </div>
           {helpContent === 'reviewParticipantDetail' &&
