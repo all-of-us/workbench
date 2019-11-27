@@ -12,6 +12,7 @@ import {urlParamsStore} from 'app/utils/navigation';
 
 import {BugReportComponent} from 'app/components/bug-report';
 import {ConfirmDeleteModalComponent} from 'app/components/confirm-delete-modal';
+import {HelpSidebarComponent} from 'app/components/help-sidebar';
 import {WorkspaceNavBarComponent} from 'app/pages/workspace/workspace-nav-bar';
 import {WorkspaceShareComponent} from 'app/pages/workspace/workspace-share';
 import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/component';
@@ -57,6 +58,7 @@ describe('WorkspaceWrapperComponent', () => {
         BugReportComponent,
         ConfirmDeleteModalComponent,
         FakeAppComponent,
+        HelpSidebarComponent,
         WorkspaceWrapperComponent,
         WorkspaceNavBarComponent,
         WorkspaceShareComponent,

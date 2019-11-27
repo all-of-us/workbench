@@ -142,15 +142,6 @@ public class CohortBuilderControllerTest {
     } catch (BadRequestException bre) {
       // success
       assertEquals(
-          "Bad Request: Please provide a valid type. null is not valid.", bre.getMessage());
-    }
-
-    try {
-      controller.getCriteriaBy(1L, "blah", "blah", false, null);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // success
-      assertEquals(
           "Bad Request: Please provide a valid domain. blah is not valid.", bre.getMessage());
     }
 
@@ -275,15 +266,6 @@ public class CohortBuilderControllerTest {
       // success
       assertEquals(
           "Bad Request: Please provide a valid domain. null is not valid.", bre.getMessage());
-    }
-
-    try {
-      controller.getCriteriaAutoComplete(1L, "blah", "blah", null, null, null);
-      fail("Should have thrown a BadRequestException!");
-    } catch (BadRequestException bre) {
-      // success
-      assertEquals(
-          "Bad Request: Please provide a valid type. null is not valid.", bre.getMessage());
     }
 
     try {
