@@ -15,7 +15,6 @@ import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.springframework.stereotype.Service;
 
-@Service
 public interface DataSetService {
   DbDataset saveDataSet(
       String name,

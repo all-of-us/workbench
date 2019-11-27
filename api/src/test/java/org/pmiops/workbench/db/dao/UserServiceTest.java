@@ -7,15 +7,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Random;
-import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -27,11 +26,13 @@ import org.pmiops.workbench.firecloud.model.NihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
@@ -44,6 +45,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class UserServiceTest {
 
+  private static final String USER_EMAIL = "abc@fake-research-aou.org";
   private final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
 
   private Long incrementedUserId = 1L;
@@ -51,43 +53,78 @@ public class UserServiceTest {
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final long TIMESTAMP_MSECS = 100;
   private static final FakeClock CLOCK = new FakeClock();
+  private static DbUser dbUser;
 
+  @Autowired private AdminActionHistoryDao mockAdminActionHistoryDao;
+  @Autowired private FireCloudService mockFireCloudService;
+  @Autowired private ComplianceService mockComplianceService;
+  @Autowired private DirectoryService mockDirectoryService;
+  @Autowired private UserServiceAuditAdapter mockUserServiceAuditAdapter;
+
+  @Autowired private UserService userService;
   @Autowired private UserDao userDao;
-  @Mock private AdminActionHistoryDao adminActionHistoryDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
-  @Mock private FireCloudService fireCloudService;
-  @Mock private ComplianceService complianceService;
-  @Mock private DirectoryService directoryService;
-  @Mock private UserServiceAuditAdapter mockUserServiceAuditAdapter;
-
-  private UserService userService;
 
   private DbUser testUser;
+
+  @TestConfiguration
+  @Import({
+      UserService.class
+  })
+  @MockBean({
+      AdminActionHistoryDao.class,
+      FireCloudService.class,
+      ComplianceService.class,
+      DirectoryService.class,
+      UserServiceAuditAdapter.class
+  })
+  static class Configuration {
+    @Bean
+    Clock clock() {
+      return CLOCK;
+    }
+
+    @Bean
+    WorkbenchConfig getWorkbenchConfig() {
+      return WorkbenchConfig.createEmptyConfig();
+    }
+
+    @Bean
+    Random getRandom() {
+      return new Random();
+    }
+
+    @Bean
+    DbUser getDbUser() {
+      return dbUser;
+    }
+
+  }
 
   @Before
   public void setUp() {
     CLOCK.setInstant(Instant.ofEpochMilli(TIMESTAMP_MSECS));
-    Provider<WorkbenchConfig> configProvider = Providers.of(WorkbenchConfig.createEmptyConfig());
-    testUser = insertUser(EMAIL_ADDRESS);
-
-    userService =
-        new UserService(
-            Providers.of(testUser),
-            userDao,
-            adminActionHistoryDao,
-            userDataUseAgreementDao,
-            CLOCK,
-            new Random(),
-            fireCloudService,
-            configProvider,
-            complianceService,
-            directoryService,
-            mockUserServiceAuditAdapter);
+//    Provider<WorkbenchConfig> configProvider = Providers.of(WorkbenchConfig.createEmptyConfig());
+    testUser = insertUser();
+    dbUser = insertUser();
+//    userService =
+//        new UserService(
+//            Providers.of(testUser),
+//            userDao,
+//            mockAdminActionHistoryDao,
+//            userDataUseAgreementDao,
+//            CLOCK,
+//            new Random(),
+//            mockFireCloudService,
+//            configProvider,
+//            mockComplianceService,
+//            mockDirectoryService,
+//            mockUserServiceAuditAdapter);
   }
 
-  private DbUser insertUser(String email) {
+  private DbUser insertUser() {
     DbUser user = new DbUser();
-    user.setEmail(email);
+    user.setEmail(USER_EMAIL);
     user.setUserId(incrementedUserId);
     incrementedUserId++;
     userDao.save(user);
@@ -100,8 +137,8 @@ public class UserServiceTest {
     badge.setName("All of us badge");
     badge.setDateexpire("12345");
 
-    when(complianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
-    when(complianceService.getUserBadge(1)).thenReturn(Arrays.asList(badge));
+    when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
+    when(mockComplianceService.getUserBadge(1)).thenReturn(Arrays.asList(badge));
 
     userService.syncComplianceTrainingStatus();
 
@@ -120,10 +157,10 @@ public class UserServiceTest {
 
   @Test
   public void testSyncComplianceTrainingStatusNoMoodleId() throws Exception {
-    when(complianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(null);
+    when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(null);
     userService.syncComplianceTrainingStatus();
 
-    verify(complianceService, never()).getUserBadge(anyInt());
+    verify(mockComplianceService, never()).getUserBadge(anyInt());
     DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
@@ -135,8 +172,8 @@ public class UserServiceTest {
     user.setComplianceTrainingCompletionTime(new Timestamp(12345));
     userDao.save(user);
 
-    when(complianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
-    when(complianceService.getUserBadge(1)).thenReturn(null);
+    when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
+    when(mockComplianceService.getUserBadge(1)).thenReturn(null);
     userService.syncComplianceTrainingStatus();
     user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
@@ -145,8 +182,8 @@ public class UserServiceTest {
   @Test(expected = NotFoundException.class)
   public void testSyncComplianceTrainingStatusBadgeNotFound() throws Exception {
     // We should propagate a NOT_FOUND exception from the compliance service.
-    when(complianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
-    when(complianceService.getUserBadge(1))
+    when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
+    when(mockComplianceService.getUserBadge(1))
         .thenThrow(
             new org.pmiops.workbench.moodle.ApiException(
                 HttpStatus.NOT_FOUND.value(), "user not found"));
@@ -160,7 +197,7 @@ public class UserServiceTest {
     // FireCloud stores the NIH status in seconds, not msecs.
     nihStatus.setLinkExpireTime(TIMESTAMP_MSECS / 1000);
 
-    when(fireCloudService.getNihStatus()).thenReturn(nihStatus);
+    when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
 
     userService.syncEraCommonsStatus();
 
@@ -184,7 +221,7 @@ public class UserServiceTest {
     userDao.save(testUser);
 
     // API returns a null value.
-    when(fireCloudService.getNihStatus()).thenReturn(null);
+    when(mockFireCloudService.getNihStatus()).thenReturn(null);
 
     userService.syncEraCommonsStatus();
 
@@ -199,7 +236,7 @@ public class UserServiceTest {
     googleUser.setPrimaryEmail(EMAIL_ADDRESS);
     googleUser.setIsEnrolledIn2Sv(true);
 
-    when(directoryService.getUser(EMAIL_ADDRESS)).thenReturn(googleUser);
+    when(mockDirectoryService.getUser(EMAIL_ADDRESS)).thenReturn(googleUser);
     userService.syncTwoFactorAuthStatus();
     // twoFactorAuthCompletionTime should now be set
     DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
