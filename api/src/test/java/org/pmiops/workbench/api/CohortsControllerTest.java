@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
 import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -194,7 +195,8 @@ public class CohortsControllerTest {
     FireCloudService.class,
     LeonardoNotebooksClient.class,
     UserRecentResourceService.class,
-    WorkspaceAuditAdapter.class
+    WorkspaceAuditAdapter.class,
+    UserServiceAuditAdapter.class
   })
   static class Configuration {
 

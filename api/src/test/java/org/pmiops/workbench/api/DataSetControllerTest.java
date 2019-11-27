@@ -43,6 +43,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
 import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -242,7 +243,8 @@ public class DataSetControllerTest {
     NotebooksService.class,
     CohortQueryBuilder.class,
     UserRecentResourceService.class,
-    WorkspaceAuditAdapter.class
+    WorkspaceAuditAdapter.class,
+    UserServiceAuditAdapter.class
   })
   static class Configuration {
     @Bean

@@ -13,7 +13,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
-import org.springframework.stereotype.Service;
 
 public interface DataSetService {
   DbDataset saveDataSet(

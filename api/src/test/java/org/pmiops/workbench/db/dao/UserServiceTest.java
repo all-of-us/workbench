@@ -54,8 +54,7 @@ public class UserServiceTest {
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final long TIMESTAMP_MSECS = 100;
   private static final Instant START_INSTANT = Instant.ofEpochMilli(TIMESTAMP_MSECS);
-  private static final FakeClock PROVIDED_CLOCK =
-      new FakeClock(START_INSTANT);
+  private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
 
@@ -68,15 +67,13 @@ public class UserServiceTest {
   @Autowired private UserDao userDao;
 
   @TestConfiguration
-  @Import({
-      UserService.class
-  })
+  @Import({UserService.class})
   @MockBean({
-      AdminActionHistoryDao.class,
-      FireCloudService.class,
-      ComplianceService.class,
-      DirectoryService.class,
-      UserServiceAuditAdapter.class
+    AdminActionHistoryDao.class,
+    FireCloudService.class,
+    ComplianceService.class,
+    DirectoryService.class,
+    UserServiceAuditAdapter.class
   })
   static class Configuration {
     @Bean
@@ -216,15 +213,13 @@ public class UserServiceTest {
 
   @Test
   public void testClearsEraCommonsStatus() throws Exception {
-//    DbUser testUser = insertUser();
     DbUser testUser = userDao.findUserByEmail(EMAIL_ADDRESS);
     // Put the test user in a state where eRA commons is completed.
     testUser.setEraCommonsCompletionTime(new Timestamp(TIMESTAMP_MSECS));
     testUser.setEraCommonsLinkedNihUsername("nih-user");
-    testUser = userDao.save(testUser);
 
-    // API returns a null value.
-    when(mockFireCloudService.getNihStatus()).thenReturn(null);
+    //noinspection UnusedAssignment
+    testUser = userDao.save(testUser);
 
     userService.syncEraCommonsStatus();
 

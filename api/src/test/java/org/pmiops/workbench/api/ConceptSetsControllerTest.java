@@ -18,7 +18,7 @@ import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
 import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -198,8 +198,6 @@ public class ConceptSetsControllerTest {
 
   @Autowired ConceptBigQueryService conceptBigQueryService;
 
-  @Mock Provider<DbUser> userProvider;
-
   @Autowired Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired WorkspacesController workspacesController;
@@ -227,7 +225,8 @@ public class ConceptSetsControllerTest {
     FireCloudService.class,
     NotebooksService.class,
     UserRecentResourceService.class,
-    WorkspaceAuditAdapter.class
+    WorkspaceAuditAdapter.class,
+    UserServiceAuditAdapter.class
   })
   static class Configuration {
     @Bean
