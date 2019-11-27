@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,7 +72,7 @@ public class UserService {
   private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
-  private UserServiceAuditAdapter userServiceAuditAdapter;
+  private final UserServiceAuditAdapter userServiceAuditAdapter;
   private static final Logger log = Logger.getLogger(UserService.class.getName());
 
   @Autowired
@@ -368,15 +367,6 @@ public class UserService {
     userDataUseAgreementDao.save(dataUseAgreements);
   }
 
-  private DbUser setBypassTimeWithRetries(
-      long userId,
-      Timestamp bypassTime,
-      BypassTimeTargetProperty targetProperty,
-      BiFunction<DbUser, Timestamp, DbUser> setter) {
-    return setBypassTimeWithRetries(
-        userDao.findUserByUserId(userId), bypassTime, targetProperty, setter);
-  }
-
   public void setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
     setBypassTimeWithRetries(
         userId,
@@ -426,20 +416,17 @@ public class UserService {
         userDao.findUserByUserId(userId),
         bypassTime,
         targetProperty,
-        (u, t) -> {
-          setter.accept(u, t);
-          return u;
-        });
+        setter);
   }
 
-  private DbUser setBypassTimeWithRetries(
+  private void setBypassTimeWithRetries(
       DbUser dbUser,
       Timestamp bypassTime,
       BypassTimeTargetProperty targetProperty,
-      BiFunction<DbUser, Timestamp, DbUser> setter) {
-    return updateUserWithRetries(
+      BiConsumer<DbUser, Timestamp> setter) {
+    updateUserWithRetries(
         (u) -> {
-          u = setter.apply(u, bypassTime);
+          setter.accept(u, bypassTime);
           userServiceAuditAdapter.fireAdministrativeBypassTime(
               dbUser.getUserId(),
               targetProperty,
@@ -449,8 +436,8 @@ public class UserService {
         dbUser);
   }
 
-  public DbUser setClusterRetryCount(int clusterRetryCount) {
-    return updateUserWithRetries(
+  public void setClusterRetryCount(int clusterRetryCount) {
+    updateUserWithRetries(
         (user) -> {
           user.setClusterCreateRetries(clusterRetryCount);
           return user;
