@@ -3,7 +3,7 @@
     "baseUrl": "https:\/\/api.firecloud.org",
     "clusterMaxAgeDays": 7,
     "clusterIdleMaxAgeDays": 3,
-    "clusterDefaultMachineType": "n1-standard-4",
+    "clusterDefaultMachineType": "n1-highmem-4",
     "clusterDefaultDiskSizeGb": 50,
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
@@ -11,7 +11,7 @@
     "registeredDomainGroup": "GROUP_all-of-us-registered-staging@firecloud.org",
     "xAppIdValue": "staging-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
-    "timeoutInSeconds": 40,
+    "timeoutInSeconds": 60,
     "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-gatk:0.0.3"
   },
   "billing": {

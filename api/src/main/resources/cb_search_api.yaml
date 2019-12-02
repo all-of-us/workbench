@@ -39,6 +39,21 @@ security:
 paths:
 
   # Cohort Builder #######################################################################
+  /v1/cohortbuilder/{cdrVersionId}/criteria/menu:
+    parameters:
+      - $ref: '#/parameters/cdrVersionId'
+    get:
+      tags:
+        - cohortBuilder
+      description: >
+        Returns criteria menu options
+      operationId: "findCriteriaMenuOptions"
+      responses:
+        200:
+          description: A collection of criteria menu options
+          schema:
+            $ref: "#/definitions/CriteriaMenuOptionsListResponse"
+
   /v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search/term:
     parameters:
       - $ref: '#/parameters/cdrVersionId'
@@ -62,7 +77,6 @@ paths:
         - in: query
           name: limit
           type: integer
-          format: int64
           required: false
           description: number of criteria matches to return
       responses:
@@ -168,7 +182,6 @@ paths:
         - in: query
           name: limit
           type: integer
-          format: int64
           required: false
           description: number of criteria matches to return
       responses:
@@ -194,7 +207,6 @@ paths:
         - in: query
           name: limit
           type: integer
-          format: int64
           required: false
           description: number of criteria matches to return
       responses:
@@ -321,6 +333,16 @@ definitions:
         items:
           $ref: "#/definitions/Criteria"
 
+  CriteriaMenuOptionsListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/CriteriaMenuOption"
+
   Criteria:
     type: object
     required:
@@ -430,6 +452,43 @@ definitions:
         type: boolean
       isStandard:
         description: Reveals if this criteria is standard or source.
+        type: boolean
+
+  CriteriaMenuOption:
+    type: object
+    required:
+      - domain
+      - types
+    properties:
+      domain:
+        description: The criteria domains that are searchable in Cohort Builder
+        type: string
+      types:
+        type: array
+        items:
+          $ref: "#/definitions/CriteriaMenuSubOption"
+
+  CriteriaMenuSubOption:
+    type: object
+    required:
+      - type
+      - standardFlags
+    properties:
+      type:
+        description: The criteria types that are searchable in Cohort Builder
+        type: string
+      standardFlags:
+        type: array
+        items:
+          $ref: "#/definitions/StandardFlag"
+
+  StandardFlag:
+    type: object
+    required:
+      - standard
+    properties:
+      standard:
+        description: flag that determines standard or source
         type: boolean
 
   CriteriaAttributeListResponse:

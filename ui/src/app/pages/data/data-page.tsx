@@ -4,7 +4,6 @@ import * as React from 'react';
 
 import {CardButton, TabButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {ResourceCard} from 'app/components/resource-card';
@@ -299,13 +298,12 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           {isLoading && <SpinnerOverlay></SpinnerOverlay>}
         </div>
       </FadeBox>
-      <HelpSidebar location='data' />
     </React.Fragment>;
   }
 });
 
 @Component({
-  template: '<div #root style="position: relative; margin-right: 45px;"></div>'
+  template: '<div #root></div>'
 })
 export class DataPageComponent extends ReactWrapperBase {
   constructor() {

@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,10 +77,10 @@ public class OfflineAuditControllerTest {
     user.setDisabled(false);
     user = userDao.save(user);
 
-    CdrVersion cdrV1 = new CdrVersion();
+    DbCdrVersion cdrV1 = new DbCdrVersion();
     cdrV1.setBigqueryProject(CDR_V1_PROJECT_ID);
     cdrV1 = cdrVersionDao.save(cdrV1);
-    CdrVersion cdrV2 = new CdrVersion();
+    DbCdrVersion cdrV2 = new DbCdrVersion();
     cdrV2.setBigqueryProject(CDR_V2_PROJECT_ID);
     cdrV2 = cdrVersionDao.save(cdrV2);
 

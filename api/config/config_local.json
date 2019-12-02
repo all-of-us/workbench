@@ -12,7 +12,7 @@
     "registeredDomainGroup": "GROUP_all-of-us-registered-test@dev.test.firecloud.org",
     "xAppIdValue": "local-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
-    "timeoutInSeconds": 40,
+    "timeoutInSeconds": 60,
     "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-gatk:0.0.3"
   },
   "billing": {

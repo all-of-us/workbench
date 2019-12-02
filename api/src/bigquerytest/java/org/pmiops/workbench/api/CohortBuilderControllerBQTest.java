@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -22,12 +23,12 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
-import org.pmiops.workbench.cdr.model.CBCriteria;
+import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -36,6 +37,8 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.CloudStorageServiceImpl;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.CriteriaMenuOption;
+import org.pmiops.workbench.model.CriteriaMenuSubOption;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DemoChartInfo;
@@ -48,6 +51,7 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.StandardFlag;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
@@ -89,7 +93,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   private CohortBuilderController controller;
 
-  private CdrVersion cdrVersion;
+  private DbCdrVersion cdrVersion;
 
   @Autowired private BigQueryService bigQueryService;
 
@@ -141,18 +145,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             cohortQueryBuilder,
             cbCriteriaDao,
             cbCriteriaAttributeDao,
-            cdrVersionDao,
             cdrVersionService,
             elasticSearchService,
             configProvider);
 
-    cdrVersion = new CdrVersion();
+    cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    cdrVersionDao.save(cdrVersion);
+    cdrVersion = cdrVersionDao.save(cdrVersion);
   }
 
   private static SearchParameter icd9() {
@@ -445,8 +448,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .conceptId(903115L));
   }
 
-  private static CBCriteria drugCriteriaParent() {
-    return new CBCriteria()
+  private static DbCriteria drugCriteriaParent() {
+    return new DbCriteria()
         .parentId(99999)
         .domainId(DomainType.DRUG.toString())
         .type(CriteriaType.ATC.toString())
@@ -456,8 +459,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .selectable(true);
   }
 
-  private static CBCriteria drugCriteriaChild(long parentId) {
-    return new CBCriteria()
+  private static DbCriteria drugCriteriaChild(long parentId) {
+    return new DbCriteria()
         .parentId(parentId)
         .domainId(DomainType.DRUG.toString())
         .type(CriteriaType.RXNORM.toString())
@@ -466,8 +469,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .selectable(true);
   }
 
-  private static CBCriteria icd9CriteriaParent() {
-    return new CBCriteria()
+  private static DbCriteria icd9CriteriaParent() {
+    return new DbCriteria()
         .parentId(99999)
         .domainId(DomainType.CONDITION.toString())
         .type(CriteriaType.ICD9CM.toString())
@@ -482,8 +485,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .synonyms("[CONDITION_rank1]");
   }
 
-  private static CBCriteria icd9CriteriaChild(long parentId) {
-    return new CBCriteria()
+  private static DbCriteria icd9CriteriaChild(long parentId) {
+    return new DbCriteria()
         .parentId(parentId)
         .domainId(DomainType.CONDITION.toString())
         .type(CriteriaType.ICD9CM.toString())
@@ -495,6 +498,65 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .selectable(true)
         .ancestorData(false)
         .conceptId("1");
+  }
+
+  @Test
+  public void findCriteriaMenuOptions() throws Exception {
+    cbCriteriaDao.save(
+        new DbCriteria()
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD9CM.toString())
+            .standard(false));
+    cbCriteriaDao.save(
+        new DbCriteria()
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD10CM.toString())
+            .standard(false));
+    cbCriteriaDao.save(
+        new DbCriteria()
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.SNOMED.toString())
+            .standard(true));
+    cbCriteriaDao.save(
+        new DbCriteria()
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.SNOMED.toString())
+            .standard(false));
+    cbCriteriaDao.save(
+        new DbCriteria()
+            .domainId(DomainType.PROCEDURE.toString())
+            .type(CriteriaType.CPT4.toString())
+            .standard(false));
+    List<CriteriaMenuOption> options =
+        controller.findCriteriaMenuOptions(cdrVersion.getCdrVersionId()).getBody().getItems();
+    assertEquals(2, options.size());
+    CriteriaMenuOption option1 =
+        new CriteriaMenuOption()
+            .domain(DomainType.CONDITION.toString())
+            .addTypesItem(
+                new CriteriaMenuSubOption()
+                    .type(CriteriaType.ICD10CM.toString())
+                    .standardFlags(Arrays.asList(new StandardFlag().standard(false))))
+            .addTypesItem(
+                new CriteriaMenuSubOption()
+                    .type(CriteriaType.ICD9CM.toString())
+                    .standardFlags(Arrays.asList(new StandardFlag().standard(false))))
+            .addTypesItem(
+                new CriteriaMenuSubOption()
+                    .type(CriteriaType.SNOMED.toString())
+                    .standardFlags(
+                        Arrays.asList(
+                            new StandardFlag().standard(false),
+                            new StandardFlag().standard(true))));
+    CriteriaMenuOption option2 =
+        new CriteriaMenuOption()
+            .domain(DomainType.PROCEDURE.toString())
+            .addTypesItem(
+                new CriteriaMenuSubOption()
+                    .type(CriteriaType.CPT4.toString())
+                    .standardFlags(Arrays.asList(new StandardFlag().standard(false))));
+    assertTrue(options.contains(option1));
+    assertTrue(options.contains(option2));
   }
 
   @Test
@@ -685,9 +747,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void firstMentionOfDrug5DaysBeforeICD10WithModifiers() throws Exception {
-    CBCriteria drugNode1 = drugCriteriaParent();
+    DbCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
-    CBCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
+    DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
     insertCriteriaAncestor(1520218, 1520218);
     SearchGroupItem drugSGI =
@@ -712,17 +774,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     cbCriteriaDao.delete(drugNode1.getId());
     cbCriteriaDao.delete(drugNode2.getId());
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
+    assertParticipants(response, 1);
   }
 
   @Test
   public void anyMentionOfCPTParent5DaysAfterICD10Child() throws Exception {
-    CBCriteria icd9Parent =
-        new CBCriteria()
+    DbCriteria icd9Parent =
+        new DbCriteria()
             .ancestorData(false)
             .code("001")
             .conceptId("0")
@@ -732,8 +795,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .standard(false)
             .synonyms("+[CONDITION_rank1]");
     saveCriteriaWithPath("0", icd9Parent);
-    CBCriteria icd9Child =
-        new CBCriteria()
+    DbCriteria icd9Child =
+        new DbCriteria()
             .ancestorData(false)
             .code("001.1")
             .conceptId("1")
@@ -767,10 +830,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     cbCriteriaDao.delete(icd9Parent.getId());
     cbCriteriaDao.delete(icd9Child.getId());
+    assertParticipants(response, 1);
   }
 
   @Test
@@ -802,9 +866,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void firstMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
-    CBCriteria drugCriteria = drugCriteriaChild(1).conceptId("11");
-    saveCriteriaWithPath("0", drugCriteria);
-    insertCriteriaAncestor(11, 11);
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
 
     SearchGroupItem drugSGI =
         new SearchGroupItem()
@@ -826,17 +889,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    cbCriteriaDao.delete(drugCriteria.getId());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
+    assertParticipants(response, 1);
   }
 
   @Test
   public void lastMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
-    CBCriteria drugCriteria = drugCriteriaChild(1).conceptId("11");
-    saveCriteriaWithPath("0", drugCriteria);
-    insertCriteriaAncestor(11, 11);
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
 
     SearchGroupItem drugSGI =
         new SearchGroupItem()
@@ -858,24 +920,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    cbCriteriaDao.delete(drugCriteria.getId());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
+    assertParticipants(response, 1);
   }
 
   @Test
   public void lastMentionOfDrugDuringSameEncounterAsMeasurementOrVisit() throws Exception {
-    CBCriteria drugCriteria =
-        new CBCriteria()
-            .domainId(DomainType.DRUG.toString())
-            .type(CriteriaType.ATC.toString())
-            .group(false)
-            .ancestorData(true)
-            .standard(true)
-            .conceptId("11");
-    saveCriteriaWithPath("0", drugCriteria);
-    insertCriteriaAncestor(11, 11);
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
 
     SearchGroupItem drugSGI =
         new SearchGroupItem()
@@ -902,17 +956,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-    cbCriteriaDao.delete(drugCriteria.getId());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
+    assertParticipants(response, 1);
   }
 
   @Test
   public void lastMentionOfMeasurementOrVisit5DaysAfterDrug() throws Exception {
-    CBCriteria drugCriteria1 = drugCriteriaParent();
+    DbCriteria drugCriteria1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugCriteria1);
-    CBCriteria drugCriteria2 = drugCriteriaChild(drugCriteria1.getId());
+    DbCriteria drugCriteria2 = drugCriteriaChild(drugCriteria1.getId());
     saveCriteriaWithPath(drugCriteria1.getPath(), drugCriteria2);
     insertCriteriaAncestor(1520218, 1520218);
 
@@ -942,11 +996,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .timeValue(5L);
 
     SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     cbCriteriaDao.delete(drugCriteria1.getId());
     cbCriteriaDao.delete(drugCriteria2.getId());
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
+    assertParticipants(response, 1);
   }
 
   @Test
@@ -1036,9 +1091,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ConditionParent() throws Exception {
-    CBCriteria criteriaParent = icd9CriteriaParent();
+    DbCriteria criteriaParent = icd9CriteriaParent();
     saveCriteriaWithPath("0", criteriaParent);
-    CBCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
+    DbCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
     saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
 
     SearchRequest searchRequest =
@@ -1046,10 +1101,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.CONDITION.toString(),
             Arrays.asList(icd9().group(true).conceptId(2L)),
             new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     cbCriteriaDao.delete(criteriaParent.getId());
     cbCriteriaDao.delete(criteriaChild.getId());
+    assertParticipants(response, 1);
   }
 
   @Test
@@ -1159,9 +1215,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ParentAndICD10ChildCondition() throws Exception {
-    CBCriteria criteriaParent = icd9CriteriaParent();
+    DbCriteria criteriaParent = icd9CriteriaParent();
     saveCriteriaWithPath("0", criteriaParent);
-    CBCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
+    DbCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
     saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
 
     SearchRequest searchRequest =
@@ -1169,10 +1225,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.CONDITION.toString(),
             Arrays.asList(icd9().group(true).conceptId(2L), icd10().conceptId(6L)),
             new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     cbCriteriaDao.delete(criteriaParent.getId());
     cbCriteriaDao.delete(criteriaChild.getId());
+    assertParticipants(response, 2);
   }
 
   @Test
@@ -1201,8 +1258,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsSnomedParentProcedure() throws Exception {
     SearchParameter snomed = snomed().group(true).standard(true).conceptId(4302541L);
 
-    CBCriteria criteriaParent =
-        new CBCriteria()
+    DbCriteria criteriaParent =
+        new DbCriteria()
             .parentId(99999)
             .domainId(DomainType.PROCEDURE.toString())
             .type(CriteriaType.SNOMED.toString())
@@ -1216,8 +1273,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .conceptId("4302541")
             .synonyms("+[PROCEDURE_rank1]");
     saveCriteriaWithPath("0", criteriaParent);
-    CBCriteria criteriaChild =
-        new CBCriteria()
+    DbCriteria criteriaChild =
+        new DbCriteria()
             .parentId(criteriaParent.getId())
             .domainId(DomainType.PROCEDURE.toString())
             .type(CriteriaType.SNOMED.toString())
@@ -1235,10 +1292,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(), Arrays.asList(snomed), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     cbCriteriaDao.delete(criteriaParent.getId());
     cbCriteriaDao.delete(criteriaChild.getId());
+    assertParticipants(response, 1);
   }
 
   @Test
@@ -1263,19 +1321,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugChild() throws Exception {
-    insertCriteriaAncestor(11, 11);
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     SearchRequest searchRequest =
         createSearchRequests(DomainType.DRUG.toString(), Arrays.asList(drug()), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
+    assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsDrugParent() throws Exception {
-    CBCriteria drugNode1 = drugCriteriaParent();
+    DbCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
-    CBCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
+    DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
 
     insertCriteriaAncestor(1520218, 1520218);
@@ -1284,18 +1344,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.DRUG.toString(),
             Arrays.asList(drug().group(true).conceptId(21600932L)),
             new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
     cbCriteriaDao.delete(drugNode1.getId());
     cbCriteriaDao.delete(drugNode2.getId());
+    assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsDrugParentAndChild() throws Exception {
-    CBCriteria drugNode1 = drugCriteriaParent();
+    DbCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
-    CBCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
+    DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
     saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
 
     insertCriteriaAncestor(1520218, 1520218);
@@ -1304,33 +1365,38 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             DomainType.DRUG.toString(),
             Arrays.asList(drug().group(true).conceptId(21600932L), drug()),
             new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
     cbCriteriaDao.delete(drugNode1.getId());
     cbCriteriaDao.delete(drugNode2.getId());
+    assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsDrugChildEncounter() throws Exception {
-    insertCriteriaAncestor(11, 11);
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.DRUG.toString(), Arrays.asList(drug()), Arrays.asList(visitModifier()));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
+    assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsDrugChildAgeAtEvent() throws Exception {
-    insertCriteriaAncestor(11, 11);
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.DRUG.toString(), Arrays.asList(drug()), Arrays.asList(ageModifier()));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
+    assertParticipants(response, 1);
   }
 
   @Test
@@ -1634,59 +1700,29 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsPPI() throws Exception {
-    CBCriteria surveyNode =
-        new CBCriteria()
-            .parentId(0)
-            .domainId(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.SURVEY.toString())
-            .group(true)
-            .selectable(true)
-            .standard(false)
-            .conceptId("22");
-    saveCriteriaWithPath("0", surveyNode);
-    CBCriteria questionNode =
-        new CBCriteria()
-            .parentId(surveyNode.getId())
-            .domainId(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.QUESTION.toString())
-            .group(true)
-            .selectable(true)
-            .standard(false)
-            .name("In what country were you born?")
-            .conceptId("1585899")
-            .synonyms("[SURVEY_rank1]");
-    saveCriteriaWithPath(surveyNode.getPath(), questionNode);
-    CBCriteria answerNode =
-        new CBCriteria()
-            .parentId(questionNode.getId())
-            .domainId(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.ANSWER.toString())
-            .group(false)
-            .selectable(true)
-            .standard(false)
-            .name("USA")
-            .conceptId("5");
-    saveCriteriaWithPath(questionNode.getPath(), answerNode);
+    List<DbCriteria> surveys = insertSurveyCriteria();
 
     // Survey
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.SURVEY.toString(), Arrays.asList(survey()), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    deleteSurveyCriteria(surveys);
+    assertParticipants(response, 1);
 
     // Question
+    surveys = insertSurveyCriteria();
     SearchParameter ppiQuestion =
         survey().subtype(CriteriaSubType.QUESTION.toString()).conceptId(1585899L);
     searchRequest =
         createSearchRequests(ppiQuestion.getType(), Arrays.asList(ppiQuestion), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    response = controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    deleteSurveyCriteria(surveys);
+    assertParticipants(response, 1);
 
     // value source concept id
+    surveys = insertSurveyCriteria();
     List<Attribute> attributes =
         Arrays.asList(
             new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("7")));
@@ -1695,10 +1731,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequest =
         createSearchRequests(
             ppiValueAsConceptId.getType(), Arrays.asList(ppiValueAsConceptId), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+    response = controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    deleteSurveyCriteria(surveys);
+    assertParticipants(response, 1);
 
     // value as number
+    surveys = insertSurveyCriteria();
     attributes =
         Arrays.asList(
             new Attribute()
@@ -1710,12 +1748,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     searchRequest =
         createSearchRequests(
             ppiValueAsNumer.getType(), Arrays.asList(ppiValueAsNumer), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-
-    cbCriteriaDao.delete(surveyNode.getId());
-    cbCriteriaDao.delete(questionNode.getId());
-    cbCriteriaDao.delete(answerNode.getId());
+    response = controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    deleteSurveyCriteria(surveys);
+    assertParticipants(response, 1);
   }
 
   @Test
@@ -1727,19 +1762,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     DemoChartInfoListResponse response =
         controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
-    assertEquals(4, response.getItems().size());
-    assertEquals(
-        new DemoChartInfo().gender("MALE").race("Asian").ageRange("19-44").count(0L),
-        response.getItems().get(0));
+    assertEquals(2, response.getItems().size());
     assertEquals(
         new DemoChartInfo().gender("MALE").race("Asian").ageRange("45-64").count(1L),
+        response.getItems().get(0));
+    assertEquals(
+        new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("18-44").count(1L),
         response.getItems().get(1));
-    assertEquals(
-        new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("19-44").count(1L),
-        response.getItems().get(2));
-    assertEquals(
-        new DemoChartInfo().gender("MALE").race("Caucasian").ageRange("45-64").count(0L),
-        response.getItems().get(3));
   }
 
   @Test
@@ -1753,7 +1782,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   protected String getTablePrefix() {
-    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     return cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset();
   }
 
@@ -1793,8 +1822,54 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertThat(participantCount).isEqualTo(expectedCount);
   }
 
-  private void saveCriteriaWithPath(String path, CBCriteria criteria) {
-    cbCriteriaDao.save(criteria);
+  private List<DbCriteria> insertSurveyCriteria() {
+    DbCriteria surveyNode =
+        new DbCriteria()
+            .parentId(0)
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.SURVEY.toString())
+            .group(true)
+            .selectable(true)
+            .standard(false)
+            .conceptId("22");
+    saveCriteriaWithPath("0", surveyNode);
+    DbCriteria questionNode =
+        new DbCriteria()
+            .parentId(surveyNode.getId())
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.QUESTION.toString())
+            .group(true)
+            .selectable(true)
+            .standard(false)
+            .name("In what country were you born?")
+            .conceptId("1585899")
+            .synonyms("[SURVEY_rank1]");
+    saveCriteriaWithPath(surveyNode.getPath(), questionNode);
+    DbCriteria answerNode =
+        new DbCriteria()
+            .parentId(questionNode.getId())
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.ANSWER.toString())
+            .group(false)
+            .selectable(true)
+            .standard(false)
+            .name("USA")
+            .conceptId("5");
+    saveCriteriaWithPath(questionNode.getPath(), answerNode);
+    return Arrays.asList(surveyNode, questionNode, answerNode);
+  }
+
+  private void deleteSurveyCriteria(List<DbCriteria> surveys) {
+    for (DbCriteria survey : surveys) {
+      cbCriteriaDao.delete(survey.getId());
+    }
+  }
+
+  private void saveCriteriaWithPath(String path, DbCriteria criteria) {
+    criteria = cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
     criteria.path(path.isEmpty() ? pathEnd : path + "." + pathEnd);
     cbCriteriaDao.save(criteria);

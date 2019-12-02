@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cohortbuilder.util.CriteriaLookupUtil;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -33,9 +35,7 @@ public class CohortQueryBuilder {
       "select gender, \n"
           + "race, \n"
           + "case "
-          + getAgeRangeSql(0, 18)
-          + "\n"
-          + getAgeRangeSql(19, 44)
+          + getAgeRangeSql(18, 44)
           + "\n"
           + getAgeRangeSql(45, 64)
           + "\n"
@@ -93,6 +93,7 @@ public class CohortQueryBuilder {
       "${mainTable}.person_id not in\n" + "(${excludeSql})\n";
 
   private CBCriteriaDao cbCriteriaDao;
+  private static final Logger log = Logger.getLogger(CohortQueryBuilder.class.getName());
 
   @Autowired
   public CohortQueryBuilder(CBCriteriaDao cbCriteriaDao) {
@@ -205,6 +206,8 @@ public class CohortQueryBuilder {
               participantCriteria.getParticipantIdsToInclude().toArray(new Long[0]), Long.class));
     } else {
       if (request.getIncludes().isEmpty() && request.getExcludes().isEmpty()) {
+        log.log(
+            Level.WARNING, "Invalid SearchRequest: includes[] and excludes[] cannot both be empty");
         throw new BadRequestException(
             "Invalid SearchRequest: includes[] and excludes[] cannot both be empty");
       }
@@ -214,6 +217,7 @@ public class CohortQueryBuilder {
       try {
         criteriaLookup = new CriteriaLookupUtil(cbCriteriaDao).buildCriteriaLookupMap(request);
       } catch (IllegalArgumentException ex) {
+        log.log(Level.WARNING, "Unable to lookup criteria children", ex);
         throw new BadRequestException("Bad Request: " + ex.getMessage());
       }
 

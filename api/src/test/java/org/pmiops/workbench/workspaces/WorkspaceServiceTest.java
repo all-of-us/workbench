@@ -1,17 +1,15 @@
 package org.pmiops.workbench.workspaces;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -32,8 +30,6 @@ import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.Workspace;
-import org.pmiops.workbench.firecloud.model.WorkspaceACL;
-import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -168,20 +164,13 @@ public class WorkspaceServiceTest {
       WorkspaceAccessLevel accessLevel,
       WorkspaceActiveStatus activeStatus) {
 
-    WorkspaceACL workspaceAccessLevelResponse = spy(WorkspaceACL.class);
-    HashMap<String, WorkspaceAccessEntry> acl = new HashMap<>();
-    WorkspaceAccessEntry accessLevelEntry =
-        new WorkspaceAccessEntry().accessLevel(accessLevel.toString());
-    acl.put(DEFAULT_USER_EMAIL, accessLevelEntry);
-    doReturn(acl).when(workspaceAccessLevelResponse).getAcl();
-    workspaceAccessLevelResponse.setAcl(acl);
     WorkspaceResponse mockWorkspaceResponse =
         mockFirecloudWorkspaceResponse(
             Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
-    doReturn(workspaceAccessLevelResponse)
-        .when(mockFireCloudService)
-        .getWorkspaceAcl(workspaceNamespace, workspaceName);
     mockWorkspaceResponses.add(mockWorkspaceResponse);
+    doReturn(mockWorkspaceResponse)
+        .when(mockFireCloudService)
+        .getWorkspace(workspaceNamespace, workspaceName);
 
     DbWorkspace dbWorkspace =
         workspaceDao.save(
@@ -267,7 +256,7 @@ public class WorkspaceServiceTest {
             .stream()
             .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).containsAll(expectedIds);
+    assertThat(actualIds).containsAllIn(expectedIds);
   }
 
   @Test
@@ -304,7 +293,7 @@ public class WorkspaceServiceTest {
             .stream()
             .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).containsAll(expectedIds);
+    assertThat(actualIds).containsAllIn(expectedIds);
 
     DbUser mockUser = mock(DbUser.class);
     doReturn(mockUser).when(mockUserProvider).get();
@@ -334,7 +323,7 @@ public class WorkspaceServiceTest {
         recentWorkspaces.stream()
             .map(DbUserRecentWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).contains(1L, 2L);
+    assertThat(actualIds).containsAllOf(1L, 2L);
   }
 
   @Test

@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +22,7 @@ import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterStatus;
+import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -96,10 +98,26 @@ public class OfflineClusterControllerTest {
         .dateAccessed(NOW.minus(idleTime).toString());
   }
 
+  private List<ListClusterResponse> toListClusterResponseList(List<Cluster> clusters) {
+    return clusters.stream()
+        .map(
+            c ->
+                // TODO: this is fragile.  will need a line for each field we want to test
+                new ListClusterResponse()
+                    .clusterName(c.getClusterName())
+                    .googleProject(c.getGoogleProject())
+                    .status(c.getStatus())
+                    .createdDate(c.getCreatedDate())
+                    .dateAccessed(c.getDateAccessed()))
+        .collect(Collectors.toList());
+  }
+
   private void stubClusters(List<Cluster> clusters) throws Exception {
-    when(clusterApi.listClusters(any(), any())).thenReturn(clusters);
-    for (Cluster c : clusters) {
-      when(clusterApi.getCluster(c.getGoogleProject(), c.getClusterName())).thenReturn(c);
+    when(clusterApi.listClusters(any(), any())).thenReturn(toListClusterResponseList(clusters));
+
+    for (Cluster cluster : clusters) {
+      when(clusterApi.getCluster(cluster.getGoogleProject(), cluster.getClusterName()))
+          .thenReturn(cluster);
     }
   }
 

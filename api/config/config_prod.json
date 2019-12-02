@@ -3,7 +3,7 @@
     "baseUrl": "https:\/\/api.firecloud.org",
     "clusterMaxAgeDays": 14,
     "clusterIdleMaxAgeDays": 7,
-    "clusterDefaultMachineType": "n1-standard-4",
+    "clusterDefaultMachineType": "n1-highmem-4",
     "clusterDefaultDiskSizeGb": 50,
     "debugEndpoints": false,
     "leoBaseUrl": "https:\/\/notebooks.firecloud.org",
@@ -11,7 +11,7 @@
     "registeredDomainGroup": "all-of-us-registered-prod@firecloud.org",
     "xAppIdValue": "AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_prod",
-    "timeoutInSeconds": 40,
+    "timeoutInSeconds": 60,
     "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-gatk:0.0.3"
   },
   "billing": {
@@ -19,7 +19,7 @@
     "projectNamePrefix": "aou-rw-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.gcp_billing_export_v1_015EAA_E95687_1F8614",
     "retryCount": 4,
-    "bufferCapacity": 100,
+    "bufferCapacity": 200,
     "bufferRefillProjectsPerTask": 1,
     "defaultFreeCreditsLimit": 100.0,
     "garbageCollectionUserCapacity": 1000,

@@ -2,7 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BillingProjectBufferStatus;
+import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.Authority;
@@ -53,22 +53,22 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_AUTHORITY.get(authority);
   }
 
-  private static final BiMap<BillingProjectBufferStatus, Short>
+  private static final BiMap<BufferEntryStatus, Short>
       CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS =
-          ImmutableBiMap.<BillingProjectBufferStatus, Short>builder()
-              .put(BillingProjectBufferStatus.CREATING, (short) 0)
-              .put(BillingProjectBufferStatus.ERROR, (short) 1)
-              .put(BillingProjectBufferStatus.AVAILABLE, (short) 2)
-              .put(BillingProjectBufferStatus.ASSIGNING, (short) 3)
-              .put(BillingProjectBufferStatus.ASSIGNED, (short) 4)
-              .put(BillingProjectBufferStatus.GARBAGE_COLLECTED, (short) 5)
+          ImmutableBiMap.<BufferEntryStatus, Short>builder()
+              .put(BufferEntryStatus.CREATING, (short) 0)
+              .put(BufferEntryStatus.ERROR, (short) 1)
+              .put(BufferEntryStatus.AVAILABLE, (short) 2)
+              .put(BufferEntryStatus.ASSIGNING, (short) 3)
+              .put(BufferEntryStatus.ASSIGNED, (short) 4)
+              .put(BufferEntryStatus.GARBAGE_COLLECTED, (short) 5)
               .build();
 
-  public static BillingProjectBufferStatus billingProjectBufferStatusFromStorage(Short s) {
+  public static BufferEntryStatus billingProjectBufferEntryStatusFromStorage(Short s) {
     return CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS.inverse().get(s);
   }
 
-  public static Short billingProjectBufferStatusToStorage(BillingProjectBufferStatus s) {
+  public static Short billingProjectBufferEntryStatusToStorage(BufferEntryStatus s) {
     return CLIENT_TO_STORAGE_BILLING_PROJECT_BUFFER_STATUS.get(s);
   }
 

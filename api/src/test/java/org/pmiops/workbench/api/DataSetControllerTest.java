@@ -1,7 +1,16 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
@@ -34,7 +43,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.pmiops.workbench.audit.adapters.WorkspaceAuditAdapterService;
+import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -61,8 +70,8 @@ import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.CdrVersion;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -204,7 +213,7 @@ public class DataSetControllerTest {
 
   @Autowired WorkspaceService workspaceService;
 
-  @Autowired WorkspaceAuditAdapterService workspaceAuditAdapterService;
+  @Autowired WorkspaceAuditAdapter workspaceAuditAdapter;
 
   @TestConfiguration
   @Import({
@@ -233,7 +242,7 @@ public class DataSetControllerTest {
     NotebooksService.class,
     CohortQueryBuilder.class,
     UserRecentResourceService.class,
-    WorkspaceAuditAdapterService.class
+    WorkspaceAuditAdapter.class
   })
   static class Configuration {
     @Bean
@@ -304,7 +313,7 @@ public class DataSetControllerTest {
             notebooksService,
             userService,
             workbenchConfigProvider,
-            workspaceAuditAdapterService);
+            workspaceAuditAdapter);
     CohortsController cohortsController =
         new CohortsController(
             workspaceService,
@@ -352,7 +361,7 @@ public class DataSetControllerTest {
     currentUser = user;
     when(userProvider.get()).thenReturn(user);
 
-    CdrVersion cdrVersion = new CdrVersion();
+    DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
@@ -644,6 +653,9 @@ public class DataSetControllerTest {
     assertThat(response.getCode())
         .isEqualTo(
             "import pandas\n\n"
+                + "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n"
+                + "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n"
+                + "max_number_of_rows = '1000000'\n\n"
                 + "# This query represents dataset \"blah\" for domain \"condition\"\n"
                 + prefix
                 + "sql = \"\"\"SELECT PERSON_ID FROM `"
@@ -653,7 +665,9 @@ public class DataSetControllerTest {
                 + "condition_source_concept_id IN (123)) \n"
                 + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
-                + ".person` person))\"\"\"\n"
+                + ".person` person)) "
+                + "\n"
+                + "LIMIT \"\"\" + max_number_of_rows\n"
                 + "\n"
                 + prefix
                 + "query_config = {\n"
@@ -703,16 +717,20 @@ public class DataSetControllerTest {
             "if(! \"reticulate\" %in% installed.packages()) { install.packages(\"reticulate\") }\n"
                 + "library(reticulate)\n"
                 + "pd <- reticulate::import(\"pandas\")\n\n"
+                + "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n"
+                + "# If you increase the limit and run into responsiveness issues, please request a VM size upgrade.\n"
+                + "max_number_of_rows = '1000000'\n\n"
                 + "# This query represents dataset \"blah\" for domain \"condition\"\n"
                 + prefix
-                + "sql <- \"SELECT PERSON_ID FROM `"
+                + "sql <- paste(\"SELECT PERSON_ID FROM `"
                 + TEST_CDR_TABLE
                 + ".condition_occurrence` c_occurrence WHERE \n"
                 + "(condition_concept_id IN (123) OR \n"
                 + "condition_source_concept_id IN (123)) \n"
                 + "AND (c_occurrence.PERSON_ID IN (SELECT * FROM person_id from `"
                 + TEST_CDR_TABLE
-                + ".person` person))\"\n"
+                + ".person` person)) \n"
+                + "LIMIT \", max_number_of_rows)\n"
                 + "\n"
                 + prefix
                 + "query_config <- list(\n"
@@ -851,7 +869,7 @@ public class DataSetControllerTest {
             "person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person");
     // For demographic unlike other domains WHERE should be followed by person.person_id rather than
     // concept_id
-    assertThat(response.getCode().contains("WHERE person.PERSON_ID"));
+    assertThat(response.getCode()).contains("WHERE person.PERSON_ID");
   }
 
   @Rule public ExpectedException expectedException = ExpectedException.none();

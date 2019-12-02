@@ -24,7 +24,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -43,7 +43,7 @@ public class BigQueryService {
 
   @VisibleForTesting
   protected BigQuery getBigQueryService() {
-    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     if (cdrVersion == null) {
       return defaultBigQuery;
     }
@@ -93,7 +93,7 @@ public class BigQueryService {
   }
 
   public QueryJobConfiguration filterBigQueryConfig(QueryJobConfiguration queryJobConfiguration) {
-    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     if (cdrVersion == null) {
       throw new ServerErrorException("No CDR version specified");
     }
@@ -147,7 +147,7 @@ public class BigQueryService {
   }
 
   public FieldList getTableFieldsFromDomain(Domain d) {
-    CdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
+    DbCdrVersion cdrVersion = CdrVersionContext.getCdrVersion();
     String tableName;
     if (Domain.CONDITION.equals(d)) {
       tableName = "ds_condition_occurrence";

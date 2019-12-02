@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.cdr.model.CBCriteriaAttribute;
+import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -25,13 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class CBCriteriaAttributeDaoTest {
 
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
-  private CBCriteriaAttribute attribute;
+  private DbCriteriaAttribute attribute;
 
   @Before
   public void onSetup() {
     attribute =
         cbCriteriaAttributeDao.save(
-            new CBCriteriaAttribute()
+            new DbCriteriaAttribute()
                 .conceptId(1L)
                 .conceptName("test")
                 .estCount("10")
@@ -41,7 +41,7 @@ public class CBCriteriaAttributeDaoTest {
 
   @Test
   public void findCriteriaAttributeByConceptId() throws Exception {
-    List<CBCriteriaAttribute> attributes =
+    List<DbCriteriaAttribute> attributes =
         cbCriteriaAttributeDao.findCriteriaAttributeByConceptId(1L);
     assertEquals(1, attributes.size());
     assertEquals(attribute, attributes.get(0));

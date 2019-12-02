@@ -16,13 +16,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import javax.inject.Provider;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
@@ -38,7 +36,7 @@ import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
@@ -52,6 +50,7 @@ import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
 import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
+import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.DomainType;
@@ -122,7 +121,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   private static final Long PARTICIPANT_ID = 102246L;
   private static final Long PARTICIPANT_ID2 = 102247L;
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
-  private CdrVersion cdrVersion;
+  private DbCdrVersion cdrVersion;
   private DbWorkspace workspace;
 
   @Autowired private CohortReviewController controller;
@@ -133,8 +132,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private CohortReviewDao cohortReviewDao;
 
-  @Autowired private DataSetService dataSetService;
-
   @Autowired private WorkspaceDao workspaceDao;
 
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -144,8 +141,6 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Autowired private FireCloudService mockFireCloudService;
 
   @Autowired private UserDao userDao;
-
-  @Mock private Provider<DbUser> userProvider;
 
   private DbCohort cohort;
   private DbCohortReview review;
@@ -164,15 +159,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() throws Exception {
-    DbUser user = new DbUser();
-    user.setEmail("bob@gmail.com");
-    user.setUserId(123L);
-    user.setDisabled(false);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
-    user = userDao.save(user);
-    currentUser = user;
-    when(userProvider.get()).thenReturn(user);
-    controller.setUserProvider(userProvider);
+    DbUser dbUser = new DbUser();
+    dbUser.setEmail("bob@gmail.com");
+    dbUser.setUserId(123L);
+    dbUser.setDisabled(false);
+    dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+    dbUser = userDao.save(dbUser);
+    currentUser = dbUser;
 
     when(mockFireCloudService.getWorkspaceAcl(anyString(), anyString()))
         .thenReturn(
@@ -181,16 +174,16 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                     ImmutableMap.of(
                         currentUser.getEmail(), new WorkspaceAccessEntry().accessLevel("OWNER"))));
 
-    cdrVersion = new CdrVersion();
+    cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
-    cdrVersionDao.save(cdrVersion);
+    cdrVersion = cdrVersionDao.save(cdrVersion);
 
     workspace = new DbWorkspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setWorkspaceNamespace(NAMESPACE);
     workspace.setFirecloudName(NAME);
-    workspaceDao.save(workspace);
+    workspace = workspaceDao.save(workspace);
     stubMockFirecloudGetWorkspace();
     stubMockFirecloudGetWorkspaceAcl();
 
@@ -198,7 +191,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     cohort = new DbCohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohort.setCriteria(gson.toJson(SearchRequests.males()));
-    cohortDao.save(cohort);
+    cohort = cohortDao.save(cohort);
 
     review =
         new DbCohortReview()
@@ -207,23 +200,19 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .creationTime(new Timestamp(new Date().getTime()))
             .lastModifiedTime(new Timestamp(new Date().getTime()))
             .cohortId(cohort.getCohortId());
-    cohortReviewDao.save(review);
+    review = cohortReviewDao.save(review);
 
     DbParticipantCohortStatusKey key =
         new DbParticipantCohortStatusKey()
             .participantId(PARTICIPANT_ID)
             .cohortReviewId(review.getCohortReviewId());
-    DbParticipantCohortStatus participantCohortStatus =
-        new DbParticipantCohortStatus().participantKey(key);
-    participantCohortStatusDao.save(participantCohortStatus);
+    participantCohortStatusDao.save(new DbParticipantCohortStatus().participantKey(key));
 
     DbParticipantCohortStatusKey key2 =
         new DbParticipantCohortStatusKey()
             .participantId(PARTICIPANT_ID2)
             .cohortReviewId(review.getCohortReviewId());
-    DbParticipantCohortStatus participantCohortStatus2 =
-        new DbParticipantCohortStatus().participantKey(key2);
-    participantCohortStatusDao.save(participantCohortStatus2);
+    participantCohortStatusDao.save(new DbParticipantCohortStatus().participantKey(key2));
   }
 
   @After
@@ -334,8 +323,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void getCohortReviewsInWorkspace() throws Exception {
-    org.pmiops.workbench.model.CohortReview expectedReview =
-        new org.pmiops.workbench.model.CohortReview()
+    CohortReview expectedReview =
+        new CohortReview()
             .cohortReviewId(review.getCohortReviewId())
             .reviewSize(review.getReviewSize())
             .reviewStatus(review.getReviewStatusEnum())
@@ -363,9 +352,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             + "\"ICD10CM\",\"group\":true,\"attributes\":[],\"ancestorData\":false,\"standard\":false,\"conceptId\":1,\"value\":\"C34\"}],"
             + "\"modifiers\":[]}],\"temporal\":false}],\"excludes\":[]}";
     cohortWithoutReview.setCriteria(criteria);
-    cohortDao.save(cohortWithoutReview);
+    cohortWithoutReview = cohortDao.save(cohortWithoutReview);
 
-    org.pmiops.workbench.model.CohortReview cohortReview =
+    CohortReview cohortReview =
         controller
             .createCohortReview(
                 NAMESPACE,
@@ -674,7 +663,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     WorkspaceAccessEntry accessLevelEntry =
         new WorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.WRITER.toString());
     Map<String, WorkspaceAccessEntry> userEmailToAccessEntry =
-        ImmutableMap.of(userProvider.get().getEmail(), accessLevelEntry);
+        ImmutableMap.of(currentUser.getEmail(), accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(mockFireCloudService.getWorkspaceAcl(NAMESPACE, NAME))
         .thenReturn(workspaceAccessLevelResponse);

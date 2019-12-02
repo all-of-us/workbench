@@ -14,7 +14,7 @@ import org.pmiops.workbench.model.DemoChartInfo;
 
 public class AggregationUtils {
 
-  public static final String RANGE_19_44 = "19-44";
+  public static final String RANGE_18_44 = "18-44";
   public static final String RANGE_45_64 = "45-64";
   public static final String RANGE_GT_65 = "65";
   public static final String DATE = "d_";

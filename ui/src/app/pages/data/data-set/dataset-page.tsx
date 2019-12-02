@@ -5,7 +5,6 @@ import * as React from 'react';
 import {Button, Clickable, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
@@ -512,8 +511,15 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     handlePrePackagedConceptSets(domain, selected) {
-      const {valueSets, selectedDomainValuePairs} = this.state;
+      const {conceptSetList, valueSets, selectedDomainValuePairs, selectedConceptSetIds} = this.state;
       if (!selected) {
+        // Do not do update the value set list if there exist concept sets with the same Domain as
+        // that of the un-selected Pre Packaged Concept Set
+        const sameDomainConceptSetsIds = selectedConceptSetIds.filter(selectedId =>
+            conceptSetList.filter(conceptSet => conceptSet.id === selectedId && conceptSet.domain === domain));
+        if (sameDomainConceptSetsIds.length > 0) {
+          return;
+        }
         const updatedValueSets =
             valueSets.filter(valueSet => !(fp.contains(valueSet.domain, domain)));
         const updatedSelectedDomainValuePairs =
@@ -534,10 +540,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
       this.setState({valuesLoading: true});
       this.getValuesList(newDomains)
-        .then(newValueSets => this.setState({
-          valueSets: valueSets.concat(newValueSets),
-          valuesLoading: false
-        }));
+        .then(newValueSets => this.updateValueSets(newValueSets));
     }
 
     select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
@@ -551,8 +554,6 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         const origDomains = valueSets.map(valueSet => valueSet.domain);
         const newDomains = fp.without(origDomains, currentDomains) as unknown as Domain[];
         const removedDomains = fp.without(currentDomains, origDomains);
-        const updatedValueSets =
-          valueSets.filter(valueSet => !(fp.contains(valueSet.domain, removedDomains)));
         const updatedSelectedDomainValuePairs =
           selectedDomainValuePairs.filter(selectedDomainValuePair =>
             !fp.contains(selectedDomainValuePair.domain, removedDomains));
@@ -564,18 +565,15 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           const cSet = resource as ConceptSet;
           if (cSet.survey != null ) {
             this.getValuesList(newDomains, cSet.survey)
-                .then(newValueSets => this.setState({
-                  valueSets: updatedValueSets.concat(newValueSets),
-                  valuesLoading: false
-                }));
+                .then(newValueSets => this.updateValueSets(newValueSets));
           } else {
             this.getValuesList(newDomains)
-                .then(newValueSets => this.setState({
-                  valueSets: updatedValueSets.concat(newValueSets),
-                  valuesLoading: false
-                }));
+                .then(newValueSets => this.updateValueSets(newValueSets));
           }
-        } else {
+        } else if (removedDomains.length > 0 ) {
+          // if domains are being removed
+          const updatedValueSets =
+              valueSets.filter(valueSet => !(fp.contains(valueSet.domain, removedDomains)));
           this.setState({valueSets: updatedValueSets});
         }
       } else {
@@ -605,22 +603,47 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       this.setState({selectedDomainValuePairs: valuesSelected, dataSetTouched: true});
     }
 
-    get selectAll() {
-      return fp.isEmpty(this.state.selectedDomainValuePairs);
+    // Append newValueSets (values from API) to state's valueSets and to selectedDomainValuePairs.
+    // Set valuesLoading to false once the state is updated
+    updateValueSets(newValueSets: ValueSet[]) {
+      const {selectedDomainValuePairs, valueSets} = this.state;
+
+      newValueSets.map(newValueSet => {
+        newValueSet.values.items.map(value => {
+          selectedDomainValuePairs.push({domain: newValueSet.domain, value: value.value});
+        });
+      });
+      this.setState({
+        valueSets: valueSets.concat(newValueSets),
+        selectedDomainValuePairs: selectedDomainValuePairs,
+        valuesLoading: false
+      });
+    }
+
+    // Returns true if selected values set is empty or is not equal to the total values displayed
+    get allValuesSelected() {
+      return !fp.isEmpty(this.state.selectedDomainValuePairs) &&
+          this.state.selectedDomainValuePairs.length === this.valuesCount;
+    }
+
+    get valuesCount() {
+      let count = 0 ;
+      this.state.valueSets.map(value => count += value.values.items.length);
+      return count;
     }
 
     selectAllValues() {
-      if (!this.selectAll) {
+      if (this.allValuesSelected) {
         this.setState({selectedDomainValuePairs: []});
         return;
       } else {
-        const allValuesSelected = [];
+        const selectedValuesList = [];
         this.state.valueSets.map(valueSet => {
           valueSet.values.items.map(value => {
-            allValuesSelected.push({domain: valueSet.domain, value: value.value});
+            selectedValuesList.push({domain: valueSet.domain, value: value.value});
           });
         });
-        this.setState({selectedDomainValuePairs: allValuesSelected});
+        this.setState({selectedDomainValuePairs: selectedValuesList});
       }
     }
 
@@ -893,9 +916,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                 disabled={fp.isEmpty(valueSets)}
                                 data-test-id='select-all'
                                 onChange={() => this.selectAllValues()}
-                                checked={!this.selectAll} />
+                                checked={this.allValuesSelected} />
                       <div style={{marginLeft: '0.25rem', fontSize: '13px', lineHeight: '17px'}}>
-                        {this.selectAll ? 'Select All' : 'Deselect All'}
+                        {this.allValuesSelected ? 'Deselect All' : 'Select All'}
                       </div>
                     </div>
                   </BoxHeader>
@@ -1027,7 +1050,6 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                              this.setState({openSaveModal: false});
                                            }}
         />}
-        <HelpSidebar location='datasetBuilder' />
       </React.Fragment>;
     }
   });
@@ -1038,7 +1060,7 @@ export {
 };
 
 @Component({
-  template: '<div #root style="position: relative; margin-right: 45px;"></div>'
+  template: '<div #root></div>'
 })
 export class DataSetPageComponent extends ReactWrapperBase {
   constructor() {

@@ -13,8 +13,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
-import org.pmiops.workbench.cdr.model.CBCriteria;
+import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
@@ -126,8 +127,8 @@ public final class CriteriaLookupUtil {
       Set<String> parentConceptIds =
           byParent.keySet().stream().map(c -> c.toString()).collect(Collectors.toSet());
 
-      List<CBCriteria> parents = Lists.newArrayList();
-      List<CBCriteria> leaves = Lists.newArrayList();
+      List<DbCriteria> parents = Lists.newArrayList();
+      List<DbCriteria> leaves = Lists.newArrayList();
       // This dao call returns the parents in addition to the criteria ancestors for each leave in
       // order to allow the client to determine the relationship between the returned Criteria.
       cbCriteriaDao
@@ -153,8 +154,8 @@ public final class CriteriaLookupUtil {
       Set<String> parentConceptIds =
           byParent.keySet().stream().map(c -> c.toString()).collect(Collectors.toSet());
 
-      List<CBCriteria> parents = Lists.newArrayList();
-      List<CBCriteria> leaves = Lists.newArrayList();
+      List<DbCriteria> parents = Lists.newArrayList();
+      List<DbCriteria> leaves = Lists.newArrayList();
       if (treeType.type.equals(CriteriaType.ICD9CM)) {
         // This dao call returns all parents matching the parentConceptIds.
         List<Long> ids =
@@ -230,17 +231,19 @@ public final class CriteriaLookupUtil {
   }
 
   private void putLeavesOnParent(
-      Map<Long, Set<Long>> byParent, List<CBCriteria> parents, List<CBCriteria> leaves) {
-    for (CBCriteria c : leaves) {
+      Map<Long, Set<Long>> byParent, List<DbCriteria> parents, List<DbCriteria> leaves) {
+    for (DbCriteria c : leaves) {
       // Technically this could scale poorly with many criteria groups. We don't expect this
       // number to be very high as it requires a user action to add a group, but a better data
       // structure could be used here if this becomes too slow.
-      for (CBCriteria parent : parents) {
+      for (DbCriteria parent : parents) {
         String path = parent.getPath();
         if (c.getPath().startsWith(path)) {
-          long parentConceptId = Long.parseLong(parent.getConceptId());
-          byParent.putIfAbsent(parentConceptId, Sets.newHashSet());
-          byParent.get(parentConceptId).add(Long.parseLong(c.getConceptId()));
+          if (StringUtils.isNotBlank(c.getConceptId())) {
+            long parentConceptId = Long.parseLong(parent.getConceptId());
+            byParent.putIfAbsent(parentConceptId, Sets.newHashSet());
+            byParent.get(parentConceptId).add(Long.parseLong(c.getConceptId()));
+          }
         }
       }
     }

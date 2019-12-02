@@ -1,27 +1,76 @@
-import {AfterViewInit, Component, Input} from '@angular/core';
-import {LIST_DOMAIN_TYPES, LIST_PROGRAM_TYPES} from 'app/cohort-search/constant';
-import {wizardStore} from 'app/cohort-search/search-state.service';
+import {Component, Input, OnInit} from '@angular/core';
+import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
+import {criteriaMenuOptionsStore, wizardStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
+import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {triggerEvent} from 'app/utils/analytics';
-import {DomainType, SearchRequest} from 'generated/fetch';
+import {currentWorkspaceStore} from 'app/utils/navigation';
+import {CriteriaType, DomainType, SearchRequest} from 'generated/fetch';
 
 @Component({
   selector: 'app-search-group-select',
   templateUrl: './search-group-select.component.html',
   styleUrls: ['./search-group-select.component.css']
 })
-export class SearchGroupSelectComponent implements AfterViewInit {
+export class SearchGroupSelectComponent implements OnInit {
   @Input() role: keyof SearchRequest;
   @Input() index: number;
 
-  readonly domainTypes = LIST_DOMAIN_TYPES;
-  readonly programTypes = LIST_PROGRAM_TYPES;
   position = 'bottom-left';
   demoOpen = false;
   demoMenuHover = false;
   category: string;
+  criteriaMenuOptions = {programTypes: [], domainTypes: []};
 
-  ngAfterViewInit(): void {
+  ngOnInit(): void {
+    const {cdrVersionId} = currentWorkspaceStore.getValue();
+    criteriaMenuOptionsStore.subscribe(options => {
+      if (this.role === 'includes' && !options[cdrVersionId]) {
+        this.getMenuOptions();
+      } else if (!!options[cdrVersionId]) {
+        this.criteriaMenuOptions = options[cdrVersionId];
+        setTimeout(() => this.setDemoMenuHover());
+      }
+    });
+  }
+
+  getMenuOptions() {
+    const {cdrVersionId} = currentWorkspaceStore.getValue();
+    const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
+    cohortBuilderApi().findCriteriaMenuOptions(+cdrVersionId).then(res => {
+      criteriaMenuOptions[cdrVersionId] = res.items.reduce((acc, opt) => {
+        const {domain, types} = opt;
+        if (PROGRAM_TYPES.includes(DomainType[domain])) {
+          const option = {
+            name: domainToTitle(domain),
+            domain,
+            type: types[0].type,
+            standard: types[0].standardFlags[0].standard,
+            order: PROGRAM_TYPES.indexOf(DomainType[domain])};
+          if (domain === DomainType[DomainType.PERSON]) {
+            option['children'] = types
+              .filter(subopt => subopt.type !== CriteriaType[CriteriaType.DECEASED])
+              .map(subopt => ({name: typeToTitle(subopt.type), domain, type: subopt.type}));
+          }
+          acc.programTypes.push(option);
+        }
+        if (DOMAIN_TYPES.includes(DomainType[domain])) {
+          acc.domainTypes.push({
+            name: domainToTitle(domain),
+            domain,
+            type: types[0].type,
+            standard: types[0].standardFlags[0].standard,
+            order: DOMAIN_TYPES.indexOf(DomainType[domain])});
+        }
+        return acc;
+      }, {programTypes: [], domainTypes: []});
+      criteriaMenuOptions[cdrVersionId].programTypes.sort((a, b) => a.order - b.order);
+      criteriaMenuOptions[cdrVersionId].domainTypes.sort((a, b) => a.order - b.order);
+      criteriaMenuOptionsStore.next(criteriaMenuOptions);
+    });
+  }
+
+  setDemoMenuHover() {
     /* Open nested menu on hover */
     const demoItem = document.getElementById('DEMO-' + this.index);
     if (demoItem) {
@@ -33,7 +82,7 @@ export class SearchGroupSelectComponent implements AfterViewInit {
           demoMenu.addEventListener('mouseleave', () => this.demoMenuHover = false);
         });
       });
-      demoItem.addEventListener('mouseleave', () => this.demoOpen = false);
+      demoItem.addEventListener('mouseleave', () => setTimeout(() => this.demoOpen = false));
     }
   }
 
