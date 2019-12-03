@@ -7,7 +7,6 @@ import io.opencensus.stats.Stats;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.stats.View;
 import io.opencensus.stats.ViewManager;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.logging.Level;
@@ -26,13 +25,18 @@ public class StackdriverMonitoringService implements MonitoringService {
   }
 
   @Override
-  public void registerSignal(String signalName, String signalDescription, Measure measurementInformation, Aggregation aggregation) {
-    View view = View.create(
-        View.Name.create(signalName),
-        signalDescription,
-        measurementInformation,
-        aggregation,
-        Collections.emptyList());
+  public void registerSignal(
+      String signalName,
+      String signalDescription,
+      Measure measurementInformation,
+      Aggregation aggregation) {
+    View view =
+        View.create(
+            View.Name.create(signalName),
+            signalDescription,
+            measurementInformation,
+            aggregation,
+            Collections.emptyList());
     ViewManager viewManager = Stats.getViewManager();
     viewManager.registerView(view);
   }

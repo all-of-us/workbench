@@ -5,8 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
-
-import java.io.IOException;
+import io.opencensus.stats.Aggregation;
+import io.opencensus.stats.BucketBoundaries;
+import io.opencensus.stats.Measure;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -19,15 +20,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-
-import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
-import io.opencensus.stats.Aggregation;
-import io.opencensus.stats.BucketBoundaries;
-import io.opencensus.stats.Measure;
-import io.opencensus.stats.Stats;
-import io.opencensus.stats.StatsRecorder;
-import io.opencensus.stats.View;
-import io.opencensus.stats.ViewManager;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
@@ -53,12 +45,11 @@ public class BillingProjectBufferService {
   private static final int PROJECT_BILLING_ID_SIZE = 8;
   @VisibleForTesting static final Duration CREATING_TIMEOUT = Duration.ofMinutes(60);
   @VisibleForTesting static final Duration ASSIGNING_TIMEOUT = Duration.ofMinutes(10);
-  private static final Measure.MeasureLong BUFFER_ENTRY_MEASUREMENT = Measure.MeasureLong.create(
-      "buffer_entries",
-      "The number of billing projects in the buffer",
-      "projects");
-  private static final BucketBoundaries PROJECT_BOUNDARIES = BucketBoundaries.create(
-      Lists.newArrayList(0d, 10d, 20d, 50d, 200d));
+  private static final Measure.MeasureLong BUFFER_ENTRY_MEASUREMENT =
+      Measure.MeasureLong.create(
+          "buffer_entries", "The number of billing projects in the buffer", "projects");
+  private static final BucketBoundaries PROJECT_BOUNDARIES =
+      BucketBoundaries.create(Lists.newArrayList(0d, 10d, 20d, 50d, 200d));
   private static ImmutableMap<BufferEntryStatus, Duration> statusToGracePeriod =
       ImmutableMap.of(
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
@@ -81,10 +72,11 @@ public class BillingProjectBufferService {
     this.fireCloudService = fireCloudService;
     this.monitoringService = monitoringService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.monitoringService.registerSignal("billing_project_buffer_entries",
+    this.monitoringService.registerSignal(
+        "billing_project_buffer_entries",
         "The number of billing project buffer entries.",
-        BUFFER_ENTRY_MEASUREMENT, Aggregation.Distribution.create(PROJECT_BOUNDARIES));
-
+        BUFFER_ENTRY_MEASUREMENT,
+        Aggregation.Distribution.create(PROJECT_BOUNDARIES));
   }
 
   private Timestamp getCurrentTimestamp() {
