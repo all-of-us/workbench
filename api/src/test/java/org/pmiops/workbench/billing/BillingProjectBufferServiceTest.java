@@ -129,7 +129,11 @@ public class BillingProjectBufferServiceTest {
 
     billingProjectBufferService =
         new BillingProjectBufferService(
-            billingProjectBufferEntryDao, clock, fireCloudService, monitoringService, workbenchConfigProvider);
+            billingProjectBufferEntryDao,
+            clock,
+            fireCloudService,
+            monitoringService,
+            workbenchConfigProvider);
   }
 
   @Test

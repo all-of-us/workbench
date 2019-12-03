@@ -1,7 +1,5 @@
 package org.pmiops.workbench.monitoring;
 
-import org.springframework.stereotype.Service;
-
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure;
@@ -9,11 +7,11 @@ import io.opencensus.stats.Stats;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.stats.View;
 import io.opencensus.stats.ViewManager;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.springframework.stereotype.Service;
 
 @Service
 public class StackdriverMonitoringService implements MonitoringService {
@@ -28,9 +26,11 @@ public class StackdriverMonitoringService implements MonitoringService {
     }
   }
 
-  // signalName should be unique, if you change the aggregation type or the measure type, it will barf and fail. Fix by
+  // signalName should be unique, if you change the aggregation type or the measure type, it will
+  // barf and fail. Fix by
   // changing the name or using the stackdriver monitoring API here:
-  // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors/delete to delete and recreate.
+  // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors/delete to
+  // delete and recreate.
   @Override
   public void registerSignal(
       String signalName,
