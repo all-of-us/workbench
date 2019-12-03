@@ -26,6 +26,7 @@ import {environment} from 'environments/environment';
 import {
   Profile,
 } from 'generated/fetch';
+import {AnalyticsTracker} from "app/utils/analytics";
 
 export const styles = reactStyles({
   bottomBanner: {
@@ -436,7 +437,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
                       <FlexRow style={{paddingTop: '2rem'}}>
                         <div style={styles.contentWrapperLeft}>
                           <div style={styles.mainHeaderToDelete}>Researcher Workbench</div>
-                          <CardButton onClick={() => navigate(['workspaces/build'])}
+                          <CardButton onClick={() => {
+                                        AnalyticsTracker.Workspaces.OpenCreatePage();
+                                        navigate(['workspaces/build'])
+                                      }}
                                       style={{margin: '1.9rem 106px 0 3%'}}>
                             Create a <br/> New Workspace
                             <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>

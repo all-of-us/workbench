@@ -19,6 +19,7 @@ import {ArchivalStatus, CdrVersion, CdrVersionListResponse, DataAccessLevel, Spe
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
+import {AnalyticsTracker} from "app/utils/analytics";
 
 export const ResearchPurposeDescription =
   <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
@@ -627,11 +628,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       });
     }
 
-    isEmpty(parent, field) {
-      const fieldValue = parent[field];
-      return !fieldValue || fieldValue === '';
-    }
-
     isMode(mode) {
       return this.props.routeConfigData.mode === mode;
     }
@@ -910,7 +906,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 {errors.diseaseOfFocus && <div>You must specify a disease of focus</div>}
               </ul>
             } disabled={!errors}>
-              <Button type='primary' onClick={() => this.saveWorkspace()}
+              <Button type='primary'
+                      onClick={() => {
+                        AnalyticsTracker.Workspaces.Create();
+                        this.saveWorkspace()}}
                       disabled={errors || this.state.loading}
                       data-test-id='workspace-save-btn'>
                 {this.renderButtonText()}

@@ -29,6 +29,23 @@ export function triggerEvent(
   }
 }
 
+export const AnalyticsTracker = {
+  Workspaces: {
+    OpenCreatePage: () => triggerEvent('Workspaces', 'Open Create Page', getCurrentPageLabel()),
+    Create: () => triggerEvent('Workspaces', 'Create')
+  }
+};
+
+function getCurrentPageLabel() {
+  if (window.location.pathname === '/') {
+    return 'From Home Page';
+  } else if (window.location.pathname === '/workspaces') {
+    return 'From Workspace List Page';
+  } else {
+    return 'Unknown Label: ' + window.location.pathname;
+  }
+}
+
 enum UserAuthState {
   LOGGED_IN = 'Logged in',
   LOGGED_OUT = 'Logged out'
