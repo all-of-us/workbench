@@ -40,6 +40,7 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
+import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,7 +59,6 @@ public class BillingProjectBufferService {
       "projects");
   private static final BucketBoundaries PROJECT_BOUNDARIES = BucketBoundaries.create(
       Lists.newArrayList(0d, 10d, 20d, 50d, 200d));
-  private static final StatsRecorder STATS_RECORDER = Stats.getStatsRecorder();
   private static ImmutableMap<BufferEntryStatus, Duration> statusToGracePeriod =
       ImmutableMap.of(
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
@@ -66,6 +66,7 @@ public class BillingProjectBufferService {
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
+  private final MonitoringService monitoringService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
@@ -73,24 +74,16 @@ public class BillingProjectBufferService {
       BillingProjectBufferEntryDao billingProjectBufferEntryDao,
       Clock clock,
       FireCloudService fireCloudService,
+      MonitoringService monitoringService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.billingProjectBufferEntryDao = billingProjectBufferEntryDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
+    this.monitoringService = monitoringService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    View view = View.create(
-        View.Name.create("billing_project_buffer_entries"),
+    this.monitoringService.registerSignal("billing_project_buffer_entries",
         "The number of billing project buffer entries.",
-        BUFFER_ENTRY_MEASUREMENT,
-        Aggregation.Distribution.create(PROJECT_BOUNDARIES),
-        Collections.emptyList());
-    ViewManager viewManager = Stats.getViewManager();
-    viewManager.registerView(view);
-    try {
-      StackdriverStatsExporter.createAndRegister();
-    } catch (IOException e) {
-      log.log(Level.WARNING, "Failure to initialize stackdriver stats exporter");
-    }
+        BUFFER_ENTRY_MEASUREMENT, Aggregation.Distribution.create(PROJECT_BOUNDARIES));
 
   }
 
@@ -101,7 +94,7 @@ public class BillingProjectBufferService {
   /** Makes a configurable number of project creation attempts. */
   public void bufferBillingProjects() {
 
-    STATS_RECORDER.newMeasureMap().put(BUFFER_ENTRY_MEASUREMENT, getCurrentBufferSize()).record();
+    monitoringService.sendLongSignal(BUFFER_ENTRY_MEASUREMENT, getCurrentBufferSize());
     int creationAttempts = this.workbenchConfigProvider.get().billing.bufferRefillProjectsPerTask;
     for (int i = 0; i < creationAttempts; i++) {
       bufferBillingProject();

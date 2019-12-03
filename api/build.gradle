@@ -391,9 +391,9 @@ dependencies {
   compile "joda-time:joda-time:${JODA_VERSION}"
 
   compile "io.opencensus:opencensus-api:${OPENCENSUS_VERSION}"
+  compile "io.opencensus:opencensus-exporter-stats-stackdriver:${OPENCENSUS_VERSION}"
   compile "io.opencensus:opencensus-exporter-trace-stackdriver:${OPENCENSUS_VERSION}"
   compile "io.opencensus:opencensus-impl:${OPENCENSUS_VERSION}"
-  compile "io.opencensus:opencensus-exporter-stats-stackdriver:${OPENCENSUS_VERSION}"
 
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
