@@ -47,6 +47,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
+import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -102,6 +103,7 @@ public class BillingProjectBufferServiceTest {
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
   @Autowired private BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   @Autowired private FireCloudService fireCloudService;
+  @Autowired private MonitoringService monitoringService;
 
   @Autowired private BillingProjectBufferService billingProjectBufferService;
 
@@ -125,7 +127,7 @@ public class BillingProjectBufferServiceTest {
 
     billingProjectBufferService =
         new BillingProjectBufferService(
-            billingProjectBufferEntryDao, clock, fireCloudService, workbenchConfigProvider);
+            billingProjectBufferEntryDao, clock, fireCloudService, monitoringService, workbenchConfigProvider);
   }
 
   @Test

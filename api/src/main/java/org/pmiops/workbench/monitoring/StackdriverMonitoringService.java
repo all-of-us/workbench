@@ -1,5 +1,7 @@
 package org.pmiops.workbench.monitoring;
 
+import org.springframework.stereotype.Service;
+
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure;
@@ -7,11 +9,13 @@ import io.opencensus.stats.Stats;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.stats.View;
 import io.opencensus.stats.ViewManager;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Service
 public class StackdriverMonitoringService implements MonitoringService {
   private static final StatsRecorder STATS_RECORDER = Stats.getStatsRecorder();
   private static final Logger log = Logger.getLogger(StackdriverMonitoringService.class.getName());

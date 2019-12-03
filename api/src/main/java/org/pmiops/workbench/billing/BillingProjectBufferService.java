@@ -48,8 +48,6 @@ public class BillingProjectBufferService {
   private static final Measure.MeasureLong BUFFER_ENTRY_MEASUREMENT =
       Measure.MeasureLong.create(
           "buffer_entries", "The number of billing projects in the buffer", "projects");
-  private static final BucketBoundaries PROJECT_BOUNDARIES =
-      BucketBoundaries.create(Lists.newArrayList(0d, 10d, 20d, 50d, 200d));
   private static ImmutableMap<BufferEntryStatus, Duration> statusToGracePeriod =
       ImmutableMap.of(
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
@@ -76,7 +74,7 @@ public class BillingProjectBufferService {
         "billing_project_buffer_entries",
         "The number of billing project buffer entries.",
         BUFFER_ENTRY_MEASUREMENT,
-        Aggregation.Distribution.create(PROJECT_BOUNDARIES));
+        Aggregation.LastValue.create());
   }
 
   private Timestamp getCurrentTimestamp() {
