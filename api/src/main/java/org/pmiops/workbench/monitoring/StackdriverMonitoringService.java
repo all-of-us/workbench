@@ -28,6 +28,9 @@ public class StackdriverMonitoringService implements MonitoringService {
     }
   }
 
+  // signalName should be unique, if you change the aggregation type or the measure type, it will barf and fail. Fix by
+  // changing the name or using the stackdriver monitoring API here:
+  // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors/delete to delete and recreate.
   @Override
   public void registerSignal(
       String signalName,

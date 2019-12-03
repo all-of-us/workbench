@@ -81,7 +81,7 @@ public class BillingProjectBufferServiceTest {
 
   @TestConfiguration
   @Import({BillingProjectBufferService.class})
-  @MockBean({FireCloudService.class})
+  @MockBean({FireCloudService.class, MonitoringService.class})
   static class Configuration {
     @Bean
     public Clock clock() {
@@ -124,6 +124,8 @@ public class BillingProjectBufferServiceTest {
     doAnswer(invocation -> lock.release())
         .when(billingProjectBufferEntryDao)
         .releaseAssigningLock();
+
+    monitoringService = spy(monitoringService);
 
     billingProjectBufferService =
         new BillingProjectBufferService(
