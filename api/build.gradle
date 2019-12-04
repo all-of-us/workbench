@@ -441,12 +441,12 @@ dependencies {
   generatedCompile "com.google.code.gson:gson:${GSON_VERSION}"
   generatedCompile "joda-time:joda-time:${JODA_VERSION}"
   generatedCompile "com.fasterxml.jackson.datatype:jackson-datatype-joda:${JACKSON_VERSION}"
-  // OpenCensus API is an AoU-specific addition to the default Swagger ApiClient dependencies.
-  // See the template file ApiClient.mustache for more details.
+  // OpenCensus is an AoU-specific addition to the default Swagger API dependencies. See the
+  // template file api.mustache for more details.
   generatedCompile "io.opencensus:opencensus-api:${OPENCENSUS_VERSION}"
   generatedCompile "io.opencensus:opencensus-exporter-trace-stackdriver:${OPENCENSUS_VERSION}"
   generatedCompile "io.opencensus:opencensus-impl:${OPENCENSUS_VERSION}"
-  
+
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${KOTLIN_VERSION}"
 }
 
