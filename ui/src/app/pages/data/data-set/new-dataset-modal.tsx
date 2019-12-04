@@ -20,6 +20,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {
   DataSet,
@@ -29,7 +30,6 @@ import {
   KernelTypeEnum,
   PrePackagedConceptSetEnum
 } from 'generated/fetch';
-import {AnalyticsTracker} from "app/utils/analytics";
 
 interface Props {
   closeFunction: Function;

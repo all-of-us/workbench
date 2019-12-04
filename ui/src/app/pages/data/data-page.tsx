@@ -12,6 +12,7 @@ import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
 import {cohortReviewApi, cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {
   convertToResources,
@@ -19,7 +20,6 @@ import {
 } from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Domain, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
-import {AnalyticsTracker} from "app/utils/analytics";
 
 const styles = {
   cardButtonArea: {

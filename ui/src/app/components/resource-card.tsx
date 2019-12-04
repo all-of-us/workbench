@@ -19,7 +19,7 @@ import {CopyRequest, DataSet, RecentResource} from 'generated/fetch';
 import {Modal, ModalBody, ModalTitle} from 'app/components/modals';
 import {RenameModal} from 'app/components/rename-modal';
 import {cohortReviewApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
-import {AnalyticsTracker} from "app/utils/analytics";
+import {AnalyticsTracker} from 'app/utils/analytics';
 
 const styles = reactStyles({
   card: {
@@ -416,7 +416,7 @@ export class ResourceCard extends React.Component<Props, State> {
                  href={this.getResourceUrl()}
                  onClick={e => {
                    if (this.resourceType === ResourceType.DATA_SET) {
-                     AnalyticsTracker.DatasetBuilder.OpenEditPage("From Clicking Card");
+                     AnalyticsTracker.DatasetBuilder.OpenEditPage('From Clicking Card');
                    }
                    navigateAndPreventDefaultIfNoKeysPressed(e, this.getResourceUrl());
                  }}>{this.displayName}

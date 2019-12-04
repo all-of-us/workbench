@@ -29,6 +29,7 @@ import {
   withUrlParams,
   withUserProfile
 } from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -53,7 +54,6 @@ import {
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
-import {AnalyticsTracker} from "app/utils/analytics";
 
 export const styles = {
   dataDictionaryHeader: {

@@ -4,8 +4,8 @@ import {Clickable, MenuItem} from 'app/components/buttons';
 import {SnowmanIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import {switchCase} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {ResourceType} from 'app/utils/resourceActions';
-import {AnalyticsTracker} from "app/utils/analytics";
 
 export interface ResourceCardMenuProps {
   resourceType: ResourceType;
@@ -76,7 +76,7 @@ export class ResourceCardMenu extends React.Component<ResourceCardMenuProps> {
               </MenuItem>
               <MenuItem icon='pencil'
                         onClick={() => {
-                          AnalyticsTracker.DatasetBuilder.OpenEditPage("From Card Snowman");
+                          AnalyticsTracker.DatasetBuilder.OpenEditPage('From Card Snowman');
                           this.props.onEdit();
                         }}
                         disabled={!this.props.canEdit}

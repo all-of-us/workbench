@@ -13,8 +13,8 @@ import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 
 
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {DataSet, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
-import {AnalyticsTracker} from "app/utils/analytics";
 
 interface Props {
   closeFunction: Function;
