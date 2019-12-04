@@ -10,14 +10,13 @@ import io.opencensus.trace.SpanBuilder;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import io.opencensus.trace.samplers.Samplers;
+import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import io.swagger.annotations.ApiOperation;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.FirecloudApiClientTracer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +63,8 @@ public class TracingInterceptor extends HandlerInterceptorAdapter {
     // methodName is the method name defined in our Swagger YAML.
     // Example: Recv.syncBillingProjectStatus
     HandlerMethod method = (HandlerMethod) handler;
-    SpanBuilder requestSpanBuilder = tracer.spanBuilder(method.getMethod().getName()).setSpanKind(Span.Kind.SERVER);
+    SpanBuilder requestSpanBuilder =
+        tracer.spanBuilder(method.getMethod().getName()).setSpanKind(Span.Kind.SERVER);
     if (workbenchConfigProvider.get().server.traceAllRequests) {
       requestSpanBuilder.setSampler(Samplers.alwaysSample());
     }
@@ -72,16 +72,26 @@ public class TracingInterceptor extends HandlerInterceptorAdapter {
 
     // Log some additional key-value attributes, which will be visible in the details pane on
     // Stackdriver.
-    tracer.getCurrentSpan().putAttribute("aou-env", AttributeValue.stringAttributeValue(
-        workbenchConfigProvider.get().server.shortName));
-    tracer.getCurrentSpan().putAttribute("method", AttributeValue.stringAttributeValue(request.getMethod()));
-    tracer.getCurrentSpan().putAttribute("path", AttributeValue.stringAttributeValue(request.getRequestURI()));
+    tracer
+        .getCurrentSpan()
+        .putAttribute(
+            "aou-env",
+            AttributeValue.stringAttributeValue(workbenchConfigProvider.get().server.shortName));
+    tracer
+        .getCurrentSpan()
+        .putAttribute("method", AttributeValue.stringAttributeValue(request.getMethod()));
+    tracer
+        .getCurrentSpan()
+        .putAttribute("path", AttributeValue.stringAttributeValue(request.getRequestURI()));
     ApiOperation apiOp = AnnotationUtils.findAnnotation(method.getMethod(), ApiOperation.class);
     if (apiOp != null) {
-      tracer.getCurrentSpan().putAttribute("description", AttributeValue.stringAttributeValue(
-          apiOp.notes()
-      ));
-      tracer.getCurrentSpan().putAttribute("responseType", AttributeValue.stringAttributeValue(apiOp.response().toString()));
+      tracer
+          .getCurrentSpan()
+          .putAttribute("description", AttributeValue.stringAttributeValue(apiOp.notes()));
+      tracer
+          .getCurrentSpan()
+          .putAttribute(
+              "responseType", AttributeValue.stringAttributeValue(apiOp.response().toString()));
     }
 
     // Store the span as a payload within our request so we can close the span on completion.
