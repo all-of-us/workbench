@@ -71,26 +71,28 @@ public class TracingInterceptor extends HandlerInterceptorAdapter {
     if (workbenchConfigProvider.get().server.traceAllRequests) {
       requestSpanBuilder.setSampler(Samplers.alwaysSample());
     }
-    Scope requestScopedSpan = requestSpanBuilder.startScopedSpan();
-
-    // Log some additional key-value attributes, which will be visible in the details pane on
-    // Stackdriver.
-    final Span currentSpan = tracer.getCurrentSpan();
-    currentSpan.putAttribute(
-        "aou-env",
-        AttributeValue.stringAttributeValue(workbenchConfigProvider.get().server.shortName));
-    currentSpan.putAttribute("method", AttributeValue.stringAttributeValue(request.getMethod()));
-    currentSpan.putAttribute("path", AttributeValue.stringAttributeValue(request.getRequestURI()));
-    ApiOperation apiOp =
-        AnnotationUtils.findAnnotation(handlerMethod.getMethod(), ApiOperation.class);
-    if (apiOp != null) {
-      currentSpan.putAttribute("description", AttributeValue.stringAttributeValue(apiOp.notes()));
+    try (Scope requestScopedSpan = requestSpanBuilder.startScopedSpan()) {
+      // Log some additional key-value attributes, which will be visible in the details pane on
+      // Stackdriver.
+      final Span currentSpan = tracer.getCurrentSpan();
       currentSpan.putAttribute(
-          "responseType", AttributeValue.stringAttributeValue(apiOp.response().toString()));
+          "aou-env",
+          AttributeValue.stringAttributeValue(workbenchConfigProvider.get().server.shortName));
+      currentSpan.putAttribute("method", AttributeValue.stringAttributeValue(request.getMethod()));
+      currentSpan.putAttribute(
+          "path", AttributeValue.stringAttributeValue(request.getRequestURI()));
+      ApiOperation apiOp =
+          AnnotationUtils.findAnnotation(handlerMethod.getMethod(), ApiOperation.class);
+      if (apiOp != null) {
+        currentSpan.putAttribute("description", AttributeValue.stringAttributeValue(apiOp.notes()));
+        currentSpan.putAttribute(
+            "responseType", AttributeValue.stringAttributeValue(apiOp.response().toString()));
+      }
+
+      // Store the span as a payload within our request so we can close the span on completion.
+      request.setAttribute(RequestAttribute.TRACE.toString(), requestScopedSpan);
     }
 
-    // Store the span as a payload within our request so we can close the span on completion.
-    request.setAttribute(RequestAttribute.TRACE.toString(), requestScopedSpan);
     return true;
   }
 

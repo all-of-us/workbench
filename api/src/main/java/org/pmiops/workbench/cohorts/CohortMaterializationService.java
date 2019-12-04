@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService.ConceptIds;
@@ -34,7 +33,6 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ParticipantCohortStatusDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohortReview;
@@ -90,7 +88,7 @@ public class CohortMaterializationService {
                 valueMap.put("value", arrayValue.getValue());
                 values.add(valueMap.build());
               }
-              parameterValueMap.put("arrayValues", values.build().<Map<String, Object>>toArray());
+              parameterValueMap.put("arrayValues", values.build().toArray());
             }
             builder.put("parameterType", parameterTypeMap.build());
             builder.put("parameterValue", parameterValueMap.build());
@@ -109,7 +107,6 @@ public class CohortMaterializationService {
   private final ParticipantCohortStatusDao participantCohortStatusDao;
   private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private final CohortBuilderService cohortBuilderService;
-  private Provider<WorkbenchConfig> configProvider;
 
   @Autowired
   public CohortMaterializationService(
@@ -117,14 +114,12 @@ public class CohortMaterializationService {
       AnnotationQueryBuilder annotationQueryBuilder,
       ParticipantCohortStatusDao participantCohortStatusDao,
       CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
-      CohortBuilderService cohortBuilderService,
-      Provider<WorkbenchConfig> configProvider) {
+      CohortBuilderService cohortBuilderService) {
     this.fieldSetQueryBuilder = fieldSetQueryBuilder;
     this.annotationQueryBuilder = annotationQueryBuilder;
     this.participantCohortStatusDao = participantCohortStatusDao;
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.cohortBuilderService = cohortBuilderService;
-    this.configProvider = configProvider;
   }
 
   private Set<Long> getParticipantIdsWithStatus(
@@ -314,7 +309,7 @@ public class CohortMaterializationService {
         "queryParameters",
         jobConfiguration.getNamedParameters().entrySet().stream()
             .map(TO_QUERY_PARAMETER_MAP)
-            .<Map<String, Object>>toArray());
+            .toArray());
     configurationMap.put("query", queryConfigurationMap.build());
     cdrQuery.setConfiguration(configurationMap.build());
     return cdrQuery;

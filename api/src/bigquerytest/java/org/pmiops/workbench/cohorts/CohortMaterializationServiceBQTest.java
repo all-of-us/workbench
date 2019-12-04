@@ -16,10 +16,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryTestService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
@@ -33,7 +31,6 @@ import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -82,7 +79,6 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   private CohortMaterializationService cohortMaterializationService;
   private DbCohortReview cohortReview;
-  private static final String STANDARD_CONCEPT_CODE = "S";
 
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
@@ -107,8 +103,6 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
   @Autowired private AnnotationQueryBuilder annotationQueryBuilder;
 
   @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-
-  @Mock private Provider<WorkbenchConfig> configProvider;
 
   private DbParticipantCohortStatus makeStatus(
       long cohortReviewId, long participantId, CohortStatus status) {
@@ -168,8 +162,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
             annotationQueryBuilder,
             participantCohortStatusDao,
             cdrBigQuerySchemaConfigService,
-            cohortBuilderService,
-            configProvider);
+            cohortBuilderService);
   }
 
   @Override
