@@ -29,20 +29,23 @@ export function triggerEvent(
   }
 }
 
+enum ANALYTICS_CATEGORIES {
+  WORKSPACES = 'Workspaces'
+}
+
 export const AnalyticsTracker = {
   Workspaces: {
-    OpenCreatePage: () => triggerEvent('Workspaces', 'Open Create Page', getCurrentPageLabel()),
-    Create: () => triggerEvent('Workspaces', 'Create'),
-    OpenDuplicatePage: (suffix = '') => triggerEvent('Workspaces', 'Open Duplicate Page', getCurrentPageLabel(suffix)),
-    Duplicate: () => triggerEvent('Workspaces', 'Duplicate'),
-    OpenEditPage: (suffix = '') => triggerEvent('Workspaces', 'Open Edit Page', getCurrentPageLabel(suffix)),
-    Edit: () => triggerEvent('Workspaces', 'Edit'),
-    OpenShareModal: (suffix = '') => triggerEvent('Workspaces', 'Open Share Modal', getCurrentPageLabel(suffix)),
-    Share: () => triggerEvent('Workspaces', 'Share', getCurrentPageLabel()),
-    OpenDeleteModal: (suffix = '') => triggerEvent('Workspaces', 'Open Delete Modal', getCurrentPageLabel(suffix)),
-    Delete: () => triggerEvent('Workspaces', 'Delete', getCurrentPageLabel())
-  },
-
+    OpenCreatePage: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Create Page', getCurrentPageLabel()),
+    Create: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Create'),
+    OpenDuplicatePage: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Duplicate Page', getCurrentPageLabel(suffix)),
+    Duplicate: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Duplicate'),
+    OpenEditPage: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Edit Page', getCurrentPageLabel(suffix)),
+    Edit: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Edit'),
+    OpenShareModal: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Share Modal', getCurrentPageLabel(suffix)),
+    Share: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Share', getCurrentPageLabel()),
+    OpenDeleteModal: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Delete Modal', getCurrentPageLabel(suffix)),
+    Delete: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Delete', getCurrentPageLabel())
+  }
 };
 
 function getCurrentPageLabel(suffix = '') {

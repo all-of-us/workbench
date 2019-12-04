@@ -79,7 +79,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
       <React.Fragment>
         <MenuItem icon='copy'
                   onClick={() => {
-                    AnalyticsTracker.Workspaces.OpenDuplicatePage('Tile');
+                    AnalyticsTracker.Workspaces.OpenDuplicatePage('Card');
                     navigate([wsPathPrefix, 'duplicate']); }
                   }>
           Duplicate
@@ -88,7 +88,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
                         disabled={WorkspacePermissionsUtil.canWrite(accessLevel)}>
           <MenuItem icon='pencil'
                     onClick={() => {
-                      AnalyticsTracker.Workspaces.OpenEditPage('Tile');
+                      AnalyticsTracker.Workspaces.OpenEditPage('Card');
                       navigate([wsPathPrefix, 'edit']); }
                     }
                     disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}>
@@ -99,7 +99,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
                         disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
           <MenuItem icon='pencil'
                     onClick={() => {
-                      AnalyticsTracker.Workspaces.OpenShareModal('Tile');
+                      AnalyticsTracker.Workspaces.OpenShareModal('Card');
                       onShare();
                     }}
                     disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
@@ -110,7 +110,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
                         disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
           <MenuItem icon='trash'
                     onClick={() => {
-                      AnalyticsTracker.Workspaces.OpenDeleteModal('Tile');
+                      AnalyticsTracker.Workspaces.OpenDeleteModal('Card');
                       onDelete();
                     }}
                     disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
