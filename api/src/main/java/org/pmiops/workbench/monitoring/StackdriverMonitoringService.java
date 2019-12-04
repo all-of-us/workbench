@@ -1,7 +1,6 @@
 package org.pmiops.workbench.monitoring;
 
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
-import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure;
 import io.opencensus.stats.Stats;
 import io.opencensus.stats.StatsRecorder;
@@ -11,6 +10,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.pmiops.workbench.monitoring.signals.Signal;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,28 +34,32 @@ public class StackdriverMonitoringService implements MonitoringService {
   // delete and recreate.
   @Override
   public void registerSignal(
-      String signalName,
-      String signalDescription,
-      Measure measurementInformation,
-      Aggregation aggregation) {
+      Signal signal) {
     View view =
         View.create(
-            View.Name.create(signalName),
-            signalDescription,
-            measurementInformation,
-            aggregation,
+            View.Name.create(signal.getName()),
+            signal.getDescription(),
+            signal.getMeasure(),
+            signal.getAggregation(),
             Collections.emptyList());
     ViewManager viewManager = Stats.getViewManager();
     viewManager.registerView(view);
   }
 
   @Override
-  public void sendLongSignal(Measure.MeasureLong measurementInformation, Long longValue) {
-    STATS_RECORDER.newMeasureMap().put(measurementInformation, longValue).record();
+  public void sendSignal(Signal signal, Object value) {
+    if (signal.getMeasureClass().equals(Measure.MeasureLong.class)) {
+      sendLongSignal(signal.getMeasureLong(), (long) value);
+    } else if (signal.getMeasureClass().equals(Measure.MeasureDouble.class)) {
+      sendDoubleSignal(signal.getMeasureDouble(), (double) value);
+    }
   }
 
-  @Override
-  public void sendDoubleSignal(Measure.MeasureDouble measurementInformation, Double doubleValue) {
-    STATS_RECORDER.newMeasureMap().put(measurementInformation, doubleValue).record();
+  public void sendLongSignal(Measure.MeasureLong measurementInformation, Long value) {
+    STATS_RECORDER.newMeasureMap().put(measurementInformation, value).record();
+  }
+
+  public void sendDoubleSignal(Measure.MeasureDouble measurementInformation, Double value) {
+    STATS_RECORDER.newMeasureMap().put(measurementInformation, value).record();
   }
 }

@@ -31,6 +31,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.monitoring.MonitoringService;
+import org.pmiops.workbench.monitoring.signals.GaugeSignals;
 import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,9 +44,6 @@ public class BillingProjectBufferService {
   private static final int PROJECT_BILLING_ID_SIZE = 8;
   @VisibleForTesting static final Duration CREATING_TIMEOUT = Duration.ofMinutes(60);
   @VisibleForTesting static final Duration ASSIGNING_TIMEOUT = Duration.ofMinutes(10);
-  private static final Measure.MeasureLong BUFFER_ENTRY_MEASUREMENT =
-      Measure.MeasureLong.create(
-          "buffer_entries", "The number of billing projects in the buffer", "projects");
   private static ImmutableMap<BufferEntryStatus, Duration> statusToGracePeriod =
       ImmutableMap.of(
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
@@ -68,11 +66,7 @@ public class BillingProjectBufferService {
     this.fireCloudService = fireCloudService;
     this.monitoringService = monitoringService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.monitoringService.registerSignal(
-        "billing_project_buffer_entries",
-        "The number of billing project buffer entries.",
-        BUFFER_ENTRY_MEASUREMENT,
-        Aggregation.LastValue.create());
+    this.monitoringService.registerSignal(GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS);
   }
 
   private Timestamp getCurrentTimestamp() {
@@ -82,7 +76,7 @@ public class BillingProjectBufferService {
   /** Makes a configurable number of project creation attempts. */
   public void bufferBillingProjects() {
 
-    monitoringService.sendLongSignal(BUFFER_ENTRY_MEASUREMENT, getCurrentBufferSize());
+    monitoringService.sendSignal(GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS, getCurrentBufferSize());
     int creationAttempts = this.workbenchConfigProvider.get().billing.bufferRefillProjectsPerTask;
     for (int i = 0; i < creationAttempts; i++) {
       bufferBillingProject();
