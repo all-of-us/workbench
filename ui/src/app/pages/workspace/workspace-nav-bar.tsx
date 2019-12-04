@@ -9,9 +9,9 @@ import {withCurrentWorkspace, withUrlParams} from 'app/utils/index';
 import {NavStore} from 'app/utils/navigation';
 import {WorkspaceAccessLevel} from 'generated';
 
+import {AnalyticsTracker} from 'app/utils/analytics';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {AnalyticsTracker} from "app/utils/analytics";
 
 
 const styles = reactStyles({

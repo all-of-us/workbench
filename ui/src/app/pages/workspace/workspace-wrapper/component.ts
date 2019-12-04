@@ -14,8 +14,8 @@ import {
 } from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
-import {AnalyticsTracker} from "app/utils/analytics";
 
 @Component({
   styleUrls: ['../../../styles/buttons.css',

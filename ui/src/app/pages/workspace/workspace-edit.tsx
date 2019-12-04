@@ -13,13 +13,13 @@ import {TwoColPaddedTable} from 'app/components/tables';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCdrVersions, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
 import {ArchivalStatus, CdrVersion, CdrVersionListResponse, DataAccessLevel, SpecificPopulationEnum, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
-import {AnalyticsTracker} from "app/utils/analytics";
 
 export const ResearchPurposeDescription =
   <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
@@ -915,7 +915,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                         } else if (this.isMode(WorkspaceEditMode.Edit)) {
                           AnalyticsTracker.Workspaces.Edit();
                         }
-                        this.saveWorkspace()}}
+                        this.saveWorkspace();
+                      }}
                       disabled={errors || this.state.loading}
                       data-test-id='workspace-save-btn'>
                 {this.renderButtonText()}
