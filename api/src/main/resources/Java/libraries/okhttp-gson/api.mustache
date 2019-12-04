@@ -1,3 +1,13 @@
+{{!
+
+This is an AoU-specific extension of the default Swagger-codegen okhttp API implementation class.
+
+This file was originally copied from the swagger-codegen repo in December 2019; the swagger-codegen file
+was last modified on Nov 9: https://github.com/swagger-api/swagger-codegen/blob/master/modules/swagger-codegen/src/main/resources/Java/libraries/okhttp-gson/ApiClient.mustache
+
+AoU-specific additions have been surroundid with Mustache comments indicating as such.
+
+}}
 {{>licenseInfo}}
 
 package {{package}};
@@ -34,12 +44,14 @@ import java.lang.reflect.Type;
 {{#imports}}import {{import}};
 {{/imports}}
 
+{{! Begin AoU-specific additions }}
 import io.opencensus.common.Scope;
 import io.opencensus.trace.AttributeValue;
 import io.opencensus.trace.Span;
 import io.opencensus.trace.Tracer;
 import io.opencensus.trace.Tracing;
 import java.lang.reflect.Type;
+{{! End AoU-specific additions }}
 {{^fullJavaUtil}}
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -178,6 +190,7 @@ public class {{classname}} {
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
     public {{#returnType}}{{{returnType}}} {{/returnType}}{{^returnType}}void {{/returnType}}{{operationId}}({{#allParams}}{{{dataType}}} {{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) throws ApiException {
+        {{! Begin AoU-specific additions }}
         // Generate an OpenCensus tracing span for this API method call.
         Scope scope = tracer.spanBuilder("{{classname}}.{{operationId}}").setSpanKind(Span.Kind.CLIENT).startScopedSpan();
         Map<String, AttributeValue> attrs = new HashMap<>();
@@ -185,6 +198,7 @@ public class {{classname}} {
         attrs.put("path", AttributeValue.stringAttributeValue("{{path}}"));
         attrs.put("description", AttributeValue.stringAttributeValue("{{summary}}"));
         tracer.getCurrentSpan().putAttributes(attrs);
+        {{! End AoU-specific additions }}
 
         {{#returnType}}ApiResponse<{{{returnType}}}> {{localVariablePrefix}}resp = {{/returnType}}{{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}});{{#returnType}}
 
