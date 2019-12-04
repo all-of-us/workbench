@@ -3,13 +3,7 @@ package org.pmiops.workbench.billing;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -48,6 +42,7 @@ import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.BillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.monitoring.MonitoringService;
+import org.pmiops.workbench.monitoring.signals.GaugeSignals;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -134,6 +129,12 @@ public class BillingProjectBufferServiceTest {
             fireCloudService,
             monitoringService,
             workbenchConfigProvider);
+  }
+
+  @Test
+  public void sendsSignalWhenBufferingProjects() {
+    billingProjectBufferService.bufferBillingProjects();
+    verify(monitoringService).sendSignal(GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS, 0L);
   }
 
   @Test
