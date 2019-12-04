@@ -56,10 +56,22 @@ public class StackdriverMonitoringService implements MonitoringService {
   }
 
   public void sendLongSignal(Measure.MeasureLong measurementInformation, Long value) {
-    STATS_RECORDER.newMeasureMap().put(measurementInformation, value).record();
+    try {
+      STATS_RECORDER.newMeasureMap().put(measurementInformation, value).record();
+    } catch (RuntimeException e) {
+      logAndSwallow(e);
+    }
   }
 
   public void sendDoubleSignal(Measure.MeasureDouble measurementInformation, Double value) {
-    STATS_RECORDER.newMeasureMap().put(measurementInformation, value).record();
+    try {
+      STATS_RECORDER.newMeasureMap().put(measurementInformation, value).record();
+    } catch (RuntimeException e) {
+      logAndSwallow(e);
+    }
+  }
+
+  private void logAndSwallow(RuntimeException e) {
+    log.log(Level.SEVERE, String.format("Exception encountered during monitoring.", e));
   }
 }
