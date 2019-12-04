@@ -403,7 +403,7 @@ definitions:
         description: >
           Set to true if the column value should be compared to null.
         type: boolean
-        default: false
+        default: null
   CohortStatus:
     type: string
     description: possible values indicating whether participants are in or out of the cohort
