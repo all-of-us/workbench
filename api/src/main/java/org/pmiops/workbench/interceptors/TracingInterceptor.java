@@ -14,7 +14,6 @@ import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.firecloud.FirecloudApiClientTracer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -23,7 +22,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 @Service
 public class TracingInterceptor extends HandlerInterceptorAdapter {
   private static final Tracer tracer = Tracing.getTracer();
-  private static final Logger log = Logger.getLogger(FirecloudApiClientTracer.class.getName());
+  private static final Logger log = Logger.getLogger(TracingInterceptor.class.getName());
   private static final String TRACE_ATTRIBUTE_KEY = "Tracing Span";
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;

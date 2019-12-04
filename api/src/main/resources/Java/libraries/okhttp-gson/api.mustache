@@ -192,17 +192,25 @@ public class {{classname}} {
     public {{#returnType}}{{{returnType}}} {{/returnType}}{{^returnType}}void {{/returnType}}{{operationId}}({{#allParams}}{{{dataType}}} {{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) throws ApiException {
         {{! Begin AoU-specific additions }}
         // Generate an OpenCensus tracing span for this API method call.
-        Scope scope = tracer.spanBuilder("{{classname}}.{{operationId}}").setSpanKind(Span.Kind.CLIENT).startScopedSpan();
+        Scope scope = tracer.spanBuilderWithExplicitParent("{{classname}}.{{operationId}}", tracer.getCurrentSpan())
+            .setSpanKind(Span.Kind.CLIENT).startScopedSpan();
         Map<String, AttributeValue> attrs = new HashMap<>();
         attrs.put("package", AttributeValue.stringAttributeValue("{{package}}"));
         attrs.put("path", AttributeValue.stringAttributeValue("{{path}}"));
         attrs.put("description", AttributeValue.stringAttributeValue("{{summary}}"));
         tracer.getCurrentSpan().putAttributes(attrs);
-        {{! End AoU-specific additions }}
+        System.out.println("foo");
 
-        {{#returnType}}ApiResponse<{{{returnType}}}> {{localVariablePrefix}}resp = {{/returnType}}{{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}});{{#returnType}}
-
-        return {{localVariablePrefix}}resp.getData();{{/returnType}}
+        try {
+          {{#returnType}}ApiResponse<{{{returnType}}}> {{localVariablePrefix}}resp = {{/returnType}}{{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}});{{#returnType}}
+          return {{localVariablePrefix}}resp.getData();{{/returnType}}
+        } catch (ApiException e) {
+          tracer.getCurrentSpan().putAttribute("error", AttributeValue.stringAttributeValue(e.getMessage()));
+          throw e;
+        } finally {
+          scope.close();
+        }
+    {{! End AoU-specific additions }}
     }
 
     /**
