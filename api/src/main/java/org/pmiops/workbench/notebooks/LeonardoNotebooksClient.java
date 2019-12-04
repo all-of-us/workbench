@@ -1,6 +1,5 @@
 package org.pmiops.workbench.notebooks;
 
-import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.notebooks.model.Cluster;
@@ -24,9 +23,6 @@ public interface LeonardoNotebooksClient {
 
   /** Deletes a notebook cluster */
   void deleteCluster(String googleProject, String clusterName) throws WorkbenchException;
-
-  /** Lists all existing clusters */
-  List<Cluster> listClusters(String labels, boolean includeDeleted) throws WorkbenchException;
 
   /** Gets information about a notebook cluster */
   Cluster getCluster(String googleProject, String clusterName) throws WorkbenchException;

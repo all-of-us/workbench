@@ -145,7 +145,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             cohortQueryBuilder,
             cbCriteriaDao,
             cbCriteriaAttributeDao,
-            cdrVersionDao,
             cdrVersionService,
             elasticSearchService,
             configProvider);
