@@ -65,7 +65,7 @@ public class DirectoryServiceImplIntegrationTest {
                 });
     // Ensure our two custom schema fields are correctly set & re-fetched from GSuite.
     assertThat(aouMeta).containsEntry("Institution", "All of Us Research Workbench");
-    assertThat(service.getContactEmailAddress(userName).equals("notasecret@gmail.com"));
+    assertThat(service.getContactEmailAddress(userName)).isEqualTo("notasecret@gmail.com");
     service.deleteUser(userName);
     assertThat(service.isUsernameTaken(userName)).isFalse();
   }

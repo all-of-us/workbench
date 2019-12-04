@@ -5,7 +5,6 @@ import static org.pmiops.workbench.tools.BackfillBillingProjectUsers.extractAclR
 import com.opencsv.bean.BeanField;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -41,6 +40,7 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -60,7 +60,7 @@ public class ExportWorkspaceData {
 
   private static Option exportFilenameOpt =
       Option.builder()
-          .longOpt("exportFilename")
+          .longOpt("export-filename")
           .desc("Filename of export")
           .required()
           .hasArg()
@@ -77,11 +77,11 @@ public class ExportWorkspaceData {
     return new WorkspaceServiceImpl(null, null, null, null, null, null, null, null, null);
   }
 
-  private static WorkspacesApi workspacesApi;
+  private WorkspacesApi workspacesApi;
 
   @Primary
   @Bean
-  @Scope("prototype")
+  @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
   @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
   WorkspacesApi workspaceApi(Provider<WorkbenchConfig> configProvider) {
     if (workspacesApi == null && configProvider.get() != null) {
@@ -97,6 +97,13 @@ public class ExportWorkspaceData {
     return workspacesApi;
   }
 
+  private WorkspaceDao workspaceDao;
+  private CohortDao cohortDao;
+  private ConceptSetDao conceptSetDao;
+  private DataSetDao dataSetDao;
+  private NotebooksService notebooksService;
+  private WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
+
   @Bean
   public CommandLineRunner run(
       WorkspaceDao workspaceDao,
@@ -106,97 +113,96 @@ public class ExportWorkspaceData {
       NotebooksService notebooksService,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       Provider<WorkspacesApi> workspacesApiProvider) {
+    this.workspaceDao = workspaceDao;
+    this.cohortDao = cohortDao;
+    this.conceptSetDao = conceptSetDao;
+    this.dataSetDao = dataSetDao;
+    this.notebooksService = notebooksService;
+    this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
+    workspacesApi = workspacesApiProvider.get();
+
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
 
-      WorkspacesApi workspacesApi = workspacesApiProvider.get();
-
-      FileWriter writer = new FileWriter(opts.getOptionValue(exportFilenameOpt.getLongOpt()));
-
       List<WorkspaceExportRow> rows = new ArrayList<>();
 
-      for (DbWorkspace workspace : workspaceDao.findAll()) {
-        WorkspaceExportRow row = new WorkspaceExportRow();
-        row.setCreatorContactEmail(workspace.getCreator().getContactEmail());
-        row.setCreatorUsername(workspace.getCreator().getEmail());
-        row.setCreatorFirstSignIn(dateFormat.format(workspace.getCreator().getFirstSignInTime()));
-        row.setCreatorRegistrationState(workspace.getCreator().getDataAccessLevelEnum().toString());
-
-        row.setProjectId(workspace.getWorkspaceNamespace());
-        row.setName(workspace.getName());
-        row.setCreatedDate(dateFormat.format(workspace.getCreationTime()));
-
-        try {
-          row.setCollaborators(
-              extractAclResponse(
-                      workspacesApi.getWorkspaceAcl(
-                          workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
-                  .keySet().stream()
-                  .collect(Collectors.joining(",\n")));
-        } catch (ApiException e) {
-          row.setCollaborators("Error: Not Found");
-        }
-
-        Collection<DbCohort> cohorts = cohortDao.findByWorkspaceId(workspace.getWorkspaceId());
-        row.setCohortNames(
-            cohorts.stream().map(cohort -> cohort.getName()).collect(Collectors.joining(",\n")));
-        row.setCohortCount(String.valueOf(cohorts.size()));
-
-        Collection<DbConceptSet> conceptSets =
-            conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
-        row.setConceptSetNames(
-            conceptSets.stream()
-                .map(conceptSet -> conceptSet.getName())
-                .collect(Collectors.joining(",\n")));
-        row.setConceptSetCount(String.valueOf(conceptSets.size()));
-
-        Collection<DbDataset> datasets = dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
-        row.setDatasetNames(
-            datasets.stream().map(dataSet -> dataSet.getName()).collect(Collectors.joining(",\n")));
-        row.setDatasetCount(String.valueOf(datasets.size()));
-
-        try {
-          Collection<FileDetail> notebooks =
-              notebooksService.getNotebooks(
-                  workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-          row.setNotebookNames(
-              notebooks.stream()
-                  .map(notebook -> notebook.getName())
-                  .collect(Collectors.joining(",\n")));
-          row.setNotebooksCount(String.valueOf(notebooks.size()));
-        } catch (NotFoundException e) {
-          row.setNotebookNames("Error: Not Found");
-          row.setNotebooksCount("N/A");
-        }
-
-        DbWorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(workspace);
-        row.setWorkspaceSpending(usage == null ? "0" : String.valueOf(usage.getCost()));
-
-        row.setReviewForStigmatizingResearch(toYesNo(workspace.getReviewRequested()));
-        row.setWorkspaceLastUpdatedDate(dateFormat.format(workspace.getLastModifiedTime()));
-        row.setActive(toYesNo(workspace.isActive()));
-
-        rows.add(row);
+      for (DbWorkspace workspace : this.workspaceDao.findAll()) {
+        rows.add(toWorkspaceExportRow(workspace));
 
         if (rows.size() % 10 == 0) {
-          log.info("Processed " + rows.size() + "/" + workspaceDao.count() + " rows");
-        }
-
-        if (rows.size() == 50) {
-          break;
+          log.info("Processed " + rows.size() + "/" + this.workspaceDao.count() + " rows");
         }
       }
 
       final CustomMappingStrategy mappingStrategy = new CustomMappingStrategy();
       mappingStrategy.setType(WorkspaceExportRow.class);
 
-      StatefulBeanToCsv beanWriter =
-          new StatefulBeanToCsvBuilder(writer).withMappingStrategy(mappingStrategy).build();
-
-      beanWriter.write(rows);
-
-      writer.close();
+      try (FileWriter writer =
+          new FileWriter(opts.getOptionValue(exportFilenameOpt.getLongOpt()))) {
+        new StatefulBeanToCsvBuilder(writer)
+            .withMappingStrategy(mappingStrategy)
+            .build()
+            .write(rows);
+      }
     };
+  }
+
+  private WorkspaceExportRow toWorkspaceExportRow(DbWorkspace workspace) {
+    WorkspaceExportRow row = new WorkspaceExportRow();
+    row.setCreatorContactEmail(workspace.getCreator().getContactEmail());
+    row.setCreatorUsername(workspace.getCreator().getEmail());
+    row.setCreatorFirstSignIn(dateFormat.format(workspace.getCreator().getFirstSignInTime()));
+    row.setCreatorRegistrationState(workspace.getCreator().getDataAccessLevelEnum().toString());
+
+    row.setProjectId(workspace.getWorkspaceNamespace());
+    row.setName(workspace.getName());
+    row.setCreatedDate(dateFormat.format(workspace.getCreationTime()));
+
+    try {
+      row.setCollaborators(
+          extractAclResponse(
+                  workspacesApi.getWorkspaceAcl(
+                      workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
+              .keySet().stream()
+              .collect(Collectors.joining(",\n")));
+    } catch (ApiException e) {
+      row.setCollaborators("Error: Not Found");
+    }
+
+    Collection<DbCohort> cohorts = cohortDao.findByWorkspaceId(workspace.getWorkspaceId());
+    row.setCohortNames(cohorts.stream().map(DbCohort::getName).collect(Collectors.joining(",\n")));
+    row.setCohortCount(String.valueOf(cohorts.size()));
+
+    Collection<DbConceptSet> conceptSets =
+        conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+    row.setConceptSetNames(
+        conceptSets.stream().map(DbConceptSet::getName).collect(Collectors.joining(",\n")));
+    row.setConceptSetCount(String.valueOf(conceptSets.size()));
+
+    Collection<DbDataset> datasets = dataSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+    row.setDatasetNames(
+        datasets.stream().map(DbDataset::getName).collect(Collectors.joining(",\n")));
+    row.setDatasetCount(String.valueOf(datasets.size()));
+
+    try {
+      Collection<FileDetail> notebooks =
+          notebooksService.getNotebooks(
+              workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
+      row.setNotebookNames(
+          notebooks.stream().map(FileDetail::getName).collect(Collectors.joining(",\n")));
+      row.setNotebooksCount(String.valueOf(notebooks.size()));
+    } catch (NotFoundException e) {
+      row.setNotebookNames("Error: Not Found");
+      row.setNotebooksCount("N/A");
+    }
+
+    DbWorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(workspace);
+    row.setWorkspaceSpending(usage == null ? "0" : String.valueOf(usage.getCost()));
+
+    row.setReviewForStigmatizingResearch(toYesNo(workspace.getReviewRequested()));
+    row.setWorkspaceLastUpdatedDate(dateFormat.format(workspace.getLastModifiedTime()));
+    row.setActive(toYesNo(workspace.isActive()));
+    return row;
   }
 
   public static void main(String[] args) {

@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cdr.model;
 
+import com.google.common.base.Strings;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -162,8 +163,8 @@ public class DbCriteria {
   }
 
   @Transient
-  public long getLongCount() {
-    return Long.valueOf(this.count);
+  public Long getLongCount() {
+    return Strings.isNullOrEmpty(this.count) ? null : Long.valueOf(this.count);
   }
 
   @Column(name = "concept_id")
@@ -178,6 +179,11 @@ public class DbCriteria {
   public DbCriteria conceptId(String conceptId) {
     this.conceptId = conceptId;
     return this;
+  }
+
+  @Transient
+  public Long getLongConceptId() {
+    return Strings.isNullOrEmpty(this.conceptId) ? null : Long.valueOf(this.conceptId);
   }
 
   @Column(name = "domain_id")

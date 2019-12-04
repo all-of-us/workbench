@@ -3,11 +3,10 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {from} from 'rxjs/observable/from';
 
-import {HelpSidebar} from 'app/components/help-sidebar';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DetailHeader} from 'app/pages/data/cohort-review/detail-header.component';
 import {DetailTabs} from 'app/pages/data/cohort-review/detail-tabs.component';
-import {cohortReviewStore, getVocabOptions, vocabOptions} from 'app/services/review-state.service';
+import {cohortReviewStore, getVocabOptions, participantStore, vocabOptions} from 'app/services/review-state.service';
 import {cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {currentCohortStore, urlParamsStore} from 'app/utils/navigation';
@@ -54,25 +53,19 @@ export const DetailPage = withCurrentWorkspace()(
         .filter(params => !!params.pid)
         .switchMap(({pid}) => {
           return from(cohortReviewApi()
-            .getParticipantCohortStatus(ns, wsid,
-              cohortReviewStore.getValue().cohortReviewId, +pid))
-            .do(ps => {
-              this.setState({participant: ps});
-            });
+            .getParticipantCohortStatus(ns, wsid, cohortReviewStore.getValue().cohortReviewId, +pid))
+            .do(ps => participantStore.next(ps));
         })
         .subscribe();
       if (!vocabOptions.getValue()) {
         const {cohortReviewId} = cohortReviewStore.getValue();
         getVocabOptions(namespace, id, cohortReviewId);
       }
+      participantStore.subscribe(participant => this.setState({participant}));
     }
 
     componentWillUnmount() {
       this.subscription.unsubscribe();
-    }
-
-    setParticipant(v) {
-      this.setState({participant: v});
     }
 
     render() {
@@ -87,8 +80,6 @@ export const DetailPage = withCurrentWorkspace()(
           ? <React.Fragment>
             <DetailHeader participant={participant} />
             <DetailTabs />
-            <HelpSidebar location='reviewParticipantDetail' participant={participant}
-              setParticipant={(p) => this.setParticipant(p)} />
           </React.Fragment>
           : <SpinnerOverlay />
         }

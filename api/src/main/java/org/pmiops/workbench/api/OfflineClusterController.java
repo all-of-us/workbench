@@ -16,6 +16,7 @@ import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterStatus;
+import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -71,7 +72,7 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
     Duration idleMaxAge = Duration.ofDays(config.firecloud.clusterIdleMaxAgeDays);
 
     ClusterApi clusterApi = clusterApiProvider.get();
-    List<Cluster> clusters;
+    List<ListClusterResponse> clusters;
     try {
       clusters = clusterApi.listClusters(null, false);
     } catch (ApiException e) {
@@ -82,12 +83,16 @@ public class OfflineClusterController implements OfflineClusterApiDelegate {
     int idles = 0;
     int activeDeletes = 0;
     int unusedDeletes = 0;
-    for (Cluster c : clusters) {
-      String clusterId = c.getGoogleProject() + "/" + c.getClusterName();
+    for (ListClusterResponse listClusterResponse : clusters) {
+      String clusterId =
+          listClusterResponse.getGoogleProject() + "/" + listClusterResponse.getClusterName();
+      Cluster c;
       try {
         // Refetch the cluster to ensure freshness as this iteration may take
         // some time.
-        c = clusterApi.getCluster(c.getGoogleProject(), c.getClusterName());
+        c =
+            clusterApi.getCluster(
+                listClusterResponse.getGoogleProject(), listClusterResponse.getClusterName());
       } catch (ApiException e) {
         log.log(Level.WARNING, String.format("failed to refetch cluster '%s'", clusterId), e);
         errors++;

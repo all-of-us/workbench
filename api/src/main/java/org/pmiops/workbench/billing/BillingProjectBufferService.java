@@ -105,6 +105,10 @@ public class BillingProjectBufferService {
     List<DbBillingProjectBufferEntry> creatingEntriesToSync =
         billingProjectBufferEntryDao.findTop5ByStatusOrderByLastSyncRequestTimeAsc(
             DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.CREATING));
+    if (creatingEntriesToSync.isEmpty()) {
+      return;
+    }
+
     int successfulSyncCount = 0;
     for (DbBillingProjectBufferEntry bufferEntry : creatingEntriesToSync) {
       //noinspection UnusedAssignment
@@ -113,7 +117,7 @@ public class BillingProjectBufferService {
     }
     log.info(
         String.format(
-            "Synchronized %d billing projects of %d attempted",
+            "Synchronized %d/%d billing projects.",
             successfulSyncCount, creatingEntriesToSync.size()));
   }
 
@@ -130,14 +134,13 @@ public class BillingProjectBufferService {
           bufferEntry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
           log.info(
               String.format(
-                  "SyncBillingProjectStatus: BillingProject %s available",
-                  bufferEntry.getFireCloudProjectName()));
+                  "SyncBillingProjectStatus: BillingProject %s available", bufferEntry.toString()));
           break;
         case ERROR:
           log.warning(
               String.format(
                   "SyncBillingProjectStatus: BillingProject %s creation failed",
-                  bufferEntry.getFireCloudProjectName()));
+                  bufferEntry.toString()));
           bufferEntry.setStatusEnum(BufferEntryStatus.ERROR, this::getCurrentTimestamp);
           break;
         case CREATING:
@@ -145,16 +148,15 @@ public class BillingProjectBufferService {
         default:
           log.info(
               String.format(
-                  "SyncBillingProjectStatus: BillingProject %s status=%s",
-                  bufferEntry.getFireCloudProjectName(), fireCloudStatus.toString()));
+                  "SyncBillingProjectStatus: BillingProject %s Firecloud status = %s",
+                  bufferEntry.toString(), fireCloudStatus.toString()));
           break;
       }
     } catch (NotFoundException e) {
       log.log(
           Level.WARNING,
-          "Get BillingProjectStatus call failed for "
-              + bufferEntry.toString()
-              + ". Project not found.",
+          String.format(
+              "Failed to get Firecloud status for %s. Project not found.", bufferEntry.toString()),
           e);
     } catch (WorkbenchException e) {
       log.log(
