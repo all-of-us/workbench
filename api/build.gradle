@@ -608,16 +608,6 @@ task elasticSearchIndexer(type: JavaExec) {
   }
 }
 
-// See project.rb command: backfill-billing-project-users
-task backfillBillingProjectUsers(type: JavaExec) {
-  classpath = sourceSets.tools.runtimeClasspath
-  main = "org.pmiops.workbench.tools.BackfillBillingProjectUsers"
-  systemProperties = commandLineSpringProperties
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
-}
-
 // See project.rb command: fetch-firecloud-user-profiles
 task fetchFireCloudUserProfile(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath
