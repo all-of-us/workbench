@@ -13,6 +13,7 @@ import {ResourceType} from 'app/utils/resourceActions';
 import {CopyRequest, RecentResource} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
+import {AnalyticsTracker} from "app/utils/analytics";
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: RecentResource;
@@ -70,6 +71,7 @@ export const NotebookResourceCard = fp.flow(
         icon: 'pencil',
         displayName: 'Rename',
         onClick: () => {
+          AnalyticsTracker.Notebooks.OpenRenameModal();
           this.setState({showRenameModal: true});
         },
         disabled: !this.writePermission,
@@ -77,21 +79,33 @@ export const NotebookResourceCard = fp.flow(
       {
         icon: 'copy',
         displayName: 'Duplicate',
-        onClick: () => this.duplicateNotebook(),
+        onClick: () => {
+          AnalyticsTracker.Notebooks.Duplicate();
+          this.duplicateNotebook();
+        },
         disabled: !this.writePermission,
       },
       {
         icon: 'copy',
         displayName: 'Copy to another Workspace',
-        onClick: () => this.setState({showCopyNotebookModal: true}),
+        onClick: () => {
+          AnalyticsTracker.Notebooks.OpenCopyModal();
+          this.setState({showCopyNotebookModal: true});
+        },
         disabled: false,
       },
       {
         icon: 'trash',
         displayName: 'Delete',
         onClick: () => {
-          this.props.showConfirmDeleteModal(this.displayName,
-            this.resourceType, () => this.deleteNotebook());
+          AnalyticsTracker.Notebooks.OpenDeleteModal();
+          this.props.showConfirmDeleteModal(
+            this.displayName,
+            this.resourceType,
+            () => {
+              AnalyticsTracker.Notebooks.Delete();
+              return this.deleteNotebook();
+            });
         },
         disabled: !this.deletePermission,
       }];
@@ -146,6 +160,8 @@ export const NotebookResourceCard = fp.flow(
   }
 
   copyNotebook(copyRequest: CopyRequest) {
+    AnalyticsTracker.Notebooks.Copy();
+
     return workspacesApi().copyNotebook(
       this.props.resource.workspaceNamespace,
       this.props.resource.workspaceFirecloudName,
@@ -169,7 +185,10 @@ export const NotebookResourceCard = fp.flow(
 
       {this.state.showRenameModal &&
       <RenameModal type={this.resourceType}
-                   onRename={(newName) => this.renameNotebook(newName)}
+                   onRename={(newName) => {
+                     AnalyticsTracker.Notebooks.Rename();
+                     this.renameNotebook(newName);
+                   }}
                    onCancel={() => this.setState({showRenameModal: false})}
                    hideDescription={true}
                    oldName={this.props.resource.notebook.name}
@@ -181,6 +200,7 @@ export const NotebookResourceCard = fp.flow(
         actions={this.actions}
         disabled={false} // Notebook Cards are always at least readable
         resourceUrl={this.resourceUrl}
+        onNavigate={() => AnalyticsTracker.Notebooks.Preview()}
         displayName={this.displayName}
         description={''}
         displayDate={formatRecentResourceDisplayDate(this.props.resource.modifiedTime)}

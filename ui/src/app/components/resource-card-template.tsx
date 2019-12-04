@@ -65,6 +65,7 @@ interface Props {
   actions: Action[];
   disabled: boolean;
   resourceUrl: string;
+  onNavigate: () => void;
   displayName: string;
   description: string;
   displayDate: string;
@@ -79,10 +80,12 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
     super(props);
   }
 
+  static defaultProps = {
+    onNavigate: () => {}
+  }
+
   render() {
     return <React.Fragment>
-
-
       <ResourceCardBase style={styles.card}
                         data-test-id='card'>
         <FlexColumn style={{alignItems: 'flex-start'}}>
@@ -115,8 +118,10 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
                  data-test-id='card-name'
                  href={this.props.resourceUrl}
                  onClick={e => {
+                   this.props.onNavigate();
                    navigateAndPreventDefaultIfNoKeysPressed(e, this.props.resourceUrl);
-                 }}> {this.props.displayName}
+                 }}>
+                {this.props.displayName}
               </a>
             </Clickable>
           </FlexRow>

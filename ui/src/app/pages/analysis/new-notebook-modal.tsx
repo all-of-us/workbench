@@ -14,6 +14,7 @@ import {Kernels} from 'app/utils/notebook-kernels';
 import {ResourceType} from 'app/utils/resourceActions';
 
 import {Workspace} from 'generated/fetch';
+import {AnalyticsTracker} from "app/utils/analytics";
 
 export class NewNotebookModal extends React.Component<
   {onClose: Function, workspace: Workspace, existingNameList: string[]},
@@ -79,8 +80,13 @@ export class NewNotebookModal extends React.Component<
           <Button
             style={{marginLeft: '0.5rem'}}
             disabled={!!errors}
-            onClick={() => this.save()}
-          >Create Notebook</Button>
+            onClick={() => {
+              AnalyticsTracker.Notebooks.Create(Kernels[this.state.kernel]);
+              this.save();
+            }}
+          >
+            Create Notebook
+          </Button>
         </TooltipTrigger>
       </ModalFooter>
     </Modal>;

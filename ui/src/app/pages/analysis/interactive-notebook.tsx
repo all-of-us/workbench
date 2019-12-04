@@ -18,6 +18,7 @@ import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ClusterStatus} from 'generated/fetch';
+import {AnalyticsTracker} from "app/utils/analytics";
 
 
 const styles = reactStyles({
@@ -265,14 +266,20 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
               </div>) : (
               <div style={{display: 'flex'}}>
                 <div style={this.buttonStyleObj}
-                     onClick={() => { this.startEditMode(); }}>
+                     onClick={() => {
+                       AnalyticsTracker.Notebooks.Edit();
+                       this.startEditMode();
+                     }}>
                   <EditComponentReact enableHoverEffect={false}
                                       disabled={!this.canWrite}
                                       style={styles.navBarIcon}/>
                   Edit {this.notebookInUse && '(In Use)'}
                 </div>
                 <div style={this.buttonStyleObj}
-                     onClick={() => { this.onPlaygroundModeClick(); }}>
+                     onClick={() => {
+                       AnalyticsTracker.Notebooks.Run();
+                       this.onPlaygroundModeClick();
+                     }}>
                   <PlaygroundModeIcon enableHoverEffect={false} disabled={!this.canWrite}
                                       style={styles.navBarIcon}/>
                   Run (Playground Mode)
