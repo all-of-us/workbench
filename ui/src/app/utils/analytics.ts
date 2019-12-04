@@ -30,7 +30,8 @@ export function triggerEvent(
 }
 
 enum ANALYTICS_CATEGORIES {
-  WORKSPACES = 'Workspaces'
+  WORKSPACES = 'Workspaces',
+  DATASET_BUILDER = 'Dataset Builder',
 }
 
 export const AnalyticsTracker = {
@@ -45,6 +46,20 @@ export const AnalyticsTracker = {
     Share: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Share', getCurrentPageLabel()),
     OpenDeleteModal: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Delete Modal', getCurrentPageLabel(suffix)),
     Delete: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Delete', getCurrentPageLabel())
+  },
+  DatasetBuilder: {
+    OpenCreatePage: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Create Page'),
+    Save: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Save', suffix),
+    OpenEditPage: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Edit Page', suffix),
+    Update: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Update', suffix),
+    SeeCodePreview: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'See Code Preview'),
+    OpenRenameModal: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Rename Modal'),
+    Rename: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Rename'),
+    OpenExportModal: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Export Modal'),
+    Export: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Export', suffix),
+    OpenDeleteModal: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Delete Modal'),
+    Delete: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Delete'),
+    ViewPreviewTable: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'View Preview Table')
   }
 };
 

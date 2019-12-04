@@ -18,11 +18,8 @@ import {CopyRequest, DataSet, RecentResource} from 'generated/fetch';
 
 import {Modal, ModalBody, ModalTitle} from 'app/components/modals';
 import {RenameModal} from 'app/components/rename-modal';
-import {
-  cohortReviewApi,
-  conceptSetsApi,
-  dataSetApi
-} from 'app/services/swagger-fetch-clients';
+import {cohortReviewApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {AnalyticsTracker} from "app/utils/analytics";
 
 const styles = reactStyles({
   card: {
@@ -267,6 +264,7 @@ export class ResourceCard extends React.Component<Props, State> {
         break;
       }
       case ResourceType.DATA_SET: {
+        AnalyticsTracker.DatasetBuilder.Delete();
         dataSetApi().deleteDataSet(
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
@@ -417,6 +415,9 @@ export class ResourceCard extends React.Component<Props, State> {
                    data-test-id='card-name'
                  href={this.getResourceUrl()}
                  onClick={e => {
+                   if (this.resourceType === ResourceType.DATA_SET) {
+                     AnalyticsTracker.DatasetBuilder.OpenEditPage("From Clicking Card");
+                   }
                    navigateAndPreventDefaultIfNoKeysPressed(e, this.getResourceUrl());
                  }}>{this.displayName}
               </a>
@@ -463,7 +464,10 @@ export class ResourceCard extends React.Component<Props, State> {
                           closeFunction={() => this.setState({exportingDataSet: false})}/>}
       {this.state.renaming && this.isDataSet &&
         <RenameModal
-          onRename={(newName, newDescription) => this.receiveDataSetRename(newName, newDescription)}
+          onRename={(newName, newDescription) => {
+            AnalyticsTracker.DatasetBuilder.Rename();
+            this.receiveDataSetRename(newName, newDescription);
+          }}
           type='Dataset'
           onCancel={() => this.cancelRename()}
           oldDescription ={this.props.resourceCard.dataSet.description}

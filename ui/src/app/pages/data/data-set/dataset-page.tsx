@@ -53,6 +53,7 @@ import {
 } from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
+import {AnalyticsTracker} from "app/utils/analytics";
 
 export const styles = {
   dataDictionaryHeader: {
@@ -974,12 +975,19 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                 </div>
               </div>
               </FlexColumn>
-              <Clickable data-test-id='preview-button' style={{
-                marginTop: '0.5rem',
-                cursor: this.disableSave() ? 'not-allowed' : 'pointer', height: '1.8rem',
-                width: '6.5rem', color: this.disableSave() ? colorWithWhiteness(colors.dark, 0.6) :
-                  colors.accent}} disabled={this.disableSave()}
-                onClick={() => this.getPreviewList()}>
+              <Clickable data-test-id='preview-button'
+                         style={{
+                           marginTop: '0.5rem',
+                           cursor: this.disableSave() ? 'not-allowed' : 'pointer',
+                           height: '1.8rem',
+                           width: '6.5rem',
+                           color: this.disableSave() ? colorWithWhiteness(colors.dark, 0.6) : colors.accent
+                         }}
+                         disabled={this.disableSave()}
+                         onClick={() => {
+                           AnalyticsTracker.DatasetBuilder.ViewPreviewTable();
+                           this.getPreviewList();
+                         }}>
                   View Preview Table
               </Clickable>
             </div>

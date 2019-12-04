@@ -19,6 +19,7 @@ import {
 } from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Domain, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
+import {AnalyticsTracker} from "app/utils/analytics";
 
 const styles = {
   cardButtonArea: {
@@ -227,6 +228,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
               disabled={!writePermission}
               onClick={() => {
+                AnalyticsTracker.DatasetBuilder.OpenCreatePage();
                 navigate(['workspaces', namespace, id, 'data', 'data-sets']);
               }}>
               <div style={styles.cardHeader}>

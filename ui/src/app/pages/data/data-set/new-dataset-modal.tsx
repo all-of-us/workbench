@@ -29,6 +29,7 @@ import {
   KernelTypeEnum,
   PrePackagedConceptSetEnum
 } from 'generated/fetch';
+import {AnalyticsTracker} from "app/utils/analytics";
 
 interface Props {
   closeFunction: Function;
@@ -271,7 +272,12 @@ class NewDataSetModal extends React.Component<Props, State> {
         {exportToNotebook && <React.Fragment>
           {notebooksLoading && <SpinnerOverlay />}
           <Button style={{marginTop: '1rem'}} data-test-id='code-preview-button'
-                  onClick={() => this.setState({seePreview: !seePreview})}>
+                  onClick={() => {
+                    if (!seePreview) {
+                      AnalyticsTracker.DatasetBuilder.SeeCodePreview();
+                    }
+                    this.setState({seePreview: !seePreview});
+                  }}>
             {seePreview ? 'Hide Preview' : 'See Code Preview'}
           </Button>
           {seePreview && <React.Fragment>
@@ -325,8 +331,17 @@ class NewDataSetModal extends React.Component<Props, State> {
           Cancel
         </Button>
         <TooltipTrigger content={summarizeErrors(errors)}>
-          <Button type='primary' data-test-id='save-data-set'
-                  disabled={errors} onClick={() => this.saveDataSet()}>
+          <Button type='primary'
+                  data-test-id='save-data-set'
+                  disabled={errors}
+                  onClick={() => {
+                    if (this.props.dataSet) {
+                      AnalyticsTracker.DatasetBuilder.Update(this.state.kernelType);
+                    } else {
+                      AnalyticsTracker.DatasetBuilder.Save(this.state.kernelType);
+                    }
+                    this.saveDataSet();
+                  }}>
             {!this.props.dataSet ? 'Save' : 'Update' }{exportToNotebook && ' and Analyze'}
           </Button>
         </TooltipTrigger>
