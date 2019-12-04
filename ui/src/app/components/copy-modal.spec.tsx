@@ -6,11 +6,11 @@ import {TextInput} from 'app/components/inputs';
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
-import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
-import {CopyModal, CopyModalProps, CopyModalState} from './copy-modal';
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
+import {CopyModal, CopyModalProps, CopyModalState} from './copy-modal';
 
 describe('CopyModal', () => {
   let props: CopyModalProps;
@@ -80,11 +80,11 @@ describe('CopyModal', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
-    let select = wrapper.find(Select);
+    const select = wrapper.find(Select);
     select.instance().setState({menuIsOpen: true});
     wrapper.update();
 
-    const options = wrapper.find(Select).find({role: 'option'}).map(e => e.text());
+    const options = wrapper.find(Select).find({type: 'option'}).map(e => e.text());
 
     expect(options).toEqual([workspaces[0].name, workspaces[2].name]);
   });
@@ -99,7 +99,7 @@ describe('CopyModal', () => {
     wrapper.update();
 
     // Select an option
-    wrapper.find(Select).find({role: 'option'})
+    wrapper.find(Select).find({type: 'option'})
       .findWhere(e => e.text() === workspaces[2].name)
       .first()
       .simulate('click');
