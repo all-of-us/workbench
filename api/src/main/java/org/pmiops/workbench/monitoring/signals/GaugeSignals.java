@@ -3,18 +3,21 @@ package org.pmiops.workbench.monitoring.signals;
 import com.google.appengine.repackaged.com.google.common.collect.ImmutableMap;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure;
-
 import java.util.Map;
 import java.util.function.Function;
 
 public enum GaugeSignals implements Signal {
-  BILLING_BUFFER_AVAILABLE_PROJECTS("billing_project_buffer_entries",
+  BILLING_BUFFER_AVAILABLE_PROJECTS(
+      "billing_project_buffer_entries",
       "The number of billing project buffer entries.",
-      "projects", Measure.MeasureLong.class);
+      "projects",
+      Measure.MeasureLong.class);
 
-  private static final Map<Class, Function<GaugeSignals, Measure>> MEASURE_CLASS_TO_MEASURE_FUNCTION = ImmutableMap.of(
-      Measure.MeasureLong.class, GaugeSignals::getMeasureLong,
-      Measure.MeasureDouble.class, GaugeSignals::getMeasureDouble);
+  private static final Map<Class, Function<GaugeSignals, Measure>>
+      MEASURE_CLASS_TO_MEASURE_FUNCTION =
+          ImmutableMap.of(
+              Measure.MeasureLong.class, GaugeSignals::getMeasureLong,
+              Measure.MeasureDouble.class, GaugeSignals::getMeasureDouble);
   private final String name;
   private final String description;
   private final String unit;
@@ -26,7 +29,8 @@ public enum GaugeSignals implements Signal {
   }
 
   // TODO: Support doubles
-  GaugeSignals(String name, String description, String unit, Class measureClass, Aggregation aggregation) {
+  GaugeSignals(
+      String name, String description, String unit, Class measureClass, Aggregation aggregation) {
     this.name = name;
     this.description = description;
     this.unit = unit;

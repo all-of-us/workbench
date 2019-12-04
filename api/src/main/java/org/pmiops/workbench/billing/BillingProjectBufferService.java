@@ -4,8 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
-import io.opencensus.stats.Aggregation;
-import io.opencensus.stats.Measure;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -76,7 +74,8 @@ public class BillingProjectBufferService {
   /** Makes a configurable number of project creation attempts. */
   public void bufferBillingProjects() {
 
-    monitoringService.sendSignal(GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS, getCurrentBufferSize());
+    monitoringService.sendSignal(
+        GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS, getCurrentBufferSize());
     int creationAttempts = this.workbenchConfigProvider.get().billing.bufferRefillProjectsPerTask;
     for (int i = 0; i < creationAttempts; i++) {
       bufferBillingProject();

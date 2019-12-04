@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.pmiops.workbench.monitoring.signals.Signal;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +32,7 @@ public class StackdriverMonitoringService implements MonitoringService {
   // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors/delete to
   // delete and recreate.
   @Override
-  public void registerSignal(
-      Signal signal) {
+  public void registerSignal(Signal signal) {
     View view =
         View.create(
             View.Name.create(signal.getName()),
