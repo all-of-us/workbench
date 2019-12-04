@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -446,6 +447,11 @@ public class DbWorkspace {
     this.reviewRequested = reviewRequested;
   }
 
+  /**
+   * This "bit" is used as a tri-state. TODO(jaycarlton) replace this column with an enum like {
+   * NOT_SET, APPROVED, REJECTED } and make all Boolean columns non-nullable with explicit defaults.
+   */
+  @Nullable
   @Column(name = "rp_approved")
   public Boolean getApproved() {
     return this.approved;

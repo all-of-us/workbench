@@ -2511,7 +2511,7 @@ definitions:
         type: string
       approved:
         type: boolean
-        default: false
+        default: null
       ancestry:
         type: boolean
         default: false
