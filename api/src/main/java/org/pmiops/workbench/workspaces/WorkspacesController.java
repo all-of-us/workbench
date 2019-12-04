@@ -51,6 +51,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -778,14 +779,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     Map<Long, DbWorkspace> dbWorkspacesById =
         dbWorkspaces.stream()
             .collect(Collectors.toMap(DbWorkspace::getWorkspaceId, Function.identity()));
-    Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsById =
-        dbWorkspaces.stream()
-            .collect(
-                Collectors.toMap(
-                    DbWorkspace::getWorkspaceId,
-                    dbWorkspace ->
-                        workspaceService.getWorkspaceAccessLevel(
-                            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())));
+    final Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsById;
+    try {
+      workspaceAccessLevelsById =
+          dbWorkspaces.stream()
+              .collect(
+                  Collectors.toMap(
+                      DbWorkspace::getWorkspaceId,
+                      dbWorkspace ->
+                          workspaceService.getWorkspaceAccessLevel(
+                              dbWorkspace.getWorkspaceNamespace(),
+                              dbWorkspace.getFirecloudName())));
+
+    } catch (IllegalArgumentException e) {
+      throw new ServerErrorException(e);
+    }
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     List<RecentWorkspace> recentWorkspaces =
@@ -801,8 +809,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.get(workspaceNamespace, workspaceId);
     DbUserRecentWorkspace userRecentWorkspace =
         workspaceService.updateRecentWorkspaces(dbWorkspace);
-    WorkspaceAccessLevel workspaceAccessLevel =
-        workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    final WorkspaceAccessLevel workspaceAccessLevel;
+
+    try {
+      workspaceAccessLevel =
+          workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    } catch (IllegalArgumentException e) {
+      throw new ServerErrorException(e);
+    }
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =

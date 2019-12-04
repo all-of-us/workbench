@@ -434,7 +434,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
-    WorkspaceAccessLevel access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    final WorkspaceAccessLevel access;
+    try {
+      access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    } catch (IllegalArgumentException e) {
+      throw new ServerErrorException(e);
+    }
     if (requiredAccess.compareTo(access) > 0) {
       throw new ForbiddenException(
           String.format(
