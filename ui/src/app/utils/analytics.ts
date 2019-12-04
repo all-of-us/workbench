@@ -32,18 +32,33 @@ export function triggerEvent(
 export const AnalyticsTracker = {
   Workspaces: {
     OpenCreatePage: () => triggerEvent('Workspaces', 'Open Create Page', getCurrentPageLabel()),
-    Create: () => triggerEvent('Workspaces', 'Create')
-  }
+    Create: () => triggerEvent('Workspaces', 'Create'),
+    OpenDuplicatePage: (suffix = '') => triggerEvent('Workspaces', 'Open Duplicate Page', getCurrentPageLabel(suffix)),
+    Duplicate: () => triggerEvent('Workspaces', 'Duplicate'),
+    OpenEditPage: (suffix = '') => triggerEvent('Workspaces', 'Open Edit Page', getCurrentPageLabel(suffix)),
+    Edit: () => triggerEvent('Workspaces', 'Edit'),
+    OpenShareModal: (suffix = '') => triggerEvent('Workspaces', 'Open Share Modal', getCurrentPageLabel(suffix)),
+    Share: () => triggerEvent('Workspaces', 'Share', getCurrentPageLabel()),
+    OpenDeleteModal: (suffix = '') => triggerEvent('Workspaces', 'Open Delete Modal', getCurrentPageLabel(suffix)),
+    Delete: () => triggerEvent('Workspaces', 'Delete', getCurrentPageLabel())
+  },
+
 };
 
-function getCurrentPageLabel() {
+function getCurrentPageLabel(suffix = '') {
+  let prefix;
+
   if (window.location.pathname === '/') {
-    return 'From Home Page';
+    prefix = 'From Home Page';
   } else if (window.location.pathname === '/workspaces') {
-    return 'From Workspace List Page';
+    prefix = 'From Workspace List Page';
+  } else if (window.location.pathname.match(/\/workspaces\/.*/) !== null) {
+    prefix = 'From Workspace Page';
   } else {
-    return 'Unknown Label: ' + window.location.pathname;
+    prefix = 'Unknown Label: ' + window.location.pathname;
   }
+
+  return `${prefix} (${suffix})`;
 }
 
 enum UserAuthState {

@@ -11,6 +11,7 @@ import {WorkspaceAccessLevel} from 'generated';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {AnalyticsTracker} from "app/utils/analytics";
 
 
 const styles = reactStyles({
@@ -100,14 +101,20 @@ export const WorkspaceNavBarReact = fp.flow(
           <div style={styles.dropdownHeader}>Workspace Actions</div>
           <MenuItem
             icon='copy'
-            onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}>
+            onClick={() => {
+              AnalyticsTracker.Workspaces.OpenDuplicatePage();
+              NavStore.navigate(['/workspaces', namespace, id, 'duplicate']);
+            }}>
             Duplicate
           </MenuItem>
           <MenuItem
             icon='pencil'
             tooltip={isNotOwner && 'Requires owner permission'}
             disabled={isNotOwner}
-            onClick={() => NavStore.navigate(['/workspaces', namespace, id, 'edit'])}
+            onClick={() => {
+              AnalyticsTracker.Workspaces.OpenEditPage();
+              NavStore.navigate(['/workspaces', namespace, id, 'edit']);
+            }}
           >
             Edit
           </MenuItem>
@@ -115,14 +122,20 @@ export const WorkspaceNavBarReact = fp.flow(
             icon='share'
             tooltip={isNotOwner && 'Requires owner permission'}
             disabled={isNotOwner}
-            onClick={() => shareFunction()}>
+            onClick={() => {
+              AnalyticsTracker.Workspaces.OpenShareModal();
+              shareFunction();
+            }}>
             Share
           </MenuItem>
           <MenuItem
             icon='trash'
             tooltip={isNotOwner && 'Requires owner permission'}
             disabled={isNotOwner}
-            onClick={() => deleteFunction()}>
+            onClick={() => {
+              AnalyticsTracker.Workspaces.OpenDeleteModal();
+              deleteFunction();
+            }}>
             Delete
           </MenuItem>
         </React.Fragment>

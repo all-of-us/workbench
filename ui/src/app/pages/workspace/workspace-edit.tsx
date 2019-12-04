@@ -908,7 +908,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             } disabled={!errors}>
               <Button type='primary'
                       onClick={() => {
-                        AnalyticsTracker.Workspaces.Create();
+                        if (this.isMode(WorkspaceEditMode.Create)) {
+                          AnalyticsTracker.Workspaces.Create();
+                        } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
+                          AnalyticsTracker.Workspaces.Duplicate();
+                        } else if (this.isMode(WorkspaceEditMode.Edit)) {
+                          AnalyticsTracker.Workspaces.Edit();
+                        }
                         this.saveWorkspace()}}
                       disabled={errors || this.state.loading}
                       data-test-id='workspace-save-btn'>
