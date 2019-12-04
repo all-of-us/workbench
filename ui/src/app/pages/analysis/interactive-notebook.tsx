@@ -13,12 +13,12 @@ import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients'
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {ClusterStatus} from 'generated/fetch';
-import {AnalyticsTracker} from "app/utils/analytics";
 
 
 const styles = reactStyles({

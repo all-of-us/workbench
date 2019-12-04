@@ -13,8 +13,8 @@ import {navigate} from 'app/utils/navigation';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {ResourceType} from 'app/utils/resourceActions';
 
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {Workspace} from 'generated/fetch';
-import {AnalyticsTracker} from "app/utils/analytics";
 
 export class NewNotebookModal extends React.Component<
   {onClose: Function, workspace: Workspace, existingNameList: string[]},

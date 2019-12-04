@@ -82,7 +82,7 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
 
   static defaultProps = {
     onNavigate: () => {}
-  }
+  };
 
   render() {
     return <React.Fragment>

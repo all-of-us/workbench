@@ -17,8 +17,8 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 
 
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {FileDetail, WorkspaceAccessLevel} from 'generated/fetch';
-import {AnalyticsTracker} from "app/utils/analytics";
 
 const styles = {
   heading: {
