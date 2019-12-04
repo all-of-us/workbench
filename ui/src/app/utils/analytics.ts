@@ -61,7 +61,7 @@ function getCurrentPageLabel(suffix = '') {
     prefix = 'Unknown Label: ' + window.location.pathname;
   }
 
-  return `${prefix} (${suffix})`;
+  return suffix ? `${prefix} (${suffix})` : prefix;
 }
 
 enum UserAuthState {

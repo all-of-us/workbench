@@ -324,7 +324,10 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                     size={30}
                                     className={'is-solid'}
                                     style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
-                                    onClick={() => navigate(['workspaces/build'])}
+                                    onClick={() => {
+                                      AnalyticsTracker.Workspaces.OpenCreatePage();
+                                      navigate(['workspaces/build']);
+                                    }}
                                   />
                                 </FlexRow>
                                 <span
