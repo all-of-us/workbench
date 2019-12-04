@@ -875,7 +875,7 @@ public class DataSetControllerTest {
             "person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person");
     // For demographic unlike other domains WHERE should be followed by person.person_id rather than
     // concept_id
-    assertThat(response.getCode().contains("WHERE person.PERSON_ID"));
+    assertThat(response.getCode()).contains("WHERE person.PERSON_ID");
   }
 
   @Rule public ExpectedException expectedException = ExpectedException.none();

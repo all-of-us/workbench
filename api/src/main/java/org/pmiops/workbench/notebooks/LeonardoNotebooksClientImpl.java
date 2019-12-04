@@ -2,7 +2,6 @@ package org.pmiops.workbench.notebooks;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -143,12 +142,6 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
           clusterApi.deleteCluster(googleProject, clusterName);
           return null;
         });
-  }
-
-  @Override
-  public List<Cluster> listClusters(String labels, boolean includeDeleted) {
-    ClusterApi clusterApi = clusterApiProvider.get();
-    return retryHandler.run((context) -> clusterApi.listClusters(labels, includeDeleted));
   }
 
   @Override
