@@ -37,17 +37,18 @@ public class AuthDomainAuditAdapterImpl implements AuthDomainAuditAdapter {
   public void fireSetAccountEnabled(
       long targetUserId, boolean newEnabledValue, boolean previousEnabledValue) {
     actionAuditService.send(
-        new ActionAuditEvent(
-            clock.millis(),
-            AgentType.ADMINISTRATOR,
-            adminDbUserProvider.get().getUserId(),
-            adminDbUserProvider.get().getEmail(),
-            actionIdProvider.get(),
-            ActionType.EDIT,
-            TargetType.ACCOUNT,
-            AccountTargetProperty.IS_ENABLED.getPropertyName(),
-            targetUserId,
-            Boolean.toString(previousEnabledValue),
-            Boolean.toString(newEnabledValue)));
+        ActionAuditEvent.builder()
+            .timestamp(clock.millis())
+            .agentType(AgentType.ADMINISTRATOR)
+            .agentId(adminDbUserProvider.get().getUserId())
+            .agentEmailMaybe(adminDbUserProvider.get().getEmail())
+            .actionId(actionIdProvider.get())
+            .actionType(ActionType.EDIT)
+            .targetType(TargetType.ACCOUNT)
+            .targetPropertyMaybe(AccountTargetProperty.IS_ENABLED.getPropertyName())
+            .targetIdMaybe(targetUserId)
+            .previousValueMaybe(Boolean.toString(previousEnabledValue))
+            .newValueMaybe(Boolean.toString(newEnabledValue))
+            .build());
   }
 }

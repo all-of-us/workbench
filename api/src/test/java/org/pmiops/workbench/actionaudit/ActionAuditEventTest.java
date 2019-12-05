@@ -24,6 +24,7 @@ public class ActionAuditEventTest {
             .agentId(333L)
             .agentEmailMaybe("jay@msn.com")
             .targetType(TargetType.COHORT)
+            .targetIdMaybe(null)
             .targetPropertyMaybe("name")
             .previousValueMaybe(null)
             .newValueMaybe("Fred")
