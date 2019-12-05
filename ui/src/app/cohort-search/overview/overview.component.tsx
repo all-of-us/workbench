@@ -312,8 +312,9 @@ export const ListOverview = withCurrentWorkspace()(
         saving, stackChart, total} = this.state;
       const disableIcon = loading || !cohort ;
       const disableSave = loading || saving || this.definitionErrors || !total;
-      const invalid = nameTouched && !name;
-      const nameConflict = existingCohorts.includes(name);
+      const invalid = nameTouched && (!name || !name.trim());
+      const nameConflict = !!name && existingCohorts.includes(name.trim());
+      const saveDisabled = invalid || !name || nameConflict || saving;
       const showTotal = total !== undefined && total !== null;
       const items = [
         {label: 'Save', command: () => this.saveCohort(),
@@ -420,7 +421,7 @@ export const ListOverview = withCurrentWorkspace()(
           <ModalFooter>
             <Button style={{color: colors.primary}} type='link' onClick={() => this.cancelSave()}
               disabled={saving}>Cancel</Button>
-            <Button type='primary' disabled={!name || nameConflict || saving} onClick={() => this.submit()}>
+            <Button type='primary' disabled={saveDisabled} onClick={() => this.submit()}>
               {saving && <Spinner style={{marginRight: '0.25rem'}} size={18} />}
                Save
             </Button>
