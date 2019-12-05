@@ -1,5 +1,6 @@
 package org.pmiops.workbench.actionaudit.targetproperties
 
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.pmiops.workbench.model.DataAccessLevel
@@ -38,21 +39,21 @@ class TargetPropertyExtractorTest {
                 TargetPropertyExtractor.getPropertyValuesByName(
                         WorkspaceTargetProperty.values(),
                         workspace!!)
-        assert(propertyValuesByName[WorkspaceTargetProperty.NAME.propertyName] == "DbWorkspace 1")
-        assert(propertyValuesByName.size == 6)
+        assertThat(propertyValuesByName[WorkspaceTargetProperty.NAME.propertyName])
+                .isEqualTo("DbWorkspace 1")
+        assertThat(propertyValuesByName).hasSize(20)
     }
 
     @Test fun testGetTargetPropertyEnumByTargetClass() {
         val result: Map<KClass<out Any>, KClass<out Any>> =
                 TargetPropertyExtractor.getTargetPropertyEnumByTargetClass()
-        assert(result.size == 2)
-
-        assert(result[Workspace::class] == WorkspaceTargetProperty::class)
+        assertThat(result).hasSize(2)
+        assertThat(result[Workspace::class]).isEqualTo(WorkspaceTargetProperty::class)
     }
 
     @Test fun testGetPropertyEnum() {
         val result: KClass<out Any> =
                 TargetPropertyExtractor.getTargetPropertyEnum(Workspace::class)
-        assert(result == WorkspaceTargetProperty::class)
+        assertThat(result).isEqualTo(WorkspaceTargetProperty::class)
     }
 }

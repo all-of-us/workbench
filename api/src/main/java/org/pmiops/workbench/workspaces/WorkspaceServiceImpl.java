@@ -419,24 +419,27 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public WorkspaceAccessLevel getWorkspaceAccessLevel(
-      String workspaceNamespace, String workspaceId) {
+  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId)
+      throws IllegalArgumentException {
     String userAccess =
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
     if (PROJECT_OWNER_ACCESS_LEVEL.equals(userAccess)) {
       return WorkspaceAccessLevel.OWNER;
     }
-    WorkspaceAccessLevel result = WorkspaceAccessLevel.fromValue(userAccess);
-    if (result == null) {
-      throw new ServerErrorException("Unrecognized access level: " + userAccess);
-    }
-    return result;
+    return Optional.ofNullable(WorkspaceAccessLevel.fromValue(userAccess))
+        .orElseThrow(
+            () -> new IllegalArgumentException("Unrecognized access level: " + userAccess));
   }
 
   @Override
   public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
-    WorkspaceAccessLevel access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    final WorkspaceAccessLevel access;
+    try {
+      access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    } catch (IllegalArgumentException e) {
+      throw new ServerErrorException(e);
+    }
     if (requiredAccess.compareTo(access) > 0) {
       throw new ForbiddenException(
           String.format(

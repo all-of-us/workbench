@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -14,6 +15,7 @@ import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -56,9 +58,6 @@ public class WorkspaceConversionUtils {
   public static Workspace toApiWorkspace(
       DbWorkspace workspace, org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
-    if (workspace.getPopulation()) {
-      researchPurpose.setPopulationDetails(new ArrayList<>(workspace.getSpecificPopulationsEnum()));
-    }
 
     Workspace result =
         new Workspace()
@@ -162,10 +161,24 @@ public class WorkspaceConversionUtils {
             .additionalNotes(workspace.getAdditionalNotes())
             .reviewRequested(workspace.getReviewRequested())
             .approved(workspace.getApproved())
-            .otherPopulationDetails(workspace.getOtherPopulationDetails());
+            .otherPopulationDetails(workspace.getOtherPopulationDetails())
+            .populationDetails(
+                workspace.getPopulationDetails().stream()
+                    .map(DbStorageEnums::specificPopulationFromStorage)
+                    .collect(Collectors.toList()));
     if (workspace.getTimeRequested() != null) {
       researchPurpose.timeRequested(workspace.getTimeRequested().getTime());
     }
+
+    // population field is a guard on (specific) population details
+    final List<SpecificPopulationEnum> specificPopulationDetails;
+    if (workspace.getPopulation()) {
+      specificPopulationDetails = new ArrayList<>(workspace.getSpecificPopulationsEnum());
+    } else {
+      specificPopulationDetails = new ArrayList<>();
+    }
+    researchPurpose.setPopulationDetails(specificPopulationDetails);
+
     return researchPurpose;
   }
 
