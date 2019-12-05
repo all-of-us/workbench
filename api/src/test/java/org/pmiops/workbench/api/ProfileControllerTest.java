@@ -44,7 +44,7 @@ import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.NihStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -536,7 +536,7 @@ public class ProfileControllerTest {
   @Test
   public void testUpdateNihToken() {
     when(fireCloudService.postNihCallback(any()))
-        .thenReturn(new NihStatus().linkedNihUsername("test").linkExpireTime(500L));
+        .thenReturn(new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L));
     try {
       createUser();
       profileController.updateNihToken(new NihToken().jwt("test"));
@@ -563,7 +563,7 @@ public class ProfileControllerTest {
 
   @Test
   public void testSyncEraCommons() throws Exception {
-    NihStatus nihStatus = new NihStatus();
+    FirecloudNihStatus nihStatus = new FirecloudNihStatus();
     String linkedUsername = "linked";
     nihStatus.setLinkedNihUsername(linkedUsername);
     nihStatus.setLinkExpireTime(TIMESTAMP.getTime());

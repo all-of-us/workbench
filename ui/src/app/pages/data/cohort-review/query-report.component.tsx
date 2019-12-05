@@ -4,12 +4,12 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {CohortDefinition} from 'app/pages/data/cohort-review/cohort-definition.component';
 import {ParticipantsCharts} from 'app/pages/data/cohort-review/participants-charts';
 import {cohortReviewStore} from 'app/services/review-state.service';
-import {cdrVersionsApi, cohortBuilderApi} from 'app/services/swagger-fetch-clients';
+import {cdrVersionsApi, cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType, SearchRequest} from 'generated/fetch';
+import {Cohort, CohortReview, DomainType, SearchRequest} from 'generated/fetch';
 import * as moment from 'moment';
 import * as React from 'react';
 
@@ -179,35 +179,39 @@ export interface QueryReportProps {
 }
 export interface QueryReportState {
   cdrName: string;
+  cohort: Cohort;
   data: any;
   groupedData: any;
   loading: boolean;
+  review: CohortReview;
 }
 
 export const QueryReport = withCurrentWorkspace()(
   class extends React.Component<QueryReportProps, QueryReportState> {
-    cohort = currentCohortStore.getValue();
-    review = cohortReviewStore.getValue();
-
     constructor(props: any) {
       super(props);
       this.state = {
         cdrName: null,
+        cohort: undefined,
         data: null,
         groupedData: null,
-        loading: true
+        loading: true,
+        review: cohortReviewStore.getValue()
       };
     }
 
     componentDidMount() {
       const {cdrVersionId} = this.props.workspace;
+      const {review} = this.state;
+      const {ns, wsid, cid} = urlParamsStore.getValue();
+      cohortsApi().getCohort(ns, wsid, cid).then(cohort => this.setState({cohort}));
       cdrVersionsApi().getCdrVersions().then(resp => {
         const cdrName = resp.items.find(
-          v => v.cdrVersionId === this.review.cdrVersionId.toString()
+          v => v.cdrVersionId === review.cdrVersionId.toString()
         ).name;
         this.setState({cdrName});
       });
-      const request = (JSON.parse(this.review.cohortDefinition)) as SearchRequest;
+      const request = (JSON.parse(review.cohortDefinition)) as SearchRequest;
       cohortBuilderApi().getDemoChartInfo(+cdrVersionId, request)
         .then(response => {
           this.groupChartData(response.items);
@@ -249,9 +253,10 @@ export const QueryReport = withCurrentWorkspace()(
     }
 
     render() {
-      const {cdrName, data, groupedData, loading} = this.state;
-      const totalCount = this.review.matchedParticipantCount;
-      const created = moment(this.cohort.creationTime).format('YYYY-MM-DD');
+      const {cdrName, cohort, data, groupedData, loading, review} = this.state;
+      const totalCount = review.matchedParticipantCount;
+      // TODO can we use the creation time from the review instead of the cohort here?
+      const created = !!cohort ? moment(cohort.creationTime).format('YYYY-MM-DD') : null;
       return <React.Fragment>
         <style>{css}</style>
         <button
@@ -271,13 +276,13 @@ export const QueryReport = withCurrentWorkspace()(
                         Cohort Name
                       </div>
                       <div style={styles.queryContent}>
-                        {this.review.cohortName}
+                        {review.cohortName}
                       </div>
                       <div style={styles.queryTitle}>
                         Created By
                       </div>
                       <div style={styles.queryContent}>
-                        {this.cohort.creator}
+                        {!!cohort ? cohort.creator : ''}
                       </div>
                     </div>
                     <div style={columns.col6}>

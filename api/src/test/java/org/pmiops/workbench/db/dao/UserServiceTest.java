@@ -23,7 +23,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.NihStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
@@ -191,7 +191,7 @@ public class UserServiceTest {
 
   @Test
   public void testSyncEraCommonsStatus() {
-    NihStatus nihStatus = new NihStatus();
+    FirecloudNihStatus nihStatus = new FirecloudNihStatus();
     nihStatus.setLinkedNihUsername("nih-user");
     // FireCloud stores the NIH status in seconds, not msecs.
     nihStatus.setLinkExpireTime(TIMESTAMP_MSECS / 1000);

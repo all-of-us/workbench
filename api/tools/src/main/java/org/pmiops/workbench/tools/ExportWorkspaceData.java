@@ -1,7 +1,5 @@
 package org.pmiops.workbench.tools;
 
-import static org.pmiops.workbench.tools.BackfillBillingProjectUsers.extractAclResponse;
-
 import com.opencsv.bean.BeanField;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvBindByName;
@@ -34,6 +32,7 @@ import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
+import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -160,7 +159,7 @@ public class ExportWorkspaceData {
 
     try {
       row.setCollaborators(
-          extractAclResponse(
+          FirecloudTransforms.extractAclResponse(
                   workspacesApi.getWorkspaceAcl(
                       workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
               .keySet().stream()

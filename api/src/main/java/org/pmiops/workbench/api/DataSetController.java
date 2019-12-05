@@ -56,7 +56,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.GatewayTimeoutException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
@@ -441,7 +441,8 @@ public class DataSetController implements DataSetApiDelegate {
     // This suppresses 'may not be initialized errors. We will always init to something else before
     // used.
     JSONObject notebookFile = new JSONObject();
-    WorkspaceResponse workspace = fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
+    FirecloudWorkspaceResponse workspace =
+        fireCloudService.getWorkspace(workspaceNamespace, workspaceId);
     JSONObject metaData = new JSONObject();
 
     if (!dataSetExportRequest.getNewNotebook()) {

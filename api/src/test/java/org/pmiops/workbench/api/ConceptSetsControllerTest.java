@@ -42,8 +42,10 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.WorkspaceACL;
-import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Concept;
@@ -61,6 +63,7 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -80,7 +83,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import(LiquibaseAutoConfiguration.class)
+@Import(value = {LiquibaseAutoConfiguration.class})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -212,7 +215,8 @@ public class ConceptSetsControllerTest {
     UserService.class,
     ConceptSetsController.class,
     WorkspacesController.class,
-    ConceptSetService.class
+    ConceptSetService.class,
+    WorkspaceMapperImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -300,8 +304,7 @@ public class ConceptSetsControllerTest {
     stubGetWorkspaceAcl(
         workspace2.getNamespace(), WORKSPACE_NAME_2, USER_EMAIL, WorkspaceAccessLevel.OWNER);
 
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
     when(fireCloudService.getWorkspace(workspace.getNamespace(), WORKSPACE_NAME))
         .thenReturn(fcResponse);
@@ -769,13 +772,11 @@ public class ConceptSetsControllerTest {
 
   private void stubGetWorkspace(String ns, String name, String creator, WorkspaceAccessLevel access)
       throws Exception {
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        new org.pmiops.workbench.firecloud.model.Workspace();
+    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(creator);
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
@@ -783,10 +784,10 @@ public class ConceptSetsControllerTest {
 
   private void stubGetWorkspaceAcl(
       String ns, String name, String creator, WorkspaceAccessLevel access) {
-    WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
-    WorkspaceAccessEntry accessLevelEntry =
-        new WorkspaceAccessEntry().accessLevel(access.toString());
-    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry =
+    FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
+    FirecloudWorkspaceAccessEntry accessLevelEntry =
+        new FirecloudWorkspaceAccessEntry().accessLevel(access.toString());
+    Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(creator, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);

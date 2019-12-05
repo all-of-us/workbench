@@ -9,12 +9,12 @@ import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortReviewStore, filterStateStore, getVocabOptions, multiOptions, vocabOptions} from 'app/services/review-state.service';
-import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CohortStatus,
@@ -253,11 +253,8 @@ export const ParticipantsTable = withCurrentWorkspace()(
       const {filters} = this.state;
       const {cdrVersionId} = this.props.workspace;
       const promises = [];
-      const {ns, wsid, cid} = urlParamsStore.getValue();
+      const {ns, wsid} = urlParamsStore.getValue();
       const review = cohortReviewStore.getValue();
-      if (!currentCohortStore.getValue()) {
-        promises.push(cohortsApi().getCohort(ns, wsid, cid).then(cohort => currentCohortStore.next(cohort)));
-      }
       if (!review) {
         promises.push(
           this.getParticipantStatuses().then(rev => {
@@ -569,7 +566,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
     render() {
       const {loading, page, sortField, sortOrder, total} = this.state;
       const data = loading ? null : this.state.data;
-      const cohort = currentCohortStore.getValue();
+      const review = cohortReviewStore.getValue();
       const start = page * rows;
       let pageReportTemplate;
       if (data !== null) {
@@ -606,7 +603,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
       });
       return <div style={styles.review}>
         <style>{datatableStyles}</style>
-        {!!cohort && <React.Fragment>
+        {!!review && <React.Fragment>
           <button
             style={styles.backBtn}
             type='button'
@@ -614,7 +611,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             Back to cohort
           </button>
           <h4 style={styles.title}>
-            Review Sets for {cohort.name}
+            Review Sets for {review.cohortName}
             <Button
               style={{float: 'right', height: '1.3rem'}}
               disabled={!data}
@@ -623,7 +620,7 @@ export const ParticipantsTable = withCurrentWorkspace()(
             </Button>
           </h4>
           <div style={styles.description}>
-            {cohort.description}
+            {review.description}
           </div>
           <DataTable
             style={styles.table}

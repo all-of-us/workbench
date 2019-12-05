@@ -9,7 +9,7 @@ import {
   Clickable,
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {CustomBulletList, CustomBulletListItem} from 'app/components/CustomBulletList';
+import {CustomBulletList, CustomBulletListItem} from 'app/components/custom-bullet-list';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header, SemiBoldHeader, SmallHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';

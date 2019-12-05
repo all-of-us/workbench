@@ -76,8 +76,10 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.WorkspaceACL;
-import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Cohort;
@@ -104,6 +106,8 @@ import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.utils.TestMockFactory;
+import org.pmiops.workbench.utils.WorkspaceMapper;
+import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -216,6 +220,8 @@ public class DataSetControllerTest {
 
   @Autowired WorkspaceAuditAdapter workspaceAuditAdapter;
 
+  @Autowired WorkspaceMapper workspaceMapper;
+
   @TestConfiguration
   @Import({
     CohortFactoryImpl.class,
@@ -223,7 +229,8 @@ public class DataSetControllerTest {
     TestBigQueryCdrSchemaConfig.class,
     UserService.class,
     WorkspacesController.class,
-    WorkspaceServiceImpl.class
+    WorkspaceServiceImpl.class,
+    WorkspaceMapperImpl.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -315,7 +322,8 @@ public class DataSetControllerTest {
             notebooksService,
             userService,
             workbenchConfigProvider,
-            workspaceAuditAdapter);
+            workspaceAuditAdapter,
+            workspaceMapper);
     CohortsController cohortsController =
         new CohortsController(
             workspaceService,
@@ -523,14 +531,12 @@ public class DataSetControllerTest {
 
   private void stubGetWorkspace(String ns, String name, String creator, WorkspaceAccessLevel access)
       throws Exception {
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        new org.pmiops.workbench.firecloud.model.Workspace();
+    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
     fcWorkspace.setCreatedBy(creator);
     fcWorkspace.setBucketName(WORKSPACE_BUCKET_NAME);
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(access.toString());
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
@@ -538,10 +544,10 @@ public class DataSetControllerTest {
 
   private void stubGetWorkspaceAcl(
       String ns, String name, String creator, WorkspaceAccessLevel access) {
-    WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
-    WorkspaceAccessEntry accessLevelEntry =
-        new WorkspaceAccessEntry().accessLevel(access.toString());
-    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry =
+    FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
+    FirecloudWorkspaceAccessEntry accessLevelEntry =
+        new FirecloudWorkspaceAccessEntry().accessLevel(access.toString());
+    Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(creator, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);
@@ -871,7 +877,7 @@ public class DataSetControllerTest {
             "person_sql = \"\"\"SELECT PERSON_ID FROM `" + TEST_CDR_TABLE + ".person` person");
     // For demographic unlike other domains WHERE should be followed by person.person_id rather than
     // concept_id
-    assertThat(response.getCode().contains("WHERE person.PERSON_ID"));
+    assertThat(response.getCode()).contains("WHERE person.PERSON_ID");
   }
 
   @Rule public ExpectedException expectedException = ExpectedException.none();

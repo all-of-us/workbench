@@ -29,16 +29,16 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.Workspace;
-import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.RecentResourceResponse;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.utils.CohortMapper;
-import org.pmiops.workbench.utils.CohortMapperImpl;
+import org.pmiops.workbench.utils.mappers.CohortMapper;
+import org.pmiops.workbench.utils.mappers.CohortMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -71,8 +71,8 @@ public class UserMetricsControllerTest {
   private DbUserRecentResource dbUserRecentResource2;
   private DbUserRecentResource dbUserRecentResource3;
 
-  private Workspace fcWorkspace1;
-  private Workspace fcWorkspace2;
+  private FirecloudWorkspace fcWorkspace1;
+  private FirecloudWorkspace fcWorkspace2;
 
   private DbWorkspace dbWorkspace1;
   private DbWorkspace dbWorkspace2;
@@ -133,17 +133,17 @@ public class UserMetricsControllerTest {
     when(mockWorkspaceService.findActiveByWorkspaceId(dbUserRecentResource3.getWorkspaceId()))
         .thenReturn(Optional.of(dbWorkspace2));
 
-    fcWorkspace1 = new Workspace();
+    fcWorkspace1 = new FirecloudWorkspace();
     fcWorkspace1.setNamespace(dbWorkspace1.getFirecloudName());
 
-    fcWorkspace2 = new Workspace();
+    fcWorkspace2 = new FirecloudWorkspace();
     fcWorkspace1.setNamespace(dbWorkspace2.getFirecloudName());
 
-    WorkspaceResponse workspaceResponse = new WorkspaceResponse();
+    FirecloudWorkspaceResponse workspaceResponse = new FirecloudWorkspaceResponse();
     workspaceResponse.setAccessLevel("OWNER");
     workspaceResponse.setWorkspace(fcWorkspace1);
 
-    WorkspaceResponse workspaceResponse2 = new WorkspaceResponse();
+    FirecloudWorkspaceResponse workspaceResponse2 = new FirecloudWorkspaceResponse();
     workspaceResponse2.setAccessLevel("READER");
     workspaceResponse2.setWorkspace(fcWorkspace2);
 

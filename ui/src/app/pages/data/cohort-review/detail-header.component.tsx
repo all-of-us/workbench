@@ -4,7 +4,7 @@ import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentCohortStore, currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {
@@ -375,7 +375,7 @@ export const DetailHeader = withCurrentWorkspace()(
         isFirstParticipant,
         isLastParticipant
       } = this.state;
-      const cohort = currentCohortStore.getValue();
+      const review = cohortReviewStore.getValue();
       const errors = validate({ageMin, ageMax, dateMin, dateMax}, {
         ageMin: {
           numericality: {
@@ -409,8 +409,8 @@ export const DetailHeader = withCurrentWorkspace()(
           onClick={() => this.backToTable()}>
           Back to review set
         </button>
-        <h4 style={styles.title}>{cohort.name}</h4>
-        <div style={styles.description}>{cohort.description}</div>
+        <h4 style={styles.title}>{review.cohortName}</h4>
+        <div style={styles.description}>{review.description}</div>
         {errors && <div className='error-messages'>
           <ValidationError>
             {summarizeErrors(errors && (
