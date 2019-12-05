@@ -533,6 +533,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
     }
 
+    onSaveClick() {
+      if (this.isMode(WorkspaceEditMode.Create)) {
+        AnalyticsTracker.Workspaces.Create();
+      } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
+        AnalyticsTracker.Workspaces.Duplicate();
+      } else if (this.isMode(WorkspaceEditMode.Edit)) {
+        AnalyticsTracker.Workspaces.Edit();
+      }
+
+      this.saveWorkspace();
+    }
+
     async saveWorkspace() {
       try {
         this.setState({loading: true});
@@ -907,16 +919,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </ul>
             } disabled={!errors}>
               <Button type='primary'
-                      onClick={() => {
-                        if (this.isMode(WorkspaceEditMode.Create)) {
-                          AnalyticsTracker.Workspaces.Create();
-                        } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
-                          AnalyticsTracker.Workspaces.Duplicate();
-                        } else if (this.isMode(WorkspaceEditMode.Edit)) {
-                          AnalyticsTracker.Workspaces.Edit();
-                        }
-                        this.saveWorkspace();
-                      }}
+                      onClick={() => this.onSaveClick()}
                       disabled={errors || this.state.loading}
                       data-test-id='workspace-save-btn'>
                 {this.renderButtonText()}
