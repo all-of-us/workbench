@@ -186,9 +186,17 @@ class NewDataSetModal extends React.Component<Props, State> {
 
   onSaveClick() {
     if (this.props.dataSet) {
-      AnalyticsTracker.DatasetBuilder.Update(this.state.kernelType);
+      if (this.state.exportToNotebook) {
+        AnalyticsTracker.DatasetBuilder.UpdateAndAnalyze(this.state.kernelType);
+      } else {
+        AnalyticsTracker.DatasetBuilder.Update();
+      }
     } else {
-      AnalyticsTracker.DatasetBuilder.Save(this.state.kernelType);
+      if (this.state.exportToNotebook) {
+        AnalyticsTracker.DatasetBuilder.SaveAndAnalyze(this.state.kernelType);
+      } else {
+        AnalyticsTracker.DatasetBuilder.Save();
+      }
     }
 
     this.saveDataSet();
