@@ -6,7 +6,7 @@ import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 
 // This path is the Java sources root for finding any overridden Swagger-codegen
 // templates we may be using.
-def swaggerTemplateDir = 'src/main/resources/Java'
+def swaggerTemplateDir = 'src/main/resources/swaggercodegen'
 def mergedApiSourceFile = 'src/main/resources/merged.yaml'
 def clientApiSourceFile = 'src/main/resources/client_api.yaml'
 def cbReviewApiSourceFile = 'src/main/resources/cb_review_api.yaml'
