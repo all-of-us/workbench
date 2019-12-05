@@ -47,6 +47,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
+import org.pmiops.workbench.monitoring.MonitoringService;
+import org.pmiops.workbench.monitoring.signals.GaugeSignals;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -80,7 +82,7 @@ public class BillingProjectBufferServiceTest {
 
   @TestConfiguration
   @Import({BillingProjectBufferService.class})
-  @MockBean({FireCloudService.class})
+  @MockBean({FireCloudService.class, MonitoringService.class})
   static class Configuration {
     @Bean
     public Clock clock() {
@@ -102,6 +104,7 @@ public class BillingProjectBufferServiceTest {
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
   @Autowired private BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   @Autowired private FireCloudService fireCloudService;
+  @Autowired private MonitoringService monitoringService;
 
   @Autowired private BillingProjectBufferService billingProjectBufferService;
 
@@ -123,9 +126,21 @@ public class BillingProjectBufferServiceTest {
         .when(billingProjectBufferEntryDao)
         .releaseAssigningLock();
 
+    monitoringService = spy(monitoringService);
+
     billingProjectBufferService =
         new BillingProjectBufferService(
-            billingProjectBufferEntryDao, clock, fireCloudService, workbenchConfigProvider);
+            billingProjectBufferEntryDao,
+            clock,
+            fireCloudService,
+            monitoringService,
+            workbenchConfigProvider);
+  }
+
+  @Test
+  public void sendsSignalWhenBufferingProjects() {
+    billingProjectBufferService.bufferBillingProjects();
+    verify(monitoringService).sendSignal(GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS, 0L);
   }
 
   @Test

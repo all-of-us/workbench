@@ -28,6 +28,8 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
+import org.pmiops.workbench.monitoring.MonitoringService;
+import org.pmiops.workbench.monitoring.signals.GaugeSignals;
 import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,6 +49,7 @@ public class BillingProjectBufferService {
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
+  private final MonitoringService monitoringService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
@@ -54,11 +57,14 @@ public class BillingProjectBufferService {
       BillingProjectBufferEntryDao billingProjectBufferEntryDao,
       Clock clock,
       FireCloudService fireCloudService,
+      MonitoringService monitoringService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.billingProjectBufferEntryDao = billingProjectBufferEntryDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
+    this.monitoringService = monitoringService;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.monitoringService.registerSignal(GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS);
   }
 
   private Timestamp getCurrentTimestamp() {
@@ -67,6 +73,9 @@ public class BillingProjectBufferService {
 
   /** Makes a configurable number of project creation attempts. */
   public void bufferBillingProjects() {
+
+    monitoringService.sendSignal(
+        GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS, getCurrentBufferSize());
     int creationAttempts = this.workbenchConfigProvider.get().billing.bufferRefillProjectsPerTask;
     for (int i = 0; i < creationAttempts; i++) {
       bufferBillingProject();
