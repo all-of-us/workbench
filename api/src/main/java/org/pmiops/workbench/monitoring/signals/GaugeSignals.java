@@ -1,6 +1,6 @@
 package org.pmiops.workbench.monitoring.signals;
 
-import com.google.appengine.repackaged.com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure;
 import java.util.Map;
