@@ -45,8 +45,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
   @Mapping(target = "creator", source = "fcWorkspace.createdBy")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
-  Workspace toApiWorkspace(
-      DbWorkspace dbWorkspace, FirecloudWorkspace fcWorkspace);
+  Workspace toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspace fcWorkspace);
 
   // This method is simply merging the research purpose, which covers only a subset of the fields
   // in the DbWorkspace target
