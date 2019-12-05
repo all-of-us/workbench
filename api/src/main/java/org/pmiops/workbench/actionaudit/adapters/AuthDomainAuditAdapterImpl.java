@@ -36,7 +36,7 @@ public class AuthDomainAuditAdapterImpl implements AuthDomainAuditAdapter {
   @Override
   public void fireSetAccountEnabled(
       long targetUserId, boolean newEnabledValue, boolean previousEnabledValue) {
-    final ActionAuditEvent event =
+    actionAuditService.send(
         new ActionAuditEvent(
             clock.millis(),
             AgentType.ADMINISTRATOR,
@@ -48,7 +48,6 @@ public class AuthDomainAuditAdapterImpl implements AuthDomainAuditAdapter {
             AccountTargetProperty.IS_ENABLED.getPropertyName(),
             targetUserId,
             Boolean.toString(previousEnabledValue),
-            Boolean.toString(newEnabledValue));
-    actionAuditService.send(event);
+            Boolean.toString(newEnabledValue)));
   }
 }
