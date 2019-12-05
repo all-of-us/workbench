@@ -338,7 +338,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public FirecloudWorkspaceResponse getWorkspace(String projectName, String workspaceName) {
+  public FirecloudWorkspaceResponse getWorkspace(String projectName, String workspaceName)
+      throws WorkbenchException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     return retryHandler.run(
         (context) ->
@@ -347,7 +348,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public Optional<FirecloudWorkspaceResponse> getWorkspace(DbWorkspace dbWorkspace) {
+  public Optional<FirecloudWorkspaceResponse> getWorkspace(DbWorkspace dbWorkspace)
+      throws WorkbenchException {
     try {
       final FirecloudWorkspaceResponse result =
           getWorkspace(dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
@@ -365,12 +367,12 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public List<FirecloudWorkspaceResponse> getWorkspaces(List<String> fields) {
+  public List<FirecloudWorkspaceResponse> getWorkspaces(List<String> fields) throws WorkbenchException {
     return retryHandler.run((context) -> workspacesApiProvider.get().listWorkspaces(fields));
   }
 
   @Override
-  public void deleteWorkspace(String projectName, String workspaceName) {
+  public void deleteWorkspace(String projectName, String workspaceName) throws WorkbenchException {
     WorkspacesApi workspacesApi = workspacesApiProvider.get();
     retryHandler.run(
         (context) -> {
@@ -380,13 +382,13 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public FirecloudManagedGroupWithMembers getGroup(String groupName) {
+  public FirecloudManagedGroupWithMembers getGroup(String groupName) throws WorkbenchException {
     GroupsApi groupsApi = groupsApiProvider.get();
     return retryHandler.run((context) -> groupsApi.getGroup(groupName));
   }
 
   @Override
-  public FirecloudManagedGroupWithMembers createGroup(String groupName) {
+  public FirecloudManagedGroupWithMembers createGroup(String groupName) throws WorkbenchException {
     GroupsApi groupsApi = groupsApiProvider.get();
     return retryHandler.run((context) -> groupsApi.createGroup(groupName));
   }

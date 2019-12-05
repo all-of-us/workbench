@@ -225,13 +225,6 @@ public class ProfileController implements ProfileApiDelegate {
             .collect(Collectors.toList()));
   }
 
-  private String createFirecloudUserAndBillingProject(DbUser user) {
-    // If the user is already registered, their profile will get updated.
-    fireCloudService.registerUser(
-        user.getContactEmail(), user.getGivenName(), user.getFamilyName());
-    return createFirecloudBillingProject(user);
-  }
-
   private void validateStringLength(String field, String fieldName, int max, int min) {
     if (field == null) {
       throw new BadRequestException(String.format("%s cannot be left blank!", fieldName));
@@ -268,73 +261,6 @@ public class ProfileController implements ProfileApiDelegate {
       log.log(Level.WARNING, "version conflict for user update", e);
       throw new ConflictException("Failed due to concurrent modification");
     }
-  }
-
-  private String createFirecloudBillingProject(DbUser user) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    long suffix;
-    if (workbenchEnvironment.isDevelopment()) {
-      // For local development, make one billing project per account based on a hash of the account
-      // email, and reuse it across database resets. (Assume we won't have any collisions;
-      // if we discover that somebody starts using our namespace, change it up.)
-      suffix = Math.abs(user.getEmail().hashCode());
-    } else {
-      // In other environments, create a suffix based on the user ID from the database. We will
-      // add a suffix if that billing project is already taken. (If the database is reset, we
-      // should consider switching the prefix.)
-      suffix = user.getUserId();
-    }
-    // GCP billing project names must be <= 30 characters. The per-user hash, an integer,
-    // is <= 10 chars.
-    String billingProjectNamePrefix =
-        workbenchConfigProvider.get().billing.projectNamePrefix + suffix;
-    String billingProjectName = billingProjectNamePrefix;
-    int numAttempts = 0;
-    while (numAttempts < MAX_BILLING_PROJECT_CREATION_ATTEMPTS) {
-      try {
-        fireCloudService.createAllOfUsBillingProject(billingProjectName);
-        break;
-      } catch (ConflictException e) {
-        if (workbenchEnvironment.isDevelopment()) {
-          // In local development, just re-use existing projects for the account. (We don't
-          // want to create a new billing project every time the database is reset.)
-          log.log(
-              Level.WARNING,
-              String.format(
-                  "Project with name '%s' already exists; using it.", billingProjectName));
-          break;
-        } else {
-          numAttempts++;
-          // In cloud environments, keep trying billing project names until we find one
-          // that hasn't been used before, or we hit MAX_BILLING_PROJECT_CREATION_ATTEMPTS.
-          billingProjectName = billingProjectNamePrefix + "-" + numAttempts;
-        }
-      }
-    }
-    if (numAttempts == MAX_BILLING_PROJECT_CREATION_ATTEMPTS) {
-      throw new ServerErrorException(
-          String.format(
-              "Encountered %d billing project name " + "collisions; giving up",
-              MAX_BILLING_PROJECT_CREATION_ATTEMPTS));
-    }
-
-    try {
-      // If the user is already a member of the billing project, this will have no effect.
-      fireCloudService.addUserToBillingProject(user.getEmail(), billingProjectName);
-    } catch (ForbiddenException e) {
-      // AofU is not the owner of the billing project. This should only happen in local
-      // environments (and hopefully never, given the prefix we're using.) If it happens,
-      // we may need to pick a different prefix.
-      log.log(
-          Level.SEVERE,
-          String.format(
-              "Unable to add user to billing project %s; "
-                  + "consider changing billing project prefix",
-              billingProjectName),
-          e);
-      throw new ServerErrorException("Unable to add user to billing project", e);
-    }
-    return billingProjectName;
   }
 
   private DbUser initializeUserIfNeeded() {

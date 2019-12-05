@@ -51,6 +51,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -84,6 +85,7 @@ import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -117,6 +119,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final UserService userService;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private WorkspaceAuditAdapter workspaceAuditAdapter;
+  private WorkspaceMapper workspaceMapper;
 
   @Autowired
   public WorkspacesController(
@@ -131,7 +134,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       NotebooksService notebooksService,
       UserService userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceAuditAdapter workspaceAuditAdapter) {
+      WorkspaceAuditAdapter workspaceAuditAdapter,
+      WorkspaceMapper workspaceMapper) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -144,6 +148,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditAdapter = workspaceAuditAdapter;
+    this.workspaceMapper = workspaceMapper;
   }
 
   private String getRegisteredUserDomainEmail() {
@@ -200,16 +205,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Workspace> createWorkspace(Workspace workspace) {
-    if (Strings.isNullOrEmpty(workspace.getName())) {
-      throw new BadRequestException("missing required field 'name'");
-    } else if (workspace.getResearchPurpose() == null) {
-      throw new BadRequestException("missing required field 'researchPurpose'");
-    } else if (workspace.getDataAccessLevel() == null) {
-      throw new BadRequestException("missing required field 'dataAccessLevel'");
-    } else if (workspace.getName().length() > 80) {
-      throw new BadRequestException("DbWorkspace name must be 80 characters or less");
-    }
+  public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
+    validateWorkspaceApiModel(workspace);
 
     DbUser user = userProvider.get();
     String workspaceNamespace;
@@ -251,6 +248,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditAdapter.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
+  }
+
+  private void validateWorkspaceApiModel(Workspace workspace) {
+    if (Strings.isNullOrEmpty(workspace.getName())) {
+      throw new BadRequestException("missing required field 'name'");
+    } else if (workspace.getResearchPurpose() == null) {
+      throw new BadRequestException("missing required field 'researchPurpose'");
+    } else if (workspace.getDataAccessLevel() == null) {
+      throw new BadRequestException("missing required field 'dataAccessLevel'");
+    } else if (workspace.getName().length() > 80) {
+      throw new BadRequestException("DbWorkspace name must be 80 characters or less");
+    }
   }
 
   private void setDbWorkspaceFields(
@@ -301,7 +310,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Workspace> updateWorkspace(
-      String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
+      String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request)
+      throws NotFoundException {
+
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
@@ -314,6 +325,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (Strings.isNullOrEmpty(workspace.getEtag())) {
       throw new BadRequestException("Missing required update field 'etag'");
     }
+
+    final Workspace originalWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+
     int version = Etags.toVersion(workspace.getEtag());
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated workspace version");
@@ -337,12 +351,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+
+    final Workspace editedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+
+    workspaceAuditAdapter.fireEditAction(
+        originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
   @Override
   public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(
-      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body) {
+      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body)
+      throws BadRequestException, TooManyRequestsException {
     Workspace toWorkspace = body.getWorkspace();
     if (Strings.isNullOrEmpty(toWorkspace.getName())) {
       throw new BadRequestException("missing required field 'workspace.name'");
@@ -440,7 +460,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    DbWorkspace savedWorkspace =
+    DbWorkspace savedDbWorkspace =
         workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
 
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
@@ -457,14 +477,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      savedWorkspace =
+      savedDbWorkspace =
           workspaceService.updateWorkspaceAcls(
-              savedWorkspace, clonedRoles, getRegisteredUserDomainEmail());
+              savedDbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
-    workspaceAuditAdapter.fireDuplicateAction(fromWorkspace, savedWorkspace);
-    return ResponseEntity.ok(
-        new CloneWorkspaceResponse()
-            .workspace(WorkspaceConversionUtils.toApiWorkspace(savedWorkspace, toFcWorkspace)));
+    final Workspace savedWorkspace =
+        workspaceMapper.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
+
+    workspaceAuditAdapter.fireDuplicateAction(
+        fromWorkspace.getWorkspaceId(), savedDbWorkspace.getWorkspaceId(), savedWorkspace);
+    return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 
   // A retry period is needed because the permission to copy files into the cloned workspace is not
@@ -756,14 +778,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     Map<Long, DbWorkspace> dbWorkspacesById =
         dbWorkspaces.stream()
             .collect(Collectors.toMap(DbWorkspace::getWorkspaceId, Function.identity()));
-    Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsById =
-        dbWorkspaces.stream()
-            .collect(
-                Collectors.toMap(
-                    DbWorkspace::getWorkspaceId,
-                    dbWorkspace ->
-                        workspaceService.getWorkspaceAccessLevel(
-                            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())));
+    final Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsById;
+    try {
+      workspaceAccessLevelsById =
+          dbWorkspaces.stream()
+              .collect(
+                  Collectors.toMap(
+                      DbWorkspace::getWorkspaceId,
+                      dbWorkspace ->
+                          workspaceService.getWorkspaceAccessLevel(
+                              dbWorkspace.getWorkspaceNamespace(),
+                              dbWorkspace.getFirecloudName())));
+
+    } catch (IllegalArgumentException e) {
+      throw new ServerErrorException(e);
+    }
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     List<RecentWorkspace> recentWorkspaces =
@@ -779,8 +808,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.get(workspaceNamespace, workspaceId);
     DbUserRecentWorkspace userRecentWorkspace =
         workspaceService.updateRecentWorkspaces(dbWorkspace);
-    WorkspaceAccessLevel workspaceAccessLevel =
-        workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    final WorkspaceAccessLevel workspaceAccessLevel;
+
+    try {
+      workspaceAccessLevel =
+          workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    } catch (IllegalArgumentException e) {
+      throw new ServerErrorException(e);
+    }
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =

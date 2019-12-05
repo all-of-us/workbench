@@ -14,10 +14,10 @@ import org.pmiops.workbench.actionaudit.targetproperties.WorkspaceTargetProperty
 import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.db.model.DbWorkspace
 import org.pmiops.workbench.model.Workspace
-import org.pmiops.workbench.workspaces.WorkspaceConversionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import java.util.logging.Level
 
 @Service
 class WorkspaceAuditAdapterImpl @Autowired
@@ -30,27 +30,60 @@ constructor(
 
     override fun fireCreateAction(createdWorkspace: Workspace, dbWorkspaceId: Long) {
         try {
-            val actionId = actionIdProvider.get()
-            val userId = userProvider.get().userId
-            val userEmail = userProvider.get().email
+            val info = getAuditEventInfo()
             val propertyValues = TargetPropertyExtractor.getPropertyValuesByName(
                     WorkspaceTargetProperty.values(), createdWorkspace)
-            val timestamp = clock.millis()
             val events = propertyValues.entries
                     .map { ActionAuditEvent(
-                            actionId = actionId,
-                            agentEmailMaybe = userEmail,
+                            actionId = info.actionId,
+                            agentEmailMaybe = info.userEmail,
                             actionType = ActionType.CREATE,
                             agentType = AgentType.USER,
-                            agentId = userId,
+                            agentId = info.userId,
                             targetType = TargetType.WORKSPACE,
                             targetPropertyMaybe = it.key,
                             targetIdMaybe = dbWorkspaceId,
                             previousValueMaybe = null,
                             newValueMaybe = it.value,
-                            timestamp = timestamp)
+                            timestamp = info.timestamp)
                     }
             actionAuditService.send(events)
+        } catch (e: RuntimeException) {
+            logAndSwallow(e)
+        }
+    }
+
+    override fun fireEditAction(
+        previousWorkspace: Workspace?,
+        editedWorkspace: Workspace?,
+        workspaceId: Long
+    ) {
+        try {
+            if (previousWorkspace == null || editedWorkspace == null) {
+                logger.log(Level.WARNING, "Null workspace passed to fireEditAction.")
+                return
+            }
+            val info = getAuditEventInfo()
+            val propertyToChangedValue = TargetPropertyExtractor.getChangedValuesByName(
+                    WorkspaceTargetProperty.values(),
+                    previousWorkspace,
+                    editedWorkspace)
+
+            val actionAuditEvents = propertyToChangedValue.entries
+                    .map { ActionAuditEvent(
+                            actionId = info.actionId,
+                            agentEmailMaybe = info.userEmail,
+                            actionType = ActionType.EDIT,
+                            agentType = AgentType.USER,
+                            agentId = info.userId,
+                            targetType = TargetType.WORKSPACE,
+                            targetPropertyMaybe = it.key,
+                            targetIdMaybe = workspaceId,
+                            previousValueMaybe = it.value.previousValue,
+                            newValueMaybe = it.value.newValue,
+                            timestamp = info.timestamp
+                    ) }
+            actionAuditService.send(actionAuditEvents)
         } catch (e: RuntimeException) {
             logAndSwallow(e)
         }
@@ -65,19 +98,16 @@ constructor(
     // consistent across actions somewhat challenging.
     override fun fireDeleteAction(dbWorkspace: DbWorkspace) {
         try {
-            val actionId = actionIdProvider.get()
-            val userId = userProvider.get().userId
-            val userEmail = userProvider.get().email
-            val timestamp = clock.millis()
+            val info = getAuditEventInfo()
             val event = ActionAuditEvent(
-                    actionId = actionId,
-                    agentEmailMaybe = userEmail,
+                    actionId = info.actionId,
+                    agentEmailMaybe = info.userEmail,
                     actionType = ActionType.DELETE,
                     agentType = AgentType.USER,
-                    agentId = userId,
+                    agentId = info.userId,
                     targetType = TargetType.WORKSPACE,
                     targetIdMaybe = dbWorkspace.workspaceId,
-                    timestamp = timestamp)
+                    timestamp = info.timestamp)
 
             actionAuditService.send(event)
         } catch (e: RuntimeException) {
@@ -86,45 +116,42 @@ constructor(
     }
 
     override fun fireDuplicateAction(
-        sourceWorkspaceDbModel: DbWorkspace,
-        destinationWorkspaceDbModel: DbWorkspace
+        sourceWorkspaceId: Long,
+        destinationWorkspaceId: Long,
+        destinationWorkspace: Workspace
     ) {
         try {
             // We represent the duplication as a single action with events with different
             // ActionTypes: DUPLICATE_FROM and DUPLICATE_TO. The latter action generates many events
             // (similar to how CREATE is handled) for all the properties. I'm not (currently) filtering
             // out values that are the same.
-            val actionId = actionIdProvider.get()
-            val userId = userProvider.get().userId
-            val userEmail = userProvider.get().email
-            val timestamp = clock.millis()
             // TODO(jaycarlton): consider grabbing source event properties as well
+            val info = getAuditEventInfo()
             val sourceEvent = ActionAuditEvent(
-                    actionId = actionId,
-                    agentEmailMaybe = userEmail,
+                    actionId = info.actionId,
+                    agentEmailMaybe = info.userEmail,
                     actionType = ActionType.DUPLICATE_FROM,
                     agentType = AgentType.USER,
-                    agentId = userId,
+                    agentId = info.userId,
                     targetType = TargetType.WORKSPACE,
-                    targetIdMaybe = sourceWorkspaceDbModel.workspaceId,
-                    timestamp = timestamp
+                    targetIdMaybe = sourceWorkspaceId,
+                    timestamp = info.timestamp
             )
             val destinationPropertyValues = TargetPropertyExtractor.getPropertyValuesByName(
-                    WorkspaceTargetProperty.values(),
-                    WorkspaceConversionUtils.toApiWorkspace(destinationWorkspaceDbModel))
+                    WorkspaceTargetProperty.values(), destinationWorkspace)
 
             val destinationEvents: List<ActionAuditEvent> = destinationPropertyValues.entries
                     .map { ActionAuditEvent(
-                            actionId = actionId,
-                            agentEmailMaybe = userEmail,
+                            actionId = info.actionId,
+                            agentEmailMaybe = info.userEmail,
                             actionType = ActionType.DUPLICATE_TO,
                             agentType = AgentType.USER,
-                            agentId = userId,
+                            agentId = info.userId,
                             targetType = TargetType.WORKSPACE,
                             targetPropertyMaybe = it.key,
-                            targetIdMaybe = destinationWorkspaceDbModel.workspaceId,
+                            targetIdMaybe = destinationWorkspaceId,
                             newValueMaybe = it.value,
-                            timestamp = timestamp
+                            timestamp = info.timestamp
                             ) }
 
             val allEvents = listOf(listOf(sourceEvent), destinationEvents).flatten()
@@ -144,30 +171,26 @@ constructor(
                 return
             }
 
-            val actionId = actionIdProvider.get()
-            val sharingUserId = userProvider.get().userId
-            val userEmail = userProvider.get().email
-            val timestamp = clock.millis()
-
+            val info = getAuditEventInfo()
             val workspaceTargetEvent = ActionAuditEvent(
-                    actionId = actionId,
+                    actionId = info.actionId,
                     actionType = ActionType.COLLABORATE,
                     agentType = AgentType.USER,
-                    agentEmailMaybe = userEmail,
-                    agentId = sharingUserId,
-                    timestamp = timestamp,
+                    agentEmailMaybe = info.userEmail,
+                    agentId = info.userId,
+                    timestamp = info.timestamp,
                     targetType = TargetType.WORKSPACE,
                     targetIdMaybe = sourceWorkspaceId
             )
 
             val inviteeEvents = aclStringsByUserId.entries
                     .map { ActionAuditEvent(
-                            actionId = actionId,
+                            actionId = info.actionId,
                             actionType = ActionType.COLLABORATE,
                             agentType = AgentType.USER,
-                            agentEmailMaybe = userEmail,
-                            agentId = sharingUserId,
-                            timestamp = timestamp,
+                            agentEmailMaybe = info.userEmail,
+                            agentId = info.userId,
+                            timestamp = info.timestamp,
                             targetType = TargetType.USER,
                             targetIdMaybe = it.key,
                             targetPropertyMaybe = AclTargetProperty.ACCESS_LEVEL.name,
@@ -178,6 +201,13 @@ constructor(
         } catch (e: RuntimeException) {
             logAndSwallow(e)
         }
+    }
+
+    private fun getAuditEventInfo(): CommonAuditEventInfo {
+        return CommonAuditEventInfo(actionId = actionIdProvider.get(),
+                userId = userProvider.get().userId,
+                userEmail = userProvider.get().email,
+                timestamp = clock.millis())
     }
 
     companion object {

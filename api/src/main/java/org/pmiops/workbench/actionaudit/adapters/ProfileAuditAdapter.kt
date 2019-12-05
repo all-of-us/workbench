@@ -3,7 +3,7 @@ package org.pmiops.workbench.actionaudit.adapters
 import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.model.Profile
 
-interface ProfileAuditAdapter : AuditAdapter<Profile> {
+interface ProfileAuditAdapter {
     fun fireCreateAction(createdProfile: Profile)
 
     fun fireUpdateAction(previousProfile: Profile, updatedProfile: Profile)
