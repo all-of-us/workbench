@@ -95,6 +95,7 @@ public class OfflineAuditController implements OfflineAuditApiDelegate {
         tableSuffixes.stream().map(s -> "'" + s + "'").collect(Collectors.joining(",")));
   }
 
+  // TODO(RW-3331): Update this method to handle VPC-SC CDRs and re-enable the cron if still needed.
   @Override
   public ResponseEntity<AuditBigQueryResponse> auditBigQuery() {
     // We expect to only see queries run within Firecloud AoU projects, or for administrative
