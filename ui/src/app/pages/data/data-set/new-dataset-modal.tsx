@@ -184,6 +184,16 @@ class NewDataSetModal extends React.Component<Props, State> {
     this.setState({exportToNotebook: !this.state.exportToNotebook});
   }
 
+  onSaveClick() {
+    if (this.props.dataSet) {
+      AnalyticsTracker.DatasetBuilder.Update(this.state.kernelType);
+    } else {
+      AnalyticsTracker.DatasetBuilder.Save(this.state.kernelType);
+    }
+
+    this.saveDataSet();
+  }
+
   async generateQuery() {
     const {workspaceNamespace, workspaceId} = this.props;
     const dataSetRequest: DataSetRequest = {
@@ -334,14 +344,7 @@ class NewDataSetModal extends React.Component<Props, State> {
           <Button type='primary'
                   data-test-id='save-data-set'
                   disabled={errors}
-                  onClick={() => {
-                    if (this.props.dataSet) {
-                      AnalyticsTracker.DatasetBuilder.Update(this.state.kernelType);
-                    } else {
-                      AnalyticsTracker.DatasetBuilder.Save(this.state.kernelType);
-                    }
-                    this.saveDataSet();
-                  }}>
+                  onClick={() => this.onSaveClick()}>
             {!this.props.dataSet ? 'Save' : 'Update' }{exportToNotebook && ' and Analyze'}
           </Button>
         </TooltipTrigger>
