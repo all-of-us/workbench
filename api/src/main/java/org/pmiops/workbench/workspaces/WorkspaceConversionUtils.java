@@ -12,7 +12,8 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
-import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -55,8 +56,7 @@ public class WorkspaceConversionUtils {
     return result;
   }
 
-  public static Workspace toApiWorkspace(
-      DbWorkspace workspace, org.pmiops.workbench.firecloud.model.Workspace fcWorkspace) {
+  public static Workspace toApiWorkspace(DbWorkspace workspace, FirecloudWorkspace fcWorkspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
 
     Workspace result =
@@ -102,7 +102,7 @@ public class WorkspaceConversionUtils {
     return result;
   }
 
-  public static UserRole toApiUserRole(DbUser user, WorkspaceAccessEntry aclEntry) {
+  public static UserRole toApiUserRole(DbUser user, FirecloudWorkspaceAccessEntry aclEntry) {
     UserRole result = new UserRole();
     result.setEmail(user.getEmail());
     result.setGivenName(user.getGivenName());

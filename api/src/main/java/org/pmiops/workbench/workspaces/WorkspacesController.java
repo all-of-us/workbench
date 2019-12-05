@@ -55,8 +55,9 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
-import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
@@ -151,7 +152,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private String getRegisteredUserDomainEmail() {
-    ManagedGroupWithMembers registeredDomainGroup =
+    FirecloudManagedGroupWithMembers registeredDomainGroup =
         fireCloudService.getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
     return registeredDomainGroup.getGroupEmail();
   }
@@ -198,8 +199,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return new FirecloudWorkspaceId(namespace, strippedName);
   }
 
-  private org.pmiops.workbench.firecloud.model.Workspace attemptFirecloudWorkspaceCreation(
-      FirecloudWorkspaceId workspaceId) {
+  private FirecloudWorkspace attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
     return fireCloudService.createWorkspace(
         workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
   }
@@ -221,8 +221,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId =
         generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        attemptFirecloudWorkspaceCreation(workspaceId);
+    FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbWorkspace dbWorkspace = new DbWorkspace();
@@ -267,7 +266,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       DbWorkspace dbWorkspace,
       DbUser user,
       FirecloudWorkspaceId workspaceId,
-      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+      FirecloudWorkspace fcWorkspace,
       Timestamp createdAndLastModifiedTime) {
     dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
     dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
@@ -318,7 +317,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
+    FirecloudWorkspace fcWorkspace =
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace();
     if (workspace == null) {
       throw new BadRequestException("No workspace provided in request");
@@ -398,7 +397,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     FirecloudWorkspaceId toFcWorkspaceId =
         generateFirecloudWorkspaceId(toWorkspaceName, toWorkspace.getName());
-    org.pmiops.workbench.firecloud.model.Workspace toFcWorkspace =
+    FirecloudWorkspace toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
             fromWorkspaceId,
@@ -465,12 +464,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
 
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
-      Map<String, WorkspaceAccessEntry> fromAclsMap =
+      Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
           workspaceService.getFirecloudWorkspaceAcls(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
 
       Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
-      for (Map.Entry<String, WorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
+      for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
         if (!entry.getKey().equals(user.getEmail())) {
           clonedRoles.put(
               entry.getKey(), WorkspaceAccessLevel.fromValue(entry.getValue().getAccessLevel()));
@@ -540,7 +539,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
-    Map<String, WorkspaceAccessEntry> updatedWsAcls =
+    Map<String, FirecloudWorkspaceAccessEntry> updatedWsAcls =
         workspaceService.getFirecloudWorkspaceAcls(
             workspaceNamespace, dbWorkspace.getFirecloudName());
     List<UserRole> updatedUserRoles =
@@ -732,7 +731,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    Map<String, WorkspaceAccessEntry> firecloudAcls =
+    Map<String, FirecloudWorkspaceAccessEntry> firecloudAcls =
         workspaceService.getFirecloudWorkspaceAcls(
             workspaceNamespace, dbWorkspace.getFirecloudName());
     List<UserRole> userRoles = workspaceService.convertWorkspaceAclsToUserRoles(firecloudAcls);

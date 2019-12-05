@@ -27,6 +27,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
@@ -168,7 +169,7 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<ClusterLocalizeResponse> localize(
       String projectName, String clusterName, ClusterLocalizeRequest body) {
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
+    FirecloudWorkspace fcWorkspace;
     try {
       fcWorkspace =
           fireCloudService
@@ -280,9 +281,7 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   private String aouConfigDataUri(
-      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
-      DbCdrVersion cdrVersion,
-      String cdrBillingCloudProject) {
+      FirecloudWorkspace fcWorkspace, DbCdrVersion cdrVersion, String cdrBillingCloudProject) {
     JSONObject config = new JSONObject();
 
     String host = null;

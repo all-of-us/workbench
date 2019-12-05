@@ -19,7 +19,7 @@ import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
+import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateUserDisabledRequest;
@@ -67,7 +67,7 @@ public class AuthDomainControllerTest {
     adminUser.setUserId(0L);
     doNothing().when(fireCloudService).addUserToBillingProject(any(), any());
     doNothing().when(fireCloudService).removeUserFromBillingProject(any(), any());
-    when(fireCloudService.createGroup(any())).thenReturn(new ManagedGroupWithMembers());
+    when(fireCloudService.createGroup(any())).thenReturn(new FirecloudManagedGroupWithMembers());
     when(userProvider.get()).thenReturn(adminUser);
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new WorkbenchConfig.FireCloudConfig();

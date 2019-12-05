@@ -15,6 +15,7 @@ import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -44,8 +45,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
   @Mapping(target = "creator", source = "fcWorkspace.createdBy")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
-  Workspace toApiWorkspace(
-      DbWorkspace dbWorkspace, org.pmiops.workbench.firecloud.model.Workspace fcWorkspace);
+  Workspace toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspace fcWorkspace);
 
   // This method is simply merging the research purpose, which covers only a subset of the fields
   // in the DbWorkspace target

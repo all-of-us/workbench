@@ -26,7 +26,7 @@ import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.model.Me;
+import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -143,7 +143,7 @@ public class FireCloudIntegrationTest {
 
     // Run the most basic API call against the /me/ endpoint.
     ProfileApi profileApi = new ProfileApi(apiClient);
-    Me me = profileApi.me();
+    FirecloudMe me = profileApi.me();
     assertThat(me.getUserInfo().getUserEmail())
         .isEqualTo("integration-test-user@fake-research-aou.org");
     assertThat(me.getUserInfo().getUserSubjectId()).isEqualTo("101727030557929965916");

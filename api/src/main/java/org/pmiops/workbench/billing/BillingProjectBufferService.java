@@ -26,7 +26,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.BillingProjectStatus.CreationStatusEnum;
+import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
