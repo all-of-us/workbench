@@ -1,6 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
-import {faCloud, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import {faThunderstorm} from '@fortawesome/pro-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -143,16 +144,16 @@ const icons = [{
 }, {
   id: 'cloud',
   disabled: true,
-  faIcon: faCloud,
+  faIcon: faThunderstorm,
   page: null,
-  style: {fontSize: '20px', opacity: 0.5},
+  style: {fontSize: '22px', marginTop: '0.25rem', opacity: 0.5},
   tooltip: 'Compute Configuration',
 }, {
   id: 'annotations',
   disabled: false,
   faIcon: faEdit,
   page: 'reviewParticipantDetail',
-  style: {fontSize: '22px', marginLeft: '5px'},
+  style: {fontSize: '20px', marginLeft: '5px'},
   tooltip: 'Annotations',
 }];
 
