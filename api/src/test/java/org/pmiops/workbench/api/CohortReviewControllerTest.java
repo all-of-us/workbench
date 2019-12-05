@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,12 +69,14 @@ import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.PageFilterRequest;
 import org.pmiops.workbench.model.ParticipantCohortAnnotation;
 import org.pmiops.workbench.model.ParticipantCohortAnnotationListResponse;
+import org.pmiops.workbench.model.ParticipantCohortStatus;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -82,6 +85,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -184,6 +188,7 @@ public class CohortReviewControllerTest {
     }
 
     @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     DbUser user() {
       return user;
     }
@@ -717,7 +722,7 @@ public class CohortReviewControllerTest {
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.READER))
         .thenReturn(workspace);
 
-    org.pmiops.workbench.model.ParticipantCohortStatus response =
+    ParticipantCohortStatus response =
         cohortReviewController
             .getParticipantCohortStatus(
                 WORKSPACE_NAMESPACE,
@@ -781,12 +786,18 @@ public class CohortReviewControllerTest {
     assertParticipantCohortStatuses(
         expectedReview1, page, pageSize, SortOrder.DESC, FilterColumns.STATUS);
     verify(userRecentResourceService).updateCohortEntry(anyLong(), anyLong(), anyLong());
+
     assertParticipantCohortStatuses(
         expectedReview2, page, pageSize, SortOrder.DESC, FilterColumns.PARTICIPANTID);
+
     assertParticipantCohortStatuses(expectedReview3, null, null, null, FilterColumns.STATUS);
+
     assertParticipantCohortStatuses(expectedReview4, null, null, SortOrder.ASC, null);
+
     assertParticipantCohortStatuses(expectedReview4, null, pageSize, null, null);
+
     assertParticipantCohortStatuses(expectedReview4, page, null, null, null);
+
     assertParticipantCohortStatuses(expectedReview4, null, null, null, null);
   }
 
@@ -845,7 +856,7 @@ public class CohortReviewControllerTest {
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(workspace);
 
-    org.pmiops.workbench.model.ParticipantCohortStatus participantCohortStatus =
+    ParticipantCohortStatus participantCohortStatus =
         cohortReviewController
             .updateParticipantCohortStatus(
                 WORKSPACE_NAMESPACE,
@@ -959,7 +970,7 @@ public class CohortReviewControllerTest {
                     .pageSize(pageSize)
                     .sortOrder(sortOrder))
             .getBody();
-
+    verify(userRecentResourceService).updateCohortEntry(anyLong(), anyLong(), anyLong());
     assertThat(actualReview).isEqualTo(expectedReview);
   }
 
@@ -1005,22 +1016,10 @@ public class CohortReviewControllerTest {
       Integer pageSize,
       SortOrder sortOrder,
       FilterColumns sortColumn) {
-    List<org.pmiops.workbench.model.ParticipantCohortStatus> newParticipantCohortStatusList =
-        new ArrayList<>();
-    for (DbParticipantCohortStatus participantCohortStatus : participantCohortStatusList) {
-      newParticipantCohortStatusList.add(
-          new org.pmiops.workbench.model.ParticipantCohortStatus()
-              .birthDate(participantCohortStatus.getBirthDate().toString())
-              .ethnicityConceptId(participantCohortStatus.getEthnicityConceptId())
-              .ethnicity(participantCohortStatus.getEthnicity())
-              .genderConceptId(participantCohortStatus.getGenderConceptId())
-              .gender(participantCohortStatus.getGender())
-              .participantId(participantCohortStatus.getParticipantKey().getParticipantId())
-              .raceConceptId(participantCohortStatus.getRaceConceptId())
-              .race(participantCohortStatus.getRace())
-              .status(participantCohortStatus.getStatusEnum())
-              .deceased(participantCohortStatus.getDeceased()));
-    }
+    List<ParticipantCohortStatus> newParticipantCohortStatusList = participantCohortStatusList.stream()
+        .map(this::dbParticipantCohortStatusToApi)
+        .collect(Collectors.toList());
+
     return new CohortReview()
         .cohortReviewId(actualReview.getCohortReviewId())
         .cohortId(actualReview.getCohortId())
@@ -1035,5 +1034,19 @@ public class CohortReviewControllerTest {
         .pageSize(pageSize)
         .sortOrder(sortOrder.toString())
         .sortColumn(sortColumn.name());
+  }
+
+  private ParticipantCohortStatus dbParticipantCohortStatusToApi(DbParticipantCohortStatus dbStatus) {
+    return new ParticipantCohortStatus()
+        .birthDate(dbStatus.getBirthDate().toString())
+        .ethnicityConceptId(dbStatus.getEthnicityConceptId())
+        .ethnicity(dbStatus.getEthnicity())
+        .genderConceptId(dbStatus.getGenderConceptId())
+        .gender(dbStatus.getGender())
+        .participantId(dbStatus.getParticipantKey().getParticipantId())
+        .raceConceptId(dbStatus.getRaceConceptId())
+        .race(dbStatus.getRace())
+        .status(dbStatus.getStatusEnum())
+        .deceased(dbStatus.getDeceased());
   }
 }
