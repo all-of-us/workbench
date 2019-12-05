@@ -5,7 +5,8 @@ This is an AoU-specific extension of the default Swagger-codegen okhttp API impl
 The original template was copied from the 2.2.3 release of swagger-codegen; see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/modules/swagger-codegen/src/main/resources/Java/libraries/okhttp-gson/api.mustache
 for the original file.
 
-AoU-specific additions have been clearly bookended with comments marked "Begin AoU-specific additions".
+AoU-specific additions or replacements are imported via separate files prefixed with "aou",
+e.g. "aouTraceImports" and "aouTracedMethodCall".
 
 }}
 {{>licenseInfo}}
@@ -44,15 +45,7 @@ import java.lang.reflect.Type;
 {{#imports}}import {{import}};
 {{/imports}}
 
-{{! Begin AoU-specific additions }}
-import io.opencensus.common.Scope;
-import io.opencensus.trace.AttributeValue;
-import io.opencensus.trace.Span;
-import io.opencensus.trace.Status;
-import io.opencensus.trace.Tracer;
-import io.opencensus.trace.Tracing;
-import java.lang.reflect.Type;
-{{! End AoU-specific additions }}
+{{>aouTraceImports}}
 {{^fullJavaUtil}}
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -191,40 +184,7 @@ public class {{classname}} {
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      */
     public {{#returnType}}{{{returnType}}} {{/returnType}}{{^returnType}}void {{/returnType}}{{operationId}}({{#allParams}}{{{dataType}}} {{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) throws ApiException {
-        {{! Begin AoU-specific additions }}
-        // Generate an OpenCensus tracing span for this API method call.
-        Scope scope = tracer.spanBuilderWithExplicitParent("{{classname}}.{{operationId}}", tracer.getCurrentSpan())
-            .setSpanKind(Span.Kind.CLIENT).startScopedSpan();
-        Span span = tracer.getCurrentSpan();
-        // Some of these attribute keys use naming from the OpenCensus standard. See
-        // https://github.com/census-instrumentation/opencensus-specs/blob/master/trace/HTTP.md
-        span.putAttribute("package", AttributeValue.stringAttributeValue("{{package}}"));
-        span.putAttribute("http.host", AttributeValue.stringAttributeValue(apiClient.getBasePath()));
-        span.putAttribute("http.path", AttributeValue.stringAttributeValue("{{path}}"));
-        span.putAttribute("http.method", AttributeValue.stringAttributeValue("{{httpMethod}}"));
-        span.putAttribute("description", AttributeValue.stringAttributeValue("{{summary}}"));
-        {{#returnType}}span.putAttribute("responseType", AttributeValue.stringAttributeValue("{{{returnType}}}"));{{/returnType}}
-        span.putAttribute("connectionTimeout", AttributeValue.longAttributeValue(apiClient.getConnectTimeout()));
-
-        try {
-            // Create and execute the API request.
-            {{#returnType}}ApiResponse<{{{returnType}}}> {{localVariablePrefix}}resp = {{/returnType}}{{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}});
-            {{#returnType}}
-            span.putAttribute("http.status_code", AttributeValue.longAttributeValue(resp.getStatusCode()));
-            return {{localVariablePrefix}}resp.getData();
-            {{/returnType}}
-        } catch (ApiException e) {
-            // We could be more intelligent about aligning HTTP error codes with OpenCensus canonical
-            // status codes... but this is for tracing purposes, not logging / deeper debugging, so we'll
-            // be lazy and use UNKNOWN, including the actual code as an attribute.
-            span.setStatus(Status.UNKNOWN.withDescription(e.getMessage()));
-            span.putAttribute("http.status_code", AttributeValue.longAttributeValue(e.getCode()));
-            span.putAttribute("errorMessage", AttributeValue.stringAttributeValue(e.getMessage()));
-            throw e;
-        } finally {
-            scope.close();
-        }
-    {{! End AoU-specific additions }}
+        {{>aouTracedMethodCall}}
     }
 
     /**
