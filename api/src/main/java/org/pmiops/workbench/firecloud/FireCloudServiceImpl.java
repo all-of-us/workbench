@@ -367,7 +367,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public List<FirecloudWorkspaceResponse> getWorkspaces(List<String> fields) throws WorkbenchException {
+  public List<FirecloudWorkspaceResponse> getWorkspaces(List<String> fields)
+      throws WorkbenchException {
     return retryHandler.run((context) -> workspacesApiProvider.get().listWorkspaces(fields));
   }
 

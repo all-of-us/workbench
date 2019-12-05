@@ -18,6 +18,7 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -52,7 +53,7 @@ public class WorkspaceMapperTest {
 
   private Workspace sourceClientWorkspace;
   private DbWorkspace sourceDbWorkspace;
-  private org.pmiops.workbench.firecloud.model.Workspace sourceFirecloudWorkspace;
+  private FirecloudWorkspace sourceFirecloudWorkspace;
 
   @Autowired private WorkspaceMapper workspaceMapper;
   @Autowired private WorkspaceDao mockWorkspaceDao;
@@ -65,7 +66,7 @@ public class WorkspaceMapperTest {
   @Before
   public void setUp() {
     sourceFirecloudWorkspace =
-        new org.pmiops.workbench.firecloud.model.Workspace()
+        new FirecloudWorkspace()
             .workspaceId(Long.toString(CREATOR_USER_ID))
             .bucketName(FIRECLOUD_BUCKET_NAME)
             .createdBy(CREATOR_EMAIL)
