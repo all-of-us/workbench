@@ -208,9 +208,11 @@ public class {{classname}} {
 
         try {
             // Create and execute the API request.
-            {{#returnType}}ApiResponse<{{{returnType}}}> {{localVariablePrefix}}resp = {{/returnType}}{{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}});{{#returnType}}
+            {{#returnType}}ApiResponse<{{{returnType}}}> {{localVariablePrefix}}resp = {{/returnType}}{{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}});
+            {{#returnType}}
             span.putAttribute("http.status_code", AttributeValue.longAttributeValue(resp.getStatusCode()));
-            return {{localVariablePrefix}}resp.getData();{{/returnType}}
+            return {{localVariablePrefix}}resp.getData();
+            {{/returnType}}
         } catch (ApiException e) {
             // We could be more intelligent about aligning HTTP error codes with OpenCensus canonical
             // status codes... but this is for tracing purposes, not logging / deeper debugging, so we'll
