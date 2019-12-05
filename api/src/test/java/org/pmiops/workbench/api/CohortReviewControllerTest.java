@@ -283,32 +283,32 @@ public class CohortReviewControllerTest {
             .participantId(2L);
 
     participantCohortStatus1 =
-        new DbParticipantCohortStatus()
-            .statusEnum(CohortStatus.NOT_REVIEWED)
-            .participantKey(key1)
-            .genderConceptId(TestDemo.MALE.getConceptId())
-            .gender(TestDemo.MALE.getName())
-            .raceConceptId(TestDemo.ASIAN.getConceptId())
-            .race(TestDemo.ASIAN.getName())
-            .ethnicityConceptId(TestDemo.NOT_HISPANIC.getConceptId())
-            .ethnicity(TestDemo.NOT_HISPANIC.getName())
-            .birthDate(new java.sql.Date(today.getTime()))
-            .deceased(false);
-    participantCohortStatus2 =
-        new DbParticipantCohortStatus()
-            .statusEnum(CohortStatus.NOT_REVIEWED)
-            .participantKey(key2)
-            .genderConceptId(TestDemo.FEMALE.getConceptId())
-            .gender(TestDemo.FEMALE.getName())
-            .raceConceptId(TestDemo.WHITE.getConceptId())
-            .race(TestDemo.WHITE.getName())
-            .ethnicityConceptId(TestDemo.NOT_HISPANIC.getConceptId())
-            .ethnicity(TestDemo.NOT_HISPANIC.getName())
-            .birthDate(new java.sql.Date(today.getTime()))
-            .deceased(false);
+        participantCohortStatusDao.save(
+            new DbParticipantCohortStatus()
+                .statusEnum(CohortStatus.NOT_REVIEWED)
+                .participantKey(key1)
+                .genderConceptId(TestDemo.MALE.getConceptId())
+                .gender(TestDemo.MALE.getName())
+                .raceConceptId(TestDemo.ASIAN.getConceptId())
+                .race(TestDemo.ASIAN.getName())
+                .ethnicityConceptId(TestDemo.NOT_HISPANIC.getConceptId())
+                .ethnicity(TestDemo.NOT_HISPANIC.getName())
+                .birthDate(new java.sql.Date(today.getTime()))
+                .deceased(false));
 
-    participantCohortStatusDao.save(participantCohortStatus1);
-    participantCohortStatusDao.save(participantCohortStatus2);
+    participantCohortStatus2 =
+        participantCohortStatusDao.save(
+            new DbParticipantCohortStatus()
+                .statusEnum(CohortStatus.NOT_REVIEWED)
+                .participantKey(key2)
+                .genderConceptId(TestDemo.FEMALE.getConceptId())
+                .gender(TestDemo.FEMALE.getName())
+                .raceConceptId(TestDemo.WHITE.getConceptId())
+                .race(TestDemo.WHITE.getName())
+                .ethnicityConceptId(TestDemo.NOT_HISPANIC.getConceptId())
+                .ethnicity(TestDemo.NOT_HISPANIC.getName())
+                .birthDate(new java.sql.Date(today.getTime()))
+                .deceased(false));
 
     stringAnnotationDefinition =
         new DbCohortAnnotationDefinition()
