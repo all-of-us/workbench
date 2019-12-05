@@ -260,7 +260,7 @@ export const ListOverview = withCurrentWorkspace()(
       const {ns, wsid} = urlParamsStore.getValue();
       const {cohort} = this.state;
       cohortsApi().deleteCohort(ns, wsid, cohort.id).then(() => {
-        navigate(['workspaces', ns, wsid, 'data', 'cohorts']);
+        navigate(['workspaces', ns, wsid, 'data']);
       }, (error) => {
         console.log(error);
       });
