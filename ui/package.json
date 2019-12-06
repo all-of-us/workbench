@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "dev-up": "yarn run codegen && yarn start",
+    "dev-up": "yarn && yarn run codegen && yarn start",
     "build": "ng build",
     "test": "ng test --source-map=false",
     "test-react": "jest",
