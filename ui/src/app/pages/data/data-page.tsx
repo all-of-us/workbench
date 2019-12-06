@@ -12,6 +12,7 @@ import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
 import {cohortReviewApi, cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {
   convertToResources,
@@ -227,6 +228,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
               disabled={!writePermission}
               onClick={() => {
+                AnalyticsTracker.DatasetBuilder.OpenCreatePage();
                 navigate(['workspaces', namespace, id, 'data', 'data-sets']);
               }}>
               <div style={styles.cardHeader}>

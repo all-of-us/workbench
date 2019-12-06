@@ -1,0 +1,34 @@
+        // Generate an OpenCensus tracing span for this API method call.
+        Scope scope = tracer.spanBuilderWithExplicitParent("{{classname}}.{{operationId}}", tracer.getCurrentSpan())
+            .setSpanKind(Span.Kind.CLIENT).startScopedSpan();
+        Span span = tracer.getCurrentSpan();
+        // Some of these attribute keys use naming from the OpenCensus standard. See
+        // https://github.com/census-instrumentation/opencensus-specs/blob/master/trace/HTTP.md
+        span.putAttribute("package", AttributeValue.stringAttributeValue("{{package}}"));
+        span.putAttribute("http.host", AttributeValue.stringAttributeValue(apiClient.getBasePath()));
+        span.putAttribute("http.path", AttributeValue.stringAttributeValue("{{path}}"));
+        span.putAttribute("http.method", AttributeValue.stringAttributeValue("{{httpMethod}}"));
+        span.putAttribute("description", AttributeValue.stringAttributeValue("{{summary}}"));
+        span.putAttribute("connectionTimeout", AttributeValue.longAttributeValue(apiClient.getConnectTimeout()));
+        {{#returnType}}
+            span.putAttribute("responseType", AttributeValue.stringAttributeValue("{{{returnType}}}"));
+        {{/returnType}}
+
+        try {
+            // Create and execute the API request.
+            {{#returnType}}ApiResponse<{{{returnType}}}> {{localVariablePrefix}}resp = {{/returnType}}{{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}});
+            {{#returnType}}
+            span.putAttribute("http.status_code", AttributeValue.longAttributeValue(resp.getStatusCode()));
+            return {{localVariablePrefix}}resp.getData();
+            {{/returnType}}
+        } catch (ApiException e) {
+            // We could be more intelligent about aligning HTTP error codes with OpenCensus canonical
+            // status codes... but this is for tracing purposes, not logging / deeper debugging, so we'll
+            // be lazy and use UNKNOWN, including the actual code as an attribute.
+            span.setStatus(Status.UNKNOWN.withDescription(e.getMessage()));
+            span.putAttribute("http.status_code", AttributeValue.longAttributeValue(e.getCode()));
+            span.putAttribute("errorMessage", AttributeValue.stringAttributeValue(e.getMessage()));
+            throw e;
+        } finally {
+            scope.close();
+        }

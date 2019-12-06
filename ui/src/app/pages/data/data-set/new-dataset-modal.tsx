@@ -20,6 +20,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {
   DataSet,
@@ -183,6 +184,24 @@ class NewDataSetModal extends React.Component<Props, State> {
     this.setState({exportToNotebook: !this.state.exportToNotebook});
   }
 
+  onSaveClick() {
+    if (this.props.dataSet) {
+      if (this.state.exportToNotebook) {
+        AnalyticsTracker.DatasetBuilder.UpdateAndAnalyze(this.state.kernelType);
+      } else {
+        AnalyticsTracker.DatasetBuilder.Update();
+      }
+    } else {
+      if (this.state.exportToNotebook) {
+        AnalyticsTracker.DatasetBuilder.SaveAndAnalyze(this.state.kernelType);
+      } else {
+        AnalyticsTracker.DatasetBuilder.Save();
+      }
+    }
+
+    this.saveDataSet();
+  }
+
   async generateQuery() {
     const {workspaceNamespace, workspaceId} = this.props;
     const dataSetRequest: DataSetRequest = {
@@ -271,7 +290,12 @@ class NewDataSetModal extends React.Component<Props, State> {
         {exportToNotebook && <React.Fragment>
           {notebooksLoading && <SpinnerOverlay />}
           <Button style={{marginTop: '1rem'}} data-test-id='code-preview-button'
-                  onClick={() => this.setState({seePreview: !seePreview})}>
+                  onClick={() => {
+                    if (!seePreview) {
+                      AnalyticsTracker.DatasetBuilder.SeeCodePreview();
+                    }
+                    this.setState({seePreview: !seePreview});
+                  }}>
             {seePreview ? 'Hide Preview' : 'See Code Preview'}
           </Button>
           {seePreview && <React.Fragment>
@@ -325,8 +349,10 @@ class NewDataSetModal extends React.Component<Props, State> {
           Cancel
         </Button>
         <TooltipTrigger content={summarizeErrors(errors)}>
-          <Button type='primary' data-test-id='save-data-set'
-                  disabled={errors} onClick={() => this.saveDataSet()}>
+          <Button type='primary'
+                  data-test-id='save-data-set'
+                  disabled={errors}
+                  onClick={() => this.onSaveClick()}>
             {!this.props.dataSet ? 'Save' : 'Update' }{exportToNotebook && ' and Analyze'}
           </Button>
         </TooltipTrigger>

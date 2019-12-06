@@ -6,5 +6,6 @@ import {testEnvironmentBase} from 'environments/test-env-base';
 export const environment: Environment = {
   ...testEnvironmentBase,
   displayTag: 'Local->Test',
-  debug: true
+  debug: true,
+  gaId: 'UA-112406425-5'
 };

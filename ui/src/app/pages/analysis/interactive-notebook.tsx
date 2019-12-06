@@ -13,6 +13,7 @@ import {notebooksClusterApi} from 'app/services/notebooks-swagger-fetch-clients'
 import {clusterApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -265,14 +266,20 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
               </div>) : (
               <div style={{display: 'flex'}}>
                 <div style={this.buttonStyleObj}
-                     onClick={() => { this.startEditMode(); }}>
+                     onClick={() => {
+                       AnalyticsTracker.Notebooks.Edit();
+                       this.startEditMode();
+                     }}>
                   <EditComponentReact enableHoverEffect={false}
                                       disabled={!this.canWrite}
                                       style={styles.navBarIcon}/>
                   Edit {this.notebookInUse && '(In Use)'}
                 </div>
                 <div style={this.buttonStyleObj}
-                     onClick={() => { this.onPlaygroundModeClick(); }}>
+                     onClick={() => {
+                       AnalyticsTracker.Notebooks.Run();
+                       this.onPlaygroundModeClick();
+                     }}>
                   <PlaygroundModeIcon enableHoverEffect={false} disabled={!this.canWrite}
                                       style={styles.navBarIcon}/>
                   Run (Playground Mode)
