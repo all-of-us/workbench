@@ -30,7 +30,9 @@ export function triggerEvent(
 }
 
 enum ANALYTICS_CATEGORIES {
-  WORKSPACES = 'Workspaces'
+  WORKSPACES = 'Workspaces',
+  DATASET_BUILDER = 'Dataset Builder',
+  NOTEBOOKS = 'Notebooks'
 }
 
 export const AnalyticsTracker = {
@@ -45,6 +47,36 @@ export const AnalyticsTracker = {
     Share: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Share', getCurrentPageLabel()),
     OpenDeleteModal: (suffix = '') => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Open Delete Modal', getCurrentPageLabel(suffix)),
     Delete: () => triggerEvent(ANALYTICS_CATEGORIES.WORKSPACES, 'Delete', getCurrentPageLabel())
+  },
+  DatasetBuilder: {
+    OpenCreatePage: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Create Page'),
+    Save: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Save'),
+    SaveAndAnalyze: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Save and Analyze', suffix),
+    OpenEditPage: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Edit Page', suffix),
+    Update: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Update'),
+    UpdateAndAnalyze: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Update and Analyze', suffix),
+    SeeCodePreview: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'See Code Preview'),
+    OpenRenameModal: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Rename Modal'),
+    Rename: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Rename'),
+    OpenExportModal: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Export Modal'),
+    Export: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Export', suffix),
+    OpenDeleteModal: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Delete Modal'),
+    Delete: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Delete'),
+    ViewPreviewTable: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'View Preview Table')
+  },
+  Notebooks: {
+    OpenCreateModal: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Open Create Modal'),
+    Create: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Create', suffix),
+    OpenRenameModal: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Open Rename Modal'),
+    Rename: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Rename'),
+    Duplicate: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Duplicate'),
+    OpenCopyModal: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Open Copy Modal'),
+    Copy: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Copy'),
+    OpenDeleteModal: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Open Delete Modal'),
+    Delete: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Delete'),
+    Preview: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Preview'),
+    Edit: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Edit'),
+    Run: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Run (Playground Mode)')
   }
 };
 

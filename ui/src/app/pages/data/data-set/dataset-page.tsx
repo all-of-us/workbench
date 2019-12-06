@@ -29,6 +29,7 @@ import {
   withUrlParams,
   withUserProfile
 } from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -974,12 +975,19 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                 </div>
               </div>
               </FlexColumn>
-              <Clickable data-test-id='preview-button' style={{
-                marginTop: '0.5rem',
-                cursor: this.disableSave() ? 'not-allowed' : 'pointer', height: '1.8rem',
-                width: '6.5rem', color: this.disableSave() ? colorWithWhiteness(colors.dark, 0.6) :
-                  colors.accent}} disabled={this.disableSave()}
-                onClick={() => this.getPreviewList()}>
+              <Clickable data-test-id='preview-button'
+                         style={{
+                           marginTop: '0.5rem',
+                           cursor: this.disableSave() ? 'not-allowed' : 'pointer',
+                           height: '1.8rem',
+                           width: '6.5rem',
+                           color: this.disableSave() ? colorWithWhiteness(colors.dark, 0.6) : colors.accent
+                         }}
+                         disabled={this.disableSave()}
+                         onClick={() => {
+                           AnalyticsTracker.DatasetBuilder.ViewPreviewTable();
+                           this.getPreviewList();
+                         }}>
                   View Preview Table
               </Clickable>
             </div>
