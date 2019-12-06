@@ -13,6 +13,7 @@ import {TwoColPaddedTable} from 'app/components/tables';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCdrVersions, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
 import {ArchivalStatus, CdrVersion, CdrVersionListResponse, DataAccessLevel, SpecificPopulationEnum, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
@@ -532,6 +533,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
     }
 
+    onSaveClick() {
+      if (this.isMode(WorkspaceEditMode.Create)) {
+        AnalyticsTracker.Workspaces.Create();
+      } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
+        AnalyticsTracker.Workspaces.Duplicate();
+      } else if (this.isMode(WorkspaceEditMode.Edit)) {
+        AnalyticsTracker.Workspaces.Edit();
+      }
+
+      this.saveWorkspace();
+    }
+
     async saveWorkspace() {
       try {
         this.setState({loading: true});
@@ -625,11 +638,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         workspaceCreationError : false,
         workspaceCreationConflictError : false
       });
-    }
-
-    isEmpty(parent, field) {
-      const fieldValue = parent[field];
-      return !fieldValue || fieldValue === '';
     }
 
     isMode(mode) {
@@ -910,7 +918,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 {errors.diseaseOfFocus && <div>You must specify a disease of focus</div>}
               </ul>
             } disabled={!errors}>
-              <Button type='primary' onClick={() => this.saveWorkspace()}
+              <Button type='primary'
+                      onClick={() => this.onSaveClick()}
                       disabled={errors || this.state.loading}
                       data-test-id='workspace-save-btn'>
                 {this.renderButtonText()}
