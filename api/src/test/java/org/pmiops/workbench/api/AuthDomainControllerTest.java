@@ -110,7 +110,8 @@ public class AuthDomainControllerTest {
     UpdateUserDisabledRequest request =
         new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(true);
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
-    verify(mockAuthDomainAuditAdapter).fireSetAccountEnabled(createdUser.getUserId(), false, true);
+    verify(mockAuthDomainAuditAdapter)
+        .fireSetAccountDisabledStatus(createdUser.getUserId(), false, true);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled()).isTrue();
@@ -122,7 +123,8 @@ public class AuthDomainControllerTest {
     UpdateUserDisabledRequest request =
         new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(false);
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
-    verify(mockAuthDomainAuditAdapter).fireSetAccountEnabled(createdUser.getUserId(), true, false);
+    verify(mockAuthDomainAuditAdapter)
+        .fireSetAccountDisabledStatus(createdUser.getUserId(), true, false);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled()).isFalse();

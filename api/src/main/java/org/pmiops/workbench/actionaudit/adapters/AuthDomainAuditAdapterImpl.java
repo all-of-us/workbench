@@ -8,6 +8,7 @@ import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AccountTargetProperty;
+import org.pmiops.workbench.actionaudit.targetproperties.values.AccountDisabledStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,8 +35,8 @@ public class AuthDomainAuditAdapterImpl implements AuthDomainAuditAdapter {
   }
 
   @Override
-  public void fireSetAccountEnabled(
-      long targetUserId, boolean newEnabledValue, boolean previousEnabledValue) {
+  public void fireSetAccountDisabledStatus(
+      long targetUserId, boolean newDisabledValue, boolean oldDisabledValue) {
     actionAuditService.send(
         ActionAuditEvent.builder()
             .timestamp(clock.millis())
@@ -47,8 +48,10 @@ public class AuthDomainAuditAdapterImpl implements AuthDomainAuditAdapter {
             .targetType(TargetType.ACCOUNT)
             .targetPropertyMaybe(AccountTargetProperty.IS_ENABLED.getPropertyName())
             .targetIdMaybe(targetUserId)
-            .previousValueMaybe(Boolean.toString(previousEnabledValue))
-            .newValueMaybe(Boolean.toString(newEnabledValue))
+            .previousValueMaybe(
+                AccountDisabledStatus.fromDisabledBoolean(oldDisabledValue).getValueName())
+            .newValueMaybe(
+                AccountDisabledStatus.fromDisabledBoolean(newDisabledValue).getValueName())
             .build());
   }
 }

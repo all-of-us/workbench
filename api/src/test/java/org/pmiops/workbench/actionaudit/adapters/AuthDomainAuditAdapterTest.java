@@ -15,6 +15,7 @@ import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AccountTargetProperty;
+import org.pmiops.workbench.actionaudit.targetproperties.values.AccountDisabledStatus;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +70,7 @@ public class AuthDomainAuditAdapterTest {
 
   @Test
   public void testFires() {
-    authDomainAuditAdapter.fireSetAccountEnabled(USER_ID, true, false);
+    authDomainAuditAdapter.fireSetAccountDisabledStatus(USER_ID, true, false);
     verify(mockActionAuditService).send(eventCaptor.capture());
     final ActionAuditEvent event = eventCaptor.getValue();
 
@@ -83,7 +84,8 @@ public class AuthDomainAuditAdapterTest {
     assertThat(event.getTargetPropertyMaybe())
         .isEqualTo(AccountTargetProperty.IS_ENABLED.getPropertyName());
     assertThat(event.getTargetIdMaybe()).isEqualTo(USER_ID);
-    assertThat(event.getPreviousValueMaybe()).isEqualTo(Boolean.toString(false));
-    assertThat(event.getNewValueMaybe()).isEqualTo(Boolean.toString(true));
+    assertThat(event.getPreviousValueMaybe())
+        .isEqualTo(AccountDisabledStatus.ENABLED.getValueName());
+    assertThat(event.getNewValueMaybe()).isEqualTo(AccountDisabledStatus.DISABLED.getValueName());
   }
 }
