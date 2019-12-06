@@ -1,6 +1,7 @@
 package org.pmiops.workbench.actionaudit.adapters;
 
 import java.time.Clock;
+import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthDomainAuditAdapterImpl implements AuthDomainAuditAdapter {
+
+  private static final Logger log = Logger.getLogger(AuthDomainAuditAdapterImpl.class.getName());
 
   private ActionAuditService actionAuditService;
   private Clock clock;
@@ -36,19 +39,23 @@ public class AuthDomainAuditAdapterImpl implements AuthDomainAuditAdapter {
   @Override
   public void fireSetAccountEnabled(
       long targetUserId, boolean newEnabledValue, boolean previousEnabledValue) {
-    actionAuditService.send(
-        ActionAuditEvent.builder()
-            .timestamp(clock.millis())
-            .agentType(AgentType.ADMINISTRATOR)
-            .agentId(adminDbUserProvider.get().getUserId())
-            .agentEmailMaybe(adminDbUserProvider.get().getEmail())
-            .actionId(actionIdProvider.get())
-            .actionType(ActionType.EDIT)
-            .targetType(TargetType.ACCOUNT)
-            .targetPropertyMaybe(AccountTargetProperty.IS_ENABLED.getPropertyName())
-            .targetIdMaybe(targetUserId)
-            .previousValueMaybe(Boolean.toString(previousEnabledValue))
-            .newValueMaybe(Boolean.toString(newEnabledValue))
-            .build());
+    try {
+      actionAuditService.send(
+          ActionAuditEvent.builder()
+              .timestamp(clock.millis())
+              .agentType(AgentType.ADMINISTRATOR)
+              .agentId(adminDbUserProvider.get().getUserId())
+              .agentEmailMaybe(adminDbUserProvider.get().getEmail())
+              .actionId(actionIdProvider.get())
+              .actionType(ActionType.EDIT)
+              .targetType(TargetType.ACCOUNT)
+              .targetPropertyMaybe(AccountTargetProperty.IS_ENABLED.getPropertyName())
+              .targetIdMaybe(targetUserId)
+              .previousValueMaybe(Boolean.toString(previousEnabledValue))
+              .newValueMaybe(Boolean.toString(newEnabledValue))
+              .build());
+    } catch (RuntimeException e) {
+      actionAuditService.logRuntimeException(log, e);
+    }
   }
 }
