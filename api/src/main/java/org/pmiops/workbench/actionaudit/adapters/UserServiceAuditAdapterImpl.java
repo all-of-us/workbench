@@ -3,7 +3,6 @@ package org.pmiops.workbench.actionaudit.adapters;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceAuditAdapterImpl implements UserServiceAuditAdapter {
 
-  private static final Logger log = Logger.getLogger(UserServiceAuditAdapterImpl.class.getName());
   private final ActionAuditService actionAuditService;
   private final Clock clock;
   private Provider<DbUser> dbUserProvider;
@@ -42,24 +40,20 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditAdapter {
   @Override
   public void fireUpdateDataAccessAction(
       DbUser targetUser, DataAccessLevel dataAccessLevel, DataAccessLevel previousDataAccessLevel) {
-    try {
-      actionAuditService.send(
-          ActionAuditEvent.builder()
-              .timestamp(clock.millis())
-              .agentType(AgentType.ADMINISTRATOR)
-              .agentId(dbUserProvider.get().getUserId())
-              .agentEmailMaybe(dbUserProvider.get().getEmail())
-              .actionId(actionIdProvider.get())
-              .actionType(ActionType.EDIT)
-              .targetType(TargetType.ACCOUNT)
-              .targetPropertyMaybe(AccountTargetProperty.REGISTRATION_STATUS.getPropertyName())
-              .targetIdMaybe(targetUser.getUserId())
-              .previousValueMaybe(previousDataAccessLevel.toString())
-              .newValueMaybe(dataAccessLevel.toString())
-              .build());
-    } catch (RuntimeException e) {
-      actionAuditService.logRuntimeException(log, e);
-    }
+    actionAuditService.send(
+        ActionAuditEvent.builder()
+            .timestamp(clock.millis())
+            .agentType(AgentType.ADMINISTRATOR)
+            .agentId(dbUserProvider.get().getUserId())
+            .agentEmailMaybe(dbUserProvider.get().getEmail())
+            .actionId(actionIdProvider.get())
+            .actionType(ActionType.EDIT)
+            .targetType(TargetType.ACCOUNT)
+            .targetPropertyMaybe(AccountTargetProperty.REGISTRATION_STATUS.getPropertyName())
+            .targetIdMaybe(targetUser.getUserId())
+            .previousValueMaybe(previousDataAccessLevel.toString())
+            .newValueMaybe(dataAccessLevel.toString())
+            .build());
   }
 
   @Override
@@ -67,22 +61,18 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditAdapter {
       long userId,
       BypassTimeTargetProperty bypassTimeTargetProperty,
       Optional<Instant> bypassTime) {
-    try {
-      ActionAuditEvent.Builder eventBuilder =
-          ActionAuditEvent.builder()
-              .agentType(AgentType.ADMINISTRATOR)
-              .agentId(dbUserProvider.get().getUserId())
-              .agentEmailMaybe(dbUserProvider.get().getEmail())
-              .actionId(actionIdProvider.get())
-              .actionType(ActionType.BYPASS)
-              .targetType(TargetType.ACCOUNT)
-              .targetPropertyMaybe(bypassTimeTargetProperty.getPropertyName())
-              .targetIdMaybe(userId);
-      bypassTime.ifPresent(i -> eventBuilder.newValueMaybe(String.valueOf(i.toEpochMilli())));
+    ActionAuditEvent.Builder eventBuilder =
+        ActionAuditEvent.builder()
+            .agentType(AgentType.ADMINISTRATOR)
+            .agentId(dbUserProvider.get().getUserId())
+            .agentEmailMaybe(dbUserProvider.get().getEmail())
+            .actionId(actionIdProvider.get())
+            .actionType(ActionType.BYPASS)
+            .targetType(TargetType.ACCOUNT)
+            .targetPropertyMaybe(bypassTimeTargetProperty.getPropertyName())
+            .targetIdMaybe(userId);
+    bypassTime.ifPresent(i -> eventBuilder.newValueMaybe(String.valueOf(i.toEpochMilli())));
 
-      actionAuditService.send(eventBuilder.build());
-    } catch (RuntimeException e) {
-      actionAuditService.logRuntimeException(log, e);
-    }
+    actionAuditService.send(eventBuilder.build());
   }
 }

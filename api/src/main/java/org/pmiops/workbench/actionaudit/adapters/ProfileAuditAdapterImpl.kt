@@ -1,7 +1,6 @@
 package org.pmiops.workbench.actionaudit.adapters
 
 import java.time.Clock
-import java.util.logging.Logger
 import javax.inject.Provider
 import org.pmiops.workbench.actionaudit.ActionAuditEvent
 import org.pmiops.workbench.actionaudit.ActionAuditService
@@ -26,110 +25,83 @@ constructor(
 ) : ProfileAuditAdapter {
 
     override fun fireCreateAction(createdProfile: Profile) {
-        try {
-            val propertiesByName: Map<String, String?> = TargetPropertyExtractor
-                    .getPropertyValuesByName(ProfileTargetProperty.values(), createdProfile)
-            val actionId = actionIdProvider.get()
-            // We can't rely on the UserProvider here since the user didn't exist when it
-            // got loaded or whatever.
-            val createEvents = propertiesByName.entries
-                    .map {
-                        ActionAuditEvent(
-                            timestamp = clock.millis(),
-                            actionId = actionId,
-                            actionType = ActionType.CREATE,
-                            agentType = AgentType.USER,
-                            agentId = createdProfile.userId,
-                            agentEmailMaybe = createdProfile.contactEmail,
-                            targetType = TargetType.PROFILE,
-                            targetIdMaybe = createdProfile.userId,
-                            targetPropertyMaybe = it.key,
-                            previousValueMaybe = null,
-                            newValueMaybe = it.value)
-                    }
-            actionAuditService.send(createEvents)
-        } catch (e: RuntimeException) {
-            logAndSwallow(e)
-        }
+        val propertiesByName: Map<String, String?> = TargetPropertyExtractor
+                .getPropertyValuesByName(ProfileTargetProperty.values(), createdProfile)
+        val actionId = actionIdProvider.get()
+        // We can't rely on the UserProvider here since the user didn't exist when it
+        // got loaded or whatever.
+        val createEvents = propertiesByName.entries
+                .map {
+                    ActionAuditEvent(
+                        timestamp = clock.millis(),
+                        actionId = actionId,
+                        actionType = ActionType.CREATE,
+                        agentType = AgentType.USER,
+                        agentId = createdProfile.userId,
+                        agentEmailMaybe = createdProfile.contactEmail,
+                        targetType = TargetType.PROFILE,
+                        targetIdMaybe = createdProfile.userId,
+                        targetPropertyMaybe = it.key,
+                        previousValueMaybe = null,
+                        newValueMaybe = it.value)
+                }
+        actionAuditService.send(createEvents)
     }
 
     override fun fireUpdateAction(previousProfile: Profile, updatedProfile: Profile) {
-        try {
-            // determine changed fields
-            val changesByProperty = TargetPropertyExtractor.getChangedValuesByName(
-                    ProfileTargetProperty.values(),
-                    previousProfile,
-                    updatedProfile)
-            val events = changesByProperty.entries
-                    .map {
-                        ActionAuditEvent(
-                                timestamp = clock.millis(),
-                                actionId = actionIdProvider.get(),
-                                actionType = ActionType.EDIT,
-                                agentType = AgentType.USER,
-                                agentId = userProvider.get().userId,
-                                agentEmailMaybe = userProvider.get().email,
-                                targetType = TargetType.PROFILE,
-                                targetIdMaybe = userProvider.get().userId,
-                                targetPropertyMaybe = it.key,
-                                previousValueMaybe = it.value.previousValue,
-                                newValueMaybe = it.value.newValue)
-                    }
-            actionAuditService.send(events)
-        } catch (e: java.lang.RuntimeException) {
-            logAndSwallow(e)
-        }
+        // determine changed fields
+        val changesByProperty = TargetPropertyExtractor.getChangedValuesByName(
+                ProfileTargetProperty.values(),
+                previousProfile,
+                updatedProfile)
+        val events = changesByProperty.entries
+                .map {
+                    ActionAuditEvent(
+                            timestamp = clock.millis(),
+                            actionId = actionIdProvider.get(),
+                            actionType = ActionType.EDIT,
+                            agentType = AgentType.USER,
+                            agentId = userProvider.get().userId,
+                            agentEmailMaybe = userProvider.get().email,
+                            targetType = TargetType.PROFILE,
+                            targetIdMaybe = userProvider.get().userId,
+                            targetPropertyMaybe = it.key,
+                            previousValueMaybe = it.value.previousValue,
+                            newValueMaybe = it.value.newValue)
+                }
+        actionAuditService.send(events)
     }
 
     // Each user is assumed to have only one profile, but we can't rely on
     // the userProvider if the user is deleted before the profile.
     override fun fireDeleteAction(userId: Long, userEmail: String) {
-        try {
-            val deleteProfileEvent = ActionAuditEvent(
-                    timestamp = clock.millis(),
-                    actionId = actionIdProvider.get(),
-                    actionType = ActionType.DELETE,
-                    agentType = AgentType.USER,
-                    agentId = userId,
-                    agentEmailMaybe = userEmail,
-                    targetType = TargetType.PROFILE,
-                    targetIdMaybe = userId,
-                    targetPropertyMaybe = null,
-                    previousValueMaybe = null,
-                    newValueMaybe = null
-                    )
-            actionAuditService.send(deleteProfileEvent)
-        } catch (e: RuntimeException) {
-            logAndSwallow(e)
-        }
+        val deleteProfileEvent = ActionAuditEvent(
+                timestamp = clock.millis(),
+                actionId = actionIdProvider.get(),
+                actionType = ActionType.DELETE,
+                agentType = AgentType.USER,
+                agentId = userId,
+                agentEmailMaybe = userEmail,
+                targetType = TargetType.PROFILE,
+                targetIdMaybe = userId,
+                targetPropertyMaybe = null,
+                previousValueMaybe = null,
+                newValueMaybe = null)
+        actionAuditService.send(deleteProfileEvent)
     }
 
     override fun fireLoginAction(dbUser: DbUser) {
-        try {
-            actionAuditService.send(ActionAuditEvent(
-                    timestamp = clock.millis(),
-                    actionId = actionIdProvider.get(),
-                    actionType = ActionType.LOGIN,
-                    agentType = AgentType.USER,
-                    agentId = dbUser.userId,
-                    agentEmailMaybe = dbUser.email,
-                    targetType = TargetType.WORKBENCH,
-                    targetIdMaybe = null,
-                    targetPropertyMaybe = null,
-                    previousValueMaybe = null,
-                    newValueMaybe = null
-            ))
-        } catch (e: java.lang.RuntimeException) {
-            logAndSwallow(e)
-        }
-    }
-
-    private fun logAndSwallow(e: RuntimeException) {
-        actionAuditService.logRuntimeException(logger, e)
-    }
-
-    companion object {
-
-        private val logger = Logger.getLogger(ProfileAuditAdapterImpl::class.java.name)
+        actionAuditService.send(ActionAuditEvent(
+                timestamp = clock.millis(),
+                actionId = actionIdProvider.get(),
+                actionType = ActionType.LOGIN,
+                agentType = AgentType.USER,
+                agentId = dbUser.userId,
+                agentEmailMaybe = dbUser.email,
+                targetType = TargetType.WORKBENCH,
+                targetIdMaybe = null,
+                targetPropertyMaybe = null,
+                previousValueMaybe = null,
+                newValueMaybe = null))
     }
 }

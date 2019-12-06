@@ -236,12 +236,6 @@ public class WorkspaceAuditAdapterTest {
   }
 
   @Test
-  public void testDoesNotThrowWhenMissingRequiredFields() {
-    workspace1.setResearchPurpose(null); // programming error
-    workspaceAuditAdapter.fireCreateAction(workspace1, WORKSPACE_1_DB_ID);
-  }
-
-  @Test
   public void testDoesNotThrowWhenUserProviderFails() {
     doReturn(null).when(mockUserProvider).get();
     workspaceAuditAdapter.fireDeleteAction(dbWorkspace1);
