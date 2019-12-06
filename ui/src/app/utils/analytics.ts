@@ -32,6 +32,7 @@ export function triggerEvent(
 enum ANALYTICS_CATEGORIES {
   WORKSPACES = 'Workspaces',
   DATASET_BUILDER = 'Dataset Builder',
+  NOTEBOOKS = 'Notebooks'
 }
 
 export const AnalyticsTracker = {
@@ -62,6 +63,20 @@ export const AnalyticsTracker = {
     OpenDeleteModal: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Open Delete Modal'),
     Delete: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'Delete'),
     ViewPreviewTable: () => triggerEvent(ANALYTICS_CATEGORIES.DATASET_BUILDER, 'View Preview Table')
+  },
+  Notebooks: {
+    OpenCreateModal: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Open Create Modal'),
+    Create: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Create', suffix),
+    OpenRenameModal: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Open Rename Modal'),
+    Rename: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Rename'),
+    Duplicate: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Duplicate'),
+    OpenCopyModal: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Open Copy Modal'),
+    Copy: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Copy'),
+    OpenDeleteModal: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Open Delete Modal'),
+    Delete: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Delete'),
+    Preview: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Preview'),
+    Edit: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Edit'),
+    Run: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Run (Playground Mode)')
   }
 };
 
