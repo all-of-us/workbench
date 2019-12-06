@@ -51,6 +51,20 @@ export class SignInService {
           scope: 'https://www.googleapis.com/auth/plus.login openid profile'
         }).then(() => {
           this.subscribeToAuth2User();
+
+          console.log('starting');
+          gapi.load("client", () => {
+            console.log('client loaded');
+            gapi.client.load('storage', 'v1', () => {
+              console.log('storage loaded');
+
+              gapi.client.storage.objects.get({bucket: "all-of-us-workbench-test-alerts", object: "alert.json", alt: "media"})
+                .then((response) => {
+                  console.log(response.body);
+                })
+            });
+          });
+
         });
         resolve(gapi.auth2);
       });
