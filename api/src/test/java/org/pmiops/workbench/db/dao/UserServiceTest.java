@@ -6,15 +6,15 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
-import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
@@ -22,14 +22,19 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -41,52 +46,71 @@ import org.springframework.test.context.junit4.SpringRunner;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class UserServiceTest {
 
-  private final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
-
-  private Long incrementedUserId = 1L;
+  private static final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
+  private static final int MOODLE_ID = 1001;
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
-  private static final long TIMESTAMP_MSECS = 100;
-  private static final FakeClock CLOCK = new FakeClock();
+  private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z"); // Instant.ofEpochMilli(TIMESTAMP_MSECS);
+  private static final long TIMESTAMP_MSECS = START_INSTANT.toEpochMilli();
+  private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
+  private static DbUser providedDbUser;
+  private static WorkbenchConfig providedWorkbenchConfig;
 
+  @Autowired private FireCloudService mockFireCloudService;
+  @Autowired private ComplianceService mockComplianceService;
+  @Autowired private DirectoryService mockDirectoryService;
+
+  @Autowired private UserService userService;
   @Autowired private UserDao userDao;
-  @Mock private AdminActionHistoryDao adminActionHistoryDao;
-  @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
-  @Mock private FireCloudService fireCloudService;
-  @Mock private ComplianceService complianceService;
-  @Mock private DirectoryService directoryService;
 
-  private UserService userService;
+  @TestConfiguration
+  @Import({UserService.class})
+  @MockBean({
+    AdminActionHistoryDao.class,
+    FireCloudService.class,
+    ComplianceService.class,
+    DirectoryService.class
+  })
+  static class Configuration {
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    Clock clock() {
+      return PROVIDED_CLOCK;
+    }
 
-  private DbUser testUser;
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    WorkbenchConfig getWorkbenchConfig() {
+      return providedWorkbenchConfig;
+    }
+
+    @Bean
+    Random getRandom() {
+      return new Random();
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    DbUser getDbUser() {
+      return providedDbUser;
+    }
+  }
 
   @Before
   public void setUp() {
-    CLOCK.setInstant(Instant.ofEpochMilli(TIMESTAMP_MSECS));
-    Provider<WorkbenchConfig> configProvider = Providers.of(WorkbenchConfig.createEmptyConfig());
-    testUser = insertUser(EMAIL_ADDRESS);
-
-    userService =
-        new UserService(
-            Providers.of(testUser),
-            userDao,
-            adminActionHistoryDao,
-            userDataUseAgreementDao,
-            CLOCK,
-            new Random(),
-            fireCloudService,
-            configProvider,
-            complianceService,
-            directoryService);
-  }
-
-  private DbUser insertUser(String email) {
     DbUser user = new DbUser();
-    user.setEmail(email);
-    user.setUserId(incrementedUserId);
-    incrementedUserId++;
+    user.setEmail(EMAIL_ADDRESS);
     userDao.save(user);
-    return user;
+    providedDbUser = user;
+
+    providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
+
+    // Since we're injecting the same static instance of this FakeClock,
+    // increments and other mutations will carry across tests if we don't reset it here.
+    // I tried easier ways of ensuring this, like creating new instances for every test run,
+    // but it was injecting null clocks giving NPEs long after construction, and so far this
+    // is the only working approach I've seen.
+    PROVIDED_CLOCK.setInstant(START_INSTANT);
   }
 
   @Test
@@ -95,8 +119,9 @@ public class UserServiceTest {
     badge.setName("All of us badge");
     badge.setDateexpire("12345");
 
-    when(complianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
-    when(complianceService.getUserBadge(1)).thenReturn(Arrays.asList(badge));
+    when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(MOODLE_ID);
+    when(mockComplianceService.getUserBadge(MOODLE_ID))
+        .thenReturn(Collections.singletonList(badge));
 
     userService.syncComplianceTrainingStatus();
 
@@ -107,41 +132,45 @@ public class UserServiceTest {
     assertThat(user.getComplianceTrainingExpirationTime()).isEqualTo(new Timestamp(12345));
 
     // Completion timestamp should not change when the method is called again.
-    CLOCK.increment(1000);
+    incrementClock();
     Timestamp completionTime = user.getComplianceTrainingCompletionTime();
     userService.syncComplianceTrainingStatus();
     assertThat(user.getComplianceTrainingCompletionTime()).isEqualTo(completionTime);
   }
 
+  private void incrementClock() {
+    PROVIDED_CLOCK.increment(1000);
+  }
+
   @Test
   public void testSyncComplianceTrainingStatusNoMoodleId() throws Exception {
-    when(complianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(null);
+    when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(null);
     userService.syncComplianceTrainingStatus();
 
-    verify(complianceService, never()).getUserBadge(anyInt());
+    verify(mockComplianceService, never()).getUserBadge(anyInt());
     DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusNullBadge() throws Exception {
+  public void testSyncComplianceTrainingStatusNullBadge() throws ApiException {
     // When Moodle returns an empty badge response, we should clear the completion bit.
     DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
     user.setComplianceTrainingCompletionTime(new Timestamp(12345));
     userDao.save(user);
 
-    when(complianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
-    when(complianceService.getUserBadge(1)).thenReturn(null);
+    when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
+    when(mockComplianceService.getUserBadge(1)).thenReturn(null);
     userService.syncComplianceTrainingStatus();
     user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test(expected = NotFoundException.class)
-  public void testSyncComplianceTrainingStatusBadgeNotFound() throws Exception {
+  public void testSyncComplianceTrainingStatusBadgeNotFound() throws ApiException {
     // We should propagate a NOT_FOUND exception from the compliance service.
-    when(complianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
-    when(complianceService.getUserBadge(1))
+    when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(MOODLE_ID);
+    when(mockComplianceService.getUserBadge(MOODLE_ID))
         .thenThrow(
             new org.pmiops.workbench.moodle.ApiException(
                 HttpStatus.NOT_FOUND.value(), "user not found"));
@@ -149,59 +178,67 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testSyncEraCommonsStatus() throws Exception {
+  public void testSyncComplianceTraining_SkippedForServiceAccount() throws ApiException {
+    providedWorkbenchConfig.auth.serviceAccountApiUsers.add(EMAIL_ADDRESS);
+    userService.syncComplianceTrainingStatus();
+    assertThat(providedDbUser.getMoodleId()).isNull();
+  }
+
+  @Test
+  public void testSyncEraCommonsStatus() {
     FirecloudNihStatus nihStatus = new FirecloudNihStatus();
     nihStatus.setLinkedNihUsername("nih-user");
     // FireCloud stores the NIH status in seconds, not msecs.
-    nihStatus.setLinkExpireTime(TIMESTAMP_MSECS / 1000);
+    final long FC_LINK_EXPIRATION_SECONDS = START_INSTANT.toEpochMilli() / 1000;
+    nihStatus.setLinkExpireTime(FC_LINK_EXPIRATION_SECONDS);
 
-    when(fireCloudService.getNihStatus()).thenReturn(nihStatus);
+    when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
 
     userService.syncEraCommonsStatus();
 
     DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
-    assertThat(user.getEraCommonsCompletionTime()).isEqualTo(new Timestamp(TIMESTAMP_MSECS));
-    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(new Timestamp(TIMESTAMP_MSECS / 1000));
+    assertThat(user.getEraCommonsCompletionTime()).isEqualTo(Timestamp.from(START_INSTANT));
+    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(START_INSTANT));
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
 
     // Completion timestamp should not change when the method is called again.
-    CLOCK.increment(1000);
+    incrementClock();
     Timestamp completionTime = user.getEraCommonsCompletionTime();
     userService.syncEraCommonsStatus();
     assertThat(user.getEraCommonsCompletionTime()).isEqualTo(completionTime);
   }
 
   @Test
-  public void testClearsEraCommonsStatus() throws Exception {
+  public void testClearsEraCommonsStatus() {
+    DbUser testUser = userDao.findUserByEmail(EMAIL_ADDRESS);
     // Put the test user in a state where eRA commons is completed.
     testUser.setEraCommonsCompletionTime(new Timestamp(TIMESTAMP_MSECS));
     testUser.setEraCommonsLinkedNihUsername("nih-user");
-    userDao.save(testUser);
 
-    // API returns a null value.
-    when(fireCloudService.getNihStatus()).thenReturn(null);
+    //noinspection UnusedAssignment
+    testUser = userDao.save(testUser);
 
     userService.syncEraCommonsStatus();
 
-    DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
-    assertThat(user.getEraCommonsCompletionTime()).isNull();
+    DbUser retrievedUser = userDao.findUserByEmail(EMAIL_ADDRESS);
+    assertThat(retrievedUser.getEraCommonsCompletionTime()).isNull();
   }
 
   @Test
-  public void testSyncTwoFactorAuthStatus() throws Exception {
+  public void testSyncTwoFactorAuthStatus() {
     com.google.api.services.directory.model.User googleUser =
         new com.google.api.services.directory.model.User();
     googleUser.setPrimaryEmail(EMAIL_ADDRESS);
     googleUser.setIsEnrolledIn2Sv(true);
 
-    when(directoryService.getUser(EMAIL_ADDRESS)).thenReturn(googleUser);
+    when(mockDirectoryService.getUser(EMAIL_ADDRESS)).thenReturn(googleUser);
     userService.syncTwoFactorAuthStatus();
     // twoFactorAuthCompletionTime should now be set
     DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getTwoFactorAuthCompletionTime()).isNotNull();
 
     // twoFactorAuthCompletionTime should not change when already set
-    CLOCK.increment(1000);
+    incrementClock();
     Timestamp twoFactorAuthCompletionTime = user.getTwoFactorAuthCompletionTime();
     userService.syncTwoFactorAuthStatus();
     user = userDao.findUserByEmail(EMAIL_ADDRESS);
@@ -212,5 +249,39 @@ public class UserServiceTest {
     userService.syncTwoFactorAuthStatus();
     user = userDao.findUserByEmail(EMAIL_ADDRESS);
     assertThat(user.getTwoFactorAuthCompletionTime()).isNull();
+  }
+
+  @Test
+  public void testSetBypassTimes() {
+    DbUser dbUser = userDao.findUserByEmail(EMAIL_ADDRESS);
+    assertThat(dbUser.getDataUseAgreementBypassTime()).isNull();
+    assertThat(dbUser.getComplianceTrainingBypassTime()).isNull();
+    assertThat(dbUser.getBetaAccessBypassTime()).isNull();
+    assertThat(dbUser.getEraCommonsBypassTime()).isNull();
+    assertThat(dbUser.getTwoFactorAuthBypassTime()).isNull();
+
+    final Timestamp duaBypassTime = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
+    userService.setDataUseAgreementBypassTime(dbUser.getUserId(), duaBypassTime);
+    assertThat(dbUser.getDataUseAgreementBypassTime()).isEqualTo(duaBypassTime);
+
+    userService.setDataUseAgreementBypassTime(dbUser.getUserId(), null);
+    assertThat(dbUser.getDataUseAgreementBypassTime()).isNull();
+
+    final Timestamp complianceTrainingBypassTime =
+        Timestamp.from(Instant.parse("2001-01-01T00:00:00.00Z"));
+    userService.setComplianceTrainingBypassTime(dbUser.getUserId(), complianceTrainingBypassTime);
+    assertThat(dbUser.getComplianceTrainingBypassTime()).isEqualTo(complianceTrainingBypassTime);
+
+    final Timestamp betaAccessBypassTime = Timestamp.from(Instant.parse("2002-01-01T00:00:00.00Z"));
+    userService.setBetaAccessBypassTime(dbUser.getUserId(), betaAccessBypassTime);
+    assertThat(dbUser.getBetaAccessBypassTime()).isEqualTo(betaAccessBypassTime);
+
+    final Timestamp eraCommonsBypassTime = Timestamp.from(Instant.parse("2003-01-01T00:00:00.00Z"));
+    userService.setEraCommonsBypassTime(dbUser.getUserId(), eraCommonsBypassTime);
+    assertThat(dbUser.getEraCommonsBypassTime()).isEqualTo(eraCommonsBypassTime);
+
+    final Timestamp twoFactorBypassTime = Timestamp.from(Instant.parse("2004-01-01T00:00:00.00Z"));
+    userService.setTwoFactorAuthBypassTime(dbUser.getUserId(), twoFactorBypassTime);
+    assertThat(dbUser.getTwoFactorAuthBypassTime()).isEqualTo(twoFactorBypassTime);
   }
 }
