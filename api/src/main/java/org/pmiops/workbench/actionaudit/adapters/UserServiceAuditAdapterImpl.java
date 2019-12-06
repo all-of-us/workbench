@@ -43,20 +43,20 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditAdapter {
   public void fireUpdateDataAccessAction(
       DbUser targetUser, DataAccessLevel dataAccessLevel, DataAccessLevel previousDataAccessLevel) {
     try {
-      ActionAuditEvent event =
-          new ActionAuditEvent(
-              clock.millis(),
-              AgentType.ADMINISTRATOR,
-              dbUserProvider.get().getUserId(),
-              dbUserProvider.get().getEmail(),
-              actionIdProvider.get(),
-              ActionType.EDIT,
-              TargetType.ACCOUNT,
-              AccountTargetProperty.REGISTRATION_STATUS.getPropertyName(),
-              targetUser.getUserId(),
-              previousDataAccessLevel.toString(),
-              dataAccessLevel.toString());
-      actionAuditService.send(event);
+      actionAuditService.send(
+          ActionAuditEvent.builder()
+              .timestamp(clock.millis())
+              .agentType(AgentType.ADMINISTRATOR)
+              .agentId(dbUserProvider.get().getUserId())
+              .agentEmailMaybe(dbUserProvider.get().getEmail())
+              .actionId(actionIdProvider.get())
+              .actionType(ActionType.EDIT)
+              .targetType(TargetType.ACCOUNT)
+              .targetPropertyMaybe(AccountTargetProperty.REGISTRATION_STATUS.getPropertyName())
+              .targetIdMaybe(targetUser.getUserId())
+              .previousValueMaybe(previousDataAccessLevel.toString())
+              .newValueMaybe(dataAccessLevel.toString())
+              .build());
     } catch (RuntimeException e) {
       actionAuditService.logRuntimeException(log, e);
     }
@@ -68,19 +68,19 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditAdapter {
       BypassTimeTargetProperty bypassTimeTargetProperty,
       Optional<Instant> bypassTime) {
     try {
-      actionAuditService.send(
-          new ActionAuditEvent(
-              clock.millis(),
-              AgentType.ADMINISTRATOR,
-              dbUserProvider.get().getUserId(),
-              dbUserProvider.get().getEmail(),
-              actionIdProvider.get(),
-              ActionType.BYPASS,
-              TargetType.ACCOUNT,
-              bypassTimeTargetProperty.getPropertyName(),
-              userId,
-              null,
-              bypassTime.map(Instant::toEpochMilli).map(String::valueOf).orElse(null)));
+      ActionAuditEvent.Builder eventBuilder =
+          ActionAuditEvent.builder()
+              .agentType(AgentType.ADMINISTRATOR)
+              .agentId(dbUserProvider.get().getUserId())
+              .agentEmailMaybe(dbUserProvider.get().getEmail())
+              .actionId(actionIdProvider.get())
+              .actionType(ActionType.BYPASS)
+              .targetType(TargetType.ACCOUNT)
+              .targetPropertyMaybe(bypassTimeTargetProperty.getPropertyName())
+              .targetIdMaybe(userId);
+      bypassTime.ifPresent(i -> eventBuilder.newValueMaybe(String.valueOf(i.toEpochMilli())));
+
+      actionAuditService.send(eventBuilder.build());
     } catch (RuntimeException e) {
       actionAuditService.logRuntimeException(log, e);
     }
