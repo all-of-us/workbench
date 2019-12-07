@@ -74,7 +74,7 @@ public class BillingProjectBufferService {
   /** Makes a configurable number of project creation attempts. */
   public void bufferBillingProjects() {
 
-    monitoringService.sendSignal(
+    monitoringService.send(
         GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS, getCurrentBufferSize());
     int creationAttempts = this.workbenchConfigProvider.get().billing.bufferRefillProjectsPerTask;
     for (int i = 0; i < creationAttempts; i++) {

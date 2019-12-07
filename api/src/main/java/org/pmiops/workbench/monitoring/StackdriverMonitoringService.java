@@ -33,7 +33,7 @@ public class StackdriverMonitoringService implements MonitoringService {
   // delete and recreate.
   @Override
   public void registerSignal(Signal signal) {
-    View view =
+    final View view =
         View.create(
             View.Name.create(signal.getName()),
             signal.getDescription(),
@@ -45,15 +45,17 @@ public class StackdriverMonitoringService implements MonitoringService {
   }
 
   @Override
-  public void sendSignal(Signal signal, Object value) {
+  public void send(Signal signal, Object value) {
     if (signal.getMeasureClass().equals(Measure.MeasureLong.class)) {
       sendLongSignal(signal.getMeasureLong(), (long) value);
     } else if (signal.getMeasureClass().equals(Measure.MeasureDouble.class)) {
       sendDoubleSignal(signal.getMeasureDouble(), (double) value);
+    } else {
+      log.log(Level.SEVERE, String.format("Unrecognized measure class %s", signal.getMeasureClass().getName());
     }
   }
 
-  public void sendLongSignal(Measure.MeasureLong measurementInformation, Long value) {
+  private void sendLongSignal(Measure.MeasureLong measurementInformation, Long value) {
     try {
       STATS_RECORDER.newMeasureMap().put(measurementInformation, value).record();
     } catch (RuntimeException e) {
@@ -61,7 +63,7 @@ public class StackdriverMonitoringService implements MonitoringService {
     }
   }
 
-  public void sendDoubleSignal(Measure.MeasureDouble measurementInformation, Double value) {
+  private void sendDoubleSignal(Measure.MeasureDouble measurementInformation, Double value) {
     try {
       STATS_RECORDER.newMeasureMap().put(measurementInformation, value).record();
     } catch (RuntimeException e) {
@@ -70,6 +72,6 @@ public class StackdriverMonitoringService implements MonitoringService {
   }
 
   private void logAndSwallow(RuntimeException e) {
-    log.log(Level.SEVERE, String.format("Exception encountered during monitoring.", e));
+    log.log(Level.SEVERE, "Exception encountered during monitoring.", e);
   }
 }

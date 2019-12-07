@@ -140,7 +140,7 @@ public class BillingProjectBufferServiceTest {
   @Test
   public void sendsSignalWhenBufferingProjects() {
     billingProjectBufferService.bufferBillingProjects();
-    verify(monitoringService).sendSignal(GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS, 0L);
+    verify(monitoringService).send(GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS, 0L);
   }
 
   @Test
