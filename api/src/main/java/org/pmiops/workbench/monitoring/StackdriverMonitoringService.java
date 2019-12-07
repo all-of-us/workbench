@@ -51,7 +51,7 @@ public class StackdriverMonitoringService implements MonitoringService {
     } else if (signal.getMeasureClass().equals(Measure.MeasureDouble.class)) {
       sendDoubleSignal(signal.getMeasureDouble(), (double) value);
     } else {
-      log.log(Level.SEVERE, String.format("Unrecognized measure class %s", signal.getMeasureClass().getName());
+      log.log(Level.SEVERE, String.format("Unrecognized measure class %s", signal.getMeasureClass().getName()));
     }
   }
 
