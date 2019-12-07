@@ -7,6 +7,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Random;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -151,7 +152,43 @@ public class UserService {
     }
   }
 
-  private void updateDataAccessLevel(DbUser user) {
+  private void updateDataAccessLevel(DbUser dbUser) {
+    final DataAccessLevel previousDataAccessLevel = dbUser.getDataAccessLevelEnum();
+    final DataAccessLevel newDataAccessLevel;
+    if (shouldUserBeRegistered(dbUser)) {
+      addToRegisteredTierGroupIdempotent(dbUser);
+      newDataAccessLevel = DataAccessLevel.REGISTERED;
+    } else {
+      removeFromRegisteredTierGroupIdempotent(dbUser);
+      newDataAccessLevel = DataAccessLevel.UNREGISTERED;
+    }
+    if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
+      dbUser.setDataAccessLevelEnum(newDataAccessLevel);
+    }
+  }
+
+  private void removeFromRegisteredTierGroupIdempotent(DbUser dbUser) {
+    if (isUserMemberOfRegisteredTierGroup(dbUser)) {
+      this.fireCloudService.removeUserFromGroup(
+          dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
+      log.info(String.format("Removed user %s from registered-tier group.", dbUser.getEmail()));
+    }
+  }
+
+  private boolean isUserMemberOfRegisteredTierGroup(DbUser dbUser) {
+    return this.fireCloudService.isUserMemberOfGroup(
+        dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
+  }
+
+  private void addToRegisteredTierGroupIdempotent(DbUser user) {
+    if (!isUserMemberOfRegisteredTierGroup(user)) {
+      this.fireCloudService.addUserToGroup(
+          user.getEmail(), configProvider.get().firecloud.registeredDomainName);
+      log.info(String.format("Added user %s to registered-tier group.", user.getEmail()));
+    }
+  }
+
+  private boolean shouldUserBeRegistered(DbUser user) {
     boolean dataUseAgreementCompliant =
         user.getDataUseAgreementCompletionTime() != null
             || user.getDataUseAgreementBypassTime() != null
@@ -170,32 +207,13 @@ public class UserService {
         user.getTwoFactorAuthCompletionTime() != null || user.getTwoFactorAuthBypassTime() != null;
 
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
-    boolean shouldBeRegistered =
-        !user.getDisabled()
-            && complianceTrainingCompliant
-            && eraCommonsCompliant
-            && betaAccessGranted
-            && twoFactorAuthComplete
-            && dataUseAgreementCompliant
-            && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
-    boolean isInGroup =
-        this.fireCloudService.isUserMemberOfGroup(
-            user.getEmail(), configProvider.get().firecloud.registeredDomainName);
-    if (shouldBeRegistered) {
-      if (!isInGroup) {
-        this.fireCloudService.addUserToGroup(
-            user.getEmail(), configProvider.get().firecloud.registeredDomainName);
-        log.info(String.format("Added user %s to registered-tier group.", user.getEmail()));
-      }
-      user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
-    } else {
-      if (isInGroup) {
-        this.fireCloudService.removeUserFromGroup(
-            user.getEmail(), configProvider.get().firecloud.registeredDomainName);
-        log.info(String.format("Removed user %s from registered-tier group.", user.getEmail()));
-      }
-      user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
-    }
+    return !user.getDisabled()
+        && complianceTrainingCompliant
+        && eraCommonsCompliant
+        && betaAccessGranted
+        && twoFactorAuthComplete
+        && dataUseAgreementCompliant
+        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
   }
 
   private boolean isServiceAccount(DbUser user) {
@@ -341,88 +359,53 @@ public class UserService {
     userDataUseAgreementDao.save(dataUseAgreements);
   }
 
-  public DbUser setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setDataUseAgreementBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(userId, bypassTime, DbUser::setDataUseAgreementBypassTime);
   }
 
-  public DbUser setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setComplianceTrainingBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(userId, bypassTime, DbUser::setComplianceTrainingBypassTime);
   }
 
-  public DbUser setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setBetaAccessBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(userId, bypassTime, DbUser::setBetaAccessBypassTime);
   }
 
-  public DbUser setEmailVerificationBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setEmailVerificationBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(userId, bypassTime, DbUser::setEraCommonsBypassTime);
   }
 
-  public DbUser setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setEraCommonsBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(userId, bypassTime, DbUser::setTwoFactorAuthBypassTime);
   }
 
-  public DbUser setIdVerificationBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setIdVerificationBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  /**
+   * Functional bypass time column setter, using retry logic.
+   *
+   * @param userId id of user getting bypassed
+   * @param bypassTime type of bypass
+   * @param setter void-returning method to call to set the particular bypass field. Should
+   *     typically be a method reference on DbUser, e.g.
+   */
+  private void setBypassTimeWithRetries(
+      long userId, Timestamp bypassTime, BiConsumer<DbUser, Timestamp> setter) {
+    setBypassTimeWithRetries(userDao.findUserByUserId(userId), bypassTime, setter);
   }
 
-  public DbUser setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
+  private void setBypassTimeWithRetries(
+      DbUser dbUser, Timestamp bypassTime, BiConsumer<DbUser, Timestamp> setter) {
+    updateUserWithRetries(
         (u) -> {
-          u.setTwoFactorAuthBypassTime(bypassTime);
+          setter.accept(u, bypassTime);
           return u;
         },
-        user);
+        dbUser);
   }
 
-  public DbUser setClusterRetryCount(int clusterRetryCount) {
-    return updateUserWithRetries(
+  public void setClusterRetryCount(int clusterRetryCount) {
+    updateUserWithRetries(
         (user) -> {
           user.setClusterCreateRetries(clusterRetryCount);
-          return user;
-        });
-  }
-
-  public DbUser setBillingRetryCount(int billingRetryCount) {
-    return updateUserWithRetries(
-        (user) -> {
-          user.setBillingProjectRetries(billingRetryCount);
           return user;
         });
   }
