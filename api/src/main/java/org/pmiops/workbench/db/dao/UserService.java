@@ -360,38 +360,23 @@ public class UserService {
   }
 
   public void setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
-    setBypassTimeWithRetries(
-        userId,
-        bypassTime,
-        DbUser::setDataUseAgreementBypassTime);
+    setBypassTimeWithRetries(userId, bypassTime, DbUser::setDataUseAgreementBypassTime);
   }
 
   public void setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
-    setBypassTimeWithRetries(
-        userId,
-        bypassTime,
-        DbUser::setComplianceTrainingBypassTime);
+    setBypassTimeWithRetries(userId, bypassTime, DbUser::setComplianceTrainingBypassTime);
   }
 
   public void setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
-    setBypassTimeWithRetries(
-        userId,
-        bypassTime,
-        DbUser::setBetaAccessBypassTime);
+    setBypassTimeWithRetries(userId, bypassTime, DbUser::setBetaAccessBypassTime);
   }
 
   public void setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
-    setBypassTimeWithRetries(
-        userId,
-        bypassTime,
-        DbUser::setEraCommonsBypassTime);
+    setBypassTimeWithRetries(userId, bypassTime, DbUser::setEraCommonsBypassTime);
   }
 
   public void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
-    setBypassTimeWithRetries(
-        userId,
-        bypassTime,
-        DbUser::setTwoFactorAuthBypassTime);
+    setBypassTimeWithRetries(userId, bypassTime, DbUser::setTwoFactorAuthBypassTime);
   }
 
   /**
@@ -403,16 +388,12 @@ public class UserService {
    *     typically be a method reference on DbUser, e.g.
    */
   private void setBypassTimeWithRetries(
-      long userId,
-      Timestamp bypassTime,
-      BiConsumer<DbUser, Timestamp> setter) {
+      long userId, Timestamp bypassTime, BiConsumer<DbUser, Timestamp> setter) {
     setBypassTimeWithRetries(userDao.findUserByUserId(userId), bypassTime, setter);
   }
 
   private void setBypassTimeWithRetries(
-      DbUser dbUser,
-      Timestamp bypassTime,
-      BiConsumer<DbUser, Timestamp> setter) {
+      DbUser dbUser, Timestamp bypassTime, BiConsumer<DbUser, Timestamp> setter) {
     updateUserWithRetries(
         (u) -> {
           setter.accept(u, bypassTime);

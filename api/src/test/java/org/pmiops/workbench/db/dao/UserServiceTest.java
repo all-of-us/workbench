@@ -6,7 +6,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -50,7 +49,7 @@ public class UserServiceTest {
   private static final int MOODLE_ID = 1001;
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
-  private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z"); // Instant.ofEpochMilli(TIMESTAMP_MSECS);
+  private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final long TIMESTAMP_MSECS = START_INSTANT.toEpochMilli();
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
   private static DbUser providedDbUser;
@@ -132,13 +131,13 @@ public class UserServiceTest {
     assertThat(user.getComplianceTrainingExpirationTime()).isEqualTo(new Timestamp(12345));
 
     // Completion timestamp should not change when the method is called again.
-    incrementClock();
+    tick();
     Timestamp completionTime = user.getComplianceTrainingCompletionTime();
     userService.syncComplianceTrainingStatus();
     assertThat(user.getComplianceTrainingCompletionTime()).isEqualTo(completionTime);
   }
 
-  private void incrementClock() {
+  private void tick() {
     PROVIDED_CLOCK.increment(1000);
   }
 
@@ -202,7 +201,7 @@ public class UserServiceTest {
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
 
     // Completion timestamp should not change when the method is called again.
-    incrementClock();
+    tick();
     Timestamp completionTime = user.getEraCommonsCompletionTime();
     userService.syncEraCommonsStatus();
     assertThat(user.getEraCommonsCompletionTime()).isEqualTo(completionTime);
@@ -238,7 +237,7 @@ public class UserServiceTest {
     assertThat(user.getTwoFactorAuthCompletionTime()).isNotNull();
 
     // twoFactorAuthCompletionTime should not change when already set
-    incrementClock();
+    tick();
     Timestamp twoFactorAuthCompletionTime = user.getTwoFactorAuthCompletionTime();
     userService.syncTwoFactorAuthStatus();
     user = userDao.findUserByEmail(EMAIL_ADDRESS);
