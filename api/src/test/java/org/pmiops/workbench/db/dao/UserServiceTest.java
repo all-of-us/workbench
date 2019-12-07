@@ -53,9 +53,10 @@ public class UserServiceTest {
   private static final int MOODLE_ID = 1001;
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
-  private static final long TIMESTAMP_MSECS = 100;
-  private static final Instant START_INSTANT = Instant.ofEpochMilli(TIMESTAMP_MSECS);
+  private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
+  private static final long TIMESTAMP_MSECS = START_INSTANT.toEpochMilli();
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
+  private static final int CLOCK_INCREMENT_MILLIS = 1000;
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
 
@@ -136,14 +137,14 @@ public class UserServiceTest {
     assertThat(user.getComplianceTrainingExpirationTime()).isEqualTo(new Timestamp(12345));
 
     // Completion timestamp should not change when the method is called again.
-    incrementClock();
+    tick();
     Timestamp completionTime = user.getComplianceTrainingCompletionTime();
     userService.syncComplianceTrainingStatus();
     assertThat(user.getComplianceTrainingCompletionTime()).isEqualTo(completionTime);
   }
 
-  private void incrementClock() {
-    PROVIDED_CLOCK.increment(1000);
+  private void tick() {
+    PROVIDED_CLOCK.increment(CLOCK_INCREMENT_MILLIS);
   }
 
   @Test
@@ -157,7 +158,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusNullBadge() throws Exception {
+  public void testSyncComplianceTrainingStatusNullBadge() throws ApiException {
     // When Moodle returns an empty badge response, we should clear the completion bit.
     DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
     user.setComplianceTrainingCompletionTime(new Timestamp(12345));
@@ -171,7 +172,7 @@ public class UserServiceTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void testSyncComplianceTrainingStatusBadgeNotFound() throws Exception {
+  public void testSyncComplianceTrainingStatusBadgeNotFound() throws ApiException {
     // We should propagate a NOT_FOUND exception from the compliance service.
     when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(MOODLE_ID);
     when(mockComplianceService.getUserBadge(MOODLE_ID))
@@ -193,26 +194,27 @@ public class UserServiceTest {
     FirecloudNihStatus nihStatus = new FirecloudNihStatus();
     nihStatus.setLinkedNihUsername("nih-user");
     // FireCloud stores the NIH status in seconds, not msecs.
-    nihStatus.setLinkExpireTime(TIMESTAMP_MSECS / 1000);
+    final long FC_LINK_EXPIRATION_SECONDS = START_INSTANT.toEpochMilli() / 1000;
+    nihStatus.setLinkExpireTime(FC_LINK_EXPIRATION_SECONDS);
 
     when(mockFireCloudService.getNihStatus()).thenReturn(nihStatus);
 
     userService.syncEraCommonsStatus();
 
     DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
-    assertThat(user.getEraCommonsCompletionTime()).isEqualTo(new Timestamp(TIMESTAMP_MSECS));
-    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(new Timestamp(TIMESTAMP_MSECS / 1000));
+    assertThat(user.getEraCommonsCompletionTime()).isEqualTo(Timestamp.from(START_INSTANT));
+    assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(START_INSTANT));
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
 
     // Completion timestamp should not change when the method is called again.
-    incrementClock();
+    tick();
     Timestamp completionTime = user.getEraCommonsCompletionTime();
     userService.syncEraCommonsStatus();
     assertThat(user.getEraCommonsCompletionTime()).isEqualTo(completionTime);
   }
 
   @Test
-  public void testClearsEraCommonsStatus() throws Exception {
+  public void testClearsEraCommonsStatus() {
     DbUser testUser = userDao.findUserByEmail(EMAIL_ADDRESS);
     // Put the test user in a state where eRA commons is completed.
     testUser.setEraCommonsCompletionTime(new Timestamp(TIMESTAMP_MSECS));
@@ -228,7 +230,7 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testSyncTwoFactorAuthStatus() throws Exception {
+  public void testSyncTwoFactorAuthStatus() {
     com.google.api.services.directory.model.User googleUser =
         new com.google.api.services.directory.model.User();
     googleUser.setPrimaryEmail(EMAIL_ADDRESS);
@@ -241,7 +243,7 @@ public class UserServiceTest {
     assertThat(user.getTwoFactorAuthCompletionTime()).isNotNull();
 
     // twoFactorAuthCompletionTime should not change when already set
-    incrementClock();
+    tick();
     Timestamp twoFactorAuthCompletionTime = user.getTwoFactorAuthCompletionTime();
     userService.syncTwoFactorAuthStatus();
     user = userDao.findUserByEmail(EMAIL_ADDRESS);
@@ -257,6 +259,7 @@ public class UserServiceTest {
   @Test
   public void testSetBypassTimes() {
     DbUser dbUser = userDao.findUserByEmail(EMAIL_ADDRESS);
+
     // Make sure we're starting with a clean slate before doing the operations and assertions
     // below. This both a sanity check against future changes to the test user initialization
     // logic that could accidentally render one of the assertions moot as well as executable
