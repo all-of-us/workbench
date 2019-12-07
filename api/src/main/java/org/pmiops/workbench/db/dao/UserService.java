@@ -432,13 +432,13 @@ public class UserService {
     updateUserWithRetries(
         (u) -> {
           setter.accept(u, bypassTime);
-          userServiceAuditAdapter.fireAdministrativeBypassTime(
-              dbUser.getUserId(),
-              targetProperty,
-              Optional.ofNullable(bypassTime).map(Timestamp::toInstant));
           return u;
         },
         dbUser);
+    userServiceAuditAdapter.fireAdministrativeBypassTime(
+        dbUser.getUserId(),
+        targetProperty,
+        Optional.ofNullable(bypassTime).map(Timestamp::toInstant));
   }
 
   public void setClusterRetryCount(int clusterRetryCount) {

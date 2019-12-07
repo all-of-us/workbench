@@ -78,7 +78,6 @@ public class UserServiceTest {
   })
   static class Configuration {
     @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     Clock clock() {
       return PROVIDED_CLOCK;
     }
@@ -258,6 +257,10 @@ public class UserServiceTest {
   @Test
   public void testSetBypassTimes() {
     DbUser dbUser = userDao.findUserByEmail(EMAIL_ADDRESS);
+    // Make sure we're starting with a clean slate before doing the operations and assertions
+    // below. This both a sanity check against future changes to the test user initialization
+    // logic that could accidentally render one of the assertions moot as well as executable
+    // documentation that these fields are expected to be null by default.
     assertThat(dbUser.getDataUseAgreementBypassTime()).isNull();
     assertThat(dbUser.getComplianceTrainingBypassTime()).isNull();
     assertThat(dbUser.getBetaAccessBypassTime()).isNull();
