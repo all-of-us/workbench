@@ -106,12 +106,15 @@ public class AuthDomainControllerTest {
 
   @Test
   public void testDisableUser() {
-    final DbUser createdUser = createUser(false);
+    final boolean oldDisabledValue = false;
+    final DbUser createdUser = createUser(oldDisabledValue);
+
+    final boolean newDisabledValue = true;
     UpdateUserDisabledRequest request =
-        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(true);
+        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(newDisabledValue);
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
     verify(mockAuthDomainAuditAdapter)
-        .fireSetAccountDisabledStatus(createdUser.getUserId(), false, true);
+        .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled()).isTrue();
@@ -119,12 +122,16 @@ public class AuthDomainControllerTest {
 
   @Test
   public void testEnableUser() {
-    final DbUser createdUser = createUser(true);
+    final boolean oldDisabledValue = true;
+    final DbUser createdUser = createUser(oldDisabledValue);
+
+    final boolean newDisabledValue = false;
     UpdateUserDisabledRequest request =
-        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(false);
+        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(newDisabledValue);
+
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
     verify(mockAuthDomainAuditAdapter)
-        .fireSetAccountDisabledStatus(createdUser.getUserId(), true, false);
+        .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled()).isFalse();
