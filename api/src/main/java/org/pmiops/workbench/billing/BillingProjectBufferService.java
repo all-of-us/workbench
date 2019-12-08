@@ -8,8 +8,12 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -29,7 +33,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.signals.GaugeSignals;
+import org.pmiops.workbench.monitoring.signals.MonitoringViews;
+import org.pmiops.workbench.monitoring.signals.StatsViewProperties;
 import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,10 +47,16 @@ public class BillingProjectBufferService {
   private static final int PROJECT_BILLING_ID_SIZE = 8;
   @VisibleForTesting static final Duration CREATING_TIMEOUT = Duration.ofMinutes(60);
   @VisibleForTesting static final Duration ASSIGNING_TIMEOUT = Duration.ofMinutes(10);
-  private static ImmutableMap<BufferEntryStatus, Duration> statusToGracePeriod =
+  private static final ImmutableMap<BufferEntryStatus, Duration> statusToGracePeriod =
       ImmutableMap.of(
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
           BufferEntryStatus.ASSIGNING, ASSIGNING_TIMEOUT);
+  private static final ImmutableMap<BufferEntryStatus, MonitoringViews> entryStatusToMetricView =
+      ImmutableMap.of(
+          BufferEntryStatus.AVAILABLE, MonitoringViews.BILLING_BUFFER_AVAILABLE_PROJECT_COUNT,
+          BufferEntryStatus.ASSIGNING, MonitoringViews.BILLING_BUFFER_ASSIGNING_PROJECT_COUNT,
+          BufferEntryStatus.CREATING, MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT);
+
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
@@ -64,7 +75,6 @@ public class BillingProjectBufferService {
     this.fireCloudService = fireCloudService;
     this.monitoringService = monitoringService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.monitoringService.registerSignal(GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS);
   }
 
   private Timestamp getCurrentTimestamp() {
@@ -74,11 +84,30 @@ public class BillingProjectBufferService {
   /** Makes a configurable number of project creation attempts. */
   public void bufferBillingProjects() {
 
-    monitoringService.send(
-        GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS, getCurrentBufferSize());
+    updateBillingProjectBufferMetrics();
     int creationAttempts = this.workbenchConfigProvider.get().billing.bufferRefillProjectsPerTask;
     for (int i = 0; i < creationAttempts; i++) {
       bufferBillingProject();
+    }
+  }
+
+  private void updateBillingProjectBufferMetrics() {
+    monitoringService.send(MonitoringViews.BILLING_BUFFER_SIZE, getCurrentBufferSize());
+    ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
+        Arrays.stream(BufferEntryStatus.values())
+            .map(
+                status ->
+                    new SimpleImmutableEntry<>(
+                        status,
+                        billingProjectBufferEntryDao.countByStatus(
+                            DbStorageEnums.billingProjectBufferEntryStatusToStorage(status))))
+            .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
+
+    for (Map.Entry<BufferEntryStatus, MonitoringViews> entry : entryStatusToMetricView.entrySet()) {
+      final BufferEntryStatus entryStatus = entry.getKey();
+      final StatsViewProperties metricView = entry.getValue();
+      final Long value = entryStatusToCount.get(entryStatus);
+      monitoringService.send(metricView, value);
     }
   }
 

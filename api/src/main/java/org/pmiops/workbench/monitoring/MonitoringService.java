@@ -1,9 +1,7 @@
 package org.pmiops.workbench.monitoring;
 
-import org.pmiops.workbench.monitoring.signals.Signal;
+import org.pmiops.workbench.monitoring.signals.StatsViewProperties;
 
 public interface MonitoringService {
-  void registerSignal(Signal signal);
-
-  void send(Signal signal, Object value);
+  void send(StatsViewProperties signal, Object value);
 }
