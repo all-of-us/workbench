@@ -13,7 +13,8 @@ import java.util.function.Function;
 
 public enum MonitoringViews implements StatsViewProperties {
   BILLING_BUFFER_SIZE(
-      "billing_project_buffer_entries", "The number of billing project buffer entries."),
+      "billing_project_buffer_entries",
+      "The number of billing project buffer entries."),
   BILLING_BUFFER_AVAILABLE_PROJECT_COUNT(
       "billing_project_buffer_available_project_count",
       "Current number of billing projects with available status."),
@@ -22,7 +23,13 @@ public enum MonitoringViews implements StatsViewProperties {
       "Current number of billing projects with assigning status."),
   BILLING_BUFFER_CREATING_PROJECT_COUNT(
       "billing_project_buffer_creating_project_count",
-      "Current number of billing projects with creating status.");
+      "Current number of billing projects with creating status."),
+  DEBUG_MILLISECONDS_SINCE_EPOCH(
+      "debug_epoch_millis",
+      "Number of milliseconds since epoch"),
+  DEBUG_RANDOM_DOUBLE(
+      "debug_random_double",
+      "Double value for debugging");
 
   private static final Map<Class, Function<MonitoringViews, Measure>>
       MEASURE_CLASS_TO_MEASURE_FUNCTION =

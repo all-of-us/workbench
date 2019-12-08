@@ -140,7 +140,7 @@ public class BillingProjectBufferServiceTest {
   @Test
   public void sendsSignalWhenBufferingProjects() {
     billingProjectBufferService.bufferBillingProjects();
-    verify(monitoringService).send(MonitoringViews.BILLING_BUFFER_SIZE, 0L);
+    verify(monitoringService).record(MonitoringViews.BILLING_BUFFER_SIZE, 0L);
   }
 
   @Test

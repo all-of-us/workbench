@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
+import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -62,6 +63,7 @@ public class BillingProjectBufferService {
   private final FireCloudService fireCloudService;
   private final MonitoringService monitoringService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private SecureRandom random;
 
   @Autowired
   public BillingProjectBufferService(
@@ -75,6 +77,7 @@ public class BillingProjectBufferService {
     this.fireCloudService = fireCloudService;
     this.monitoringService = monitoringService;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.random = new SecureRandom();
   }
 
   private Timestamp getCurrentTimestamp() {
@@ -92,7 +95,11 @@ public class BillingProjectBufferService {
   }
 
   private void updateBillingProjectBufferMetrics() {
-    monitoringService.send(MonitoringViews.BILLING_BUFFER_SIZE, getCurrentBufferSize());
+    monitoringService.record(MonitoringViews.BILLING_BUFFER_SIZE, getCurrentBufferSize());
+    monitoringService.record(MonitoringViews.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis());
+    monitoringService.record(MonitoringViews.DEBUG_RANDOM_DOUBLE, random.nextDouble());
+
+    // TODO(jaycarlton): set up a DAO/data manager method pair to build this map in one query.
     ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
         Arrays.stream(BufferEntryStatus.values())
             .map(
@@ -107,7 +114,7 @@ public class BillingProjectBufferService {
       final BufferEntryStatus entryStatus = entry.getKey();
       final StatsViewProperties metricView = entry.getValue();
       final Long value = entryStatusToCount.get(entryStatus);
-      monitoringService.send(metricView, value);
+      monitoringService.record(metricView, value);
     }
   }
 

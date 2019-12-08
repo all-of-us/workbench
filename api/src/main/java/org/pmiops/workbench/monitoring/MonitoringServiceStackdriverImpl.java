@@ -67,21 +67,21 @@ public class MonitoringServiceStackdriverImpl implements MonitoringService {
   }
 
   @Override
-  public void send(StatsViewProperties signal, Object value) {
+  public void record(StatsViewProperties viewProperties, Number value) {
     if (value == null) {
       logger.log(
           Level.WARNING,
-          String.format("Attempting to log a null numeric value for signal %s", signal.getName()));
+          String.format("Attempting to log a null numeric value for signal %s", viewProperties.getName()));
       return;
     }
-    if (signal.getMeasureClass().equals(MeasureLong.class)) {
-      recordLongValue(signal.getMeasureLong(), (long) value);
-    } else if (signal.getMeasureClass().equals(MeasureDouble.class)) {
-      recordDoubleValue(signal.getMeasureDouble(), (double) value);
+    if (viewProperties.getMeasureClass().equals(MeasureLong.class)) {
+      recordLongValue(viewProperties.getMeasureLong(), value.longValue());
+    } else if (viewProperties.getMeasureClass().equals(MeasureDouble.class)) {
+      recordDoubleValue(viewProperties.getMeasureDouble(), value.doubleValue());
     } else {
       logger.log(
           Level.WARNING,
-          String.format("Unrecognized measure class %s", signal.getMeasureClass().getName()));
+          String.format("Unrecognized measure class %s", viewProperties.getMeasureClass().getName()));
     }
   }
 
