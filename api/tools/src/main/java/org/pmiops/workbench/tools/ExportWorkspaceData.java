@@ -1,5 +1,6 @@
 package org.pmiops.workbench.tools;
 
+import com.google.common.collect.Streams;
 import com.opencsv.bean.BeanField;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvBindByName;
@@ -10,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -22,11 +24,13 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -102,6 +106,7 @@ public class ExportWorkspaceData {
   private DataSetDao dataSetDao;
   private NotebooksService notebooksService;
   private WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
+  private UserDao userDao;
 
   @Bean
   public CommandLineRunner run(
@@ -111,6 +116,7 @@ public class ExportWorkspaceData {
       DataSetDao dataSetDao,
       NotebooksService notebooksService,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
+      UserDao userDao,
       Provider<WorkspacesApi> workspacesApiProvider) {
     this.workspaceDao = workspaceDao;
     this.cohortDao = cohortDao;
@@ -118,6 +124,7 @@ public class ExportWorkspaceData {
     this.dataSetDao = dataSetDao;
     this.notebooksService = notebooksService;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
+    this.userDao = userDao;
     workspacesApi = workspacesApiProvider.get();
 
     return (args) -> {
@@ -125,12 +132,19 @@ public class ExportWorkspaceData {
 
       List<WorkspaceExportRow> rows = new ArrayList<>();
 
+      Set<DbUser> usersWithoutWorkspaces = Streams.stream(userDao.findAll()).collect(Collectors.toSet());
+
       for (DbWorkspace workspace : this.workspaceDao.findAll()) {
         rows.add(toWorkspaceExportRow(workspace));
+        usersWithoutWorkspaces.remove(workspace.getCreator());
 
         if (rows.size() % 10 == 0) {
           log.info("Processed " + rows.size() + "/" + this.workspaceDao.count() + " rows");
         }
+      }
+
+      for (DbUser user : usersWithoutWorkspaces) {
+        rows.add(toWorkspaceExportRow(user));
       }
 
       final CustomMappingStrategy mappingStrategy = new CustomMappingStrategy();
@@ -147,11 +161,7 @@ public class ExportWorkspaceData {
   }
 
   private WorkspaceExportRow toWorkspaceExportRow(DbWorkspace workspace) {
-    WorkspaceExportRow row = new WorkspaceExportRow();
-    row.setCreatorContactEmail(workspace.getCreator().getContactEmail());
-    row.setCreatorUsername(workspace.getCreator().getEmail());
-    row.setCreatorFirstSignIn(dateFormat.format(workspace.getCreator().getFirstSignInTime()));
-    row.setCreatorRegistrationState(workspace.getCreator().getDataAccessLevelEnum().toString());
+    WorkspaceExportRow row = toWorkspaceExportRow(workspace.getCreator());
 
     row.setProjectId(workspace.getWorkspaceNamespace());
     row.setName(workspace.getName());
@@ -162,8 +172,9 @@ public class ExportWorkspaceData {
           FirecloudTransforms.extractAclResponse(
                   workspacesApi.getWorkspaceAcl(
                       workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
-              .keySet().stream()
-              .collect(Collectors.joining(",\n")));
+              .entrySet().stream()
+              .map(entry -> entry.getKey() +  " (" + entry.getValue().getAccessLevel() + ")")
+              .collect(Collectors.joining("\n")));
     } catch (ApiException e) {
       row.setCollaborators("Error: Not Found");
     }
@@ -201,6 +212,16 @@ public class ExportWorkspaceData {
     row.setReviewForStigmatizingResearch(toYesNo(workspace.getReviewRequested()));
     row.setWorkspaceLastUpdatedDate(dateFormat.format(workspace.getLastModifiedTime()));
     row.setActive(toYesNo(workspace.isActive()));
+    return row;
+  }
+
+  private WorkspaceExportRow toWorkspaceExportRow(DbUser user) {
+    WorkspaceExportRow row = new WorkspaceExportRow();
+    row.setCreatorContactEmail(user.getContactEmail());
+    row.setCreatorUsername(user.getEmail());
+    row.setCreatorFirstSignIn(user.getFirstSignInTime() == null ? "" : dateFormat.format(user.getFirstSignInTime()));
+    row.setCreatorRegistrationState(user.getDataAccessLevelEnum().toString());
+
     return row;
   }
 
