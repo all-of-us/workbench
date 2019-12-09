@@ -16,6 +16,7 @@ import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.GoogleCloudLocators;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotebooksServiceImpl implements NotebooksService {
 
+  private static final long MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // 5MB
   private static final PolicyFactory PREVIEW_SANITIZER =
       Sanitizers.FORMATTING
           .and(Sanitizers.BLOCKS)
@@ -184,8 +186,15 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public JSONObject getNotebookContents(String bucketName, String notebookName) {
-    return cloudStorageService.getFileAsJson(
-        bucketName, "notebooks/".concat(NotebooksService.withNotebookExtension(notebookName)));
+    Blob blob =
+        cloudStorageService.getBlob(
+            bucketName, "notebooks/".concat(NotebooksService.withNotebookExtension(notebookName)));
+    if (blob.getSize() >= MAX_NOTEBOOK_READ_SIZE_BYTES) {
+      throw new FailedPreconditionException(
+          String.format(
+              "target notebook is too large to process @ %.2fMB", ((double) blob.getSize()) / 1e6));
+    }
+    return cloudStorageService.readBlobAsJson(blob);
   }
 
   @Override
