@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.Blob;
 import java.time.Clock;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -136,7 +135,7 @@ public class NotebooksServiceImplTest {
     when(firecloudService.getWorkspace(any(), any()))
         .thenReturn(
             new FirecloudWorkspaceResponse().workspace(new FirecloudWorkspace().bucketName("bkt")));
+    when(mockBlob.getContent()).thenReturn("{}".getBytes());
     when(cloudStorageService.getBlob(any(), any())).thenReturn(mockBlob);
-    when(cloudStorageService.readBlobAsJson(mockBlob)).thenReturn(new JSONObject());
   }
 }
