@@ -172,7 +172,8 @@ public class ExportWorkspaceData {
           FirecloudTransforms.extractAclResponse(
                   workspacesApi.getWorkspaceAcl(
                       workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
-              .entrySet().stream()
+              .entrySet()
+              .stream()
               .map(entry -> entry.getKey() +  " (" + entry.getValue().getAccessLevel() + ")")
               .collect(Collectors.joining("\n")));
     } catch (ApiException e) {
