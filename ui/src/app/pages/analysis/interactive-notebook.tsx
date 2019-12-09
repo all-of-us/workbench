@@ -299,13 +299,13 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         case PreviewErrorMode.NONE:
           return (<SpinnerOverlay/>);
         case PreviewErrorMode.INVALID:
-          return (<div style={{...styles.previewMessageBase, ...styles.previewInvalid}}>{previewErrorMessage}</div>)
+          return (<div style={{...styles.previewMessageBase, ...styles.previewInvalid}}>{previewErrorMessage}</div>);
         case PreviewErrorMode.ERROR:
           return (<div style={{...styles.previewMessageBase, ...styles.previewError}}>
             <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
                      shape='exclamation-triangle' size='30'/>
             {previewErrorMessage}
-          </div>)
+          </div>);
       }
     }
 
