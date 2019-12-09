@@ -34,8 +34,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.signals.MonitoringViews;
-import org.pmiops.workbench.monitoring.signals.StatsViewProperties;
+import org.pmiops.workbench.monitoring.views.MonitoringViews;
+import org.pmiops.workbench.monitoring.views.StatsViewProperties;
 import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -94,10 +94,13 @@ public class BillingProjectBufferService {
     }
   }
 
+  // TODO(jaycarlton): Move most (all) of this to its own cron method on a controller dedicated to
+  // polling gauge metric values.
   private void updateBillingProjectBufferMetrics() {
-    monitoringService.record(MonitoringViews.BILLING_BUFFER_SIZE, getCurrentBufferSize());
-    monitoringService.record(MonitoringViews.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis());
-    monitoringService.record(MonitoringViews.DEBUG_RANDOM_DOUBLE, random.nextDouble());
+    ImmutableMap.Builder<StatsViewProperties, Number> signalToValueBuilder = ImmutableMap.builder();
+    signalToValueBuilder.put(MonitoringViews.BILLING_BUFFER_SIZE, getCurrentBufferSize());
+    signalToValueBuilder.put(MonitoringViews.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis());
+    signalToValueBuilder.put(MonitoringViews.DEBUG_RANDOM_DOUBLE, random.nextDouble());
 
     // TODO(jaycarlton): set up a DAO/data manager method pair to build this map in one query.
     ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
@@ -114,8 +117,10 @@ public class BillingProjectBufferService {
       final BufferEntryStatus entryStatus = entry.getKey();
       final StatsViewProperties metricView = entry.getValue();
       final Long value = entryStatusToCount.get(entryStatus);
-      monitoringService.record(metricView, value);
+      signalToValueBuilder.put(metricView, value);
     }
+
+    monitoringService.recordValue(signalToValueBuilder.build());
   }
 
   /**

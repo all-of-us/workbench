@@ -1,20 +1,14 @@
-package org.pmiops.workbench.monitoring.signals;
+package org.pmiops.workbench.monitoring.views;
 
-import com.google.common.collect.ImmutableMap;
 import io.opencensus.stats.Aggregation;
-import io.opencensus.stats.Measure;
-import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
 import io.opencensus.tags.TagKey;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
 public enum MonitoringViews implements StatsViewProperties {
   BILLING_BUFFER_SIZE(
-      "billing_project_buffer_entries",
-      "The number of billing project buffer entries."),
+      "billing_project_buffer_entries", "The number of billing project buffer entries."),
   BILLING_BUFFER_AVAILABLE_PROJECT_COUNT(
       "billing_project_buffer_available_project_count",
       "Current number of billing projects with available status."),
@@ -24,19 +18,11 @@ public enum MonitoringViews implements StatsViewProperties {
   BILLING_BUFFER_CREATING_PROJECT_COUNT(
       "billing_project_buffer_creating_project_count",
       "Current number of billing projects with creating status."),
-  DEBUG_MILLISECONDS_SINCE_EPOCH(
-      "debug_epoch_millis",
-      "Number of milliseconds since epoch"),
-  DEBUG_RANDOM_DOUBLE(
-      "debug_random_double",
-      "Double value for debugging");
-
-  private static final Map<Class, Function<MonitoringViews, Measure>>
-      MEASURE_CLASS_TO_MEASURE_FUNCTION =
-          ImmutableMap.of(
-              MeasureLong.class, MonitoringViews::getMeasureLong,
-              MeasureDouble.class, MonitoringViews::getMeasureDouble);
-  private static final String SCALAR_UNIT = "";
+  DEBUG_MILLISECONDS_SINCE_EPOCH("debug_epoch_millis", "Number of milliseconds since epoch"),
+  DEBUG_RANDOM_DOUBLE("debug_random_double", "Double value for debugging"),
+  NOTEBOOK_SAVE("notebook_save", "Save (or create) a notebook"),
+  NOTEBOOK_CLONE("notebook_clone", "Clone (duplicate) a notebook"),
+  NOTEBOOK_DELETE("notebook_delete", "Delete a notebook");
 
   private final String name;
   private final String description;
@@ -46,7 +32,7 @@ public enum MonitoringViews implements StatsViewProperties {
   private final Class measureClass;
 
   MonitoringViews(String name, String description) {
-    this(name, description, SCALAR_UNIT, MeasureLong.class);
+    this(name, description, StatsViewProperties.SCALAR_UNIT, MeasureLong.class);
   }
 
   MonitoringViews(String name, String description, String unit, Class measureClass) {
@@ -84,18 +70,8 @@ public enum MonitoringViews implements StatsViewProperties {
   }
 
   @Override
-  public Measure getMeasure() {
-    return MEASURE_CLASS_TO_MEASURE_FUNCTION.get(measureClass).apply(this);
-  }
-
-  @Override
-  public MeasureLong getMeasureLong() {
-    return MeasureLong.create(name, description, unit);
-  }
-
-  @Override
-  public MeasureDouble getMeasureDouble() {
-    return MeasureDouble.create(name, description, unit);
+  public String getUnit() {
+    return unit;
   }
 
   @Override

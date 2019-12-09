@@ -48,7 +48,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.signals.MonitoringViews;
+import org.pmiops.workbench.monitoring.views.MonitoringViews;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -140,7 +140,7 @@ public class BillingProjectBufferServiceTest {
   @Test
   public void sendsSignalWhenBufferingProjects() {
     billingProjectBufferService.bufferBillingProjects();
-    verify(monitoringService).record(MonitoringViews.BILLING_BUFFER_SIZE, 0L);
+    verify(monitoringService).recordValue(MonitoringViews.BILLING_BUFFER_SIZE, 0L);
   }
 
   @Test

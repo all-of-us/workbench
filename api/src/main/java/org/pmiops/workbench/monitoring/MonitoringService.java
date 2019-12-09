@@ -1,7 +1,20 @@
 package org.pmiops.workbench.monitoring;
 
-import org.pmiops.workbench.monitoring.signals.StatsViewProperties;
+import java.util.Map;
+import org.pmiops.workbench.monitoring.views.StatsViewProperties;
 
 public interface MonitoringService {
-  void record(StatsViewProperties viewProperties, Number value);
+
+  /**
+   * Record an occurrence of a counted event.
+   *
+   * @param viewProperties
+   */
+  default void recordIncrement(StatsViewProperties viewProperties) {
+    recordValue(viewProperties, 1);
+  }
+
+  void recordValue(StatsViewProperties viewProperties, Number value);
+
+  void recordValue(Map<StatsViewProperties, Number> enumToValue);
 }
