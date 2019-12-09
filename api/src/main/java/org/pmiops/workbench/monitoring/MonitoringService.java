@@ -1,7 +1,7 @@
 package org.pmiops.workbench.monitoring;
 
 import java.util.Map;
-import org.pmiops.workbench.monitoring.views.StatsViewProperties;
+import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 
 public interface MonitoringService {
 
@@ -10,11 +10,11 @@ public interface MonitoringService {
    *
    * @param viewProperties
    */
-  default void recordIncrement(StatsViewProperties viewProperties) {
+  default void recordIncrement(OpenCensusStatsViewInfo viewProperties) {
     recordValue(viewProperties, 1);
   }
 
-  void recordValue(StatsViewProperties viewProperties, Number value);
+  void recordValue(OpenCensusStatsViewInfo viewProperties, Number value);
 
-  void recordValue(Map<StatsViewProperties, Number> enumToValue);
+  void recordValue(Map<OpenCensusStatsViewInfo, Number> enumToValue);
 }

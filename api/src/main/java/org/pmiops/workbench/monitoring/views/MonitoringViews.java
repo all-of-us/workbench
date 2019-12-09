@@ -1,12 +1,13 @@
 package org.pmiops.workbench.monitoring.views;
 
 import io.opencensus.stats.Aggregation;
+import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
 import io.opencensus.tags.TagKey;
 import java.util.Collections;
 import java.util.List;
 
-public enum MonitoringViews implements StatsViewProperties {
+public enum MonitoringViews implements OpenCensusStatsViewInfo {
   BILLING_BUFFER_SIZE(
       "billing_project_buffer_entries", "The number of billing project buffer entries."),
   BILLING_BUFFER_AVAILABLE_PROJECT_COUNT(
@@ -19,7 +20,12 @@ public enum MonitoringViews implements StatsViewProperties {
       "billing_project_buffer_creating_project_count",
       "Current number of billing projects with creating status."),
   DEBUG_MILLISECONDS_SINCE_EPOCH("debug_epoch_millis", "Number of milliseconds since epoch"),
-  DEBUG_RANDOM_DOUBLE("debug_random_double", "Double value for debugging"),
+  DEBUG_RANDOM_DOUBLE(
+      "debug_random_double",
+      "Double value for debugging",
+      "MHz",
+      MeasureDouble.class,
+      Aggregation.Sum.create()),
   NOTEBOOK_SAVE("notebook_save", "Save (or create) a notebook"),
   NOTEBOOK_CLONE("notebook_clone", "Clone (duplicate) a notebook"),
   NOTEBOOK_DELETE("notebook_delete", "Delete a notebook");
@@ -32,7 +38,7 @@ public enum MonitoringViews implements StatsViewProperties {
   private final Class measureClass;
 
   MonitoringViews(String name, String description) {
-    this(name, description, StatsViewProperties.SCALAR_UNIT, MeasureLong.class);
+    this(name, description, OpenCensusStatsViewInfo.SCALAR_UNIT, MeasureLong.class);
   }
 
   MonitoringViews(String name, String description, String unit, Class measureClass) {

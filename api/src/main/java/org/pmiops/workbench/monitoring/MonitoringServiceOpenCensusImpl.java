@@ -14,16 +14,15 @@ import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.StatsViewProperties;
+import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MonitoringServiceStackdriverImpl implements MonitoringService {
+public class MonitoringServiceOpenCensusImpl implements MonitoringService {
   private static final Logger logger =
-      Logger.getLogger(MonitoringServiceStackdriverImpl.class.getName());
-  private static final String DOMAIN_NAME = "custom.googleapis.com";
-  private static final String ORG_NAME = "org.pmiops.workbench";
+      Logger.getLogger(MonitoringServiceOpenCensusImpl.class.getName());
+  private static final String STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME = "custom.googleapis.com";
   private ViewManager viewManager;
   private StatsRecorder statsRecorder;
   private StackdriverStatsExporterInitializationService
@@ -31,7 +30,7 @@ public class MonitoringServiceStackdriverImpl implements MonitoringService {
   private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
-  MonitoringServiceStackdriverImpl(
+  MonitoringServiceOpenCensusImpl(
       ViewManager viewManager,
       StatsRecorder statsRecorder,
       StackdriverStatsExporterInitializationService stackdriverStatsExporterInitializationService,
@@ -54,8 +53,9 @@ public class MonitoringServiceStackdriverImpl implements MonitoringService {
 
   private String buildMetricNamePrefix() {
     return String.format(
-        "%s/%s/%s/",
-        DOMAIN_NAME, ORG_NAME, workbenchConfigProvider.get().server.shortName.toLowerCase());
+        "%s/%s/",
+        STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME,
+        workbenchConfigProvider.get().server.shortName.toLowerCase());
   }
 
   private void registerSignals() {
@@ -65,7 +65,7 @@ public class MonitoringServiceStackdriverImpl implements MonitoringService {
   }
 
   @Override
-  public void recordValue(StatsViewProperties viewProperties, Number value) {
+  public void recordValue(OpenCensusStatsViewInfo viewProperties, Number value) {
     try {
       initStatsConfigurationIdempotent();
       if (value == null) {
@@ -97,18 +97,34 @@ public class MonitoringServiceStackdriverImpl implements MonitoringService {
    * @param enumToValue
    */
   @Override
-  public void recordValue(Map<StatsViewProperties, Number> enumToValue) {
+  public void recordValue(Map<OpenCensusStatsViewInfo, Number> enumToValue) {
     try {
+      initStatsConfigurationIdempotent();
+      if (enumToValue.isEmpty()) {
+        logger.warning("recordValue() called with empty map.");
+        return;
+      }
       final MeasureMap measureMap = statsRecorder.newMeasureMap();
-      enumToValue.forEach((key, value) -> addToMeasureMap(measureMap, key, value));
+      enumToValue.forEach(
+          (viewProperties, value) -> addToMeasureMap(measureMap, viewProperties, value));
       measureMap.record();
     } catch (RuntimeException e) {
       logAndSwallow(e);
     }
   }
 
+  /**
+   * Insert either a MeasureLong or MeasureDouble with appropriate value into the appropriate
+   * MeasureMap.
+   *
+   * @param measureMap map to be populated
+   * @param viewProperties properties that will give a view
+   * @param value
+   */
   private void addToMeasureMap(
-      MeasureMap measureMap, @NotNull StatsViewProperties viewProperties, Number value) {
+      @NotNull MeasureMap measureMap,
+      @NotNull OpenCensusStatsViewInfo viewProperties,
+      @NotNull Number value) {
     if (viewProperties.getMeasureClass().equals(MeasureLong.class)) {
       measureMap.put(viewProperties.getMeasureLong(), value.longValue());
     } else if (viewProperties.getMeasureClass().equals(MeasureDouble.class)) {

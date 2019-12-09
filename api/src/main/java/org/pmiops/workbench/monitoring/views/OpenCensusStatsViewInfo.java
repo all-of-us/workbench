@@ -17,12 +17,12 @@ import java.util.function.Function;
  * intstead of an abstract class. This allows us to implement it with enums, which gives an orderly
  * way to describe lots of views without cluttering up the call sites.
  */
-public interface StatsViewProperties {
+public interface OpenCensusStatsViewInfo {
 
-  Map<Class, Function<StatsViewProperties, Measure>> MEASURE_CLASS_TO_MEASURE_FUNCTION =
+  Map<Class, Function<OpenCensusStatsViewInfo, Measure>> MEASURE_CLASS_TO_MEASURE_FUNCTION =
       ImmutableMap.of(
-          MeasureLong.class, StatsViewProperties::getMeasureLong,
-          MeasureDouble.class, StatsViewProperties::getMeasureDouble);
+          MeasureLong.class, OpenCensusStatsViewInfo::getMeasureLong,
+          MeasureDouble.class, OpenCensusStatsViewInfo::getMeasureDouble);
 
   String SCALAR_UNIT = "";
 

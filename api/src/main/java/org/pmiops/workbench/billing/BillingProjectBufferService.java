@@ -35,7 +35,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.Creati
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.StatsViewProperties;
+import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -97,7 +97,8 @@ public class BillingProjectBufferService {
   // TODO(jaycarlton): Move most (all) of this to its own cron method on a controller dedicated to
   // polling gauge metric values.
   private void updateBillingProjectBufferMetrics() {
-    ImmutableMap.Builder<StatsViewProperties, Number> signalToValueBuilder = ImmutableMap.builder();
+    ImmutableMap.Builder<OpenCensusStatsViewInfo, Number> signalToValueBuilder =
+        ImmutableMap.builder();
     signalToValueBuilder.put(MonitoringViews.BILLING_BUFFER_SIZE, getCurrentBufferSize());
     signalToValueBuilder.put(MonitoringViews.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis());
     signalToValueBuilder.put(MonitoringViews.DEBUG_RANDOM_DOUBLE, random.nextDouble());
@@ -115,7 +116,7 @@ public class BillingProjectBufferService {
 
     for (Map.Entry<BufferEntryStatus, MonitoringViews> entry : entryStatusToMetricView.entrySet()) {
       final BufferEntryStatus entryStatus = entry.getKey();
-      final StatsViewProperties metricView = entry.getValue();
+      final OpenCensusStatsViewInfo metricView = entry.getValue();
       final Long value = entryStatusToCount.get(entryStatus);
       signalToValueBuilder.put(metricView, value);
     }
