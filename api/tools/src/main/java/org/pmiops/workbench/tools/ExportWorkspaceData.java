@@ -132,7 +132,8 @@ public class ExportWorkspaceData {
 
       List<WorkspaceExportRow> rows = new ArrayList<>();
 
-      Set<DbUser> usersWithoutWorkspaces = Streams.stream(userDao.findAll()).collect(Collectors.toSet());
+      Set<DbUser> usersWithoutWorkspaces =
+          Streams.stream(userDao.findAll()).collect(Collectors.toSet());
 
       for (DbWorkspace workspace : this.workspaceDao.findAll()) {
         rows.add(toWorkspaceExportRow(workspace));
@@ -172,9 +173,8 @@ public class ExportWorkspaceData {
           FirecloudTransforms.extractAclResponse(
                   workspacesApi.getWorkspaceAcl(
                       workspace.getWorkspaceNamespace(), workspace.getFirecloudName()))
-              .entrySet()
-              .stream()
-              .map(entry -> entry.getKey() +  " (" + entry.getValue().getAccessLevel() + ")")
+              .entrySet().stream()
+              .map(entry -> entry.getKey() + " (" + entry.getValue().getAccessLevel() + ")")
               .collect(Collectors.joining("\n")));
     } catch (ApiException e) {
       row.setCollaborators("Error: Not Found");
@@ -220,7 +220,8 @@ public class ExportWorkspaceData {
     WorkspaceExportRow row = new WorkspaceExportRow();
     row.setCreatorContactEmail(user.getContactEmail());
     row.setCreatorUsername(user.getEmail());
-    row.setCreatorFirstSignIn(user.getFirstSignInTime() == null ? "" : dateFormat.format(user.getFirstSignInTime()));
+    row.setCreatorFirstSignIn(
+        user.getFirstSignInTime() == null ? "" : dateFormat.format(user.getFirstSignInTime()));
     row.setCreatorRegistrationState(user.getDataAccessLevelEnum().toString());
 
     return row;
