@@ -1,7 +1,7 @@
 <div class="item">
   <!-- SELECT BTN -->
   <button
-    *ngIf="selectable"
+    *ngIf="node.selectable"
     type="button"
     class="btn btn-sm btn-link selection-button"
     [class.pm]="isPM"
@@ -13,9 +13,7 @@
   </button>
 
   <!-- CODE -->
-  <div class="code font-weight-bold">
-    {{ displayCode }}
-  </div>
+  <div class="code font-weight-bold">{{node.code}}</div>
 
   <!-- NAME -->
   <div #name
