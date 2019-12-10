@@ -51,7 +51,23 @@ syncs:
 
     # optional, a list of excludes. These patterns will not be synced
     # see http://www.cis.upenn.edu/~bcpierce/unison/download/releases/stable/unison-manual.html#ignore for the possible syntax and see sync_excludes_type below
-    sync_excludes: ['node_modules', '.gradle', '.idea', 'tsc-app', 'tsc-out', 'api/build', 'api/out', 'common-api/build', 'common-api/out']
+    sync_excludes: [
+      '.gradle',
+      '.idea',
+      'api/build',
+      'api/out',
+      'api/src/generated',
+      'appengine-cron-emulator/build',
+      'common-api/build',
+      'common-api/out',
+      'node_modules',
+      'tsc-app',
+      'tsc-out',
+      'ui/coverage',
+      'ui/dist',
+      'ui/src/generated',
+      'ui/src/notebooks-generated'
+    ]
 
     # use this to change the exclude syntax.
     # Path: you match the exact path ( nesting problem )
