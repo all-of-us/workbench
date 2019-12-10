@@ -51,7 +51,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.CohortAnnotationDefinitionController;
 import org.pmiops.workbench.api.CohortReviewController;
@@ -221,7 +221,7 @@ public class WorkspacesControllerTest {
   private static final DbConcept CONCEPT_3 = makeConcept(CLIENT_CONCEPT_3);
 
   @Autowired private BillingProjectBufferService billingProjectBufferService;
-  @Autowired private WorkspaceAuditAdapter mockWorkspaceAuditAdapter;
+  @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
 
@@ -255,7 +255,7 @@ public class WorkspacesControllerTest {
     UserService.class,
     UserRecentResourceService.class,
     ConceptService.class,
-    WorkspaceAuditAdapter.class
+    WorkspaceAuditor.class
   })
   static class Configuration {
 
@@ -538,7 +538,7 @@ public class WorkspacesControllerTest {
   public void getWorkspaces() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    verify(mockWorkspaceAuditAdapter).fireCreateAction(any(Workspace.class), anyLong());
+    verify(mockWorkspaceAuditor).fireCreateAction(any(Workspace.class), anyLong());
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
@@ -634,7 +634,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
-    verify(mockWorkspaceAuditAdapter).fireDeleteAction(any(DbWorkspace.class));
+    verify(mockWorkspaceAuditor).fireDeleteAction(any(DbWorkspace.class));
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");
@@ -872,8 +872,7 @@ public class WorkspacesControllerTest {
             .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
             .getBody()
             .getWorkspace();
-    verify(mockWorkspaceAuditAdapter)
-        .fireDuplicateAction(anyLong(), anyLong(), any(Workspace.class));
+    verify(mockWorkspaceAuditor).fireDuplicateAction(anyLong(), anyLong(), any(Workspace.class));
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
     stubGetWorkspace(clonedFirecloudWorkspace, WorkspaceAccessLevel.WRITER);
@@ -1799,7 +1798,7 @@ public class WorkspacesControllerTest {
         workspacesController
             .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
             .getBody();
-    verify(mockWorkspaceAuditAdapter).fireCollaborateAction(anyLong(), anyMap());
+    verify(mockWorkspaceAuditor).fireCollaborateAction(anyLong(), anyMap());
     Workspace workspace2 =
         workspacesController
             .getWorkspace(workspace.getNamespace(), workspace.getName())

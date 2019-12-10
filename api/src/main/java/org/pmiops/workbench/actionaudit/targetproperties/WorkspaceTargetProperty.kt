@@ -8,7 +8,7 @@ enum class WorkspaceTargetProperty
 constructor(
     override val propertyName: String,
     override val extractor: (Workspace) -> String?
-) : TargetProperty<Workspace> {
+) : ModelBackedTargetProperty<Workspace> {
     ETAG("etag",
             Workspace::getEtag),
     NAME("name",

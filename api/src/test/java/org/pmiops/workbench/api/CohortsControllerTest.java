@@ -21,7 +21,8 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -198,7 +199,8 @@ public class CohortsControllerTest {
     FireCloudService.class,
     LeonardoNotebooksClient.class,
     UserRecentResourceService.class,
-    WorkspaceAuditAdapter.class
+    WorkspaceAuditor.class,
+    UserServiceAuditor.class
   })
   static class Configuration {
 

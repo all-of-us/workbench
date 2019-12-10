@@ -18,7 +18,8 @@ import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
@@ -204,7 +205,7 @@ public class ConceptSetsControllerTest {
 
   @Autowired WorkspacesController workspacesController;
 
-  @Autowired WorkspaceAuditAdapter workspaceAuditAdapter;
+  @Autowired WorkspaceAuditor workspaceAuditor;
 
   @TestConfiguration
   @Import({
@@ -228,7 +229,8 @@ public class ConceptSetsControllerTest {
     FireCloudService.class,
     NotebooksService.class,
     UserRecentResourceService.class,
-    WorkspaceAuditAdapter.class
+    WorkspaceAuditor.class,
+    UserServiceAuditor.class
   })
   static class Configuration {
     @Bean

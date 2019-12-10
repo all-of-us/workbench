@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -11,6 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.actionaudit.auditors.AuthDomainAuditor;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
@@ -56,6 +59,8 @@ public class AuthDomainControllerTest {
   @Mock private Provider<DbUser> userProvider;
   @Mock private ComplianceService complianceService;
   @Mock private DirectoryService directoryService;
+  @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
+  @Mock private AuthDomainAuditor mockAuthDomainAuditAdapter;
   @Autowired private UserDao userDao;
   @Mock private UserDataUseAgreementDao userDataUseAgreementDao;
 
@@ -86,8 +91,11 @@ public class AuthDomainControllerTest {
             fireCloudService,
             Providers.of(config),
             complianceService,
-            directoryService);
-    this.authDomainController = new AuthDomainController(fireCloudService, userService, userDao);
+            directoryService,
+            mockUserServiceAuditAdapter);
+    this.authDomainController =
+        new AuthDomainController(
+            fireCloudService, userService, userDao, mockAuthDomainAuditAdapter);
   }
 
   @Test
@@ -98,10 +106,15 @@ public class AuthDomainControllerTest {
 
   @Test
   public void testDisableUser() {
-    createUser(false);
+    final boolean oldDisabledValue = false;
+    final DbUser createdUser = createUser(oldDisabledValue);
+
+    final boolean newDisabledValue = true;
     UpdateUserDisabledRequest request =
-        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(true);
+        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(newDisabledValue);
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
+    verify(mockAuthDomainAuditAdapter)
+        .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled()).isTrue();
@@ -109,16 +122,22 @@ public class AuthDomainControllerTest {
 
   @Test
   public void testEnableUser() {
-    createUser(true);
+    final boolean oldDisabledValue = true;
+    final DbUser createdUser = createUser(oldDisabledValue);
+
+    final boolean newDisabledValue = false;
     UpdateUserDisabledRequest request =
-        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(false);
+        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(newDisabledValue);
+
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
+    verify(mockAuthDomainAuditAdapter)
+        .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled()).isFalse();
   }
 
-  private void createUser(boolean disabled) {
+  private DbUser createUser(boolean disabled) {
     DbUser user = new DbUser();
     user.setGivenName(GIVEN_NAME);
     user.setFamilyName(FAMILY_NAME);
@@ -128,6 +147,6 @@ public class AuthDomainControllerTest {
     user.setCurrentPosition(CURRENT_POSITION);
     user.setAreaOfResearch(RESEARCH_PURPOSE);
     user.setDisabled(disabled);
-    userDao.save(user);
+    return userDao.save(user);
   }
 }
