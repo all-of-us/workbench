@@ -16,6 +16,7 @@ import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.GoogleCloudLocators;
@@ -28,6 +29,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotebooksServiceImpl implements NotebooksService {
 
+  // Experimentally determined that generating the preview HTML for a >11MB notebook results in
+  // OOMs on a default F1 240MB GAE task. OOMs may still occur during concurrent requests. If this
+  // issue persists, we can move preview processing onto the client (calling Calhoun), or fully
+  // client-side (using a client-side notebook renderer).
+  private static final long MAX_NOTEBOOK_READ_SIZE_BYTES = 5 * 1000 * 1000; // 5MB
   private static final PolicyFactory PREVIEW_SANITIZER =
       Sanitizers.FORMATTING
           .and(Sanitizers.BLOCKS)
@@ -52,6 +58,7 @@ public class NotebooksServiceImpl implements NotebooksService {
                   // <pre> is not included in the prebuilt sanitizers; it is used for monospace code
                   // block formatting
                   .allowElements("style", "pre")
+
                   // Allow id/class in order to interact with the style tag.
                   .allowAttributes("id", "class")
                   .globally()
@@ -184,8 +191,20 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public JSONObject getNotebookContents(String bucketName, String notebookName) {
-    return cloudStorageService.getFileAsJson(
-        bucketName, "notebooks/".concat(NotebooksService.withNotebookExtension(notebookName)));
+    Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
+    return cloudStorageService.readBlobAsJson(blob);
+  }
+
+  private Blob getBlobWithSizeConstraint(String bucketName, String notebookName) {
+    Blob blob =
+        cloudStorageService.getBlob(
+            bucketName, "notebooks/".concat(NotebooksService.withNotebookExtension(notebookName)));
+    if (blob.getSize() >= MAX_NOTEBOOK_READ_SIZE_BYTES) {
+      throw new FailedPreconditionException(
+          String.format(
+              "target notebook is too large to process @ %.2fMB", ((double) blob.getSize()) / 1e6));
+    }
+    return blob;
   }
 
   @Override
@@ -205,12 +224,12 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getWorkspace()
             .getBucketName();
 
+    Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
     // We need to send a byte array so the ApiClient attaches the body as is instead
     // of serializing it through Gson which it will do for Strings.
     // The default Gson serializer does not work since it strips out some null fields
-    // which are needed for nbconvert
-    byte[] contents = getNotebookContents(bucketName, notebookName).toString().getBytes();
-    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticNotebooksConvert(contents));
+    // which are needed for nbconvert. Skip the JSON conversion here to reduce memory overhead.
+    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticNotebooksConvert(blob.getContent()));
   }
 
   private GoogleCloudLocators getNotebookLocators(
