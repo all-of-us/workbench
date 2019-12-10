@@ -207,7 +207,7 @@ def dev_up()
     common.status "Loading configs & data..."
     bm = Benchmark.measure {
       common.run_inline %W{
-        docker-compose run api-scripts ./load_local_data_and_configs.sh
+        docker-compose run api-scripts ./libproject/load_local_data_and_configs.sh
       }
     }
     common.status "Loading configs complete (#{format_benchmark(bm)})"
