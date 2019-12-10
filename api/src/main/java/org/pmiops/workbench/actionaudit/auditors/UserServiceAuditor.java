@@ -1,4 +1,4 @@
-package org.pmiops.workbench.actionaudit.adapters;
+package org.pmiops.workbench.actionaudit.auditors;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -6,7 +6,7 @@ import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetPropert
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
 
-public interface UserServiceAuditAdapter {
+public interface UserServiceAuditor {
   void fireUpdateDataAccessAction(
       DbUser targetUser, DataAccessLevel dataAccessLevel, DataAccessLevel previousDataAccessLevel);
 

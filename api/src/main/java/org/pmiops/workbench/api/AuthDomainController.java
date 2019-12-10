@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import org.pmiops.workbench.actionaudit.adapters.AuthDomainAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.AuthDomainAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -20,14 +20,14 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   private final FireCloudService fireCloudService;
   private final UserService userService;
   private final UserDao userDao;
-  private AuthDomainAuditAdapter authDomainAuditAdapter;
+  private AuthDomainAuditor authDomainAuditAdapter;
 
   @Autowired
   AuthDomainController(
       FireCloudService fireCloudService,
       UserService userService,
       UserDao userDao,
-      AuthDomainAuditAdapter authDomainAuditAdapter) {
+      AuthDomainAuditor authDomainAuditAdapter) {
     this.fireCloudService = fireCloudService;
     this.userService = userService;
     this.userDao = userDao;

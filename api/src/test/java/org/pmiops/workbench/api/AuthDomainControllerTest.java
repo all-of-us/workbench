@@ -12,8 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.actionaudit.adapters.AuthDomainAuditAdapter;
-import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.AuthDomainAuditor;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
@@ -59,8 +59,8 @@ public class AuthDomainControllerTest {
   @Mock private Provider<DbUser> userProvider;
   @Mock private ComplianceService complianceService;
   @Mock private DirectoryService directoryService;
-  @Mock private UserServiceAuditAdapter mockUserServiceAuditAdapter;
-  @Mock private AuthDomainAuditAdapter mockAuthDomainAuditAdapter;
+  @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
+  @Mock private AuthDomainAuditor mockAuthDomainAuditAdapter;
   @Autowired private UserDao userDao;
   @Mock private UserDataUseAgreementDao userDataUseAgreementDao;
 

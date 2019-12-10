@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -63,7 +63,7 @@ public class UserServiceTest {
   @Autowired private FireCloudService mockFireCloudService;
   @Autowired private ComplianceService mockComplianceService;
   @Autowired private DirectoryService mockDirectoryService;
-  @Autowired private UserServiceAuditAdapter mockUserServiceAuditAdapter;
+  @Autowired private UserServiceAuditor mockUserServiceAuditAdapter;
 
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
@@ -75,7 +75,7 @@ public class UserServiceTest {
     FireCloudService.class,
     ComplianceService.class,
     DirectoryService.class,
-    UserServiceAuditAdapter.class
+    UserServiceAuditor.class
   })
   static class Configuration {
     @Bean

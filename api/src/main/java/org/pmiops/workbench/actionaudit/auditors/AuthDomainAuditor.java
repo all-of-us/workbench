@@ -1,6 +1,6 @@
-package org.pmiops.workbench.actionaudit.adapters;
+package org.pmiops.workbench.actionaudit.auditors;
 
-public interface AuthDomainAuditAdapter {
+public interface AuthDomainAuditor {
   void fireSetAccountDisabledStatus(
       long userId, boolean newDisabledValue, boolean oldDisabledValue);
 }

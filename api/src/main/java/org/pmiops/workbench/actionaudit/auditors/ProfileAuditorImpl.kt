@@ -1,4 +1,4 @@
-package org.pmiops.workbench.actionaudit.adapters
+package org.pmiops.workbench.actionaudit.auditors
 
 import java.time.Clock
 import javax.inject.Provider
@@ -16,13 +16,13 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 
 @Service
-class ProfileAuditAdapterImpl @Autowired
+class ProfileAuditorImpl @Autowired
 constructor(
     private val userProvider: Provider<DbUser>,
     private val actionAuditService: ActionAuditService,
     private val clock: Clock,
     @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
-) : ProfileAuditAdapter {
+) : ProfileAuditor {
 
     override fun fireCreateAction(createdProfile: Profile) {
         val propertiesByName: Map<String, String?> = TargetPropertyExtractor

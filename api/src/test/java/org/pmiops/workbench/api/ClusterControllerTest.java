@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
@@ -102,7 +102,7 @@ public class ClusterControllerTest {
     ComplianceService.class,
     DirectoryService.class,
     AdminActionHistoryDao.class,
-    UserServiceAuditAdapter.class
+    UserServiceAuditor.class
   })
   static class Configuration {
 

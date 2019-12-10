@@ -1,4 +1,4 @@
-package org.pmiops.workbench.actionaudit.adapters;
+package org.pmiops.workbench.actionaudit.auditors;
 
 import java.time.Clock;
 import javax.inject.Provider;
@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthDomainAuditAdapterImpl implements AuthDomainAuditAdapter {
+public class AuthDomainAuditorImpl implements AuthDomainAuditor {
 
   private ActionAuditService actionAuditService;
   private Clock clock;
@@ -23,7 +23,7 @@ public class AuthDomainAuditAdapterImpl implements AuthDomainAuditAdapter {
   private Provider<String> actionIdProvider;
 
   @Autowired
-  public AuthDomainAuditAdapterImpl(
+  public AuthDomainAuditorImpl(
       ActionAuditService actionAuditService,
       Clock clock,
       Provider<DbUser> adminDbUserProvider,

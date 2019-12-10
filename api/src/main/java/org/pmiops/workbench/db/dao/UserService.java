@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
-import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -72,7 +72,7 @@ public class UserService {
   private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
-  private final UserServiceAuditAdapter userServiceAuditAdapter;
+  private final UserServiceAuditor userServiceAuditAdapter;
   private static final Logger log = Logger.getLogger(UserService.class.getName());
 
   @Autowired
@@ -87,7 +87,7 @@ public class UserService {
       Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
       DirectoryService directoryService,
-      UserServiceAuditAdapter userServiceAuditAdapter) {
+      UserServiceAuditor userServiceAuditAdapter) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;

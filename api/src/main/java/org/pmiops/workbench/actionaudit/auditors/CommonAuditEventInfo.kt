@@ -1,4 +1,4 @@
-package org.pmiops.workbench.actionaudit.adapters
+package org.pmiops.workbench.actionaudit.auditors
 
 data class CommonAuditEventInfo(
     val actionId: String,

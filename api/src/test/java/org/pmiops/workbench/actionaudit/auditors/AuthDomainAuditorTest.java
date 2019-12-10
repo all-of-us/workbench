@@ -1,4 +1,4 @@
-package org.pmiops.workbench.actionaudit.adapters;
+package org.pmiops.workbench.actionaudit.auditors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
@@ -30,7 +30,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @Import(LiquibaseAutoConfiguration.class)
-public class AuthDomainAuditAdapterTest {
+public class AuthDomainAuditorTest {
 
   private static final long USER_ID = 101L;
   private static final long ADMINISTRATOR_USER_ID = 222L;
@@ -42,10 +42,10 @@ public class AuthDomainAuditAdapterTest {
 
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
 
-  @Autowired private AuthDomainAuditAdapter authDomainAuditAdapter;
+  @Autowired private AuthDomainAuditor authDomainAuditAdapter;
 
   @TestConfiguration
-  @Import({AuthDomainAuditAdapterImpl.class})
+  @Import({AuthDomainAuditorImpl.class})
   @MockBean({ActionAuditService.class})
   static class Config {
     @Bean(name = "ACTION_ID")

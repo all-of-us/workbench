@@ -1,4 +1,4 @@
-package org.pmiops.workbench.actionaudit.adapters;
+package org.pmiops.workbench.actionaudit.auditors;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserServiceAuditAdapterImpl implements UserServiceAuditAdapter {
+public class UserServiceAuditAdapterImpl implements UserServiceAuditor {
 
   private final ActionAuditService actionAuditService;
   private final Clock clock;

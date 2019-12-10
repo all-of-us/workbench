@@ -43,8 +43,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.pmiops.workbench.actionaudit.adapters.UserServiceAuditAdapter;
-import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -218,7 +218,8 @@ public class DataSetControllerTest {
 
   @Autowired WorkspaceService workspaceService;
 
-  @Autowired WorkspaceAuditAdapter workspaceAuditAdapter;
+  @Autowired
+  WorkspaceAuditor workspaceAuditor;
 
   @Autowired WorkspaceMapper workspaceMapper;
 
@@ -250,8 +251,8 @@ public class DataSetControllerTest {
     NotebooksService.class,
     CohortQueryBuilder.class,
     UserRecentResourceService.class,
-    WorkspaceAuditAdapter.class,
-    UserServiceAuditAdapter.class
+    WorkspaceAuditor.class,
+    UserServiceAuditor.class
   })
   static class Configuration {
     @Bean
@@ -322,7 +323,7 @@ public class DataSetControllerTest {
             notebooksService,
             userService,
             workbenchConfigProvider,
-            workspaceAuditAdapter,
+            workspaceAuditor,
             workspaceMapper);
     CohortsController cohortsController =
         new CohortsController(

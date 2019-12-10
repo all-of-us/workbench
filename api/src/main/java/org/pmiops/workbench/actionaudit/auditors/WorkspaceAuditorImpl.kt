@@ -1,4 +1,4 @@
-package org.pmiops.workbench.actionaudit.adapters
+package org.pmiops.workbench.actionaudit.auditors
 
 import java.time.Clock
 import java.util.logging.Logger
@@ -20,13 +20,13 @@ import org.springframework.stereotype.Service
 import java.util.logging.Level
 
 @Service
-class WorkspaceAuditAdapterImpl @Autowired
+class WorkspaceAuditorImpl @Autowired
 constructor(
     private val userProvider: Provider<DbUser>,
     private val actionAuditService: ActionAuditService,
     private val clock: Clock,
     @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
-) : WorkspaceAuditAdapter {
+) : WorkspaceAuditor {
 
     override fun fireCreateAction(createdWorkspace: Workspace, dbWorkspaceId: Long) {
         val info = getAuditEventInfo() ?: return
@@ -196,6 +196,6 @@ constructor(
     }
 
     companion object {
-        private val logger = Logger.getLogger(WorkspaceAuditAdapterImpl::class.java.name)
+        private val logger = Logger.getLogger(WorkspaceAuditorImpl::class.java.name)
     }
 }
