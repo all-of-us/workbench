@@ -271,8 +271,7 @@ public class WorkspaceAuditorTest {
             .dataAccessLevel(DataAccessLevel.REGISTERED)
             .published(false);
 
-    workspaceAuditor.fireEditAction(
-        workspace1, editedWorkspace, dbWorkspace1.getWorkspaceId());
+    workspaceAuditor.fireEditAction(workspace1, editedWorkspace, dbWorkspace1.getWorkspaceId());
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
 
     assertThat(eventCollectionCaptor.getValue()).hasSize(3);

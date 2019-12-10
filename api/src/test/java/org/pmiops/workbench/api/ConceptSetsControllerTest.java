@@ -205,8 +205,7 @@ public class ConceptSetsControllerTest {
 
   @Autowired WorkspacesController workspacesController;
 
-  @Autowired
-  WorkspaceAuditor workspaceAuditor;
+  @Autowired WorkspaceAuditor workspaceAuditor;
 
   @TestConfiguration
   @Import({

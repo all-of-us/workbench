@@ -218,8 +218,7 @@ public class DataSetControllerTest {
 
   @Autowired WorkspaceService workspaceService;
 
-  @Autowired
-  WorkspaceAuditor workspaceAuditor;
+  @Autowired WorkspaceAuditor workspaceAuditor;
 
   @Autowired WorkspaceMapper workspaceMapper;
 

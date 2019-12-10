@@ -872,8 +872,7 @@ public class WorkspacesControllerTest {
             .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
             .getBody()
             .getWorkspace();
-    verify(mockWorkspaceAuditor)
-        .fireDuplicateAction(anyLong(), anyLong(), any(Workspace.class));
+    verify(mockWorkspaceAuditor).fireDuplicateAction(anyLong(), anyLong(), any(Workspace.class));
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
     stubGetWorkspace(clonedFirecloudWorkspace, WorkspaceAccessLevel.WRITER);
