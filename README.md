@@ -620,3 +620,7 @@ curl -X GET -H "`~/go/bin/oauth2l header --json ./sa-key.json email profile clou
 # If you get 401 errors, you may need to clear your token cache.
 oauth2l reset
 ```
+
+### Action Audit System
+We have a framework for user action auditing with its own [query system](doc/action-audit-queries.md).
+Read more about its implementation [here](doc/action-audit-implementation.md).

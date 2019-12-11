@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -15,6 +16,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
@@ -69,6 +72,7 @@ public class UserService {
   private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
+  private final UserServiceAuditor userServiceAuditAdapter;
   private static final Logger log = Logger.getLogger(UserService.class.getName());
 
   @Autowired
@@ -82,7 +86,8 @@ public class UserService {
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
-      DirectoryService directoryService) {
+      DirectoryService directoryService,
+      UserServiceAuditor userServiceAuditAdapter) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
@@ -93,6 +98,7 @@ public class UserService {
     this.configProvider = configProvider;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
+    this.userServiceAuditAdapter = userServiceAuditAdapter;
   }
 
   /**
@@ -164,6 +170,8 @@ public class UserService {
     }
     if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
       dbUser.setDataAccessLevelEnum(newDataAccessLevel);
+      userServiceAuditAdapter.fireUpdateDataAccessAction(
+          dbUser, newDataAccessLevel, previousDataAccessLevel);
     }
   }
 
@@ -360,23 +368,43 @@ public class UserService {
   }
 
   public void setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
-    setBypassTimeWithRetries(userId, bypassTime, DbUser::setDataUseAgreementBypassTime);
+    setBypassTimeWithRetries(
+        userId,
+        bypassTime,
+        DbUser::setDataUseAgreementBypassTime,
+        BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME);
   }
 
   public void setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
-    setBypassTimeWithRetries(userId, bypassTime, DbUser::setComplianceTrainingBypassTime);
+    setBypassTimeWithRetries(
+        userId,
+        bypassTime,
+        DbUser::setComplianceTrainingBypassTime,
+        BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME);
   }
 
   public void setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
-    setBypassTimeWithRetries(userId, bypassTime, DbUser::setBetaAccessBypassTime);
+    setBypassTimeWithRetries(
+        userId,
+        bypassTime,
+        DbUser::setBetaAccessBypassTime,
+        BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME);
   }
 
   public void setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
-    setBypassTimeWithRetries(userId, bypassTime, DbUser::setEraCommonsBypassTime);
+    setBypassTimeWithRetries(
+        userId,
+        bypassTime,
+        DbUser::setEraCommonsBypassTime,
+        BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME);
   }
 
   public void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
-    setBypassTimeWithRetries(userId, bypassTime, DbUser::setTwoFactorAuthBypassTime);
+    setBypassTimeWithRetries(
+        userId,
+        bypassTime,
+        DbUser::setTwoFactorAuthBypassTime,
+        BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME);
   }
 
   /**
@@ -386,20 +414,31 @@ public class UserService {
    * @param bypassTime type of bypass
    * @param setter void-returning method to call to set the particular bypass field. Should
    *     typically be a method reference on DbUser, e.g.
+   * @param targetProperty BypassTimeTargetProperty enum value, for auditing
    */
   private void setBypassTimeWithRetries(
-      long userId, Timestamp bypassTime, BiConsumer<DbUser, Timestamp> setter) {
-    setBypassTimeWithRetries(userDao.findUserByUserId(userId), bypassTime, setter);
+      long userId,
+      Timestamp bypassTime,
+      BiConsumer<DbUser, Timestamp> setter,
+      BypassTimeTargetProperty targetProperty) {
+    setBypassTimeWithRetries(userDao.findUserByUserId(userId), bypassTime, targetProperty, setter);
   }
 
   private void setBypassTimeWithRetries(
-      DbUser dbUser, Timestamp bypassTime, BiConsumer<DbUser, Timestamp> setter) {
+      DbUser dbUser,
+      Timestamp bypassTime,
+      BypassTimeTargetProperty targetProperty,
+      BiConsumer<DbUser, Timestamp> setter) {
     updateUserWithRetries(
         (u) -> {
           setter.accept(u, bypassTime);
           return u;
         },
         dbUser);
+    userServiceAuditAdapter.fireAdministrativeBypassTime(
+        dbUser.getUserId(),
+        targetProperty,
+        Optional.ofNullable(bypassTime).map(Timestamp::toInstant));
   }
 
   public void setClusterRetryCount(int clusterRetryCount) {

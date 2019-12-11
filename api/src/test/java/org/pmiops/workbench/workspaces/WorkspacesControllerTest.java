@@ -51,7 +51,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.CohortAnnotationDefinitionController;
 import org.pmiops.workbench.api.CohortReviewController;
@@ -222,7 +222,7 @@ public class WorkspacesControllerTest {
   private static final DbConcept CONCEPT_3 = makeConcept(CLIENT_CONCEPT_3);
 
   @Autowired private BillingProjectBufferService billingProjectBufferService;
-  @Autowired private WorkspaceAuditAdapter mockWorkspaceAuditAdapter;
+  @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
 
@@ -256,8 +256,8 @@ public class WorkspacesControllerTest {
     UserService.class,
     UserRecentResourceService.class,
     ConceptService.class,
-    WorkspaceAuditAdapter.class,
-    MonitoringService.class
+    MonitoringService.class,
+    WorkspaceAuditor.class
   })
   static class Configuration {
 
@@ -540,7 +540,7 @@ public class WorkspacesControllerTest {
   public void getWorkspaces() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    verify(mockWorkspaceAuditAdapter).fireCreateAction(any(Workspace.class), anyLong());
+    verify(mockWorkspaceAuditor).fireCreateAction(any(Workspace.class), anyLong());
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(
@@ -636,7 +636,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
-    verify(mockWorkspaceAuditAdapter).fireDeleteAction(any(DbWorkspace.class));
+    verify(mockWorkspaceAuditor).fireDeleteAction(any(DbWorkspace.class));
     try {
       workspacesController.getWorkspace(workspace.getNamespace(), workspace.getName());
       fail("NotFoundException expected");
@@ -874,8 +874,7 @@ public class WorkspacesControllerTest {
             .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
             .getBody()
             .getWorkspace();
-    verify(mockWorkspaceAuditAdapter)
-        .fireDuplicateAction(anyLong(), anyLong(), any(Workspace.class));
+    verify(mockWorkspaceAuditor).fireDuplicateAction(anyLong(), anyLong(), any(Workspace.class));
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
     stubGetWorkspace(clonedFirecloudWorkspace, WorkspaceAccessLevel.WRITER);
@@ -1720,7 +1719,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void testClonePermissionDenied() throws Exception {
+  public void testClonePermissionDenied() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -1746,7 +1745,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = FailedPreconditionException.class)
-  public void testCloneWithMassiveNotebook() throws Exception {
+  public void testCloneWithMassiveNotebook() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -1776,7 +1775,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspace() throws Exception {
+  public void testShareWorkspace() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser readerUser = createAndSaveUser("readerfriend@gmail.com", 125L);
@@ -1801,7 +1800,7 @@ public class WorkspacesControllerTest {
         workspacesController
             .shareWorkspace(workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest)
             .getBody();
-    verify(mockWorkspaceAuditAdapter).fireCollaborateAction(anyLong(), anyMap());
+    verify(mockWorkspaceAuditor).fireCollaborateAction(anyLong(), anyMap());
     Workspace workspace2 =
         workspacesController
             .getWorkspace(workspace.getNamespace(), workspace.getName())
@@ -1815,7 +1814,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspaceAddBillingProjectUser() throws Exception {
+  public void testShareWorkspaceAddBillingProjectUser() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
@@ -1843,7 +1842,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspaceRemoveBillingProjectUser() throws Exception {
+  public void testShareWorkspaceRemoveBillingProjectUser() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
@@ -1893,7 +1892,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspaceNoRoleFailure() throws Exception {
+  public void testShareWorkspaceNoRoleFailure() {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
 
     Workspace workspace = createWorkspace();
@@ -1919,7 +1918,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUnshareWorkspace() throws Exception {
+  public void testUnshareWorkspace() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser readerUser = createAndSaveUser("readerfriend@gmail.com", 125L);
@@ -1998,7 +1997,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testStaleShareWorkspace() throws Exception {
+  public void testStaleShareWorkspace() {
     stubFcGetGroup();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -2029,7 +2028,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testUnableToShareWithNonExistentUser() throws Exception {
+  public void testUnableToShareWithNonExistentUser() {
     Workspace workspace = createWorkspace();
     workspacesController.createWorkspace(workspace);
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
@@ -2042,7 +2041,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testNotebookFileList() throws Exception {
+  public void testNotebookFileList() {
     when(fireCloudService.getWorkspace("project", "workspace"))
         .thenReturn(
             new FirecloudWorkspaceResponse()
@@ -2071,7 +2070,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testNotebookFileListOmitsExtraDirectories() throws Exception {
+  public void testNotebookFileListOmitsExtraDirectories() {
     when(fireCloudService.getWorkspace("project", "workspace"))
         .thenReturn(
             new FirecloudWorkspaceResponse()
@@ -2092,7 +2091,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testNotebookFileListNotFound() throws Exception {
+  public void testNotebookFileListNotFound() {
     when(fireCloudService.getWorkspace("mockProject", "mockWorkspace"))
         .thenThrow(new NotFoundException());
     try {
@@ -2104,7 +2103,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testEmptyFireCloudWorkspaces() throws Exception {
+  public void testEmptyFireCloudWorkspaces() {
     when(fireCloudService.getWorkspaces(any()))
         .thenReturn(new ArrayList<FirecloudWorkspaceResponse>());
     try {
@@ -2117,7 +2116,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testRenameNotebookInWorkspace() throws Exception {
+  public void testRenameNotebookInWorkspace() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2140,7 +2139,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testRenameNotebookWoExtension() throws Exception {
+  public void testRenameNotebookWoExtension() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2317,7 +2316,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneNotebook() throws Exception {
+  public void testCloneNotebook() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2333,7 +2332,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testDeleteNotebook() throws Exception {
+  public void testDeleteNotebook() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");

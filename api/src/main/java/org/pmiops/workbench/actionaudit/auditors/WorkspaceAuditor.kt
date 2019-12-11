@@ -1,9 +1,9 @@
-package org.pmiops.workbench.actionaudit.adapters
+package org.pmiops.workbench.actionaudit.auditors
 
 import org.pmiops.workbench.db.model.DbWorkspace
 import org.pmiops.workbench.model.Workspace
 
-interface WorkspaceAuditAdapter {
+interface WorkspaceAuditor {
     fun fireCreateAction(createdWorkspace: Workspace, dbWorkspaceId: Long)
 
     fun fireEditAction(

@@ -65,6 +65,31 @@ const styles = reactStyles({
     position: 'absolute',
     border: 0
   },
+  previewMessageBase: {
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginTop: '56px'
+  },
+  previewInvalid: {
+    color: colorWithWhiteness(colors.dark, .6),
+    fontSize: '18px',
+    fontWeight: 600,
+    lineHeight: '32px',
+    maxWidth: '840px',
+    textAlign: 'center'
+  },
+  previewError: {
+    background: colors.warning,
+    border: '1px solid #ebafa6',
+    borderRadius: '5px',
+    color: colors.white,
+    display: 'flex',
+    fontSize: '14px',
+    fontWeight: 500,
+    maxWidth: '550px',
+    padding: '8px',
+    textAlign: 'left'
+  },
   rotate: {
     animation: 'rotation 2s infinite linear'
   }
@@ -83,6 +108,14 @@ interface State {
   showInUseModal: boolean;
   showPlaygroundModeModal: boolean;
   userRequestedExecutableNotebook: boolean;
+  previewErrorMode: PreviewErrorMode;
+  previewErrorMessage: string;
+}
+
+enum PreviewErrorMode {
+  NONE = 'none',
+  INVALID = 'invalid',
+  ERROR = 'error'
 }
 
 export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace())(
@@ -100,6 +133,8 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
         showInUseModal: false,
         showPlaygroundModeModal: false,
         userRequestedExecutableNotebook: false,
+        previewErrorMode: PreviewErrorMode.NONE,
+        previewErrorMessage: ''
       };
     }
 
@@ -108,6 +143,16 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
 
       workspacesApi().readOnlyNotebook(ns, wsid, nbName).then(html => {
         this.setState({html: html.html});
+      }).catch((e) => {
+        let previewErrorMode = PreviewErrorMode.ERROR;
+        let previewErrorMessage = 'Failed to render preview due to an unknown error, ' +
+            'please try reloading or opening the notebook in edit or playground mode.';
+        if (e.status === 412) {
+          previewErrorMode = PreviewErrorMode.INVALID;
+          previewErrorMessage = 'Notebook is too large to display in preview mode, please use edit mode or ' +
+              'playground mode to view this notebook.';
+        }
+        this.setState({previewErrorMode, previewErrorMessage});
       });
 
       workspacesApi().getNotebookLockingMetadata(ns, wsid, nbName).then((resp) => {
@@ -245,13 +290,31 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       }
     }
 
+    private renderPreviewContents() {
+      const {html, previewErrorMode, previewErrorMessage} = this.state;
+      if (html) {
+        return (<iframe id='notebook-frame' style={styles.previewFrame} srcDoc={html}/>);
+      }
+      switch (previewErrorMode) {
+        case PreviewErrorMode.NONE:
+          return (<SpinnerOverlay/>);
+        case PreviewErrorMode.INVALID:
+          return (<div style={{...styles.previewMessageBase, ...styles.previewInvalid}}>{previewErrorMessage}</div>);
+        case PreviewErrorMode.ERROR:
+          return (<div style={{...styles.previewMessageBase, ...styles.previewError}}>
+            <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid'
+                     shape='exclamation-triangle' size='30'/>
+            {previewErrorMessage}
+          </div>);
+      }
+    }
+
     render() {
       const {
-        html,
         lastLockedBy,
         showInUseModal,
         showPlaygroundModeModal,
-        userRequestedExecutableNotebook
+        userRequestedExecutableNotebook,
       } = this.state;
       return (
         <div>
@@ -288,9 +351,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
             }
           </div>
           <div style={styles.previewDiv}>
-            {html ?
-              (<iframe id='notebook-frame' style={styles.previewFrame} srcDoc={html}/>) :
-              (<SpinnerOverlay/>)}
+            {this.renderPreviewContents()}
           </div>
           {showPlaygroundModeModal &&
             <ConfirmPlaygroundModeModal

@@ -12,7 +12,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -25,6 +24,7 @@ import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
@@ -43,20 +43,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import(LiquibaseAutoConfiguration.class)
 public class DataDictionaryTest {
 
-  @Autowired BigQueryService bigQueryService;
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CohortDao cohortDao;
-  @Autowired ConceptDao conceptDao;
-  @Autowired ConceptSetDao conceptSetDao;
-  @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
-  @Autowired DataSetDao dataSetDao;
-  @Autowired DataSetMapper dataSetMapper;
-  @Autowired DataSetService dataSetService;
-  @Autowired FireCloudService fireCloudService;
-  @Autowired NotebooksService notebooksService;
-  @Autowired WorkspaceService workspaceService;
-
-  @Autowired DataSetController dataSetController;
+  @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
+  @Autowired private DataSetController dataSetController;
 
   @Rule public ExpectedException expectedEx = ExpectedException.none();
 
@@ -125,12 +114,12 @@ public class DataDictionaryTest {
 
     dataDictionaryEntryDao.save(dataDictionaryEntry);
 
-    org.pmiops.workbench.model.DataDictionaryEntry response =
+    DataDictionaryEntry response =
         dataSetController
             .getDataDictionaryEntry(cdrVersion.getCdrVersionId(), domain.toString(), domainValue)
             .getBody();
 
-    assertThat(response.getCdrVersionId().longValue())
+    assertThat(response.getCdrVersionId())
         .isEqualTo(dataDictionaryEntry.getCdrVersion().getCdrVersionId());
     assertThat(new Timestamp(response.getDefinedTime()))
         .isEqualTo(dataDictionaryEntry.getDefinedTime());

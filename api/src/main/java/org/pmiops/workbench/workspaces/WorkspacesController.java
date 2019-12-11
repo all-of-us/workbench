@@ -30,7 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.api.WorkspacesApiDelegate;
@@ -118,7 +118,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final NotebooksService notebooksService;
   private final UserService userService;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private WorkspaceAuditAdapter workspaceAuditAdapter;
+  private WorkspaceAuditor workspaceAuditor;
   private WorkspaceMapper workspaceMapper;
 
   @Autowired
@@ -134,7 +134,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       NotebooksService notebooksService,
       UserService userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceAuditAdapter workspaceAuditAdapter,
+      WorkspaceAuditor workspaceAuditor,
       WorkspaceMapper workspaceMapper) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
@@ -147,7 +147,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.notebooksService = notebooksService;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.workspaceAuditAdapter = workspaceAuditAdapter;
+    this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
   }
 
@@ -246,7 +246,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
-    workspaceAuditAdapter.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
+    workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
   }
 
@@ -291,7 +291,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     workspaceService.maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
-    workspaceAuditAdapter.fireDeleteAction(dbWorkspace);
+    workspaceAuditor.fireDeleteAction(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -354,7 +354,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     final Workspace editedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
 
-    workspaceAuditAdapter.fireEditAction(
+    workspaceAuditor.fireEditAction(
         originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
@@ -484,7 +484,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     final Workspace savedWorkspace =
         workspaceMapper.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
 
-    workspaceAuditAdapter.fireDuplicateAction(
+    workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), savedDbWorkspace.getWorkspaceId(), savedWorkspace);
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
@@ -546,7 +546,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.convertWorkspaceAclsToUserRoles(updatedWsAcls);
     resp.setItems(updatedUserRoles);
 
-    workspaceAuditAdapter.fireCollaborateAction(
+    workspaceAuditor.fireCollaborateAction(
         dbWorkspace.getWorkspaceId(), aclStringsByUserIdBuilder.build());
     return ResponseEntity.ok(resp);
   }
