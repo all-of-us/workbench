@@ -28,6 +28,7 @@ import static org.pmiops.workbench.model.FilterColumns.VISIT_TYPE;
 import com.google.cloud.bigquery.BigQueryException;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -802,7 +803,8 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   }
 
   /** Build a map that contains all gender/race/ethnicity names with the concept id as the key. */
-  protected Map<Long, String> getGenderRaceEthnicityMap() {
+  @VisibleForTesting
+  public Map<Long, String> getGenderRaceEthnicityMap() {
     Map<Long, String> genderRaceEthnicityMap = new HashMap<>();
     cbCriteriaDao
         .findGenderRaceEthnicity()
