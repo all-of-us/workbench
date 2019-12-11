@@ -43,7 +43,6 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
@@ -79,7 +78,6 @@ public class ExportWorkspaceData {
 
   @Primary
   @Bean
-  @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
   @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
   WorkspacesApi workspaceApi(WorkbenchConfig config) throws IOException {
     return new ServiceAccountAPIClientFactory(config.firecloud.baseUrl).workspacesApi();
