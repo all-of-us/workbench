@@ -27,7 +27,9 @@ export async function fetchWithGlobalErrorHandler<T>(fetchFn: () => Promise<T>, 
   let retries = 0;
   while (true) {
     try {
-      return await fetchFn();
+      const returnVal = await fetchFn();
+      console.log(returnVal);
+      return returnVal;
     } catch (e) {
       retries++;
       const errorResponse = await convertAPIError(e);
