@@ -353,14 +353,16 @@ public class FreeTierBillingServiceTest {
     user.setFreeTierCreditsLimitDollarsOverride(freeTierCreditsDollarLimitOverride);
     user = userDao.save(user);
     assertWithinBillingTolerance(
-        freeTierBillingService.getUserFreeTierDollarLimit(user), freeTierCreditsDollarLimitOverride);
+        freeTierBillingService.getUserFreeTierDollarLimit(user),
+        freeTierCreditsDollarLimitOverride);
 
     final double doubleFreeTierCreditsDollarLimitOverrideNew = 200.0;
     user.setFreeTierCreditsLimitDollarsOverride(doubleFreeTierCreditsDollarLimitOverrideNew);
     user = userDao.save(user);
 
     assertWithinBillingTolerance(
-        freeTierBillingService.getUserFreeTierDollarLimit(user), doubleFreeTierCreditsDollarLimitOverrideNew);
+        freeTierBillingService.getUserFreeTierDollarLimit(user),
+        doubleFreeTierCreditsDollarLimitOverrideNew);
   }
 
   @Test
