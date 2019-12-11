@@ -8,12 +8,18 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {CardMenuIconComponentReact} from 'app/icons/card-menu-icon';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
 import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {highlightSearchTerm, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
+import {NavStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget} from 'app/utils/zendesk';
-import {ParticipantCohortStatus} from 'generated/fetch';
+import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {MenuItem} from './buttons';
+import {PopupTrigger} from './popups';
 
 const proIcons = {
   thunderstorm: '/assets/icons/thunderstorm-solid.svg'
@@ -122,6 +128,20 @@ const styles = reactStyles({
     color: colors.accent,
     cursor: 'pointer',
     textDecoration: 'none'
+  },
+  dropdownHeader: {
+    fontSize: 12,
+    lineHeight: '30px',
+    color: colors.primary,
+    fontWeight: 600,
+    paddingLeft: 12,
+    width: 160
+  },
+  menuButtonIcon: {
+    width: 27,
+    height: 27,
+    opacity: 0.65,
+    marginRight: 16
   }
 });
 
@@ -133,6 +153,12 @@ const iconStyles = {
   disabled: {
     ...styles.icon,
     cursor: 'not-allowed'
+  },
+  menu: {
+    ...styles.icon,
+    margin: '0.5rem auto 1.5rem',
+    height: 27,
+    width: 27
   }
 };
 
@@ -160,10 +186,13 @@ const icons = [{
 }];
 
 interface Props {
+  deleteFunction: Function;
   helpContent: string;
-  setSidebarState: Function;
-  sidebarOpen: boolean;
   profileState: any;
+  setSidebarState: Function;
+  shareFunction: Function;
+  sidebarOpen: boolean;
+  workspace: WorkspaceData;
 }
 
 interface State {
@@ -173,7 +202,7 @@ interface State {
   searchTerm: string;
   tooltipId: number;
 }
-export const HelpSidebar = withUserProfile()(
+export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
   class extends React.Component<Props, State> {
     subscription: Subscription;
     constructor(props: Props) {
@@ -272,6 +301,62 @@ export const HelpSidebar = withUserProfile()(
       return highlightSearchTerm(searchTerm, content, colors.success);
     }
 
+    renderWorkspaceMenu() {
+      const {deleteFunction, shareFunction, workspace, workspace: {accessLevel, id, namespace}} = this.props;
+      const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
+      return <PopupTrigger
+        side='bottom'
+        closeOnClick={true}
+        content={
+          <React.Fragment>
+            <div style={styles.dropdownHeader}>Workspace Actions</div>
+            <MenuItem
+              icon='copy'
+              onClick={() => {
+                AnalyticsTracker.Workspaces.OpenDuplicatePage();
+                NavStore.navigate(['/workspaces', namespace, id, 'duplicate']);
+              }}>
+              Duplicate
+            </MenuItem>
+            <MenuItem
+              icon='pencil'
+              tooltip={isNotOwner && 'Requires owner permission'}
+              disabled={isNotOwner}
+              onClick={() => {
+                AnalyticsTracker.Workspaces.OpenEditPage();
+                NavStore.navigate(['/workspaces', namespace, id, 'edit']);
+              }}
+            >
+              Edit
+            </MenuItem>
+            <MenuItem
+              icon='share'
+              tooltip={isNotOwner && 'Requires owner permission'}
+              disabled={isNotOwner}
+              onClick={() => {
+                AnalyticsTracker.Workspaces.OpenShareModal();
+                shareFunction();
+              }}>
+              Share
+            </MenuItem>
+            <MenuItem
+              icon='trash'
+              tooltip={isNotOwner && 'Requires owner permission'}
+              disabled={isNotOwner}
+              onClick={() => {
+                AnalyticsTracker.Workspaces.OpenDeleteModal();
+                deleteFunction();
+              }}>
+              Delete
+            </MenuItem>
+          </React.Fragment>
+        }>
+        <div data-test-id='workspace-menu-button' style={iconStyles.menu}>
+          <CardMenuIconComponentReact />
+        </div>
+      </PopupTrigger>;
+    }
+
     render() {
       const {helpContent, setSidebarState, sidebarOpen} = this.props;
       const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
@@ -284,6 +369,7 @@ export const HelpSidebar = withUserProfile()(
       });
       return <React.Fragment>
         <div style={styles.iconContainer}>
+          {this.renderWorkspaceMenu()}
           {icons.map((icon, i) => (!icon.page || icon.page === helpContent) && <div key={i} style={{display: 'table'}}>
             <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
               <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
@@ -356,11 +442,13 @@ export const HelpSidebar = withUserProfile()(
   template: '<div #root></div>',
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
+  @Input('deleteFunction') deleteFunction: Props['deleteFunction'];
   @Input('helpContent') helpContent: Props['helpContent'];
   @Input('setSidebarState') setSidebarState: Props['setSidebarState'];
+  @Input('shareFunction') shareFunction: Props['shareFunction'];
   @Input('sidebarOpen') sidebarOpen: Props['sidebarOpen'];
 
   constructor() {
-    super(HelpSidebar, ['helpContent', 'setSidebarState', 'sidebarOpen']);
+    super(HelpSidebar, ['deleteFunction', 'helpContent', 'setSidebarState', 'shareFunction', 'sidebarOpen']);
   }
 }
