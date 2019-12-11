@@ -20,12 +20,9 @@ public class DbParticipantCohortStatus {
   private DbParticipantCohortStatusKey participantKey;
   private Short status;
   private Long genderConceptId;
-  private String gender;
   private Date birthDate;
   private Long raceConceptId;
-  private String race;
   private Long ethnicityConceptId;
-  private String ethnicity;
   private boolean deceased;
 
   @EmbeddedId
@@ -87,20 +84,6 @@ public class DbParticipantCohortStatus {
     return this;
   }
 
-  @Transient
-  public String getGender() {
-    return gender;
-  }
-
-  public void setGender(String gender) {
-    this.gender = gender;
-  }
-
-  public DbParticipantCohortStatus gender(String gender) {
-    this.gender = gender;
-    return this;
-  }
-
   @Column(name = "birth_date")
   public Date getBirthDate() {
     return birthDate;
@@ -129,20 +112,6 @@ public class DbParticipantCohortStatus {
     return this;
   }
 
-  @Transient
-  public String getRace() {
-    return race;
-  }
-
-  public void setRace(String race) {
-    this.race = race;
-  }
-
-  public DbParticipantCohortStatus race(String race) {
-    this.race = race;
-    return this;
-  }
-
   @Column(name = "ethnicity_concept_id")
   public Long getEthnicityConceptId() {
     return ethnicityConceptId;
@@ -154,20 +123,6 @@ public class DbParticipantCohortStatus {
 
   public DbParticipantCohortStatus ethnicityConceptId(Long ethnicityConceptId) {
     this.ethnicityConceptId = ethnicityConceptId;
-    return this;
-  }
-
-  @Transient
-  public String getEthnicity() {
-    return ethnicity;
-  }
-
-  public void setEthnicity(String ethnicity) {
-    this.ethnicity = ethnicity;
-  }
-
-  public DbParticipantCohortStatus ethnicity(String ethnicity) {
-    this.ethnicity = ethnicity;
     return this;
   }
 
@@ -192,25 +147,14 @@ public class DbParticipantCohortStatus {
     DbParticipantCohortStatus that = (DbParticipantCohortStatus) o;
     return status == that.status
         && Objects.equals(genderConceptId, that.genderConceptId)
-        && Objects.equals(gender, that.gender)
         && Objects.equals(birthDate, that.birthDate)
         && Objects.equals(raceConceptId, that.raceConceptId)
-        && Objects.equals(race, that.race)
-        && Objects.equals(ethnicityConceptId, that.ethnicityConceptId)
-        && Objects.equals(ethnicity, that.ethnicity);
+        && Objects.equals(ethnicityConceptId, that.ethnicityConceptId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        status,
-        genderConceptId,
-        gender,
-        birthDate,
-        raceConceptId,
-        race,
-        ethnicityConceptId,
-        ethnicity);
+    return Objects.hash(status, genderConceptId, birthDate, raceConceptId, ethnicityConceptId);
   }
 
   @Override
@@ -219,12 +163,9 @@ public class DbParticipantCohortStatus {
         .append("participantKey", participantKey)
         .append("status", status)
         .append("genderConceptId", genderConceptId)
-        .append("gender", gender)
         .append("birthDate", birthDate)
         .append("raceConceptId", raceConceptId)
-        .append("race", race)
         .append("ethnicityConceptId", ethnicityConceptId)
-        .append("ethnicity", ethnicity)
         .toString();
   }
 }
