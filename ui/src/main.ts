@@ -8,8 +8,8 @@ import * as ReactDOM from 'react-dom';
 import * as ReactModal from 'react-modal';
 
 import {AppModule} from 'app/app.module';
-import {setupCustomValidators} from 'app/services/setup';
 import {ErrorHandler} from 'app/components/error-handler';
+import {setupCustomValidators} from 'app/services/setup';
 
 
 if (!environment.debug) {

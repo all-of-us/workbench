@@ -4,13 +4,13 @@ import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 import {ClrIcon} from 'app/components/icons';
 import {TextModal} from 'app/components/text-modal';
+import {statusApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {reactStyles, withGlobalError} from 'app/utils';
 import {globalErrorStore} from 'app/utils/navigation';
 import {ErrorCode, ErrorResponse} from 'generated/fetch';
-import colors from 'app/styles/colors';
-import {statusApi} from 'app/services/swagger-fetch-clients';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from "./modals";
-import {Button} from "./buttons";
+import {Button} from './buttons';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
 
 const styles = reactStyles({
   errorHandler: {
@@ -109,7 +109,7 @@ export const ErrorHandler = withGlobalError()(class extends React.Component<Prop
       {globalError.errorCode === ErrorCode.USERDISABLED && <TextModal
           title='This account has been disabled'
           body='Please contact a system administrator to inquire about the status of your account.'
-          closeFunction={() => {this.closeError()}}
+          closeFunction={() => {this.closeError(); }}
           buttonText='Close'
       />}
       {(apiDown || firecloudDown || notebooksDown) && !this.state.serverStatusAcknowledged && <Modal>

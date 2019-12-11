@@ -14,7 +14,7 @@ import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {environment} from 'environments/environment';
-import {ErrorResponse, FeaturedWorkspace, FeaturedWorkspaceCategory, Profile} from 'generated/fetch';
+import {FeaturedWorkspace, FeaturedWorkspaceCategory, Profile} from 'generated/fetch';
 
 const styles = reactStyles({
   navPanel: {

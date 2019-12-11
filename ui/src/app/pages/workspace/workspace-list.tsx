@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
 
 import {
-  ErrorResponse,
   Profile
 } from 'generated/fetch';
 
@@ -73,7 +72,7 @@ export const WorkspaceList = withUserProfile()
           .map(w => new WorkspacePermissions(w))});
       this.setState({workspacesLoading: false});
     } catch (e) {
-      const response = convertAPIError(e);
+      const response = await convertAPIError(e);
       this.setState({errorText: response.message});
     }
   }

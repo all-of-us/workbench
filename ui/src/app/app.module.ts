@@ -1,6 +1,6 @@
 import {ErrorHandler, NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {Http, HttpModule, RequestOptions, XHRBackend} from '@angular/http';
+import {Http, HttpModule} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouteReuseStrategy} from '@angular/router';

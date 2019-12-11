@@ -1,5 +1,5 @@
-import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 import {ErrorCode} from 'generated/fetch';
+import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 let stackdriverReporter: StackdriverErrorReporter;
 

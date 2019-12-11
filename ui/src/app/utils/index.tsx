@@ -1,12 +1,5 @@
 import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
-import {DataAccessLevel, Domain} from 'generated';
-import {DataAccessLevel as FetchDataAccessLevel, Domain as FetchDomain} from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {ReplaySubject} from 'rxjs/ReplaySubject';
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
   cdrVersionStore,
@@ -19,6 +12,13 @@ import {
   urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
+import {DataAccessLevel, Domain} from 'generated';
+import {DataAccessLevel as FetchDataAccessLevel, Domain as FetchDomain} from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 export const WINDOW_REF = 'window-ref';
 
@@ -339,7 +339,7 @@ export const withCurrentConceptSet = () => {
 
 export const withGlobalError = () => {
   return connectBehaviorSubject(globalErrorStore, 'globalError');
-}
+};
 
 // HOC that provides a 'profileState' prop with current profile and a reload function
 export const withUserProfile = () => {
