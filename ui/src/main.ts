@@ -3,10 +3,13 @@
 import {enableProdMode} from '@angular/core';
 import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
 import {environment} from 'environments/environment';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import * as ReactModal from 'react-modal';
 
 import {AppModule} from 'app/app.module';
 import {setupCustomValidators} from 'app/services/setup';
+import {ErrorHandler} from 'app/components/error-handler';
 
 
 if (!environment.debug) {
@@ -16,4 +19,8 @@ if (!environment.debug) {
 setupCustomValidators();
 ReactModal.defaultStyles.overlay = {};
 ReactModal.defaultStyles.content = {};
+
+const domContainer = document.querySelector('#error-handler-root');
+ReactDOM.render(React.createElement(ErrorHandler), domContainer);
+
 platformBrowserDynamic().bootstrapModule(AppModule);

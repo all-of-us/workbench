@@ -20,7 +20,6 @@ import {
 import colors from 'app/styles/colors';
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
-  apiCallWithGatewayTimeoutRetries,
   formatDomain,
   formatDomainString,
   ReactWrapperBase,
@@ -32,6 +31,7 @@ import {
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
+import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget} from 'app/utils/zendesk';

@@ -23,7 +23,6 @@ import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {BugReportComponent} from './components/bug-report';
-import {ErrorHandlerComponent} from './components/error-handler/component';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
@@ -144,7 +143,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     DataSetPageComponent,
     DataUseAgreementComponent,
     DetailPageComponent,
-    ErrorHandlerComponent,
     HelpSidebarComponent,
     InitialErrorComponent,
     InteractiveNotebookComponent,
@@ -219,6 +217,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     CanDeactivateGuard
   ],
   // This specifies the top-level components, to load first.
-  bootstrap: [AppComponent, ErrorHandlerComponent, InitialErrorComponent]
+  bootstrap: [AppComponent, InitialErrorComponent]
 })
 export class AppModule {}
