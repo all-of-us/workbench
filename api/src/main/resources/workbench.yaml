@@ -3442,7 +3442,7 @@ definitions:
       freeTierUsage:
         type: number
         format: double
-      freeTierQuota:
+      freeTierDollarQuota:
         type: number
         format: double
 

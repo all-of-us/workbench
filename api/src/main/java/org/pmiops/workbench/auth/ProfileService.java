@@ -199,7 +199,7 @@ public class ProfileService {
     profile.setEmailVerificationStatus(user.getEmailVerificationStatusEnum());
 
     profile.setFreeTierUsage(freeTierBillingService.getUserCachedFreeTierUsage(user));
-    profile.setFreeTierQuota(freeTierBillingService.getUserFreeTierLimit(user));
+    profile.setFreeTierQuota(freeTierBillingService.getUserFreeTierDollarLimit(user));
 
     return profile;
   }

@@ -22,7 +22,8 @@
     "retryCount": 2,
     "bufferCapacity": 100,
     "bufferRefillProjectsPerTask": 1,
-    "defaultFreeCreditsLimit": 100.0,
+    "defaultFreeCreditsDollarLimit": 100.0,
+    "defaultFreeCreditsDaysLimit": 180,
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-test-1@all-of-us-workbench-test.iam.gserviceaccount.com"
