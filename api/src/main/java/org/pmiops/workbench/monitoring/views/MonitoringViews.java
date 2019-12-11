@@ -38,7 +38,7 @@ public enum MonitoringViews implements OpenCensusStatsViewInfo {
   private final Class measureClass;
 
   MonitoringViews(String name, String description) {
-    this(name, description, OpenCensusStatsViewInfo.SCALAR_UNIT, MeasureLong.class);
+    this(name, description, OpenCensusStatsViewInfo.UNITLESS_UNIT, MeasureLong.class);
   }
 
   MonitoringViews(String name, String description, String unit, Class measureClass) {

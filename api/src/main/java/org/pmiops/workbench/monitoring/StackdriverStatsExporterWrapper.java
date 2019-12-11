@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
  * public static method)
  */
 @Service
-public class StackdriverStatsExporterInitializationService {
+public class StackdriverStatsExporterWrapper {
   private static final Logger logger =
-      Logger.getLogger(StackdriverStatsExporterInitializationService.class.getName());
+      Logger.getLogger(StackdriverStatsExporterWrapper.class.getName());
   private boolean initialized = false;
 
   /**
@@ -22,20 +22,15 @@ public class StackdriverStatsExporterInitializationService {
    * happen once, so we have an isInitialized guard for that.
    *
    * @param stackdriverStatsConfiguration
-   * @return true if we registered this time, false if we skipped it.
    */
-  public boolean createAndRegister(StackdriverStatsConfiguration stackdriverStatsConfiguration) {
+  public void createAndRegister(StackdriverStatsConfiguration stackdriverStatsConfiguration) {
     if (!initialized) {
       try {
         StackdriverStatsExporter.createAndRegister(stackdriverStatsConfiguration);
         initialized = true;
-        return true;
       } catch (IOException e) {
         logger.log(Level.WARNING, "Failed to initialize global StackdriverStatsExporter.", e);
-        return false;
       }
-    } else {
-      return false;
     }
   }
 }

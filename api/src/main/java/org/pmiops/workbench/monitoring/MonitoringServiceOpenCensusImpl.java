@@ -25,25 +25,24 @@ public class MonitoringServiceOpenCensusImpl implements MonitoringService {
   private static final String STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME = "custom.googleapis.com";
   private ViewManager viewManager;
   private StatsRecorder statsRecorder;
-  private StackdriverStatsExporterInitializationService
-      stackdriverStatsExporterInitializationService;
+  private StackdriverStatsExporterWrapper stackdriverStatsExporterInitializationService;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   MonitoringServiceOpenCensusImpl(
       ViewManager viewManager,
       StatsRecorder statsRecorder,
-      StackdriverStatsExporterInitializationService stackdriverStatsExporterInitializationService,
+      StackdriverStatsExporterWrapper stackdriverStatsExporterInitializationService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.viewManager = viewManager;
     this.statsRecorder = statsRecorder;
     this.stackdriverStatsExporterInitializationService =
         stackdriverStatsExporterInitializationService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    registerSignals();
   }
 
   private void initStatsConfigurationIdempotent() {
+    registerSignals();
     stackdriverStatsExporterInitializationService.createAndRegister(
         StackdriverStatsConfiguration.builder()
             .setMetricNamePrefix(buildMetricNamePrefix())
@@ -60,7 +59,7 @@ public class MonitoringServiceOpenCensusImpl implements MonitoringService {
 
   private void registerSignals() {
     Arrays.stream(MonitoringViews.values())
-        .map(MonitoringViews::toStatsView)
+        .map(MonitoringViews::toOpenCensusView)
         .forEach(viewManager::registerView);
   }
 

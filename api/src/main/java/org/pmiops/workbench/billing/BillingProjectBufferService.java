@@ -48,15 +48,16 @@ public class BillingProjectBufferService {
   private static final int PROJECT_BILLING_ID_SIZE = 8;
   @VisibleForTesting static final Duration CREATING_TIMEOUT = Duration.ofMinutes(60);
   @VisibleForTesting static final Duration ASSIGNING_TIMEOUT = Duration.ofMinutes(10);
-  private static final ImmutableMap<BufferEntryStatus, Duration> statusToGracePeriod =
+  private static final ImmutableMap<BufferEntryStatus, Duration> STATUS_TO_GRACE_PERIOD =
       ImmutableMap.of(
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
           BufferEntryStatus.ASSIGNING, ASSIGNING_TIMEOUT);
-  private static final ImmutableMap<BufferEntryStatus, MonitoringViews> entryStatusToMetricView =
-      ImmutableMap.of(
-          BufferEntryStatus.AVAILABLE, MonitoringViews.BILLING_BUFFER_AVAILABLE_PROJECT_COUNT,
-          BufferEntryStatus.ASSIGNING, MonitoringViews.BILLING_BUFFER_ASSIGNING_PROJECT_COUNT,
-          BufferEntryStatus.CREATING, MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT);
+  private static final ImmutableMap<BufferEntryStatus, MonitoringViews>
+      ENTRY_STATUS_TO_METRIC_VIEW =
+          ImmutableMap.of(
+              BufferEntryStatus.AVAILABLE, MonitoringViews.BILLING_BUFFER_AVAILABLE_PROJECT_COUNT,
+              BufferEntryStatus.ASSIGNING, MonitoringViews.BILLING_BUFFER_ASSIGNING_PROJECT_COUNT,
+              BufferEntryStatus.CREATING, MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT);
 
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
@@ -114,7 +115,8 @@ public class BillingProjectBufferService {
                             DbStorageEnums.billingProjectBufferEntryStatusToStorage(status))))
             .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
 
-    for (Map.Entry<BufferEntryStatus, MonitoringViews> entry : entryStatusToMetricView.entrySet()) {
+    for (Map.Entry<BufferEntryStatus, MonitoringViews> entry :
+        ENTRY_STATUS_TO_METRIC_VIEW.entrySet()) {
       final BufferEntryStatus entryStatus = entry.getKey();
       final OpenCensusStatsViewInfo metricView = entry.getValue();
       final Long value = entryStatusToCount.get(entryStatus);
@@ -241,7 +243,7 @@ public class BillingProjectBufferService {
   private List<DbBillingProjectBufferEntry> findEntriesWithExpiredGracePeriod(
       Instant now, BufferEntryStatus bufferEntryStatus) {
     final Optional<Duration> gracePeriod =
-        Optional.ofNullable(statusToGracePeriod.get(bufferEntryStatus));
+        Optional.ofNullable(STATUS_TO_GRACE_PERIOD.get(bufferEntryStatus));
 
     return gracePeriod
         .map(p -> findEntriesWithExpiredGracePeriod(now, bufferEntryStatus, p))

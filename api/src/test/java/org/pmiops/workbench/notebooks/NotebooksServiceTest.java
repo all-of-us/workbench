@@ -19,7 +19,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.views.MonitoringViews;
 import org.pmiops.workbench.test.FakeClock;
@@ -178,8 +177,7 @@ public class NotebooksServiceTest {
 
   @Test
   public void testCloneNotebook_firesMetric() {
-    final FileDetail result =
-        notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
-    verify(mockMonitoringService).recordIncrement();
+    notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
+    verify(mockMonitoringService).recordIncrement(MonitoringViews.NOTEBOOK_CLONE);
   }
 }

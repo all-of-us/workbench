@@ -38,24 +38,22 @@ public class MonitoringServiceTest {
   @Mock private MeasureMap mockMeasureMap; // not injected
   // TODO(jaycarlton): figure out why IntelliJ isn't copacetic with this
   // annotation but things still work.
-  @Autowired private StackdriverStatsExporterInitializationService mockInitService;
+  @Autowired private StackdriverStatsExporterWrapper mockInitService;
   @Autowired private ViewManager mockViewManager;
   @Autowired private StatsRecorder mockStatsRecorder;
   @Autowired private MonitoringService monitoringService;
 
   @TestConfiguration
   @Import({MonitoringServiceOpenCensusImpl.class})
-  @MockBean({
-    ViewManager.class,
-    StatsRecorder.class,
-    StackdriverStatsExporterInitializationService.class
-  })
+  @MockBean({ViewManager.class, StatsRecorder.class, StackdriverStatsExporterWrapper.class})
   static class Configuration {
     @Bean
     public WorkbenchConfig workbenchConfig() {
       final WorkbenchConfig workbenchConfig = new WorkbenchConfig();
+      // Nothing should show up in any Metrics backend for these tests.
       workbenchConfig.server = new ServerConfig();
-      workbenchConfig.server.shortName = "unit-test"; // should never show up in GCP for these tests
+      workbenchConfig.server.shortName = "unit-test";
+      workbenchConfig.server.projectId = "fake-project";
       return workbenchConfig;
     }
   }
@@ -81,6 +79,19 @@ public class MonitoringServiceTest {
     verify(mockViewManager, times(MonitoringViews.values().length)).registerView(any(View.class));
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap).put(MonitoringViews.NOTEBOOK_SAVE.getMeasureLong(), 1L);
+    verify(mockMeasureMap).record();
+  }
+
+  @Test
+  public void testRecordValue() {
+    long value = 16L;
+    monitoringService.recordValue(MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT, value);
+
+    verify(mockInitService).createAndRegister(any(StackdriverStatsConfiguration.class));
+    verify(mockViewManager, times(MonitoringViews.values().length)).registerView(any(View.class));
+    verify(mockStatsRecorder).newMeasureMap();
+    verify(mockMeasureMap)
+        .put(MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT.getMeasureLong(), value);
     verify(mockMeasureMap).record();
   }
 

@@ -24,7 +24,7 @@ public interface OpenCensusStatsViewInfo {
           MeasureLong.class, OpenCensusStatsViewInfo::getMeasureLong,
           MeasureDouble.class, OpenCensusStatsViewInfo::getMeasureDouble);
 
-  String SCALAR_UNIT = "";
+  String UNITLESS_UNIT = "1";
 
   String getName();
 
@@ -34,6 +34,12 @@ public interface OpenCensusStatsViewInfo {
 
   String getDescription();
 
+  /**
+   * Unit strings must conform to the
+   *
+   * @see <a href=https://unitsofmeasure.org/ucum.html>Unified Code for Units of Measure</a>
+   * @return canonical string for unit
+   */
   String getUnit();
 
   default Measure getMeasure() {
@@ -54,7 +60,7 @@ public interface OpenCensusStatsViewInfo {
 
   List<TagKey> getColumns();
 
-  default View toStatsView() {
+  default View toOpenCensusView() {
     return View.create(
         getStatsName(), getDescription(), getMeasure(), getAggregation(), getColumns());
   }
