@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,6 +32,9 @@ import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
+import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortAnnotationDefinitionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -83,7 +87,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.annotation.DirtiesContext;
@@ -96,8 +99,6 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @Import(LiquibaseAutoConfiguration.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ComponentScan(
-    basePackages = {"org.pmiops.workbench.cohortbuilder", "org.pmiops.workbench.cohortreview"})
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class CohortReviewControllerTest {
@@ -113,6 +114,7 @@ public class CohortReviewControllerTest {
   private DbWorkspace workspace;
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+  private Map<Long, String> genderRaceEthnicityMap;
 
   private DbCohortAnnotationDefinition stringAnnotationDefinition;
   private DbCohortAnnotationDefinition enumAnnotationDefinition;
@@ -174,7 +176,13 @@ public class CohortReviewControllerTest {
   private static DbUser user;
 
   @TestConfiguration
-  @Import({CdrVersionService.class, CohortReviewController.class})
+  @Import({
+    CdrVersionService.class,
+    CohortReviewController.class,
+    CohortReviewServiceImpl.class,
+    CohortQueryBuilder.class,
+    ReviewQueryBuilder.class
+  })
   @MockBean({
     BigQueryService.class,
     FireCloudService.class,
@@ -239,6 +247,8 @@ public class CohortReviewControllerTest {
             .conceptId(String.valueOf(TestDemo.WHITE.conceptId))
             .name(TestDemo.WHITE.name));
 
+    genderRaceEthnicityMap = cohortReviewController.getGenderRaceEthnicityMap();
+
     cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset("dataSetId");
     cdrVersion.setBigqueryProject("projectId");
@@ -288,35 +298,34 @@ public class CohortReviewControllerTest {
             .cohortReviewId(cohortReview.getCohortReviewId())
             .participantId(2L);
 
-    participantCohortStatus1 = participantCohortStatusDao.save(new DbParticipantCohortStatus()
-        .statusEnum(CohortStatus.NOT_REVIEWED)
-        .participantKey(key1)
-        .genderConceptId(TestDemo.MALE.getConceptId())
-        .gender(TestDemo.MALE.getName())
-        .raceConceptId(TestDemo.ASIAN.getConceptId())
-        .race(TestDemo.ASIAN.getName())
-        .ethnicityConceptId(TestDemo.NOT_HISPANIC.getConceptId())
-        .ethnicity(TestDemo.NOT_HISPANIC.getName())
-        .birthDate(new java.sql.Date(today.getTime()))
-        .deceased(false));
+    participantCohortStatus1 =
+        participantCohortStatusDao.save(
+            new DbParticipantCohortStatus()
+                .statusEnum(CohortStatus.NOT_REVIEWED)
+                .participantKey(key1)
+                .genderConceptId(TestDemo.MALE.getConceptId())
+                .raceConceptId(TestDemo.ASIAN.getConceptId())
+                .ethnicityConceptId(TestDemo.NOT_HISPANIC.getConceptId())
+                .birthDate(new java.sql.Date(today.getTime()))
+                .deceased(false));
 
-     participantCohortStatus2 = participantCohortStatusDao.save(new DbParticipantCohortStatus()
-        .statusEnum(CohortStatus.NOT_REVIEWED)
-        .participantKey(key2)
-        .genderConceptId(TestDemo.FEMALE.getConceptId())
-        .gender(TestDemo.FEMALE.getName())
-        .raceConceptId(TestDemo.WHITE.getConceptId())
-        .race(TestDemo.WHITE.getName())
-        .ethnicityConceptId(TestDemo.NOT_HISPANIC.getConceptId())
-        .ethnicity(TestDemo.NOT_HISPANIC.getName())
-        .birthDate(new java.sql.Date(today.getTime()))
-        .deceased(false));
+    participantCohortStatus2 =
+        participantCohortStatusDao.save(
+            new DbParticipantCohortStatus()
+                .statusEnum(CohortStatus.NOT_REVIEWED)
+                .participantKey(key2)
+                .genderConceptId(TestDemo.FEMALE.getConceptId())
+                .raceConceptId(TestDemo.WHITE.getConceptId())
+                .ethnicityConceptId(TestDemo.NOT_HISPANIC.getConceptId())
+                .birthDate(new java.sql.Date(today.getTime()))
+                .deceased(false));
 
-    stringAnnotationDefinition = cohortAnnotationDefinitionDao.save(
-        new DbCohortAnnotationDefinition()
-            .annotationType(DbStorageEnums.annotationTypeToStorage(AnnotationType.STRING))
-            .columnName("test")
-            .cohortId(cohort.getCohortId()));
+    stringAnnotationDefinition =
+        cohortAnnotationDefinitionDao.save(
+            new DbCohortAnnotationDefinition()
+                .annotationType(DbStorageEnums.annotationTypeToStorage(AnnotationType.STRING))
+                .columnName("test")
+                .cohortId(cohort.getCohortId()));
     enumAnnotationDefinition =
         new DbCohortAnnotationDefinition()
             .annotationType(DbStorageEnums.annotationTypeToStorage(AnnotationType.ENUM))
@@ -327,8 +336,8 @@ public class CohortReviewControllerTest {
         new DbCohortAnnotationEnumValue()
             .name("test")
             .cohortAnnotationDefinition(enumAnnotationDefinition));
-    enumAnnotationDefinition = cohortAnnotationDefinitionDao.save(
-        enumAnnotationDefinition.enumValues(enumValues));
+    enumAnnotationDefinition =
+        cohortAnnotationDefinitionDao.save(enumAnnotationDefinition.enumValues(enumValues));
     dateAnnotationDefinition =
         new DbCohortAnnotationDefinition()
             .annotationType(DbStorageEnums.annotationTypeToStorage(AnnotationType.DATE))
@@ -336,23 +345,28 @@ public class CohortReviewControllerTest {
             .cohortId(cohort.getCohortId());
     cohortAnnotationDefinitionDao.save(dateAnnotationDefinition);
 
-    booleanAnnotationDefinition = cohortAnnotationDefinitionDao.save(new DbCohortAnnotationDefinition()
-        .annotationType(DbStorageEnums.annotationTypeToStorage(AnnotationType.BOOLEAN))
-        .columnName("test")
-        .cohortId(cohort.getCohortId()));
+    booleanAnnotationDefinition =
+        cohortAnnotationDefinitionDao.save(
+            new DbCohortAnnotationDefinition()
+                .annotationType(DbStorageEnums.annotationTypeToStorage(AnnotationType.BOOLEAN))
+                .columnName("test")
+                .cohortId(cohort.getCohortId()));
 
+    integerAnnotationDefinition =
+        cohortAnnotationDefinitionDao.save(
+            new DbCohortAnnotationDefinition()
+                .annotationType(DbStorageEnums.annotationTypeToStorage(AnnotationType.INTEGER))
+                .columnName("test")
+                .cohortId(cohort.getCohortId()));
 
-    integerAnnotationDefinition = cohortAnnotationDefinitionDao.save(new DbCohortAnnotationDefinition()
-        .annotationType(DbStorageEnums.annotationTypeToStorage(AnnotationType.INTEGER))
-        .columnName("test")
-        .cohortId(cohort.getCohortId()));
-
-    participantAnnotation = participantCohortAnnotationDao.save(new DbParticipantCohortAnnotation()
-        .cohortReviewId(cohortReview.getCohortReviewId())
-        .participantId(participantCohortStatus1.getParticipantKey().getParticipantId())
-        .annotationValueString("test")
-        .cohortAnnotationDefinitionId(
-            stringAnnotationDefinition.getCohortAnnotationDefinitionId()));
+    participantAnnotation =
+        participantCohortAnnotationDao.save(
+            new DbParticipantCohortAnnotation()
+                .cohortReviewId(cohortReview.getCohortReviewId())
+                .participantId(participantCohortStatus1.getParticipantKey().getParticipantId())
+                .annotationValueString("test")
+                .cohortAnnotationDefinitionId(
+                    stringAnnotationDefinition.getCohortAnnotationDefinitionId()));
   }
 
   @Test
@@ -785,7 +799,6 @@ public class CohortReviewControllerTest {
 
     assertParticipantCohortStatuses(
         expectedReview1, page, pageSize, SortOrder.DESC, FilterColumns.STATUS);
-    verify(userRecentResourceService).updateCohortEntry(anyLong(), anyLong(), anyLong());
 
     assertParticipantCohortStatuses(
         expectedReview2, page, pageSize, SortOrder.DESC, FilterColumns.PARTICIPANTID);
@@ -970,7 +983,8 @@ public class CohortReviewControllerTest {
                     .pageSize(pageSize)
                     .sortOrder(sortOrder))
             .getBody();
-    verify(userRecentResourceService).updateCohortEntry(anyLong(), anyLong(), anyLong());
+    verify(userRecentResourceService, atLeastOnce())
+        .updateCohortEntry(anyLong(), anyLong(), anyLong());
     assertThat(actualReview).isEqualTo(expectedReview);
   }
 
@@ -1016,9 +1030,10 @@ public class CohortReviewControllerTest {
       Integer pageSize,
       SortOrder sortOrder,
       FilterColumns sortColumn) {
-    List<ParticipantCohortStatus> newParticipantCohortStatusList = participantCohortStatusList.stream()
-        .map(this::dbParticipantCohortStatusToApi)
-        .collect(Collectors.toList());
+    List<ParticipantCohortStatus> newParticipantCohortStatusList =
+        participantCohortStatusList.stream()
+            .map(this::dbParticipantCohortStatusToApi)
+            .collect(Collectors.toList());
 
     return new CohortReview()
         .cohortReviewId(actualReview.getCohortReviewId())
@@ -1036,16 +1051,17 @@ public class CohortReviewControllerTest {
         .sortColumn(sortColumn.name());
   }
 
-  private ParticipantCohortStatus dbParticipantCohortStatusToApi(DbParticipantCohortStatus dbStatus) {
+  private ParticipantCohortStatus dbParticipantCohortStatusToApi(
+      DbParticipantCohortStatus dbStatus) {
     return new ParticipantCohortStatus()
         .birthDate(dbStatus.getBirthDate().toString())
         .ethnicityConceptId(dbStatus.getEthnicityConceptId())
-        .ethnicity(dbStatus.getEthnicity())
+        .ethnicity(genderRaceEthnicityMap.get(dbStatus.getEthnicityConceptId()))
         .genderConceptId(dbStatus.getGenderConceptId())
-        .gender(dbStatus.getGender())
+        .gender(genderRaceEthnicityMap.get(dbStatus.getGenderConceptId()))
         .participantId(dbStatus.getParticipantKey().getParticipantId())
         .raceConceptId(dbStatus.getRaceConceptId())
-        .race(dbStatus.getRace())
+        .race(genderRaceEthnicityMap.get(dbStatus.getRaceConceptId()))
         .status(dbStatus.getStatusEnum())
         .deceased(dbStatus.getDeceased());
   }
