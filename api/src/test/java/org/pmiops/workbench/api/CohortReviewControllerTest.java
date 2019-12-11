@@ -150,7 +150,7 @@ public class CohortReviewControllerTest {
 
   @Autowired private UserDao userDao;
 
-  private enum TestDemo {
+  private enum TestConcepts {
     ASIAN("Asian", 8515),
     WHITE("White", 8527),
     MALE("MALE", 8507),
@@ -160,7 +160,7 @@ public class CohortReviewControllerTest {
     private final String name;
     private final long conceptId;
 
-    TestDemo(String name, long conceptId) {
+    TestConcepts(String name, long conceptId) {
       this.name = name;
       this.conceptId = conceptId;
     }
@@ -217,40 +217,40 @@ public class CohortReviewControllerTest {
             .domainId(DomainType.PERSON.toString())
             .type(CriteriaType.RACE.toString())
             .parentId(1L)
-            .conceptId(String.valueOf(TestDemo.ASIAN.conceptId))
-            .name(TestDemo.ASIAN.name));
+            .conceptId(String.valueOf(TestConcepts.ASIAN.conceptId))
+            .name(TestConcepts.ASIAN.name));
     cbCriteriaDao.save(
         new DbCriteria()
             .domainId(DomainType.PERSON.toString())
             .type(CriteriaType.GENDER.toString())
             .parentId(1L)
-            .conceptId(String.valueOf(TestDemo.FEMALE.conceptId))
-            .name(TestDemo.FEMALE.name));
+            .conceptId(String.valueOf(TestConcepts.FEMALE.conceptId))
+            .name(TestConcepts.FEMALE.name));
     cbCriteriaDao.save(
         new DbCriteria()
             .domainId(DomainType.PERSON.toString())
             .type(CriteriaType.GENDER.toString())
             .parentId(1L)
-            .conceptId(String.valueOf(TestDemo.MALE.conceptId))
-            .name(TestDemo.MALE.name));
+            .conceptId(String.valueOf(TestConcepts.MALE.conceptId))
+            .name(TestConcepts.MALE.name));
     cbCriteriaDao.save(
         new DbCriteria()
             .domainId(DomainType.PERSON.toString())
             .type(CriteriaType.ETHNICITY.toString())
             .parentId(1L)
-            .conceptId(String.valueOf(TestDemo.NOT_HISPANIC.conceptId))
-            .name(TestDemo.NOT_HISPANIC.name));
+            .conceptId(String.valueOf(TestConcepts.NOT_HISPANIC.conceptId))
+            .name(TestConcepts.NOT_HISPANIC.name));
     cbCriteriaDao.save(
         new DbCriteria()
             .domainId(DomainType.PERSON.toString())
             .type(CriteriaType.RACE.toString())
             .parentId(1L)
-            .conceptId(String.valueOf(TestDemo.WHITE.conceptId))
-            .name(TestDemo.WHITE.name));
+            .conceptId(String.valueOf(TestConcepts.WHITE.conceptId))
+            .name(TestConcepts.WHITE.name));
 
     genderRaceEthnicityMap =
-        Arrays.stream(TestDemo.values())
-            .collect(Collectors.toMap(TestDemo::getConceptId, TestDemo::getName));
+        Arrays.stream(TestConcepts.values())
+            .collect(Collectors.toMap(TestConcepts::getConceptId, TestConcepts::getName));
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset("dataSetId");
@@ -306,9 +306,9 @@ public class CohortReviewControllerTest {
             new DbParticipantCohortStatus()
                 .statusEnum(CohortStatus.NOT_REVIEWED)
                 .participantKey(key1)
-                .genderConceptId(TestDemo.MALE.getConceptId())
-                .raceConceptId(TestDemo.ASIAN.getConceptId())
-                .ethnicityConceptId(TestDemo.NOT_HISPANIC.getConceptId())
+                .genderConceptId(TestConcepts.MALE.getConceptId())
+                .raceConceptId(TestConcepts.ASIAN.getConceptId())
+                .ethnicityConceptId(TestConcepts.NOT_HISPANIC.getConceptId())
                 .birthDate(new java.sql.Date(today.getTime()))
                 .deceased(false));
 
@@ -317,9 +317,9 @@ public class CohortReviewControllerTest {
             new DbParticipantCohortStatus()
                 .statusEnum(CohortStatus.NOT_REVIEWED)
                 .participantKey(key2)
-                .genderConceptId(TestDemo.FEMALE.getConceptId())
-                .raceConceptId(TestDemo.WHITE.getConceptId())
-                .ethnicityConceptId(TestDemo.NOT_HISPANIC.getConceptId())
+                .genderConceptId(TestConcepts.FEMALE.getConceptId())
+                .raceConceptId(TestConcepts.WHITE.getConceptId())
+                .ethnicityConceptId(TestConcepts.NOT_HISPANIC.getConceptId())
                 .birthDate(new java.sql.Date(today.getTime()))
                 .deceased(false));
 
