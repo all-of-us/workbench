@@ -15,7 +15,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -99,9 +98,6 @@ public class ConfigLoader {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(CommandLineToolConfig.class)
-        .child(ConfigLoader.class)
-        .web(false)
-        .run(args);
+    CommandLineToolConfig.runCommandLine(ConfigLoader.class, args);
   }
 }

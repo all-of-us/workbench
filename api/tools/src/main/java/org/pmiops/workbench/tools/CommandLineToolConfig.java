@@ -13,15 +13,11 @@ import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
-import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.monitoring.MonitoringServiceImpl;
-import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
-import org.pmiops.workbench.monitoring.StackdriverStatsExporterService;
-import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -46,15 +42,7 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
  */
 @Configuration
 @EnableAutoConfiguration
-@Import({
-  CommonConfig.class,
-  MonitoringServiceImpl.class,
-  MonitoringSpringConfiguration.class,
-  NotebooksServiceImpl.class,
-  RetryConfig.class,
-  StackdriverStatsExporterService.class,
-  UserRecentResourceServiceImpl.class
-})
+@Import({RetryConfig.class, CommonConfig.class})
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @EntityScan("org.pmiops.workbench.db.model")
 // Scan the google module, for CloudStorageService and DirectoryService beans.
@@ -149,5 +137,19 @@ public class CommandLineToolConfig {
     policy.setMaxInterval(20000);
     policy.setSleeper(sleeper);
     return policy;
+  }
+
+  /**
+   * Run a command line spring boot application. The provided configuration should provide a
+   * CommandLineRunner bean. The rest of the configuration is applied as a child to the standard
+   * CommandLineToolConfig context, which provides common database / service access. The child
+   * relationship allows the CLI config class to override parent beans if needed.
+   *
+   * @param cliConfig the class which declares the CommandLineRunner and optionally other
+   *     dependencies
+   * @param args command line args to pass to the program
+   */
+  public static void runCommandLine(Class<?> cliConfig, String[] args) {
+    new SpringApplicationBuilder(CommandLineToolConfig.class).child(cliConfig).web(false).run(args);
   }
 }

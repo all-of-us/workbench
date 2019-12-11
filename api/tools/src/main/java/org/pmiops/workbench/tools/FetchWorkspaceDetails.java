@@ -13,7 +13,6 @@ import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -77,9 +76,6 @@ public class FetchWorkspaceDetails {
   }
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(CommandLineToolConfig.class)
-        .child(FetchWorkspaceDetails.class)
-        .web(false)
-        .run(args);
+    CommandLineToolConfig.runCommandLine(FetchWorkspaceDetails.class, args);
   }
 }

@@ -9,7 +9,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Authority;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -93,9 +92,6 @@ public class SetAuthority {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(CommandLineToolConfig.class)
-        .child(SetAuthority.class)
-        .web(false)
-        .run(args);
+    CommandLineToolConfig.runCommandLine(SetAuthority.class, args);
   }
 }

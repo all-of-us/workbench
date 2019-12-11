@@ -25,6 +25,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -39,18 +40,30 @@ import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.monitoring.MonitoringServiceImpl;
+import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
+import org.pmiops.workbench.monitoring.StackdriverStatsExporterService;
+import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
 /** A tool that will generate a CSV export of our workspace data */
 @Configuration
+@Import({
+  MonitoringServiceImpl.class,
+  MonitoringSpringConfiguration.class,
+  NotebooksServiceImpl.class,
+  StackdriverStatsExporterService.class,
+  UserRecentResourceServiceImpl.class
+})
 public class ExportWorkspaceData {
 
   private static final Logger log = Logger.getLogger(ExportWorkspaceData.class.getName());
@@ -70,17 +83,22 @@ public class ExportWorkspaceData {
   // Short circuit the DI wiring here with a "mock" WorkspaceService
   // Importing the real one requires importing a large subtree of dependencies
   @Bean
-  WorkspaceService workspaceService() {
+  public WorkspaceService workspaceService() {
     return new WorkspaceServiceImpl(null, null, null, null, null, null, null, null, null);
   }
 
   private WorkspacesApi workspacesApi;
 
+  @Bean
+  ServiceAccountAPIClientFactory serviceAccountAPIClientFactory(WorkbenchConfig config) {
+    return new ServiceAccountAPIClientFactory(config.firecloud.baseUrl);
+  }
+
   @Primary
   @Bean
   @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
-  WorkspacesApi workspaceApi(WorkbenchConfig config) throws IOException {
-    return new ServiceAccountAPIClientFactory(config.firecloud.baseUrl).workspacesApi();
+  WorkspacesApi workspaceApi(ServiceAccountAPIClientFactory factory) throws IOException {
+    return factory.workspacesApi();
   }
 
   private WorkspaceDao workspaceDao;
@@ -211,10 +229,7 @@ public class ExportWorkspaceData {
   }
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(CommandLineToolConfig.class)
-        .child(ExportWorkspaceData.class)
-        .web(false)
-        .run(args);
+    CommandLineToolConfig.runCommandLine(ExportWorkspaceData.class, args);
   }
 
   private String toYesNo(boolean b) {

@@ -19,7 +19,6 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -133,9 +132,6 @@ public class UpdateCdrVersions {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(CommandLineToolConfig.class)
-        .child(UpdateCdrVersions.class)
-        .web(false)
-        .run(args);
+    CommandLineToolConfig.runCommandLine(UpdateCdrVersions.class, args);
   }
 }

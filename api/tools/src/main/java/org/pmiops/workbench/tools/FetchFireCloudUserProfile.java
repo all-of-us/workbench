@@ -11,7 +11,6 @@ import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -58,9 +57,6 @@ public class FetchFireCloudUserProfile {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(CommandLineToolConfig.class)
-        .child(FetchFireCloudUserProfile.class)
-        .web(false)
-        .run(args);
+    CommandLineToolConfig.runCommandLine(FetchFireCloudUserProfile.class, args);
   }
 }

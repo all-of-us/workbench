@@ -19,7 +19,6 @@ import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
@@ -130,9 +129,6 @@ public class LoadDataDictionary {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(CommandLineToolConfig.class)
-        .child(LoadDataDictionary.class)
-        .web(false)
-        .run(args);
+    CommandLineToolConfig.runCommandLine(LoadDataDictionary.class, args);
   }
 }
