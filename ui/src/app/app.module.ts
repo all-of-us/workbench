@@ -9,16 +9,13 @@ import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/c
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
-import {InterceptedHttp} from './factory/InterceptedHttp';
 import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {CdrVersionStorageService} from './services/cdr-version-storage.service';
-import {ErrorHandlingService} from './services/error-handling.service';
 import {ErrorReporterService} from './services/error-reporter.service';
 import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
 import {ProfileStorageService} from './services/profile-storage.service';
 import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
-import {StatusCheckService} from './services/status-check.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
@@ -191,7 +188,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
         basePath: c.basePath
       })
     },
-    ErrorHandlingService,
     ServerConfigService,
     {
       provide: ErrorHandler,
@@ -201,13 +197,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     CdrVersionStorageService,
     ProfileStorageService,
     SignInService,
-    StatusCheckService,
     GoogleAnalyticsEventsService,
-    {
-      provide: Http,
-      useClass: InterceptedHttp,
-      deps: [XHRBackend, RequestOptions, ErrorHandlingService]
-    },
     {
       provide: WINDOW_REF,
       useValue: window

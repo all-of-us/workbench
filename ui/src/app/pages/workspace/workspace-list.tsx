@@ -13,13 +13,13 @@ import {ClrIcon} from 'app/components/icons';
 import {Spinner} from 'app/components/spinners';
 import {NewWorkspaceButton} from 'app/pages/workspace/new-workspace-button';
 import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
   reactStyles,
   ReactWrapperBase,
   withUserProfile
 } from 'app/utils';
+import {convertAPIError} from 'app/utils/errors';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import * as React from 'react';
 import RSelect from 'react-select';
@@ -73,7 +73,7 @@ export const WorkspaceList = withUserProfile()
           .map(w => new WorkspacePermissions(w))});
       this.setState({workspacesLoading: false});
     } catch (e) {
-      const response = ErrorHandlingService.convertAPIError(e) as unknown as ErrorResponse;
+      const response = convertAPIError(e);
       this.setState({errorText: response.message});
     }
   }
