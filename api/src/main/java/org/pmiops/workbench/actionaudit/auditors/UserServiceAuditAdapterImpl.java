@@ -63,6 +63,7 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditor {
       Optional<Instant> bypassTime) {
     ActionAuditEvent.Builder eventBuilder =
         ActionAuditEvent.builder()
+            .timestamp(clock.millis())
             .agentType(AgentType.ADMINISTRATOR)
             .agentId(dbUserProvider.get().getUserId())
             .agentEmailMaybe(dbUserProvider.get().getEmail())
