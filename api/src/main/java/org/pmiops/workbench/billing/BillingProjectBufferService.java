@@ -101,6 +101,8 @@ public class BillingProjectBufferService {
     ImmutableMap.Builder<OpenCensusStatsViewInfo, Number> signalToValueBuilder =
         ImmutableMap.builder();
     signalToValueBuilder.put(MonitoringViews.BILLING_BUFFER_SIZE, getCurrentBufferSize());
+
+    // Toy data series for developing & testing dashboards and alerts in low-traffic environments.
     signalToValueBuilder.put(MonitoringViews.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis());
     signalToValueBuilder.put(MonitoringViews.DEBUG_RANDOM_DOUBLE, random.nextDouble());
 
