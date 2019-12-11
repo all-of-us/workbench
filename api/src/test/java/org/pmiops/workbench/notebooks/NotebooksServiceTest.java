@@ -177,6 +177,9 @@ public class NotebooksServiceTest {
 
   @Test
   public void testCloneNotebook_firesMetric() {
+    doReturn(WORKSPACE_RESPONSE).when(mockFirecloudService).getWorkspace(anyString(), anyString());
+    doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
+
     notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
     verify(mockMonitoringService).recordIncrement(MonitoringViews.NOTEBOOK_CLONE);
   }
