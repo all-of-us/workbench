@@ -45,18 +45,13 @@ import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /** A tool that will generate a CSV export of our workspace data */
-@SpringBootApplication
-@EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
-@EntityScan("org.pmiops.workbench.db.model")
+@Configuration
 public class ExportWorkspaceData {
 
   private static final Logger log = Logger.getLogger(ExportWorkspaceData.class.getName());
@@ -86,18 +81,8 @@ public class ExportWorkspaceData {
   @Bean
   @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
   @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
-  WorkspacesApi workspaceApi(Provider<WorkbenchConfig> configProvider) {
-    if (workspacesApi == null && configProvider.get() != null) {
-      try {
-        workspacesApi =
-            new ServiceAccountAPIClientFactory(configProvider.get().firecloud.baseUrl)
-                .workspacesApi();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    return workspacesApi;
+  WorkspacesApi workspaceApi(WorkbenchConfig config) throws IOException {
+    return new ServiceAccountAPIClientFactory(config.firecloud.baseUrl).workspacesApi();
   }
 
   private WorkspaceDao workspaceDao;
@@ -228,7 +213,10 @@ public class ExportWorkspaceData {
   }
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(ExportWorkspaceData.class).web(false).run(args);
+    new SpringApplicationBuilder(CommandLineToolConfig.class)
+        .child(ExportWorkspaceData.class)
+        .web(false)
+        .run(args);
   }
 
   private String toYesNo(boolean b) {

@@ -20,12 +20,13 @@ import org.pmiops.workbench.monitoring.MonitoringServiceImpl;
 import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
 import org.pmiops.workbench.monitoring.StackdriverStatsExporterService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
@@ -38,9 +39,13 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
  *
  * <p>The main difference is that request-scoped dependencies cannot be used from a command-line
  * context.
+ *
+ * <p>IMPORTANT: This config should only be used in a database context. In order to implement a tool
+ * which uses this config, that tool must be run with an active SQL server available, e.g. via Cloud
+ * SQL Proxy.
  */
 @Configuration
-@EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
+@EnableAutoConfiguration
 @Import({
   CommonConfig.class,
   MonitoringServiceImpl.class,
@@ -50,6 +55,8 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
   StackdriverStatsExporterService.class,
   UserRecentResourceServiceImpl.class
 })
+@EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
+@EntityScan("org.pmiops.workbench.db.model")
 // Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")
 // Scan the FireCloud module, for FireCloudService bean.
@@ -76,8 +83,6 @@ public class CommandLineToolConfig {
    *
    * <p>Any command-line tool which loads this bean needs to be called from a project.rb command
    * which is preceded with "get_gsuite_admin_key" to ensure the local key file si populated.
-   *
-   * @return
    */
   @Lazy
   @Bean(name = Constants.GSUITE_ADMIN_CREDS)
@@ -112,19 +117,11 @@ public class CommandLineToolConfig {
   /**
    * Instead of using the CacheSpringConfiguration class (which has a request-scoped bean to return
    * a cached workbench config), we load the workbench config once from the database and use that.
-   *
-   * @param configDao
-   * @return
    */
   @Bean
   @Lazy
-  @Scope("prototype")
   WorkbenchConfig workbenchConfig(ConfigDao configDao) {
     DbConfig config = configDao.findOne(DbConfig.MAIN_CONFIG_ID);
-
-    if (config == null) {
-      return null;
-    }
 
     Gson gson = new Gson();
     return gson.fromJson(config.getConfiguration(), WorkbenchConfig.class);
@@ -133,8 +130,6 @@ public class CommandLineToolConfig {
   /**
    * Returns the Apache HTTP transport. Compare to CommonConfig which returns the App Engine HTTP
    * transport.
-   *
-   * @return
    */
   @Bean
   HttpTransport httpTransport() {

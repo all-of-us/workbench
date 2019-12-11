@@ -19,18 +19,14 @@ import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication
-@EnableJpaRepositories("org.pmiops.workbench")
-@EntityScan("org.pmiops.workbench")
+@Configuration
 public class LoadDataDictionary {
 
   private static final Logger logger = Logger.getLogger(LoadDataDictionary.class.getName());
@@ -134,6 +130,9 @@ public class LoadDataDictionary {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(LoadDataDictionary.class).web(false).run(args);
+    new SpringApplicationBuilder(CommandLineToolConfig.class)
+        .child(LoadDataDictionary.class)
+        .web(false)
+        .run(args);
   }
 }

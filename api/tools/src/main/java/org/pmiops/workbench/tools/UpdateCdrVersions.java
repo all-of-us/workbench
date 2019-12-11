@@ -19,19 +19,15 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * See api/project.rb update-cdr-versions. Reads CDR versions from a JSON file and updates the
  * database to match.
  */
-@SpringBootApplication
-@EnableJpaRepositories("org.pmiops.workbench.db.dao")
-@EntityScan("org.pmiops.workbench.db.model")
+@Configuration
 public class UpdateCdrVersions {
 
   private static final Logger logger = Logger.getLogger(UpdateCdrVersions.class.getName());
@@ -137,6 +133,9 @@ public class UpdateCdrVersions {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(UpdateCdrVersions.class).web(false).run(args);
+    new SpringApplicationBuilder(CommandLineToolConfig.class)
+        .child(UpdateCdrVersions.class)
+        .web(false)
+        .run(args);
   }
 }
