@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {registerApiClient, statusApi} from 'app/services/swagger-fetch-clients';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
-import {ErrorResponse, StatusApi} from 'generated/fetch';
+import {StatusApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {StatusApiStub} from 'testing/stubs/status-api-stub';
 import {ErrorHandler} from './error-handler';
