@@ -23,27 +23,30 @@ public class MonitoringServiceOpenCensusImpl implements MonitoringService {
   private static final Logger logger =
       Logger.getLogger(MonitoringServiceOpenCensusImpl.class.getName());
   private static final String STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME = "custom.googleapis.com";
+  private boolean viewsAreRegistered = false;
   private ViewManager viewManager;
   private StatsRecorder statsRecorder;
-  private StackdriverStatsExporterWrapper stackdriverStatsExporterInitializationService;
+  private StackdriverStatsExporterWrapper stackdriverStatsExporterWrapper;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   MonitoringServiceOpenCensusImpl(
       ViewManager viewManager,
       StatsRecorder statsRecorder,
-      StackdriverStatsExporterWrapper stackdriverStatsExporterInitializationService,
+      StackdriverStatsExporterWrapper stackdriverStatsExporterWrapper,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.viewManager = viewManager;
     this.statsRecorder = statsRecorder;
-    this.stackdriverStatsExporterInitializationService =
-        stackdriverStatsExporterInitializationService;
+    this.stackdriverStatsExporterWrapper = stackdriverStatsExporterWrapper;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   private void initStatsConfigurationIdempotent() {
-    registerSignals();
-    stackdriverStatsExporterInitializationService.createAndRegister(
+    if (!viewsAreRegistered) {
+      registerSignals();
+      viewsAreRegistered = true;
+    }
+    stackdriverStatsExporterWrapper.createAndRegister(
         StackdriverStatsConfiguration.builder()
             .setMetricNamePrefix(buildMetricNamePrefix())
             .setProjectId(workbenchConfigProvider.get().server.projectId)

@@ -16,6 +16,11 @@ import java.util.function.Function;
  * This is essentially a carbon copy of io.opencensus.stats.View, but written as an interface
  * intstead of an abstract class. This allows us to implement it with enums, which gives an orderly
  * way to describe lots of views without cluttering up the call sites.
+ *
+ * Note that Stackdriver Monitoring uses different nomenclature from OpenCensus. In particular,
+ * there's no such thing as a Metric in the latter. We use OpenCensus terminology in this system
+ * as we may wish to support other metrics backends, and don't want to depend on Stackdriver
+ * concepts or implementation details.
  */
 public interface OpenCensusStatsViewInfo {
 

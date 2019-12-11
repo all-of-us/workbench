@@ -88,6 +88,7 @@ public class NotebooksServiceTest {
     DB_USER.setUserId(101L);
     DB_USER.setEmail("panic@thedis.co");
   }
+
   @Mock private Blob mockBlob;
 
   @Test
@@ -106,10 +107,6 @@ public class NotebooksServiceTest {
 
   @Test
   public void testGetReadOnlyHtml_basicContent() {
-    when(mockFirecloudService.getWorkspace(any(), any()))
-        .thenReturn(
-            new FirecloudWorkspaceResponse().workspace(new FirecloudWorkspace().bucketName("bkt")));
-//    when(mockCloudStorageService.getFileAsJson(any(), any())).thenReturn(new JSONObject());
     stubNotebookToJson();
     when(mockFirecloudService.staticNotebooksConvert(any()))
         .thenReturn("<html><body><div>asdf</div></body></html>");
@@ -121,11 +118,6 @@ public class NotebooksServiceTest {
 
   @Test
   public void testGetReadOnlyHtml_scriptSanitization() {
-
-    when(mockFirecloudService.getWorkspace(any(), any()))
-        .thenReturn(
-            new FirecloudWorkspaceResponse().workspace(new FirecloudWorkspace().bucketName("bkt")));
-//    when(mockCloudStorageService.getFileAsJson(any(), any())).thenReturn(new JSONObject());
     stubNotebookToJson();
     when(mockFirecloudService.staticNotebooksConvert(any()))
         .thenReturn("<html><script>window.alert('hacked');</script></html>");
@@ -137,9 +129,6 @@ public class NotebooksServiceTest {
 
   @Test
   public void testGetReadOnlyHtml_styleSanitization() {
-    when(mockFirecloudService.getWorkspace(any(), any()))
-        .thenReturn(
-            new FirecloudWorkspaceResponse().workspace(new FirecloudWorkspace().bucketName("bkt")));
     stubNotebookToJson();
     when(mockFirecloudService.staticNotebooksConvert(any()))
         .thenReturn(
@@ -157,9 +146,6 @@ public class NotebooksServiceTest {
 
   @Test
   public void testGetReadOnlyHtml_allowsDataImage() {
-    when(mockFirecloudService.getWorkspace(any(), any()))
-        .thenReturn(
-            new FirecloudWorkspaceResponse().workspace(new FirecloudWorkspace().bucketName("bkt")));
     stubNotebookToJson();
     String dataUri = "data:image/png;base64,MTIz";
     when(mockFirecloudService.staticNotebooksConvert(any()))
@@ -171,9 +157,6 @@ public class NotebooksServiceTest {
 
   @Test
   public void testGetReadOnlyHtml_disallowsRemoteImage() {
-    when(mockFirecloudService.getWorkspace(any(), any()))
-        .thenReturn(
-            new FirecloudWorkspaceResponse().workspace(new FirecloudWorkspace().bucketName("bkt")));
     stubNotebookToJson();
     when(mockFirecloudService.staticNotebooksConvert(any()))
         .thenReturn("<img src=\"https://eviltrackingpixel.com\" />\n");
@@ -207,10 +190,11 @@ public class NotebooksServiceTest {
   }
 
   private void stubNotebookToJson() {
-    when(mockFirecloudService.getWorkspace(any(), any()))
+    when(mockFirecloudService.getWorkspace(anyString(), anyString()))
         .thenReturn(
-            new FirecloudWorkspaceResponse().workspace(new FirecloudWorkspace().bucketName("bkt")));
+            new FirecloudWorkspaceResponse()
+                .workspace(new FirecloudWorkspace().bucketName("bkt ")));
     when(mockBlob.getContent()).thenReturn("{}".getBytes());
-    when(mockCloudStorageService.getBlob(any(), any())).thenReturn(mockBlob);
+    when(mockCloudStorageService.getBlob(anyString(), anyString())).thenReturn(mockBlob);
   }
 }
