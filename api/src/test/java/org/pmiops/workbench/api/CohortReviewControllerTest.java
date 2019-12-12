@@ -19,7 +19,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +114,6 @@ public class CohortReviewControllerTest {
   private DbWorkspace workspace;
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
-  private Map<Long, String> genderRaceEthnicityMap = new HashMap<>();
 
   private DbCohortAnnotationDefinition stringAnnotationDefinition;
   private DbCohortAnnotationDefinition enumAnnotationDefinition;
@@ -171,6 +169,11 @@ public class CohortReviewControllerTest {
 
     public long getConceptId() {
       return conceptId;
+    }
+
+    public static Map<Long, String> asMap() {
+      return Arrays.stream(TestConcepts.values())
+          .collect(Collectors.toMap(TestConcepts::getConceptId, TestConcepts::getName));
     }
   }
 
@@ -247,10 +250,6 @@ public class CohortReviewControllerTest {
             .parentId(1L)
             .conceptId(String.valueOf(TestConcepts.WHITE.conceptId))
             .name(TestConcepts.WHITE.name));
-
-    genderRaceEthnicityMap =
-        Arrays.stream(TestConcepts.values())
-            .collect(Collectors.toMap(TestConcepts::getConceptId, TestConcepts::getName));
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset("dataSetId");
@@ -1056,6 +1055,7 @@ public class CohortReviewControllerTest {
 
   private ParticipantCohortStatus dbParticipantCohortStatusToApi(
       DbParticipantCohortStatus dbStatus) {
+    Map<Long, String> genderRaceEthnicityMap = TestConcepts.asMap();
     return new ParticipantCohortStatus()
         .birthDate(dbStatus.getBirthDate().toString())
         .ethnicityConceptId(dbStatus.getEthnicityConceptId())
