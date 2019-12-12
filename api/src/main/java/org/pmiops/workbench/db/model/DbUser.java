@@ -62,7 +62,9 @@ public class DbUser {
   private String organization;
   private Double freeTierCreditsLimitDollarsOverride = null;
   private Short freeTierCreditsLimitDaysOverride = null;
+  private Timestamp lastFreeTierCreditsTimeCheck;
   private Timestamp firstSignInTime;
+  private Timestamp firstRegistrationCompletionTime;
   private Set<Short> authorities = new HashSet<>();
   private Boolean idVerificationIsValid;
   private Timestamp demographicSurveyCompletionTime;
@@ -230,6 +232,15 @@ public class DbUser {
     this.freeTierCreditsLimitDaysOverride = freeTierCreditsLimitDaysOverride;
   }
 
+  @Column(name = "last_free_tier_credits_time_check")
+  public Timestamp getLastFreeTierCreditsTimeCheck() {
+    return lastFreeTierCreditsTimeCheck;
+  }
+
+  public void setLastFreeTierCreditsTimeCheck(Timestamp lastFreeTierCreditsTimeCheck) {
+    this.lastFreeTierCreditsTimeCheck = lastFreeTierCreditsTimeCheck;
+  }
+
   @Column(name = "first_sign_in_time")
   public Timestamp getFirstSignInTime() {
     return firstSignInTime;
@@ -237,6 +248,15 @@ public class DbUser {
 
   public void setFirstSignInTime(Timestamp firstSignInTime) {
     this.firstSignInTime = firstSignInTime;
+  }
+
+  @Column(name = "first_registration_completion_time")
+  public Timestamp getFirstRegistrationCompletionTime() {
+    return firstRegistrationCompletionTime;
+  }
+
+  public void setFirstRegistrationCompletionTime(Timestamp registrationCompletionTime) {
+    this.firstRegistrationCompletionTime = registrationCompletionTime;
   }
 
   // Authorities (special permissions) are granted using api/project.rb set-authority.
