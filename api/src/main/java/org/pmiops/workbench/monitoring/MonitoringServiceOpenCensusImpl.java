@@ -1,6 +1,5 @@
 package org.pmiops.workbench.monitoring;
 
-import com.google.common.collect.ImmutableMap;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
@@ -8,7 +7,6 @@ import io.opencensus.stats.MeasureMap;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.stats.ViewManager;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;

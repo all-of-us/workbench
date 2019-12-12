@@ -1249,6 +1249,7 @@ paths:
     post:
       tags:
         - offlineMonitoring
+        - cron
       description: Trigger recording of all gauge metrics
       operationId: updateGaugeMetrics
       responses:
