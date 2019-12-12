@@ -315,6 +315,8 @@ export const AttributesPage = withCurrentWorkspace() (
         }
         return acc;
       }, formErrors);
+      // The second condition sets formValid to false if this is a Measurements attribute with no operator selected from the dropdown and
+      // no categorical checkboxes checked
       formValid = formValid && !(this.isMeasurement && !operatorSelected && !form.cat.some(attr => attr.checked));
       return {formErrors, formValid};
     }
@@ -498,7 +500,7 @@ export const AttributesPage = withCurrentWorkspace() (
       const {node} = this.props;
       const {calculating, count, countError, form, loading, options} = this.state;
       const {formErrors, formValid} = this.validateForm();
-      const disableAdd = calculating || !formValid || (this.isMeasurement && !formValid && !form.exists);
+      const disableAdd = calculating || !formValid;
       const disableCalculate = disableAdd || form.exists || form.num.every(attr => attr.operator === 'ANY');
       return (loading ?
         <SpinnerOverlay/> :
