@@ -14,6 +14,7 @@ import {
 } from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
 @Component({
@@ -158,6 +159,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   }
 
   receiveDelete(): void {
+    AnalyticsTracker.Workspaces.Delete();
     this.delete(this.workspace);
   }
 

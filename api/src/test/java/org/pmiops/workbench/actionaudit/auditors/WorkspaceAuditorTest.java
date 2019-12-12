@@ -1,4 +1,4 @@
-package org.pmiops.workbench.actionaudit.adapters;
+package org.pmiops.workbench.actionaudit.auditors;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
@@ -33,13 +33,17 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.utils.WorkspaceMapper;
+import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-public class WorkspaceAuditAdapterTest {
+public class WorkspaceAuditorTest {
 
   private static final long WORKSPACE_1_DB_ID = 101L;
   private static final long Y2K_EPOCH_MILLIS =
@@ -48,21 +52,25 @@ public class WorkspaceAuditAdapterTest {
   private static final long ADDED_USER_ID = 401L;
   private static final String ACTION_ID = "58cbae08-447f-499f-95b9-7bdedc955f4d";
 
-  private WorkspaceAuditAdapter workspaceAuditAdapter;
+  private WorkspaceAuditor workspaceAuditor;
   private Workspace workspace1;
+  private Workspace workspace2;
   private DbUser user1;
   private DbWorkspace dbWorkspace1;
   private DbWorkspace dbWorkspace2;
+
+  @Autowired private WorkspaceMapper workspaceMapper;
 
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private Clock mockClock;
   @Mock private ActionAuditService mockActionAuditService;
   @Mock private Provider<String> mockActionIdProvider;
 
-  @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventListCaptor;
+  @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventCollectionCaptor;
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
 
   @TestConfiguration
+  @Import(value = {WorkspaceMapperImpl.class})
   @MockBean(value = {ActionAuditService.class})
   static class Configuration {}
 
@@ -74,8 +82,8 @@ public class WorkspaceAuditAdapterTest {
     user1.setGivenName("Fred");
     user1.setFamilyName("Flintstone");
     doReturn(user1).when(mockUserProvider).get();
-    workspaceAuditAdapter =
-        new WorkspaceAuditAdapterImpl(
+    workspaceAuditor =
+        new WorkspaceAuditorImpl(
             mockUserProvider, mockActionAuditService, mockClock, mockActionIdProvider);
 
     final ResearchPurpose researchPurpose1 = new ResearchPurpose();
@@ -109,19 +117,21 @@ public class WorkspaceAuditAdapterTest {
     dbWorkspace2.setCreationTime(new Timestamp(now));
     dbWorkspace2.setCreator(user1);
 
+    workspace2 = workspaceMapper.toApiWorkspace(dbWorkspace2, null);
     doReturn(Y2K_EPOCH_MILLIS).when(mockClock).millis();
     doReturn(ACTION_ID).when(mockActionIdProvider).get();
   }
 
   @Test
   public void testFiresCreateWorkspaceEvents() {
-    workspaceAuditAdapter.fireCreateAction(workspace1, WORKSPACE_1_DB_ID);
-    verify(mockActionAuditService).send(eventListCaptor.capture());
-    Collection<ActionAuditEvent> eventsSent = eventListCaptor.getValue();
-    assertThat(eventsSent.size()).isEqualTo(6);
+    workspaceAuditor.fireCreateAction(workspace1, WORKSPACE_1_DB_ID);
+    verify(mockActionAuditService).send(eventCollectionCaptor.capture());
+    Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
+    assertThat(eventsSent).hasSize(20);
     Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
     assertThat(firstEvent.isPresent()).isTrue();
-    assertThat(firstEvent.get().getActionType()).isEqualTo(ActionType.CREATE);
+    assertThat(firstEvent.map(ActionAuditEvent::getActionType).orElse(null))
+        .isEqualTo(ActionType.CREATE);
     assertThat(
             eventsSent.stream()
                 .map(ActionAuditEvent::getActionType)
@@ -132,7 +142,7 @@ public class WorkspaceAuditAdapterTest {
 
   @Test
   public void testFiresDeleteWorkspaceEvent() {
-    workspaceAuditAdapter.fireDeleteAction(dbWorkspace1);
+    workspaceAuditor.fireDeleteAction(dbWorkspace1);
     verify(mockActionAuditService).send(eventCaptor.capture());
     final ActionAuditEvent eventSent = eventCaptor.getValue();
     assertThat(eventSent.getActionType()).isEqualTo(ActionType.DELETE);
@@ -141,10 +151,11 @@ public class WorkspaceAuditAdapterTest {
 
   @Test
   public void testFiresDuplicateEvent() {
-    workspaceAuditAdapter.fireDuplicateAction(dbWorkspace1, dbWorkspace2);
-    verify(mockActionAuditService).send(eventListCaptor.capture());
-    final Collection<ActionAuditEvent> eventsSent = eventListCaptor.getValue();
-    assertThat(eventsSent).hasSize(2);
+    workspaceAuditor.fireDuplicateAction(
+        dbWorkspace1.getWorkspaceId(), dbWorkspace2.getWorkspaceId(), workspace2);
+    verify(mockActionAuditService).send(eventCollectionCaptor.capture());
+    final Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
+    assertThat(eventsSent).hasSize(14);
 
     // need same actionId for all events
     assertThat(eventsSent.stream().map(ActionAuditEvent::getActionId).distinct().count())
@@ -175,9 +186,9 @@ public class WorkspaceAuditAdapterTest {
             WorkspaceAccessLevel.NO_ACCESS.toString(),
             ADDED_USER_ID,
             WorkspaceAccessLevel.READER.toString());
-    workspaceAuditAdapter.fireCollaborateAction(dbWorkspace1.getWorkspaceId(), aclsByUserId);
-    verify(mockActionAuditService).send(eventListCaptor.capture());
-    Collection<ActionAuditEvent> eventsSent = eventListCaptor.getValue();
+    workspaceAuditor.fireCollaborateAction(dbWorkspace1.getWorkspaceId(), aclsByUserId);
+    verify(mockActionAuditService).send(eventCollectionCaptor.capture());
+    Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
     assertThat(eventsSent).hasSize(4);
 
     Map<String, Long> countByTargetType =
@@ -220,19 +231,49 @@ public class WorkspaceAuditAdapterTest {
 
   @Test
   public void testCollaborateWithEmptyMapDoesNothing() {
-    workspaceAuditAdapter.fireCollaborateAction(WORKSPACE_1_DB_ID, Collections.emptyMap());
+    workspaceAuditor.fireCollaborateAction(WORKSPACE_1_DB_ID, Collections.emptyMap());
     verifyZeroInteractions(mockActionAuditService);
-  }
-
-  @Test
-  public void testDoesNotThrowWhenMissingRequiredFields() {
-    workspace1.setResearchPurpose(null); // programming error
-    workspaceAuditAdapter.fireCreateAction(workspace1, WORKSPACE_1_DB_ID);
   }
 
   @Test
   public void testDoesNotThrowWhenUserProviderFails() {
     doReturn(null).when(mockUserProvider).get();
-    workspaceAuditAdapter.fireDeleteAction(dbWorkspace1);
+    workspaceAuditor.fireDeleteAction(dbWorkspace1);
+  }
+
+  @Test
+  public void testFireEditAction_sendsNoEventsForSameWorkspace() {
+    workspaceAuditor.fireEditAction(workspace1, workspace1, dbWorkspace1.getWorkspaceId());
+    verify(mockActionAuditService).send(eventCollectionCaptor.capture());
+    assertThat(eventCollectionCaptor.getValue()).isEmpty();
+  }
+
+  @Test
+  public void testFireEditAction_sendsChangedProperties() {
+    final ResearchPurpose editedResearchPurpose =
+        new ResearchPurpose()
+            .intendedStudy("stubbed toes")
+            .additionalNotes("I really like the cloud.")
+            .anticipatedFindings("I want to find my keys.")
+            .controlSet(true);
+
+    Workspace editedWorkspace =
+        new Workspace()
+            .name("New name")
+            .id("fc-id-1")
+            .namespace("aou-rw-local1-c4be869a")
+            .creator("user@fake-research-aou.org")
+            .cdrVersionId("1")
+            .researchPurpose(editedResearchPurpose)
+            .creationTime(Y2K_EPOCH_MILLIS)
+            .lastModifiedTime(Y2K_EPOCH_MILLIS)
+            .etag("etag_1")
+            .dataAccessLevel(DataAccessLevel.REGISTERED)
+            .published(false);
+
+    workspaceAuditor.fireEditAction(workspace1, editedWorkspace, dbWorkspace1.getWorkspaceId());
+    verify(mockActionAuditService).send(eventCollectionCaptor.capture());
+
+    assertThat(eventCollectionCaptor.getValue()).hasSize(3);
   }
 }

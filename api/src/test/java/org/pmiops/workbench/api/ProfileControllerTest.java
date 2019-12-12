@@ -26,7 +26,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.pmiops.workbench.actionaudit.adapters.ProfileAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
@@ -43,7 +44,7 @@ import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.NihStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -108,8 +109,9 @@ public class ProfileControllerTest {
   @Mock private FreeTierBillingService freeTierBillingService;
   @Mock private ComplianceService complianceTrainingService;
   @Mock private MailService mailService;
-  @Mock private UserService userService;
-  @Mock private ProfileAuditAdapter mockProfileAuditAdapter;
+  private UserService userService;
+  @Mock private ProfileAuditor mockProfileAuditor;
+  @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
 
   private ProfileController profileController;
   private ProfileController cloudProfileController;
@@ -160,7 +162,8 @@ public class ProfileControllerTest {
             fireCloudService,
             Providers.of(config),
             complianceTrainingService,
-            directoryService);
+            directoryService,
+            mockUserServiceAuditAdapter);
     ProfileService profileService = new ProfileService(userDao, freeTierBillingService);
     this.profileController =
         new ProfileController(
@@ -177,7 +180,7 @@ public class ProfileControllerTest {
             Providers.of(config),
             environment,
             Providers.of(mailService),
-            mockProfileAuditAdapter);
+            mockProfileAuditor);
     this.cloudProfileController =
         new ProfileController(
             profileService,
@@ -193,7 +196,7 @@ public class ProfileControllerTest {
             Providers.of(config),
             cloudEnvironment,
             Providers.of(mailService),
-            mockProfileAuditAdapter);
+            mockProfileAuditor);
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
@@ -211,7 +214,7 @@ public class ProfileControllerTest {
   @Test
   public void testCreateAccount_success() throws Exception {
     createUser();
-    verify(mockProfileAuditAdapter).fireCreateAction(any(Profile.class));
+    verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
     final DbUser dbUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(dbUser).isNotNull();
     assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
@@ -228,7 +231,7 @@ public class ProfileControllerTest {
     exception.expectMessage(
         "Username should be at least 3 characters and not more than 64 characters");
     profileController.createAccount(accountRequest);
-    verify(mockProfileAuditAdapter).fireCreateAction(any(Profile.class));
+    verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
   }
 
   @Test
@@ -270,7 +273,7 @@ public class ProfileControllerTest {
         TIMESTAMP,
         false);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
-    verify(mockProfileAuditAdapter).fireLoginAction(dbUser);
+    verify(mockProfileAuditor).fireLoginAction(dbUser);
   }
 
   @Test
@@ -533,7 +536,7 @@ public class ProfileControllerTest {
   @Test
   public void testUpdateNihToken() {
     when(fireCloudService.postNihCallback(any()))
-        .thenReturn(new NihStatus().linkedNihUsername("test").linkExpireTime(500L));
+        .thenReturn(new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L));
     try {
       createUser();
       profileController.updateNihToken(new NihToken().jwt("test"));
@@ -560,7 +563,7 @@ public class ProfileControllerTest {
 
   @Test
   public void testSyncEraCommons() throws Exception {
-    NihStatus nihStatus = new NihStatus();
+    FirecloudNihStatus nihStatus = new FirecloudNihStatus();
     String linkedUsername = "linked";
     nihStatus.setLinkedNihUsername(linkedUsername);
     nihStatus.setLinkExpireTime(TIMESTAMP.getTime());
@@ -597,7 +600,7 @@ public class ProfileControllerTest {
             Providers.of(config),
             environment,
             Providers.of(mailService),
-            mockProfileAuditAdapter);
+            mockProfileAuditor);
     profileController.bypassAccessRequirement(
         profile.getUserId(),
         new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
@@ -609,7 +612,7 @@ public class ProfileControllerTest {
     createUser();
 
     profileController.deleteProfile();
-    verify(mockProfileAuditAdapter).fireDeleteAction(dbUser.getUserId(), dbUser.getEmail());
+    verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getEmail());
   }
 
   private Profile createUser() throws Exception {

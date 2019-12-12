@@ -63,7 +63,7 @@ constructor(private val configProvider: Provider<WorkbenchConfig>, private val c
     }
 
     override fun logRuntimeException(logger: Logger, exception: RuntimeException) {
-        logger.log(Level.WARNING, exception) { "Exception encountered during audit." }
+        logger.log(Level.WARNING, "Exception encountered during audit.", exception)
     }
 
     companion object {

@@ -78,12 +78,9 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return configProvider.get().googleCloudStorageService.emailImagesBucketName;
   }
 
-  private String readToString(String bucketName, String objectPath) {
-    return new String(getBlob(bucketName, objectPath).getContent()).trim();
-  }
-
   // wrapper for storage.get() which throws NotFoundException instead of NullPointerException
-  private Blob getBlob(String bucketName, String objectPath) {
+  @Override
+  public Blob getBlob(String bucketName, String objectPath) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     Blob result = storage.get(bucketName, objectPath);
     if (result == null) {
@@ -125,8 +122,12 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return getCredentialsBucketJSON("elastic-cloud.json");
   }
 
+  private String readBlobAsString(Blob blob) {
+    return new String(blob.getContent()).trim();
+  }
+
   private String readCredentialsBucketString(String objectPath) {
-    return readToString(getCredentialsBucketName(), objectPath);
+    return readBlobAsString(getBlob(getCredentialsBucketName(), objectPath));
   }
 
   private GoogleCredential getCredential(final String objectPath) throws IOException {
@@ -162,8 +163,8 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public JSONObject getFileAsJson(String bucketName, String fileName) {
-    return new JSONObject(readToString(bucketName, fileName));
+  public JSONObject readBlobAsJson(Blob blob) {
+    return new JSONObject(readBlobAsString(blob));
   }
 
   @Override

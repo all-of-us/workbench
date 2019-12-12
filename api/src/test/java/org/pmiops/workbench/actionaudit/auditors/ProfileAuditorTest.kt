@@ -1,4 +1,4 @@
-package org.pmiops.workbench.actionaudit.adapters
+package org.pmiops.workbench.actionaudit.auditors
 
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.argumentCaptor
@@ -31,14 +31,14 @@ import org.springframework.test.context.junit4.SpringRunner
 import java.math.BigDecimal
 
 @RunWith(SpringRunner::class)
-class ProfileAuditAdapterTest {
+class ProfileAuditorTest {
 
     private val mockUserProvider = mock<Provider<DbUser>>()
     private val mockActionAuditService = mock<ActionAuditService>()
     private val mockClock = mock<Clock>()
     private val mockActionIdProvider = mock<Provider<String>>()
 
-    private var profileAuditAdapter: ProfileAuditAdapter? = null
+    private var profileAuditAdapter: ProfileAuditor? = null
     private var user: DbUser? = null
 
     @Before
@@ -47,7 +47,7 @@ class ProfileAuditAdapterTest {
             .apply { userId = 1001 }
             .apply { email = USER_EMAIL }
 
-        profileAuditAdapter = ProfileAuditAdapterImpl(
+        profileAuditAdapter = ProfileAuditorImpl(
                 userProvider = mockUserProvider,
                 actionAuditService = mockActionAuditService,
                 clock = mockClock,

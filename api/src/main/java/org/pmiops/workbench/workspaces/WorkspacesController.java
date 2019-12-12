@@ -30,7 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.pmiops.workbench.actionaudit.adapters.WorkspaceAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.api.WorkspacesApiDelegate;
@@ -51,11 +51,13 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
-import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
@@ -83,6 +85,7 @@ import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -115,7 +118,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final NotebooksService notebooksService;
   private final UserService userService;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private WorkspaceAuditAdapter workspaceAuditAdapter;
+  private WorkspaceAuditor workspaceAuditor;
+  private WorkspaceMapper workspaceMapper;
 
   @Autowired
   public WorkspacesController(
@@ -130,7 +134,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       NotebooksService notebooksService,
       UserService userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceAuditAdapter workspaceAuditAdapter) {
+      WorkspaceAuditor workspaceAuditor,
+      WorkspaceMapper workspaceMapper) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -142,11 +147,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.notebooksService = notebooksService;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.workspaceAuditAdapter = workspaceAuditAdapter;
+    this.workspaceAuditor = workspaceAuditor;
+    this.workspaceMapper = workspaceMapper;
   }
 
   private String getRegisteredUserDomainEmail() {
-    ManagedGroupWithMembers registeredDomainGroup =
+    FirecloudManagedGroupWithMembers registeredDomainGroup =
         fireCloudService.getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
     return registeredDomainGroup.getGroupEmail();
   }
@@ -193,23 +199,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return new FirecloudWorkspaceId(namespace, strippedName);
   }
 
-  private org.pmiops.workbench.firecloud.model.Workspace attemptFirecloudWorkspaceCreation(
-      FirecloudWorkspaceId workspaceId) {
+  private FirecloudWorkspace attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
     return fireCloudService.createWorkspace(
         workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
   }
 
   @Override
-  public ResponseEntity<Workspace> createWorkspace(Workspace workspace) {
-    if (Strings.isNullOrEmpty(workspace.getName())) {
-      throw new BadRequestException("missing required field 'name'");
-    } else if (workspace.getResearchPurpose() == null) {
-      throw new BadRequestException("missing required field 'researchPurpose'");
-    } else if (workspace.getDataAccessLevel() == null) {
-      throw new BadRequestException("missing required field 'dataAccessLevel'");
-    } else if (workspace.getName().length() > 80) {
-      throw new BadRequestException("DbWorkspace name must be 80 characters or less");
-    }
+  public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
+    validateWorkspaceApiModel(workspace);
 
     DbUser user = userProvider.get();
     String workspaceNamespace;
@@ -224,8 +221,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId =
         generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
-        attemptFirecloudWorkspaceCreation(workspaceId);
+    FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbWorkspace dbWorkspace = new DbWorkspace();
@@ -250,15 +246,27 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
-    workspaceAuditAdapter.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
+    workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
+  }
+
+  private void validateWorkspaceApiModel(Workspace workspace) {
+    if (Strings.isNullOrEmpty(workspace.getName())) {
+      throw new BadRequestException("missing required field 'name'");
+    } else if (workspace.getResearchPurpose() == null) {
+      throw new BadRequestException("missing required field 'researchPurpose'");
+    } else if (workspace.getDataAccessLevel() == null) {
+      throw new BadRequestException("missing required field 'dataAccessLevel'");
+    } else if (workspace.getName().length() > 80) {
+      throw new BadRequestException("DbWorkspace name must be 80 characters or less");
+    }
   }
 
   private void setDbWorkspaceFields(
       DbWorkspace dbWorkspace,
       DbUser user,
       FirecloudWorkspaceId workspaceId,
-      org.pmiops.workbench.firecloud.model.Workspace fcWorkspace,
+      FirecloudWorkspace fcWorkspace,
       Timestamp createdAndLastModifiedTime) {
     dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
     dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
@@ -283,7 +291,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     workspaceService.maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
-    workspaceAuditAdapter.fireDeleteAction(dbWorkspace);
+    workspaceAuditor.fireDeleteAction(dbWorkspace);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -302,12 +310,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Workspace> updateWorkspace(
-      String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
+      String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request)
+      throws NotFoundException {
+
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace =
+    FirecloudWorkspace fcWorkspace =
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace();
     if (workspace == null) {
       throw new BadRequestException("No workspace provided in request");
@@ -315,6 +325,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (Strings.isNullOrEmpty(workspace.getEtag())) {
       throw new BadRequestException("Missing required update field 'etag'");
     }
+
+    final Workspace originalWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+
     int version = Etags.toVersion(workspace.getEtag());
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated workspace version");
@@ -338,12 +351,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // The version asserted on save is the same as the one we read via
     // getRequired() above, see RW-215 for details.
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+
+    final Workspace editedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+
+    workspaceAuditor.fireEditAction(
+        originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
   @Override
   public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(
-      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body) {
+      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body)
+      throws BadRequestException, TooManyRequestsException {
     Workspace toWorkspace = body.getWorkspace();
     if (Strings.isNullOrEmpty(toWorkspace.getName())) {
       throw new BadRequestException("missing required field 'workspace.name'");
@@ -378,7 +397,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     FirecloudWorkspaceId toFcWorkspaceId =
         generateFirecloudWorkspaceId(toWorkspaceName, toWorkspace.getName());
-    org.pmiops.workbench.firecloud.model.Workspace toFcWorkspace =
+    FirecloudWorkspace toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
             fromWorkspaceId,
@@ -441,16 +460,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    DbWorkspace savedWorkspace =
+    DbWorkspace savedDbWorkspace =
         workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
 
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
-      Map<String, WorkspaceAccessEntry> fromAclsMap =
+      Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
           workspaceService.getFirecloudWorkspaceAcls(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
 
       Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
-      for (Map.Entry<String, WorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
+      for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
         if (!entry.getKey().equals(user.getEmail())) {
           clonedRoles.put(
               entry.getKey(), WorkspaceAccessLevel.fromValue(entry.getValue().getAccessLevel()));
@@ -458,14 +477,16 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      savedWorkspace =
+      savedDbWorkspace =
           workspaceService.updateWorkspaceAcls(
-              savedWorkspace, clonedRoles, getRegisteredUserDomainEmail());
+              savedDbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
-    workspaceAuditAdapter.fireDuplicateAction(fromWorkspace, savedWorkspace);
-    return ResponseEntity.ok(
-        new CloneWorkspaceResponse()
-            .workspace(WorkspaceConversionUtils.toApiWorkspace(savedWorkspace, toFcWorkspace)));
+    final Workspace savedWorkspace =
+        workspaceMapper.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
+
+    workspaceAuditor.fireDuplicateAction(
+        fromWorkspace.getWorkspaceId(), savedDbWorkspace.getWorkspaceId(), savedWorkspace);
+    return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 
   // A retry period is needed because the permission to copy files into the cloned workspace is not
@@ -518,14 +539,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
-    Map<String, WorkspaceAccessEntry> updatedWsAcls =
+    Map<String, FirecloudWorkspaceAccessEntry> updatedWsAcls =
         workspaceService.getFirecloudWorkspaceAcls(
             workspaceNamespace, dbWorkspace.getFirecloudName());
     List<UserRole> updatedUserRoles =
         workspaceService.convertWorkspaceAclsToUserRoles(updatedWsAcls);
     resp.setItems(updatedUserRoles);
 
-    workspaceAuditAdapter.fireCollaborateAction(
+    workspaceAuditor.fireCollaborateAction(
         dbWorkspace.getWorkspaceId(), aclStringsByUserIdBuilder.build());
     return ResponseEntity.ok(resp);
   }
@@ -710,7 +731,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    Map<String, WorkspaceAccessEntry> firecloudAcls =
+    Map<String, FirecloudWorkspaceAccessEntry> firecloudAcls =
         workspaceService.getFirecloudWorkspaceAcls(
             workspaceNamespace, dbWorkspace.getFirecloudName());
     List<UserRole> userRoles = workspaceService.convertWorkspaceAclsToUserRoles(firecloudAcls);
@@ -757,14 +778,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     Map<Long, DbWorkspace> dbWorkspacesById =
         dbWorkspaces.stream()
             .collect(Collectors.toMap(DbWorkspace::getWorkspaceId, Function.identity()));
-    Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsById =
-        dbWorkspaces.stream()
-            .collect(
-                Collectors.toMap(
-                    DbWorkspace::getWorkspaceId,
-                    dbWorkspace ->
-                        workspaceService.getWorkspaceAccessLevel(
-                            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName())));
+    final Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsById;
+    try {
+      workspaceAccessLevelsById =
+          dbWorkspaces.stream()
+              .collect(
+                  Collectors.toMap(
+                      DbWorkspace::getWorkspaceId,
+                      dbWorkspace ->
+                          workspaceService.getWorkspaceAccessLevel(
+                              dbWorkspace.getWorkspaceNamespace(),
+                              dbWorkspace.getFirecloudName())));
+
+    } catch (IllegalArgumentException e) {
+      throw new ServerErrorException(e);
+    }
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     List<RecentWorkspace> recentWorkspaces =
@@ -780,8 +808,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbWorkspace dbWorkspace = workspaceService.get(workspaceNamespace, workspaceId);
     DbUserRecentWorkspace userRecentWorkspace =
         workspaceService.updateRecentWorkspaces(dbWorkspace);
-    WorkspaceAccessLevel workspaceAccessLevel =
-        workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    final WorkspaceAccessLevel workspaceAccessLevel;
+
+    try {
+      workspaceAccessLevel =
+          workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    } catch (IllegalArgumentException e) {
+      throw new ServerErrorException(e);
+    }
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =

@@ -15,7 +15,7 @@ import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDate, reactStyles} from 'app/utils';
-import {triggerEvent} from 'app/utils/analytics';
+import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
 import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -78,26 +78,42 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
     content={
       <React.Fragment>
         <MenuItem icon='copy'
-                  onClick={() => {navigate([wsPathPrefix, 'duplicate']); }}>
+                  onClick={() => {
+                    AnalyticsTracker.Workspaces.OpenDuplicatePage('Card');
+                    navigate([wsPathPrefix, 'duplicate']); }
+                  }>
           Duplicate
         </MenuItem>
         <TooltipTrigger content={<div>Requires Write Permission</div>}
                         disabled={WorkspacePermissionsUtil.canWrite(accessLevel)}>
           <MenuItem icon='pencil'
-                    onClick={() => {navigate([wsPathPrefix, 'edit']); }}
+                    onClick={() => {
+                      AnalyticsTracker.Workspaces.OpenEditPage('Card');
+                      navigate([wsPathPrefix, 'edit']); }
+                    }
                     disabled={!WorkspacePermissionsUtil.canWrite(accessLevel)}>
             Edit
           </MenuItem>
         </TooltipTrigger>
         <TooltipTrigger content={<div data-test-id='workspace-share-disabled-tooltip'>Requires Owner Permission</div>}
                         disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
-          <MenuItem icon='pencil' onClick={onShare} disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+          <MenuItem icon='pencil'
+                    onClick={() => {
+                      AnalyticsTracker.Workspaces.OpenShareModal('Card');
+                      onShare();
+                    }}
+                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
             Share
           </MenuItem>
         </TooltipTrigger>
         <TooltipTrigger content={<div>Requires Owner Permission</div>}
                         disabled={WorkspacePermissionsUtil.isOwner(accessLevel)}>
-          <MenuItem icon='trash' onClick={onDelete} disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
+          <MenuItem icon='trash'
+                    onClick={() => {
+                      AnalyticsTracker.Workspaces.OpenDeleteModal('Card');
+                      onDelete();
+                    }}
+                    disabled={!WorkspacePermissionsUtil.isOwner(accessLevel)}>
             Delete
           </MenuItem>
         </TooltipTrigger>
@@ -296,7 +312,10 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
       <ConfirmDeleteModal data-test-id='confirm-delete-modal'
                           resourceType={ResourceType.WORKSPACE}
                           resourceName={workspace.name}
-                          receiveDelete={() => {this.deleteWorkspace(); }}
+                          receiveDelete={() => {
+                            AnalyticsTracker.Workspaces.Delete();
+                            this.deleteWorkspace();
+                          }}
                           closeFunction={() => {this.setState({confirmDeleting: false}); }}/>}
       {sharing && <WorkspaceShare data-test-id='workspace-share-modal'
                                   workspace={workspace}

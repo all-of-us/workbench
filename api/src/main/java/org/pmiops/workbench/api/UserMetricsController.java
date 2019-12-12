@@ -27,7 +27,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
@@ -174,7 +174,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
             .limit(distinctWorkspacelimit)
             .collect(Collectors.toList());
 
-    final ImmutableMap<Long, WorkspaceResponse> idToLiveWorkspace =
+    final ImmutableMap<Long, FirecloudWorkspaceResponse> idToLiveWorkspace =
         workspaceIdList.stream()
             .map(
                 id ->
@@ -247,10 +247,10 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   }
 
   private RecentResource buildRecentResource(
-      ImmutableMap<Long, WorkspaceResponse> idToFcWorkspaceResponse,
+      ImmutableMap<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentResource dbUserRecentResource) {
     RecentResource resource = TO_CLIENT.apply(dbUserRecentResource);
-    WorkspaceResponse workspaceDetails =
+    FirecloudWorkspaceResponse workspaceDetails =
         idToFcWorkspaceResponse.get(dbUserRecentResource.getWorkspaceId());
     resource.setPermission(workspaceDetails.getAccessLevel());
     resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());

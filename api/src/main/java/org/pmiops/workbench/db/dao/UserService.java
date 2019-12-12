@@ -6,7 +6,9 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,6 +16,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
+import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
@@ -29,7 +33,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.NihApi;
-import org.pmiops.workbench.firecloud.model.NihStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -68,6 +72,7 @@ public class UserService {
   private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
+  private final UserServiceAuditor userServiceAuditAdapter;
   private static final Logger log = Logger.getLogger(UserService.class.getName());
 
   @Autowired
@@ -81,7 +86,8 @@ public class UserService {
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
-      DirectoryService directoryService) {
+      DirectoryService directoryService,
+      UserServiceAuditor userServiceAuditAdapter) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
@@ -92,6 +98,7 @@ public class UserService {
     this.configProvider = configProvider;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
+    this.userServiceAuditAdapter = userServiceAuditAdapter;
   }
 
   /**
@@ -151,7 +158,45 @@ public class UserService {
     }
   }
 
-  private void updateDataAccessLevel(DbUser user) {
+  private void updateDataAccessLevel(DbUser dbUser) {
+    final DataAccessLevel previousDataAccessLevel = dbUser.getDataAccessLevelEnum();
+    final DataAccessLevel newDataAccessLevel;
+    if (shouldUserBeRegistered(dbUser)) {
+      addToRegisteredTierGroupIdempotent(dbUser);
+      newDataAccessLevel = DataAccessLevel.REGISTERED;
+    } else {
+      removeFromRegisteredTierGroupIdempotent(dbUser);
+      newDataAccessLevel = DataAccessLevel.UNREGISTERED;
+    }
+    if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
+      dbUser.setDataAccessLevelEnum(newDataAccessLevel);
+      userServiceAuditAdapter.fireUpdateDataAccessAction(
+          dbUser, newDataAccessLevel, previousDataAccessLevel);
+    }
+  }
+
+  private void removeFromRegisteredTierGroupIdempotent(DbUser dbUser) {
+    if (isUserMemberOfRegisteredTierGroup(dbUser)) {
+      this.fireCloudService.removeUserFromGroup(
+          dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
+      log.info(String.format("Removed user %s from registered-tier group.", dbUser.getEmail()));
+    }
+  }
+
+  private boolean isUserMemberOfRegisteredTierGroup(DbUser dbUser) {
+    return this.fireCloudService.isUserMemberOfGroup(
+        dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
+  }
+
+  private void addToRegisteredTierGroupIdempotent(DbUser user) {
+    if (!isUserMemberOfRegisteredTierGroup(user)) {
+      this.fireCloudService.addUserToGroup(
+          user.getEmail(), configProvider.get().firecloud.registeredDomainName);
+      log.info(String.format("Added user %s to registered-tier group.", user.getEmail()));
+    }
+  }
+
+  private boolean shouldUserBeRegistered(DbUser user) {
     boolean dataUseAgreementCompliant =
         user.getDataUseAgreementCompletionTime() != null
             || user.getDataUseAgreementBypassTime() != null
@@ -170,32 +215,13 @@ public class UserService {
         user.getTwoFactorAuthCompletionTime() != null || user.getTwoFactorAuthBypassTime() != null;
 
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
-    boolean shouldBeRegistered =
-        !user.getDisabled()
-            && complianceTrainingCompliant
-            && eraCommonsCompliant
-            && betaAccessGranted
-            && twoFactorAuthComplete
-            && dataUseAgreementCompliant
-            && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
-    boolean isInGroup =
-        this.fireCloudService.isUserMemberOfGroup(
-            user.getEmail(), configProvider.get().firecloud.registeredDomainName);
-    if (shouldBeRegistered) {
-      if (!isInGroup) {
-        this.fireCloudService.addUserToGroup(
-            user.getEmail(), configProvider.get().firecloud.registeredDomainName);
-        log.info(String.format("Added user %s to registered-tier group.", user.getEmail()));
-      }
-      user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
-    } else {
-      if (isInGroup) {
-        this.fireCloudService.removeUserFromGroup(
-            user.getEmail(), configProvider.get().firecloud.registeredDomainName);
-        log.info(String.format("Removed user %s from registered-tier group.", user.getEmail()));
-      }
-      user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
-    }
+    return !user.getDisabled()
+        && complianceTrainingCompliant
+        && eraCommonsCompliant
+        && betaAccessGranted
+        && twoFactorAuthComplete
+        && dataUseAgreementCompliant
+        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
   }
 
   private boolean isServiceAccount(DbUser user) {
@@ -341,88 +367,84 @@ public class UserService {
     userDataUseAgreementDao.save(dataUseAgreements);
   }
 
-  public DbUser setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setDataUseAgreementBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(
+        userId,
+        bypassTime,
+        DbUser::setDataUseAgreementBypassTime,
+        BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME);
   }
 
-  public DbUser setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setComplianceTrainingBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(
+        userId,
+        bypassTime,
+        DbUser::setComplianceTrainingBypassTime,
+        BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME);
   }
 
-  public DbUser setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setBetaAccessBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(
+        userId,
+        bypassTime,
+        DbUser::setBetaAccessBypassTime,
+        BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME);
   }
 
-  public DbUser setEmailVerificationBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setEmailVerificationBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(
+        userId,
+        bypassTime,
+        DbUser::setEraCommonsBypassTime,
+        BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME);
   }
 
-  public DbUser setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setEraCommonsBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  public void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
+    setBypassTimeWithRetries(
+        userId,
+        bypassTime,
+        DbUser::setTwoFactorAuthBypassTime,
+        BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME);
   }
 
-  public DbUser setIdVerificationBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
-        (u) -> {
-          u.setIdVerificationBypassTime(bypassTime);
-          return u;
-        },
-        user);
+  /**
+   * Functional bypass time column setter, using retry logic.
+   *
+   * @param userId id of user getting bypassed
+   * @param bypassTime type of bypass
+   * @param setter void-returning method to call to set the particular bypass field. Should
+   *     typically be a method reference on DbUser, e.g.
+   * @param targetProperty BypassTimeTargetProperty enum value, for auditing
+   */
+  private void setBypassTimeWithRetries(
+      long userId,
+      Timestamp bypassTime,
+      BiConsumer<DbUser, Timestamp> setter,
+      BypassTimeTargetProperty targetProperty) {
+    setBypassTimeWithRetries(userDao.findUserByUserId(userId), bypassTime, targetProperty, setter);
   }
 
-  public DbUser setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
-    DbUser user = userDao.findUserByUserId(userId);
-    return updateUserWithRetries(
+  private void setBypassTimeWithRetries(
+      DbUser dbUser,
+      Timestamp bypassTime,
+      BypassTimeTargetProperty targetProperty,
+      BiConsumer<DbUser, Timestamp> setter) {
+    updateUserWithRetries(
         (u) -> {
-          u.setTwoFactorAuthBypassTime(bypassTime);
+          setter.accept(u, bypassTime);
           return u;
         },
-        user);
+        dbUser);
+    userServiceAuditAdapter.fireAdministrativeBypassTime(
+        dbUser.getUserId(),
+        targetProperty,
+        Optional.ofNullable(bypassTime).map(Timestamp::toInstant));
   }
 
-  public DbUser setClusterRetryCount(int clusterRetryCount) {
-    return updateUserWithRetries(
+  public void setClusterRetryCount(int clusterRetryCount) {
+    updateUserWithRetries(
         (user) -> {
           user.setClusterCreateRetries(clusterRetryCount);
-          return user;
-        });
-  }
-
-  public DbUser setBillingRetryCount(int billingRetryCount) {
-    return updateUserWithRetries(
-        (user) -> {
-          user.setBillingProjectRetries(billingRetryCount);
           return user;
         });
   }
@@ -575,7 +597,7 @@ public class UserService {
    *
    * <p>This method saves the updated user object to the database and returns it.
    */
-  private DbUser setEraCommonsStatus(DbUser targetUser, NihStatus nihStatus) {
+  private DbUser setEraCommonsStatus(DbUser targetUser, FirecloudNihStatus nihStatus) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     return updateUserWithRetries(
@@ -623,7 +645,7 @@ public class UserService {
   /** Syncs the eraCommons access module status for the current user. */
   public DbUser syncEraCommonsStatus() {
     DbUser user = userProvider.get();
-    NihStatus nihStatus = fireCloudService.getNihStatus();
+    FirecloudNihStatus nihStatus = fireCloudService.getNihStatus();
     return setEraCommonsStatus(user, nihStatus);
   }
 
@@ -645,7 +667,7 @@ public class UserService {
     ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
     NihApi api = new NihApi(apiClient);
     try {
-      NihStatus nihStatus = api.nihStatus();
+      FirecloudNihStatus nihStatus = api.nihStatus();
       return setEraCommonsStatus(user, nihStatus);
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {

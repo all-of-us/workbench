@@ -15,10 +15,10 @@ import org.apache.commons.cli.Options;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.model.Workspace;
-import org.pmiops.workbench.firecloud.model.WorkspaceACL;
-import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
-import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
@@ -72,8 +72,9 @@ public class BackfillBillingProjectUsers {
    * Swagger Java codegen does not handle the WorkspaceACL model correctly; it returns a GSON map
    * instead. Run this through a typed Gson conversion process to coerce it into the desired type.
    */
-  public static Map<String, WorkspaceAccessEntry> extractAclResponse(WorkspaceACL aclResp) {
-    Type accessEntryType = new TypeToken<Map<String, WorkspaceAccessEntry>>() {}.getType();
+  public static Map<String, FirecloudWorkspaceAccessEntry> extractAclResponse(
+      FirecloudWorkspaceACL aclResp) {
+    Type accessEntryType = new TypeToken<Map<String, FirecloudWorkspaceAccessEntry>>() {}.getType();
     Gson gson = new Gson();
     return gson.fromJson(gson.toJson(aclResp.getAcl(), accessEntryType), accessEntryType);
   }
@@ -85,9 +86,9 @@ public class BackfillBillingProjectUsers {
       boolean dryRun)
       throws ApiException {
     int userUpgrades = 0;
-    for (WorkspaceResponse resp :
+    for (FirecloudWorkspaceResponse resp :
         workspacesApi.listWorkspaces(FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS)) {
-      Workspace w = resp.getWorkspace();
+      FirecloudWorkspace w = resp.getWorkspace();
       if (!w.getNamespace().startsWith(billingProjectPrefix)) {
         continue;
       }
@@ -101,7 +102,7 @@ public class BackfillBillingProjectUsers {
         continue;
       }
 
-      Map<String, WorkspaceAccessEntry> acl =
+      Map<String, FirecloudWorkspaceAccessEntry> acl =
           extractAclResponse(workspacesApi.getWorkspaceAcl(w.getNamespace(), w.getName()));
       for (String user : acl.keySet()) {
         if (user.equals(w.getCreatedBy())) {
@@ -109,7 +110,7 @@ public class BackfillBillingProjectUsers {
           // where this is not true will be fixed by the 1PPW migration (RW-2705).
           continue;
         }
-        WorkspaceAccessEntry entry = acl.get(user);
+        FirecloudWorkspaceAccessEntry entry = acl.get(user);
         if (!"OWNER".equals(entry.getAccessLevel())) {
           // Only owners should be granted billing project user.
           continue;

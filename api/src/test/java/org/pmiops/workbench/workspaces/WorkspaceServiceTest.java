@@ -29,8 +29,8 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.Workspace;
-import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,7 @@ public class WorkspaceServiceTest {
 
   private WorkspaceService workspaceService;
 
-  private List<WorkspaceResponse> mockWorkspaceResponses = new ArrayList<>();
+  private List<FirecloudWorkspaceResponse> mockWorkspaceResponses = new ArrayList<>();
   private List<DbWorkspace> mockWorkspaces = new ArrayList<>();
   private AtomicLong workspaceIdIncrementer = new AtomicLong(1);
   private Instant NOW = Instant.now();
@@ -127,16 +127,16 @@ public class WorkspaceServiceTest {
     doReturn(USER_ID).when(mockUser).getUserId();
   }
 
-  private WorkspaceResponse mockFirecloudWorkspaceResponse(
+  private FirecloudWorkspaceResponse mockFirecloudWorkspaceResponse(
       String workspaceId,
       String workspaceName,
       String workspaceNamespace,
       WorkspaceAccessLevel accessLevel) {
-    Workspace mockWorkspace = mock(Workspace.class);
+    FirecloudWorkspace mockWorkspace = mock(FirecloudWorkspace.class);
     doReturn(workspaceNamespace).when(mockWorkspace).getNamespace();
     doReturn(workspaceName).when(mockWorkspace).getName();
     doReturn(workspaceId).when(mockWorkspace).getWorkspaceId();
-    WorkspaceResponse mockWorkspaceResponse = mock(WorkspaceResponse.class);
+    FirecloudWorkspaceResponse mockWorkspaceResponse = mock(FirecloudWorkspaceResponse.class);
     doReturn(mockWorkspace).when(mockWorkspaceResponse).getWorkspace();
     doReturn(accessLevel.toString()).when(mockWorkspaceResponse).getAccessLevel();
     return mockWorkspaceResponse;
@@ -164,7 +164,7 @@ public class WorkspaceServiceTest {
       WorkspaceAccessLevel accessLevel,
       WorkspaceActiveStatus activeStatus) {
 
-    WorkspaceResponse mockWorkspaceResponse =
+    FirecloudWorkspaceResponse mockWorkspaceResponse =
         mockFirecloudWorkspaceResponse(
             Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
     mockWorkspaceResponses.add(mockWorkspaceResponse);
