@@ -112,13 +112,13 @@ interface State {
   cohort: Cohort;
   deleting: boolean;
   description: string;
+  existingCohorts: Array<string>;
   loading: boolean;
   name: string;
   nameTouched: boolean;
   saveError: boolean;
   saveModalOpen: boolean;
   saving: boolean;
-  showConflictError: boolean;
   stackChart: boolean;
   total: number;
 }
@@ -135,13 +135,13 @@ export const ListOverview = withCurrentWorkspace()(
         cohort: undefined,
         deleting: false,
         description: undefined,
+        existingCohorts: [],
         loading: true,
         name: undefined,
         nameTouched: false,
         saveError: false,
         saveModalOpen: false,
         saving: false,
-        showConflictError: false,
         stackChart: true,
         total: undefined,
       };
@@ -250,11 +250,8 @@ export const ListOverview = withCurrentWorkspace()(
       cohortsApi().createCohort(ns, wsid, cohort).then((c) => {
         navigate(['workspaces', ns, wsid, 'data', 'cohorts', c.id, 'actions']);
       }, (error) => {
-        if (error.status === 400) {
-          this.setState({saving: false, showConflictError: true});
-        } else {
-          this.setState({saving: false, saveError: true});
-        }
+        console.error(error);
+        this.setState({saving: false, saveError: true});
       });
     }
 
@@ -263,7 +260,7 @@ export const ListOverview = withCurrentWorkspace()(
       const {ns, wsid} = urlParamsStore.getValue();
       const {cohort} = this.state;
       cohortsApi().deleteCohort(ns, wsid, cohort.id).then(() => {
-        navigate(['workspaces', ns, wsid, 'data', 'cohorts']);
+        navigate(['workspaces', ns, wsid, 'data']);
       }, (error) => {
         console.log(error);
       });
@@ -302,17 +299,27 @@ export const ListOverview = withCurrentWorkspace()(
       this.setState({stackChart: !stackChart});
     }
 
+    openSaveModal() {
+      this.setState({saveModalOpen: true});
+      const {ns, wsid} = urlParamsStore.getValue();
+      cohortsApi().getCohortsInWorkspace(ns, wsid).then(response => {
+        this.setState({existingCohorts: response.items.map(cohort => cohort.name)});
+      }, (error) => console.error(error));
+    }
+
     render() {
-      const {cohort, chartData, deleting, apiError, loading, saveModalOpen, name, description,
-        nameTouched, saving, saveError, stackChart, total} = this.state;
+      const {apiError, cohort, chartData, deleting, description, existingCohorts, loading, name, nameTouched, saveModalOpen, saveError,
+        saving, stackChart, total} = this.state;
       const disableIcon = loading || !cohort ;
       const disableSave = loading || saving || this.definitionErrors || !total;
-      const invalid = nameTouched && !name;
+      const invalid = nameTouched && (!name || !name.trim());
+      const nameConflict = !!name && existingCohorts.includes(name.trim());
+      const saveDisabled = invalid || !name || nameConflict || saving;
       const showTotal = total !== undefined && total !== null;
       const items = [
         {label: 'Save', command: () => this.saveCohort(),
           disabled: cohort && cohort.criteria === this.criteria},
-        {label: 'Save as', command: () => this.setState({saveModalOpen: true})},
+        {label: 'Save as', command: () => this.openSaveModal()},
       ];
       return <React.Fragment>
         <div>
@@ -325,7 +332,7 @@ export const ListOverview = withCurrentWorkspace()(
                 </Button>
               </React.Fragment>
               : <Button type='primary'
-                onClick={() => this.setState({saveModalOpen: true})}
+                onClick={() => this.openSaveModal()}
                 style={styles.saveButton}
                 disabled={disableSave}>Create Cohort</Button>}
               <TooltipTrigger content={<div>Export to notebook</div>}>
@@ -405,16 +412,16 @@ export const ListOverview = withCurrentWorkspace()(
               Data cannot be saved. Please try again.
             </div>}
             {invalid && <div style={styles.invalid}>Cohort name is required</div>}
+            {nameConflict && <div style={styles.invalid}>A cohort with this name already exists. Please choose a different name.</div>}
             <TextInput style={{marginBottom: '0.5rem'}} value={name} placeholder='COHORT NAME'
-              onChange={(v) => this.setState({name: v, nameTouched: true})}
-              disabled={saving} />
+              onChange={(v) => this.setState({name: v, nameTouched: true})} disabled={saving} />
             <TextArea value={description} placeholder='DESCRIPTION' disabled={saving}
               onChange={(v) => this.setState({description: v})}/>
           </ModalBody>
           <ModalFooter>
             <Button style={{color: colors.primary}} type='link' onClick={() => this.cancelSave()}
               disabled={saving}>Cancel</Button>
-            <Button type='primary' disabled={!name || saving} onClick={() => this.submit()}>
+            <Button type='primary' disabled={saveDisabled} onClick={() => this.submit()}>
               {saving && <Spinner style={{marginRight: '0.25rem'}} size={18} />}
                Save
             </Button>
