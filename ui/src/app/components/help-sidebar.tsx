@@ -1,7 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
 import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
-import {faThunderstorm} from '@fortawesome/pro-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -16,6 +15,9 @@ import {highlightSearchTerm, reactStyles, ReactWrapperBase, withUserProfile} fro
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {ParticipantCohortStatus} from 'generated/fetch';
 
+const proIcons = {
+  thunderstorm: '/assets/icons/thunderstorm-solid.svg'
+};
 const sidebarContent = require('assets/json/help-sidebar.json');
 
 const styles = reactStyles({
@@ -142,11 +144,11 @@ const icons = [{
   style: {fontSize: '22px'},
   tooltip: 'Help Tips',
 }, {
-  id: 'cloud',
+  id: 'thunderstorm',
   disabled: true,
-  faIcon: faThunderstorm,
+  faIcon: null,
   page: null,
-  style: {fontSize: '22px', marginTop: '0.25rem', opacity: 0.5},
+  style: {height: '26px', width: '26px', marginTop: '0.25rem', opacity: 0.5},
   tooltip: 'Compute Configuration',
 }, {
   id: 'annotations',
@@ -287,11 +289,10 @@ export const HelpSidebar = withUserProfile()(
               <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
                    onMouseOver={() => this.setState({tooltipId: i})}
                    onMouseOut={() => this.setState({tooltipId: undefined})}>
-                <FontAwesomeIcon icon={icon.faIcon} style={icon.style} onClick={() => {
-                  if (!icon.disabled) {
-                    this.onIconClick(icon.id);
-                  }
-                }} />
+                {icon.faIcon === null
+                  ? <img src={proIcons[icon.id]} style={icon.style} />
+                  : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} onClick={() => this.onIconClick(icon.id)} />
+                }
               </div>
             </TooltipTrigger>
           </div>)}
