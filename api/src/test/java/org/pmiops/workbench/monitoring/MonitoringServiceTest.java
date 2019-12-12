@@ -85,7 +85,7 @@ public class MonitoringServiceTest {
   @Test
   public void testRecordValue() {
     long value = 16L;
-    monitoringService.recordValue(MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT, value);
+    monitoringService.recordValues(MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT, value);
 
     verify(mockInitService).createAndRegister(any(StackdriverStatsConfiguration.class));
     verify(mockStatsRecorder).newMeasureMap();
@@ -102,7 +102,7 @@ public class MonitoringServiceTest {
     signalToValueBuilder.put(MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT, 2L);
     signalToValueBuilder.put(MonitoringViews.DEBUG_RANDOM_DOUBLE, 3.14);
 
-    monitoringService.recordValue(signalToValueBuilder.build());
+    monitoringService.recordValues(signalToValueBuilder.build());
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap, times(2)).put(any(MeasureLong.class), anyLong());
     verify(mockMeasureMap, times(1))
@@ -112,7 +112,7 @@ public class MonitoringServiceTest {
 
   @Test
   public void testRecordValue_noOpOnEmptyMap() {
-    monitoringService.recordValue(Collections.emptyMap());
+    monitoringService.recordValues(Collections.emptyMap());
     verify(mockInitService).createAndRegister(any(StackdriverStatsConfiguration.class));
     verifyZeroInteractions(mockStatsRecorder);
     verifyZeroInteractions(mockMeasureMap);

@@ -11,10 +11,10 @@ public interface MonitoringService {
    * @param viewProperties
    */
   default void recordIncrement(OpenCensusStatsViewInfo viewProperties) {
-    recordValue(viewProperties, 1);
+    recordValues(viewProperties, 1);
   }
 
-  void recordValue(OpenCensusStatsViewInfo viewProperties, Number value);
+  void recordValues(OpenCensusStatsViewInfo viewProperties, Number value);
 
-  void recordValue(Map<OpenCensusStatsViewInfo, Number> enumToValue);
+  void recordValues(Map<OpenCensusStatsViewInfo, Number> enumToValue);
 }

@@ -1,5 +1,6 @@
 package org.pmiops.workbench.monitoring;
 
+import com.google.common.collect.ImmutableMap;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
@@ -7,6 +8,7 @@ import io.opencensus.stats.MeasureMap;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.stats.ViewManager;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,7 +69,7 @@ public class MonitoringServiceOpenCensusImpl implements MonitoringService {
   }
 
   @Override
-  public void recordValue(OpenCensusStatsViewInfo viewProperties, Number value) {
+  public void recordValues(OpenCensusStatsViewInfo viewProperties, Number value) {
     try {
       initStatsConfigurationIdempotent();
       if (value == null) {
@@ -99,7 +101,7 @@ public class MonitoringServiceOpenCensusImpl implements MonitoringService {
    * @param enumToValue
    */
   @Override
-  public void recordValue(Map<OpenCensusStatsViewInfo, Number> enumToValue) {
+  public void recordValues(Map<OpenCensusStatsViewInfo, Number> enumToValue) {
     try {
       initStatsConfigurationIdempotent();
       if (enumToValue.isEmpty()) {

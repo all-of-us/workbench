@@ -88,8 +88,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
   /** Makes a configurable number of project creation attempts. */
   public void bufferBillingProjects() {
-
-    updateBillingProjectBufferMetrics();
     int creationAttempts = this.workbenchConfigProvider.get().billing.bufferRefillProjectsPerTask;
     for (int i = 0; i < creationAttempts; i++) {
       bufferBillingProject();
@@ -125,13 +123,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
       signalToValueBuilder.put(metricView, value);
     }
     return signalToValueBuilder.build();
-  }
-
-  // TODO(jaycarlton): Move most (all) of this to its own cron method on a controller dedicated to
-  // polling gauge metric values.
-  private void updateBillingProjectBufferMetrics() {
-
-    monitoringService.recordValue(signalToValueBuilder.build());
   }
 
   /**

@@ -140,7 +140,7 @@ public class BillingProjectBufferServiceTest {
   @Test
   public void sendsSignalWhenBufferingProjects() {
     billingProjectBufferService.bufferBillingProjects();
-    verify(monitoringService).recordValue(anyMap());
+    verify(monitoringService).recordValues(anyMap());
   }
 
   @Test
