@@ -140,6 +140,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
@@ -255,6 +256,7 @@ public class WorkspacesControllerTest {
     UserService.class,
     UserRecentResourceService.class,
     ConceptService.class,
+    MonitoringService.class,
     WorkspaceAuditor.class
   })
   static class Configuration {
@@ -1717,7 +1719,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void testClonePermissionDenied() throws Exception {
+  public void testClonePermissionDenied() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -1743,7 +1745,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = FailedPreconditionException.class)
-  public void testCloneWithMassiveNotebook() throws Exception {
+  public void testCloneWithMassiveNotebook() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
@@ -1773,7 +1775,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspace() throws Exception {
+  public void testShareWorkspace() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser readerUser = createAndSaveUser("readerfriend@gmail.com", 125L);
@@ -1812,7 +1814,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspaceAddBillingProjectUser() throws Exception {
+  public void testShareWorkspaceAddBillingProjectUser() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
@@ -1840,7 +1842,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspaceRemoveBillingProjectUser() throws Exception {
+  public void testShareWorkspaceRemoveBillingProjectUser() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser ownerUser = createAndSaveUser("ownerfriend@gmail.com", 125L);
@@ -1890,7 +1892,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testShareWorkspaceNoRoleFailure() throws Exception {
+  public void testShareWorkspaceNoRoleFailure() {
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
 
     Workspace workspace = createWorkspace();
@@ -1916,7 +1918,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testUnshareWorkspace() throws Exception {
+  public void testUnshareWorkspace() {
     stubFcGetGroup();
     DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
     DbUser readerUser = createAndSaveUser("readerfriend@gmail.com", 125L);
@@ -1995,7 +1997,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testStaleShareWorkspace() throws Exception {
+  public void testStaleShareWorkspace() {
     stubFcGetGroup();
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
@@ -2026,7 +2028,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testUnableToShareWithNonExistentUser() throws Exception {
+  public void testUnableToShareWithNonExistentUser() {
     Workspace workspace = createWorkspace();
     workspacesController.createWorkspace(workspace);
     ShareWorkspaceRequest shareWorkspaceRequest = new ShareWorkspaceRequest();
@@ -2039,7 +2041,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testNotebookFileList() throws Exception {
+  public void testNotebookFileList() {
     when(fireCloudService.getWorkspace("project", "workspace"))
         .thenReturn(
             new FirecloudWorkspaceResponse()
@@ -2068,7 +2070,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testNotebookFileListOmitsExtraDirectories() throws Exception {
+  public void testNotebookFileListOmitsExtraDirectories() {
     when(fireCloudService.getWorkspace("project", "workspace"))
         .thenReturn(
             new FirecloudWorkspaceResponse()
@@ -2089,7 +2091,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testNotebookFileListNotFound() throws Exception {
+  public void testNotebookFileListNotFound() {
     when(fireCloudService.getWorkspace("mockProject", "mockWorkspace"))
         .thenThrow(new NotFoundException());
     try {
@@ -2101,7 +2103,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testEmptyFireCloudWorkspaces() throws Exception {
+  public void testEmptyFireCloudWorkspaces() {
     when(fireCloudService.getWorkspaces(any()))
         .thenReturn(new ArrayList<FirecloudWorkspaceResponse>());
     try {
@@ -2114,7 +2116,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testRenameNotebookInWorkspace() throws Exception {
+  public void testRenameNotebookInWorkspace() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2137,7 +2139,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testRenameNotebookWoExtension() throws Exception {
+  public void testRenameNotebookWoExtension() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2314,7 +2316,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testCloneNotebook() throws Exception {
+  public void testCloneNotebook() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");
@@ -2330,7 +2332,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void testDeleteNotebook() throws Exception {
+  public void testDeleteNotebook() {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     String nb1 = NotebooksService.withNotebookExtension("notebooks/nb1");

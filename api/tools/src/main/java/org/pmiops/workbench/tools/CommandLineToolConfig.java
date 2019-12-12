@@ -16,6 +16,8 @@ import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.monitoring.MonitoringServiceOpenCensusImpl;
+import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -41,6 +43,8 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 @Import({
   RetryConfig.class,
   CommonConfig.class,
+  MonitoringServiceOpenCensusImpl.class,
+  MonitoringSpringConfiguration.class,
   NotebooksServiceImpl.class,
   UserRecentResourceServiceImpl.class
 })
@@ -60,6 +64,8 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
     includeFilters = {
       @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = ServiceAccounts.class),
     })
+// Pull in the MonitoringService and its dependencies
+@ComponentScan("org.pmiops.workbench.monitoring")
 public class CommandLineToolConfig {
 
   /**
