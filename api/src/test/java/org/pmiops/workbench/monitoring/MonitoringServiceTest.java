@@ -88,7 +88,6 @@ public class MonitoringServiceTest {
     monitoringService.recordValue(MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT, value);
 
     verify(mockInitService).createAndRegister(any(StackdriverStatsConfiguration.class));
-    verify(mockViewManager, times(MonitoringViews.values().length)).registerView(any(View.class));
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap)
         .put(MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT.getMeasureLong(), value);
@@ -104,7 +103,6 @@ public class MonitoringServiceTest {
     signalToValueBuilder.put(MonitoringViews.DEBUG_RANDOM_DOUBLE, 3.14);
 
     monitoringService.recordValue(signalToValueBuilder.build());
-    verify(mockInitService).createAndRegister(any(StackdriverStatsConfiguration.class));
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap, times(2)).put(any(MeasureLong.class), anyLong());
     verify(mockMeasureMap, times(1))
