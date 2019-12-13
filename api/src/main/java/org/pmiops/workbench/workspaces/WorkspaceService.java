@@ -13,7 +13,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
-import org.pmiops.workbench.monitoring.GaugeDataCollector;
 
 public interface WorkspaceService {
 

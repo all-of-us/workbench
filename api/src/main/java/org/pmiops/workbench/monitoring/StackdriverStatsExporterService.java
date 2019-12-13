@@ -34,10 +34,11 @@ public class StackdriverStatsExporterService {
   public void createAndRegister() {
     if (!initialized) {
       try {
-        StackdriverStatsExporter.createAndRegister(StackdriverStatsConfiguration.builder()
-            .setMetricNamePrefix(buildMetricNamePrefix())
-            .setProjectId(workbenchConfigProvider.get().server.projectId)
-            .build());
+        StackdriverStatsExporter.createAndRegister(
+            StackdriverStatsConfiguration.builder()
+                .setMetricNamePrefix(buildMetricNamePrefix())
+                .setProjectId(workbenchConfigProvider.get().server.projectId)
+                .build());
         initialized = true;
       } catch (IOException e) {
         logger.log(Level.WARNING, "Failed to initialize global StackdriverStatsExporter.", e);
@@ -51,5 +52,4 @@ public class StackdriverStatsExporterService {
         STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME,
         workbenchConfigProvider.get().server.shortName.toLowerCase());
   }
-
 }

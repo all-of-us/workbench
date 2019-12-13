@@ -15,8 +15,7 @@ public class GaugeRecorderService {
   private final MonitoringService monitoringService;
 
   public GaugeRecorderService(
-      List<GaugeDataCollector> gaugeDataCollectors,
-      MonitoringService monitoringService) {
+      List<GaugeDataCollector> gaugeDataCollectors, MonitoringService monitoringService) {
     this.gaugeDataCollectors = gaugeDataCollectors;
     this.monitoringService = monitoringService;
   }
@@ -36,11 +35,7 @@ public class GaugeRecorderService {
     StringBuilder textBuilder = new StringBuilder();
     viewToValue.forEach(
         (view, value) ->
-            textBuilder
-                .append(view.getName())
-                .append(" = ")
-                .append(value.toString())
-                .append("\n"));
+            textBuilder.append(view.getName()).append(" = ").append(value.toString()).append("\n"));
     logger.info(textBuilder.toString());
   }
 }

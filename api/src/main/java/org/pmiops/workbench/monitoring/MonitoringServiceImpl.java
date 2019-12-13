@@ -9,9 +9,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.monitoring.views.MonitoringViews;
 import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +17,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MonitoringServiceImpl implements MonitoringService {
-  private static final Logger logger =
-      Logger.getLogger(MonitoringServiceImpl.class.getName());
+  private static final Logger logger = Logger.getLogger(MonitoringServiceImpl.class.getName());
   private boolean viewsAreRegistered = false;
   private ViewManager viewManager;
   private StatsRecorder statsRecorder;
@@ -68,8 +65,7 @@ public class MonitoringServiceImpl implements MonitoringService {
       } else {
         logger.log(
             Level.WARNING,
-            String.format(
-                "Unrecognized measure class %s", viewInfo.getMeasureClass().getName()));
+            String.format("Unrecognized measure class %s", viewInfo.getMeasureClass().getName()));
       }
     } catch (RuntimeException e) {
       logAndSwallow(e);
