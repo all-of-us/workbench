@@ -1,9 +1,11 @@
 package org.pmiops.workbench.monitoring;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 import org.springframework.stereotype.Service;
 
@@ -32,10 +34,9 @@ public class GaugeRecorderService {
   }
 
   private void logValues(Map<OpenCensusStatsViewInfo, Number> viewToValue) {
-    StringBuilder textBuilder = new StringBuilder();
-    viewToValue.forEach(
-        (view, value) ->
-            textBuilder.append(view.getName()).append(" = ").append(value.toString()).append("\n"));
-    logger.info(textBuilder.toString());
+    logger.info(viewToValue.entrySet().stream()
+        .map(entry -> String.format("%s = %s", entry.getKey().getName(), entry.getValue().toString()))
+        .sorted()
+        .collect(Collectors.joining("\n")));
   }
 }
