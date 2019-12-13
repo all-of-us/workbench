@@ -21,6 +21,7 @@ cron-emulator-err.log
 /api/src/main/webapp/WEB-INF/sa-key.json
 /api/src/main/webapp/WEB-INF/gsuite-admin-sa.json
 /api/src/generated
+/api/src/main/generated
 /api/tools/build/*
 /api/bin
 /common-api/.swagger-codegen/*

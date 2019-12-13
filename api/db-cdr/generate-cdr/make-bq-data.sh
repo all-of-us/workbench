@@ -87,13 +87,33 @@ do
     bq --quiet --project=$OUTPUT_PROJECT mk --schema=$schema_path/$t.json $OUTPUT_DATASET.$t
 done
 
-# Load tables from csvs we have. This is not cdr data but meta data needed for workbench app
-load_tables=(domain_info survey_module)
-csv_path=generate-cdr/csv
-for t in "${load_tables[@]}"
-do
-    bq --project=$OUTPUT_PROJECT load --quote='"' --source_format=CSV --skip_leading_rows=1 --max_bad_records=10 $OUTPUT_DATASET.$t $csv_path/$t.csv
-done
+# Populate domain_info
+###############
+# domain_info #
+###############
+echo "Inserting domain_info"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\`
+(concept_id,domain,domain_id,name,description,all_concept_count,standard_concept_count,participant_count)
+VALUES
+(19,0,'Condition','Conditions','Conditions are records of a Person suggesting the presence of a disease or medical condition stated as a diagnosis, a sign or a symptom, which is either observed by a Provider or reported by the patient.',0,0,0),
+(13,3,'Drug','Drug Exposures','Drugs biochemical substance formulated in such a way that when administered to a Person it will exert a certain physiological or biochemical effect. The drug exposure domain concepts capture records about the utilization of a Drug when ingested or otherwise introduced into the body.',0,0,0),
+(21,4,'Measurement','Measurements','Measurement',0,0,0),
+(10,6,'Procedure','Procedures','Procedure',0,0,0),
+(27,5,'Observation','Observations','Observation',0,0,0)"
+
+# Populate survey_module
+#################
+# survey_module #
+#################
+echo "Inserting survey_module"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
+(concept_id,name,description,question_count,participant_count,order_number)
+VALUES
+(1585855,'Lifestyle','Survey includes information on participant smoking, alcohol and recreational drug use.',0,0,3),
+(1585710,'Overall Health','Survey provides information about how participants report levels of individual health.',0,0,2),
+(1586134,'The Basics','Survey includes participant demographic information.',0,0,1)"
 
 # Populate some tables from cdr data
 ###############
