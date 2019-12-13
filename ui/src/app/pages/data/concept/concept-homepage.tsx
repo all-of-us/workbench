@@ -2,8 +2,7 @@ import {Component} from '@angular/core';
 import * as React from 'react';
 
 import {AlertClose, AlertDanger} from 'app/components/alert';
-import {Clickable} from 'app/components/buttons';
-import {SlidingFabReact} from 'app/components/buttons';
+import {Clickable, SlidingFabReact} from 'app/components/buttons';
 import {DomainCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -30,7 +29,7 @@ import {
   SurveyModule,
   SurveyQuestionsResponse,
 } from 'generated/fetch';
-import { Key } from 'ts-key-enum';
+import {Key} from 'ts-key-enum';
 import {SurveyDetails} from './survey-details';
 
 const styles = reactStyles({
@@ -158,6 +157,32 @@ const physicalMeasurementsStub = {
   standardConceptCount: 0
 };
 
+// Stub used to display placeholder tabs in concept search
+const conceptCacheStub = [
+  {
+    domain: Domain.SURVEY,
+    items: []
+  },
+  {
+    domain: Domain.DEATH, // TODO switch to PM after fix enum issue
+    items: []
+  }
+];
+
+// Stub used to display placeholder tabs in concept search
+const domainCountStub = [
+  {
+    domain: Domain.SURVEY,
+    name: 'Surveys',
+    conceptCount: 0
+  },
+  {
+    domain: Domain.DEATH, // TODO switch to PM after fix enum issue
+    name: 'Physical Measurements',
+    conceptCount: 0
+  }
+];
+
 interface Props {
   workspace: WorkspaceData;
 }
@@ -255,19 +280,21 @@ export const ConceptHomepage = withCurrentWorkspace()(
         const [conceptDomainInfo, surveysInfo] = await Promise.all([
           conceptsApi().getDomainInfo(namespace, id),
           conceptsApi().getSurveyInfo(namespace, id)]);
-        const conceptsCache: ConceptCacheItem[] = conceptDomainInfo.items.map((domain) => {
-          return {
+        const conceptsCache: ConceptCacheItem[] = [
+          ...conceptDomainInfo.items.map((domain) => ({
             domain: domain.domain,
             items: []
-          };
-        });
-        const conceptDomainCounts: DomainCount[] = conceptDomainInfo.items.map((domain) => {
-          return {
+          })),
+          ...conceptCacheStub
+        ];
+        const conceptDomainCounts: DomainCount[] = [
+          ...conceptDomainInfo.items.map((domain) => ({
             domain: domain.domain,
             name: domain.name,
             conceptCount: 0
-          };
-        });
+          })),
+          ...domainCountStub
+        ];
         this.setState({
           conceptsCache: conceptsCache,
           conceptDomainList: conceptDomainInfo.items,
@@ -332,6 +359,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
       const standardConceptFilter = standardConceptsOnly ?
         StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
 
+      completedDomainSearches.push(Domain.SURVEY);
       conceptsCache.forEach(async(cacheItem) => {
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
         const resp = await conceptsApi().searchConcepts(namespace, id, {
@@ -347,7 +375,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         if (activeTabSearch) {
           this.setState({
             searchLoading: false,
-            conceptDomainCounts: resp.domainCounts,
+            conceptDomainCounts: [...resp.domainCounts, ...domainCountStub],
             selectedDomain: resp.domainCounts
               .find(domainCount => domainCount.domain === cacheItem.domain)});
           this.setConceptsAndVocabularies();
