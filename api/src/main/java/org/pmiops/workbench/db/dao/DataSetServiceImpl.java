@@ -43,8 +43,10 @@ import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
+import org.pmiops.workbench.monitoring.views.MonitoringViews;
 import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.Repository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -62,7 +64,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
-    return Collections.emptyMap();
+    return ImmutableMap.of(MonitoringViews.DATASET_COUNT, dataSetDao.count());
   }
 
   /*

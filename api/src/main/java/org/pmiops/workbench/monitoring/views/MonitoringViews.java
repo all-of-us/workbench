@@ -29,7 +29,9 @@ public enum MonitoringViews implements OpenCensusStatsViewInfo {
   NOTEBOOK_SAVE("notebook_save", "Save (or create) a notebook"),
   NOTEBOOK_CLONE("notebook_clone", "Clone (duplicate) a notebook"),
   NOTEBOOK_DELETE("notebook_delete", "Delete a notebook"),
-  WORKSPACE_ACTIVE_COUNT("workspace_active_count", "Count of active workspaces");
+  WORKSPACE_ACTIVE_COUNT("workspace_total_count", "Count of all workspaces (including inactive)"),
+  DATASET_COUNT("dataset_count", "Count of all datasets in existence"),
+  COHORT_COUNT("cohort_count", "Count of all cohorts in existence");
 
   private final String name;
   private final String description;

@@ -15,7 +15,8 @@ public class GaugeRecorderService {
   private final MonitoringService monitoringService;
 
   public GaugeRecorderService(
-      List<GaugeDataCollector> gaugeDataCollectors, MonitoringService monitoringService) {
+      List<GaugeDataCollector> gaugeDataCollectors,
+      MonitoringService monitoringService) {
     this.gaugeDataCollectors = gaugeDataCollectors;
     this.monitoringService = monitoringService;
   }
