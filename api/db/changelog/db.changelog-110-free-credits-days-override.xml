@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="thibault" id="db.changelog-110-free-credits-days-override">
+    <renameColumn
+      newColumnName="free_tier_credits_limit_dollars_override"
+      oldColumnName="free_tier_credits_limit_override"
+      columnDataType="double"
+      tableName="user"/>
+    <addColumn tableName="user">
+      <column name="free_tier_credits_limit_days_override" type="tinyint">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+
+  </changeSet>
+</databaseChangeLog>

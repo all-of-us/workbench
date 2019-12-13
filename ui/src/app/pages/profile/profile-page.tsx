@@ -295,7 +295,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             </FlexColumn>
             <FlexColumn style={{alignItems: 'flex-end', marginLeft: '1.0rem'}}>
               {usdElement(profile.freeTierUsage)}
-              {usdElement(profile.freeTierQuota - profile.freeTierUsage)}
+              {usdElement(profile.freeTierDollarQuota - profile.freeTierUsage)}
             </FlexColumn>
           </FlexRow>}
           <ProfileRegistrationStepStatus
