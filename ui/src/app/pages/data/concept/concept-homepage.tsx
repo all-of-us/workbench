@@ -551,7 +551,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
               this.renderConcepts() : !browsingSurvey &&
                 <div>
                   <div style={styles.sectionHeader}>
-                    EHR Domain
+                    Domains
                   </div>
                   <div style={styles.cardList}>
                   {conceptDomainList.map((domain, i) => {
