@@ -114,7 +114,9 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
 const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: Function}> =
     ({survey, browseSurvey}) => {
       return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
-        <div style={styles.domainBoxHeader} data-test-id='survey-box-name'>{survey.name}</div>
+        <Clickable style={styles.domainBoxHeader}
+          onClick={browseSurvey}
+          data-test-id='survey-box-name'>{survey.name}</Clickable>
         <div style={styles.conceptText}>
           <span style={{fontSize: 30}}>{survey.questionCount}</span> survey questions with
           <div><b>{survey.participantCount}</b> participants</div>
@@ -122,10 +124,39 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
         <div style={{...styles.conceptText, height: '3.5rem'}}>
           {survey.description}
         </div>
-        <Clickable style={{...styles.domainBoxLink}} onClick={browseSurvey}>Browse
-          Survey</Clickable>
+        <Clickable style={{...styles.domainBoxLink}} onClick={browseSurvey}>Browse Survey</Clickable>
       </DomainCardBase>;
     };
+
+// Placeholder version of Physical Measurements card. TODO update styles when api call is ready
+const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: DomainInfo, browsePhysicalMeasurements: Function}> =
+    ({physicalMeasurement, browsePhysicalMeasurements}) => {
+      return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem', opacity: 0.4, cursor: 'not-allowed'}}>
+        <Clickable style={{...styles.domainBoxHeader, cursor: 'not-allowed'}}
+          onClick={browsePhysicalMeasurements}
+          data-test-id='pm-box-name'>{physicalMeasurement.name}</Clickable>
+        <div style={styles.conceptText}>
+          <span style={{fontSize: 30}}>{physicalMeasurement.allConceptCount}</span> physical measurements.
+          <div><b>{physicalMeasurement.participantCount}</b> participants in this domain</div>
+        </div>
+        <div style={{...styles.conceptText, height: 'auto'}}>
+          {physicalMeasurement.description}
+        </div>
+        <Clickable style={{...styles.domainBoxLink, cursor: 'not-allowed'}} onClick={browsePhysicalMeasurements}>
+          Browse Physical Measurements
+        </Clickable>
+      </DomainCardBase>;
+    };
+
+// Stub used to mock Physical Measurements data that will be returned from api call. TODO remove when api call is ready
+const physicalMeasurementsStub = {
+  domain: Domain.MEASUREMENT,
+  name: 'Physical Measurements',
+  description: 'Participants have the option to provide a standard set of physical measurements as part of the enrollment process (“program physical measurements”).',
+  allConceptCount: 0,
+  participantCount: 0,
+  standardConceptCount: 0
+};
 
 interface Props {
   workspace: WorkspaceData;
@@ -145,6 +176,8 @@ interface State { // Browse survey
   conceptDomainCounts: Array<DomainCount>;
   // Array of domains and their metadata
   conceptDomainList: Array<DomainInfo>;
+  // Array of Physical Measurements
+  conceptPhysicalMeasurementsList: Array<any>;
   conceptsSavedText: string;
   // Array of surveys
   conceptSurveysList: Array<SurveyModule>;
@@ -188,6 +221,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         surveyAddModalOpen: false,
         conceptDomainCounts: [],
         conceptDomainList: [],
+        conceptPhysicalMeasurementsList: [],
         concepts: [],
         conceptsCache: [],
         conceptsSavedText: '',
@@ -240,6 +274,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
           conceptDomainCounts: conceptDomainCounts,
           conceptSurveysList: surveysInfo.items,
           selectedDomain: conceptDomainCounts[0],
+          conceptPhysicalMeasurementsList: [physicalMeasurementsStub]
         });
       } catch (e) {
         console.error(e);
@@ -460,7 +495,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     render() {
-      const {loadingDomains, browsingSurvey, conceptDomainList, conceptSurveysList,
+      const {loadingDomains, browsingSurvey, conceptDomainList, conceptPhysicalMeasurementsList, conceptSurveysList,
         standardConceptsOnly, showSearchError, searching, selectedDomain, conceptAddModalOpen,
         conceptsToAdd, currentSearchString, conceptsSavedText, selectedSurvey, surveyAddModalOpen,
         selectedSurveyQuestions} =
@@ -514,31 +549,40 @@ export const ConceptHomepage = withCurrentWorkspace()(
           {!browsingSurvey && loadingDomains ? <div style={{position: 'relative', minHeight: '10rem'}}><SpinnerOverlay/></div> :
             searching ?
               this.renderConcepts() : !browsingSurvey &&
-                  <div>
-                    <div style={styles.sectionHeader}>
-                      EHR Domain
-                    </div>
-                    <div style={styles.cardList}>
-                    {conceptDomainList.map((domain, i) => {
-                      return <DomainCard conceptDomainInfo={domain}
-                                           standardConceptsOnly={standardConceptsOnly}
-                                           browseInDomain={() => this.browseDomain(domain)}
-                                           key={i} data-test-id='domain-box'/>;
-                    })}
-                    </div>
-                    <div style={styles.sectionHeader}>
-                      Survey Questions
-                    </div>
-                    <div style={styles.cardList}>
-                      {conceptSurveysList.map((surveys) => {
-                        return <SurveyCard survey={surveys} key={surveys.orderNumber}
-                                           browseSurvey={() => {this.setState({
-                                             browsingSurvey: true,
-                                             selectedSurvey: surveys.name
-                                           }); }}/>;
-                      })}
-                     </div>
+                <div>
+                  <div style={styles.sectionHeader}>
+                    EHR Domain
                   </div>
+                  <div style={styles.cardList}>
+                  {conceptDomainList.map((domain, i) => {
+                    return <DomainCard conceptDomainInfo={domain}
+                                         standardConceptsOnly={standardConceptsOnly}
+                                         browseInDomain={() => this.browseDomain(domain)}
+                                         key={i} data-test-id='domain-box'/>;
+                  })}
+                  </div>
+                  <div style={styles.sectionHeader}>
+                    Survey Questions
+                  </div>
+                  <div style={styles.cardList}>
+                    {conceptSurveysList.map((surveys) => {
+                      return <SurveyCard survey={surveys} key={surveys.orderNumber}
+                                         browseSurvey={() => {this.setState({
+                                           browsingSurvey: true,
+                                           selectedSurvey: surveys.name
+                                         }); }}/>;
+                    })}
+                   </div>
+                  <div style={styles.sectionHeader}>
+                    Program Physical Measurements
+                  </div>
+                  <div style={styles.cardList}>
+                    {conceptPhysicalMeasurementsList.map((physicalMeasurement, p) => {
+                      return <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement} key={p}
+                                         browsePhysicalMeasurements={() => {}}/>; // TODO replace with actual function when api call ready
+                    })}
+                   </div>
+                </div>
           }
           {conceptAddModalOpen &&
             <ConceptAddModal selectedDomain={selectedDomain}
