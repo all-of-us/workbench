@@ -32,16 +32,13 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import(LiquibaseAutoConfiguration.class)
 public class DataSetServiceTest {
   private static final QueryJobConfiguration QUERY_JOB_CONFIGURATION_1 =
       QueryJobConfiguration.newBuilder(
