@@ -164,7 +164,7 @@ const conceptCacheStub = [
     items: []
   },
   {
-    domain: Domain.DEATH, // TODO switch to PM after fix enum issue
+    domain: Domain.PHYSICALMEASUREMENT,
     items: []
   }
 ];
@@ -177,7 +177,7 @@ const domainCountStub = [
     conceptCount: 0
   },
   {
-    domain: Domain.DEATH, // TODO switch to PM after fix enum issue
+    domain: Domain.PHYSICALMEASUREMENT,
     name: 'Physical Measurements',
     conceptCount: 0
   }
@@ -351,16 +351,16 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     async searchConcepts() {
-      const {standardConceptsOnly, currentSearchString, conceptsCache,
-        selectedDomain, completedDomainSearches} = this.state;
+      const {standardConceptsOnly, currentSearchString, conceptsCache, selectedDomain} = this.state;
       const {namespace, id} = this.props.workspace;
       this.setState({concepts: [], searchLoading: true, searching: true, conceptsToAdd: [],
         selectedConceptDomainMap: new Map<string, number>(), completedDomainSearches: []});
       const standardConceptFilter = standardConceptsOnly ?
         StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
-
-      completedDomainSearches.push(Domain.SURVEY);
-      conceptsCache.forEach(async(cacheItem) => {
+      // TODO switch to empty array when we start actually searching surveys and PM
+      const completedDomainSearches = [Domain.SURVEY, Domain.PHYSICALMEASUREMENT];
+      // TODO remove filter below when we start actually searching surveys and PM
+      conceptsCache.filter(item => ![Domain.SURVEY, Domain.PHYSICALMEASUREMENT].includes(item.domain)).forEach(async(cacheItem) => {
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
         const resp = await conceptsApi().searchConcepts(namespace, id, {
           query: currentSearchString,
