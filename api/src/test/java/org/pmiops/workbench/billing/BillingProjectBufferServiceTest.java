@@ -138,12 +138,6 @@ public class BillingProjectBufferServiceTest {
   }
 
   @Test
-  public void sendsSignalWhenBufferingProjects() {
-    billingProjectBufferService.bufferBillingProjects();
-    verify(monitoringService).recordValues(anyMap());
-  }
-
-  @Test
   public void canBufferMultipleProjectsPerTask() {
     workbenchConfig.billing.bufferRefillProjectsPerTask = 2;
     billingProjectBufferService.bufferBillingProjects();
