@@ -74,6 +74,7 @@ public class WorkbenchConfig {
     // usage tracking cron endpoint.
     public String exportBigQueryTable;
     // DEPRECATED.  Renamed to defaultFreeCreditsDollarLimit.
+    // Remove after https://github.com/all-of-us/workbench/pull/2920 reaches production.
     @Deprecated public Double defaultFreeCreditsLimit;
     // The default dollar limit to apply to free-credit usage in this environment.
     public Double defaultFreeCreditsDollarLimit;
