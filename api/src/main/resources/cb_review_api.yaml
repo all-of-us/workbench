@@ -738,7 +738,7 @@ definitions:
         description: The Value of the annotation if the AnnotationType is DATE
       annotationValueBoolean:
         type: boolean
-        default: false
+        default: null
         description: The Value of the annotation if the AnnotationType is BOOLEAN
       annotationValueInteger:
         type: integer
