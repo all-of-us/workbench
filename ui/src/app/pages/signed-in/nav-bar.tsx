@@ -2,7 +2,7 @@ import {Component, Input} from '@angular/core';
 import {Breadcrumb} from 'app/components/breadcrumb';
 import {ClrIcon} from 'app/components/icons';
 import {SideNav} from 'app/components/side-nav';
-import {StatusAlertBanner} from "app/components/status-alert-banner";
+import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import * as React from 'react';

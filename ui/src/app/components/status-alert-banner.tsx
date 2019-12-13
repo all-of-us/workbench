@@ -1,9 +1,10 @@
-import * as React from "react";
-import colors, {colorWithWhiteness} from "app/styles/colors";
-import {statusAlertApi} from "app/services/swagger-fetch-clients";
-import {FlexColumn, FlexRow} from "app/components/flex";
-import {ClrIcon} from "app/components/icons";
-import {Button} from "app/components/buttons";
+import * as React from 'react';
+
+import {Button} from 'app/components/buttons';
+import {FlexColumn, FlexRow} from 'app/components/flex';
+import {ClrIcon} from 'app/components/icons';
+import {statusAlertApi} from 'app/services/swagger-fetch-clients';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {cookiesEnabled} from 'app/utils';
 
 const styles = {
@@ -22,7 +23,7 @@ const styles = {
   }
 };
 
-const cookieKey = "status-alert-banner-dismissed";
+const cookieKey = 'status-alert-banner-dismissed';
 
 export interface State {
   statusAlertId: number;
@@ -41,7 +42,7 @@ export class StatusAlertBanner extends React.Component<{}, State> {
       message: '',
       link: '',
       isVisible: false
-    }
+    };
   }
 
   async componentDidMount() {
@@ -64,10 +65,9 @@ export class StatusAlertBanner extends React.Component<{}, State> {
 
   getStyles(isVisible) {
     if (isVisible) {
-      return {...styles.alertBanner, height: '200px'}
-    }
-    else {
-      return {...styles.alertBanner, height: '0px'}
+      return {...styles.alertBanner, height: '200px'};
+    } else {
+      return {...styles.alertBanner, height: '0px'};
     }
   }
 
@@ -76,20 +76,18 @@ export class StatusAlertBanner extends React.Component<{}, State> {
   }
 
   dismiss() {
-    if(cookiesEnabled()) {
-      localStorage.setItem(cookieKey, `${this.state.statusAlertId}`)
+    if (cookiesEnabled()) {
+      localStorage.setItem(cookieKey, `${this.state.statusAlertId}`);
     }
-    this.setState({isVisible: false})
+    this.setState({isVisible: false});
   }
 
   isVisible() {
-    debugger;
-    if(cookiesEnabled()) {
+    if (cookiesEnabled()) {
       const cookie = localStorage.getItem(cookieKey);
-      return (cookie && cookie !== `${this.state.statusAlertId}`) || !!this.state.message
-    }
-    else {
-      return !!this.state.message
+      return (cookie && cookie !== `${this.state.statusAlertId}`) || !!this.state.message;
+    } else {
+      return !!this.state.message;
     }
   }
 
@@ -131,6 +129,6 @@ export class StatusAlertBanner extends React.Component<{}, State> {
           READ MORE
         </Button>
       }
-    </FlexColumn>
+    </FlexColumn>;
   }
 }
