@@ -53,9 +53,12 @@ export class StatusAlertBanner extends React.Component<{}, State> {
         statusAlertId: statusAlert.statusAlertId,
         title: statusAlert.title,
         message: statusAlert.message,
-        link: statusAlert.link,
+        link: statusAlert.link
+      });
+      // This needs to happen separately so that the other state is already set in isVisible()
+      this.setState({
         isVisible: this.isVisible()
-      })
+      });
     }
   }
 
@@ -73,7 +76,6 @@ export class StatusAlertBanner extends React.Component<{}, State> {
   }
 
   dismiss() {
-    debugger;
     if(cookiesEnabled()) {
       localStorage.setItem(cookieKey, `${this.state.statusAlertId}`)
     }
@@ -83,7 +85,8 @@ export class StatusAlertBanner extends React.Component<{}, State> {
   isVisible() {
     debugger;
     if(cookiesEnabled()) {
-      return localStorage.getItem(cookieKey) !== `${this.state.statusAlertId}` && !!this.state.message
+      const cookie = localStorage.getItem(cookieKey);
+      return (cookie && cookie !== `${this.state.statusAlertId}`) || !!this.state.message
     }
     else {
       return !!this.state.message
