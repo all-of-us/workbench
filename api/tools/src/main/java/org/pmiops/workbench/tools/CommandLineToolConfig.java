@@ -13,12 +13,16 @@ import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
+import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.monitoring.GaugeDataCollector;
+import org.pmiops.workbench.monitoring.GaugeRecorderService;
 import org.pmiops.workbench.monitoring.MonitoringServiceImpl;
 import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
+import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -43,10 +47,13 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 @Import({
   RetryConfig.class,
   CommonConfig.class,
+  DataSetServiceImpl.class,
+  GaugeRecorderService.class,
   MonitoringServiceImpl.class,
   MonitoringSpringConfiguration.class,
   NotebooksServiceImpl.class,
-  UserRecentResourceServiceImpl.class
+  UserRecentResourceServiceImpl.class,
+  WorkspaceServiceImpl.class
 })
 // Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")

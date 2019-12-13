@@ -619,6 +619,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
     long totalWorkspaceCount = workspaceDao.count();
-    return ImmutableMap.of(MonitoringViews.WORKSPACE_ACTIVE_COUNT, totalWorkspaceCount);
+    return ImmutableMap.of(MonitoringViews.WORKSPACE_TOTAL_COUNT, totalWorkspaceCount);
   }
 }
