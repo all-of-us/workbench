@@ -53,7 +53,7 @@ public class FreeTierBillingService {
                     e -> e.getKey().getCreator(), Collectors.summingDouble(Entry::getValue)))
             .entrySet()
             .stream()
-            .filter(entry -> entry.getValue() > getUserFreeTierLimit(entry.getKey()))
+            .filter(entry -> entry.getValue() > getUserFreeTierDollarLimit(entry.getKey()))
             .map(Entry::getKey)
             .collect(Collectors.toSet());
 
@@ -107,11 +107,21 @@ public class FreeTierBillingService {
     return workspaceFreeTierUsageDao.totalCostByUser(user);
   }
 
-  public Double getUserFreeTierLimit(DbUser user) {
-    if (user.getFreeTierCreditsLimitOverride() != null) {
-      return user.getFreeTierCreditsLimitOverride();
+  public Double getUserFreeTierDollarLimit(DbUser user) {
+    final Double override = user.getFreeTierCreditsLimitDollarsOverride();
+    if (override != null) {
+      return override;
     }
 
-    return workbenchConfigProvider.get().billing.defaultFreeCreditsLimit;
+    return workbenchConfigProvider.get().billing.defaultFreeCreditsDollarLimit;
+  }
+
+  public Short getUserFreeTierDaysLimit(DbUser user) {
+    final Short override = user.getFreeTierCreditsLimitDaysOverride();
+    if (override != null) {
+      return override;
+    }
+
+    return workbenchConfigProvider.get().billing.defaultFreeCreditsDaysLimit;
   }
 }

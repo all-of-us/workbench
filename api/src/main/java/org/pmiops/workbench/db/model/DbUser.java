@@ -60,7 +60,8 @@ public class DbUser {
   private String phoneNumber;
   private String currentPosition;
   private String organization;
-  private Double freeTierCreditsLimitOverride = null;
+  private Double freeTierCreditsLimitDollarsOverride = null;
+  private Short freeTierCreditsLimitDaysOverride = null;
   private Timestamp firstSignInTime;
   private Set<Short> authorities = new HashSet<>();
   private Boolean idVerificationIsValid;
@@ -211,13 +212,22 @@ public class DbUser {
     this.organization = organization;
   }
 
-  @Column(name = "free_tier_credits_limit_override")
-  public Double getFreeTierCreditsLimitOverride() {
-    return freeTierCreditsLimitOverride;
+  @Column(name = "free_tier_credits_limit_dollars_override")
+  public Double getFreeTierCreditsLimitDollarsOverride() {
+    return freeTierCreditsLimitDollarsOverride;
   }
 
-  public void setFreeTierCreditsLimitOverride(Double freeTierCreditsLimitOverride) {
-    this.freeTierCreditsLimitOverride = freeTierCreditsLimitOverride;
+  public void setFreeTierCreditsLimitDollarsOverride(Double freeTierCreditsLimitDollarsOverride) {
+    this.freeTierCreditsLimitDollarsOverride = freeTierCreditsLimitDollarsOverride;
+  }
+
+  @Column(name = "free_tier_credits_limit_days_override")
+  public Short getFreeTierCreditsLimitDaysOverride() {
+    return freeTierCreditsLimitDaysOverride;
+  }
+
+  public void setFreeTierCreditsLimitDaysOverride(Short freeTierCreditsLimitDaysOverride) {
+    this.freeTierCreditsLimitDaysOverride = freeTierCreditsLimitDaysOverride;
   }
 
   @Column(name = "first_sign_in_time")
