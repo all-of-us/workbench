@@ -38,14 +38,14 @@ public class MonitoringServiceTest {
   @Mock private MeasureMap mockMeasureMap; // not injected
   // TODO(jaycarlton): figure out why IntelliJ isn't copacetic with this
   // annotation but things still work.
-  @Autowired private StackdriverStatsExporterWrapper mockInitService;
+  @Autowired private StackdriverStatsExporterService mockInitService;
   @Autowired private ViewManager mockViewManager;
   @Autowired private StatsRecorder mockStatsRecorder;
   @Autowired private MonitoringService monitoringService;
 
   @TestConfiguration
-  @Import({MonitoringServiceOpenCensusImpl.class})
-  @MockBean({ViewManager.class, StatsRecorder.class, StackdriverStatsExporterWrapper.class})
+  @Import({MonitoringServiceImpl.class})
+  @MockBean({ViewManager.class, StatsRecorder.class, StackdriverStatsExporterService.class})
   static class Configuration {
     @Bean
     public WorkbenchConfig workbenchConfig() {
@@ -75,7 +75,7 @@ public class MonitoringServiceTest {
   public void testRecordIncrement() {
     monitoringService.recordIncrement(MonitoringViews.NOTEBOOK_SAVE);
 
-    verify(mockInitService).createAndRegister(any(StackdriverStatsConfiguration.class));
+    verify(mockInitService).createAndRegister();
     verify(mockViewManager, times(MonitoringViews.values().length)).registerView(any(View.class));
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap).put(MonitoringViews.NOTEBOOK_SAVE.getMeasureLong(), 1L);
@@ -85,9 +85,9 @@ public class MonitoringServiceTest {
   @Test
   public void testRecordValue() {
     long value = 16L;
-    monitoringService.recordValues(MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT, value);
+    monitoringService.recordValue(MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT, value);
 
-    verify(mockInitService).createAndRegister(any(StackdriverStatsConfiguration.class));
+    verify(mockInitService).createAndRegister();
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap)
         .put(MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT.getMeasureLong(), value);
@@ -113,7 +113,7 @@ public class MonitoringServiceTest {
   @Test
   public void testRecordValue_noOpOnEmptyMap() {
     monitoringService.recordValues(Collections.emptyMap());
-    verify(mockInitService).createAndRegister(any(StackdriverStatsConfiguration.class));
+    verify(mockInitService).createAndRegister();
     verifyZeroInteractions(mockStatsRecorder);
     verifyZeroInteractions(mockMeasureMap);
   }

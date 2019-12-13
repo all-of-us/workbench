@@ -1,6 +1,5 @@
 package org.pmiops.workbench.monitoring;
 
-import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
 import io.opencensus.stats.MeasureMap;
@@ -19,26 +18,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MonitoringServiceOpenCensusImpl implements MonitoringService {
+public class MonitoringServiceImpl implements MonitoringService {
   private static final Logger logger =
-      Logger.getLogger(MonitoringServiceOpenCensusImpl.class.getName());
-  private static final String STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME = "custom.googleapis.com";
+      Logger.getLogger(MonitoringServiceImpl.class.getName());
   private boolean viewsAreRegistered = false;
   private ViewManager viewManager;
   private StatsRecorder statsRecorder;
-  private StackdriverStatsExporterWrapper stackdriverStatsExporterWrapper;
-  private Provider<WorkbenchConfig> workbenchConfigProvider;
+  private StackdriverStatsExporterService stackdriverStatsExporterService;
 
   @Autowired
-  MonitoringServiceOpenCensusImpl(
+  MonitoringServiceImpl(
       ViewManager viewManager,
       StatsRecorder statsRecorder,
-      StackdriverStatsExporterWrapper stackdriverStatsExporterWrapper,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      StackdriverStatsExporterService stackdriverStatsExporterService) {
     this.viewManager = viewManager;
     this.statsRecorder = statsRecorder;
-    this.stackdriverStatsExporterWrapper = stackdriverStatsExporterWrapper;
-    this.workbenchConfigProvider = workbenchConfigProvider;
+    this.stackdriverStatsExporterService = stackdriverStatsExporterService;
   }
 
   private void initStatsConfigurationIdempotent() {
@@ -46,18 +41,7 @@ public class MonitoringServiceOpenCensusImpl implements MonitoringService {
       registerSignals();
       viewsAreRegistered = true;
     }
-    stackdriverStatsExporterWrapper.createAndRegister(
-        StackdriverStatsConfiguration.builder()
-            .setMetricNamePrefix(buildMetricNamePrefix())
-            .setProjectId(workbenchConfigProvider.get().server.projectId)
-            .build());
-  }
-
-  private String buildMetricNamePrefix() {
-    return String.format(
-        "%s/%s/",
-        STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME,
-        workbenchConfigProvider.get().server.shortName.toLowerCase());
+    stackdriverStatsExporterService.createAndRegister();
   }
 
   private void registerSignals() {
@@ -67,25 +51,25 @@ public class MonitoringServiceOpenCensusImpl implements MonitoringService {
   }
 
   @Override
-  public void recordValues(OpenCensusStatsViewInfo viewProperties, Number value) {
+  public void recordValue(OpenCensusStatsViewInfo viewInfo, Number value) {
     try {
       initStatsConfigurationIdempotent();
       if (value == null) {
         logger.log(
             Level.WARNING,
             String.format(
-                "Attempting to log a null numeric value for signal %s", viewProperties.getName()));
+                "Attempting to log a null numeric value for signal %s", viewInfo.getName()));
         return;
       }
-      if (viewProperties.getMeasureClass().equals(MeasureLong.class)) {
-        recordLongValue(viewProperties.getMeasureLong(), value.longValue());
-      } else if (viewProperties.getMeasureClass().equals(MeasureDouble.class)) {
-        recordDoubleValue(viewProperties.getMeasureDouble(), value.doubleValue());
+      if (viewInfo.getMeasureClass().equals(MeasureLong.class)) {
+        recordLongValue(viewInfo.getMeasureLong(), value.longValue());
+      } else if (viewInfo.getMeasureClass().equals(MeasureDouble.class)) {
+        recordDoubleValue(viewInfo.getMeasureDouble(), value.doubleValue());
       } else {
         logger.log(
             Level.WARNING,
             String.format(
-                "Unrecognized measure class %s", viewProperties.getMeasureClass().getName()));
+                "Unrecognized measure class %s", viewInfo.getMeasureClass().getName()));
       }
     } catch (RuntimeException e) {
       logAndSwallow(e);

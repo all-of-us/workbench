@@ -28,7 +28,8 @@ public enum MonitoringViews implements OpenCensusStatsViewInfo {
       Aggregation.Sum.create()),
   NOTEBOOK_SAVE("notebook_save", "Save (or create) a notebook"),
   NOTEBOOK_CLONE("notebook_clone", "Clone (duplicate) a notebook"),
-  NOTEBOOK_DELETE("notebook_delete", "Delete a notebook");
+  NOTEBOOK_DELETE("notebook_delete", "Delete a notebook"),
+  WORKSPACE_ACTIVE_COUNT("workspace_active_count", "Count of active workspaces");
 
   private final String name;
   private final String description;

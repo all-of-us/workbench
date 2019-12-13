@@ -1,6 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -49,6 +50,9 @@ import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
+import org.pmiops.workbench.monitoring.GaugeDataCollector;
+import org.pmiops.workbench.monitoring.views.MonitoringViews;
+import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -61,7 +65,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>This needs to implement an interface to support Transactional
  */
 @Service
-public class WorkspaceServiceImpl implements WorkspaceService {
+public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollector {
   private static final Logger logger = Logger.getLogger(WorkspaceServiceImpl.class.getName());
 
   private static final String FC_OWNER_ROLE = "OWNER";
@@ -610,5 +614,11 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     } else {
       return false;
     }
+  }
+
+  @Override
+  public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
+    long activeWorkspaceCount = workspaceDao.countAllByActiveTrue();
+    return ImmutableMap.of(MonitoringViews.WORKSPACE_ACTIVE_COUNT, activeWorkspaceCount);
   }
 }

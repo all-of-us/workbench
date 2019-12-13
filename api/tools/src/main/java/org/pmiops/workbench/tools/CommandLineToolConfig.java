@@ -16,7 +16,7 @@ import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.monitoring.MonitoringServiceOpenCensusImpl;
+import org.pmiops.workbench.monitoring.MonitoringServiceImpl;
 import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +43,7 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 @Import({
   RetryConfig.class,
   CommonConfig.class,
-  MonitoringServiceOpenCensusImpl.class,
+  MonitoringServiceImpl.class,
   MonitoringSpringConfiguration.class,
   NotebooksServiceImpl.class,
   UserRecentResourceServiceImpl.class

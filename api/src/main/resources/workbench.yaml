@@ -1245,8 +1245,8 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  /v1/monitoring/updateGaugeMetrics:
-    post:
+  /v1/cron/monitoring/updateGaugeMetrics:
+    get:
       tags:
         - offlineMonitoring
         - cron

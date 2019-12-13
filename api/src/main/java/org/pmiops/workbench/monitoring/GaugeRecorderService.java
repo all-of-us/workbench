@@ -36,7 +36,7 @@ public class GaugeRecorderService {
     viewToValue.forEach(
         (view, value) ->
             textBuilder
-                .append(view.getStatsName().toString())
+                .append(view.getName())
                 .append(" = ")
                 .append(value.toString())
                 .append("\n"));
