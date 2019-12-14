@@ -1,5 +1,6 @@
 package org.pmiops.workbench.exceptions;
 
+import java.util.UUID;
 import org.pmiops.workbench.model.ErrorCode;
 import org.pmiops.workbench.model.ErrorResponse;
 
@@ -22,6 +23,7 @@ public class WorkbenchException extends RuntimeException {
 
   public WorkbenchException(Throwable t) {
     super(t);
+    this.errorResponse = errorResponse();
   }
 
   public WorkbenchException(String message, Throwable t) {
@@ -33,14 +35,20 @@ public class WorkbenchException extends RuntimeException {
     return errorResponse;
   }
 
-  public static ErrorResponse errorResponse(String message) {
-    return errorResponse(null, message);
+  // For security reasons, we want a response stripped of everything
+  // but this identifying UUID.
+  public static ErrorResponse errorResponse() {
+    return new ErrorResponse()
+        .errorUniqueId(UUID.randomUUID().toString());
   }
 
-  public static ErrorResponse errorResponse(ErrorCode code, String message) {
-    ErrorResponse response = new ErrorResponse();
-    response.setMessage(message);
-    response.setErrorCode(code);
-    return response;
+  public static ErrorResponse errorResponse(String message) {
+    return errorResponse(message, null);
+  }
+
+  public static ErrorResponse errorResponse(String message, ErrorCode code) {
+    return errorResponse()
+        .message(message)
+        .errorCode(code);
   }
 }

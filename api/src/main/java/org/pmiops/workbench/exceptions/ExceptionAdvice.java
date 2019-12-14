@@ -25,7 +25,7 @@ public class ExceptionAdvice {
 
   @ExceptionHandler({Exception.class})
   public ResponseEntity<?> serverError(Exception e) {
-    ErrorResponse errorResponse = new ErrorResponse();
+    ErrorResponse errorResponse = WorkbenchException.errorResponse();
     Integer statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
 
     // if this error was thrown by another error, get the info from that exception
