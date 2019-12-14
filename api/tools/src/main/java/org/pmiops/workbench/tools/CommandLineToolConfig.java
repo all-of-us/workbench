@@ -7,8 +7,11 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.gson.Gson;
 import java.io.IOException;
+import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.config.BigQueryConfig;
+import org.pmiops.workbench.config.CacheSpringConfiguration;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -46,6 +49,9 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @Import({
   RetryConfig.class,
+  BigQueryConfig.class,
+  BigQueryService.class,
+  CacheSpringConfiguration.class,
   CommonConfig.class,
   DataSetServiceImpl.class,
   GaugeRecorderService.class,
