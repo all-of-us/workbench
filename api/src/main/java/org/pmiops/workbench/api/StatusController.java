@@ -22,9 +22,10 @@ public class StatusController implements StatusApiDelegate {
 
   @Override
   public ResponseEntity<StatusResponse> getStatus() {
-    StatusResponse statusResponse = new StatusResponse();
-    statusResponse.setFirecloudStatus(fireCloudService.getFirecloudStatus());
-    statusResponse.setNotebooksStatus(leonardoNotebooksClient.getNotebooksStatus());
-    return ResponseEntity.ok(statusResponse);
+    throw new IllegalArgumentException("Who dat?");
+//    StatusResponse statusResponse = new StatusResponse();
+//    statusResponse.setFirecloudStatus(fireCloudService.getFirecloudStatus());
+//    statusResponse.setNotebooksStatus(leonardoNotebooksClient.getNotebooksStatus());
+//    return ResponseEntity.ok(statusResponse);
   }
 }

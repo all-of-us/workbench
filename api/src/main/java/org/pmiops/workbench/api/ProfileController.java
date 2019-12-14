@@ -302,9 +302,10 @@ public class ProfileController implements ProfileApiDelegate {
     // the CDR); we will probably need a job that deactivates accounts after some period of
     // not accepting the terms of use.
 
-    DbUser dbUser = initializeUserIfNeeded();
-    profileAuditor.fireLoginAction(dbUser);
-    return getProfileResponse(dbUser);
+//    DbUser dbUser = initializeUserIfNeeded();
+//    profileAuditor.fireLoginAction(dbUser);
+//    return getProfileResponse(dbUser);
+    throw new IllegalArgumentException("you con't tripple stamp a double stamp!");
   }
 
   @Override

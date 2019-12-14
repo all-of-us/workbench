@@ -26,18 +26,20 @@ public class ExceptionAdvice {
   @ExceptionHandler({Exception.class})
   public ResponseEntity<?> serverError(Exception e) {
     ErrorResponse errorResponse = WorkbenchException.errorResponse();
-    Integer statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
-
     // if this error was thrown by another error, get the info from that exception
     Throwable relevantError = e;
     if (e.getCause() != null) {
       relevantError = e.getCause();
     }
 
+    final int statusCode;
     // if exception class has an HTTP status associated with it, grab it
     if (relevantError.getClass().getAnnotation(ResponseStatus.class) != null) {
       statusCode = relevantError.getClass().getAnnotation(ResponseStatus.class).value().value();
+    } else {
+      statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value();
     }
+
     if (relevantError instanceof WorkbenchException) {
       // Only include Exception details on Workbench errors.
       errorResponse.setMessage(relevantError.getMessage());
@@ -50,8 +52,11 @@ public class ExceptionAdvice {
     }
 
     // only log error if it's a server error
-    if (statusCode >= 500) {
-      log.log(Level.SEVERE, relevantError.getClass().getName(), e);
+    if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+      final String logMessage = String.format("ErrorId %s: %s",
+          errorResponse.getErrorUniqueId(),
+          relevantError.getClass().getName());
+      log.log(Level.SEVERE, logMessage, e);
     }
 
     errorResponse.setStatusCode(statusCode);
