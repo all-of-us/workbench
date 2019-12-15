@@ -522,7 +522,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       if (role.getRole() == null || role.getRole().toString().trim().isEmpty()) {
         throw new BadRequestException("Role required.");
       }
-      final DbUser invitedUser = userDao.findUserByEmail(role.getEmail());
+      final DbUser invitedUser = userDao.findUserByUserName(role.getEmail());
       if (invitedUser == null) {
         throw new BadRequestException(String.format("User %s doesn't exist", role.getEmail()));
       }

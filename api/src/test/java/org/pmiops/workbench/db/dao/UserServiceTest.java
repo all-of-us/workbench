@@ -127,7 +127,7 @@ public class UserServiceTest {
     userService.syncComplianceTrainingStatus();
 
     // The user should be updated in the database with a non-empty completion and expiration time.
-    DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser user = userDao.findUserByUserName(EMAIL_ADDRESS);
     assertThat(user.getComplianceTrainingCompletionTime())
         .isEqualTo(new Timestamp(TIMESTAMP_MSECS));
     assertThat(user.getComplianceTrainingExpirationTime()).isEqualTo(new Timestamp(12345));
@@ -149,21 +149,21 @@ public class UserServiceTest {
     userService.syncComplianceTrainingStatus();
 
     verify(mockComplianceService, never()).getUserBadge(anyInt());
-    DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser user = userDao.findUserByUserName(EMAIL_ADDRESS);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test
   public void testSyncComplianceTrainingStatusNullBadge() throws ApiException {
     // When Moodle returns an empty badge response, we should clear the completion bit.
-    DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser user = userDao.findUserByUserName(EMAIL_ADDRESS);
     user.setComplianceTrainingCompletionTime(new Timestamp(12345));
     userDao.save(user);
 
     when(mockComplianceService.getMoodleId(EMAIL_ADDRESS)).thenReturn(1);
     when(mockComplianceService.getUserBadge(1)).thenReturn(null);
     userService.syncComplianceTrainingStatus();
-    user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    user = userDao.findUserByUserName(EMAIL_ADDRESS);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
@@ -197,7 +197,7 @@ public class UserServiceTest {
 
     userService.syncEraCommonsStatus();
 
-    DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser user = userDao.findUserByUserName(EMAIL_ADDRESS);
     assertThat(user.getEraCommonsCompletionTime()).isEqualTo(Timestamp.from(START_INSTANT));
     assertThat(user.getEraCommonsLinkExpireTime()).isEqualTo(Timestamp.from(START_INSTANT));
     assertThat(user.getEraCommonsLinkedNihUsername()).isEqualTo("nih-user");
@@ -211,7 +211,7 @@ public class UserServiceTest {
 
   @Test
   public void testClearsEraCommonsStatus() {
-    DbUser testUser = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser testUser = userDao.findUserByUserName(EMAIL_ADDRESS);
     // Put the test user in a state where eRA commons is completed.
     testUser.setEraCommonsCompletionTime(new Timestamp(TIMESTAMP_MSECS));
     testUser.setEraCommonsLinkedNihUsername("nih-user");
@@ -221,7 +221,7 @@ public class UserServiceTest {
 
     userService.syncEraCommonsStatus();
 
-    DbUser retrievedUser = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser retrievedUser = userDao.findUserByUserName(EMAIL_ADDRESS);
     assertThat(retrievedUser.getEraCommonsCompletionTime()).isNull();
   }
 
@@ -235,26 +235,26 @@ public class UserServiceTest {
     when(mockDirectoryService.getUser(EMAIL_ADDRESS)).thenReturn(googleUser);
     userService.syncTwoFactorAuthStatus();
     // twoFactorAuthCompletionTime should now be set
-    DbUser user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser user = userDao.findUserByUserName(EMAIL_ADDRESS);
     assertThat(user.getTwoFactorAuthCompletionTime()).isNotNull();
 
     // twoFactorAuthCompletionTime should not change when already set
     tick();
     Timestamp twoFactorAuthCompletionTime = user.getTwoFactorAuthCompletionTime();
     userService.syncTwoFactorAuthStatus();
-    user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    user = userDao.findUserByUserName(EMAIL_ADDRESS);
     assertThat(user.getTwoFactorAuthCompletionTime()).isEqualTo(twoFactorAuthCompletionTime);
 
     // unset 2FA in google and check that twoFactorAuthCompletionTime is set to null
     googleUser.setIsEnrolledIn2Sv(false);
     userService.syncTwoFactorAuthStatus();
-    user = userDao.findUserByEmail(EMAIL_ADDRESS);
+    user = userDao.findUserByUserName(EMAIL_ADDRESS);
     assertThat(user.getTwoFactorAuthCompletionTime()).isNull();
   }
 
   @Test
   public void testSetBypassTimes() {
-    DbUser dbUser = userDao.findUserByEmail(EMAIL_ADDRESS);
+    DbUser dbUser = userDao.findUserByUserName(EMAIL_ADDRESS);
 
     // Make sure we're starting with a clean slate before doing the operations and assertions
     // below. This both a sanity check against future changes to the test user initialization

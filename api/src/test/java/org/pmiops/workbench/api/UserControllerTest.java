@@ -28,6 +28,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -109,11 +110,12 @@ public class UserControllerTest {
   @Test
   public void testUserSearch() {
     when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
-    DbUser john = userDao.findUserByEmail("john@lis.org");
+    DbUser john = userDao.findUserByUserName("john@lis.org");
 
     UserResponse response = userController.user("John", null, null, null).getBody();
     assertThat(response.getUsers()).hasSize(1);
     assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getUserName());
+    assertThat(response.getUsers().get(0).getUserName()).isSameAs(john.getUserName());
   }
 
   @Test
@@ -224,17 +226,23 @@ public class UserControllerTest {
     assertThat(robinsonsAsc.getUsers()).containsAllIn(robinsonsDesc.getUsers());
 
     // Now reverse one and assert both in the same order
-    List<org.pmiops.workbench.model.User> descendingReversed =
+    List<User> descendingReversed =
         Lists.reverse(robinsonsDesc.getUsers());
     assertThat(robinsonsAsc.getUsers()).containsAllIn(descendingReversed).inOrder();
 
     // Test that JPA sorting is really what we expected it to be by re-sorting one into a new list
-    List<org.pmiops.workbench.model.User> newAscending =
+    List<User> newAscending =
         Lists.newArrayList(robinsonsAsc.getUsers());
-    newAscending.sort(Comparator.comparing(org.pmiops.workbench.model.User::getEmail));
+    newAscending.sort(Comparator.comparing(User::getUserName));
     assertThat(robinsonsAsc.getUsers()).containsAllIn(newAscending).inOrder();
   }
 
+  @Test
+  public void testEmailAndUserNameEquivalence() {
+    User user = new User()
+        .userName("bob")
+        .email("Clyde");
+  }
   /*
    * Testing helpers
    */

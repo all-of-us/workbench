@@ -481,7 +481,7 @@ public class ProfileController implements ProfileApiDelegate {
       UpdateContactEmailRequest updateContactEmailRequest) {
     String username = updateContactEmailRequest.getUsername().toLowerCase();
     com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
-    DbUser user = userDao.findUserByEmail(username);
+    DbUser user = userDao.findUserByUserName(username);
     checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
     if (userHasEverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -501,7 +501,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
     String username = resendRequest.getUsername().toLowerCase();
     com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
-    DbUser user = userDao.findUserByEmail(username);
+    DbUser user = userDao.findUserByUserName(username);
     checkUserCreationNonce(user, resendRequest.getCreationNonce());
     if (userHasEverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

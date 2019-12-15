@@ -54,7 +54,7 @@ public class CohortMapperTest {
     creator.setContactEmail("bill@terra.bio");
     creator.setUserId(888L);
 
-    doReturn(creator).when(mockUserDao).findUserByEmail(creator.getUserName());
+    doReturn(creator).when(mockUserDao).findUserByUserName(creator.getUserName());
 
     final DbCohortReview review = new DbCohortReview();
     review.setCdrVersionId(3);

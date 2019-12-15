@@ -286,7 +286,7 @@ public class ClusterControllerTest {
                     new ClusterConfig().machineType("n1-standard-16").masterDiskSize(100)));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
-    DbUser updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
+    DbUser updatedUser = userDao.findUserByUserName(OTHER_USER_EMAIL);
     assertThat(updatedUser.getClusterConfigDefault().machineType).isEqualTo("n1-standard-16");
     assertThat(updatedUser.getClusterConfigDefault().masterDiskSize).isEqualTo(100);
   }
@@ -306,7 +306,7 @@ public class ClusterControllerTest {
             new UpdateClusterConfigRequest().userEmail(OTHER_USER_EMAIL).clusterConfig(null));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
-    DbUser updatedUser = userDao.findUserByEmail(OTHER_USER_EMAIL);
+    DbUser updatedUser = userDao.findUserByUserName(OTHER_USER_EMAIL);
     assertThat(updatedUser.getClusterConfigDefault()).isNull();
   }
 

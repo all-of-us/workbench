@@ -228,23 +228,23 @@ public class UserService {
     return configProvider.get().auth.serviceAccountApiUsers.contains(user.getUserName());
   }
 
-  public DbUser createServiceAccountUser(String email) {
+  public DbUser createServiceAccountUser(String userName) {
     DbUser user = new DbUser();
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
-    user.setUserName(email);
+    user.setUserName(userName);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     try {
       return userDao.save(user);
     } catch (DataIntegrityViolationException e) {
-      final DbUser userByEmail = userDao.findUserByEmail(email);
-      if (userByEmail == null) {
+      final DbUser userByUserName = userDao.findUserByUserName(userName);
+      if (userByUserName == null) {
         log.log(
             Level.WARNING,
             String.format(
                 "While creating new user with email %s due to "
                     + "DataIntegrityViolationException. No user was persisted",
-                email),
+                userName),
             e);
         throw e;
       } else {
@@ -253,9 +253,9 @@ public class UserService {
             String.format(
                 "While creating new user with email %s due to "
                     + "DataIntegrityViolationException. However, user %d was persisted",
-                email, userByEmail.getUserId()),
+                userName, userByUserName.getUserId()),
             e);
-        return userByEmail;
+        return userByUserName;
       }
     }
   }
@@ -263,7 +263,7 @@ public class UserService {
   public DbUser createUser(
       String givenName,
       String familyName,
-      String email,
+      String userName,
       String contactEmail,
       String currentPosition,
       String organization,
@@ -271,7 +271,7 @@ public class UserService {
     return createUser(
         givenName,
         familyName,
-        email,
+        userName,
         contactEmail,
         currentPosition,
         organization,
@@ -284,7 +284,7 @@ public class UserService {
   public DbUser createUser(
       String givenName,
       String familyName,
-      String email,
+      String userName,
       String contactEmail,
       String currentPosition,
       String organization,
@@ -292,28 +292,28 @@ public class UserService {
       DbAddress address,
       DbDemographicSurvey demographicSurvey,
       List<DbInstitutionalAffiliation> institutionalAffiliations) {
-    DbUser user = new DbUser();
-    user.setCreationNonce(Math.abs(random.nextLong()));
-    user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
-    user.setUserName(email);
-    user.setContactEmail(contactEmail);
-    user.setCurrentPosition(currentPosition);
-    user.setOrganization(organization);
-    user.setAreaOfResearch(areaOfResearch);
-    user.setFamilyName(familyName);
-    user.setGivenName(givenName);
-    user.setDisabled(false);
-    user.setAboutYou(null);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
-    user.setAddress(address);
-    user.setDemographicSurvey(demographicSurvey);
+    DbUser dbUser = new DbUser();
+    dbUser.setCreationNonce(Math.abs(random.nextLong()));
+    dbUser.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
+    dbUser.setUserName(userName);
+    dbUser.setContactEmail(contactEmail);
+    dbUser.setCurrentPosition(currentPosition);
+    dbUser.setOrganization(organization);
+    dbUser.setAreaOfResearch(areaOfResearch);
+    dbUser.setFamilyName(familyName);
+    dbUser.setGivenName(givenName);
+    dbUser.setDisabled(false);
+    dbUser.setAboutYou(null);
+    dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
+    dbUser.setAddress(address);
+    dbUser.setDemographicSurvey(demographicSurvey);
     // For existing user that do not have address
     if (address != null) {
-      address.setUser(user);
+      address.setUser(dbUser);
     }
-    if (demographicSurvey != null) demographicSurvey.setUser(user);
+    if (demographicSurvey != null) demographicSurvey.setUser(dbUser);
     if (institutionalAffiliations != null) {
-      final DbUser u = user;
+      final DbUser u = dbUser;
       institutionalAffiliations.forEach(
           affiliation -> {
             affiliation.setUser(u);
@@ -321,20 +321,20 @@ public class UserService {
           });
     }
     try {
-      userDao.save(user);
+      dbUser = userDao.save(dbUser);
     } catch (DataIntegrityViolationException e) {
-      user = userDao.findUserByEmail(email);
-      if (user == null) {
+      dbUser = userDao.findUserByUserName(userName);
+      if (dbUser == null) {
         throw e;
       }
       // If a user already existed (due to multiple requests trying to create a user simultaneously)
       // just return it.
     }
-    return user;
+    return dbUser;
   }
 
   public DbUser submitDataUseAgreement(
-      DbUser user, Integer dataUseAgreementSignedVersion, String initials) {
+      DbUser dbUser, Integer dataUseAgreementSignedVersion, String initials) {
     // FIXME: this should not be hardcoded
     if (dataUseAgreementSignedVersion != CURRENT_DATA_USE_AGREEMENT_VERSION) {
       throw new BadRequestException("Data Use Agreement Version is not up to date");
@@ -342,16 +342,16 @@ public class UserService {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
     dataUseAgreement.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
-    dataUseAgreement.setUserId(user.getUserId());
-    dataUseAgreement.setUserFamilyName(user.getFamilyName());
-    dataUseAgreement.setUserGivenName(user.getGivenName());
+    dataUseAgreement.setUserId(dbUser.getUserId());
+    dataUseAgreement.setUserFamilyName(dbUser.getFamilyName());
+    dataUseAgreement.setUserGivenName(dbUser.getGivenName());
     dataUseAgreement.setUserInitials(initials);
     dataUseAgreement.setCompletionTime(timestamp);
     userDataUseAgreementDao.save(dataUseAgreement);
     // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
-    user.setDataUseAgreementCompletionTime(timestamp);
-    user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
-    return userDao.save(user);
+    dbUser.setDataUseAgreementCompletionTime(timestamp);
+    dbUser.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+    return userDao.save(dbUser);
   }
 
   @Transactional
@@ -521,23 +521,23 @@ public class UserService {
    * MOODLE. 3. If there are no badges for a user set training completion time and expiration date
    * as null
    */
-  public DbUser syncComplianceTrainingStatus(DbUser user)
+  public DbUser syncComplianceTrainingStatus(DbUser dbUser)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    if (isServiceAccount(user)) {
+    if (isServiceAccount(dbUser)) {
       // Skip sync for service account user rows.
-      return user;
+      return dbUser;
     }
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     try {
-      Integer moodleId = user.getMoodleId();
+      Integer moodleId = dbUser.getMoodleId();
       if (moodleId == null) {
-        moodleId = complianceService.getMoodleId(user.getUserName());
+        moodleId = complianceService.getMoodleId(dbUser.getUserName());
         if (moodleId == null) {
           // User has not yet created/logged into MOODLE
-          return user;
+          return dbUser;
         }
-        user.setMoodleId(moodleId);
+        dbUser.setMoodleId(moodleId);
       }
 
       List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
@@ -549,33 +549,33 @@ public class UserService {
                 ? null
                 : new Timestamp(Long.parseLong(badge.getDateexpire()));
 
-        if (user.getComplianceTrainingCompletionTime() == null) {
+        if (dbUser.getComplianceTrainingCompletionTime() == null) {
           // This is the user's first time with a Moodle badge response, so we reset the completion
           // time.
-          user.setComplianceTrainingCompletionTime(now);
+          dbUser.setComplianceTrainingCompletionTime(now);
         } else if (badgeExpiration != null
-            && !badgeExpiration.equals(user.getComplianceTrainingExpirationTime())) {
+            && !badgeExpiration.equals(dbUser.getComplianceTrainingExpirationTime())) {
           // The badge has a new expiration date, suggesting some sort of course completion change.
           // Reset the completion time.
-          user.setComplianceTrainingCompletionTime(now);
+          dbUser.setComplianceTrainingCompletionTime(now);
         }
 
-        user.setComplianceTrainingExpirationTime(badgeExpiration);
+        dbUser.setComplianceTrainingExpirationTime(badgeExpiration);
       } else {
         // Moodle has returned zero badges for the given user -- we should clear the user's
         // training completion & expiration time.
-        user.setComplianceTrainingCompletionTime(null);
-        user.setComplianceTrainingExpirationTime(null);
+        dbUser.setComplianceTrainingCompletionTime(null);
+        dbUser.setComplianceTrainingExpirationTime(null);
       }
 
       return updateUserWithRetries(
-          dbUser -> {
-            dbUser.setMoodleId(user.getMoodleId());
-            dbUser.setComplianceTrainingExpirationTime(user.getComplianceTrainingExpirationTime());
-            dbUser.setComplianceTrainingCompletionTime(user.getComplianceTrainingCompletionTime());
-            return dbUser;
+          u -> {
+            u.setMoodleId(u.getMoodleId());
+            u.setComplianceTrainingExpirationTime(u.getComplianceTrainingExpirationTime());
+            u.setComplianceTrainingCompletionTime(u.getComplianceTrainingCompletionTime());
+            return u;
           },
-          user);
+          dbUser);
 
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format from Moodle");
@@ -585,7 +585,7 @@ public class UserService {
         log.severe(
             String.format(
                 "Error while retrieving Badge for user %s: %s ",
-                user.getUserId(), ex.getMessage()));
+                dbUser.getUserId(), ex.getMessage()));
         throw new NotFoundException(ex.getMessage());
       }
       throw ex;

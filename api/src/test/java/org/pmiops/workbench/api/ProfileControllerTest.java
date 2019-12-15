@@ -210,7 +210,7 @@ public class ProfileControllerTest {
   public void testCreateAccount_success() throws Exception {
     createUser();
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
-    final DbUser dbUser = userDao.findUserByEmail(PRIMARY_EMAIL);
+    final DbUser dbUser = userDao.findUserByUserName(PRIMARY_EMAIL);
     assertThat(dbUser).isNotNull();
     assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
   }
@@ -567,10 +567,10 @@ public class ProfileControllerTest {
     createUser();
 
     profileController.syncEraCommonsStatus();
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsLinkedNihUsername())
+    assertThat(userDao.findUserByUserName(PRIMARY_EMAIL).getEraCommonsLinkedNihUsername())
         .isEqualTo(linkedUsername);
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsLinkExpireTime()).isNotNull();
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
+    assertThat(userDao.findUserByUserName(PRIMARY_EMAIL).getEraCommonsLinkExpireTime()).isNotNull();
+    assertThat(userDao.findUserByUserName(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
   }
 
   @Test
@@ -615,7 +615,7 @@ public class ProfileControllerTest {
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
         .thenReturn(googleUser);
     Profile result = profileController.createAccount(createAccountRequest).getBody();
-    dbUser = userDao.findUserByEmail(PRIMARY_EMAIL);
+    dbUser = userDao.findUserByUserName(PRIMARY_EMAIL);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     userDao.save(dbUser);
     when(userProvider.get()).thenReturn(dbUser);
@@ -649,7 +649,7 @@ public class ProfileControllerTest {
       String givenName,
       DataAccessLevel dataAccessLevel,
       Timestamp firstSignInTime) {
-    DbUser user = userDao.findUserByEmail(primaryEmail);
+    DbUser user = userDao.findUserByUserName(primaryEmail);
     assertThat(user).isNotNull();
     assertThat(user.getContactEmail()).isEqualTo(contactEmail);
     assertThat(user.getFamilyName()).isEqualTo(familyName);

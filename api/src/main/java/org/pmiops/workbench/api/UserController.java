@@ -30,7 +30,8 @@ public class UserController implements UserApiDelegate {
   private static final Function<DbUser, org.pmiops.workbench.model.User> TO_USER_RESPONSE_USER =
       user -> {
         org.pmiops.workbench.model.User modelUser = new org.pmiops.workbench.model.User();
-        modelUser.setEmail(user.getUserName());
+        modelUser.setEmail(user.getUserName()); // deprecated, but kept for compatibility
+        modelUser.setUserName(user.getUserName());
         modelUser.setGivenName(user.getGivenName());
         modelUser.setFamilyName(user.getFamilyName());
         return modelUser;

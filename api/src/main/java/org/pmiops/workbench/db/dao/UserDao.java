@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface UserDao extends CrudRepository<DbUser, Long> {
 
-  DbUser findUserByEmail(String email);
+  DbUser findUserByUserName(String userName);
 
   DbUser findUserByUserId(long userId);
 
@@ -29,7 +29,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
   /** Find users matching the user's name or email */
   @Query(
-      "SELECT user FROM DbUser user WHERE user.dataAccessLevel IN :dals AND ( lower(user.email) LIKE lower(concat('%', :term, '%')) OR lower(user.familyName) LIKE lower(concat('%', :term, '%')) OR lower(user.givenName) LIKE lower(concat('%', :term, '%')) )")
+      "SELECT user FROM DbUser user WHERE user.dataAccessLevel IN :dals AND ( lower(user.userName) LIKE lower(concat('%', :term, '%')) OR lower(user.familyName) LIKE lower(concat('%', :term, '%')) OR lower(user.givenName) LIKE lower(concat('%', :term, '%')) )")
   List<DbUser> findUsersByDataAccessLevelsAndSearchString(
       @Param("dals") List<Short> dataAccessLevels, @Param("term") String term, Sort sort);
 }

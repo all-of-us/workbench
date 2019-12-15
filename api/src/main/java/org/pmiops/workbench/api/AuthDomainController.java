@@ -44,7 +44,7 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @Override
   @AuthorityRequired({Authority.ACCESS_CONTROL_ADMIN})
   public ResponseEntity<Void> updateUserDisabledStatus(UpdateUserDisabledRequest request) {
-    final DbUser targetDbUser = userDao.findUserByEmail(request.getEmail());
+    final DbUser targetDbUser = userDao.findUserByUserName(request.getEmail());
     final Boolean previousDisabled = targetDbUser.getDisabled();
     final DbUser updatedTargetUser =
         userService.setDisabledStatus(targetDbUser.getUserId(), request.getDisabled());
