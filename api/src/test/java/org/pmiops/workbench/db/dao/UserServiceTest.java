@@ -100,7 +100,7 @@ public class UserServiceTest {
   @Before
   public void setUp() {
     DbUser user = new DbUser();
-    user.setEmail(EMAIL_ADDRESS);
+    user.setUserName(EMAIL_ADDRESS);
     userDao.save(user);
     providedDbUser = user;
 

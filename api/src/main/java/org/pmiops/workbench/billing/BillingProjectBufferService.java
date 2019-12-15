@@ -280,7 +280,7 @@ public class BillingProjectBufferService {
     DbBillingProjectBufferEntry bufferEntry = consumeBufferEntryForAssignment();
 
     fireCloudService.addUserToBillingProject(
-        dbUser.getEmail(), bufferEntry.getFireCloudProjectName());
+        dbUser.getUserName(), bufferEntry.getFireCloudProjectName());
     bufferEntry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     bufferEntry.setAssignedUser(dbUser);
 

@@ -74,7 +74,7 @@ public class CohortsController implements CohortsApiDelegate {
                   .name(cohort.getName())
                   .type(cohort.getType());
           if (cohort.getCreator() != null) {
-            result.setCreator(cohort.getCreator().getEmail());
+            result.setCreator(cohort.getCreator().getUserName());
           }
           return result;
         }

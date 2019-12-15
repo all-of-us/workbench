@@ -136,7 +136,7 @@ public class AuthDomainControllerTest {
     DbUser user = new DbUser();
     user.setGivenName(GIVEN_NAME);
     user.setFamilyName(FAMILY_NAME);
-    user.setEmail(PRIMARY_EMAIL);
+    user.setUserName(PRIMARY_EMAIL);
     user.setContactEmail(CONTACT_EMAIL);
     user.setOrganization(ORGANIZATION);
     user.setCurrentPosition(CURRENT_POSITION);

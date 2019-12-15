@@ -67,7 +67,7 @@ public class FetchWorkspaceDetails {
 
         sb.append("\nWorkspace Name: " + workspace.getName() + "\n");
         sb.append("Workspace Namespace: " + workspace.getWorkspaceNamespace() + "\n");
-        sb.append("Creator: " + workspace.getCreator().getEmail() + "\n");
+        sb.append("Creator: " + workspace.getCreator().getUserName() + "\n");
         sb.append("Collaborators:\n");
         for (Map.Entry<String, FirecloudWorkspaceAccessEntry> aclEntry : acl.entrySet()) {
           sb.append("\t" + aclEntry.getKey() + " (" + aclEntry.getValue().getAccessLevel() + ")\n");

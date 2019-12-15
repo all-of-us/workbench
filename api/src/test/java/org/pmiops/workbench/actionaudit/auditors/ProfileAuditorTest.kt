@@ -45,7 +45,7 @@ class ProfileAuditorTest {
     fun setUp() {
         user = DbUser()
             .apply { userId = 1001 }
-            .apply { email = USER_EMAIL }
+            .apply { userName = USER_EMAIL }
 
         profileAuditAdapter = ProfileAuditorImpl(
                 userProvider = mockUserProvider,

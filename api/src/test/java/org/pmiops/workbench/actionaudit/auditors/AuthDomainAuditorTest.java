@@ -56,7 +56,7 @@ public class AuthDomainAuditorTest {
     public DbUser getUser() {
       final DbUser administrator = new DbUser();
       administrator.setUserId(ADMINISTRATOR_USER_ID);
-      administrator.setEmail(ADMINISTRATOR_EMAIL);
+      administrator.setUserName(ADMINISTRATOR_EMAIL);
       return administrator;
     }
 

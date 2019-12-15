@@ -178,21 +178,21 @@ public class UserService {
   private void removeFromRegisteredTierGroupIdempotent(DbUser dbUser) {
     if (isUserMemberOfRegisteredTierGroup(dbUser)) {
       this.fireCloudService.removeUserFromGroup(
-          dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
-      log.info(String.format("Removed user %s from registered-tier group.", dbUser.getEmail()));
+          dbUser.getUserName(), configProvider.get().firecloud.registeredDomainName);
+      log.info(String.format("Removed user %s from registered-tier group.", dbUser.getUserName()));
     }
   }
 
   private boolean isUserMemberOfRegisteredTierGroup(DbUser dbUser) {
     return this.fireCloudService.isUserMemberOfGroup(
-        dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
+        dbUser.getUserName(), configProvider.get().firecloud.registeredDomainName);
   }
 
   private void addToRegisteredTierGroupIdempotent(DbUser user) {
     if (!isUserMemberOfRegisteredTierGroup(user)) {
       this.fireCloudService.addUserToGroup(
-          user.getEmail(), configProvider.get().firecloud.registeredDomainName);
-      log.info(String.format("Added user %s to registered-tier group.", user.getEmail()));
+          user.getUserName(), configProvider.get().firecloud.registeredDomainName);
+      log.info(String.format("Added user %s to registered-tier group.", user.getUserName()));
     }
   }
 
@@ -225,13 +225,13 @@ public class UserService {
   }
 
   private boolean isServiceAccount(DbUser user) {
-    return configProvider.get().auth.serviceAccountApiUsers.contains(user.getEmail());
+    return configProvider.get().auth.serviceAccountApiUsers.contains(user.getUserName());
   }
 
   public DbUser createServiceAccountUser(String email) {
     DbUser user = new DbUser();
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
-    user.setEmail(email);
+    user.setUserName(email);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     try {
@@ -295,7 +295,7 @@ public class UserService {
     DbUser user = new DbUser();
     user.setCreationNonce(Math.abs(random.nextLong()));
     user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
-    user.setEmail(email);
+    user.setUserName(email);
     user.setContactEmail(contactEmail);
     user.setCurrentPosition(currentPosition);
     user.setOrganization(organization);
@@ -532,7 +532,7 @@ public class UserService {
     try {
       Integer moodleId = user.getMoodleId();
       if (moodleId == null) {
-        moodleId = complianceService.getMoodleId(user.getEmail());
+        moodleId = complianceService.getMoodleId(user.getUserName());
         if (moodleId == null) {
           // User has not yet created/logged into MOODLE
           return user;
@@ -664,7 +664,7 @@ public class UserService {
       return user;
     }
 
-    ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
+    ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getUserName());
     NihApi api = new NihApi(apiClient);
     try {
       FirecloudNihStatus nihStatus = api.nihStatus();
@@ -673,7 +673,7 @@ public class UserService {
       if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
         // We'll catch the NOT_FOUND ApiException here, since we expect many users to have an empty
         // eRA Commons linkage.
-        log.info(String.format("NIH Status not found for user %s", user.getEmail()));
+        log.info(String.format("NIH Status not found for user %s", user.getUserName()));
         return user;
       } else {
         throw e;
@@ -694,7 +694,7 @@ public class UserService {
 
     return updateUserWithRetries(
         user -> {
-          boolean isEnrolledIn2FA = directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv();
+          boolean isEnrolledIn2FA = directoryService.getUser(user.getUserName()).getIsEnrolledIn2Sv();
           if (isEnrolledIn2FA) {
             if (user.getTwoFactorAuthCompletionTime() == null) {
               user.setTwoFactorAuthCompletionTime(new Timestamp(clock.instant().toEpochMilli()));

@@ -75,14 +75,14 @@ public class OfflineUserController implements OfflineUserApiDelegate {
           log.info(
               String.format(
                   "Compliance training completion changed for user %s. Old %s, new %s",
-                  user.getEmail(), oldTime, newTime));
+                  user.getUserName(), oldTime, newTime));
           changeCount++;
         }
         if (oldLevel != newLevel) {
           log.info(
               String.format(
                   "Data access level changed for user %s. Old %s, new %s",
-                  user.getEmail(), oldLevel.toString(), newLevel.toString()));
+                  user.getUserName(), oldLevel.toString(), newLevel.toString()));
           accessLevelChangeCount++;
         }
       } catch (org.pmiops.workbench.moodle.ApiException | NotFoundException e) {
@@ -90,7 +90,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         log.severe(
             String.format(
                 "Error syncing compliance training status for user %s: %s",
-                user.getEmail(), e.getMessage()));
+                user.getUserName(), e.getMessage()));
       }
     }
 
@@ -134,14 +134,14 @@ public class OfflineUserController implements OfflineUserApiDelegate {
           log.info(
               String.format(
                   "eRA Commons completion changed for user %s. Old %s, new %s",
-                  user.getEmail(), oldTime, newTime));
+                  user.getUserName(), oldTime, newTime));
           changeCount++;
         }
         if (oldLevel != newLevel) {
           log.info(
               String.format(
                   "Data access level changed for user %s. Old %s, new %s",
-                  user.getEmail(), oldLevel.toString(), newLevel.toString()));
+                  user.getUserName(), oldLevel.toString(), newLevel.toString()));
           accessLevelChangeCount++;
         }
       } catch (org.pmiops.workbench.firecloud.ApiException e) {
@@ -149,13 +149,13 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         log.severe(
             String.format(
                 "Error syncing eRA Commons status for user %s: %s",
-                user.getEmail(), e.getMessage()));
+                user.getUserName(), e.getMessage()));
       } catch (IOException e) {
         errorCount++;
         log.severe(
             String.format(
                 "Error fetching impersonated creds for user %s: %s",
-                user.getEmail(), e.getMessage()));
+                user.getUserName(), e.getMessage()));
       }
     }
 
@@ -198,14 +198,14 @@ public class OfflineUserController implements OfflineUserApiDelegate {
           log.info(
               String.format(
                   "Two-factor auth completion changed for user %s. Old %s, new %s",
-                  user.getEmail(), oldTime, newTime));
+                  user.getUserName(), oldTime, newTime));
           changeCount++;
         }
         if (oldLevel != newLevel) {
           log.info(
               String.format(
                   "Data access level changed for user %s. Old %s, new %s",
-                  user.getEmail(), oldLevel.toString(), newLevel.toString()));
+                  user.getUserName(), oldLevel.toString(), newLevel.toString()));
           accessLevelChangeCount++;
         }
       } catch (Exception e) {
@@ -213,7 +213,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         log.severe(
             String.format(
                 "Error syncing two-factor auth status for user %s: %s",
-                user.getEmail(), e.getMessage()));
+                user.getUserName(), e.getMessage()));
       }
     }
 
@@ -247,7 +247,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         log.log(
             Level.WARNING,
             "User "
-                + user.getEmail()
+                + user.getUserName()
                 + " has access to projects: "
                 + String.join(", ", unauthorizedLogs));
       }

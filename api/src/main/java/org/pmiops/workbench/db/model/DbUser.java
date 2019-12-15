@@ -51,7 +51,7 @@ public class DbUser {
   // unauthenticated API calls after account creation, but before initial login.
   private Long creationNonce;
   // The Google email address that the user signs in with.
-  private String email;
+  private String userName;
   // The email address that can be used to contact the user.
   private String contactEmail;
   private Short dataAccessLevel;
@@ -131,12 +131,12 @@ public class DbUser {
   }
 
   @Column(name = "email")
-  public String getEmail() {
-    return email;
+  public String getUserName() {
+    return userName;
   }
 
-  public void setEmail(String email) {
-    this.email = email;
+  public void setUserName(String userName) {
+    this.userName = userName;
   }
 
   @Column(name = "contact_email")

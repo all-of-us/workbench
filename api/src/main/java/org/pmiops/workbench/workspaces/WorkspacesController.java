@@ -470,7 +470,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
       Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
       for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
-        if (!entry.getKey().equals(user.getEmail())) {
+        if (!entry.getKey().equals(user.getUserName())) {
           clonedRoles.put(
               entry.getKey(), WorkspaceAccessLevel.fromValue(entry.getValue().getAccessLevel()));
         } else {

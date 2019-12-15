@@ -50,11 +50,11 @@ public class CohortMapperTest {
 
     // right now we're using same creator for all tests
     final DbUser creator = new DbUser();
-    creator.setEmail("billg@msn.com");
+    creator.setUserName("billg@msn.com");
     creator.setContactEmail("bill@terra.bio");
     creator.setUserId(888L);
 
-    doReturn(creator).when(mockUserDao).findUserByEmail(creator.getEmail());
+    doReturn(creator).when(mockUserDao).findUserByEmail(creator.getUserName());
 
     final DbCohortReview review = new DbCohortReview();
     review.setCdrVersionId(3);
@@ -100,7 +100,7 @@ public class CohortMapperTest {
     assertThat(dbModelCohort.getCriteria()).isEqualTo(clientCohort.getCriteria());
     assertThat(dbModelCohort.getType()).isEqualTo(clientCohort.getType());
     assertThat(dbModelCohort.getDescription()).isEqualTo(clientCohort.getDescription());
-    assertThat(dbModelCohort.getCreator().getEmail()).isEqualTo(clientCohort.getCreator());
+    assertThat(dbModelCohort.getCreator().getUserName()).isEqualTo(clientCohort.getCreator());
     assertThat(dbModelCohort.getCreationTime().toInstant().toEpochMilli())
         .isEqualTo(clientCohort.getCreationTime());
     assertThat(dbModelCohort.getLastModifiedTime().toInstant().toEpochMilli())

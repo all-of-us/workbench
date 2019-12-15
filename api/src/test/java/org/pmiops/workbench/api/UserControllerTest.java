@@ -113,7 +113,7 @@ public class UserControllerTest {
 
     UserResponse response = userController.user("John", null, null, null).getBody();
     assertThat(response.getUsers()).hasSize(1);
-    assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getEmail());
+    assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getUserName());
   }
 
   @Test
@@ -252,7 +252,7 @@ public class UserControllerTest {
   @SuppressWarnings("SameParameterValue")
   private void saveUser(String email, String givenName, String familyName, boolean registered) {
     DbUser user = new DbUser();
-    user.setEmail(email);
+    user.setUserName(email);
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
@@ -271,7 +271,7 @@ public class UserControllerTest {
   private void saveUserNotInFirecloud(
       String email, String givenName, String familyName, boolean registered) {
     DbUser user = new DbUser();
-    user.setEmail(email);
+    user.setUserName(email);
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
     user.setFamilyName(familyName);

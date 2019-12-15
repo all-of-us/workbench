@@ -129,7 +129,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                 googleProject,
                 clusterName,
                 createFirecloudClusterRequest(
-                    user.getEmail(),
+                    user.getUserName(),
                     user.getClusterConfigDefault(),
                     customClusterEnvironmentVariables)));
   }

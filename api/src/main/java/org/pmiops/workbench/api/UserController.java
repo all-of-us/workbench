@@ -30,7 +30,7 @@ public class UserController implements UserApiDelegate {
   private static final Function<DbUser, org.pmiops.workbench.model.User> TO_USER_RESPONSE_USER =
       user -> {
         org.pmiops.workbench.model.User modelUser = new org.pmiops.workbench.model.User();
-        modelUser.setEmail(user.getEmail());
+        modelUser.setEmail(user.getUserName());
         modelUser.setGivenName(user.getGivenName());
         modelUser.setFamilyName(user.getFamilyName());
         return modelUser;
@@ -76,7 +76,7 @@ public class UserController implements UserApiDelegate {
     // limited researcher profile details.
     WorkbenchConfig config = configProvider.get();
     if (!fireCloudService.isUserMemberOfGroup(
-        userProvider.get().getEmail(), config.firecloud.registeredDomainName)) {
+        userProvider.get().getUserName(), config.firecloud.registeredDomainName)) {
       throw new ForbiddenException("user search requires registered data access");
     }
 

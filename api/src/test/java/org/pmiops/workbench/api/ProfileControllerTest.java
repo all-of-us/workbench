@@ -404,7 +404,7 @@ public class ProfileControllerTest {
         profileController.updateContactEmail(
             new UpdateContactEmailRequest()
                 .contactEmail("newContactEmail@whatever.com")
-                .username(dbUser.getEmail())
+                .username(dbUser.getUserName())
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     assertThat(dbUser.getContactEmail()).isEqualTo(originalEmail);
@@ -421,7 +421,7 @@ public class ProfileControllerTest {
         profileController.updateContactEmail(
             new UpdateContactEmailRequest()
                 .contactEmail("bad email address *(SD&(*D&F&*(DS ")
-                .username(dbUser.getEmail())
+                .username(dbUser.getUserName())
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(dbUser.getContactEmail()).isEqualTo(originalEmail);
@@ -437,7 +437,7 @@ public class ProfileControllerTest {
         profileController.updateContactEmail(
             new UpdateContactEmailRequest()
                 .contactEmail("newContactEmail@whatever.com")
-                .username(dbUser.getEmail())
+                .username(dbUser.getUserName())
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     assertThat(dbUser.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
@@ -506,7 +506,7 @@ public class ProfileControllerTest {
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
-            new ResendWelcomeEmailRequest().username(dbUser.getEmail()).creationNonce(NONCE));
+            new ResendWelcomeEmailRequest().username(dbUser.getUserName()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     // called twice, once during account creation, once on resend
     verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
@@ -521,7 +521,7 @@ public class ProfileControllerTest {
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
-            new ResendWelcomeEmailRequest().username(dbUser.getEmail()).creationNonce(NONCE));
+            new ResendWelcomeEmailRequest().username(dbUser.getUserName()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     // called twice, once during account creation, once on resend
     verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
@@ -607,7 +607,7 @@ public class ProfileControllerTest {
     createUser();
 
     profileController.deleteProfile();
-    verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getEmail());
+    verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getUserName());
   }
 
   private Profile createUser() throws Exception {

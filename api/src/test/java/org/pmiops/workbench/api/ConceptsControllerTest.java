@@ -260,7 +260,7 @@ public class ConceptsControllerTest {
             surveyModuleDao);
 
     DbUser user = new DbUser();
-    user.setEmail(USER_EMAIL);
+    user.setUserName(USER_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);

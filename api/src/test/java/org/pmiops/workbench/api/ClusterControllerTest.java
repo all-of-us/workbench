@@ -154,7 +154,7 @@ public class ClusterControllerTest {
     config.featureFlags = new FeatureFlagsConfig();
 
     user = new DbUser();
-    user.setEmail(LOGGED_IN_USER_EMAIL);
+    user.setUserName(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
 
     createUser(OTHER_USER_EMAIL);
@@ -422,7 +422,7 @@ public class ClusterControllerTest {
     DbUser user = new DbUser();
     user.setGivenName("first");
     user.setFamilyName("last");
-    user.setEmail(email);
+    user.setUserName(email);
     userDao.save(user);
   }
 }

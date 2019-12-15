@@ -86,7 +86,7 @@ public class NotebooksServiceTest {
   public void setup() {
     DB_USER = new DbUser();
     DB_USER.setUserId(101L);
-    DB_USER.setEmail("panic@thedis.co");
+    DB_USER.setUserName("panic@thedis.co");
   }
 
   @Mock private Blob mockBlob;

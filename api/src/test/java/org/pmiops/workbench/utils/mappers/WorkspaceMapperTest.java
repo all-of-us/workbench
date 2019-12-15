@@ -74,7 +74,7 @@ public class WorkspaceMapperTest {
             .name(WORKSPACE_FIRECLOUD_NAME);
 
     final DbUser creatorUser = new DbUser();
-    creatorUser.setEmail(CREATOR_EMAIL);
+    creatorUser.setUserName(CREATOR_EMAIL);
     creatorUser.setDataAccessLevelEnum(DATA_ACCESS_LEVEL);
     creatorUser.setUserId(CREATOR_USER_ID);
 
