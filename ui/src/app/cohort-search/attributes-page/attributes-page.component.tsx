@@ -101,8 +101,8 @@ const styles = reactStyles({
     marginLeft: '-0.25rem'
   },
   resultsContainer: {
-    flex: '0 0 41.66667%',
-    maxWidth: '41.66667%',
+    flex: '0 0 50%',
+    maxWidth: '50%',
     padding: '0.3rem 0.5rem 0',
     color: colors.primary,
     fontSize: '14px',
@@ -315,8 +315,9 @@ export const AttributesPage = withCurrentWorkspace() (
         }
         return acc;
       }, formErrors);
-      formValid = formValid ||
-        (this.isMeasurement && !operatorSelected && form.cat.some(attr => attr.checked));
+      // The second condition sets formValid to false if this is a Measurements attribute with no operator selected from the dropdown and
+      // no categorical checkboxes checked
+      formValid = formValid && !(this.isMeasurement && !operatorSelected && !form.cat.some(attr => attr.checked));
       return {formErrors, formValid};
     }
 
@@ -499,7 +500,8 @@ export const AttributesPage = withCurrentWorkspace() (
       const {node} = this.props;
       const {calculating, count, countError, form, loading, options} = this.state;
       const {formErrors, formValid} = this.validateForm();
-      const disabled = calculating || form.exists || !formValid || form.num.every(attr => attr.operator === 'ANY');
+      const disableAdd = calculating || !formValid;
+      const disableCalculate = disableAdd || form.exists || form.num.every(attr => attr.operator === 'ANY');
       return (loading ?
         <SpinnerOverlay/> :
         <div style={{margin: '0.5rem 0 1.5rem'}}>
@@ -565,29 +567,19 @@ export const AttributesPage = withCurrentWorkspace() (
           <div style={styles.countPreview}>
             <div style={styles.row}>
               <div style={styles.buttonContainer}>
-                <Button type='primary' disabled={disabled}
-                  style={{
-                    ...styles.button,
-                    ...(disabled ? {opacity: 0.4} : {}),
-                    background: colorWithWhiteness(colors.primary, .2)
-                  }}
-                  onClick={() => this.requestPreview()}>
-                  {calculating && <Spinner size={16} style={styles.spinner}/>}
-                  Calculate
+                <Button type='primary' disabled={disableCalculate} style={styles.button} onClick={() => this.requestPreview()}>
+                  {calculating && <Spinner size={16} style={styles.spinner}/>} Calculate
                 </Button>
               </div>
               <div style={styles.resultsContainer}>
                 <div style={{fontWeight: 'bold'}}>Results</div>
-                <div>
-                  Number Participants:
-                  <span> {count === null ? '--' : count.toLocaleString()} </span>
-                </div>
+                <div>Number Participants: <span> {count === null ? '--' : count.toLocaleString()} </span></div>
               </div>
-              {!calculating && formValid && <div style={styles.buttonContainer}>
-                <Button type='link'
-                  style={{...styles.button, color: colorWithWhiteness(colors.primary, .2)}}
-                  onClick={() => this.addParameterToSearchItem()}> ADD THIS</Button>
-              </div>}
+              <div style={styles.buttonContainer}>
+                <Button type='primary' disabled={disableAdd} style={styles.button} onClick={() => this.addParameterToSearchItem()}>
+                  ADD THIS
+                </Button>
+              </div>
             </div>
           </div>
         </div>

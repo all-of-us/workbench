@@ -358,7 +358,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                             this.setState({error: false})}>Close</Button>
               </ModalFooter>
           </Modal>}
-          {removingConcepts && <Modal>
+          {removingConcepts && <Modal loading={removeSubmitting}>
             <ModalTitle>Are you sure you want to remove {this.selectedConceptsCount}
             {this.selectedConceptsCount > 1 ? ' concepts' : ' concept'} from this set?</ModalTitle>
             <ModalFooter>

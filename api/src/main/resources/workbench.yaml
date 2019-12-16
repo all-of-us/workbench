@@ -2115,6 +2115,7 @@ paths:
           description: Mark all dataset with cohort/concept id as dirty
           schema:
             type: boolean
+            default: false
 
   /v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook:
     post:
@@ -2176,8 +2177,10 @@ definitions:
     properties:
       firecloudStatus:
         type: boolean
+        default: false
       notebooksStatus:
         type: boolean
+        default: false
 
   ConfigResponse:
     type: object
@@ -2199,15 +2202,19 @@ definitions:
           domain. If unset, Stackdriver error reporting should be disabled.
       enableComplianceTraining:
         type: boolean
+        default: false
         description: Feature flag for enabling compliance training in registration steps
       enableDataUseAgreement:
         type: boolean
+        default: false
         description: Feature flag for enabling data use agreement
       unsafeAllowSelfBypass:
         type: boolean
+        default: false
         description: Enable a user to bypass themself
       enableEraCommons:
         type: boolean
+        default: false
         description: Feature flag for enabling eRA commons
       firecloudURL:
         type: string
@@ -2264,6 +2271,7 @@ definitions:
         type: string
       transformedByRegisteredTierPrivacyMethods:
         type: boolean
+        default: false
 
   BillingProjectStatus:
     type: string
@@ -2382,6 +2390,7 @@ definitions:
         description: Milliseconds since the UNIX epoch.
       published:
         type: boolean
+        default: false
 
   UserRole:
     type: object
@@ -2447,6 +2456,7 @@ definitions:
     properties:
       includeUserRoles:
         type: boolean
+        default: false
         description: >
           Whether to duplicate the user roles (sharing settings) on the workspace.
           By default, duplicate follows the behavior of CreateWorkspace - it is
@@ -2516,6 +2526,7 @@ definitions:
         type: string
       approved:
         type: boolean
+        default: null
       ancestry:
         type: boolean
         default: false
@@ -2602,6 +2613,7 @@ definitions:
     properties:
       approved:
         type: boolean
+        default: false
 
   ClusterConfig:
     properties:
@@ -2646,6 +2658,7 @@ definitions:
         $ref: "#/definitions/AccessModule"
       isBypassed:
         type: boolean
+        default: false
 
   CohortReviewListResponse:
     type: object
@@ -2957,6 +2970,7 @@ definitions:
         type: string
       newNotebook:
         type: boolean
+        default: false
       kernelType:
         $ref: "#/definitions/KernelTypeEnum"
 
@@ -3001,6 +3015,7 @@ definitions:
           modify a changed resource.
       includesAllParticipants:
         type: boolean
+        default: false
       description:
         type: string
       workspaceId:
@@ -3335,6 +3350,7 @@ definitions:
       contactEmailFailure:
         description: Whether or not contact email could be added to verification list
         type: boolean
+        default: false
       firstSignInTime:
         type: integer
         format: int64
@@ -3372,6 +3388,7 @@ definitions:
         description: Timestamp when the user completed a demographic survey in milliseconds since the UNIX epoch.
       disabled:
         type: boolean
+        default: false
       emailVerificationStatus:
         $ref: "#/definitions/EmailVerificationStatus"
       aboutYou:
@@ -3493,6 +3510,7 @@ definitions:
         $ref: '#/definitions/Education'
       disability:
         type: boolean
+        default: false
 
   Address:
     type: object
@@ -3614,6 +3632,7 @@ definitions:
           type: string
       playgroundMode:
         type: boolean
+        default: false
         description: Set to true if playgroundMode needed
 
   ClusterLocalizeResponse:
@@ -3637,6 +3656,7 @@ definitions:
       isTaken:
         description: Boolean response to whether username is already taken.
         type: boolean
+        default: false
     example:
       isTaken: false
 
@@ -3648,6 +3668,7 @@ definitions:
       isTaken:
         description: Boolean response to whether contact email is already taken.
         type: boolean
+        default: false
     example:
       isTaken: false
 
@@ -3682,6 +3703,7 @@ definitions:
       disabled:
         description: Set to true to disable user in auth domain, false otherwise
         type: boolean
+        default: false
 
   AuditBigQueryResponse:
     type: object
