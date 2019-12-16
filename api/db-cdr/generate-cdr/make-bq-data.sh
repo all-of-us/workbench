@@ -100,7 +100,8 @@ VALUES
 (13,3,'Drug','Drug Exposures','Drugs biochemical substance formulated in such a way that when administered to a Person it will exert a certain physiological or biochemical effect. The drug exposure domain concepts capture records about the utilization of a Drug when ingested or otherwise introduced into the body.',0,0,0),
 (21,4,'Measurement','Measurements','Measurement',0,0,0),
 (10,6,'Procedure','Procedures','Procedure',0,0,0),
-(27,5,'Observation','Observations','Observation',0,0,0)"
+(27,5,'Observation','Observations','Observation',0,0,0),
+(0,8,'Physical Measurements','Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process',8,8,0)"
 
 # Populate survey_module
 #################
