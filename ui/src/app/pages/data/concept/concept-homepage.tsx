@@ -19,6 +19,7 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {NavStore, queryParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
+import {environment} from 'environments/environment';
 import {
   Concept,
   ConceptSet,
@@ -280,21 +281,19 @@ export const ConceptHomepage = withCurrentWorkspace()(
         const [conceptDomainInfo, surveysInfo] = await Promise.all([
           conceptsApi().getDomainInfo(namespace, id),
           conceptsApi().getSurveyInfo(namespace, id)]);
-        const conceptsCache: ConceptCacheItem[] = [
-          ...conceptDomainInfo.items.map((domain) => ({
-            domain: domain.domain,
-            items: []
-          })),
-          ...conceptCacheStub
-        ];
-        const conceptDomainCounts: DomainCount[] = [
-          ...conceptDomainInfo.items.map((domain) => ({
-            domain: domain.domain,
-            name: domain.name,
-            conceptCount: 0
-          })),
-          ...domainCountStub
-        ];
+        let conceptsCache: ConceptCacheItem[] = conceptDomainInfo.items.map((domain) => ({
+          domain: domain.domain,
+          items: []
+        }));
+        let conceptDomainCounts: DomainCount[] = conceptDomainInfo.items.map((domain) => ({
+          domain: domain.domain,
+          name: domain.name,
+          conceptCount: 0
+        }));
+        if (environment.enableNewConceptTabs) {
+          conceptsCache = [...conceptsCache, ...conceptCacheStub];
+          conceptDomainCounts = [...conceptDomainCounts, ...domainCountStub];
+        }
         this.setState({
           conceptsCache: conceptsCache,
           conceptDomainList: conceptDomainInfo.items,
@@ -375,7 +374,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         if (activeTabSearch) {
           this.setState({
             searchLoading: false,
-            conceptDomainCounts: [...resp.domainCounts, ...domainCountStub],
+            conceptDomainCounts: [...resp.domainCounts, ...(environment.enableNewConceptTabs ? domainCountStub : [])],
             selectedDomain: resp.domainCounts
               .find(domainCount => domainCount.domain === cacheItem.domain)});
           this.setConceptsAndVocabularies();
@@ -601,15 +600,17 @@ export const ConceptHomepage = withCurrentWorkspace()(
                                          }); }}/>;
                     })}
                    </div>
-                  <div style={styles.sectionHeader}>
-                    Program Physical Measurements
-                  </div>
-                  <div style={styles.cardList}>
-                    {conceptPhysicalMeasurementsList.map((physicalMeasurement, p) => {
-                      return <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement} key={p}
-                                         browsePhysicalMeasurements={() => {}}/>; // TODO replace with actual function when api call ready
-                    })}
-                   </div>
+                  {environment.enableNewConceptTabs && <React.Fragment>
+                    <div style={styles.sectionHeader}>
+                      Program Physical Measurements
+                    </div>
+                    <div style={styles.cardList}>
+                      {conceptPhysicalMeasurementsList.map((physicalMeasurement, p) => {
+                        return <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement} key={p}
+                                           browsePhysicalMeasurements={() => {}}/>; // TODO replace with actual function when api call ready
+                      })}
+                    </div>
+                  </React.Fragment>}
                 </div>
           }
           {conceptAddModalOpen &&
