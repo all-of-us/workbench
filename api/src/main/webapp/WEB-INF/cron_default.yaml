@@ -51,6 +51,6 @@ cron:
   target: api
 - description: 'Sample all gauge metrics for OpenCensus Monitoring and record them'
   url: /v1/cron/monitoring/updateGaugeMetrics
-  schedule: every 1 minute
+  schedule: every 1 minutes
   timezone: UTC
   target: api
