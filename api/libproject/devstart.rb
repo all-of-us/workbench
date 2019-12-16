@@ -112,6 +112,7 @@ end
 def ensure_docker(cmd_name, args=nil)
   args = (args or [])
   unless Workbench.in_docker?
+    ensure_docker_sync()
     exec(*(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args))
   end
 end
@@ -169,6 +170,14 @@ def format_benchmark(bm)
   "%ds" % [bm.real]
 end
 
+def ensure_docker_sync()
+  common = Common.new
+  at_exit do
+    common.run_inline %W{docker-sync stop}
+    end
+  common.run_inline %W{docker-sync start}
+end
+
 def dev_up()
   common = Common.new
 
@@ -179,16 +188,11 @@ def dev_up()
 
   at_exit do
     common.run_inline %W{docker-compose down}
-    common.run_inline %W{docker-sync stop}
   end
 
-  overall_bm = Benchmark.measure {
-    common.status "Docker-sync startup..."
-    bm = Benchmark.measure {
-      common.run_inline %W{docker-sync start}
-    }
-    common.status "Docker-sync startup complete (#{format_benchmark(bm)})"
+  ensure_docker_sync()
 
+  overall_bm = Benchmark.measure {
     common.status "Database startup..."
     bm = Benchmark.measure {
       common.run_inline %W{docker-compose up -d db}
@@ -602,6 +606,8 @@ Common.register_command({
 })
 
 def run_local_all_migrations()
+  ensure_docker_sync()
+
   common = Common.new
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 
@@ -616,6 +622,8 @@ Common.register_command({
 })
 
 def run_local_data_migrations()
+  ensure_docker_sync()
+
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
 end
 
@@ -626,6 +634,8 @@ Common.register_command({
 })
 
 def run_local_rw_migrations()
+  ensure_docker_sync()
+
   common = Common.new
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 end
@@ -1005,6 +1015,8 @@ Imports .sql file to local mysql instance",
 
 
 def run_drop_cdr_db()
+  ensure_docker_sync()
+
   common = Common.new
   common.run_inline %W{docker-compose run cdr-scripts ./run-drop-db.sh}
 end
@@ -1550,6 +1562,7 @@ def load_es_index(cmd_name, *args)
   end
 
   unless Workbench.in_docker?
+    ensure_docker_sync()
     exec(*(%W{docker-compose run --rm es-scripts ./project.rb #{cmd_name}} + args))
   end
 
@@ -1622,6 +1635,8 @@ Common.register_command({
 })
 
 def update_cdr_versions_local(cmd_name, *args)
+  ensure_docker_sync()
+
   setup_local_environment
   op = update_cdr_version_options(cmd_name, args)
   op.parse.validate
