@@ -215,4 +215,24 @@ describe('ConceptHomepage', () => {
       .toBe(SurveyStubVariables.STUB_SURVEYS.length);
 
   });
+
+  it('should display all Concept selected message when header checkbox is selected', async() => {
+    const wrapper = mount(<ConceptHomepage />);
+    await waitOneTickAndUpdate(wrapper);
+    searchTable('Stub Concept', wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('span.p-checkbox-icon.p-clickable').at(1).simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find('[data-test-id="selection"]').text()).toContain('All concepts on this page are selected.');
+    expect(wrapper.find('[data-test-id="banner-link"]').text()).toEqual('Select 1');
+    wrapper.find('[data-test-id="banner-link"]').simulate('click');
+    expect(wrapper.find('[data-test-id="selectedConcepts"]').length).toEqual(1);
+
+    expect(wrapper.find('[data-test-id="banner-link"]').text()).toEqual('Clear Selection');
+    wrapper.find('[data-test-id="banner-link"]').simulate('click');
+    expect(wrapper.find('[data-test-id="selectedConcepts"]').length).toEqual(0);
+
+  });
 });

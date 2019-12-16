@@ -1,4 +1,5 @@
-import {Link} from 'app/components/buttons';
+import {Clickable, Link} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -38,7 +39,7 @@ interface SynonymsObjectState {
   seeMore: boolean;
   willOverflow: boolean;
 }
-const ROWS_TO_DISPLAY = 10;
+const ROWS_TO_DISPLAY = 20;
 export class SynonymsObject extends React.Component<{}, SynonymsObjectState> {
   domElement: any;
   constructor(props) {
@@ -92,7 +93,6 @@ interface Props {
   concepts: Concept[];
   loading: boolean;
   onSelectConcepts: Function;
-  nextPage?: Function;
   placeholderValue: string;
   reactKey: string;
   searchTerm?: string;
@@ -103,9 +103,13 @@ interface State {
   first: number;
   pageLoading: boolean;
   selectedConcepts: Concept[];
+  showBanner: boolean;
+  selectAll: boolean;
   totalRecords: number;
   pageConcepts: Concept[];
   pageNumber: number;
+  tableRef: any;
+  pageNum: number;
 }
 
 export class ConceptTable extends React.Component<Props, State> {
@@ -114,11 +118,15 @@ export class ConceptTable extends React.Component<Props, State> {
     super(props);
     this.state = {
       selectedConcepts: props.selectedConcepts,
+      showBanner: false,
+      selectAll: false,
       pageLoading: false,
       first: 0,
       totalRecords: props.concepts.length,
       pageNumber: 0,
-      pageConcepts: props.concepts.slice(0, 10)
+      pageConcepts: props.concepts.slice(0, 10),
+      tableRef: React.createRef(),
+      pageNum: 1
     };
   }
 
@@ -129,9 +137,25 @@ export class ConceptTable extends React.Component<Props, State> {
     }
   }
 
-  updateSelectedConceptList(selectedConcepts) {
-    this.setState({selectedConcepts : selectedConcepts});
-    this.props.onSelectConcepts(selectedConcepts);
+  updateSelectedConceptList(selectedConcepts, origin) {
+    if (selectedConcepts.length === this.props.concepts.length && origin === 'table') {
+      const startIndex = this.state.tableRef.current.state.first;
+      const endIndex = startIndex + ROWS_TO_DISPLAY;
+      const selectedConceptss = this.state.selectedConcepts
+          .concat(this.props.concepts.slice(startIndex, endIndex));
+      const uniq = fp.uniqBy( 'conceptId', selectedConceptss);
+      this.setState({selectedConcepts: uniq});
+      this.props.onSelectConcepts(uniq);
+      this.setState({showBanner: true});
+    } else if (selectedConcepts.length === 0 ) {
+      this.setState({showBanner: false});
+      this.setState({selectedConcepts: selectedConcepts});
+      this.props.onSelectConcepts(selectedConcepts);
+    } else {
+      this.setState({selectedConcepts: selectedConcepts});
+      this.props.onSelectConcepts(selectedConcepts);
+    }
+
   }
 
   distinctVocabulary() {
@@ -143,13 +167,10 @@ export class ConceptTable extends React.Component<Props, State> {
     if ((nextProps.concepts !==  this.props.concepts)) {
       if (nextProps.concepts !== this.props.concepts && nextProps.concepts.length > 0 ) {
         this.setState({totalRecords: nextProps.concepts.length});
-
-        // Update pageConcepts only for the first time/page.
-        // onPage() will update for the rest of the pages
-        if (this.state.pageNumber === 0 ) {
-          this.setState({pageConcepts: nextProps.concepts.slice(0, 10)});
-        }
       }
+    }
+    if (nextProps.reactKey !== this.props.reactKey) {
+      this.setState({showBanner: false});
     }
   }
 
@@ -184,45 +205,48 @@ export class ConceptTable extends React.Component<Props, State> {
       </span>);
   }
 
-  async onPage(event) {
-    this.setState({pageLoading: true});
+  selectAll() {
+    this.setState({selectAll: !this.state.selectAll});
+    const selectedConcept = this.state.selectAll ? [] : this.props.concepts;
+    this.updateSelectedConceptList(selectedConcept, 'link');
+  }
 
-    // Call next set of concepts only if user is on the last page
-    if ((event.page + 1) === event.pageCount) {
-      const pageCount = Math.ceil(this.state.totalRecords / 100);
-      await this.props.nextPage(pageCount);
-      this.setState({pageNumber: pageCount, pageLoading: true});
+  selectAllHeader() {
+    if (this.state.showBanner) {
+      const {concepts} = this.props;
+      const bannerText = this.state.selectAll ? 'Clear Selection' : 'Select ' + concepts.length;
+      return <FlexRow  data-test-id='selection' style={{fontWeight: '200'}}>
+        All concepts on this page are selected.&nbsp;
+        <Clickable data-test-id='banner-link' style={{color: 'blue'}} onClick={() => this.selectAll()}>
+          {bannerText}
+        </Clickable>
+      </FlexRow>;
     }
+    return;
+  }
 
-    const startIndex = event.first;
-    const endIndex = event.first + event.rows;
-
-    this.setState({
-      first: event.first,
-      pageConcepts: this.props.concepts.slice(startIndex, endIndex),
-      pageLoading: false
-    });
+  onPage() {
+    this.state.tableRef.current.first === 0 ? this.setState({showBanner: false}): '';
   }
 
   render() {
-    const {pageConcepts, pageLoading, selectedConcepts} = this.state;
+    const {pageConcepts, pageLoading, selectedConcepts, tableRef} = this.state;
     const {placeholderValue, loading, reactKey} = this.props;
     return <div data-test-id='conceptTable' key={reactKey}>
-      <DataTable emptyMessage={loading ? '' : placeholderValue}
-                 value={pageConcepts} scrollable={true}
+      <DataTable ref={tableRef} emptyMessage={loading ? '' : placeholderValue}
+                 header={this.selectAllHeader()}
+                 value={this.props.concepts} scrollable={true}
                  selection={selectedConcepts} style={{minWidth: 1100}}
                  totalRecords={this.state.totalRecords}
                  expandedRows={this.props.concepts
                    .filter(concept => concept.conceptSynonyms.length > 0)}
                  rowExpansionTemplate={(data) => this.rowExpansionTemplate(data)}
                  paginator={true} rows={ROWS_TO_DISPLAY}
-                 onPage={(event) => this.onPage(event)}
-                 loading={pageLoading}
-                 lazy={true} first={this.state.first}
                  data-test-id='conceptRow'
-                 onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
+                 onValueChange={(value) => this.onPage()}
+                 onSelectionChange={e => this.updateSelectedConceptList(e.value, 'table')} >
       <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
-              data-test-id='conceptCheckBox' selectionMode='multiple' />
+              data-test-id='conceptCheckBox' selectionMode='multiple'/>
       <Column bodyStyle={styles.colStyle} field='conceptName' header='Name'
               data-test-id='conceptName'/>
       <Column bodyStyle={styles.colStyle} field='conceptCode' header='Code'/>

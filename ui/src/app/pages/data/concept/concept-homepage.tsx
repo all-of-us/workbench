@@ -149,8 +149,6 @@ interface State { // Browse survey
   conceptsSavedText: string;
   // Array of surveys
   conceptSurveysList: Array<SurveyModule>;
-  // Array of concepts that have been selected
-  conceptsToAdd: Concept[];
   // Current string in search box
   currentSearchString: string;
   // If concept metadata is still being gathered for any domain
@@ -159,8 +157,8 @@ interface State { // Browse survey
   searchLoading: boolean;
   // If we are in 'search mode' and should show the table
   searching: boolean;
-  // Map of domain to number of selected concepts in domain
-  selectedConceptDomainMap: Map<String, number>;
+  // Map of domain to selected concepts in domain
+  selectedConceptDomainMap: Map<String, Concept[]>;
   // Domain being viewed. Will be the domain that the add button uses.
   selectedDomain: DomainCount;
   // Name of the survey selected
@@ -179,7 +177,7 @@ interface State { // Browse survey
 export const ConceptHomepage = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
 
-    private MAX_CONCEPT_FETCH = 100;
+    private MAX_CONCEPT_FETCH = 1000;
     constructor(props) {
       super(props);
       this.state = {
@@ -193,12 +191,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
         conceptsCache: [],
         conceptsSavedText: '',
         conceptSurveysList: [],
-        conceptsToAdd: [],
         currentSearchString: '',
         loadingDomains: true,
         searchLoading: false,
         searching: false,
-        selectedConceptDomainMap: new Map<string, number>(),
+        selectedConceptDomainMap: new Map<string, Concept[]>(),
         selectedDomain: {
           name: '',
           domain: undefined,
@@ -291,15 +288,15 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     async searchConcepts() {
       const {standardConceptsOnly, currentSearchString, conceptsCache,
-        selectedDomain, completedDomainSearches} = this.state;
+        selectedDomain, completedDomainSearches, selectedConceptDomainMap} = this.state;
       const {namespace, id} = this.props.workspace;
-      this.setState({concepts: [], searchLoading: true, searching: true, conceptsToAdd: [],
-        selectedConceptDomainMap: new Map<string, number>()});
+      this.setState({concepts: [], searchLoading: true, searching: true});
       const standardConceptFilter = standardConceptsOnly ?
         StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
 
       conceptsCache.forEach(async(cacheItem) => {
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
+        selectedConceptDomainMap[cacheItem.domain] = [];
         const resp = await conceptsApi().searchConcepts(namespace, id, {
           query: currentSearchString,
           standardConceptFilter: standardConceptFilter,
@@ -319,32 +316,15 @@ export const ConceptHomepage = withCurrentWorkspace()(
           this.setConceptsAndVocabularies();
         }
       });
-    }
-
-    async getNextConceptSet(pageNumber) {
-      const {standardConceptsOnly, currentSearchString, selectedDomain} = this.state;
-      const {namespace, id} = this.props.workspace;
-      const standardConceptFilter = standardConceptsOnly ?
-          StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
-
-      const concepts = this.state.concepts;
-      const resp = await conceptsApi().searchConcepts(namespace, id, {
-        query: currentSearchString,
-        standardConceptFilter: standardConceptFilter,
-        domain: selectedDomain.domain,
-        includeDomainCounts: true,
-        maxResults: this.MAX_CONCEPT_FETCH,
-        pageNumber: pageNumber ? pageNumber : 0
-      });
-      this.setState({concepts: concepts.concat(resp.items)});
+      this.setState({selectedConceptDomainMap: selectedConceptDomainMap});
     }
 
     selectConcepts(concepts: Concept[]) {
       const {selectedDomain, selectedConceptDomainMap} = this.state;
       selectedConceptDomainMap[selectedDomain.domain] = concepts.filter(concept => {
         return concept.domainId.toLowerCase() === selectedDomain.domain.toString().toLowerCase();
-      }).length;
-      this.setState({selectedConceptDomainMap: selectedConceptDomainMap, conceptsToAdd: concepts});
+      });
+      this.setState({selectedConceptDomainMap: selectedConceptDomainMap});
     }
 
     clearSearch() {
@@ -384,7 +364,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         || !selectedConceptDomainMap[selectedDomain.domain]) {
         return 0;
       }
-      return selectedConceptDomainMap[selectedDomain.domain];
+      return selectedConceptDomainMap[selectedDomain.domain].length;
     }
 
     selectedQuestion(selectedQues) {
@@ -411,8 +391,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     renderConcepts() {
-      const {concepts, searchLoading, conceptDomainCounts, selectedDomain,
-        conceptsToAdd, selectedConceptDomainMap} = this.state;
+      const {concepts, searchLoading, conceptDomainCounts, selectedDomain, selectedConceptDomainMap} = this.state;
 
       return <FadeBox>
         <FlexRow style={{justifyContent: 'flex-start'}}>
@@ -427,9 +406,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
                     <Spinner style={{height: '15px', width: '15px'}}/> :
                     <FlexRow style={{justifyContent: 'space-between'}}>
                       <div>{domain.conceptCount}</div>
-                      {(selectedConceptDomainMap[domain.domain] > 0) &&
+                      {(selectedConceptDomainMap[domain.domain].length > 0) &&
                       <div style={styles.selectedConceptsCount} data-test-id='selectedConcepts'>
-                        {selectedConceptDomainMap[domain.domain]}
+                        {selectedConceptDomainMap[domain.domain].length}
                       </div>}
                     </FlexRow>
                 }
@@ -440,17 +419,16 @@ export const ConceptHomepage = withCurrentWorkspace()(
             </FlexColumn>;
           })}
         </FlexRow>
-        <div style={styles.conceptCounts}>
-          Showing top {concepts.length} of {selectedDomain.conceptCount} {selectedDomain.name}
-        </div>
+        {selectedDomain.conceptCount > 10000 && <div style={styles.conceptCounts}>
+          Showing top {concepts.length} {selectedDomain.name}
+        </div>}
         <ConceptTable concepts={concepts}
                       loading={searchLoading}
                       onSelectConcepts={this.selectConcepts.bind(this)}
                       placeholderValue={this.noConceptsConstant}
                       searchTerm={this.state.currentSearchString}
-                      selectedConcepts={conceptsToAdd}
-                      reactKey={selectedDomain.name}
-                      nextPage={(page) => this.getNextConceptSet(page)}/>
+                      selectedConcepts={selectedConceptDomainMap[selectedDomain.domain]}
+                      reactKey={selectedDomain.name}/>
         <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
                          iconShape='plus'
                          tooltip={!this.state.workspacePermissions.canWrite}
@@ -464,8 +442,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
     render() {
       const {loadingDomains, browsingSurvey, conceptDomainList, conceptSurveysList,
         standardConceptsOnly, showSearchError, searching, selectedDomain, conceptAddModalOpen,
-        conceptsToAdd, currentSearchString, conceptsSavedText, selectedSurvey, surveyAddModalOpen,
-        selectedSurveyQuestions} =
+        currentSearchString, conceptsSavedText, selectedSurvey, surveyAddModalOpen,
+        selectedSurveyQuestions, selectedConceptDomainMap} =
           this.state;
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
@@ -544,7 +522,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
           }
           {conceptAddModalOpen &&
             <ConceptAddModal selectedDomain={selectedDomain}
-                             selectedConcepts={conceptsToAdd}
+                             selectedConcepts={selectedConceptDomainMap[selectedDomain.domain]}
                              onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
                              onClose={() => this.setState({conceptAddModalOpen: false})}/>}
           {surveyAddModalOpen &&
