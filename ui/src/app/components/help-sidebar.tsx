@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
-import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import {faEllipsisV, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -8,7 +8,6 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
-import {CardMenuIconComponentReact} from 'app/icons/card-menu-icon';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
 import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -167,21 +166,21 @@ const icons = [{
   disabled: false,
   faIcon: faInfoCircle,
   page: null,
-  style: {fontSize: '22px'},
+  style: {fontSize: '21px'},
   tooltip: 'Help Tips',
 }, {
   id: 'thunderstorm',
   disabled: true,
   faIcon: null,
   page: null,
-  style: {height: '26px', width: '26px', marginTop: '0.25rem', opacity: 0.5},
+  style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
   tooltip: 'Compute Configuration',
 }, {
   id: 'annotations',
   disabled: false,
   faIcon: faEdit,
   page: 'reviewParticipantDetail',
-  style: {fontSize: '20px', marginLeft: '5px'},
+  style: {fontSize: '20px', marginLeft: '3px'},
   tooltip: 'Annotations',
 }];
 
@@ -306,7 +305,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
       const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
       return <PopupTrigger
         side='bottom'
-        closeOnClick={true}
+        closeOnClick
         content={
           <React.Fragment>
             <div style={styles.dropdownHeader}>Workspace Actions</div>
@@ -325,8 +324,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenEditPage();
                 NavStore.navigate(['/workspaces', namespace, id, 'edit']);
-              }}
-            >
+              }}>
               Edit
             </MenuItem>
             <MenuItem
@@ -351,8 +349,12 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
             </MenuItem>
           </React.Fragment>
         }>
-        <div data-test-id='workspace-menu-button' style={iconStyles.menu}>
-          <CardMenuIconComponentReact />
+        <div data-test-id='workspace-menu-button'>
+          <TooltipTrigger content={<div>Menu</div>} side='left'>
+            <div style={styles.icon}>
+              <FontAwesomeIcon icon={faEllipsisV} style={{fontSize: '21px'}}/>
+            </div>
+          </TooltipTrigger>
         </div>
       </PopupTrigger>;
     }
