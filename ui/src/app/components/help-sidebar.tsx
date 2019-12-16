@@ -285,7 +285,7 @@ export const HelpSidebar = withUserProfile()(
       return <React.Fragment>
         <div style={styles.iconContainer}>
           {icons.map((icon, i) => (!icon.page || icon.page === helpContent) && <div key={i} style={{display: 'table'}}>
-            <TooltipTrigger disabled={tooltipId !== i} content={<div>{icon.tooltip}</div>}>
+            <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
               <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
                    onMouseOver={() => this.setState({tooltipId: i})}
                    onMouseOut={() => this.setState({tooltipId: undefined})}>

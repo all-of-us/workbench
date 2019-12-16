@@ -26,7 +26,6 @@ cron-emulator-err.log
 /common-api/.swagger-codegen/*
 /common-api/bin
 /common-api/src/generated
-/ui/.npmrc
 /ui/package-lock.json
 /ui/coverage
 /ui/**/*.map
