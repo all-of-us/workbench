@@ -28,7 +28,7 @@ const styles = reactStyles({
   }
 });
 
-interface ServerStatus {
+interface ServerDownStatus {
   apiDown: boolean;
   firecloudDown: boolean;
   notebooksDown: boolean;
@@ -39,7 +39,7 @@ interface Props {
 }
 
 interface State {
-  serverStatus: ServerStatus;
+  serverDownStatus: ServerDownStatus;
   serverStatusAcknowledged: boolean;
 }
 
@@ -48,17 +48,16 @@ interface State {
 const shouldCheckStatus = new BehaviorSubject<any>(true);
 
 export const ErrorHandler = withGlobalError()(class extends React.Component<Props, State> {
-  obs;
   constructor(props: Props) {
     super(props);
     this.state = {
-      serverStatus: {apiDown: false, firecloudDown: false, notebooksDown: false},
+      serverDownStatus: {apiDown: false, firecloudDown: false, notebooksDown: false},
       serverStatusAcknowledged: false
     };
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.serverStatus !== prevState.serverStatus) {
+    if (this.state.serverDownStatus !== prevState.serverDownStatus) {
       this.setState({serverStatusAcknowledged: false});
     }
     const {globalError} = this.props;
@@ -74,19 +73,19 @@ export const ErrorHandler = withGlobalError()(class extends React.Component<Prop
   }
 
   async pingServer() {
-    const serverStatus = {firecloudDown: false, notebooksDown: false, apiDown: false};
+    const serverDownStatus = {firecloudDown: false, notebooksDown: false, apiDown: false};
     await statusApi().getStatus().then(statusResponse => {
       if (statusResponse.firecloudStatus === false) {
-        serverStatus.firecloudDown = true;
+        serverDownStatus.firecloudDown = true;
       }
       if (statusResponse.notebooksStatus === false) {
-        serverStatus.notebooksDown = true;
+        serverDownStatus.notebooksDown = true;
       }
     }).catch(error => {
-      serverStatus.apiDown = true;
+      serverDownStatus.apiDown = true;
     });
     shouldCheckStatus.next(true);
-    this.setState({serverStatus});
+    this.setState({serverDownStatus});
   }
 
   closeError() {
@@ -95,7 +94,7 @@ export const ErrorHandler = withGlobalError()(class extends React.Component<Prop
 
   render() {
     const {globalError} = this.props;
-    const {apiDown, firecloudDown, notebooksDown} = this.state.serverStatus;
+    const {apiDown, firecloudDown, notebooksDown} = this.state.serverDownStatus;
 
     return globalError !== undefined && <React.Fragment>
       {globalError.statusCode === 500 && <div style={styles.errorHandler}>

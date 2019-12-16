@@ -22,14 +22,20 @@ export async function fetchAbortableRetry<T>(fetchFn: () => Promise<T>, timeoutM
 }
 
 
+/*
+ * A method to run an api call with our global error handling. It also adds retries on 503
+ * errors. This will convert errors to our JavaScript object, and push them to our global
+ * error handler.
+ * Parameters:
+ *    fetchFn: Lambda that will run an API call, in the form of () => apiClient.apiCall(args)
+ *    maxRetries?: The number of times it will retry before failing. Defaults to 3.
+ */
 
 export async function fetchWithGlobalErrorHandler<T>(fetchFn: () => Promise<T>, maxRetries: number = 3): Promise<T> {
   let retries = 0;
   while (true) {
     try {
-      const returnVal = await fetchFn();
-      console.log(returnVal);
-      return returnVal;
+      return await fetchFn();
     } catch (e) {
       retries++;
       const errorResponse = await convertAPIError(e);
