@@ -29,10 +29,10 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
   /** Find users matching the user's name or email */
   @Query(
-      "SELECT dbUser FROM DbUser dbUser WHERE dbUser.dataAccessLevel IN :dals " +
-          "AND ( lower(dbUser.username) LIKE lower(concat('%', :term, '%')) " +
-          "OR lower(dbUser.familyName) LIKE lower(concat('%', :term, '%')) " +
-          "OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%')) )")
+      "SELECT dbUser FROM DbUser dbUser WHERE dbUser.dataAccessLevel IN :dals "
+          + "AND ( lower(dbUser.username) LIKE lower(concat('%', :term, '%')) "
+          + "OR lower(dbUser.familyName) LIKE lower(concat('%', :term, '%')) "
+          + "OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%')) )")
   List<DbUser> findUsersByDataAccessLevelsAndSearchString(
       @Param("dals") List<Short> dataAccessLevels, @Param("term") String term, Sort sort);
 }

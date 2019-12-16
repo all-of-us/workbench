@@ -62,7 +62,8 @@ public class CdrVersionService {
   public void setCdrVersion(DbCdrVersion version) {
     // TODO: map data access level to authorization domain here (RW-943)
     String authorizationDomain = configProvider.get().firecloud.registeredDomainName;
-    if (!fireCloudService.isUserMemberOfGroup(userProvider.get().getUsername(), authorizationDomain)) {
+    if (!fireCloudService.isUserMemberOfGroup(
+        userProvider.get().getUsername(), authorizationDomain)) {
       throw new ForbiddenException(
           "Requester is not a member of " + authorizationDomain + ", cannot access CDR");
     }

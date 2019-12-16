@@ -226,23 +226,15 @@ public class UserControllerTest {
     assertThat(robinsonsAsc.getUsers()).containsAllIn(robinsonsDesc.getUsers());
 
     // Now reverse one and assert both in the same order
-    List<User> descendingReversed =
-        Lists.reverse(robinsonsDesc.getUsers());
+    List<User> descendingReversed = Lists.reverse(robinsonsDesc.getUsers());
     assertThat(robinsonsAsc.getUsers()).containsAllIn(descendingReversed).inOrder();
 
     // Test that JPA sorting is really what we expected it to be by re-sorting one into a new list
-    List<User> newAscending =
-        Lists.newArrayList(robinsonsAsc.getUsers());
+    List<User> newAscending = Lists.newArrayList(robinsonsAsc.getUsers());
     newAscending.sort(Comparator.comparing(User::getUserName));
     assertThat(robinsonsAsc.getUsers()).containsAllIn(newAscending).inOrder();
   }
 
-  @Test
-  public void testEmailAndUserNameEquivalence() {
-    User user = new User()
-        .userName("bob")
-        .email("Clyde");
-  }
   /*
    * Testing helpers
    */

@@ -694,7 +694,8 @@ public class UserService {
 
     return updateUserWithRetries(
         user -> {
-          boolean isEnrolledIn2FA = directoryService.getUser(user.getUsername()).getIsEnrolledIn2Sv();
+          boolean isEnrolledIn2FA =
+              directoryService.getUser(user.getUsername()).getIsEnrolledIn2Sv();
           if (isEnrolledIn2FA) {
             if (user.getTwoFactorAuthCompletionTime() == null) {
               user.setTwoFactorAuthCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
