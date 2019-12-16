@@ -166,7 +166,9 @@ public class BillingProjectBufferServiceTest {
   public void fillBuffer_failedCreateRequest() {
     long expectedCount = billingProjectBufferEntryDao.count() + 1;
 
-    doThrow(RuntimeException.class).when(mockFireCloudService).createAllOfUsBillingProject(anyString());
+    doThrow(RuntimeException.class)
+        .when(mockFireCloudService)
+        .createAllOfUsBillingProject(anyString());
     try {
       billingProjectBufferService.bufferBillingProjects();
     } catch (Exception e) {
@@ -232,7 +234,8 @@ public class BillingProjectBufferServiceTest {
 
     // should no op since we're at capacity + 2
     billingProjectBufferService.bufferBillingProjects();
-    verify(mockFireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
+    verify(mockFireCloudService, times((int) BUFFER_CAPACITY))
+        .createAllOfUsBillingProject(anyString());
 
     // should no op since we're at capacity + 1
     Iterator<DbBillingProjectBufferEntry> bufferEntries =
@@ -241,14 +244,16 @@ public class BillingProjectBufferServiceTest {
     entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProjects();
-    verify(mockFireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
+    verify(mockFireCloudService, times((int) BUFFER_CAPACITY))
+        .createAllOfUsBillingProject(anyString());
 
     // should no op since we're at capacity
     entry = bufferEntries.next();
     entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProjects();
-    verify(mockFireCloudService, times((int) BUFFER_CAPACITY)).createAllOfUsBillingProject(anyString());
+    verify(mockFireCloudService, times((int) BUFFER_CAPACITY))
+        .createAllOfUsBillingProject(anyString());
 
     // should invoke since we're below capacity
     entry = bufferEntries.next();

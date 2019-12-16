@@ -34,11 +34,12 @@ public class StackdriverStatsExporterService {
   public void createAndRegister() {
     if (!initialized) {
       try {
-        StackdriverStatsExporter.createAndRegister(
+        final StackdriverStatsConfiguration configuration =
             StackdriverStatsConfiguration.builder()
                 .setMetricNamePrefix(buildMetricNamePrefix())
                 .setProjectId(workbenchConfigProvider.get().server.projectId)
-                .build());
+                .build();
+        StackdriverStatsExporter.createAndRegister(configuration);
         initialized = true;
       } catch (IOException e) {
         logger.log(Level.WARNING, "Failed to initialize global StackdriverStatsExporter.", e);
