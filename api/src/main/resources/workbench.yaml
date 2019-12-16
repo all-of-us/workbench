@@ -1252,6 +1252,7 @@ paths:
         - cron
       description: Trigger recording of all gauge metrics
       operationId: updateGaugeMetrics
+      security: []
       responses:
         204:
           description: No content
