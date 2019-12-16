@@ -1,9 +1,13 @@
 import {Component, Input} from '@angular/core';
+import {faEdit} from '@fortawesome/free-regular-svg-icons';
+import {faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ClrIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
 import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -11,6 +15,9 @@ import {highlightSearchTerm, reactStyles, ReactWrapperBase, withUserProfile} fro
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {ParticipantCohortStatus} from 'generated/fetch';
 
+const proIcons = {
+  thunderstorm: '/assets/icons/thunderstorm-solid.svg'
+};
 const sidebarContent = require('assets/json/help-sidebar.json');
 
 const styles = reactStyles({
@@ -53,12 +60,16 @@ const styles = reactStyles({
     zIndex: 101
   },
   icon: {
+    background: colorWithWhiteness(colors.primary, 0.48),
     color: colors.white,
-    marginTop: '1rem',
-    padding: '0.25rem 0',
+    display: 'table-cell',
+    height: '46px',
+    width: '45px',
+    borderBottom: `1px solid ${colorWithWhiteness(colors.primary, 0.4)}`,
     cursor: 'pointer',
     textAlign: 'center',
-    transition: 'background 0.2s linear'
+    transition: 'background 0.2s linear',
+    verticalAlign: 'middle'
   },
   topBar: {
     width: '14rem',
@@ -121,10 +132,32 @@ const iconStyles = {
   },
   disabled: {
     ...styles.icon,
-    opacity: 0.4,
     cursor: 'not-allowed'
   }
 };
+
+const icons = [{
+  id: 'help',
+  disabled: false,
+  faIcon: faInfoCircle,
+  page: null,
+  style: {fontSize: '22px'},
+  tooltip: 'Help Tips',
+}, {
+  id: 'thunderstorm',
+  disabled: true,
+  faIcon: null,
+  page: null,
+  style: {height: '26px', width: '26px', marginTop: '0.25rem', opacity: 0.5},
+  tooltip: 'Compute Configuration',
+}, {
+  id: 'annotations',
+  disabled: false,
+  faIcon: faEdit,
+  page: 'reviewParticipantDetail',
+  style: {fontSize: '20px', marginLeft: '5px'},
+  tooltip: 'Annotations',
+}];
 
 interface Props {
   helpContent: string;
@@ -138,6 +171,7 @@ interface State {
   filteredContent: Array<any>;
   participant: ParticipantCohortStatus;
   searchTerm: string;
+  tooltipId: number;
 }
 export const HelpSidebar = withUserProfile()(
   class extends React.Component<Props, State> {
@@ -148,7 +182,8 @@ export const HelpSidebar = withUserProfile()(
         activeIcon: undefined,
         filteredContent: undefined,
         participant: undefined,
-        searchTerm: ''
+        searchTerm: '',
+        tooltipId: undefined
       };
     }
 
@@ -232,17 +267,6 @@ export const HelpSidebar = withUserProfile()(
       openZendeskWidget(givenName, familyName, username, contactEmail);
     }
 
-    hideSidebar() {
-      this.props.setSidebarState(false);
-      // keep activeIcon set while the sidebar transition completes
-      setTimeout(() => {
-        // check if the sidebar has been opened again before resetting activeIcon
-        if (!this.props.sidebarOpen) {
-          this.setState({activeIcon: undefined});
-        }
-      }, 300);
-    }
-
     highlightMatches(content: string) {
       const {searchTerm} = this.state;
       return highlightSearchTerm(searchTerm, content, colors.success);
@@ -250,7 +274,7 @@ export const HelpSidebar = withUserProfile()(
 
     render() {
       const {helpContent, setSidebarState, sidebarOpen} = this.props;
-      const {activeIcon, filteredContent, participant, searchTerm} = this.state;
+      const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContent];
       const contentStyle = (tab: string) => ({
         display: activeIcon === tab ? 'block' : 'none',
@@ -260,22 +284,18 @@ export const HelpSidebar = withUserProfile()(
       });
       return <React.Fragment>
         <div style={styles.iconContainer}>
-          <div style={activeIcon === 'help' ? iconStyles.active : styles.icon}>
-            <ClrIcon className='is-solid' shape='info-standard' size={28} title='Help Tips'
-              onClick={() => this.onIconClick('help')} />
-          </div>
-          <div style={styles.icon}>
-            <a href='https://docs.google.com/spreadsheets/d/1dsvJV8B7EXQj5EWa2XG-KAhs-l7FsQnyJSSFMstLF2U/edit#gid=183931508'
-              target='_blank' style={{color: colors.white}}>
-              <ClrIcon className='is-solid' shape='book' size={32} title='Data Dictionary' />
-            </a>
-          </div>
-          {helpContent === 'reviewParticipantDetail' &&
-            <div style={activeIcon === 'annotations' ? iconStyles.active : styles.icon}>
-              <ClrIcon shape='note' size={32}  title='Participant Status and Annotations'
-                onClick={() => this.onIconClick('annotations')} />
-            </div>
-          }
+          {icons.map((icon, i) => (!icon.page || icon.page === helpContent) && <div key={i} style={{display: 'table'}}>
+            <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
+              <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
+                   onMouseOver={() => this.setState({tooltipId: i})}
+                   onMouseOut={() => this.setState({tooltipId: undefined})}>
+                {icon.faIcon === null
+                  ? <img src={proIcons[icon.id]} style={icon.style} />
+                  : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} onClick={() => this.onIconClick(icon.id)} />
+                }
+              </div>
+            </TooltipTrigger>
+          </div>)}
         </div>
         <div style={activeIcon ? {...styles.sidebarContainer, ...styles.sidebarContainerActive} : styles.sidebarContainer}>
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
