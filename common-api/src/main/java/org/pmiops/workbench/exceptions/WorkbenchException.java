@@ -38,8 +38,7 @@ public class WorkbenchException extends RuntimeException {
   // For security reasons, we want a response stripped of everything
   // but this identifying UUID.
   public static ErrorResponse errorResponse() {
-    return new ErrorResponse()
-        .errorUniqueId(UUID.randomUUID().toString());
+    return new ErrorResponse().errorUniqueId(UUID.randomUUID().toString());
   }
 
   public static ErrorResponse errorResponse(String message) {
@@ -47,8 +46,6 @@ public class WorkbenchException extends RuntimeException {
   }
 
   public static ErrorResponse errorResponse(String message, ErrorCode code) {
-    return errorResponse()
-        .message(message)
-        .errorCode(code);
+    return errorResponse().message(message).errorCode(code);
   }
 }
