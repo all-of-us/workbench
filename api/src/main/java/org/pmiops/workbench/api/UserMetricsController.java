@@ -85,7 +85,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 .name(cohort.getName())
                 .type(cohort.getType());
         if (cohort.getCreator() != null) {
-          result.setCreator(cohort.getCreator().getUserName());
+          result.setCreator(cohort.getCreator().getUsername());
         }
         return result;
       };

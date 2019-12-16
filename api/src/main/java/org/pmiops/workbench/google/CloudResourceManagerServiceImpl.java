@@ -52,7 +52,7 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
     GoogleCredential googleCredential = cloudResourceManagerAdminCredsProvider.get();
 
     googleCredential =
-        serviceAccounts.getImpersonatedCredential(googleCredential, user.getUserName(), SCOPES);
+        serviceAccounts.getImpersonatedCredential(googleCredential, user.getUsername(), SCOPES);
 
     return new CloudResourceManager.Builder(
             httpTransport, getDefaultJsonFactory(), googleCredential)

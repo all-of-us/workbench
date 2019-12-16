@@ -40,7 +40,7 @@ public class FetchFireCloudUserProfile {
       }
 
       String userEmail = args[0];
-      DbUser user = userDao.findUserByUserName(userEmail);
+      DbUser user = userDao.findUserByUsername(userEmail);
       if (user == null) {
         throw new RuntimeException(
             String.format("Error fetching AoU user with email %s", userEmail));

@@ -47,7 +47,7 @@ public class WorkspaceConversionUtils {
             .published(workspace.getPublished())
             .researchPurpose(researchPurpose);
     if (workspace.getCreator() != null) {
-      result.setCreator(workspace.getCreator().getUserName());
+      result.setCreator(workspace.getCreator().getUsername());
     }
     if (workspace.getCdrVersion() != null) {
       result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
@@ -104,7 +104,7 @@ public class WorkspaceConversionUtils {
 
   public static UserRole toApiUserRole(DbUser user, FirecloudWorkspaceAccessEntry aclEntry) {
     UserRole result = new UserRole();
-    result.setEmail(user.getUserName());
+    result.setEmail(user.getUsername());
     result.setGivenName(user.getGivenName());
     result.setFamilyName(user.getFamilyName());
     result.setRole(WorkspaceAccessLevel.fromValue(aclEntry.getAccessLevel()));

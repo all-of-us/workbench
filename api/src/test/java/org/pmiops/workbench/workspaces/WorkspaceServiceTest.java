@@ -118,7 +118,7 @@ public class WorkspaceServiceTest {
     doReturn(mockWorkspaceResponses).when(mockFireCloudService).getWorkspaces(any());
     DbUser mockUser = mock(DbUser.class);
     doReturn(mockUser).when(mockUserProvider).get();
-    doReturn(DEFAULT_USER_EMAIL).when(mockUser).getUserName();
+    doReturn(DEFAULT_USER_EMAIL).when(mockUser).getUsername();
     doReturn(USER_ID).when(mockUser).getUserId();
   }
 
@@ -292,7 +292,7 @@ public class WorkspaceServiceTest {
 
     DbUser mockUser = mock(DbUser.class);
     doReturn(mockUser).when(mockUserProvider).get();
-    doReturn(DEFAULT_USER_EMAIL).when(mockUser).getUserName();
+    doReturn(DEFAULT_USER_EMAIL).when(mockUser).getUsername();
     doReturn(OTHER_USER_ID).when(mockUser).getUserId();
     List<DbUserRecentWorkspace> otherRecentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(otherRecentWorkspaces.size()).isEqualTo(1);

@@ -154,7 +154,7 @@ public class ClusterControllerTest {
     config.featureFlags = new FeatureFlagsConfig();
 
     user = new DbUser();
-    user.setUserName(LOGGED_IN_USER_EMAIL);
+    user.setUsername(LOGGED_IN_USER_EMAIL);
     user.setUserId(123L);
 
     createUser(OTHER_USER_EMAIL);
@@ -286,7 +286,7 @@ public class ClusterControllerTest {
                     new ClusterConfig().machineType("n1-standard-16").masterDiskSize(100)));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
-    DbUser updatedUser = userDao.findUserByUserName(OTHER_USER_EMAIL);
+    DbUser updatedUser = userDao.findUserByUsername(OTHER_USER_EMAIL);
     assertThat(updatedUser.getClusterConfigDefault().machineType).isEqualTo("n1-standard-16");
     assertThat(updatedUser.getClusterConfigDefault().masterDiskSize).isEqualTo(100);
   }
@@ -306,7 +306,7 @@ public class ClusterControllerTest {
             new UpdateClusterConfigRequest().userEmail(OTHER_USER_EMAIL).clusterConfig(null));
     assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 
-    DbUser updatedUser = userDao.findUserByUserName(OTHER_USER_EMAIL);
+    DbUser updatedUser = userDao.findUserByUsername(OTHER_USER_EMAIL);
     assertThat(updatedUser.getClusterConfigDefault()).isNull();
   }
 
@@ -422,7 +422,7 @@ public class ClusterControllerTest {
     DbUser user = new DbUser();
     user.setGivenName("first");
     user.setFamilyName("last");
-    user.setUserName(email);
+    user.setUsername(email);
     userDao.save(user);
   }
 }

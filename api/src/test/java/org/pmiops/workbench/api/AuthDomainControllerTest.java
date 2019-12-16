@@ -111,7 +111,7 @@ public class AuthDomainControllerTest {
     verify(mockAuthDomainAuditAdapter)
         .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    DbUser updatedUser = userDao.findUserByUserName(PRIMARY_EMAIL);
+    DbUser updatedUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled()).isTrue();
   }
 
@@ -128,7 +128,7 @@ public class AuthDomainControllerTest {
     verify(mockAuthDomainAuditAdapter)
         .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    DbUser updatedUser = userDao.findUserByUserName(PRIMARY_EMAIL);
+    DbUser updatedUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled()).isFalse();
   }
 
@@ -136,7 +136,7 @@ public class AuthDomainControllerTest {
     DbUser user = new DbUser();
     user.setGivenName(GIVEN_NAME);
     user.setFamilyName(FAMILY_NAME);
-    user.setUserName(PRIMARY_EMAIL);
+    user.setUsername(PRIMARY_EMAIL);
     user.setContactEmail(CONTACT_EMAIL);
     user.setOrganization(ORGANIZATION);
     user.setCurrentPosition(CURRENT_POSITION);

@@ -68,7 +68,7 @@ public class OfflineAuditControllerTest {
   @Before
   public void setUp() {
     DbUser user = new DbUser();
-    user.setUserName(USER_EMAIL);
+    user.setUsername(USER_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);
     user = userDao.save(user);

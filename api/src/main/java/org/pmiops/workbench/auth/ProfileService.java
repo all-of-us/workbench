@@ -104,7 +104,7 @@ public class ProfileService {
 
     Profile profile = new Profile();
     profile.setUserId(user.getUserId());
-    profile.setUsername(user.getUserName());
+    profile.setUsername(user.getUsername());
     if (user.getCreationNonce() != null) {
       profile.setCreationNonce(user.getCreationNonce().toString());
     }

@@ -205,7 +205,7 @@ public class CohortReviewControllerTest {
   @Before
   public void setUp() {
     user = new DbUser();
-    user.setUserName("bob@gmail.com");
+    user.setUsername("bob@gmail.com");
     user.setUserId(123L);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);

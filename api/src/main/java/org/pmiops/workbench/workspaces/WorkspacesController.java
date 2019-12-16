@@ -470,7 +470,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
       Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
       for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : fromAclsMap.entrySet()) {
-        if (!entry.getKey().equals(user.getUserName())) {
+        if (!entry.getKey().equals(user.getUsername())) {
           clonedRoles.put(
               entry.getKey(), WorkspaceAccessLevel.fromValue(entry.getValue().getAccessLevel()));
         } else {
@@ -522,7 +522,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       if (role.getRole() == null || role.getRole().toString().trim().isEmpty()) {
         throw new BadRequestException("Role required.");
       }
-      final DbUser invitedUser = userDao.findUserByUserName(role.getEmail());
+      final DbUser invitedUser = userDao.findUserByUsername(role.getEmail());
       if (invitedUser == null) {
         throw new BadRequestException(String.format("User %s doesn't exist", role.getEmail()));
       }

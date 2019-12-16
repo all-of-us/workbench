@@ -120,7 +120,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       // Whitelisted service accounts are able to make API calls, too.
       // TODO: stop treating service accounts as normal users, have a separate table for them,
       // administrators.
-      DbUser user = userDao.findUserByUserName(userEmail);
+      DbUser user = userDao.findUserByUsername(userEmail);
       if (user == null) {
         user = userService.createServiceAccountUser(userEmail);
       }
@@ -150,7 +150,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
         return false;
       }
     }
-    DbUser user = userDao.findUserByUserName(userEmail);
+    DbUser user = userDao.findUserByUsername(userEmail);
     if (user == null) {
       // TODO(danrodney): start populating contact email in Google account, use it here.
       user =

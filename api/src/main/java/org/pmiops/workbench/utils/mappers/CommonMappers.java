@@ -28,7 +28,7 @@ public class CommonMappers {
   }
 
   public static String dbUserToCreatorEmail(DbUser creator) {
-    return creator.getUserName();
+    return creator.getUsername();
   }
 
   public static String cdrVersionToId(DbCdrVersion cdrVersion) {

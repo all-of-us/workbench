@@ -393,7 +393,7 @@ public class ProfileController implements ProfileApiDelegate {
     if (user.getBetaAccessRequestTime() == null) {
       log.log(Level.INFO, "Sending beta access request email.");
       try {
-        mailServiceProvider.get().sendBetaAccessRequestEmail(user.getUserName());
+        mailServiceProvider.get().sendBetaAccessRequestEmail(user.getUsername());
       } catch (MessagingException e) {
         throw new EmailException("Error submitting beta access request", e);
       }
@@ -481,7 +481,7 @@ public class ProfileController implements ProfileApiDelegate {
       UpdateContactEmailRequest updateContactEmailRequest) {
     String username = updateContactEmailRequest.getUsername().toLowerCase();
     com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
-    DbUser user = userDao.findUserByUserName(username);
+    DbUser user = userDao.findUserByUsername(username);
     checkUserCreationNonce(user, updateContactEmailRequest.getCreationNonce());
     if (userHasEverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -501,7 +501,7 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Void> resendWelcomeEmail(ResendWelcomeEmailRequest resendRequest) {
     String username = resendRequest.getUsername().toLowerCase();
     com.google.api.services.directory.model.User googleUser = directoryService.getUser(username);
-    DbUser user = userDao.findUserByUserName(username);
+    DbUser user = userDao.findUserByUsername(username);
     checkUserCreationNonce(user, resendRequest.getCreationNonce());
     if (userHasEverLoggedIn(googleUser, user)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -720,11 +720,11 @@ public class ProfileController implements ProfileApiDelegate {
       throw new ForbiddenException("Self account deletion is disallowed in this environment.");
     }
     DbUser user = userProvider.get();
-    log.log(Level.WARNING, "Deleting profile: user email: " + user.getUserName());
-    directoryService.deleteUser(user.getUserName().split("@")[0]);
+    log.log(Level.WARNING, "Deleting profile: user email: " + user.getUsername());
+    directoryService.deleteUser(user.getUsername().split("@")[0]);
     userDao.delete(user.getUserId());
     profileAuditor.fireDeleteAction(
-        user.getUserId(), user.getUserName()); // not sure if user profider will survive the next line
+        user.getUserId(), user.getUsername()); // not sure if user profider will survive the next line
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }

@@ -110,12 +110,12 @@ public class UserControllerTest {
   @Test
   public void testUserSearch() {
     when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
-    DbUser john = userDao.findUserByUserName("john@lis.org");
+    DbUser john = userDao.findUserByUsername("john@lis.org");
 
     UserResponse response = userController.user("John", null, null, null).getBody();
     assertThat(response.getUsers()).hasSize(1);
-    assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getUserName());
-    assertThat(response.getUsers().get(0).getUserName()).isSameAs(john.getUserName());
+    assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getUsername());
+    assertThat(response.getUsers().get(0).getUserName()).isSameAs(john.getUsername());
   }
 
   @Test
@@ -260,7 +260,7 @@ public class UserControllerTest {
   @SuppressWarnings("SameParameterValue")
   private void saveUser(String email, String givenName, String familyName, boolean registered) {
     DbUser user = new DbUser();
-    user.setUserName(email);
+    user.setUsername(email);
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
@@ -279,7 +279,7 @@ public class UserControllerTest {
   private void saveUserNotInFirecloud(
       String email, String givenName, String familyName, boolean registered) {
     DbUser user = new DbUser();
-    user.setUserName(email);
+    user.setUsername(email);
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
     user.setFamilyName(familyName);

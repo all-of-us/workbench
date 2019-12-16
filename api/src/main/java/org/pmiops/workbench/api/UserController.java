@@ -26,12 +26,12 @@ public class UserController implements UserApiDelegate {
 
   private static final Logger log = Logger.getLogger(UserController.class.getName());
   private static final int DEFAULT_PAGE_SIZE = 10;
-  private static final String DEFAULT_SORT_FIELD = "email";
+  private static final String DEFAULT_SORT_FIELD = "username";
   private static final Function<DbUser, org.pmiops.workbench.model.User> TO_USER_RESPONSE_USER =
       user -> {
         org.pmiops.workbench.model.User modelUser = new org.pmiops.workbench.model.User();
-        modelUser.setEmail(user.getUserName()); // deprecated, but kept for compatibility
-        modelUser.setUserName(user.getUserName());
+        modelUser.setEmail(user.getUsername()); // deprecated, but kept for compatibility
+        modelUser.setUserName(user.getUsername());
         modelUser.setGivenName(user.getGivenName());
         modelUser.setFamilyName(user.getFamilyName());
         return modelUser;
@@ -77,7 +77,7 @@ public class UserController implements UserApiDelegate {
     // limited researcher profile details.
     WorkbenchConfig config = configProvider.get();
     if (!fireCloudService.isUserMemberOfGroup(
-        userProvider.get().getUserName(), config.firecloud.registeredDomainName)) {
+        userProvider.get().getUsername(), config.firecloud.registeredDomainName)) {
       throw new ForbiddenException("user search requires registered data access");
     }
 

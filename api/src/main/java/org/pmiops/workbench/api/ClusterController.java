@@ -250,7 +250,7 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   @AuthorityRequired({Authority.DEVELOPER})
   public ResponseEntity<EmptyResponse> updateClusterConfig(UpdateClusterConfigRequest body) {
-    DbUser user = userDao.findUserByUserName(body.getUserEmail());
+    DbUser user = userDao.findUserByUsername(body.getUserEmail());
     if (user == null) {
       throw new NotFoundException("User '" + body.getUserEmail() + "' not found");
     }

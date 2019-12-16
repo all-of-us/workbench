@@ -219,7 +219,7 @@ public class ExportWorkspaceData {
   private WorkspaceExportRow toWorkspaceExportRow(DbUser user) {
     WorkspaceExportRow row = new WorkspaceExportRow();
     row.setCreatorContactEmail(user.getContactEmail());
-    row.setCreatorUsername(user.getUserName());
+    row.setCreatorUsername(user.getUsername());
     row.setCreatorFirstSignIn(
         user.getFirstSignInTime() == null ? "" : dateFormat.format(user.getFirstSignInTime()));
     row.setCreatorRegistrationState(user.getDataAccessLevelEnum().toString());

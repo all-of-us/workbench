@@ -190,7 +190,7 @@ constructor(
             CommonAuditEventInfo(
                     actionId = actionIdProvider.get(),
                     userId = dbUser.userId,
-                    userEmail = dbUser.userName,
+                    userEmail = dbUser.username,
                     timestamp = clock.millis())
         }
     }

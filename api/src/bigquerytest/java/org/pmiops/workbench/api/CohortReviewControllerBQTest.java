@@ -157,7 +157,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   @Before
   public void setUp() throws Exception {
     DbUser dbUser = new DbUser();
-    dbUser.setUserName("bob@gmail.com");
+    dbUser.setUsername("bob@gmail.com");
     dbUser.setUserId(123L);
     dbUser.setDisabled(false);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
@@ -169,7 +169,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             new FirecloudWorkspaceACL()
                 .acl(
                     ImmutableMap.of(
-                        currentUser.getUserName(),
+                        currentUser.getUsername(),
                         new FirecloudWorkspaceAccessEntry().accessLevel("OWNER"))));
 
     cdrVersion = new DbCdrVersion();
@@ -661,7 +661,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     FirecloudWorkspaceAccessEntry accessLevelEntry =
         new FirecloudWorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.WRITER.toString());
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
-        ImmutableMap.of(currentUser.getUserName(), accessLevelEntry);
+        ImmutableMap.of(currentUser.getUsername(), accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(mockFireCloudService.getWorkspaceAcl(NAMESPACE, NAME))
         .thenReturn(workspaceAccessLevelResponse);
