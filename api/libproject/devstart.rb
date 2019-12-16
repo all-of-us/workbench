@@ -109,6 +109,14 @@ def get_cdr_sql_project(project)
   return must_get_env_value(project, :cdr_sql_instance).split(":")[0]
 end
 
+def ensure_docker_sync()
+  common = Common.new
+  at_exit do
+    common.run_inline %W{docker-sync stop}
+  end
+  common.run_inline %W{docker-sync start}
+end
+
 def ensure_docker(cmd_name, args=nil)
   args = (args or [])
   unless Workbench.in_docker?
@@ -168,14 +176,6 @@ end
 
 def format_benchmark(bm)
   "%ds" % [bm.real]
-end
-
-def ensure_docker_sync()
-  common = Common.new
-  at_exit do
-    common.run_inline %W{docker-sync stop}
-    end
-  common.run_inline %W{docker-sync start}
 end
 
 def dev_up()
