@@ -42,10 +42,10 @@ public class WorkbenchException extends RuntimeException {
   }
 
   public static ErrorResponse errorResponse(String message) {
-    return errorResponse(message, null);
+    return errorResponse().message(message);
   }
 
   public static ErrorResponse errorResponse(String message, ErrorCode code) {
-    return errorResponse().message(message).errorCode(code);
+    return errorResponse(message).errorCode(code);
   }
 }
