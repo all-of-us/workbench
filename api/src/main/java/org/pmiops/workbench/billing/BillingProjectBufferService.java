@@ -33,6 +33,7 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
+import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.views.MonitoringViews;
 import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
@@ -41,7 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BillingProjectBufferService {
+public class BillingProjectBufferService implements GaugeDataCollector {
 
   private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
 
@@ -87,17 +88,14 @@ public class BillingProjectBufferService {
 
   /** Makes a configurable number of project creation attempts. */
   public void bufferBillingProjects() {
-
-    updateBillingProjectBufferMetrics();
     int creationAttempts = this.workbenchConfigProvider.get().billing.bufferRefillProjectsPerTask;
     for (int i = 0; i < creationAttempts; i++) {
       bufferBillingProject();
     }
   }
 
-  // TODO(jaycarlton): Move most (all) of this to its own cron method on a controller dedicated to
-  // polling gauge metric values.
-  private void updateBillingProjectBufferMetrics() {
+  @Override
+  public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
     ImmutableMap.Builder<OpenCensusStatsViewInfo, Number> signalToValueBuilder =
         ImmutableMap.builder();
     signalToValueBuilder.put(MonitoringViews.BILLING_BUFFER_SIZE, getCurrentBufferSize());
@@ -124,8 +122,7 @@ public class BillingProjectBufferService {
       final Long value = entryStatusToCount.get(entryStatus);
       signalToValueBuilder.put(metricView, value);
     }
-
-    monitoringService.recordValue(signalToValueBuilder.build());
+    return signalToValueBuilder.build();
   }
 
   /**

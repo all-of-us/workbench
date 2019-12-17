@@ -1245,6 +1245,22 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/cron/monitoring/updateGaugeMetrics:
+    get:
+      tags:
+        - offlineMonitoring
+        - cron
+      description: Trigger recording of all gauge metrics
+      operationId: updateGaugeMetrics
+      security: []
+      responses:
+        204:
+          description: No content
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   # Notebooks ############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename:
