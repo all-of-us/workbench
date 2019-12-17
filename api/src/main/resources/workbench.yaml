@@ -177,24 +177,6 @@ paths:
           schema:
             $ref: "#/definitions/UsernameTakenResponse"
 
-  /v1/is-contact-email-taken:
-    get:
-      tags:
-        - profile
-      description: Checks to see if the given contact email is not available.
-      operationId: isContactEmailTaken
-      security: []
-      parameters:
-        - in: query
-          name: contactEmail
-          type: string
-          required: true
-      responses:
-        200:
-          description: The answer.
-          schema:
-            $ref: "#/definitions/ContactEmailTakenResponse"
-
   /v1/update-contact-email:
     post:
       tags:
@@ -3656,18 +3638,6 @@ definitions:
     properties:
       isTaken:
         description: Boolean response to whether username is already taken.
-        type: boolean
-        default: false
-    example:
-      isTaken: false
-
-  ContactEmailTakenResponse:
-    type: object
-    required:
-      - isTaken
-    properties:
-      isTaken:
-        description: Boolean response to whether contact email is already taken.
         type: boolean
         default: false
     example:
