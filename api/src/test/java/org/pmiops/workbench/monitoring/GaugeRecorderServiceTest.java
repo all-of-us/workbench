@@ -75,23 +75,20 @@ public class GaugeRecorderServiceTest {
 
   @Test
   public void testRecord() {
-    final Map<OpenCensusStatsViewInfo, Number> result = gaugeRecorderService.record();
+    gaugeRecorderService.record();
 
     verify(mockMonitoringService).recordValues(gaugeDataCaptor.capture());
     verify(mockWorkspaceServiceImpl).getGaugeData();
     verify(mockBillingProjectBufferService).getGaugeData();
 
-    assertThat(result).hasSize(WORKSPACE_GAUGE_MAP.size() + BILLING_BUFFER_GAUGE_MAP.size());
-    assertThat(gaugeDataCaptor.getValue()).isEqualTo(result);
-    assertThat(result.get(MonitoringViews.WORKSPACE_TOTAL_COUNT)).isEqualTo(WORKSPACES_COUNT);
+    assertThat(gaugeDataCaptor.getValue()).hasSize(WORKSPACE_GAUGE_MAP.size() + BILLING_BUFFER_GAUGE_MAP.size());
+    assertThat(gaugeDataCaptor.getValue().get(MonitoringViews.WORKSPACE_TOTAL_COUNT)).isEqualTo(WORKSPACES_COUNT);
   }
 
   @Test
   public void testRecord_emptyMap() {
     doReturn(Collections.emptyMap()).when(mockWorkspaceServiceImpl).getGaugeData();
     doReturn(Collections.emptyMap()).when(mockBillingProjectBufferService).getGaugeData();
-
-    assertThat(gaugeRecorderService.record()).isEmpty();
 
     verify(mockMonitoringService).recordValues(gaugeDataCaptor.capture());
     verify(mockWorkspaceServiceImpl).getGaugeData();

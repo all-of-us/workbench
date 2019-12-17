@@ -65,7 +65,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   private final FireCloudService fireCloudService;
   private final MonitoringService monitoringService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private SecureRandom random;
 
   @Autowired
   public BillingProjectBufferService(
@@ -79,7 +78,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     this.fireCloudService = fireCloudService;
     this.monitoringService = monitoringService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.random = new SecureRandom();
   }
 
   private Timestamp getCurrentTimestamp() {
@@ -99,10 +97,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     ImmutableMap.Builder<OpenCensusStatsViewInfo, Number> signalToValueBuilder =
         ImmutableMap.builder();
     signalToValueBuilder.put(MonitoringViews.BILLING_BUFFER_SIZE, getCurrentBufferSize());
-
-    // Toy data series for developing & testing dashboards and alerts in low-traffic environments.
-    signalToValueBuilder.put(MonitoringViews.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis());
-    signalToValueBuilder.put(MonitoringViews.DEBUG_RANDOM_DOUBLE, random.nextDouble());
 
     // TODO(jaycarlton): set up a DAO/data manager method pair to build this map in one query.
     ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =

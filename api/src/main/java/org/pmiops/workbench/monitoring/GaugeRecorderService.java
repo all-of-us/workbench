@@ -1,6 +1,7 @@
 package org.pmiops.workbench.monitoring;
 
 import com.google.common.collect.ImmutableMap;
+import io.opencensus.metrics.data.AttachmentValue;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -21,7 +22,24 @@ public class GaugeRecorderService {
     this.monitoringService = monitoringService;
   }
 
-  public Map<OpenCensusStatsViewInfo, Number> record() {
+  /**
+   * Record each map that has a non-empty attacment map separately, and just group the others.
+   * @return
+   */
+  public void record() {
+    ImmutableMap.Builder<OpenCensusStatsViewInfo, Number> noAttachmentsSignalMap = ImmutableMap.builder();
+    for (GaugeDataCollector collector : gaugeDataCollectors) {
+      Map<String, AttachmentValue> attachmentKeyToValue = collector.getMeasureMapAttachments();
+      if (attachmentKeyToValue.isEmpty()) {
+        // put all these values in the map with no attachments
+        noAttachmentsSignalMap.putAll(collector.getGaugeData());
+      } else {
+        // record now
+        monitoringService.recordValues(collector.getGaugeData(), collector.getMeasureMapAttachments());
+      }
+      monitoringService.recordValues(noAttachmentsSignalMap.build());
+    }
+
     ImmutableMap<OpenCensusStatsViewInfo, Number> result =
         gaugeDataCollectors.stream()
             .map(GaugeDataCollector::getGaugeData)
@@ -29,7 +47,6 @@ public class GaugeRecorderService {
             .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
     monitoringService.recordValues(result);
     logValues(result); // temporary until dashboards are up and robust
-    return result;
   }
 
   private void logValues(Map<OpenCensusStatsViewInfo, Number> viewToValue) {

@@ -19,6 +19,7 @@ public enum MonitoringViews implements OpenCensusStatsViewInfo {
   BILLING_BUFFER_CREATING_PROJECT_COUNT(
       "billing_project_buffer_creating_project_count",
       "Current number of billing projects with creating status."),
+  DEBUG_CONSTANT_VALUE("debug_constant_value", "Always 101"),
   DEBUG_MILLISECONDS_SINCE_EPOCH("debug_epoch_millis", "Number of milliseconds since epoch"),
   DEBUG_RANDOM_DOUBLE(
       "debug_random_double",

@@ -2,6 +2,7 @@ package org.pmiops.workbench.notebooks;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
+import com.google.common.collect.ImmutableMap;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -23,6 +24,8 @@ import org.pmiops.workbench.google.GoogleCloudLocators;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.MonitoringService;
+import org.pmiops.workbench.monitoring.ViewBundle;
+import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
 import org.pmiops.workbench.monitoring.views.MonitoringViews;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,7 +161,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   public FileDetail cloneNotebook(
       String workspaceNamespace, String workspaceName, String fromNotebookName) {
     String newName = "Duplicate of " + fromNotebookName;
-    final FileDetail result =
+    final FileDetail copiedNotebookFileDetail =
         copyNotebook(
             workspaceNamespace,
             workspaceName,
@@ -166,8 +169,12 @@ public class NotebooksServiceImpl implements NotebooksService {
             workspaceNamespace,
             workspaceName,
             newName);
-    monitoringService.recordIncrement(MonitoringViews.NOTEBOOK_CLONE);
-    return result;
+    monitoringService.recordDelta(MonitoringViews.NOTEBOOK_CLONE,
+        ViewBundle.fromAttachmentKeyToString(
+            ImmutableMap.of(
+                AttachmentKey.NOTEBOOK_NAME, copiedNotebookFileDetail.getName(),
+                AttachmentKey.NOTEBOOK_WORKSPACE_NAMESPACE, workspaceName)));
+    return copiedNotebookFileDetail;
   }
 
   @Override
@@ -179,7 +186,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         workspaceService.getRequired(workspaceNamespace, workspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
         notebookLocators.fullPath);
-    monitoringService.recordIncrement(MonitoringViews.NOTEBOOK_DELETE);
+    monitoringService.recordDelta(MonitoringViews.NOTEBOOK_DELETE);
   }
 
   @Override
@@ -222,7 +229,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         bucketName,
         "notebooks/" + NotebooksService.withNotebookExtension(notebookName),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
-    monitoringService.recordIncrement(MonitoringViews.NOTEBOOK_SAVE);
+    monitoringService.recordDelta(MonitoringViews.NOTEBOOK_SAVE);
   }
 
   @Override

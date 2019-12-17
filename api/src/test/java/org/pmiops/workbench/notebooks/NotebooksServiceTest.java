@@ -168,7 +168,7 @@ public class NotebooksServiceTest {
   @Test
   public void testSaveNotebook_firesMetric() {
     notebooksService.saveNotebook(BUCKET_NAME, NOTEBOOK_NAME, NOTEBOOK_CONTENTS);
-    verify(mockMonitoringService).recordIncrement(MonitoringViews.NOTEBOOK_SAVE);
+    verify(mockMonitoringService).recordDelta(MonitoringViews.NOTEBOOK_SAVE);
   }
 
   @Test
@@ -177,7 +177,7 @@ public class NotebooksServiceTest {
     doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
 
     notebooksService.deleteNotebook(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
-    verify(mockMonitoringService).recordIncrement(MonitoringViews.NOTEBOOK_DELETE);
+    verify(mockMonitoringService).recordDelta(MonitoringViews.NOTEBOOK_DELETE);
   }
 
   @Test
@@ -186,7 +186,7 @@ public class NotebooksServiceTest {
     doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
 
     notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
-    verify(mockMonitoringService).recordIncrement(MonitoringViews.NOTEBOOK_CLONE);
+    verify(mockMonitoringService).recordDelta(MonitoringViews.NOTEBOOK_CLONE);
   }
 
   private void stubNotebookToJson() {

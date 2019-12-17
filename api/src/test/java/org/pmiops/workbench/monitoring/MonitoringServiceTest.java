@@ -72,7 +72,7 @@ public class MonitoringServiceTest {
 
   @Test
   public void testRecordIncrement() {
-    monitoringService.recordIncrement(MonitoringViews.NOTEBOOK_SAVE);
+    monitoringService.recordDelta(MonitoringViews.NOTEBOOK_SAVE);
 
     verify(mockInitService).createAndRegister();
     verify(mockViewManager, times(MonitoringViews.values().length)).registerView(any(View.class));
