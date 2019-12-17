@@ -97,6 +97,7 @@ public class DbUser {
   private Timestamp idVerificationBypassTime;
   private Timestamp twoFactorAuthCompletionTime;
   private Timestamp twoFactorAuthBypassTime;
+  private Timestamp lastModifiedTime;
   private DbDemographicSurvey demographicSurvey;
   private DbAddress address;
 
@@ -580,6 +581,15 @@ public class DbUser {
 
   public void setTwoFactorAuthBypassTime(Timestamp twoFactorAuthBypassTime) {
     this.twoFactorAuthBypassTime = twoFactorAuthBypassTime;
+  }
+
+  @Column(name = "last_modified_time")
+  public Timestamp getLastModifiedTime() {
+    return lastModifiedTime;
+  }
+
+  public void setLastModifiedTime(Timestamp lastModifiedTime) {
+    this.lastModifiedTime = lastModifiedTime;
   }
 
   @OneToOne(

@@ -569,7 +569,7 @@ public class ProfileController implements ProfileApiDelegate {
     user.setCurrentPosition(updatedProfile.getCurrentPosition());
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
-
+    user.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
     if (updatedProfile.getContactEmail() != null
         && !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
       // See RW-1488.
