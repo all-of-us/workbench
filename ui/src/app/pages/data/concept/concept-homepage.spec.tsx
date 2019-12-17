@@ -94,7 +94,7 @@ describe('ConceptHomepage', () => {
         standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
         domain: domain.domain,
         includeDomainCounts: includeDomainCounts,
-        maxResults: 100
+        maxResults: 1000
       };
       expect(spy).toHaveBeenCalledWith(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -140,7 +140,7 @@ describe('ConceptHomepage', () => {
         standardConceptFilter: StandardConceptFilter.ALLCONCEPTS,
         domain: domain.domain,
         includeDomainCounts: includeDomainCounts,
-        maxResults: 100
+        maxResults: 1000
       };
       expect(spy).toHaveBeenCalledWith(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
