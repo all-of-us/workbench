@@ -101,7 +101,7 @@ VALUES
 (21,4,'Measurement','Measurements','Measurement',0,0,0),
 (10,6,'Procedure','Procedures','Procedure',0,0,0),
 (27,5,'Observation','Observations','Observation',0,0,0),
-(0,8,'Physical Measurements','Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process',8,8,0)"
+(0,8,'Physical Measurements','Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process',9,9,0)"
 
 # Populate survey_module
 #################
@@ -510,6 +510,22 @@ and (c.count_value > 0 or c.source_count_value > 0)
 group by c.domain_id) c
 where d.domain_id = c.domain_id"
 
+# Set all_concept_count and standard_concept_count on domain_info for Physical Measurments
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.domain_info\` d
+set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.standard_concept_count from
+(select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
+SUM(CASE WHEN c.standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count from
+\`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
+join \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.domain_info\` d2
+on d2.domain_id = c.domain_id
+and (c.count_value > 0 or c.source_count_value > 0)
+where c.domain_id='Measurement' and c.concept_id not in (3036277, 3025315, 3027018, 3031203, 40759207, 903107, 903126, 40765148,
+903135, 903136, 3022318, 3012888, 3004249, 903115, 903118, 3038553, 903133, 903121, 903111, 903120, 1586218, 903124)
+group by c.domain_id) c
+where d.domain_id = c.domain_id
+"
+
 # domain_info contains counts for all EHR specific domains (Condition, Measurement, Procedure and Drug Exposure
 # We're using *_ext tables to limit the count of people that have EHR specific data. This a an effort to exclude PPI related data.
 # PPI specific data is counted in the survey_module table. The only time the *_ext tables should be absent is in the synthetic datasets.
@@ -573,6 +589,18 @@ if [[ "$tables" == *"_ext"* ]]; then
     where c.vocabulary_id != 'PPI'
     and od.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` where src_id like '%EHR%')) as r
     where d.concept_id = 27"
+
+    # Set participant counts for Physical Measurements domain
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.domain_info\` d
+    set d.participant_count = r.count from
+    (select ((select count(distinct person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\`
+    where measurement_concept_id in (903118, 903115, 903133, 903121, 903135, 903136, 903126, 903111, 903120, 1586218, 903124)
+    or measurement_source_concept_id in (903118, 903115, 903133, 903121, 903135, 903136, 903126, 903111, 903120, 1586218, 903124)) +
+    (select count(distinct person_id) from  \`${BQ_PROJECT}.${BQ_DATASET}.observation\`
+    where observation_concept_id in (903120)
+    or observation_source_concept_id in (903120))) as count) as r
+    where d.domain = 8"
 else
     # Set participant counts for Condition domain
     bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -592,7 +620,8 @@ else
     from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on m.measurement_concept_id = c.concept_id
     where c.vocabulary_id != 'PPI'
-    and m.measurement_concept_id not in (3036277,903118,903115,3025315,903135,903136,903126,903111,42528957)) as r
+    and m.measurement_concept_id not in (903118, 903115, 903133, 903121, 903135, 903136, 903126, 903111, 903120, 1586218, 903124)
+    or m.measurement_source_concept_id in (903118, 903115, 903133, 903121, 903135, 903136, 903126, 903111, 903120, 1586218, 903124)) as r
     where d.concept_id = 21"
 
     # Set participant counts for Procedure domain
@@ -602,8 +631,7 @@ else
     (select count(distinct person_id) as count
     from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on po.procedure_concept_id = c.concept_id
-    where c.vocabulary_id != 'PPI'
-    and c.concept_id not in (3036277,903133,903118,903115,3025315,903121,903135,903136,903126,903111,42528957,903120)) as r
+    where c.vocabulary_id != 'PPI') as r
     where d.concept_id = 10"
 
     # Set participant counts for Drug domain
@@ -623,8 +651,21 @@ else
     (select count(distinct person_id) as count
     from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
     join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on o.observation_concept_id = c.concept_id
-    where c.vocabulary_id != 'PPI') as r
+    where c.vocabulary_id != 'PPI'
+    and o.observation_source_concept_id not in (903120)) as r
     where d.concept_id = 27"
+
+    # Set participant counts for Physical Measurements domain
+    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.domain_info\` d
+    set d.participant_count = r.count from
+    (select ((select count(distinct person_id) from \`${BQ_PROJECT}.${BQ_DATASET}.measurement\`
+    where measurement_concept_id in (903118, 903115, 903133, 903121, 903135, 903136, 903126, 903111, 903120, 1586218, 903124)
+    or measurement_source_concept_id in (903118, 903115, 903133, 903121, 903135, 903136, 903126, 903111, 903120, 1586218, 903124)) +
+    (select count(distinct person_id) from  \`${BQ_PROJECT}.${BQ_DATASET}.observation\`
+    where observation_concept_id in (903120)
+    or observation_source_concept_id in (903120))) as count) as r
+    where d.domain = 8"
 fi
 
 ##########################################
@@ -644,10 +685,16 @@ where c1.concept_id=survey_concept_id"
 
 # Set the participant count on the survey_module row
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` sm
-set sm.participant_count=c.count_value from
-\`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
-where c.concept_id=sm.concept_id"
+"UPDATE \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` x
+SET x.participant_count = y.est_count
+FROM
+    (
+        SELECT concept_id, est_count
+        FROM \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\`
+        WHERE domain_id = 'SURVEY'
+            and parent_id = 0
+    ) y
+WHERE x.concept_id = y.concept_id"
 
 # Set the question participant counts
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -663,16 +710,23 @@ where c1.concept_id=question_id"
 
 # Set the question count on the survey_module row
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` sm
-set sm.question_count=num_questions from
-(select cr.ancestor_concept_id,c1.concept_name,count(*) as num_questions
- from \`${BQ_PROJECT}.${BQ_DATASET}.concept_ancestor\` cr
- join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c on c.concept_id=cr.descendant_concept_id
- join \`${BQ_PROJECT}.${BQ_DATASET}.concept\` c1 on c1.concept_id=cr.ancestor_concept_id
- where cr.ancestor_concept_id in (1586134, 1585855, 1585710)
- and c.concept_class_id='Question'
- group by cr.ancestor_concept_id,c1.concept_name)
-where sm.concept_id = ancestor_concept_id"
+"UPDATE \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` x
+SET x.question_count = y.num_questions
+FROM
+    (
+        SELECT b.concept_id, count(*) as num_questions
+        FROM \`${BQ_PROJECT}.${BQ_DATASET}.prep_criteria_ancestor\` a
+        LEFT JOIN \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\` b on a.ANCESTOR_ID = b.ID
+        WHERE ancestor_id in
+            (
+                SELECT id
+                FROM \`${BQ_PROJECT}.${BQ_DATASET}.cb_criteria\`
+                WHERE domain_id = 'SURVEY'
+                    and parent_id = 0
+            )
+        GROUP BY 1
+    ) y
+WHERE x.concept_id = y.concept_id"
 
 ########################
 # concept_relationship #
