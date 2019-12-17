@@ -333,6 +333,7 @@ definitions:
           Set to true if a result matching allOf or anyOf below should result in a result *not*
           being returned.
         type: boolean
+        default: false
       allOf:
         description: >
           A list of result filters. All filters matching means a result should be returned (or not returned
@@ -402,7 +403,7 @@ definitions:
         description: >
           Set to true if the column value should be compared to null.
         type: boolean
-
+        default: null
   CohortStatus:
     type: string
     description: possible values indicating whether participants are in or out of the cohort
@@ -459,6 +460,7 @@ definitions:
       standardConcept:
         description: True if this is a standard concept, false otherwise
         type: boolean
+        default: false
       countValue:
         description: Count of participants matching this concept in the CDR
         type: integer
@@ -525,6 +527,7 @@ definitions:
         description: The maximum number of results returned. Defaults to 20.
       includeDomainCounts:
         type: boolean
+        default: false
         description: True if per-domain counts of concepts matching the criteria should be included in the response
       pageNumber:
         type: integer

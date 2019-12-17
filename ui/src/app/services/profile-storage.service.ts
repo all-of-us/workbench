@@ -6,8 +6,6 @@ import 'rxjs/Rx';
 import {Injectable} from '@angular/core';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 
-import {ErrorHandlingService} from './error-handling.service';
-
 import {Profile} from 'generated';
 import {ProfileService} from 'generated';
 
@@ -20,8 +18,7 @@ export class ProfileStorageService {
   private profile = new ReplaySubject<Profile>(1);
   public profile$ = this.profile.asObservable();
 
-  constructor(private profileService: ProfileService,
-    private errorHandlingService: ErrorHandlingService) {
+  constructor(private profileService: ProfileService) {
     this.reload();
   }
 
@@ -61,7 +58,6 @@ export class ProfileStorageService {
         this.nextUserProfileStore(profile);
         this.activeCall = false;
       }, (err) => {
-        this.errorHandlingService.profileLoadError = true;
         this.activeCall = false;
       });
   }

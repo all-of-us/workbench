@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import com.google.common.collect.ImmutableMap;
-import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
 import io.opencensus.stats.MeasureMap;
@@ -38,14 +37,14 @@ public class MonitoringServiceTest {
   @Mock private MeasureMap mockMeasureMap; // not injected
   // TODO(jaycarlton): figure out why IntelliJ isn't copacetic with this
   // annotation but things still work.
-  @Autowired private StackdriverStatsExporterWrapper mockInitService;
+  @Autowired private StackdriverStatsExporterService mockInitService;
   @Autowired private ViewManager mockViewManager;
   @Autowired private StatsRecorder mockStatsRecorder;
   @Autowired private MonitoringService monitoringService;
 
   @TestConfiguration
-  @Import({MonitoringServiceOpenCensusImpl.class})
-  @MockBean({ViewManager.class, StatsRecorder.class, StackdriverStatsExporterWrapper.class})
+  @Import({MonitoringServiceImpl.class})
+  @MockBean({ViewManager.class, StatsRecorder.class, StackdriverStatsExporterService.class})
   static class Configuration {
     @Bean
     public WorkbenchConfig workbenchConfig() {
@@ -75,7 +74,7 @@ public class MonitoringServiceTest {
   public void testRecordIncrement() {
     monitoringService.recordIncrement(MonitoringViews.NOTEBOOK_SAVE);
 
-    verify(mockInitService).createAndRegister(any(StackdriverStatsConfiguration.class));
+    verify(mockInitService).createAndRegister();
     verify(mockViewManager, times(MonitoringViews.values().length)).registerView(any(View.class));
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap).put(MonitoringViews.NOTEBOOK_SAVE.getMeasureLong(), 1L);
@@ -87,7 +86,7 @@ public class MonitoringServiceTest {
     long value = 16L;
     monitoringService.recordValue(MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT, value);
 
-    verify(mockInitService).createAndRegister(any(StackdriverStatsConfiguration.class));
+    verify(mockInitService).createAndRegister();
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap)
         .put(MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT.getMeasureLong(), value);
@@ -102,7 +101,7 @@ public class MonitoringServiceTest {
     signalToValueBuilder.put(MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT, 2L);
     signalToValueBuilder.put(MonitoringViews.DEBUG_RANDOM_DOUBLE, 3.14);
 
-    monitoringService.recordValue(signalToValueBuilder.build());
+    monitoringService.recordValues(signalToValueBuilder.build());
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap, times(2)).put(any(MeasureLong.class), anyLong());
     verify(mockMeasureMap, times(1))
@@ -112,8 +111,8 @@ public class MonitoringServiceTest {
 
   @Test
   public void testRecordValue_noOpOnEmptyMap() {
-    monitoringService.recordValue(Collections.emptyMap());
-    verify(mockInitService).createAndRegister(any(StackdriverStatsConfiguration.class));
+    monitoringService.recordValues(Collections.emptyMap());
+    verify(mockInitService).createAndRegister();
     verifyZeroInteractions(mockStatsRecorder);
     verifyZeroInteractions(mockMeasureMap);
   }

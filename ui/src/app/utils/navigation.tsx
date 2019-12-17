@@ -2,7 +2,7 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConfigResponse} from 'generated';
-import {CdrVersionListResponse, Cohort, ConceptSet, Profile} from 'generated/fetch';
+import {CdrVersionListResponse, Cohort, ConceptSet, ErrorResponse, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
@@ -22,6 +22,7 @@ export const nextWorkspaceWarmupStore = new BehaviorSubject<WorkspaceData>(undef
 export const currentWorkspaceStore = new BehaviorSubject<WorkspaceData>(undefined);
 export const currentCohortStore = new BehaviorSubject<Cohort>(undefined);
 export const currentConceptSetStore = new BehaviorSubject<ConceptSet>(undefined);
+export const globalErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
 export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});

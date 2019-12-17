@@ -136,6 +136,7 @@ paths:
         - in: query
           name: standard
           type: boolean
+          default: false
           required: false
           description: reveals if source or standard
         - in: query
@@ -172,6 +173,7 @@ paths:
         - in: query
           name: standard
           type: boolean
+          default: false
           required: false
           description: the type of the criteria were search for
         - in: query
@@ -398,12 +400,14 @@ definitions:
       group:
         description: specifies if child or parent
         type: boolean
+        default: false
       selectable:
         description: >
           Whether or not a client can specify this criteria in a search request.
           Selecting a group implies selecting all criteria contained within that
           group.
         type: boolean
+        default: false
       conceptId:
         description: >
           The OMOP concept id associated with this criteria. May be null if this
@@ -434,6 +438,7 @@ definitions:
           by value during a search, for example a blood pressure measurement
           criteria might have an associated measurement value attribute.
         type: boolean
+        default: false
       path:
         description: >
           A "." delimited path of all parent criteria IDs. Does not include the
@@ -447,13 +452,15 @@ definitions:
       hasHierarchy:
         description: Whether criteria is linked to a tree.
         type: boolean
+        default: false
       hasAncestorData:
         description: Whether criteria needs lookup in the criteria_ancestor table.
         type: boolean
+        default: false
       isStandard:
         description: Reveals if this criteria is standard or source.
         type: boolean
-
+        default: false
   CriteriaMenuOption:
     type: object
     required:
@@ -490,7 +497,7 @@ definitions:
       standard:
         description: flag that determines standard or source
         type: boolean
-
+        default: false
   CriteriaAttributeListResponse:
     type: object
     required:
@@ -700,12 +707,15 @@ definitions:
       group:
         description: Specifies if the generating Criterion is a leaf or node in its Criteria tree
         type: boolean
+        default: false
       ancestorData:
         description: flag that determines if concept ids need to be looked up in the ancestor table
         type: boolean
+        default: false
       standard:
         description: flag that determines standard or source
         type: boolean
+        default: false
       conceptId:
         description: The concept id that maps to concept table, if any.
         type: integer
