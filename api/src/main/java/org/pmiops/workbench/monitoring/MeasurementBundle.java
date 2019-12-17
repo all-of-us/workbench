@@ -72,12 +72,23 @@ public class MeasurementBundle {
 
   @Override
   public String toString() {
-    return "MeasurementBundle{"
-        + "monitoringViews="
-        + monitoringViews
-        + ", attachments="
-        + attachmentKeyToString
-        + '}';
+    final StringBuilder sb = new StringBuilder("MeasurementBundle\n").append("\tMeasurements:\n");
+    getMeasurements()
+        .forEach(
+            (key, value) ->
+                sb.append("\t\t").append(key.getName()).append(" = ").append(value).append("\n"));
+    if (!getAttachments().isEmpty()) {
+      sb.append("\tAttachments:\n");
+      getAttachments()
+          .forEach(
+              (key, value) ->
+                  sb.append("\t\t")
+                      .append(key)
+                      .append(" = ")
+                      .append(value.getValue())
+                      .append("\n"));
+    }
+    return sb.toString();
   }
 
   public static class Builder {

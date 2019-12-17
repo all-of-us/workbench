@@ -33,20 +33,8 @@ public class GaugeRecorderService {
   private void logValues(Collection<MeasurementBundle> bundles) {
     logger.info(
         bundles.stream()
-            .map(this::measurementBundleToLogString)
+            .map(MeasurementBundle::toString)
             .sorted()
             .collect(Collectors.joining("\n")));
-  }
-
-  private String measurementBundleToLogString(MeasurementBundle bundle) {
-    final StringBuilder bldr = new StringBuilder("MeasurementBundle\n").append("\tMeasurements:\n");
-    bundle
-        .getMeasurements()
-        .forEach(
-            (key, value) -> bldr.append(key.getName()).append(" = ").append(value).append("\n"));
-    if (!bundle.getAttachments().isEmpty()) {
-      bldr.append("\tAttachments:\n");
-    }
-    return bldr.toString();
   }
 }
