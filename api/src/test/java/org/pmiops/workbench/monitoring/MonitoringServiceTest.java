@@ -23,7 +23,7 @@ import org.mockito.Mock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig;
 import org.pmiops.workbench.monitoring.views.OpenCensusView;
-import org.pmiops.workbench.monitoring.views.ViewProperties;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -72,39 +72,39 @@ public class MonitoringServiceTest {
 
   @Test
   public void testRecordIncrement() {
-    monitoringService.recordDelta(ViewProperties.NOTEBOOK_SAVE);
+    monitoringService.recordDelta(Metric.NOTEBOOK_SAVE);
 
     verify(mockInitService).createAndRegister();
-    verify(mockViewManager, times(ViewProperties.values().length)).registerView(any(View.class));
+    verify(mockViewManager, times(Metric.values().length)).registerView(any(View.class));
     verify(mockStatsRecorder).newMeasureMap();
-    verify(mockMeasureMap).put(ViewProperties.NOTEBOOK_SAVE.getMeasureLong(), 1L);
+    verify(mockMeasureMap).put(Metric.NOTEBOOK_SAVE.getMeasureLong(), 1L);
     verify(mockMeasureMap).record();
   }
 
   @Test
   public void testRecordValue() {
     long value = 16L;
-    monitoringService.recordValue(ViewProperties.BILLING_BUFFER_CREATING_PROJECT_COUNT, value);
+    monitoringService.recordValue(Metric.BILLING_BUFFER_CREATING_PROJECT_COUNT, value);
 
     verify(mockInitService).createAndRegister();
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap)
-        .put(ViewProperties.BILLING_BUFFER_CREATING_PROJECT_COUNT.getMeasureLong(), value);
+        .put(Metric.BILLING_BUFFER_CREATING_PROJECT_COUNT.getMeasureLong(), value);
     verify(mockMeasureMap).record();
   }
 
   @Test
   public void testRecordMap() {
     ImmutableMap.Builder<OpenCensusView, Number> signalToValueBuilder = ImmutableMap.builder();
-    signalToValueBuilder.put(ViewProperties.BILLING_BUFFER_SIZE, 99L);
-    signalToValueBuilder.put(ViewProperties.BILLING_BUFFER_CREATING_PROJECT_COUNT, 2L);
-    signalToValueBuilder.put(ViewProperties.DEBUG_RANDOM_DOUBLE, 3.14);
+    signalToValueBuilder.put(Metric.BILLING_BUFFER_SIZE, 99L);
+    signalToValueBuilder.put(Metric.BILLING_BUFFER_CREATING_PROJECT_COUNT, 2L);
+    signalToValueBuilder.put(Metric.DEBUG_RANDOM_DOUBLE, 3.14);
 
     monitoringService.recordValues(signalToValueBuilder.build());
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap, times(2)).put(any(MeasureLong.class), anyLong());
     verify(mockMeasureMap, times(1))
-        .put(ViewProperties.DEBUG_RANDOM_DOUBLE.getMeasureDouble(), 3.14);
+        .put(Metric.DEBUG_RANDOM_DOUBLE.getMeasureDouble(), 3.14);
     verify(mockMeasureMap).record();
   }
 

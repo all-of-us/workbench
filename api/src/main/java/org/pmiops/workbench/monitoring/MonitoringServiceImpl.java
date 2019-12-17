@@ -7,13 +7,12 @@ import io.opencensus.stats.MeasureMap;
 import io.opencensus.stats.StatsRecorder;
 import io.opencensus.stats.ViewManager;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.monitoring.views.OpenCensusView;
-import org.pmiops.workbench.monitoring.views.ViewProperties;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,26 +43,48 @@ public class MonitoringServiceImpl implements MonitoringService {
   }
 
   private void registerSignals() {
-    Arrays.stream(ViewProperties.values())
-        .map(ViewProperties::toView)
+    Arrays.stream(Metric.values())
+        .map(OpenCensusView::toView)
         .forEach(viewManager::registerView);
   }
 
-  /**
-   * Record multiple values at once, indexed by keys in the StatsViewProperties enum. This should
-   * save calls to Stackdriver.
-   *
-   * @param viewInfoToValue
-   */
   @Override
-  public void recordValues(Map<OpenCensusView, Number> viewInfoToValue) {
-    recordValues(viewInfoToValue, Collections.emptyMap());
+  public void recordValue(OpenCensusView viewInfo, Number value) {
+    try {
+      initStatsConfigurationIdempotent();
+      if (value == null) {
+        logger.log(
+            Level.WARNING,
+            String.format(
+                "Attempting to log a null numeric value for signal %s", viewInfo.getName()));
+        return;
+      }
+      if (viewInfo.getMeasureClass().equals(MeasureLong.class)) {
+        recordLongValue(viewInfo.getMeasureLong(), value.longValue());
+      } else if (viewInfo.getMeasureClass().equals(MeasureDouble.class)) {
+        recordDoubleValue(viewInfo.getMeasureDouble(), value.doubleValue());
+      } else {
+        logger.log(
+            Level.WARNING,
+            String.format("Unrecognized measure class %s", viewInfo.getMeasureClass().getName()));
+      }
+    } catch (RuntimeException e) {
+      logAndSwallow(e);
+    }
   }
 
+  /**
+   * Record multiple values at once. An attachment map allows associating these measurements
+   * with metadata (shared across all samples). We use a single MeasureMap for all the entries in
+   * both maps.
+   * @param viewInfoToValue key/value pairs for time series. These need not be related, but any
+   *                        attachments should apply to all entries in this map.
+   * @param attachmentKeyToValue Map of String/AttachmentValue pairs to be associated with these
+   *                             data.
+   */
   @Override
-  public void recordValues(
-      Map<OpenCensusView, Number> viewInfoToValue,
-      Map<String, AttachmentValue> attachmentKeysToValue) {
+  public void recordValues(Map<OpenCensusView, Number> viewInfoToValue,
+      Map<String, AttachmentValue> attachmentKeyToValue) {
     try {
       initStatsConfigurationIdempotent();
       if (viewInfoToValue.isEmpty()) {
@@ -73,6 +94,9 @@ public class MonitoringServiceImpl implements MonitoringService {
       final MeasureMap measureMap = statsRecorder.newMeasureMap();
       viewInfoToValue.forEach(
           (viewProperties, value) -> addToMeasureMap(measureMap, viewProperties, value));
+      attachmentKeyToValue.forEach(measureMap::putAttachment);
+
+      // Finally, send the data to the backend (Stackdriver/Cloud Monitoring for now).
       measureMap.record();
     } catch (RuntimeException e) {
       logAndSwallow(e);
@@ -100,6 +124,22 @@ public class MonitoringServiceImpl implements MonitoringService {
           Level.WARNING,
           String.format(
               "Unrecognized measure class %s", viewProperties.getMeasureClass().getName()));
+    }
+  }
+
+  private void recordLongValue(MeasureLong measureLong, Long value) {
+    try {
+      statsRecorder.newMeasureMap().put(measureLong, value).record();
+    } catch (RuntimeException e) {
+      logAndSwallow(e);
+    }
+  }
+
+  private void recordDoubleValue(MeasureDouble measureDouble, Double value) {
+    try {
+      statsRecorder.newMeasureMap().put(measureDouble, value).record();
+    } catch (RuntimeException e) {
+      logAndSwallow(e);
     }
   }
 

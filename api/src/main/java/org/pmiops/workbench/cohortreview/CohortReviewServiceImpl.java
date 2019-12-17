@@ -32,7 +32,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.pmiops.workbench.monitoring.views.ViewProperties;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -381,11 +380,6 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
         String.format(
             "Bad Request: Please provide a valid %s value for annotation defintion id: %s",
             annotationType, cohortAnnotationDefinitionId));
-  }
-
-  @Override
-  public Map<OpenCensusView, Number> getGaugeDataLegacy() {
-    return ImmutableMap.of(ViewProperties.COHORT_COUNT, cohortDao.count());
   }
 
   @Override

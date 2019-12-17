@@ -45,7 +45,6 @@ import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.pmiops.workbench.monitoring.views.ViewProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,11 +61,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
   private static final int DATA_SET_VERSION = 1;
-
-  @Override
-  public Map<OpenCensusView, Number> getGaugeDataLegacy() {
-    return ImmutableMap.of(ViewProperties.DATASET_COUNT, dataSetDao.count());
-  }
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {

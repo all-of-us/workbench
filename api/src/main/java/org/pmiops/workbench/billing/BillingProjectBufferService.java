@@ -95,32 +95,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   }
 
   @Override
-  public Map<OpenCensusView, Number> getGaugeDataLegacy() {
-    ImmutableMap.Builder<OpenCensusView, Number> signalToValueBuilder = ImmutableMap.builder();
-    signalToValueBuilder.put(ViewProperties.BILLING_BUFFER_SIZE, getCurrentBufferSize());
-
-    // TODO(jaycarlton): set up a DAO/data manager method pair to build this map in one query.
-    ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
-        Arrays.stream(BufferEntryStatus.values())
-            .map(
-                status ->
-                    new SimpleImmutableEntry<>(
-                        status,
-                        billingProjectBufferEntryDao.countByStatus(
-                            DbStorageEnums.billingProjectBufferEntryStatusToStorage(status))))
-            .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
-
-    for (Map.Entry<BufferEntryStatus, ViewProperties> entry :
-        ENTRY_STATUS_TO_METRIC_VIEW.entrySet()) {
-      final BufferEntryStatus entryStatus = entry.getKey();
-      final OpenCensusView metricView = entry.getValue();
-      final Long value = entryStatusToCount.get(entryStatus);
-      signalToValueBuilder.put(metricView, value);
-    }
-    return signalToValueBuilder.build();
-  }
-
-  @Override
   public Collection<MeasurementBundle> getGaugeData() {
     final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
     resultBuilder.add(
@@ -139,7 +113,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
                             DbStorageEnums.billingProjectBufferEntryStatusToStorage(status))))
             .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
 
-
     for (Map.Entry<BufferEntryStatus, ViewProperties> entry :
         ENTRY_STATUS_TO_METRIC_VIEW.entrySet()) {
       final BufferEntryStatus entryStatus = entry.getKey();
@@ -149,15 +122,14 @@ public class BillingProjectBufferService implements GaugeDataCollector {
       resultBuilder.add(
           MeasurementBundle.builder().addViewInfoValuePair(view, statusCount).build());
     }
-    for (BufferEntryStatus status : BufferEntryStatus.values()) {
-      final long statusCount = entryStatusToCount.get(status);
-      // Add a bundle specifically for the overall
-      resultBuilder.add(
-          MeasurementBundle.builder()
-              .addViewInfoValuePair(ViewProperties.BILLING_BUFFER_COUNT_BY_STATUS, statusCount)
-              .addAttachmentKeyValuePair(AttachmentKey.BUFFER_ENTRY_STATUS, status.toString())
-              .build());
-    }
+
+    // Add a bundle specifically for the overall
+    entryStatusToCount.entrySet().stream()
+        .map(entry -> MeasurementBundle.builder()
+            .addViewInfoValuePair(ViewProperties.BILLING_BUFFER_COUNT_BY_STATUS, entry.getValue())
+            .addAttachmentKeyValuePair(AttachmentKey.BUFFER_ENTRY_STATUS, entry.getKey().toString())
+            .build())
+        .forEach(resultBuilder::add);
     return resultBuilder.build();
   }
 

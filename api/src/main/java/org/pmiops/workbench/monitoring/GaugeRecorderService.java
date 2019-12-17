@@ -1,7 +1,9 @@
 package org.pmiops.workbench.monitoring;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.opencensus.metrics.data.AttachmentValue;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -22,42 +24,19 @@ public class GaugeRecorderService {
     this.monitoringService = monitoringService;
   }
 
-  /**
-   * Record each map that has a non-empty attacment map separately, and just group the others.
-   *
-   * @return
-   */
   public void record() {
-    ImmutableMap.Builder<OpenCensusView, Number> noAttachmentsSignalMap = ImmutableMap.builder();
+    ImmutableList.Builder<MeasurementBundle> bundlesToLogBuilder = ImmutableList.builder();
     for (GaugeDataCollector collector : gaugeDataCollectors) {
-      Map<String, AttachmentValue> attachmentKeyToValue = collector.getMeasureMapAttachments();
-      if (attachmentKeyToValue.isEmpty()) {
-        // put all these values in the map with no attachments
-        noAttachmentsSignalMap.putAll(collector.getGaugeDataLegacy());
-      } else {
-        // record now
-        monitoringService.recordValues(
-            collector.getGaugeDataLegacy(), collector.getMeasureMapAttachments());
-      }
-      monitoringService.recordValues(noAttachmentsSignalMap.build());
+      Collection<MeasurementBundle> bundles = collector.getGaugeData();
+      bundles.forEach(monitoringService::recordBundle);
+      bundlesToLogBuilder.addAll(bundles);
     }
-
-    ImmutableMap<OpenCensusView, Number> result =
-        gaugeDataCollectors.stream()
-            .map(GaugeDataCollector::getGaugeDataLegacy)
-            .flatMap(m -> m.entrySet().stream())
-            .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
-    monitoringService.recordValues(result);
-    logValues(result); // temporary until dashboards are up and robust
+    logValues();
   }
-
-  private void logValues(Map<OpenCensusView, Number> viewToValue) {
-    logger.info(
-        viewToValue.entrySet().stream()
-            .map(
-                entry ->
-                    String.format("%s = %s", entry.getKey().getName(), entry.getValue().toString()))
-            .sorted()
-            .collect(Collectors.joining("\n")));
+  private void logValues(Collection<MeasurementBundle> bundles) {
+    logger.info(bundles.stream()
+        .map(MeasurementBundle::toString)
+        .sorted()
+        .collect(Collectors.joining("\n")));
   }
 }
