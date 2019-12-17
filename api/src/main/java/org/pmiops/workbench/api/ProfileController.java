@@ -50,7 +50,6 @@ import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
-import org.pmiops.workbench.model.ContactEmailTakenResponse;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
@@ -311,12 +310,6 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<UsernameTakenResponse> isUsernameTaken(String username) {
     return ResponseEntity.ok(
         new UsernameTakenResponse().isTaken(directoryService.isUsernameTaken(username)));
-  }
-
-  @Override
-  public ResponseEntity<ContactEmailTakenResponse> isContactEmailTaken(String contactEmail) {
-    return ResponseEntity.ok(
-        new ContactEmailTakenResponse().isTaken(userService.getContactEmailTaken(contactEmail)));
   }
 
   @Override
