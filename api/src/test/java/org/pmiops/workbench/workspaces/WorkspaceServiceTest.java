@@ -64,7 +64,7 @@ public class WorkspaceServiceTest {
   private AtomicLong workspaceIdIncrementer = new AtomicLong(1);
   private Instant NOW = Instant.now();
   private long USER_ID = 1L;
-  private String DEFAULT_USER_EMAIL = "mock@mock.com";
+  private String DEFAULT_USERNAME = "mock@mock.com";
   private String DEFAULT_WORKSPACE_NAMESPACE = "namespace";
 
   @Before
@@ -118,7 +118,7 @@ public class WorkspaceServiceTest {
     doReturn(mockWorkspaceResponses).when(mockFireCloudService).getWorkspaces(any());
     DbUser mockUser = mock(DbUser.class);
     doReturn(mockUser).when(mockUserProvider).get();
-    doReturn(DEFAULT_USER_EMAIL).when(mockUser).getUsername();
+    doReturn(DEFAULT_USERNAME).when(mockUser).getUsername();
     doReturn(USER_ID).when(mockUser).getUserId();
   }
 
@@ -292,7 +292,7 @@ public class WorkspaceServiceTest {
 
     DbUser mockUser = mock(DbUser.class);
     doReturn(mockUser).when(mockUserProvider).get();
-    doReturn(DEFAULT_USER_EMAIL).when(mockUser).getUsername();
+    doReturn(DEFAULT_USERNAME).when(mockUser).getUsername();
     doReturn(OTHER_USER_ID).when(mockUser).getUserId();
     List<DbUserRecentWorkspace> otherRecentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(otherRecentWorkspaces.size()).isEqualTo(1);

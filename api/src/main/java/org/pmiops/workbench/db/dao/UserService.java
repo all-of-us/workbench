@@ -228,23 +228,26 @@ public class UserService {
     return configProvider.get().auth.serviceAccountApiUsers.contains(user.getUsername());
   }
 
-  public DbUser createServiceAccountUser(String userName) {
+  public DbUser createServiceAccountUser(String username) {
     DbUser user = new DbUser();
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
-    user.setUsername(userName);
+    user.setUsername(username);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     try {
       return userDao.save(user);
     } catch (DataIntegrityViolationException e) {
-      final DbUser userByUserName = userDao.findUserByUsername(userName);
+      // For certain test workflows, it's possible to have concurrent user creation.
+      // We attempt to handle that gracefully here.
+      final DbUser userByUserName = userDao.findUserByUsername(username);
       if (userByUserName == null) {
         log.log(
             Level.WARNING,
             String.format(
                 "While creating new user with email %s due to "
-                    + "DataIntegrityViolationException. No user was persisted",
-                userName),
+                    + "DataIntegrityViolationException. No user matching this username was found " +
+                    "and none exists in the database",
+                username),
             e);
         throw e;
       } else {
@@ -252,8 +255,9 @@ public class UserService {
             Level.WARNING,
             String.format(
                 "While creating new user with email %s due to "
-                    + "DataIntegrityViolationException. However, user %d was persisted",
-                userName, userByUserName.getUserId()),
+                    + "DataIntegrityViolationException. User %d is present however," +,
+                "indicating possible concurrent creation.",
+                username, userByUserName.getUserId()),
             e);
         return userByUserName;
       }
@@ -313,11 +317,13 @@ public class UserService {
     }
     if (demographicSurvey != null) demographicSurvey.setUser(dbUser);
     if (institutionalAffiliations != null) {
-      final DbUser u = dbUser;
+      // We need an "effectively final" variable to be captured in the lambda
+      // to pass to forEach.
+      final DbUser finalDbUserReference = dbUser;
       institutionalAffiliations.forEach(
           affiliation -> {
-            affiliation.setUser(u);
-            u.addInstitutionalAffiliation(affiliation);
+            affiliation.setUser(finalDbUserReference);
+            finalDbUserReference.addInstitutionalAffiliation(affiliation);
           });
     }
     try {
