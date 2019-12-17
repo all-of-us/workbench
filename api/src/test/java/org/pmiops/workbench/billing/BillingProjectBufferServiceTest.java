@@ -676,7 +676,7 @@ public class BillingProjectBufferServiceTest {
     assertThat(bundles.size()).isGreaterThan(0);
     Optional<MeasurementBundle> entryStatusBundle =
         bundles.stream()
-            .filter(b -> b.getMonitoringViews().containsKey(Metric.BILLING_BUFFER_COUNT_BY_STATUS))
+            .filter(b -> b.getMeasurements().containsKey(Metric.BILLING_BUFFER_COUNT_BY_STATUS))
             .findFirst();
     assertThat(entryStatusBundle.isPresent()).isTrue();
     assertThat(entryStatusBundle.get().getAttachments()).isNotEmpty();

@@ -100,4 +100,25 @@ public enum Metric implements OpenCensusView {
   public List<TagKey> getColumns() {
     return columns;
   }
+
+  @Override
+  public String toString() {
+    return "Metric{"
+        + "name='"
+        + name
+        + '\''
+        + ", description='"
+        + description
+        + '\''
+        + ", unit='"
+        + unit
+        + '\''
+        + ", aggregation="
+        + aggregation
+        + ", columns="
+        + columns
+        + ", measureClass="
+        + measureClass
+        + '}';
+  }
 }

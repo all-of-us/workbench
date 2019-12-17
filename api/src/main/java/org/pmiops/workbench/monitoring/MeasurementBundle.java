@@ -26,7 +26,7 @@ public class MeasurementBundle {
     this.attachmentKeyToString = attachmentKeyToString;
   }
 
-  public Map<OpenCensusView, Number> getMonitoringViews() {
+  public Map<OpenCensusView, Number> getMeasurements() {
     return monitoringViews;
   }
 
@@ -34,6 +34,10 @@ public class MeasurementBundle {
     return fromAttachmentKeyToString(attachmentKeyToString);
   }
 
+  // In our system, it's more convenient to work with the AttachmentKey
+  // enum directly and String values. For some reason we have to wrap strings
+  // in AttachmentValueStrings now (though naked Strings are still supported but
+  // deprecated).
   private static Map<String, AttachmentValue> fromAttachmentKeyToString(
       Map<AttachmentKey, String> attachmentKeyStringMap) {
     return attachmentKeyStringMap.entrySet().stream()
@@ -68,53 +72,53 @@ public class MeasurementBundle {
 
   @Override
   public String toString() {
-    return "ViewBundle{"
+    return "MeasurementBundle{"
         + "monitoringViews="
         + monitoringViews
-        + ", attachmentKeyToString="
+        + ", attachments="
         + attachmentKeyToString
         + '}';
   }
 
   public static class Builder {
-    private ImmutableMap.Builder<OpenCensusView, Number> viewToValueBuilder;
-    private ImmutableMap.Builder<AttachmentKey, String> attachmentKeyToValueBuilder;
+    private ImmutableMap.Builder<OpenCensusView, Number> measurementsBuilder;
+    private ImmutableMap.Builder<AttachmentKey, String> attachmentsBuilder;
 
     private Builder() {
-      viewToValueBuilder = ImmutableMap.builder();
-      attachmentKeyToValueBuilder = ImmutableMap.builder();
+      measurementsBuilder = ImmutableMap.builder();
+      attachmentsBuilder = ImmutableMap.builder();
     }
 
-    public Builder addViewInfoDelta(OpenCensusView viewInfo) {
-      viewToValueBuilder.put(viewInfo, MonitoringService.DELTA_VALUE);
+    public Builder add(OpenCensusView viewInfo) {
+      measurementsBuilder.put(viewInfo, MonitoringService.DELTA_VALUE);
       return this;
     }
 
-    public Builder addViewInfoValuePair(OpenCensusView viewInfo, Number value) {
-      viewToValueBuilder.put(viewInfo, value);
+    public Builder add(OpenCensusView viewInfo, Number value) {
+      measurementsBuilder.put(viewInfo, value);
       return this;
     }
 
-    public Builder addViewInfoToValueMap(Map<OpenCensusView, Number> map) {
-      viewToValueBuilder.putAll(ImmutableMap.copyOf(map));
+    public Builder addAll(Map<OpenCensusView, Number> map) {
+      measurementsBuilder.putAll(ImmutableMap.copyOf(map));
       return this;
     }
 
-    public Builder addAttachmentKeyValuePair(AttachmentKey attachmentKey, String value) {
-      attachmentKeyToValueBuilder.put(attachmentKey, value);
+    public Builder attach(AttachmentKey attachmentKey, String value) {
+      attachmentsBuilder.put(attachmentKey, value);
       return this;
     }
 
-    public Builder addAttachmentKeyValueMap(Map<AttachmentKey, String> attachmentKeyToString) {
-      attachmentKeyToValueBuilder.putAll(ImmutableMap.copyOf(attachmentKeyToString));
+    public Builder attachAll(Map<AttachmentKey, String> attachmentKeyToString) {
+      attachmentsBuilder.putAll(ImmutableMap.copyOf(attachmentKeyToString));
       return this;
     }
 
     public MeasurementBundle build() {
-      if (viewToValueBuilder.build().isEmpty()) {
-        throw new IllegalStateException("MeasurementBundle must have at least one data point");
+      if (measurementsBuilder.build().isEmpty()) {
+        throw new IllegalStateException("MeasurementBundle must have at least one measurement.");
       }
-      return new MeasurementBundle(viewToValueBuilder.build(), attachmentKeyToValueBuilder.build());
+      return new MeasurementBundle(measurementsBuilder.build(), attachmentsBuilder.build());
     }
   }
 }

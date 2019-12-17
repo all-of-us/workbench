@@ -26,15 +26,15 @@ public class ToyGaugeDataCollector implements GaugeDataCollector {
     return ImmutableSet.<MeasurementBundle>builder()
         .add(
             MeasurementBundle.builder()
-                .addViewInfoValuePair(Metric.DEBUG_CONSTANT_VALUE, TOY_CONSTANT_VALUE)
+                .add(Metric.DEBUG_CONSTANT_VALUE, TOY_CONSTANT_VALUE)
                 .build())
         .add(
             MeasurementBundle.builder()
-                .addViewInfoValuePair(Metric.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis())
+                .add(Metric.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis())
                 .build())
         .add(
             MeasurementBundle.builder()
-                .addViewInfoValuePair(Metric.DEBUG_RANDOM_DOUBLE, random.nextDouble())
+                .add(Metric.DEBUG_RANDOM_DOUBLE, random.nextDouble())
                 .build())
         .build();
   }

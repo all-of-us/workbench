@@ -48,25 +48,19 @@ public class GaugeRecorderServiceTest {
 
   private static final List<MeasurementBundle> BILLING_BUFFER_GAUGE_BUNDLES =
       ImmutableList.of(
+          MeasurementBundle.builder().addAll(BILLING_BUFFER_INDIVIDUAL_GAUGE_MAP).build(),
           MeasurementBundle.builder()
-              .addViewInfoToValueMap(BILLING_BUFFER_INDIVIDUAL_GAUGE_MAP)
+              .add(Metric.BILLING_BUFFER_COUNT_BY_STATUS, 22L)
+              .attach(AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
               .build(),
           MeasurementBundle.builder()
-              .addViewInfoValuePair(Metric.BILLING_BUFFER_COUNT_BY_STATUS, 22L)
-              .addAttachmentKeyValuePair(
-                  AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
-              .build(),
-          MeasurementBundle.builder()
-              .addViewInfoValuePair(Metric.BILLING_BUFFER_COUNT_BY_STATUS, 3L)
-              .addAttachmentKeyValuePair(
-                  AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.CREATING.toString())
+              .add(Metric.BILLING_BUFFER_COUNT_BY_STATUS, 3L)
+              .attach(AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.CREATING.toString())
               .build());
 
   private static final long WORKSPACES_COUNT = 101L;
   private static final MeasurementBundle WORKSPACE_MEASUREMENT_BUNDLE =
-      MeasurementBundle.builder()
-          .addViewInfoValuePair(Metric.WORKSPACE_TOTAL_COUNT, WORKSPACES_COUNT)
-          .build();
+      MeasurementBundle.builder().add(Metric.WORKSPACE_TOTAL_COUNT, WORKSPACES_COUNT).build();
   public static final String TEST_GAUGE_DATA_COLLECTOR = "test gauge data collector";
 
   @Captor private ArgumentCaptor<MeasurementBundle> measurementBundleCaptor;
@@ -112,8 +106,8 @@ public class GaugeRecorderServiceTest {
       return () ->
           Collections.singleton(
               MeasurementBundle.builder()
-                  .addViewInfoValuePair(Metric.DATASET_COUNT, 999L)
-                  .addViewInfoValuePair(Metric.DEBUG_CONSTANT_VALUE, 100L)
+                  .add(Metric.DATASET_COUNT, 999L)
+                  .add(Metric.DEBUG_CONSTANT_VALUE, 100L)
                   .build());
     }
   }
@@ -150,14 +144,12 @@ public class GaugeRecorderServiceTest {
 
     final Optional<MeasurementBundle> workspacesBundle =
         allRecordedBundles.stream()
-            .filter(b -> b.getMonitoringViews().containsKey(Metric.WORKSPACE_TOTAL_COUNT))
+            .filter(b -> b.getMeasurements().containsKey(Metric.WORKSPACE_TOTAL_COUNT))
             .findFirst();
 
     assertThat(
-            workspacesBundle
-                .map(MeasurementBundle::getMonitoringViews)
-                .orElse(Collections.emptyMap()))
+            workspacesBundle.map(MeasurementBundle::getMeasurements).orElse(Collections.emptyMap()))
         .hasSize(1);
-    assertThat(workspacesBundle.get().getMonitoringViews().get(Metric.WORKSPACE_TOTAL_COUNT));
+    assertThat(workspacesBundle.get().getMeasurements().get(Metric.WORKSPACE_TOTAL_COUNT));
   }
 }

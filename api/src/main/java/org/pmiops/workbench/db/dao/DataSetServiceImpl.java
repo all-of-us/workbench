@@ -65,9 +65,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
     return Collections.singleton(
-        MeasurementBundle.builder()
-            .addViewInfoValuePair(Metric.DATASET_COUNT, dataSetDao.count())
-            .build());
+        MeasurementBundle.builder().add(Metric.DATASET_COUNT, dataSetDao.count()).build());
   }
 
   /*

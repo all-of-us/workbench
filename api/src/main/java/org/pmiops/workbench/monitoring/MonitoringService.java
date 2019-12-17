@@ -39,7 +39,7 @@ public interface MonitoringService {
       Map<String, AttachmentValue> attachmentKeyToValue);
 
   default void recordBundle(MeasurementBundle viewBundle) {
-    recordValues(viewBundle.getMonitoringViews(), viewBundle.getAttachments());
+    recordValues(viewBundle.getMeasurements(), viewBundle.getAttachments());
   }
 
   // Record each ViewBundle object separately, so that we don't

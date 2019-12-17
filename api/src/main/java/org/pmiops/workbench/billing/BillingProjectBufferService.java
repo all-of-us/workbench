@@ -99,7 +99,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
     resultBuilder.add(
         MeasurementBundle.builder()
-            .addViewInfoValuePair(Metric.BILLING_BUFFER_SIZE, getCurrentBufferSize())
+            .add(Metric.BILLING_BUFFER_SIZE, getCurrentBufferSize())
             .build());
 
     // TODO(jaycarlton): set up a DAO/data manager method pair to build this map in one query.
@@ -118,8 +118,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
       final OpenCensusView view = entry.getValue();
       final Long statusCount = entryStatusToCount.get(entryStatus);
       // Add the status-specific
-      resultBuilder.add(
-          MeasurementBundle.builder().addViewInfoValuePair(view, statusCount).build());
+      resultBuilder.add(MeasurementBundle.builder().add(view, statusCount).build());
     }
 
     // Add a bundle specifically for the overall
@@ -127,9 +126,8 @@ public class BillingProjectBufferService implements GaugeDataCollector {
         .map(
             entry ->
                 MeasurementBundle.builder()
-                    .addViewInfoValuePair(Metric.BILLING_BUFFER_COUNT_BY_STATUS, entry.getValue())
-                    .addAttachmentKeyValuePair(
-                        AttachmentKey.BUFFER_ENTRY_STATUS, entry.getKey().toString())
+                    .add(Metric.BILLING_BUFFER_COUNT_BY_STATUS, entry.getValue())
+                    .attach(AttachmentKey.BUFFER_ENTRY_STATUS, entry.getKey().toString())
                     .build())
         .forEach(resultBuilder::add);
     return resultBuilder.build();

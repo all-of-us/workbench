@@ -170,10 +170,9 @@ public class NotebooksServiceImpl implements NotebooksService {
             newName);
     monitoringService.recordBundle(
         MeasurementBundle.builder()
-            .addViewInfoValuePair(Metric.NOTEBOOK_CLONE, 1L)
-            .addAttachmentKeyValuePair(
-                AttachmentKey.NOTEBOOK_NAME, copiedNotebookFileDetail.getName())
-            .addAttachmentKeyValuePair(AttachmentKey.NOTEBOOK_WORKSPACE_NAMESPACE, workspaceName)
+            .add(Metric.NOTEBOOK_CLONE, 1L)
+            .attach(AttachmentKey.NOTEBOOK_NAME, copiedNotebookFileDetail.getName())
+            .attach(AttachmentKey.NOTEBOOK_WORKSPACE_NAMESPACE, workspaceName)
             .build());
     return copiedNotebookFileDetail;
   }
