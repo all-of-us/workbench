@@ -1,10 +1,10 @@
 package org.pmiops.workbench.monitoring;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
-import com.google.api.MetricOrBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.time.Clock;
@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,8 +22,8 @@ import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
-import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,11 +53,13 @@ public class GaugeRecorderServiceTest {
               .build(),
           MeasurementBundle.builder()
               .addViewInfoValuePair(Metric.BILLING_BUFFER_COUNT_BY_STATUS, 22L)
-              .addAttachmentKeyValuePair(AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
+              .addAttachmentKeyValuePair(
+                  AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
               .build(),
           MeasurementBundle.builder()
               .addViewInfoValuePair(Metric.BILLING_BUFFER_COUNT_BY_STATUS, 3L)
-              .addAttachmentKeyValuePair(AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.CREATING.toString())
+              .addAttachmentKeyValuePair(
+                  AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.CREATING.toString())
               .build());
 
   private static final long WORKSPACES_COUNT = 101L;
@@ -64,6 +67,7 @@ public class GaugeRecorderServiceTest {
       MeasurementBundle.builder()
           .addViewInfoValuePair(Metric.WORKSPACE_TOTAL_COUNT, WORKSPACES_COUNT)
           .build();
+  public static final String TEST_GAUGE_DATA_COLLECTOR = "test gauge data collector";
 
   @Captor private ArgumentCaptor<MeasurementBundle> measurementBundleCaptor;
   @Captor private ArgumentCaptor<Collection<MeasurementBundle>> gaugeDataCaptor;
@@ -76,7 +80,10 @@ public class GaugeRecorderServiceTest {
   @Autowired private WorkspaceServiceImpl mockWorkspaceServiceImpl;
   @Autowired private MonitoringService mockMonitoringService;
 
-  @Autowired @Qualifier("pedro") GaugeDataCollector standAloneGaugeDataCollector;
+  @Autowired
+  @Qualifier(TEST_GAUGE_DATA_COLLECTOR)
+  private GaugeDataCollector standAloneGaugeDataCollector;
+
   @Autowired private GaugeRecorderService gaugeRecorderService;
 
   @TestConfiguration
@@ -94,23 +101,28 @@ public class GaugeRecorderServiceTest {
     }
 
     /**
-     * This is "yet another" GaugeDataCollector implementation, meant to showcase
-     * how we just grab all of the implementers nad inject them into the GaugeRecorderService,
-     * and that the two services I called out above aren't a special or all-inclusive list.
+     * This is "yet another" GaugeDataCollector implementation, meant to showcase how we just grab
+     * all of the implementers nad inject them into the GaugeRecorderService, and that the two
+     * services I called out above aren't a special or all-inclusive list.
+     *
      * @return
      */
-    @Bean(name = "pedro")
+    @Bean(name = TEST_GAUGE_DATA_COLLECTOR)
     public GaugeDataCollector getGaugeDataCollector() {
-      return () -> Collections.singleton(MeasurementBundle.builder()
-          .addViewInfoValuePair(Metric.DATASET_COUNT, 999L)
-          .addViewInfoValuePair(Metric.DEBUG_CONSTANT_VALUE, 100L)
-          .build());
+      return () ->
+          Collections.singleton(
+              MeasurementBundle.builder()
+                  .addViewInfoValuePair(Metric.DATASET_COUNT, 999L)
+                  .addViewInfoValuePair(Metric.DEBUG_CONSTANT_VALUE, 100L)
+                  .build());
     }
   }
 
   @Before
   public void setup() {
-    doReturn(Collections.singleton(WORKSPACE_MEASUREMENT_BUNDLE)).when(mockWorkspaceServiceImpl).getGaugeData();
+    doReturn(Collections.singleton(WORKSPACE_MEASUREMENT_BUNDLE))
+        .when(mockWorkspaceServiceImpl)
+        .getGaugeData();
     doReturn(BILLING_BUFFER_GAUGE_BUNDLES).when(mockBillingProjectBufferService).getGaugeData();
   }
 
@@ -125,24 +137,27 @@ public class GaugeRecorderServiceTest {
   public void testRecord() {
     gaugeRecorderService.record();
 
-    verify(mockMonitoringService).recordBundle(gaugeDataCaptor.capture());
+    verify(mockMonitoringService, atLeast(1)).recordBundle(measurementBundleCaptor.capture());
     verify(mockWorkspaceServiceImpl).getGaugeData();
     verify(mockBillingProjectBufferService).getGaugeData();
 
-//    assertThat(gaugeDataCaptor.getValue())
-//        .hasSize(1 + BILLING_BUFFER_INDIVIDUAL_GAUGE_MAP.size());
-//    assertThat(gaugeDataCaptor.getValue().get(Metric.WORKSPACE_TOTAL_COUNT))
-//        .isEqualTo(WORKSPACES_COUNT);
-  }
+    final List<MeasurementBundle> allRecordedBundles = measurementBundleCaptor.getAllValues();
+    final int expectedSize =
+        mockWorkspaceServiceImpl.getGaugeData().size()
+            + mockBillingProjectBufferService.getGaugeData().size()
+            + standAloneGaugeDataCollector.getGaugeData().size();
+    assertThat(allRecordedBundles).hasSize(expectedSize);
 
-//  @Test
-//  public void testRecord_emptyMap() {
-//    doReturn(Collections.emptyMap()).when(mockWorkspaceServiceImpl).getGaugeData();
-//    doReturn(Collections.emptyMap()).when(mockBillingProjectBufferService).getGaugeData();
-//
-//    verify(mockMonitoringService).recordValues(gaugeDataCaptor.capture());
-//    verify(mockWorkspaceServiceImpl).getGaugeDataLegacy();
-//    verify(mockBillingProjectBufferService).getGaugeDataLegacy();
-//    assertThat(gaugeDataCaptor.getValue()).isEmpty();
-//  }
+    final Optional<MeasurementBundle> workspacesBundle =
+        allRecordedBundles.stream()
+            .filter(b -> b.getMonitoringViews().containsKey(Metric.WORKSPACE_TOTAL_COUNT))
+            .findFirst();
+
+    assertThat(
+            workspacesBundle
+                .map(MeasurementBundle::getMonitoringViews)
+                .orElse(Collections.emptyMap()))
+        .hasSize(1);
+    assertThat(workspacesBundle.get().getMonitoringViews().get(Metric.WORKSPACE_TOTAL_COUNT));
+  }
 }

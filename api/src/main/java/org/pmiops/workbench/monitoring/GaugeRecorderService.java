@@ -1,14 +1,10 @@
 package org.pmiops.workbench.monitoring;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import io.opencensus.metrics.data.AttachmentValue;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,12 +27,14 @@ public class GaugeRecorderService {
       bundles.forEach(monitoringService::recordBundle);
       bundlesToLogBuilder.addAll(bundles);
     }
-    logValues();
+    logValues(bundlesToLogBuilder.build());
   }
+
   private void logValues(Collection<MeasurementBundle> bundles) {
-    logger.info(bundles.stream()
-        .map(MeasurementBundle::toString)
-        .sorted()
-        .collect(Collectors.joining("\n")));
+    logger.info(
+        bundles.stream()
+            .map(MeasurementBundle::toString)
+            .sorted()
+            .collect(Collectors.joining("\n")));
   }
 }

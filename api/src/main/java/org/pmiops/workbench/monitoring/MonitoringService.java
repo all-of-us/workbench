@@ -18,7 +18,6 @@ public interface MonitoringService {
    *
    * @param viewInfo
    */
-
   default void recordDelta(OpenCensusView viewInfo) {
     recordValue(viewInfo, DELTA_VALUE);
   }

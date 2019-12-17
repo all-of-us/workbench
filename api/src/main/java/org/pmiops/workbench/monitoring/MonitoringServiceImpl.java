@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,9 +43,7 @@ public class MonitoringServiceImpl implements MonitoringService {
   }
 
   private void registerSignals() {
-    Arrays.stream(Metric.values())
-        .map(OpenCensusView::toView)
-        .forEach(viewManager::registerView);
+    Arrays.stream(Metric.values()).map(OpenCensusView::toView).forEach(viewManager::registerView);
   }
 
   @Override
@@ -74,16 +72,18 @@ public class MonitoringServiceImpl implements MonitoringService {
   }
 
   /**
-   * Record multiple values at once. An attachment map allows associating these measurements
-   * with metadata (shared across all samples). We use a single MeasureMap for all the entries in
-   * both maps.
+   * Record multiple values at once. An attachment map allows associating these measurements with
+   * metadata (shared across all samples). We use a single MeasureMap for all the entries in both
+   * maps.
+   *
    * @param viewInfoToValue key/value pairs for time series. These need not be related, but any
-   *                        attachments should apply to all entries in this map.
+   *     attachments should apply to all entries in this map.
    * @param attachmentKeyToValue Map of String/AttachmentValue pairs to be associated with these
-   *                             data.
+   *     data.
    */
   @Override
-  public void recordValues(Map<OpenCensusView, Number> viewInfoToValue,
+  public void recordValues(
+      Map<OpenCensusView, Number> viewInfoToValue,
       Map<String, AttachmentValue> attachmentKeyToValue) {
     try {
       initStatsConfigurationIdempotent();

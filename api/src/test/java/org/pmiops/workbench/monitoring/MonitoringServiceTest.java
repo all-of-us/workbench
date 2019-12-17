@@ -22,8 +22,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig;
-import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -103,8 +103,7 @@ public class MonitoringServiceTest {
     monitoringService.recordValues(signalToValueBuilder.build());
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap, times(2)).put(any(MeasureLong.class), anyLong());
-    verify(mockMeasureMap, times(1))
-        .put(Metric.DEBUG_RANDOM_DOUBLE.getMeasureDouble(), 3.14);
+    verify(mockMeasureMap, times(1)).put(Metric.DEBUG_RANDOM_DOUBLE.getMeasureDouble(), 3.14);
     verify(mockMeasureMap).record();
   }
 

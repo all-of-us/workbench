@@ -38,8 +38,8 @@ import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
-import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -113,8 +113,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
                             DbStorageEnums.billingProjectBufferEntryStatusToStorage(status))))
             .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
 
-    for (Map.Entry<BufferEntryStatus, Metric> entry :
-        ENTRY_STATUS_TO_METRIC_VIEW.entrySet()) {
+    for (Map.Entry<BufferEntryStatus, Metric> entry : ENTRY_STATUS_TO_METRIC_VIEW.entrySet()) {
       final BufferEntryStatus entryStatus = entry.getKey();
       final OpenCensusView view = entry.getValue();
       final Long statusCount = entryStatusToCount.get(entryStatus);
@@ -125,10 +124,13 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
     // Add a bundle specifically for the overall
     entryStatusToCount.entrySet().stream()
-        .map(entry -> MeasurementBundle.builder()
-            .addViewInfoValuePair(Metric.BILLING_BUFFER_COUNT_BY_STATUS, entry.getValue())
-            .addAttachmentKeyValuePair(AttachmentKey.BUFFER_ENTRY_STATUS, entry.getKey().toString())
-            .build())
+        .map(
+            entry ->
+                MeasurementBundle.builder()
+                    .addViewInfoValuePair(Metric.BILLING_BUFFER_COUNT_BY_STATUS, entry.getValue())
+                    .addAttachmentKeyValuePair(
+                        AttachmentKey.BUFFER_ENTRY_STATUS, entry.getKey().toString())
+                    .build())
         .forEach(resultBuilder::add);
     return resultBuilder.build();
   }

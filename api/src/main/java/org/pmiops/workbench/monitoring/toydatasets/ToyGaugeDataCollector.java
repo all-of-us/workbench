@@ -6,6 +6,7 @@ import java.time.Clock;
 import java.util.Collection;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,13 +23,19 @@ public class ToyGaugeDataCollector implements GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-//    ImmutableMap.Builder<OpenCensusView, Number> signalToValueBuilder = ImmutableMap.builder();
-//    // Toy data series for developing & testing dashboards and alerts in low-traffic environments.
-//    signalToValueBuilder.put(ViewProperties.DEBUG_CONSTANT_VALUE, TOY_CONSTANT_VALUE);
-//    signalToValueBuilder.put(ViewProperties.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis());
-//    signalToValueBuilder.put(ViewProperties.DEBUG_RANDOM_DOUBLE, random.nextDouble());
-//    return signalToValueBuilder.build();
-    ImmutableSet.builder()
+    return ImmutableSet.<MeasurementBundle>builder()
+        .add(
+            MeasurementBundle.builder()
+                .addViewInfoValuePair(Metric.DEBUG_CONSTANT_VALUE, TOY_CONSTANT_VALUE)
+                .build())
+        .add(
+            MeasurementBundle.builder()
+                .addViewInfoValuePair(Metric.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis())
+                .build())
+        .add(
+            MeasurementBundle.builder()
+                .addViewInfoValuePair(Metric.DEBUG_RANDOM_DOUBLE, random.nextDouble())
+                .build())
         .build();
   }
 }

@@ -52,13 +52,8 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
-<<<<<<< HEAD
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.views.Metric;
-=======
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
->>>>>>> master
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -624,8 +619,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    return Collections.singleton(MeasurementBundle.builder()
-        .addViewInfoValuePair(Metric.WORKSPACE_TOTAL_COUNT, workspaceDao.count())
-      .build());
+    return Collections.singleton(
+        MeasurementBundle.builder()
+            .addViewInfoValuePair(Metric.WORKSPACE_TOTAL_COUNT, workspaceDao.count())
+            .build());
   }
 }
