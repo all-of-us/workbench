@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.views.OpenCensusView;
+import org.pmiops.workbench.monitoring.views.ViewProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,8 +44,8 @@ public class MonitoringServiceImpl implements MonitoringService {
   }
 
   private void registerSignals() {
-    Arrays.stream(MonitoringViews.values())
-        .map(MonitoringViews::toOpenCensusView)
+    Arrays.stream(ViewProperties.values())
+        .map(ViewProperties::toView)
         .forEach(viewManager::registerView);
   }
 
@@ -56,12 +56,14 @@ public class MonitoringServiceImpl implements MonitoringService {
    * @param viewInfoToValue
    */
   @Override
-  public void recordValues(Map<OpenCensusStatsViewInfo, Number> viewInfoToValue) {
+  public void recordValues(Map<OpenCensusView, Number> viewInfoToValue) {
     recordValues(viewInfoToValue, Collections.emptyMap());
   }
 
   @Override
-  public void recordValues(Map<OpenCensusStatsViewInfo, Number> viewInfoToValue, Map<String, AttachmentValue> attachmentKeysToValue) {
+  public void recordValues(
+      Map<OpenCensusView, Number> viewInfoToValue,
+      Map<String, AttachmentValue> attachmentKeysToValue) {
     try {
       initStatsConfigurationIdempotent();
       if (viewInfoToValue.isEmpty()) {
@@ -87,7 +89,7 @@ public class MonitoringServiceImpl implements MonitoringService {
    */
   private void addToMeasureMap(
       @NotNull MeasureMap measureMap,
-      @NotNull OpenCensusStatsViewInfo viewProperties,
+      @NotNull OpenCensusView viewProperties,
       @NotNull Number value) {
     if (viewProperties.getMeasureClass().equals(MeasureLong.class)) {
       measureMap.put(viewProperties.getMeasureLong(), value.longValue());

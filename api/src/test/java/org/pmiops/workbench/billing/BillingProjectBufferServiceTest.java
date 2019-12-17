@@ -49,8 +49,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.views.OpenCensusView;
+import org.pmiops.workbench.monitoring.views.ViewProperties;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -671,9 +671,9 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void testGetGaugeData() {
-    final Map<OpenCensusStatsViewInfo, Number> result = billingProjectBufferService.getGaugeData();
+    final Map<OpenCensusView, Number> result = billingProjectBufferService.getGaugeDataLegacy();
     assertThat(result.size()).isGreaterThan(0);
-    assertThat(result.get(MonitoringViews.BILLING_BUFFER_SIZE)).isEqualTo(0);
+    assertThat(result.get(ViewProperties.BILLING_BUFFER_SIZE)).isEqualTo(0);
   }
 
   private Timestamp getCurrentTimestamp() {

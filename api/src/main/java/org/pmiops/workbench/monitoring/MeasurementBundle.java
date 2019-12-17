@@ -8,33 +8,35 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.views.OpenCensusView;
 
 /**
- * Simple bundle class to avoid dealing with lists of pairs of maps. This
- * situation can occur in classes that have multiple kinds of signals with different attribute
- * maps among subsets. In order to avoid excessive proliferation of (confusing) argument list types,
- * we try to consolidate here.
+ * Simple bundle class to avoid dealing with lists of pairs of maps. This situation can occur in
+ * classes that have multiple kinds of signals with different attribute maps among subsets. In order
+ * to avoid excessive proliferation of (confusing) argument list types, we try to consolidate here.
  */
-public class ViewBundle {
-  private final Map<OpenCensusStatsViewInfo, Number> monitoringViews;
+public class MeasurementBundle {
+  private final Map<OpenCensusView, Number> monitoringViews;
   private final Map<AttachmentKey, String> attachmentKeyToString;
 
-  private ViewBundle(
-      Map<OpenCensusStatsViewInfo, Number> monitoringViews,
+  private MeasurementBundle(
+      Map<OpenCensusView, Number> monitoringViews,
       Map<AttachmentKey, String> attachmentKeyToString) {
     this.monitoringViews = monitoringViews;
     this.attachmentKeyToString = attachmentKeyToString;
   }
 
-  public static Map<String, AttachmentValue> fromAttachmentKeyToString(Map<AttachmentKey, String> attachmentKeyStringMap) {
+  public static Map<String, AttachmentValue> fromAttachmentKeyToString(
+      Map<AttachmentKey, String> attachmentKeyStringMap) {
     return attachmentKeyStringMap.entrySet().stream()
-        .map(e -> new SimpleImmutableEntry<String, AttachmentValue>(e.getKey().getKeyName(), AttachmentValueString
-            .create(e.getValue())))
+        .map(
+            e ->
+                new SimpleImmutableEntry<String, AttachmentValue>(
+                    e.getKey().getKeyName(), AttachmentValueString.create(e.getValue())))
         .collect(ImmutableMap.toImmutableMap(Entry::getKey, SimpleImmutableEntry::getValue));
   }
 
-  public Map<OpenCensusStatsViewInfo, Number> getMonitoringViews() {
+  public Map<OpenCensusView, Number> getMonitoringViews() {
     return monitoringViews;
   }
 
@@ -51,12 +53,12 @@ public class ViewBundle {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof ViewBundle)) {
+    if (!(o instanceof MeasurementBundle)) {
       return false;
     }
-    ViewBundle that = (ViewBundle) o;
-    return monitoringViews.equals(that.monitoringViews) &&
-        attachmentKeyToString.equals(that.attachmentKeyToString);
+    MeasurementBundle that = (MeasurementBundle) o;
+    return monitoringViews.equals(that.monitoringViews)
+        && attachmentKeyToString.equals(that.attachmentKeyToString);
   }
 
   @Override
@@ -66,14 +68,16 @@ public class ViewBundle {
 
   @Override
   public String toString() {
-    return "ViewBundle{" +
-        "monitoringViews=" + monitoringViews +
-        ", attachmentKeyToString=" + attachmentKeyToString +
-        '}';
+    return "ViewBundle{"
+        + "monitoringViews="
+        + monitoringViews
+        + ", attachmentKeyToString="
+        + attachmentKeyToString
+        + '}';
   }
 
   public static class Builder {
-    private ImmutableMap.Builder<OpenCensusStatsViewInfo, Number> viewToValueBuilder;
+    private ImmutableMap.Builder<OpenCensusView, Number> viewToValueBuilder;
     private ImmutableMap.Builder<AttachmentKey, String> attachmentKeyToValueBuilder;
 
     private Builder() {
@@ -81,17 +85,17 @@ public class ViewBundle {
       attachmentKeyToValueBuilder = ImmutableMap.builder();
     }
 
-    public Builder addViewInfoDelta(OpenCensusStatsViewInfo viewInfo) {
+    public Builder addViewInfoDelta(OpenCensusView viewInfo) {
       viewToValueBuilder.put(viewInfo, MonitoringService.DELTA_VALUE);
       return this;
     }
 
-    public Builder addViewInfoValuePair(OpenCensusStatsViewInfo viewInfo, Number value) {
+    public Builder addViewInfoValuePair(OpenCensusView viewInfo, Number value) {
       viewToValueBuilder.put(viewInfo, value);
       return this;
     }
 
-    public Builder addViewInfoToValueMap(Map<OpenCensusStatsViewInfo, Number> map) {
+    public Builder addViewInfoToValueMap(Map<OpenCensusView, Number> map) {
       viewToValueBuilder.putAll(ImmutableMap.copyOf(map));
       return this;
     }
@@ -106,8 +110,8 @@ public class ViewBundle {
       return this;
     }
 
-    public ViewBundle build() {
-      return new ViewBundle(viewToValueBuilder.build(), attachmentKeyToValueBuilder.build());
+    public MeasurementBundle build() {
+      return new MeasurementBundle(viewToValueBuilder.build(), attachmentKeyToValueBuilder.build());
     }
   }
 }

@@ -7,9 +7,11 @@ import io.opencensus.tags.TagKey;
 import java.util.Collections;
 import java.util.List;
 
-public enum MonitoringViews implements OpenCensusStatsViewInfo {
+public enum ViewProperties implements OpenCensusView {
   BILLING_BUFFER_SIZE(
       "billing_project_buffer_entries", "The number of billing project buffer entries."),
+  BILLING_BUFFER_COUNT_BY_STATUS(
+      "billing_buffer_count_by_status", "Number of projects inthe billing buffer for each status"),
   BILLING_BUFFER_AVAILABLE_PROJECT_COUNT(
       "billing_project_buffer_available_project_count",
       "Current number of billing projects with available status."),
@@ -41,20 +43,20 @@ public enum MonitoringViews implements OpenCensusStatsViewInfo {
   private List<TagKey> columns;
   private final Class measureClass;
 
-  MonitoringViews(String name, String description) {
-    this(name, description, OpenCensusStatsViewInfo.UNITLESS_UNIT, MeasureLong.class);
+  ViewProperties(String name, String description) {
+    this(name, description, OpenCensusView.UNITLESS_UNIT, MeasureLong.class);
   }
 
-  MonitoringViews(String name, String description, String unit, Class measureClass) {
+  ViewProperties(String name, String description, String unit, Class measureClass) {
     this(name, description, unit, measureClass, Aggregation.LastValue.create());
   }
 
-  MonitoringViews(
+  ViewProperties(
       String name, String description, String unit, Class measureClass, Aggregation aggregation) {
     this(name, description, unit, measureClass, aggregation, Collections.emptyList());
   }
 
-  MonitoringViews(
+  ViewProperties(
       String name,
       String description,
       String unit,

@@ -2,7 +2,6 @@ package org.pmiops.workbench.notebooks;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
-import com.google.common.collect.ImmutableMap;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -23,10 +22,10 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.GoogleCloudLocators;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.ViewBundle;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
+import org.pmiops.workbench.monitoring.views.ViewProperties;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -169,11 +168,13 @@ public class NotebooksServiceImpl implements NotebooksService {
             workspaceNamespace,
             workspaceName,
             newName);
-    monitoringService.recordBundle(ViewBundle.builder()
-        .addViewInfoValuePair(MonitoringViews.NOTEBOOK_CLONE, 1L)
-        .addAttachmentKeyValuePair(AttachmentKey.NOTEBOOK_NAME, copiedNotebookFileDetail.getName())
-        .addAttachmentKeyValuePair(AttachmentKey.NOTEBOOK_WORKSPACE_NAMESPACE, workspaceName)
-      .build());
+    monitoringService.recordBundle(
+        MeasurementBundle.builder()
+            .addViewInfoValuePair(ViewProperties.NOTEBOOK_CLONE, 1L)
+            .addAttachmentKeyValuePair(
+                AttachmentKey.NOTEBOOK_NAME, copiedNotebookFileDetail.getName())
+            .addAttachmentKeyValuePair(AttachmentKey.NOTEBOOK_WORKSPACE_NAMESPACE, workspaceName)
+            .build());
     return copiedNotebookFileDetail;
   }
 
@@ -186,7 +187,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         workspaceService.getRequired(workspaceNamespace, workspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
         notebookLocators.fullPath);
-    monitoringService.recordDelta(MonitoringViews.NOTEBOOK_DELETE);
+    monitoringService.recordDelta(ViewProperties.NOTEBOOK_DELETE);
   }
 
   @Override
@@ -229,7 +230,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         bucketName,
         "notebooks/" + NotebooksService.withNotebookExtension(notebookName),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
-    monitoringService.recordDelta(MonitoringViews.NOTEBOOK_SAVE);
+    monitoringService.recordDelta(ViewProperties.NOTEBOOK_SAVE);
   }
 
   @Override

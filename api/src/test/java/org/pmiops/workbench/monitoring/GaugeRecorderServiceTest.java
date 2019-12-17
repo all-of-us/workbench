@@ -15,8 +15,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.views.OpenCensusView;
+import org.pmiops.workbench.monitoring.views.ViewProperties;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,19 +29,19 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class GaugeRecorderServiceTest {
 
-  private static final Map<OpenCensusStatsViewInfo, Number> BILLING_BUFFER_GAUGE_MAP =
+  private static final Map<OpenCensusView, Number> BILLING_BUFFER_GAUGE_MAP =
       ImmutableMap.of(
-          MonitoringViews.BILLING_BUFFER_ASSIGNING_PROJECT_COUNT,
+          ViewProperties.BILLING_BUFFER_ASSIGNING_PROJECT_COUNT,
           2L,
-          MonitoringViews.BILLING_BUFFER_AVAILABLE_PROJECT_COUNT,
+          ViewProperties.BILLING_BUFFER_AVAILABLE_PROJECT_COUNT,
           1L,
-          MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT,
+          ViewProperties.BILLING_BUFFER_CREATING_PROJECT_COUNT,
           0L);
   private static final long WORKSPACES_COUNT = 101L;
-  private static final Map<OpenCensusStatsViewInfo, Number> WORKSPACE_GAUGE_MAP =
-      ImmutableMap.of(MonitoringViews.WORKSPACE_TOTAL_COUNT, WORKSPACES_COUNT);
+  private static final Map<OpenCensusView, Number> WORKSPACE_GAUGE_MAP =
+      ImmutableMap.of(ViewProperties.WORKSPACE_TOTAL_COUNT, WORKSPACES_COUNT);
 
-  @Captor private ArgumentCaptor<Map<OpenCensusStatsViewInfo, Number>> gaugeDataCaptor;
+  @Captor private ArgumentCaptor<Map<OpenCensusView, Number>> gaugeDataCaptor;
 
   // In order to access the GaugeDataCollector method, we need to mock the
   // Implementation classes for the ones that implement it. We could get
@@ -69,8 +69,8 @@ public class GaugeRecorderServiceTest {
 
   @Before
   public void setup() {
-    doReturn(WORKSPACE_GAUGE_MAP).when(mockWorkspaceServiceImpl).getGaugeData();
-    doReturn(BILLING_BUFFER_GAUGE_MAP).when(mockBillingProjectBufferService).getGaugeData();
+    doReturn(WORKSPACE_GAUGE_MAP).when(mockWorkspaceServiceImpl).getGaugeDataLegacy();
+    doReturn(BILLING_BUFFER_GAUGE_MAP).when(mockBillingProjectBufferService).getGaugeDataLegacy();
   }
 
   @Test
@@ -78,21 +78,23 @@ public class GaugeRecorderServiceTest {
     gaugeRecorderService.record();
 
     verify(mockMonitoringService).recordValues(gaugeDataCaptor.capture());
-    verify(mockWorkspaceServiceImpl).getGaugeData();
-    verify(mockBillingProjectBufferService).getGaugeData();
+    verify(mockWorkspaceServiceImpl).getGaugeDataLegacy();
+    verify(mockBillingProjectBufferService).getGaugeDataLegacy();
 
-    assertThat(gaugeDataCaptor.getValue()).hasSize(WORKSPACE_GAUGE_MAP.size() + BILLING_BUFFER_GAUGE_MAP.size());
-    assertThat(gaugeDataCaptor.getValue().get(MonitoringViews.WORKSPACE_TOTAL_COUNT)).isEqualTo(WORKSPACES_COUNT);
+    assertThat(gaugeDataCaptor.getValue())
+        .hasSize(WORKSPACE_GAUGE_MAP.size() + BILLING_BUFFER_GAUGE_MAP.size());
+    assertThat(gaugeDataCaptor.getValue().get(ViewProperties.WORKSPACE_TOTAL_COUNT))
+        .isEqualTo(WORKSPACES_COUNT);
   }
 
   @Test
   public void testRecord_emptyMap() {
-    doReturn(Collections.emptyMap()).when(mockWorkspaceServiceImpl).getGaugeData();
-    doReturn(Collections.emptyMap()).when(mockBillingProjectBufferService).getGaugeData();
+    doReturn(Collections.emptyMap()).when(mockWorkspaceServiceImpl).getGaugeDataLegacy();
+    doReturn(Collections.emptyMap()).when(mockBillingProjectBufferService).getGaugeDataLegacy();
 
     verify(mockMonitoringService).recordValues(gaugeDataCaptor.capture());
-    verify(mockWorkspaceServiceImpl).getGaugeData();
-    verify(mockBillingProjectBufferService).getGaugeData();
+    verify(mockWorkspaceServiceImpl).getGaugeDataLegacy();
+    verify(mockBillingProjectBufferService).getGaugeDataLegacy();
 
     assertThat(gaugeDataCaptor.getValue()).isEmpty();
   }

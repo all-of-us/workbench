@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,8 +31,9 @@ import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.views.OpenCensusView;
+import org.pmiops.workbench.monitoring.views.ViewProperties;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -381,7 +384,14 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   @Override
-  public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
-    return ImmutableMap.of(MonitoringViews.COHORT_COUNT, cohortDao.count());
+  public Map<OpenCensusView, Number> getGaugeDataLegacy() {
+    return ImmutableMap.of(ViewProperties.COHORT_COUNT, cohortDao.count());
+  }
+
+  @Override
+  public Collection<MeasurementBundle> getGaugeData() {
+    return Collections.singleton(MeasurementBundle.builder()
+        .addViewInfoValuePair(ViewProperties.COHORT_COUNT, cohortDao.count())
+        .build());
   }
 }
