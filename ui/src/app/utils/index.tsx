@@ -1,8 +1,19 @@
 import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
+import {colorWithWhiteness} from 'app/styles/colors';
+import {
+  cdrVersionStore,
+  currentCohortStore,
+  currentConceptSetStore,
+  currentWorkspaceStore,
+  globalErrorStore,
+  queryParamsStore,
+  routeConfigDataStore,
+  urlParamsStore,
+  userProfileStore
+} from 'app/utils/navigation';
 import {DataAccessLevel, Domain} from 'generated';
-import {Domain as FetchDomain} from 'generated/fetch';
-import {DataAccessLevel as FetchDataAccessLevel} from 'generated/fetch';
+import {DataAccessLevel as FetchDataAccessLevel, Domain as FetchDomain} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -10,17 +21,6 @@ import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 export const WINDOW_REF = 'window-ref';
-import {colorWithWhiteness} from 'app/styles/colors';
-import {
-  cdrVersionStore,
-  currentCohortStore,
-  currentConceptSetStore,
-  currentWorkspaceStore,
-  queryParamsStore,
-  routeConfigDataStore,
-  urlParamsStore,
-  userProfileStore
-} from 'app/utils/navigation';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null) {
@@ -337,6 +337,10 @@ export const withCurrentConceptSet = () => {
   return connectBehaviorSubject(currentConceptSetStore, 'conceptSet');
 };
 
+export const withGlobalError = () => {
+  return connectBehaviorSubject(globalErrorStore, 'globalError');
+};
+
 // HOC that provides a 'profileState' prop with current profile and a reload function
 export const withUserProfile = () => {
   return connectBehaviorSubject(userProfileStore, 'profileState');
@@ -472,31 +476,3 @@ export function highlightSearchTerm(searchTerm: string, stringToHighlight: strin
     </span>);
 }
 
-/*
- * A method to run an api call with a specified number of retries and exponential backoff.
- * This method will only error
- * Parameters:
- *    apiCall: Lambda that will run an API call, in the form of () => apiClient.apiCall(args)
- *    maxRetries: The amount of retries the system will take before erroring
- *    defaultWaitTime: How long the base exponential backoff is, in milliseconds
- *      For example, if 1000 is passed in, it will wait 1s for the first retry,
- *      2s for the second, etc.
- */
-export async function apiCallWithGatewayTimeoutRetries<T>(
-  apiCall: () => Promise<T>, maxRetries = 3, initialWaitTime = 1000): Promise<T> {
-  return apiCallWithGatewayTimeoutRetriesAndRetryCount(apiCall, maxRetries, 1, initialWaitTime);
-}
-
-async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
-  apiCall: () => Promise<T>, maxRetries = 3, retryCount = 1, initialWaitTime = 1000): Promise<T> {
-  try {
-    return await apiCall();
-  } catch (ex) {
-    if (ex.status !== 504 || retryCount > maxRetries) {
-      throw ex;
-    }
-    await new Promise(resolve => setTimeout(resolve, initialWaitTime * Math.pow(2, retryCount)));
-    return await apiCallWithGatewayTimeoutRetriesAndRetryCount(
-      apiCall, maxRetries, retryCount + 1, initialWaitTime);
-  }
-}

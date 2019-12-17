@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import {apiCallWithGatewayTimeoutRetries} from 'app/utils/index';
+import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 
 const functionStub = {
   successfulFunction() {
@@ -9,7 +9,7 @@ const functionStub = {
   failedFunction() {
     return Promise.resolve({status: 504}).then(response => {throw response});
   }
-}
+};
 
 
 describe('IndexUtils', () => {

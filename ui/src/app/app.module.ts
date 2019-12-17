@@ -1,6 +1,6 @@
 import {ErrorHandler, NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {Http, HttpModule, RequestOptions, XHRBackend} from '@angular/http';
+import {Http, HttpModule} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouteReuseStrategy} from '@angular/router';
@@ -9,21 +9,17 @@ import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/c
 import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
-import {InterceptedHttp} from './factory/InterceptedHttp';
 import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {CdrVersionStorageService} from './services/cdr-version-storage.service';
-import {ErrorHandlingService} from './services/error-handling.service';
 import {ErrorReporterService} from './services/error-reporter.service';
 import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
 import {ProfileStorageService} from './services/profile-storage.service';
 import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
-import {StatusCheckService} from './services/status-check.service';
 import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {BugReportComponent} from './components/bug-report';
-import {ErrorHandlerComponent} from './components/error-handler/component';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
@@ -144,7 +140,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     DataSetPageComponent,
     DataUseAgreementComponent,
     DetailPageComponent,
-    ErrorHandlerComponent,
     HelpSidebarComponent,
     InitialErrorComponent,
     InteractiveNotebookComponent,
@@ -193,7 +188,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
         basePath: c.basePath
       })
     },
-    ErrorHandlingService,
     ServerConfigService,
     {
       provide: ErrorHandler,
@@ -203,13 +197,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     CdrVersionStorageService,
     ProfileStorageService,
     SignInService,
-    StatusCheckService,
     GoogleAnalyticsEventsService,
-    {
-      provide: Http,
-      useClass: InterceptedHttp,
-      deps: [XHRBackend, RequestOptions, ErrorHandlingService]
-    },
     {
       provide: WINDOW_REF,
       useValue: window
@@ -219,6 +207,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     CanDeactivateGuard
   ],
   // This specifies the top-level components, to load first.
-  bootstrap: [AppComponent, ErrorHandlerComponent, InitialErrorComponent]
+  bootstrap: [AppComponent, InitialErrorComponent]
 })
 export class AppModule {}
