@@ -138,24 +138,22 @@ export class ConceptTable extends React.Component<Props, State> {
   }
 
   updateSelectedConceptList(selectedConcepts, origin) {
+    // By default Data table will select all the concepts in the table but since we have first give
+    // an option to user to select all concepts in a page
+    // we will just add the the concepts in the page to selected concept list
     if (selectedConcepts.length === this.props.concepts.length && origin === 'table') {
       const startIndex = this.state.tableRef.current.state.first;
       const endIndex = startIndex + ROWS_TO_DISPLAY;
-      const selectedConceptss = this.state.selectedConcepts
+      const allSelectedConcepts = this.state.selectedConcepts
           .concat(this.props.concepts.slice(startIndex, endIndex));
-      const uniq = fp.uniqBy( 'conceptId', selectedConceptss);
-      this.setState({selectedConcepts: uniq});
-      this.props.onSelectConcepts(uniq);
+      selectedConcepts = fp.uniqBy( 'conceptId', allSelectedConcepts);
       this.setState({showBanner: true});
     } else if (selectedConcepts.length === 0 ) {
+      // if no concepts are selected remove the banner
       this.setState({showBanner: false});
-      this.setState({selectedConcepts: selectedConcepts});
-      this.props.onSelectConcepts(selectedConcepts);
-    } else {
-      this.setState({selectedConcepts: selectedConcepts});
-      this.props.onSelectConcepts(selectedConcepts);
     }
-
+    this.setState({selectedConcepts: selectedConcepts});
+    this.props.onSelectConcepts(selectedConcepts);
   }
 
   distinctVocabulary() {
@@ -230,7 +228,7 @@ export class ConceptTable extends React.Component<Props, State> {
   }
 
   render() {
-    const {pageConcepts, pageLoading, selectedConcepts, tableRef} = this.state;
+    const {selectedConcepts, tableRef} = this.state;
     const {placeholderValue, loading, reactKey} = this.props;
     return <div data-test-id='conceptTable' key={reactKey}>
       <DataTable ref={tableRef} emptyMessage={loading ? '' : placeholderValue}
