@@ -189,7 +189,6 @@ def dev_up()
   at_exit do
     common.run_inline %W{docker-compose down}
   end
-
   ensure_docker_sync()
 
   overall_bm = Benchmark.measure {
@@ -607,7 +606,6 @@ Common.register_command({
 
 def run_local_all_migrations()
   ensure_docker_sync()
-
   common = Common.new
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 
@@ -623,7 +621,6 @@ Common.register_command({
 
 def run_local_data_migrations()
   ensure_docker_sync()
-
   init_new_cdr_db %W{--cdr-db-name cdr --run-list data --context local}
 end
 
@@ -635,7 +632,6 @@ Common.register_command({
 
 def run_local_rw_migrations()
   ensure_docker_sync()
-
   common = Common.new
   common.run_inline %W{docker-compose run db-scripts ./run-migrations.sh main}
 end
@@ -1016,7 +1012,6 @@ Imports .sql file to local mysql instance",
 
 def run_drop_cdr_db()
   ensure_docker_sync()
-
   common = Common.new
   common.run_inline %W{docker-compose run cdr-scripts ./run-drop-db.sh}
 end
@@ -1636,7 +1631,6 @@ Common.register_command({
 
 def update_cdr_versions_local(cmd_name, *args)
   ensure_docker_sync()
-
   setup_local_environment
   op = update_cdr_version_options(cmd_name, args)
   op.parse.validate
