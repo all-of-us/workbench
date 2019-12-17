@@ -223,8 +223,11 @@ export class ConceptTable extends React.Component<Props, State> {
     return;
   }
 
-  onPage() {
-    this.state.tableRef.current.first === 0 ? this.setState({showBanner: false}): '';
+  onPageChange() {
+    const startIndex = this.state.tableRef.current.state.first;
+    const endIndex = startIndex + ROWS_TO_DISPLAY;
+    const allPageConcepts = this.props.concepts.slice(startIndex, endIndex);
+    fp.includes(this.state.selectedConcepts, allPageConcepts) ? this.setState({showBanner: true}) : this.setState({showBanner: false});
   }
 
   render() {
@@ -241,7 +244,7 @@ export class ConceptTable extends React.Component<Props, State> {
                  rowExpansionTemplate={(data) => this.rowExpansionTemplate(data)}
                  paginator={true} rows={ROWS_TO_DISPLAY}
                  data-test-id='conceptRow'
-                 onValueChange={(value) => this.onPage()}
+                 onValueChange={(value) => this.onPageChange()}
                  onSelectionChange={e => this.updateSelectedConceptList(e.value, 'table')} >
       <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
               data-test-id='conceptCheckBox' selectionMode='multiple'/>
