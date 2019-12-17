@@ -10,10 +10,12 @@ def build_snippets_menu()
          ("=" * 20) + " */\n" + tmpl
 
   {
-    "{{PY_MENU_JSON}}" => "py-snippets-menu.json",
-    "{{PY_DATASET_MENU_JSON}}" => "py-dataset-snippets-menu.json",
-    "{{R_MENU_JSON}}" => "r-snippets-menu.json",
-    "{{R_DATASET_MENU_JSON}}" => "r-dataset-snippets-menu.json",
+    "{{PY_DATASET_MENU_JSON}}" => "py_dataset_snippets_menu_config.json",
+    "{{PY_GCS_MENU_JSON}}" => "py_gcs_snippets_menu_config.json",
+    "{{PY_SQL_MENU_JSON}}" => "py_sql_snippets_menu_config.json",
+    "{{R_DATASET_MENU_JSON}}" => "r_dataset_snippets_menu_config.json",
+    "{{R_GCS_MENU_JSON}}" => "r_gcs_snippets_menu_config.json",
+    "{{R_SQL_MENU_JSON}}" => "r_sql_snippets_menu_config.json",
   }.each do |var, path|
     # Ruby apparently lacks a basic string replacement function. sub/gsub
     # support pattern inputs and captures, and \ interacts poorly with output
