@@ -1,13 +1,11 @@
 package org.pmiops.workbench.cohortreview;
 
-import com.google.common.collect.ImmutableMap;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
@@ -32,7 +30,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.views.ViewProperties;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -385,7 +383,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
     return Collections.singleton(MeasurementBundle.builder()
-        .addViewInfoValuePair(ViewProperties.COHORT_COUNT, cohortDao.count())
+        .addViewInfoValuePair(Metric.COHORT_COUNT, cohortDao.count())
         .build());
   }
 }

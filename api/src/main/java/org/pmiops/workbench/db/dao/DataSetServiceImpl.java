@@ -45,7 +45,7 @@ import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.views.ViewProperties;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -65,7 +65,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
     return Collections.singleton(MeasurementBundle.builder()
-        .addViewInfoValuePair(ViewProperties.DATASET_COUNT, dataSetDao.count())
+        .addViewInfoValuePair(Metric.DATASET_COUNT, dataSetDao.count())
         .build();
   }
 

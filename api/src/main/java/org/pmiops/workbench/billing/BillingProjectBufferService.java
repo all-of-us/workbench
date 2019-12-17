@@ -39,7 +39,7 @@ import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
 import org.pmiops.workbench.monitoring.views.OpenCensusView;
-import org.pmiops.workbench.monitoring.views.ViewProperties;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,11 +56,11 @@ public class BillingProjectBufferService implements GaugeDataCollector {
       ImmutableMap.of(
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
           BufferEntryStatus.ASSIGNING, ASSIGNING_TIMEOUT);
-  private static final ImmutableMap<BufferEntryStatus, ViewProperties> ENTRY_STATUS_TO_METRIC_VIEW =
+  private static final ImmutableMap<BufferEntryStatus, Metric> ENTRY_STATUS_TO_METRIC_VIEW =
       ImmutableMap.of(
-          BufferEntryStatus.AVAILABLE, ViewProperties.BILLING_BUFFER_AVAILABLE_PROJECT_COUNT,
-          BufferEntryStatus.ASSIGNING, ViewProperties.BILLING_BUFFER_ASSIGNING_PROJECT_COUNT,
-          BufferEntryStatus.CREATING, ViewProperties.BILLING_BUFFER_CREATING_PROJECT_COUNT);
+          BufferEntryStatus.AVAILABLE, Metric.BILLING_BUFFER_AVAILABLE_PROJECT_COUNT,
+          BufferEntryStatus.ASSIGNING, Metric.BILLING_BUFFER_ASSIGNING_PROJECT_COUNT,
+          BufferEntryStatus.CREATING, Metric.BILLING_BUFFER_CREATING_PROJECT_COUNT);
 
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
@@ -99,7 +99,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
     resultBuilder.add(
         MeasurementBundle.builder()
-            .addViewInfoValuePair(ViewProperties.BILLING_BUFFER_SIZE, getCurrentBufferSize())
+            .addViewInfoValuePair(Metric.BILLING_BUFFER_SIZE, getCurrentBufferSize())
             .build());
 
     // TODO(jaycarlton): set up a DAO/data manager method pair to build this map in one query.
@@ -113,7 +113,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
                             DbStorageEnums.billingProjectBufferEntryStatusToStorage(status))))
             .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
 
-    for (Map.Entry<BufferEntryStatus, ViewProperties> entry :
+    for (Map.Entry<BufferEntryStatus, Metric> entry :
         ENTRY_STATUS_TO_METRIC_VIEW.entrySet()) {
       final BufferEntryStatus entryStatus = entry.getKey();
       final OpenCensusView view = entry.getValue();
@@ -126,7 +126,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     // Add a bundle specifically for the overall
     entryStatusToCount.entrySet().stream()
         .map(entry -> MeasurementBundle.builder()
-            .addViewInfoValuePair(ViewProperties.BILLING_BUFFER_COUNT_BY_STATUS, entry.getValue())
+            .addViewInfoValuePair(Metric.BILLING_BUFFER_COUNT_BY_STATUS, entry.getValue())
             .addAttachmentKeyValuePair(AttachmentKey.BUFFER_ENTRY_STATUS, entry.getKey().toString())
             .build())
         .forEach(resultBuilder::add);

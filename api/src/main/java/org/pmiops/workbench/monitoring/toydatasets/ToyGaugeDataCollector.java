@@ -1,15 +1,11 @@
 package org.pmiops.workbench.monitoring.toydatasets;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.util.Collection;
-import java.util.Map;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.views.OpenCensusView;
-import org.pmiops.workbench.monitoring.views.ViewProperties;
 import org.springframework.stereotype.Service;
 
 @Service

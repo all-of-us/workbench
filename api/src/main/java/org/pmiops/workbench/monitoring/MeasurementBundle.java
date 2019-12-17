@@ -26,7 +26,15 @@ public class MeasurementBundle {
     this.attachmentKeyToString = attachmentKeyToString;
   }
 
-  public static Map<String, AttachmentValue> fromAttachmentKeyToString(
+  public Map<OpenCensusView, Number> getMonitoringViews() {
+    return monitoringViews;
+  }
+
+  public Map<String, AttachmentValue> getAttachments() {
+    return fromAttachmentKeyToString(attachmentKeyToString);
+  }
+
+  private static Map<String, AttachmentValue> fromAttachmentKeyToString(
       Map<AttachmentKey, String> attachmentKeyStringMap) {
     return attachmentKeyStringMap.entrySet().stream()
         .map(
@@ -34,14 +42,6 @@ public class MeasurementBundle {
                 new SimpleImmutableEntry<String, AttachmentValue>(
                     e.getKey().getKeyName(), AttachmentValueString.create(e.getValue())))
         .collect(ImmutableMap.toImmutableMap(Entry::getKey, SimpleImmutableEntry::getValue));
-  }
-
-  public Map<OpenCensusView, Number> getMonitoringViews() {
-    return monitoringViews;
-  }
-
-  public Map<String, AttachmentValue> getAttachments() {
-    return fromAttachmentKeyToString(attachmentKeyToString);
   }
 
   public static Builder builder() {
@@ -111,6 +111,9 @@ public class MeasurementBundle {
     }
 
     public MeasurementBundle build() {
+      if (viewToValueBuilder.build().isEmpty()) {
+        throw new IllegalStateException("MeasurementBundle must have at least one data point");
+      }
       return new MeasurementBundle(viewToValueBuilder.build(), attachmentKeyToValueBuilder.build());
     }
   }
