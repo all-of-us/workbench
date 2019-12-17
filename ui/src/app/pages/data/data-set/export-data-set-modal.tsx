@@ -13,6 +13,7 @@ import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 
 
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {DataSet, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
 
 interface Props {
@@ -173,7 +174,12 @@ class ExportDataSetModal extends React.Component<
       <ModalTitle>Export {dataSet.name} to Notebook</ModalTitle>
       <ModalBody>
         <Button data-test-id='code-preview-button'
-                onClick={() => this.setState({seePreview: !seePreview})}>
+                onClick={() => {
+                  if (!seePreview) {
+                    AnalyticsTracker.DatasetBuilder.SeeCodePreview();
+                  }
+                  this.setState({seePreview: !seePreview});
+                }}>
           {seePreview ? 'Hide Preview' : 'See Code Preview'}
         </Button>
         {seePreview && <React.Fragment>
@@ -225,8 +231,13 @@ class ExportDataSetModal extends React.Component<
           Cancel
         </Button>
         <TooltipTrigger content={summarizeErrors(errors)}>
-          <Button type='primary' data-test-id='save-data-set'
-                  disabled={errors || loading} onClick={() => this.exportDataSet()}>
+          <Button type='primary'
+                  data-test-id='save-data-set'
+                  disabled={errors || loading}
+                  onClick={() => {
+                    AnalyticsTracker.DatasetBuilder.Export(this.state.kernelType);
+                    this.exportDataSet();
+                  }}>
             Export and Open
           </Button>
         </TooltipTrigger>

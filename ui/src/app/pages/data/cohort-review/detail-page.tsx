@@ -3,14 +3,13 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {from} from 'rxjs/observable/from';
 
-import {HelpSidebar} from 'app/components/help-sidebar';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {DetailHeader} from 'app/pages/data/cohort-review/detail-header.component';
 import {DetailTabs} from 'app/pages/data/cohort-review/detail-tabs.component';
-import {cohortReviewStore, getVocabOptions, vocabOptions} from 'app/services/review-state.service';
-import {cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
+import {cohortReviewStore, getVocabOptions, participantStore, vocabOptions} from 'app/services/review-state.service';
+import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore, urlParamsStore} from 'app/utils/navigation';
+import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ParticipantCohortStatus, SortOrder} from 'generated/fetch';
 
@@ -33,46 +32,31 @@ export const DetailPage = withCurrentWorkspace()(
     async componentDidMount() {
       const {workspace: {cdrVersionId, id, namespace}} = this.props;
       const {ns, wsid, cid} = urlParamsStore.getValue();
-      const promises = [];
       if (!cohortReviewStore.getValue()) {
-        promises.push(
-          cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
-            page: 0,
-            pageSize: 25,
-            sortOrder: SortOrder.Asc,
-            filters: {items: []}
-          }).then(review => cohortReviewStore.next(review))
-        );
-      }
-      if (!currentCohortStore.getValue()) {
-        promises.push(cohortsApi().getCohort(ns, wsid, cid).then(cohort => currentCohortStore.next(cohort)));
-      }
-      if (promises.length) {
-        await Promise.all(promises);
+        await cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, {
+          page: 0,
+          pageSize: 25,
+          sortOrder: SortOrder.Asc,
+          filters: {items: []}
+        }).then(review => cohortReviewStore.next(review));
       }
       this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(params => !!params.pid)
         .switchMap(({pid}) => {
           return from(cohortReviewApi()
-            .getParticipantCohortStatus(ns, wsid,
-              cohortReviewStore.getValue().cohortReviewId, +pid))
-            .do(ps => {
-              this.setState({participant: ps});
-            });
+            .getParticipantCohortStatus(ns, wsid, cohortReviewStore.getValue().cohortReviewId, +pid))
+            .do(ps => participantStore.next(ps));
         })
         .subscribe();
       if (!vocabOptions.getValue()) {
         const {cohortReviewId} = cohortReviewStore.getValue();
         getVocabOptions(namespace, id, cohortReviewId);
       }
+      participantStore.subscribe(participant => this.setState({participant}));
     }
 
     componentWillUnmount() {
       this.subscription.unsubscribe();
-    }
-
-    setParticipant(v) {
-      this.setState({participant: v});
     }
 
     render() {
@@ -87,8 +71,6 @@ export const DetailPage = withCurrentWorkspace()(
           ? <React.Fragment>
             <DetailHeader participant={participant} />
             <DetailTabs />
-            <HelpSidebar location='reviewParticipantDetail' participant={participant}
-              setParticipant={(p) => this.setParticipant(p)} />
           </React.Fragment>
           : <SpinnerOverlay />
         }

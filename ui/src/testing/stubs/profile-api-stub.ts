@@ -30,7 +30,7 @@ export class ProfileStubVariables {
     eraCommonsBypassTime: null,
     authorities: [],
     freeTierUsage: 1.23,
-    freeTierQuota: 34.56
+    freeTierDollarQuota: 34.56
   };
 }
 

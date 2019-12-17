@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
@@ -11,6 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.actionaudit.auditors.AuthDomainAuditor;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
@@ -19,7 +22,7 @@ import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.ManagedGroupWithMembers;
+import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateUserDisabledRequest;
@@ -27,10 +30,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -38,9 +38,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import(LiquibaseAutoConfiguration.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class AuthDomainControllerTest {
 
   private static final String GIVEN_NAME = "Bob";
@@ -56,6 +54,8 @@ public class AuthDomainControllerTest {
   @Mock private Provider<DbUser> userProvider;
   @Mock private ComplianceService complianceService;
   @Mock private DirectoryService directoryService;
+  @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
+  @Mock private AuthDomainAuditor mockAuthDomainAuditAdapter;
   @Autowired private UserDao userDao;
   @Mock private UserDataUseAgreementDao userDataUseAgreementDao;
 
@@ -67,7 +67,7 @@ public class AuthDomainControllerTest {
     adminUser.setUserId(0L);
     doNothing().when(fireCloudService).addUserToBillingProject(any(), any());
     doNothing().when(fireCloudService).removeUserFromBillingProject(any(), any());
-    when(fireCloudService.createGroup(any())).thenReturn(new ManagedGroupWithMembers());
+    when(fireCloudService.createGroup(any())).thenReturn(new FirecloudManagedGroupWithMembers());
     when(userProvider.get()).thenReturn(adminUser);
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
@@ -86,8 +86,11 @@ public class AuthDomainControllerTest {
             fireCloudService,
             Providers.of(config),
             complianceService,
-            directoryService);
-    this.authDomainController = new AuthDomainController(fireCloudService, userService, userDao);
+            directoryService,
+            mockUserServiceAuditAdapter);
+    this.authDomainController =
+        new AuthDomainController(
+            fireCloudService, userService, userDao, mockAuthDomainAuditAdapter);
   }
 
   @Test
@@ -98,27 +101,38 @@ public class AuthDomainControllerTest {
 
   @Test
   public void testDisableUser() {
-    createUser(false);
+    final boolean oldDisabledValue = false;
+    final DbUser createdUser = createUser(oldDisabledValue);
+
+    final boolean newDisabledValue = true;
     UpdateUserDisabledRequest request =
-        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(true);
+        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(newDisabledValue);
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
+    verify(mockAuthDomainAuditAdapter)
+        .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
-    assertThat(updatedUser.getDisabled());
+    assertThat(updatedUser.getDisabled()).isTrue();
   }
 
   @Test
   public void testEnableUser() {
-    createUser(true);
+    final boolean oldDisabledValue = true;
+    final DbUser createdUser = createUser(oldDisabledValue);
+
+    final boolean newDisabledValue = false;
     UpdateUserDisabledRequest request =
-        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(false);
+        new UpdateUserDisabledRequest().email(PRIMARY_EMAIL).disabled(newDisabledValue);
+
     ResponseEntity<Void> response = this.authDomainController.updateUserDisabledStatus(request);
+    verify(mockAuthDomainAuditAdapter)
+        .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
-    assertThat(!updatedUser.getDisabled());
+    assertThat(updatedUser.getDisabled()).isFalse();
   }
 
-  private void createUser(boolean disabled) {
+  private DbUser createUser(boolean disabled) {
     DbUser user = new DbUser();
     user.setGivenName(GIVEN_NAME);
     user.setFamilyName(FAMILY_NAME);
@@ -128,6 +142,6 @@ public class AuthDomainControllerTest {
     user.setCurrentPosition(CURRENT_POSITION);
     user.setAreaOfResearch(RESEARCH_PURPOSE);
     user.setDisabled(disabled);
-    userDao.save(user);
+    return userDao.save(user);
   }
 }

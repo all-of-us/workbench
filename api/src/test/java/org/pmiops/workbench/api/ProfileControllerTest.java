@@ -26,7 +26,8 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.pmiops.workbench.actionaudit.adapters.ProfileAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
@@ -43,7 +44,7 @@ import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.NihStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -63,10 +64,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -75,9 +73,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import(LiquibaseAutoConfiguration.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class ProfileControllerTest {
 
   private static final Instant NOW = Instant.now();
@@ -108,8 +104,9 @@ public class ProfileControllerTest {
   @Mock private FreeTierBillingService freeTierBillingService;
   @Mock private ComplianceService complianceTrainingService;
   @Mock private MailService mailService;
-  @Mock private UserService userService;
-  @Mock private ProfileAuditAdapter mockProfileAuditAdapter;
+  private UserService userService;
+  @Mock private ProfileAuditor mockProfileAuditor;
+  @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
 
   private ProfileController profileController;
   private ProfileController cloudProfileController;
@@ -117,7 +114,7 @@ public class ProfileControllerTest {
   private InvitationVerificationRequest invitationVerificationRequest;
   private com.google.api.services.directory.model.User googleUser;
   private FakeClock clock;
-  private DbUser user;
+  private DbUser dbUser;
 
   @Rule public final ExpectedException exception = ExpectedException.none();
 
@@ -160,7 +157,8 @@ public class ProfileControllerTest {
             fireCloudService,
             Providers.of(config),
             complianceTrainingService,
-            directoryService);
+            directoryService,
+            mockUserServiceAuditAdapter);
     ProfileService profileService = new ProfileService(userDao, freeTierBillingService);
     this.profileController =
         new ProfileController(
@@ -177,7 +175,7 @@ public class ProfileControllerTest {
             Providers.of(config),
             environment,
             Providers.of(mailService),
-            mockProfileAuditAdapter);
+            mockProfileAuditor);
     this.cloudProfileController =
         new ProfileController(
             profileService,
@@ -193,7 +191,7 @@ public class ProfileControllerTest {
             Providers.of(config),
             cloudEnvironment,
             Providers.of(mailService),
-            mockProfileAuditAdapter);
+            mockProfileAuditor);
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
   }
 
@@ -211,7 +209,7 @@ public class ProfileControllerTest {
   @Test
   public void testCreateAccount_success() throws Exception {
     createUser();
-    verify(mockProfileAuditAdapter).fireCreateAction(any(Profile.class));
+    verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
     final DbUser dbUser = userDao.findUserByEmail(PRIMARY_EMAIL);
     assertThat(dbUser).isNotNull();
     assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
@@ -228,7 +226,7 @@ public class ProfileControllerTest {
     exception.expectMessage(
         "Username should be at least 3 characters and not more than 64 characters");
     profileController.createAccount(accountRequest);
-    verify(mockProfileAuditAdapter).fireCreateAction(any(Profile.class));
+    verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
   }
 
   @Test
@@ -241,8 +239,18 @@ public class ProfileControllerTest {
   @Test
   public void testSubmitDataUseAgreement_success() throws Exception {
     createUser();
-    assertThat(profileController.submitDataUseAgreement(DUA_VERSION, "NIH").getStatusCode())
+    DbUser dbUser = userProvider.get();
+    String duaInitials = "NIH";
+    assertThat(profileController.submitDataUseAgreement(DUA_VERSION, duaInitials).getStatusCode())
         .isEqualTo(HttpStatus.OK);
+    List<DbUserDataUseAgreement> dbUserDataUseAgreementList =
+        userDataUseAgreementDao.findByUserIdOrderByCompletionTimeDesc(dbUser.getUserId());
+    assertThat(dbUserDataUseAgreementList.size()).isEqualTo(1);
+    DbUserDataUseAgreement dbUserDataUseAgreement = dbUserDataUseAgreementList.get(0);
+    assertThat(dbUserDataUseAgreement.getUserFamilyName()).isEqualTo(dbUser.getFamilyName());
+    assertThat(dbUserDataUseAgreement.getUserGivenName()).isEqualTo(dbUser.getGivenName());
+    assertThat(dbUserDataUseAgreement.getUserInitials()).isEqualTo(duaInitials);
+    assertThat(dbUserDataUseAgreement.getDataUseAgreementSignedVersion()).isEqualTo(DUA_VERSION);
   }
 
   @Test
@@ -258,8 +266,9 @@ public class ProfileControllerTest {
         GIVEN_NAME,
         DataAccessLevel.UNREGISTERED,
         TIMESTAMP,
-        null);
+        false);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
+    verify(mockProfileAuditor).fireLoginAction(dbUser);
   }
 
   @Test
@@ -274,7 +283,7 @@ public class ProfileControllerTest {
         GIVEN_NAME,
         DataAccessLevel.UNREGISTERED,
         TIMESTAMP,
-        null);
+        false);
     verify(fireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
 
     // An additional call to getMe() should have no effect.
@@ -288,7 +297,7 @@ public class ProfileControllerTest {
         GIVEN_NAME,
         DataAccessLevel.UNREGISTERED,
         TIMESTAMP,
-        null);
+        false);
   }
 
   @Test
@@ -388,50 +397,50 @@ public class ProfileControllerTest {
   @Test
   public void updateContactEmail_forbidden() throws Exception {
     createUser();
-    user.setFirstSignInTime(new Timestamp(new Date().getTime()));
-    String originalEmail = user.getContactEmail();
+    dbUser.setFirstSignInTime(new Timestamp(new Date().getTime()));
+    String originalEmail = dbUser.getContactEmail();
 
     ResponseEntity<Void> response =
         profileController.updateContactEmail(
             new UpdateContactEmailRequest()
                 .contactEmail("newContactEmail@whatever.com")
-                .username(user.getEmail())
+                .username(dbUser.getEmail())
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-    assertThat(user.getContactEmail()).isEqualTo(originalEmail);
+    assertThat(dbUser.getContactEmail()).isEqualTo(originalEmail);
   }
 
   @Test
   public void updateContactEmail_badRequest() throws Exception {
     createUser();
     when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
-    user.setFirstSignInTime(null);
-    String originalEmail = user.getContactEmail();
+    dbUser.setFirstSignInTime(null);
+    String originalEmail = dbUser.getContactEmail();
 
     ResponseEntity<Void> response =
         profileController.updateContactEmail(
             new UpdateContactEmailRequest()
                 .contactEmail("bad email address *(SD&(*D&F&*(DS ")
-                .username(user.getEmail())
+                .username(dbUser.getEmail())
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    assertThat(user.getContactEmail()).isEqualTo(originalEmail);
+    assertThat(dbUser.getContactEmail()).isEqualTo(originalEmail);
   }
 
   @Test
   public void updateContactEmail_OK() throws Exception {
     createUser();
-    user.setFirstSignInTime(null);
+    dbUser.setFirstSignInTime(null);
     when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
 
     ResponseEntity<Void> response =
         profileController.updateContactEmail(
             new UpdateContactEmailRequest()
                 .contactEmail("newContactEmail@whatever.com")
-                .username(user.getEmail())
+                .username(dbUser.getEmail())
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    assertThat(user.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
+    assertThat(dbUser.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
   }
 
   @Test
@@ -489,7 +498,7 @@ public class ProfileControllerTest {
   @Test
   public void resendWelcomeEmail_messagingException() throws Exception {
     createUser();
-    user.setFirstSignInTime(null);
+    dbUser.setFirstSignInTime(null);
     when(directoryService.resetUserPassword(anyString())).thenReturn(googleUser);
     doThrow(new MessagingException("exception"))
         .when(mailService)
@@ -497,7 +506,7 @@ public class ProfileControllerTest {
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
-            new ResendWelcomeEmailRequest().username(user.getEmail()).creationNonce(NONCE));
+            new ResendWelcomeEmailRequest().username(dbUser.getEmail()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     // called twice, once during account creation, once on resend
     verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
@@ -512,7 +521,7 @@ public class ProfileControllerTest {
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
-            new ResendWelcomeEmailRequest().username(user.getEmail()).creationNonce(NONCE));
+            new ResendWelcomeEmailRequest().username(dbUser.getEmail()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     // called twice, once during account creation, once on resend
     verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
@@ -522,7 +531,7 @@ public class ProfileControllerTest {
   @Test
   public void testUpdateNihToken() {
     when(fireCloudService.postNihCallback(any()))
-        .thenReturn(new NihStatus().linkedNihUsername("test").linkExpireTime(500L));
+        .thenReturn(new FirecloudNihStatus().linkedNihUsername("test").linkExpireTime(500L));
     try {
       createUser();
       profileController.updateNihToken(new NihToken().jwt("test"));
@@ -549,7 +558,7 @@ public class ProfileControllerTest {
 
   @Test
   public void testSyncEraCommons() throws Exception {
-    NihStatus nihStatus = new NihStatus();
+    FirecloudNihStatus nihStatus = new FirecloudNihStatus();
     String linkedUsername = "linked";
     nihStatus.setLinkedNihUsername(linkedUsername);
     nihStatus.setLinkExpireTime(TIMESTAMP.getTime());
@@ -586,7 +595,7 @@ public class ProfileControllerTest {
             Providers.of(config),
             environment,
             Providers.of(mailService),
-            mockProfileAuditAdapter);
+            mockProfileAuditor);
     profileController.bypassAccessRequirement(
         profile.getUserId(),
         new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));
@@ -598,7 +607,7 @@ public class ProfileControllerTest {
     createUser();
 
     profileController.deleteProfile();
-    verify(mockProfileAuditAdapter).fireDeleteAction(user.getUserId(), user.getEmail());
+    verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getEmail());
   }
 
   private Profile createUser() throws Exception {
@@ -606,12 +615,12 @@ public class ProfileControllerTest {
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
         .thenReturn(googleUser);
     Profile result = profileController.createAccount(createAccountRequest).getBody();
-    user = userDao.findUserByEmail(PRIMARY_EMAIL);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
-    userDao.save(user);
-    when(userProvider.get()).thenReturn(user);
+    dbUser = userDao.findUserByEmail(PRIMARY_EMAIL);
+    dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+    userDao.save(dbUser);
+    when(userProvider.get()).thenReturn(dbUser);
     when(userAuthenticationProvider.get())
-        .thenReturn(new UserAuthentication(user, null, null, UserType.RESEARCHER));
+        .thenReturn(new UserAuthentication(dbUser, null, null, UserType.RESEARCHER));
     return result;
   }
 

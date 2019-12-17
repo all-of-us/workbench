@@ -13,7 +13,7 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.FeaturedWorkspacesConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
-import org.pmiops.workbench.db.model.Config;
+import org.pmiops.workbench.db.model.DbConfig;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -37,11 +37,11 @@ public class ConfigLoader {
 
   private static final ImmutableMap<String, Class<?>> CONFIG_CLASS_MAP =
       ImmutableMap.of(
-          Config.MAIN_CONFIG_ID,
+          DbConfig.MAIN_CONFIG_ID,
           WorkbenchConfig.class,
-          Config.CDR_BIGQUERY_SCHEMA_CONFIG_ID,
+          DbConfig.CDR_BIGQUERY_SCHEMA_CONFIG_ID,
           CdrBigQuerySchemaConfig.class,
-          Config.FEATURED_WORKSPACES_CONFIG_ID,
+          DbConfig.FEATURED_WORKSPACES_CONFIG_ID,
           FeaturedWorkspacesConfig.class);
 
   @Bean
@@ -79,10 +79,10 @@ public class ConfigLoader {
         log.info(marshalledDiff.toString());
         System.exit(1);
       }
-      Config existingConfig = configDao.findOne(configKey);
+      DbConfig existingConfig = configDao.findOne(configKey);
       if (existingConfig == null) {
         log.info("No configuration exists, creating one.");
-        Config config = new Config();
+        DbConfig config = new DbConfig();
         config.setConfigId(configKey);
         config.setConfiguration(newJson.toString());
         configDao.save(config);

@@ -1,9 +1,4 @@
 cron:
-- description: 'daily BigQuery audit job'
-  url: /v1/cron/auditBigQuery
-  schedule: every 24 hours
-  timezone: UTC
-  target: api
 - description: 'Periodic notebook cluster checks'
   url: /v1/cron/checkClusters
   schedule: every 3 hours

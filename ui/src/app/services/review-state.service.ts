@@ -1,7 +1,7 @@
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {CohortReview, CohortStatus} from 'generated/fetch';
+import {CohortReview, CohortStatus, ParticipantCohortStatus} from 'generated/fetch';
 
 export const initialFilterState = {
   global: {
@@ -96,16 +96,12 @@ export const initialFilterState = {
 
 export const cohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
 export const visitsFilterOptions = new BehaviorSubject<Array<any>>(null);
-export const filterStateStore =
-  new BehaviorSubject<any>(JSON.parse(JSON.stringify(initialFilterState)));
+export const filterStateStore = new BehaviorSubject<any>(JSON.parse(JSON.stringify(initialFilterState)));
 export const vocabOptions = new BehaviorSubject<any>(null);
 export const multiOptions = new BehaviorSubject<any>(null);
+export const participantStore = new BehaviorSubject<ParticipantCohortStatus>(null);
 
-export function getVocabOptions(
-  workspaceNamespace: string,
-  workspaceId: string,
-  cohortReviewId: number
-) {
+export function getVocabOptions(workspaceNamespace: string, workspaceId: string, cohortReviewId: number) {
   const vocabFilters = {source: {}, standard: {}};
   try {
     cohortReviewApi().getVocabularies(workspaceNamespace, workspaceId, cohortReviewId)
@@ -122,5 +118,16 @@ export function getVocabOptions(
   } catch (error) {
     vocabOptions.next(vocabFilters);
     console.error(error);
+  }
+}
+
+export function updateParticipant(participant: ParticipantCohortStatus) {
+  const review = cohortReviewStore.getValue();
+  if (participant && review) {
+    const index = review.participantCohortStatuses.findIndex(p => p.participantId === participant.participantId);
+    if (index !== -1) {
+      review.participantCohortStatuses[index] = participant;
+      cohortReviewStore.next(review);
+    }
   }
 }

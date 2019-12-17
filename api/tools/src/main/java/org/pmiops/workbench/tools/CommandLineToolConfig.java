@@ -13,13 +13,18 @@ import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
-import org.pmiops.workbench.db.model.Config;
+import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
+import org.pmiops.workbench.db.model.DbConfig;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.monitoring.MonitoringServiceOpenCensusImpl;
+import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
+import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
@@ -35,7 +40,14 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
  */
 @Configuration
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
-@Import({RetryConfig.class, CommonConfig.class})
+@Import({
+  RetryConfig.class,
+  CommonConfig.class,
+  MonitoringServiceOpenCensusImpl.class,
+  MonitoringSpringConfiguration.class,
+  NotebooksServiceImpl.class,
+  UserRecentResourceServiceImpl.class
+})
 // Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")
 // Scan the FireCloud module, for FireCloudService bean.
@@ -52,6 +64,8 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
     includeFilters = {
       @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = ServiceAccounts.class),
     })
+// Pull in the MonitoringService and its dependencies
+@ComponentScan("org.pmiops.workbench.monitoring")
 public class CommandLineToolConfig {
 
   /**
@@ -104,8 +118,14 @@ public class CommandLineToolConfig {
    */
   @Bean
   @Lazy
+  @Scope("prototype")
   WorkbenchConfig workbenchConfig(ConfigDao configDao) {
-    Config config = configDao.findOne(Config.MAIN_CONFIG_ID);
+    DbConfig config = configDao.findOne(DbConfig.MAIN_CONFIG_ID);
+
+    if (config == null) {
+      return null;
+    }
+
     Gson gson = new Gson();
     return gson.fromJson(config.getConfiguration(), WorkbenchConfig.class);
   }

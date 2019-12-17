@@ -39,10 +39,12 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.WorkspaceACL;
-import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.WorkspaceACLUpdateResponseList;
-import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -143,14 +145,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces() {
-    Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse> fcWorkspaces =
+    Map<String, FirecloudWorkspaceResponse> fcWorkspaces =
         getFirecloudWorkspaces(ImmutableList.of("accessLevel", "workspace.workspaceId"));
     List<DbWorkspace> dbWorkspaces = workspaceDao.findAllByFirecloudUuidIn(fcWorkspaces.keySet());
 
     return dbWorkspaces.stream()
-        .filter(
-            dbWorkspace ->
-                dbWorkspace.getWorkspaceActiveStatusEnum() == WorkspaceActiveStatus.ACTIVE)
+        .filter(DbWorkspace::isActive)
         .map(
             dbWorkspace -> {
               String fcWorkspaceAccessLevel =
@@ -169,8 +169,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
 
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse;
-    org.pmiops.workbench.firecloud.model.Workspace fcWorkspace;
+    FirecloudWorkspaceResponse fcResponse;
+    FirecloudWorkspace fcWorkspace;
 
     WorkspaceResponse workspaceResponse = new WorkspaceResponse();
 
@@ -193,8 +193,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     return workspaceResponse;
   }
 
-  private Map<String, org.pmiops.workbench.firecloud.model.WorkspaceResponse>
-      getFirecloudWorkspaces(List<String> fields) {
+  private Map<String, FirecloudWorkspaceResponse> getFirecloudWorkspaces(List<String> fields) {
     // fields must include at least "workspace.workspaceId", otherwise
     // the map creation will fail
     return fireCloudService.getWorkspaces(fields).stream()
@@ -205,13 +204,14 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public Map<String, WorkspaceAccessEntry> getFirecloudWorkspaceAcls(
+  public Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName) {
-    WorkspaceACL aclResp = fireCloudService.getWorkspaceAcl(workspaceNamespace, firecloudName);
+    FirecloudWorkspaceACL aclResp =
+        fireCloudService.getWorkspaceAcl(workspaceNamespace, firecloudName);
 
     // Swagger Java codegen does not handle the WorkspaceACL model correctly; it returns a GSON map
     // instead. Run this through a typed Gson conversion process to parse into the desired type.
-    Type accessEntryType = new TypeToken<Map<String, WorkspaceAccessEntry>>() {}.getType();
+    Type accessEntryType = new TypeToken<Map<String, FirecloudWorkspaceAccessEntry>>() {}.getType();
     Gson gson = new Gson();
     return gson.fromJson(gson.toJson(aclResp.getAcl(), accessEntryType), accessEntryType);
   }
@@ -278,8 +278,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public WorkspaceACLUpdate updateFirecloudAclsOnUser(
-      WorkspaceAccessLevel updatedAccess, WorkspaceACLUpdate currentUpdate) {
+  public FirecloudWorkspaceACLUpdate updateFirecloudAclsOnUser(
+      WorkspaceAccessLevel updatedAccess, FirecloudWorkspaceACLUpdate currentUpdate) {
     if (updatedAccess == WorkspaceAccessLevel.OWNER) {
       currentUpdate.setCanShare(true);
       currentUpdate.setCanCompute(true);
@@ -306,17 +306,17 @@ public class WorkspaceServiceImpl implements WorkspaceService {
       Map<String, WorkspaceAccessLevel> updatedAclsMap,
       String registeredUsersGroup) {
     // userRoleMap is a map of the new permissions for ALL users on the ws
-    Map<String, WorkspaceAccessEntry> aclsMap =
+    Map<String, FirecloudWorkspaceAccessEntry> aclsMap =
         getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
 
     // Iterate through existing roles, update/remove them
-    ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
+    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
     Map<String, WorkspaceAccessLevel> toAdd = new HashMap<>(updatedAclsMap);
-    for (Map.Entry<String, WorkspaceAccessEntry> entry : aclsMap.entrySet()) {
+    for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : aclsMap.entrySet()) {
       String currentUserEmail = entry.getKey();
       WorkspaceAccessLevel updatedAccess = toAdd.get(currentUserEmail);
       if (updatedAccess != null) {
-        WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
+        FirecloudWorkspaceACLUpdate currentUpdate = new FirecloudWorkspaceACLUpdate();
         currentUpdate.setEmail(currentUserEmail);
         currentUpdate = updateFirecloudAclsOnUser(updatedAccess, currentUpdate);
         updateACLRequestList.add(currentUpdate);
@@ -327,7 +327,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
         // Note: do not do groups.  Unpublish will pass the specific NO_ACCESS acl
         // TODO [jacmrob] : have all users pass NO_ACCESS explicitly? Handle filtering on frontend?
         if (!currentUserEmail.equals(registeredUsersGroup)) {
-          WorkspaceACLUpdate removedUser = new WorkspaceACLUpdate();
+          FirecloudWorkspaceACLUpdate removedUser = new FirecloudWorkspaceACLUpdate();
           removedUser.setEmail(currentUserEmail);
           removedUser = updateFirecloudAclsOnUser(WorkspaceAccessLevel.NO_ACCESS, removedUser);
           updateACLRequestList.add(removedUser);
@@ -337,12 +337,12 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
     // Iterate through remaining new roles; add them
     for (Entry<String, WorkspaceAccessLevel> remainingRole : toAdd.entrySet()) {
-      WorkspaceACLUpdate newUser = new WorkspaceACLUpdate();
+      FirecloudWorkspaceACLUpdate newUser = new FirecloudWorkspaceACLUpdate();
       newUser.setEmail(remainingRole.getKey());
       newUser = updateFirecloudAclsOnUser(remainingRole.getValue(), newUser);
       updateACLRequestList.add(newUser);
     }
-    WorkspaceACLUpdateResponseList fireCloudResponse =
+    FirecloudWorkspaceACLUpdateResponseList fireCloudResponse =
         fireCloudService.updateWorkspaceACL(
             workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
     if (fireCloudResponse.getUsersNotFound().size() != 0) {
@@ -361,7 +361,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
     // canCompute to other users. See RW-3009 for details.
     for (String email : Sets.union(updatedAclsMap.keySet(), aclsMap.keySet())) {
       String fromAccess =
-          aclsMap.getOrDefault(email, new WorkspaceAccessEntry().accessLevel("")).getAccessLevel();
+          aclsMap
+              .getOrDefault(email, new FirecloudWorkspaceAccessEntry().accessLevel(""))
+              .getAccessLevel();
       WorkspaceAccessLevel toAccess =
           updatedAclsMap.getOrDefault(email, WorkspaceAccessLevel.NO_ACCESS);
       if (FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER != toAccess) {
@@ -421,24 +423,27 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   }
 
   @Override
-  public WorkspaceAccessLevel getWorkspaceAccessLevel(
-      String workspaceNamespace, String workspaceId) {
+  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId)
+      throws IllegalArgumentException {
     String userAccess =
         fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
     if (PROJECT_OWNER_ACCESS_LEVEL.equals(userAccess)) {
       return WorkspaceAccessLevel.OWNER;
     }
-    WorkspaceAccessLevel result = WorkspaceAccessLevel.fromValue(userAccess);
-    if (result == null) {
-      throw new ServerErrorException("Unrecognized access level: " + userAccess);
-    }
-    return result;
+    return Optional.ofNullable(WorkspaceAccessLevel.fromValue(userAccess))
+        .orElseThrow(
+            () -> new IllegalArgumentException("Unrecognized access level: " + userAccess));
   }
 
   @Override
   public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
-    WorkspaceAccessLevel access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    final WorkspaceAccessLevel access;
+    try {
+      access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    } catch (IllegalArgumentException e) {
+      throw new ServerErrorException(e);
+    }
     if (requiredAccess.compareTo(access) > 0) {
       throw new ForbiddenException(
           String.format(
@@ -464,8 +469,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
     DbWorkspace workspace = getDao().findOne(workspaceId);
-    if (workspace == null
-        || (workspace.getWorkspaceActiveStatusEnum() != WorkspaceActiveStatus.ACTIVE)) {
+    if (workspace == null || !workspace.isActive()) {
       return Optional.empty();
     }
     return Optional.of(workspace);
@@ -473,9 +477,9 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
   @Override
   public List<UserRole> convertWorkspaceAclsToUserRoles(
-      Map<String, WorkspaceAccessEntry> rolesMap) {
+      Map<String, FirecloudWorkspaceAccessEntry> rolesMap) {
     List<UserRole> userRoles = new ArrayList<>();
-    for (Map.Entry<String, WorkspaceAccessEntry> entry : rolesMap.entrySet()) {
+    for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : rolesMap.entrySet()) {
       // Filter out groups
       DbUser user = userDao.findUserByEmail(entry.getKey());
       if (user == null) {
@@ -493,8 +497,8 @@ public class WorkspaceServiceImpl implements WorkspaceService {
   @Override
   public DbWorkspace setPublished(
       DbWorkspace workspace, String publishedWorkspaceGroup, boolean publish) {
-    ArrayList<WorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
-    WorkspaceACLUpdate currentUpdate = new WorkspaceACLUpdate();
+    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
+    FirecloudWorkspaceACLUpdate currentUpdate = new FirecloudWorkspaceACLUpdate();
     currentUpdate.setEmail(publishedWorkspaceGroup);
 
     if (publish) {

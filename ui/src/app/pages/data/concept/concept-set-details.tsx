@@ -9,7 +9,6 @@ import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
 import {CopyModal} from 'app/components/copy-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon, SnowmanIcon} from 'app/components/icons';
 import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -359,7 +358,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                             this.setState({error: false})}>Close</Button>
               </ModalFooter>
           </Modal>}
-          {removingConcepts && <Modal>
+          {removingConcepts && <Modal loading={removeSubmitting}>
             <ModalTitle>Are you sure you want to remove {this.selectedConceptsCount}
             {this.selectedConceptsCount > 1 ? ' concepts' : ' concept'} from this set?</ModalTitle>
             <ModalFooter>
@@ -381,14 +380,13 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
             saveFunction={(copyRequest: CopyRequest) => this.copyConceptSet(copyRequest)}/>
           }
         </FadeBox>
-        <HelpSidebar location='conceptSets' />
       </React.Fragment>;
     }
   });
 
 
 @Component({
-  template: '<div #root style="position: relative; margin-right: 45px;"></div>'
+  template: '<div #root></div>'
 })
 export class ConceptSetDetailsComponent extends ReactWrapperBase {
   constructor() {

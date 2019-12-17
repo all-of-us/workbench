@@ -73,8 +73,13 @@ public class WorkbenchConfig {
     // The full table name for the BigQuery billing export, which is read from by the free-tier
     // usage tracking cron endpoint.
     public String exportBigQueryTable;
-    // The default limit to apply to free-credit usage in this environment.
-    public Double defaultFreeCreditsLimit;
+    // DEPRECATED.  Renamed to defaultFreeCreditsDollarLimit.
+    // Remove after https://github.com/all-of-us/workbench/pull/2920 reaches production.
+    @Deprecated public Double defaultFreeCreditsLimit;
+    // The default dollar limit to apply to free-credit usage in this environment.
+    public Double defaultFreeCreditsDollarLimit;
+    // The default time limit in days to apply to free-credit usage in this environment.
+    public Short defaultFreeCreditsDaysLimit;
     // For project garbage collection, the max # of projects allowed to be associated with each
     // garbage-collection service account.
     public Integer garbageCollectionUserCapacity;

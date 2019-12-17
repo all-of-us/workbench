@@ -32,16 +32,13 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.test.SearchRequests;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import(LiquibaseAutoConfiguration.class)
 public class DataSetServiceTest {
   private static final QueryJobConfiguration QUERY_JOB_CONFIGURATION_1 =
       QueryJobConfiguration.newBuilder(
@@ -223,8 +220,7 @@ public class DataSetServiceTest {
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
             domain1, ImmutableList.of(conceptSet1, conceptSet2));
-    assertThat(listClauseMaybe.isPresent()).isTrue();
-    assertThat(listClauseMaybe.get().equals("1 2 3 4 5 6"));
+    assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (1, 2, 3, 4, 5, 6)");
   }
 
   @Test
@@ -234,8 +230,7 @@ public class DataSetServiceTest {
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
             Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
-    assertThat(listClauseMaybe.isPresent()).isTrue();
-    assertThat(listClauseMaybe.get().equals("1 2 3"));
+    assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (1, 2, 3)");
   }
 
   @Test

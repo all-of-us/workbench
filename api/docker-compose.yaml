@@ -75,7 +75,7 @@ services:
     volumes:
       - ..:/w:cached
       - gradle-cache:/.gradle
-    entrypoint: ['with-uid.sh', 'wait-for-it', 'db:3306', --]
+    entrypoint: ['with-uid.sh', 'wait-for-it', 'db:3306', '-t', '30', --]
     env_file:
       - db/vars.env
 
@@ -89,7 +89,7 @@ services:
     volumes:
       - ..:/w:cached
       - gradle-cache:/.gradle
-    entrypoint: ['with-uid.sh', 'wait-for-it', 'db:3306', --]
+    entrypoint: ['with-uid.sh', 'wait-for-it', 'db:3306', '-t', '30', --]
     env_file:
       - db/vars.env
 
@@ -105,7 +105,7 @@ services:
       - gradle-cache:/.gradle
       - ~/.config:/.config:cached
       - ~/.gsutil:/.gsutil:cached
-    entrypoint: ['with-uid.sh', 'wait-for-it', 'db:3306', --]
+    entrypoint: ['with-uid.sh', 'wait-for-it', 'db:3306', '-t', '30', --]
     env_file:
       - db-cdr/vars.env
 

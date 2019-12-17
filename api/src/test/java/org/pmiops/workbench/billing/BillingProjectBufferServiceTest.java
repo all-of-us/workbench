@@ -1,7 +1,8 @@
 package org.pmiops.workbench.billing;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -44,12 +45,12 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.BillingProjectStatus;
-import org.pmiops.workbench.firecloud.model.BillingProjectStatus.CreationStatusEnum;
+import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
+import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -64,7 +65,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import(LiquibaseAutoConfiguration.class)
 public class BillingProjectBufferServiceTest {
 
   private static final Instant NOW = Instant.now();
@@ -80,7 +80,7 @@ public class BillingProjectBufferServiceTest {
 
   @TestConfiguration
   @Import({BillingProjectBufferService.class})
-  @MockBean({FireCloudService.class})
+  @MockBean({FireCloudService.class, MonitoringService.class})
   static class Configuration {
     @Bean
     public Clock clock() {
@@ -102,6 +102,7 @@ public class BillingProjectBufferServiceTest {
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
   @Autowired private BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   @Autowired private FireCloudService fireCloudService;
+  @Autowired private MonitoringService monitoringService;
 
   @Autowired private BillingProjectBufferService billingProjectBufferService;
 
@@ -123,9 +124,21 @@ public class BillingProjectBufferServiceTest {
         .when(billingProjectBufferEntryDao)
         .releaseAssigningLock();
 
+    monitoringService = spy(monitoringService);
+
     billingProjectBufferService =
         new BillingProjectBufferService(
-            billingProjectBufferEntryDao, clock, fireCloudService, workbenchConfigProvider);
+            billingProjectBufferEntryDao,
+            clock,
+            fireCloudService,
+            monitoringService,
+            workbenchConfigProvider);
+  }
+
+  @Test
+  public void sendsSignalWhenBufferingProjects() {
+    billingProjectBufferService.bufferBillingProjects();
+    verify(monitoringService).recordValue(anyMap());
   }
 
   @Test
@@ -258,7 +271,7 @@ public class BillingProjectBufferServiceTest {
     verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
     String billingProjectName = captor.getValue();
 
-    BillingProjectStatus billingProjectStatus = new BillingProjectStatus();
+    FirecloudBillingProjectStatus billingProjectStatus = new FirecloudBillingProjectStatus();
     billingProjectStatus.setCreationStatus(CreationStatusEnum.CREATING);
     doReturn(billingProjectStatus)
         .when(fireCloudService)
@@ -292,7 +305,7 @@ public class BillingProjectBufferServiceTest {
     verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
     String billingProjectName = captor.getValue();
 
-    BillingProjectStatus billingProjectStatus = new BillingProjectStatus();
+    FirecloudBillingProjectStatus billingProjectStatus = new FirecloudBillingProjectStatus();
     billingProjectStatus.setCreationStatus(CreationStatusEnum.READY);
     doReturn(billingProjectStatus)
         .when(fireCloudService)
@@ -313,8 +326,8 @@ public class BillingProjectBufferServiceTest {
     verify(fireCloudService).createAllOfUsBillingProject(captor.capture());
     String billingProjectName = captor.getValue();
 
-    BillingProjectStatus billingProjectStatus =
-        new BillingProjectStatus().creationStatus(CreationStatusEnum.ERROR);
+    FirecloudBillingProjectStatus billingProjectStatus =
+        new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.ERROR);
     doReturn(billingProjectStatus)
         .when(fireCloudService)
         .getBillingProjectStatus(billingProjectName);
@@ -355,13 +368,13 @@ public class BillingProjectBufferServiceTest {
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     verify(fireCloudService, times(3)).createAllOfUsBillingProject(captor.capture());
     List<String> capturedProjectNames = captor.getAllValues();
-    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.READY))
+    doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.READY))
         .when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(0));
-    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.READY))
+    doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.READY))
         .when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(1));
-    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.ERROR))
+    doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.ERROR))
         .when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(2));
 
@@ -392,13 +405,13 @@ public class BillingProjectBufferServiceTest {
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     verify(fireCloudService, times(3)).createAllOfUsBillingProject(captor.capture());
     List<String> capturedProjectNames = captor.getAllValues();
-    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
+    doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
         .when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(0));
     doThrow(WorkbenchException.class)
         .when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(1));
-    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.READY))
+    doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.READY))
         .when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(2));
 
@@ -492,7 +505,7 @@ public class BillingProjectBufferServiceTest {
     entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
-    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
+    doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
         .when(fireCloudService)
         .getBillingProjectStatus(entry.getFireCloudProjectName());
 
@@ -511,7 +524,7 @@ public class BillingProjectBufferServiceTest {
     entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
-    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
+    doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
         .when(fireCloudService)
         .getBillingProjectStatus(entry.getFireCloudProjectName());
 
@@ -531,7 +544,7 @@ public class BillingProjectBufferServiceTest {
     entry.setCreationTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
-    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
+    doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
         .when(fireCloudService)
         .getBillingProjectStatus(entry.getFireCloudProjectName());
     billingProjectBufferService.syncBillingProjectStatus();
@@ -600,13 +613,13 @@ public class BillingProjectBufferServiceTest {
     final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     verify(fireCloudService, times(3)).createAllOfUsBillingProject(captor.capture());
     final List<String> capturedProjectNames = captor.getAllValues();
-    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
+    doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
         .when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(0));
-    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
+    doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
         .when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(1));
-    doReturn(new BillingProjectStatus().creationStatus(CreationStatusEnum.ERROR))
+    doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.ERROR))
         .when(fireCloudService)
         .getBillingProjectStatus(capturedProjectNames.get(2));
 

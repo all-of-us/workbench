@@ -7,7 +7,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {currentCohortStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
+import {navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
 import * as React from 'react';
@@ -77,30 +77,22 @@ const CohortActions = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
-      this.state = {cohort: currentCohortStore.getValue(), cohortLoading: false};
+      this.state = {cohort: undefined, cohortLoading: false};
     }
 
     componentDidMount(): void {
-      const {cohort} = this.state;
-      if (!cohort) {
-        const cid = urlParamsStore.getValue().cid;
-        this.setState({cohortLoading: true});
-        if (cid) {
-          const {namespace, id} = this.props.workspace;
-          cohortsApi().getCohort(namespace, id, cid).then(c => {
-            if (c) {
-              currentCohortStore.next(c);
-              this.setState({cohort: c, cohortLoading: false});
-            } else {
-              navigate(['workspaces', namespace, id, 'data', 'cohorts']);
-            }
-          });
-        }
+      const cid = urlParamsStore.getValue().cid;
+      this.setState({cohortLoading: true});
+      if (cid) {
+        const {namespace, id} = this.props.workspace;
+        cohortsApi().getCohort(namespace, id, cid).then(c => {
+          if (c) {
+            this.setState({cohort: c, cohortLoading: false});
+          } else {
+            navigate(['workspaces', namespace, id, 'data', 'cohorts']);
+          }
+        });
       }
-    }
-
-    componentWillUnmount(): void {
-      currentCohortStore.next(undefined);
     }
 
     navigateTo(action: string): void {

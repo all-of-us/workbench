@@ -26,18 +26,21 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
+import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.WorkspaceACL;
-import org.pmiops.workbench.firecloud.model.WorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
@@ -51,8 +54,6 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -68,8 +69,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import({LiquibaseAutoConfiguration.class, BigQueryService.class})
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import({BigQueryService.class})
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ConceptsControllerTest {
@@ -152,21 +152,15 @@ public class ConceptsControllerTest {
           .prevalence(0.1F)
           .conceptSynonyms(new ArrayList<String>());
 
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_1 =
-      makeConcept(CLIENT_CONCEPT_1);
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_2 =
-      makeConcept(CLIENT_CONCEPT_2);
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_3 =
-      makeConcept(CLIENT_CONCEPT_3);
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_4 =
-      makeConcept(CLIENT_CONCEPT_4);
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_5 =
-      makeConcept(CLIENT_CONCEPT_5);
-  private static final org.pmiops.workbench.cdr.model.Concept CONCEPT_6 =
-      makeConcept(CLIENT_CONCEPT_6);
+  private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
+  private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
+  private static final DbConcept CONCEPT_3 = makeConcept(CLIENT_CONCEPT_3);
+  private static final DbConcept CONCEPT_4 = makeConcept(CLIENT_CONCEPT_4);
+  private static final DbConcept CONCEPT_5 = makeConcept(CLIENT_CONCEPT_5);
+  private static final DbConcept CONCEPT_6 = makeConcept(CLIENT_CONCEPT_6);
 
-  private static final org.pmiops.workbench.cdr.model.DomainInfo MEASUREMENT_DOMAIN =
-      new org.pmiops.workbench.cdr.model.DomainInfo()
+  private static final DbDomainInfo MEASUREMENT_DOMAIN =
+      new DbDomainInfo()
           .domainEnum(Domain.MEASUREMENT)
           .domainId("Measurement")
           .name("Measurement!")
@@ -176,8 +170,8 @@ public class ConceptsControllerTest {
           .standardConceptCount(3)
           .allConceptCount(5);
 
-  private static final org.pmiops.workbench.cdr.model.DomainInfo CONDITION_DOMAIN =
-      new org.pmiops.workbench.cdr.model.DomainInfo()
+  private static final DbDomainInfo CONDITION_DOMAIN =
+      new DbDomainInfo()
           .domainEnum(Domain.CONDITION)
           .domainId("Condition")
           .name("Condition!")
@@ -187,8 +181,8 @@ public class ConceptsControllerTest {
           .standardConceptCount(4)
           .allConceptCount(6);
 
-  private static final org.pmiops.workbench.cdr.model.DomainInfo PROCEDURE_DOMAIN =
-      new org.pmiops.workbench.cdr.model.DomainInfo()
+  private static final DbDomainInfo PROCEDURE_DOMAIN =
+      new DbDomainInfo()
           .domainEnum(Domain.PROCEDURE)
           .domainId("Procedure")
           .name("Procedure!!!")
@@ -198,8 +192,8 @@ public class ConceptsControllerTest {
           .standardConceptCount(1)
           .allConceptCount(2);
 
-  private static final org.pmiops.workbench.cdr.model.DomainInfo DRUG_DOMAIN =
-      new org.pmiops.workbench.cdr.model.DomainInfo()
+  private static final DbDomainInfo DRUG_DOMAIN =
+      new DbDomainInfo()
           .domainEnum(Domain.DRUG)
           .domainId("Drug")
           .name("Drug!")
@@ -274,7 +268,7 @@ public class ConceptsControllerTest {
     currentUser = user;
     when(userProvider.get()).thenReturn(user);
 
-    CdrVersion cdrVersion = new CdrVersion();
+    DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
@@ -288,8 +282,7 @@ public class ConceptsControllerTest {
     workspace.setWorkspaceNamespace("ns");
     workspace.setCdrVersion(cdrVersion);
     workspaceDao.save(workspace);
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
     when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)).thenReturn(fcResponse);
     stubGetWorkspaceAcl(
@@ -830,8 +823,8 @@ public class ConceptsControllerTest {
             new DomainValue().value("FIELD_ONE"), new DomainValue().value("FIELD_TWO"));
   }
 
-  public static org.pmiops.workbench.cdr.model.Concept makeConcept(Concept concept) {
-    org.pmiops.workbench.cdr.model.Concept result = new org.pmiops.workbench.cdr.model.Concept();
+  public static DbConcept makeConcept(Concept concept) {
+    DbConcept result = new DbConcept();
     result.setConceptId(concept.getConceptId());
     result.setConceptName(concept.getConceptName());
     result.setStandardConcept(
@@ -865,15 +858,13 @@ public class ConceptsControllerTest {
     domainInfoDao.save(DRUG_DOMAIN);
   }
 
-  private DomainCount toDomainCount(
-      org.pmiops.workbench.cdr.model.DomainInfo domainInfo, boolean standardCount) {
+  private DomainCount toDomainCount(DbDomainInfo domainInfo, boolean standardCount) {
     return toDomainCount(
         domainInfo,
         standardCount ? domainInfo.getStandardConceptCount() : domainInfo.getAllConceptCount());
   }
 
-  private DomainCount toDomainCount(
-      org.pmiops.workbench.cdr.model.DomainInfo domainInfo, long conceptCount) {
+  private DomainCount toDomainCount(DbDomainInfo domainInfo, long conceptCount) {
     return new DomainCount()
         .name(domainInfo.getName())
         .conceptCount(conceptCount)
@@ -896,10 +887,10 @@ public class ConceptsControllerTest {
 
   private void stubGetWorkspaceAcl(
       String ns, String name, String creator, WorkspaceAccessLevel access) {
-    WorkspaceACL workspaceAccessLevelResponse = new WorkspaceACL();
-    WorkspaceAccessEntry accessLevelEntry =
-        new WorkspaceAccessEntry().accessLevel(access.toString());
-    Map<String, WorkspaceAccessEntry> userEmailToAccessEntry =
+    FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
+    FirecloudWorkspaceAccessEntry accessLevelEntry =
+        new FirecloudWorkspaceAccessEntry().accessLevel(access.toString());
+    Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(creator, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
     when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);

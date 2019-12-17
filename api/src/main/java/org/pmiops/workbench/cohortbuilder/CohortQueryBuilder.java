@@ -35,9 +35,7 @@ public class CohortQueryBuilder {
       "select gender, \n"
           + "race, \n"
           + "case "
-          + getAgeRangeSql(0, 18)
-          + "\n"
-          + getAgeRangeSql(19, 44)
+          + getAgeRangeSql(18, 44)
           + "\n"
           + getAgeRangeSql(45, 64)
           + "\n"

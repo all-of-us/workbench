@@ -1047,51 +1047,6 @@ Common.register_command({
   :fn => ->(*args) { update_user_registered_status("update_user_registered_status", args) }
 })
 
-def backfill_billing_project_users(cmd_name, *args)
-  common = Common.new
-  ensure_docker cmd_name, args
-
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.dry_run = true
-  op.opts.project = TEST_PROJECT
-
-  op.add_typed_option(
-      "--dry_run=[dry_run]",
-      TrueClass,
-      ->(opts, v) { opts.dry_run = v},
-      "When true, print debug lines instead of performing writes. Defaults to true.")
-
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate()
-
-  if op.opts.dry_run
-    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
-  end
-
-  fc_config = get_fc_config(op.opts.project)
-  flags = ([
-    ["--fc-base-url", fc_config["baseUrl"]],
-    ["--billing-project-prefix", fc_config["billingProjectPrefix"]]
-  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
-  if op.opts.dry_run
-    flags += ["--dry-run"]
-  end
-  # Gradle args need to be single-quote wrapped.
-  flags.map! { |f| "'#{f}'" }
-  ServiceAccountContext.new(gcc.project).run do
-    common.run_inline %W{
-        gradle backfillBillingProjectUsers
-       -PappArgs=[#{flags.join(',')}]}
-  end
-end
-
-Common.register_command({
-  :invocation => "backfill-billing-project-users",
-  :description => "Backfills billing project user role for owners",
-  :fn => ->(*args) {backfill_billing_project_users("backfill-billing-project-users", *args)}
-})
-
 def fetch_firecloud_user_profile(cmd_name, *args)
   common = Common.new
   ensure_docker cmd_name, args
@@ -1162,6 +1117,43 @@ Common.register_command({
     :invocation => "fetch-workspace-details",
     :description => "Fetch workspace details.\n",
     :fn => ->(*args) {fetch_workspace_details("fetch-workspace-details", *args)}
+})
+
+def export_workspace_data(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--export-filename [export-filename]",
+      String,
+      ->(opts, v) { opts.exportFilename = v},
+      "Filename of export file to write to")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  flags = ([
+      ["--export-filename", op.opts.exportFilename]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  flags.map! { |f| "'#{f}'" }
+
+  with_cloud_proxy_and_db(gcc) do
+    common.run_inline %W{
+        gradle exportWorkspaceData
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+Common.register_command({
+    :invocation => "export-workspace-data",
+    :description => "Export workspace data to CSV.\n",
+    :fn => ->(*args) {export_workspace_data("export-workspace-data", *args)}
 })
 
 def authority_options(cmd_name, args)

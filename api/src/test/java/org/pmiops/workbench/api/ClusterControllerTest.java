@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
@@ -29,12 +30,14 @@ import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterConfig;
@@ -49,8 +52,6 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -66,8 +67,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import(LiquibaseAutoConfiguration.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ClusterControllerTest {
@@ -98,7 +97,8 @@ public class ClusterControllerTest {
     UserRecentResourceService.class,
     ComplianceService.class,
     DirectoryService.class,
-    AdminActionHistoryDao.class
+    AdminActionHistoryDao.class,
+    UserServiceAuditor.class
   })
   static class Configuration {
 
@@ -135,7 +135,7 @@ public class ClusterControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired Clock clock;
 
-  private CdrVersion cdrVersion;
+  private DbCdrVersion cdrVersion;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
   private Cluster testCluster;
   private DbWorkspace testWorkspace;
@@ -159,7 +159,7 @@ public class ClusterControllerTest {
 
     createUser(OTHER_USER_EMAIL);
 
-    cdrVersion = new CdrVersion();
+    cdrVersion = new DbCdrVersion();
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
@@ -186,9 +186,8 @@ public class ClusterControllerTest {
     testWorkspace.setCdrVersion(cdrVersion);
   }
 
-  private org.pmiops.workbench.firecloud.model.Workspace createFcWorkspace(
-      String ns, String name, String creator) {
-    return new org.pmiops.workbench.firecloud.model.Workspace()
+  private FirecloudWorkspace createFcWorkspace(String ns, String name, String creator) {
+    return new FirecloudWorkspace()
         .namespace(ns)
         .name(name)
         .createdBy(creator)
@@ -204,10 +203,8 @@ public class ClusterControllerTest {
     stubGetFcWorkspace(createFcWorkspace(ns, name, creator));
   }
 
-  private void stubGetFcWorkspace(org.pmiops.workbench.firecloud.model.Workspace fcWorkspace)
-      throws Exception {
-    org.pmiops.workbench.firecloud.model.WorkspaceResponse fcResponse =
-        new org.pmiops.workbench.firecloud.model.WorkspaceResponse();
+  private void stubGetFcWorkspace(FirecloudWorkspace fcWorkspace) throws Exception {
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
     when(fireCloudService.getWorkspace(fcWorkspace.getNamespace(), fcWorkspace.getName()))

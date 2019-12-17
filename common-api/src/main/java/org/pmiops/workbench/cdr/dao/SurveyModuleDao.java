@@ -1,11 +1,11 @@
 package org.pmiops.workbench.cdr.dao;
 
 import java.util.List;
-import org.pmiops.workbench.cdr.model.SurveyModule;
+import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-public interface SurveyModuleDao extends CrudRepository<SurveyModule, Long> {
+public interface SurveyModuleDao extends CrudRepository<DbSurveyModule, Long> {
 
   /**
    * Returns metadata and question counts for survey modules, matching questions by name, code, or
@@ -35,9 +35,9 @@ public interface SurveyModuleDao extends CrudRepository<SurveyModule, Long> {
               + "match(r.stratum_4) against(?1 in boolean mode) > 0) \n"
               + "group by m.name, m.description, m.concept_id\n"
               + "order by m.order_number")
-  List<SurveyModule> findSurveyModuleQuestionCounts(String matchExpression);
+  List<DbSurveyModule> findSurveyModuleQuestionCounts(String matchExpression);
 
-  SurveyModule findByConceptId(long conceptId);
+  DbSurveyModule findByConceptId(long conceptId);
 
-  List<SurveyModule> findByOrderByOrderNumberAsc();
+  List<DbSurveyModule> findByOrderByOrderNumberAsc();
 }

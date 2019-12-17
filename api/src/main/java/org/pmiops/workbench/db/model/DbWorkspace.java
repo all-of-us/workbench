@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -77,7 +78,7 @@ public class DbWorkspace {
   private String workspaceNamespace;
   private String firecloudName;
   private Short dataAccessLevel;
-  private CdrVersion cdrVersion;
+  private DbCdrVersion cdrVersion;
   private DbUser creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
@@ -189,11 +190,11 @@ public class DbWorkspace {
 
   @ManyToOne
   @JoinColumn(name = "cdr_version_id")
-  public CdrVersion getCdrVersion() {
+  public DbCdrVersion getCdrVersion() {
     return cdrVersion;
   }
 
-  public void setCdrVersion(CdrVersion cdrVersion) {
+  public void setCdrVersion(DbCdrVersion cdrVersion) {
     this.cdrVersion = cdrVersion;
   }
 
@@ -360,7 +361,7 @@ public class DbWorkspace {
     this.population = population;
   }
 
-  @ElementCollection(fetch = FetchType.LAZY)
+  @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "specific_populations", joinColumns = @JoinColumn(name = "workspace_id"))
   @Column(name = "specific_population")
   public Set<Short> getPopulationDetails() {
@@ -446,6 +447,11 @@ public class DbWorkspace {
     this.reviewRequested = reviewRequested;
   }
 
+  /**
+   * This "bit" is used as a tri-state. TODO(jaycarlton) replace this column with an enum like {
+   * NOT_SET, APPROVED, REJECTED } and make all Boolean columns non-nullable with explicit defaults.
+   */
+  @Nullable
   @Column(name = "rp_approved")
   public Boolean getApproved() {
     return this.approved;
@@ -529,6 +535,11 @@ public class DbWorkspace {
 
   public void setWorkspaceActiveStatusEnum(WorkspaceActiveStatus activeStatus) {
     setActiveStatus(DbStorageEnums.workspaceActiveStatusToStorage(activeStatus));
+  }
+
+  @Transient
+  public boolean isActive() {
+    return WorkspaceActiveStatus.ACTIVE.equals(getWorkspaceActiveStatusEnum());
   }
 
   @Transient

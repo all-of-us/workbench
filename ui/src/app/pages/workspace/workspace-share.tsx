@@ -24,6 +24,7 @@ import {Button} from 'app/components/buttons';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {AnalyticsTracker} from 'app/utils/analytics';
 
 const styles = reactStyles( {
   tooltipLabel: {
@@ -429,7 +430,10 @@ export const WorkspaceShare = withCurrentWorkspace()(class extends React.Compone
             <Button type='link' style={{marginRight: '.8rem', border: 'none'}}
                     onClick={() => this.onCancel()}>Cancel</Button>
             <Button type='primary' data-test-id='save' disabled={!this.hasPermission}
-                    onClick={() => this.save()}>Save</Button>
+                    onClick={() => {
+                      AnalyticsTracker.Workspaces.Share();
+                      this.save();
+                    }}>Save</Button>
         </ModalFooter>
       </Modal>}
       {!this.state.workspaceFound && <div>

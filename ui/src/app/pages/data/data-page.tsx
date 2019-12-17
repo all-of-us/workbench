@@ -4,7 +4,6 @@ import * as React from 'react';
 
 import {CardButton, TabButton} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {ResourceCard} from 'app/components/resource-card';
@@ -13,6 +12,7 @@ import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
 import {cohortReviewApi, cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {
   convertToResources,
@@ -228,6 +228,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
               style={{...styles.resourceTypeButton, ...styles.resourceTypeButtonLast}}
               disabled={!writePermission}
               onClick={() => {
+                AnalyticsTracker.DatasetBuilder.OpenCreatePage();
                 navigate(['workspaces', namespace, id, 'data', 'data-sets']);
               }}>
               <div style={styles.cardHeader}>
@@ -299,13 +300,12 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
           {isLoading && <SpinnerOverlay></SpinnerOverlay>}
         </div>
       </FadeBox>
-      <HelpSidebar location='data' />
     </React.Fragment>;
   }
 });
 
 @Component({
-  template: '<div #root style="position: relative; margin-right: 45px;"></div>'
+  template: '<div #root></div>'
 })
 export class DataPageComponent extends ReactWrapperBase {
   constructor() {

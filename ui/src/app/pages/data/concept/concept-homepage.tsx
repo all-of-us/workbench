@@ -8,7 +8,6 @@ import {DomainCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {Header} from 'app/components/headers';
-import {HelpSidebar} from 'app/components/help-sidebar';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox, TextInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
@@ -290,7 +289,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
       const {standardConceptsOnly, currentSearchString, conceptsCache,
         selectedDomain, completedDomainSearches, selectedConceptDomainMap} = this.state;
       const {namespace, id} = this.props.workspace;
-      this.setState({concepts: [], searchLoading: true, searching: true});
+      this.setState({concepts: [], searchLoading: true, searching: true, completedDomainSearches: []});
       const standardConceptFilter = standardConceptsOnly ?
         StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
 
@@ -349,8 +348,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     domainLoading(domain) {
-      return this.state.searchLoading || !this.state.completedDomainSearches
-        .includes(domain.domain);
+      return this.state.searchLoading || !this.state.completedDomainSearches.includes(domain.domain);
     }
 
     get noConceptsConstant() {
@@ -419,7 +417,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
             </FlexColumn>;
           })}
         </FlexRow>
-        {selectedDomain.conceptCount > 10000 && <div style={styles.conceptCounts}>
+        {!searchLoading && selectedDomain.conceptCount > 10000 && <div style={styles.conceptCounts}>
           Showing top {concepts.length} {selectedDomain.name}
         </div>}
         <ConceptTable concepts={concepts}
@@ -491,7 +489,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                              expanded={this.addSurveyToSetText}
                              disable={selectedSurveyQuestions.length === 0}/>
           </div>}
-          {!browsingSurvey && loadingDomains ? <SpinnerOverlay/> :
+          {!browsingSurvey && loadingDomains ? <div style={{position: 'relative', minHeight: '10rem'}}><SpinnerOverlay/></div> :
             searching ?
               this.renderConcepts() : !browsingSurvey &&
                   <div>
@@ -531,14 +529,13 @@ export const ConceptHomepage = withCurrentWorkspace()(
                                  onSave={() => this.setState({surveyAddModalOpen: false})}
                                  surveyName={selectedSurvey}/>}
         </FadeBox>
-        <HelpSidebar location='conceptSets' />
       </React.Fragment>;
     }
   }
 );
 
 @Component({
-  template: '<div #root style="position: relative; margin-right: 45px;"></div>'
+  template: '<div #root></div>'
 })
 export class ConceptHomepageComponent extends ReactWrapperBase {
   constructor() {

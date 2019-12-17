@@ -16,7 +16,7 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.pmiops.workbench.actionaudit.adapters.ProfileAuditAdapter;
+import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -39,8 +39,9 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.BillingProjectMembership.CreationStatusEnum;
-import org.pmiops.workbench.firecloud.model.JWTWrapper;
+import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
+import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.CreationStatusEnum;
+import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.mail.MailService;
@@ -86,16 +87,12 @@ public class ProfileController implements ProfileApiDelegate {
           .put(CreationStatusEnum.READY, BillingProjectStatus.READY)
           .put(CreationStatusEnum.ERROR, BillingProjectStatus.ERROR)
           .build();
-  private static final Function<
-          org.pmiops.workbench.firecloud.model.BillingProjectMembership, BillingProjectMembership>
+  private static final Function<FirecloudBillingProjectMembership, BillingProjectMembership>
       TO_CLIENT_BILLING_PROJECT_MEMBERSHIP =
-          new Function<
-              org.pmiops.workbench.firecloud.model.BillingProjectMembership,
-              BillingProjectMembership>() {
+          new Function<FirecloudBillingProjectMembership, BillingProjectMembership>() {
             @Override
             public BillingProjectMembership apply(
-                org.pmiops.workbench.firecloud.model.BillingProjectMembership
-                    billingProjectMembership) {
+                FirecloudBillingProjectMembership billingProjectMembership) {
               BillingProjectMembership result = new BillingProjectMembership();
               result.setProjectName(billingProjectMembership.getProjectName());
               result.setRole(billingProjectMembership.getRole());
@@ -184,7 +181,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkbenchEnvironment workbenchEnvironment;
   private final Provider<MailService> mailServiceProvider;
-  private final ProfileAuditAdapter profileAuditAdapter;
+  private final ProfileAuditor profileAuditor;
 
   @Autowired
   ProfileController(
@@ -201,7 +198,7 @@ public class ProfileController implements ProfileApiDelegate {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkbenchEnvironment workbenchEnvironment,
       Provider<MailService> mailServiceProvider,
-      ProfileAuditAdapter profileAuditAdapter) {
+      ProfileAuditor profileAuditor) {
     this.profileService = profileService;
     this.userProvider = userProvider;
     this.userAuthenticationProvider = userAuthenticationProvider;
@@ -215,24 +212,17 @@ public class ProfileController implements ProfileApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workbenchEnvironment = workbenchEnvironment;
     this.mailServiceProvider = mailServiceProvider;
-    this.profileAuditAdapter = profileAuditAdapter;
+    this.profileAuditor = profileAuditor;
   }
 
   @Override
   public ResponseEntity<List<BillingProjectMembership>> getBillingProjects() {
-    List<org.pmiops.workbench.firecloud.model.BillingProjectMembership> memberships =
+    List<FirecloudBillingProjectMembership> memberships =
         fireCloudService.getBillingProjectMemberships();
     return ResponseEntity.ok(
         memberships.stream()
             .map(TO_CLIENT_BILLING_PROJECT_MEMBERSHIP)
             .collect(Collectors.toList()));
-  }
-
-  private String createFirecloudUserAndBillingProject(DbUser user) {
-    // If the user is already registered, their profile will get updated.
-    fireCloudService.registerUser(
-        user.getContactEmail(), user.getGivenName(), user.getFamilyName());
-    return createFirecloudBillingProject(user);
   }
 
   private void validateStringLength(String field, String fieldName, int max, int min) {
@@ -264,105 +254,38 @@ public class ProfileController implements ProfileApiDelegate {
     }
   }
 
-  private DbUser saveUserWithConflictHandling(DbUser user) {
+  private DbUser saveUserWithConflictHandling(DbUser dbUser) {
     try {
-      return userDao.save(user);
+      return userDao.save(dbUser);
     } catch (ObjectOptimisticLockingFailureException e) {
       log.log(Level.WARNING, "version conflict for user update", e);
       throw new ConflictException("Failed due to concurrent modification");
     }
   }
 
-  private String createFirecloudBillingProject(DbUser user) {
-    WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
-    long suffix;
-    if (workbenchEnvironment.isDevelopment()) {
-      // For local development, make one billing project per account based on a hash of the account
-      // email, and reuse it across database resets. (Assume we won't have any collisions;
-      // if we discover that somebody starts using our namespace, change it up.)
-      suffix = Math.abs(user.getEmail().hashCode());
-    } else {
-      // In other environments, create a suffix based on the user ID from the database. We will
-      // add a suffix if that billing project is already taken. (If the database is reset, we
-      // should consider switching the prefix.)
-      suffix = user.getUserId();
-    }
-    // GCP billing project names must be <= 30 characters. The per-user hash, an integer,
-    // is <= 10 chars.
-    String billingProjectNamePrefix =
-        workbenchConfigProvider.get().billing.projectNamePrefix + suffix;
-    String billingProjectName = billingProjectNamePrefix;
-    int numAttempts = 0;
-    while (numAttempts < MAX_BILLING_PROJECT_CREATION_ATTEMPTS) {
-      try {
-        fireCloudService.createAllOfUsBillingProject(billingProjectName);
-        break;
-      } catch (ConflictException e) {
-        if (workbenchEnvironment.isDevelopment()) {
-          // In local development, just re-use existing projects for the account. (We don't
-          // want to create a new billing project every time the database is reset.)
-          log.log(
-              Level.WARNING,
-              String.format(
-                  "Project with name '%s' already exists; using it.", billingProjectName));
-          break;
-        } else {
-          numAttempts++;
-          // In cloud environments, keep trying billing project names until we find one
-          // that hasn't been used before, or we hit MAX_BILLING_PROJECT_CREATION_ATTEMPTS.
-          billingProjectName = billingProjectNamePrefix + "-" + numAttempts;
-        }
-      }
-    }
-    if (numAttempts == MAX_BILLING_PROJECT_CREATION_ATTEMPTS) {
-      throw new ServerErrorException(
-          String.format(
-              "Encountered %d billing project name " + "collisions; giving up",
-              MAX_BILLING_PROJECT_CREATION_ATTEMPTS));
-    }
-
-    try {
-      // If the user is already a member of the billing project, this will have no effect.
-      fireCloudService.addUserToBillingProject(user.getEmail(), billingProjectName);
-    } catch (ForbiddenException e) {
-      // AofU is not the owner of the billing project. This should only happen in local
-      // environments (and hopefully never, given the prefix we're using.) If it happens,
-      // we may need to pick a different prefix.
-      log.log(
-          Level.SEVERE,
-          String.format(
-              "Unable to add user to billing project %s; "
-                  + "consider changing billing project prefix",
-              billingProjectName),
-          e);
-      throw new ServerErrorException("Unable to add user to billing project", e);
-    }
-    return billingProjectName;
-  }
-
   private DbUser initializeUserIfNeeded() {
     UserAuthentication userAuthentication = userAuthenticationProvider.get();
-    DbUser user = userAuthentication.getUser();
+    DbUser dbUser = userAuthentication.getUser();
     if (userAuthentication.getUserType() == UserType.SERVICE_ACCOUNT) {
       // Service accounts don't need further initialization.
-      return user;
+      return dbUser;
     }
 
     // On first sign-in, create a FC user, billing project, and set the first sign in time.
-    if (user.getFirstSignInTime() == null) {
+    if (dbUser.getFirstSignInTime() == null) {
       // If the user is already registered, their profile will get updated.
       fireCloudService.registerUser(
-          user.getContactEmail(), user.getGivenName(), user.getFamilyName());
+          dbUser.getContactEmail(), dbUser.getGivenName(), dbUser.getFamilyName());
 
-      user.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
+      dbUser.setFirstSignInTime(new Timestamp(clock.instant().toEpochMilli()));
       // If the user is logged in, then we know that they have followed the account creation
       // instructions sent to
       // their initial contact email address.
-      user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
-      return saveUserWithConflictHandling(user);
+      dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+      return saveUserWithConflictHandling(dbUser);
     }
 
-    return user;
+    return dbUser;
   }
 
   private ResponseEntity<Profile> getProfileResponse(DbUser user) {
@@ -379,8 +302,9 @@ public class ProfileController implements ProfileApiDelegate {
     // the CDR); we will probably need a job that deactivates accounts after some period of
     // not accepting the terms of use.
 
-    DbUser user = initializeUserIfNeeded();
-    return getProfileResponse(user);
+    DbUser dbUser = initializeUserIfNeeded();
+    profileAuditor.fireLoginAction(dbUser);
+    return getProfileResponse(dbUser);
   }
 
   @Override
@@ -458,7 +382,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
     // Note: Avoid getProfileResponse() here as this is not an authenticated request.
     final Profile createdProfile = profileService.getProfile(user);
-    profileAuditAdapter.fireCreateAction(createdProfile);
+    profileAuditor.fireCreateAction(createdProfile);
     return ResponseEntity.ok(createdProfile);
   }
 
@@ -605,20 +529,21 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> updatePageVisits(PageVisit newPageVisit) {
-    DbUser user = userProvider.get();
-    user = userDao.findUserWithAuthoritiesAndPageVisits(user.getUserId());
-    Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-    boolean shouldAdd =
-        user.getPageVisits().stream().noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
+    DbUser dbUser = userProvider.get();
+    dbUser = userDao.findUserWithAuthoritiesAndPageVisits(dbUser.getUserId());
+    Timestamp timestamp = Timestamp.from(clock.instant());
+    final boolean shouldAdd =
+        dbUser.getPageVisits().stream()
+            .noneMatch(v -> v.getPageId().equals(newPageVisit.getPage()));
     if (shouldAdd) {
-      DbPageVisit firstPageVisit = new DbPageVisit();
+      final DbPageVisit firstPageVisit = new DbPageVisit();
       firstPageVisit.setPageId(newPageVisit.getPage());
-      firstPageVisit.setUser(user);
+      firstPageVisit.setUser(dbUser);
       firstPageVisit.setFirstVisit(timestamp);
-      user.getPageVisits().add(firstPageVisit);
-      userDao.save(user);
+      dbUser.getPageVisits().add(firstPageVisit);
+      dbUser = userDao.save(dbUser);
     }
-    return getProfileResponse(saveUserWithConflictHandling(user));
+    return getProfileResponse(saveUserWithConflictHandling(dbUser));
   }
 
   @Override
@@ -689,7 +614,7 @@ public class ProfileController implements ProfileApiDelegate {
     saveUserWithConflictHandling(user);
 
     final Profile appliedUpdatedProfile = profileService.getProfile(user);
-    profileAuditAdapter.fireUpdateAction(previousProfile, appliedUpdatedProfile);
+    profileAuditor.fireUpdateAction(previousProfile, appliedUpdatedProfile);
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
@@ -737,7 +662,7 @@ public class ProfileController implements ProfileApiDelegate {
     if (token == null || token.getJwt() == null) {
       throw new BadRequestException("Token is required.");
     }
-    JWTWrapper wrapper = new JWTWrapper().jwt(token.getJwt());
+    FirecloudJWTWrapper wrapper = new FirecloudJWTWrapper().jwt(token.getJwt());
     try {
       fireCloudService.postNihCallback(wrapper);
       userService.syncEraCommonsStatus();
@@ -798,7 +723,7 @@ public class ProfileController implements ProfileApiDelegate {
     log.log(Level.WARNING, "Deleting profile: user email: " + user.getEmail());
     directoryService.deleteUser(user.getEmail().split("@")[0]);
     userDao.delete(user.getUserId());
-    profileAuditAdapter.fireDeleteAction(
+    profileAuditor.fireDeleteAction(
         user.getUserId(), user.getEmail()); // not sure if user profider will survive the next line
 
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

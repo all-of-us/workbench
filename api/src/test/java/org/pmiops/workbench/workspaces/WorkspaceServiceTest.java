@@ -1,6 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -29,23 +29,18 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.Workspace;
-import org.pmiops.workbench.firecloud.model.WorkspaceResponse;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import(LiquibaseAutoConfiguration.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WorkspaceServiceTest {
   @TestConfiguration
@@ -64,7 +59,7 @@ public class WorkspaceServiceTest {
 
   private WorkspaceService workspaceService;
 
-  private List<WorkspaceResponse> mockWorkspaceResponses = new ArrayList<>();
+  private List<FirecloudWorkspaceResponse> mockWorkspaceResponses = new ArrayList<>();
   private List<DbWorkspace> mockWorkspaces = new ArrayList<>();
   private AtomicLong workspaceIdIncrementer = new AtomicLong(1);
   private Instant NOW = Instant.now();
@@ -127,16 +122,16 @@ public class WorkspaceServiceTest {
     doReturn(USER_ID).when(mockUser).getUserId();
   }
 
-  private WorkspaceResponse mockFirecloudWorkspaceResponse(
+  private FirecloudWorkspaceResponse mockFirecloudWorkspaceResponse(
       String workspaceId,
       String workspaceName,
       String workspaceNamespace,
       WorkspaceAccessLevel accessLevel) {
-    Workspace mockWorkspace = mock(Workspace.class);
+    FirecloudWorkspace mockWorkspace = mock(FirecloudWorkspace.class);
     doReturn(workspaceNamespace).when(mockWorkspace).getNamespace();
     doReturn(workspaceName).when(mockWorkspace).getName();
     doReturn(workspaceId).when(mockWorkspace).getWorkspaceId();
-    WorkspaceResponse mockWorkspaceResponse = mock(WorkspaceResponse.class);
+    FirecloudWorkspaceResponse mockWorkspaceResponse = mock(FirecloudWorkspaceResponse.class);
     doReturn(mockWorkspace).when(mockWorkspaceResponse).getWorkspace();
     doReturn(accessLevel.toString()).when(mockWorkspaceResponse).getAccessLevel();
     return mockWorkspaceResponse;
@@ -164,7 +159,7 @@ public class WorkspaceServiceTest {
       WorkspaceAccessLevel accessLevel,
       WorkspaceActiveStatus activeStatus) {
 
-    WorkspaceResponse mockWorkspaceResponse =
+    FirecloudWorkspaceResponse mockWorkspaceResponse =
         mockFirecloudWorkspaceResponse(
             Long.toString(workspaceId), workspaceName, workspaceNamespace, accessLevel);
     mockWorkspaceResponses.add(mockWorkspaceResponse);
@@ -256,7 +251,7 @@ public class WorkspaceServiceTest {
             .stream()
             .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).containsAll(expectedIds);
+    assertThat(actualIds).containsAllIn(expectedIds);
   }
 
   @Test
@@ -293,7 +288,7 @@ public class WorkspaceServiceTest {
             .stream()
             .map(DbWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).containsAll(expectedIds);
+    assertThat(actualIds).containsAllIn(expectedIds);
 
     DbUser mockUser = mock(DbUser.class);
     doReturn(mockUser).when(mockUserProvider).get();
@@ -323,7 +318,7 @@ public class WorkspaceServiceTest {
         recentWorkspaces.stream()
             .map(DbUserRecentWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    assertThat(actualIds).contains(1L, 2L);
+    assertThat(actualIds).containsAllOf(1L, 2L);
   }
 
   @Test

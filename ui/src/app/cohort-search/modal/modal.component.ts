@@ -107,6 +107,7 @@ export class ModalComponent implements OnInit, OnDestroy {
     subtreePathStore.next([]);
     attributesStore.next( undefined);
     groupSelectionsStore.next([]);
+    this.attributesNode = undefined;
     this.hierarchyNode = undefined;
     this.loadingSubtree = false;
     this.open = false;

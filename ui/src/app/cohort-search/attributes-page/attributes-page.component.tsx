@@ -101,8 +101,8 @@ const styles = reactStyles({
     marginLeft: '-0.25rem'
   },
   resultsContainer: {
-    flex: '0 0 41.66667%',
-    maxWidth: '41.66667%',
+    flex: '0 0 50%',
+    maxWidth: '50%',
     padding: '0.3rem 0.5rem 0',
     color: colors.primary,
     fontSize: '14px',
@@ -183,10 +183,12 @@ export const AttributesPage = withCurrentWorkspace() (
     componentDidMount() {
       const {node: {subtype}} = this.props;
       const{form, options} = this.state;
-      if (this.isMeasurement) {
-        this.getMeasurementAttributes();
-      } else {
+      if (!this.isMeasurement) {
         options.unshift({label: 'Any', value: AttrName[AttrName.ANY]});
+      }
+      if (this.hasRange) {
+        this.getAttributes();
+      } else {
         form.num = subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{name: subtype, operator: 'ANY', operands: []}];
@@ -194,7 +196,7 @@ export const AttributesPage = withCurrentWorkspace() (
       }
     }
 
-    getMeasurementAttributes() {
+    getAttributes() {
       const {node: {conceptId}} = this.props;
       const{form} = this.state;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
@@ -204,7 +206,7 @@ export const AttributesPage = withCurrentWorkspace() (
             if (!form.num.length) {
               form.num.push({
                 name: AttrName.NUM,
-                operator: null,
+                operator: this.isSurvey ? 'ANY' : null,
                 operands: [],
                 conceptId: conceptId,
                 [attr.conceptName]: parseInt(attr.estCount, 10)
@@ -219,7 +221,8 @@ export const AttributesPage = withCurrentWorkspace() (
             }
           }
         });
-        this.setState({form, loading: false});
+        const count = this.isSurvey ? this.nodeCount : null;
+        this.setState({count, form, loading: false});
       });
     }
 
@@ -306,14 +309,15 @@ export const AttributesPage = withCurrentWorkspace() (
           formValid = false;
           acc.add('Form cannot accept negative values');
         }
-        if (this.isMeasurement && operands.some(op => op < MIN || op > MAX)) {
+        if (this.hasRange && operands.some(op => op < MIN || op > MAX)) {
           formValid = false;
           acc.add(`Values must be between ${MIN.toLocaleString()} and ${MAX.toLocaleString()}`);
         }
         return acc;
       }, formErrors);
-      formValid = formValid ||
-        (this.isMeasurement && !operatorSelected && form.cat.some(attr => attr.checked));
+      // The second condition sets formValid to false if this is a Measurements attribute with no operator selected from the dropdown and
+      // no categorical checkboxes checked
+      formValid = formValid && !(this.isMeasurement && !operatorSelected && !form.cat.some(attr => attr.checked));
       return {formErrors, formValid};
     }
 
@@ -464,31 +468,40 @@ export const AttributesPage = withCurrentWorkspace() (
     }
 
     get hasUnits() {
-      return typeof PM_UNITS[this.props.node.subtype] !== 'undefined';
+      const {node: {subtype}} = this.props;
+      return typeof PM_UNITS[subtype] !== 'undefined';
     }
 
     get isMeasurement() {
-      return this.props.node.domainId === DomainType.MEASUREMENT;
+      const {node: {domainId}} = this.props;
+      return domainId === DomainType.MEASUREMENT;
     }
 
     get isPhysicalMeasurement() {
-      return this.props.node.domainId === DomainType.PHYSICALMEASUREMENT;
+      const {node: {domainId}} = this.props;
+      return domainId === DomainType.PHYSICALMEASUREMENT;
     }
 
     get isSurvey() {
-      return this.props.node.domainId === DomainType.SURVEY;
+      const {node: {domainId}} = this.props;
+      return domainId === DomainType.SURVEY;
     }
 
     get isBloodPressure() {
-      return this.props.node.subtype === CriteriaSubType.BP;
+      const {node: {subtype}} = this.props;
+      return subtype === CriteriaSubType.BP;
+    }
+
+    get hasRange() {
+      return this.isMeasurement || this.isSurvey;
     }
 
     render() {
       const {node} = this.props;
       const {calculating, count, countError, form, loading, options} = this.state;
       const {formErrors, formValid} = this.validateForm();
-      const disabled = calculating || form.exists || !formValid
-        || form.num.every(attr => attr.operator === 'ANY');
+      const disableAdd = calculating || !formValid;
+      const disableCalculate = disableAdd || form.exists || form.num.every(attr => attr.operator === 'ANY');
       return (loading ?
         <SpinnerOverlay/> :
         <div style={{margin: '0.5rem 0 1.5rem'}}>
@@ -533,8 +546,8 @@ export const AttributesPage = withCurrentWorkspace() (
                     {this.hasUnits && <span> {PM_UNITS[node.subtype]}</span>}
                   </div>
                 </React.Fragment>}
-                {this.isMeasurement && attr.operator !== null &&
-                  <span style={{paddingTop: '0.2rem'}}>&nbsp;Ranges: {attr.MIN} - {attr.MAX}</span>
+                {this.hasRange && ![null, 'ANY'].includes(attr.operator) &&
+                  <span style={{paddingTop: '0.2rem'}}>&nbsp;Range: {attr.MIN.toLocaleString()} - {attr.MAX.toLocaleString()}</span>
                 }
               </div>
             </div>)}
@@ -554,29 +567,19 @@ export const AttributesPage = withCurrentWorkspace() (
           <div style={styles.countPreview}>
             <div style={styles.row}>
               <div style={styles.buttonContainer}>
-                <Button type='primary' disabled={disabled}
-                  style={{
-                    ...styles.button,
-                    ...(disabled ? {opacity: 0.4} : {}),
-                    background: colorWithWhiteness(colors.primary, .2)
-                  }}
-                  onClick={() => this.requestPreview()}>
-                  {calculating && <Spinner size={16} style={styles.spinner}/>}
-                  Calculate
+                <Button type='primary' disabled={disableCalculate} style={styles.button} onClick={() => this.requestPreview()}>
+                  {calculating && <Spinner size={16} style={styles.spinner}/>} Calculate
                 </Button>
               </div>
               <div style={styles.resultsContainer}>
                 <div style={{fontWeight: 'bold'}}>Results</div>
-                <div>
-                  Number Participants:
-                  <span> {count === null ? '--' : count.toLocaleString()} </span>
-                </div>
+                <div>Number Participants: <span> {count === null ? '--' : count.toLocaleString()} </span></div>
               </div>
-              {!calculating && formValid && <div style={styles.buttonContainer}>
-                <Button type='link'
-                  style={{...styles.button, color: colorWithWhiteness(colors.primary, .2)}}
-                  onClick={() => this.addParameterToSearchItem()}> ADD THIS</Button>
-              </div>}
+              <div style={styles.buttonContainer}>
+                <Button type='primary' disabled={disableAdd} style={styles.button} onClick={() => this.addParameterToSearchItem()}>
+                  ADD THIS
+                </Button>
+              </div>
             </div>
           </div>
         </div>

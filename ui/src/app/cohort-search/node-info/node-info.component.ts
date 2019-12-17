@@ -34,13 +34,12 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.subscription.add(groupSelectionsStore
-      .subscribe(groupIds => {
-        this.selectedChild = groupIds.some(
-          id => this.node.path.split('.')
-            .filter(pathId => pathId !== this.node.id.toString())
-            .includes(id.toString())
-        );
-      }));
+      .subscribe(groupIds => this.selectedChild = groupIds.some(
+        id => this.node.path.split('.')
+          .filter(pathId => pathId !== this.node.id.toString())
+          .includes(id.toString())
+        )
+      ));
 
     this.subscription.add(subtreeSelectedStore
       .filter(selected => !!selected)
@@ -73,17 +72,6 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
 
   get paramId() {
     return `param${this.node.conceptId && !this.isSurvey ? (this.node.conceptId + this.node.code) : this.node.id}`;
-  }
-
-  get selectable() {
-    return this.node.selectable;
-  }
-
-  get displayCode() {
-    if ((this.isDrug && this.node.group) || this.isPM || this.isSurvey || this.isSNOMED) {
-      return '';
-    }
-    return this.node.code;
   }
 
   /*
@@ -181,16 +169,8 @@ export class NodeInfoComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.node.domainId === DomainType.PHYSICALMEASUREMENT;
   }
 
-  get isDrug() {
-    return this.node.domainId === DomainType.DRUG;
-  }
-
   get isSurvey() {
     return this.node.domainId === DomainType.SURVEY;
-  }
-
-  get isSNOMED() {
-    return this.node.type === CriteriaType.SNOMED;
   }
 
   get hasAttributes() {

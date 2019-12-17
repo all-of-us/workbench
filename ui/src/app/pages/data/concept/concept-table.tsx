@@ -2,6 +2,7 @@ import {Clickable, Link} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {Concept} from 'generated/fetch/api';
@@ -10,6 +11,10 @@ import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 
+function formatCounts(concept: any) {
+  concept.countValue = concept.countValue.toLocaleString();
+  return concept;
+}
 
 const styles = reactStyles({
   colStyle: {
@@ -123,8 +128,8 @@ export class ConceptTable extends React.Component<Props, State> {
       pageLoading: false,
       first: 0,
       totalRecords: props.concepts.length,
-      pageNumber: 0,
-      pageConcepts: props.concepts.slice(0, 10),
+      pageNumber: 1,
+      pageConcepts: props.concepts.slice(0, 10).map(formatCounts),
       tableRef: React.createRef(),
       pageNum: 1
     };
@@ -197,7 +202,7 @@ export class ConceptTable extends React.Component<Props, State> {
       }
       words.push(splits[splits.length - 1]);
     }
-    return words.map(word => <span
+    return words.map((word, w) => <span key={w}
       style={matchString.test(word.toLowerCase()) ? styles.highlighted : {}}>
         {word}
       </span>);
@@ -224,19 +229,15 @@ export class ConceptTable extends React.Component<Props, State> {
   }
 
   onPageChange() {
-    const startIndex = this.state.tableRef.current.state.first;
-    const endIndex = startIndex + ROWS_TO_DISPLAY;
-    const allPageConcepts = this.props.concepts.slice(startIndex, endIndex);
-    fp.includes(this.state.selectedConcepts, allPageConcepts) ? this.setState({showBanner: true}) : this.setState({showBanner: false});
+    this.setState({showBanner: false});
   }
 
   render() {
     const {selectedConcepts, tableRef} = this.state;
     const {placeholderValue, loading, reactKey} = this.props;
-    return <div data-test-id='conceptTable' key={reactKey}>
-      <DataTable ref={tableRef} emptyMessage={loading ? '' : placeholderValue}
-                 header={this.selectAllHeader()}
-                 value={this.props.concepts} scrollable={true}
+    return <div data-test-id='conceptTable' key={reactKey} style={{position: 'relative', minHeight: '10rem'}}>
+      {loading ? <SpinnerOverlay /> : <DataTable ref={tableRef} emptyMessage={loading ? '' : placeholderValue}
+                 header={this.selectAllHeader()} value={this.props.concepts} scrollable={true}
                  selection={selectedConcepts} style={{minWidth: 1100}}
                  totalRecords={this.state.totalRecords}
                  expandedRows={this.props.concepts
@@ -253,7 +254,7 @@ export class ConceptTable extends React.Component<Props, State> {
       <Column bodyStyle={styles.colStyle} field='conceptCode' header='Code'/>
       <Column field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle} />
       <Column style={styles.colStyle} field='countValue' header='Count'/>
-    </DataTable>
+    </DataTable>}
     </div>;
   }
 }

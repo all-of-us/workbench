@@ -17,6 +17,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 
 
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {FileDetail, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = {
@@ -89,7 +90,10 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
           <CardButton
             disabled={!canWrite}
             type='small'
-            onClick={() => this.setState({creating: true})}
+            onClick={() => {
+              AnalyticsTracker.Notebooks.OpenCreateModal();
+              this.setState({creating: true});
+            }}
           >
             Create a<br/>New Notebook
             <ClrIcon shape='plus-circle' size={21} style={{marginTop: 5}} />

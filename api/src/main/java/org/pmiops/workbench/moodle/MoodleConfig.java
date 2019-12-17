@@ -14,7 +14,7 @@ public class MoodleConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public MoodleApi moodleApi(WorkbenchConfig workbenchConfig) {
     MoodleApi api = new MoodleApi();
-    ApiClient apiClient = new MoodleApiClientTracer();
+    ApiClient apiClient = new ApiClient();
     apiClient.setBasePath("https://" + workbenchConfig.moodle.host + "/webservice/rest");
     api.setApiClient(apiClient);
     return api;

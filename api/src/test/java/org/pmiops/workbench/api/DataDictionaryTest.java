@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -12,7 +12,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.dataset.DataSetMapper;
 import org.pmiops.workbench.dataset.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -20,17 +19,17 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.model.CdrVersion;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -40,23 +39,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import(LiquibaseAutoConfiguration.class)
 public class DataDictionaryTest {
 
-  @Autowired BigQueryService bigQueryService;
-  @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CohortDao cohortDao;
-  @Autowired ConceptDao conceptDao;
-  @Autowired ConceptSetDao conceptSetDao;
-  @Autowired DataDictionaryEntryDao dataDictionaryEntryDao;
-  @Autowired DataSetDao dataSetDao;
-  @Autowired DataSetMapper dataSetMapper;
-  @Autowired DataSetService dataSetService;
-  @Autowired FireCloudService fireCloudService;
-  @Autowired NotebooksService notebooksService;
-  @Autowired WorkspaceService workspaceService;
-
-  @Autowired DataSetController dataSetController;
+  @Autowired private CdrVersionDao cdrVersionDao;
+  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
+  @Autowired private DataSetController dataSetController;
 
   @Rule public ExpectedException expectedEx = ExpectedException.none();
 
@@ -85,7 +72,7 @@ public class DataDictionaryTest {
 
   @Before
   public void setUp() {
-    CdrVersion cdrVersion = new CdrVersion();
+    DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersionDao.save(cdrVersion);
 
     DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
@@ -108,7 +95,7 @@ public class DataDictionaryTest {
     final Domain domain = Domain.DRUG;
     final String domainValue = "FIELD NAME / DOMAIN VALUE";
 
-    CdrVersion cdrVersion = new CdrVersion();
+    DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersionDao.save(cdrVersion);
 
     DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
@@ -125,12 +112,12 @@ public class DataDictionaryTest {
 
     dataDictionaryEntryDao.save(dataDictionaryEntry);
 
-    org.pmiops.workbench.model.DataDictionaryEntry response =
+    DataDictionaryEntry response =
         dataSetController
             .getDataDictionaryEntry(cdrVersion.getCdrVersionId(), domain.toString(), domainValue)
             .getBody();
 
-    assertThat(response.getCdrVersionId().longValue())
+    assertThat(response.getCdrVersionId())
         .isEqualTo(dataDictionaryEntry.getCdrVersion().getCdrVersionId());
     assertThat(new Timestamp(response.getDefinedTime()))
         .isEqualTo(dataDictionaryEntry.getDefinedTime());
