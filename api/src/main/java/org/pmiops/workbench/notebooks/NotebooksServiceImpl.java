@@ -169,11 +169,11 @@ public class NotebooksServiceImpl implements NotebooksService {
             workspaceNamespace,
             workspaceName,
             newName);
-    monitoringService.recordDelta(MonitoringViews.NOTEBOOK_CLONE,
-        ViewBundle.fromAttachmentKeyToString(
-            ImmutableMap.of(
-                AttachmentKey.NOTEBOOK_NAME, copiedNotebookFileDetail.getName(),
-                AttachmentKey.NOTEBOOK_WORKSPACE_NAMESPACE, workspaceName)));
+    monitoringService.recordBundle(ViewBundle.builder()
+        .addViewInfoValuePair(MonitoringViews.NOTEBOOK_CLONE, 1L)
+        .addAttachmentKeyValuePair(AttachmentKey.NOTEBOOK_NAME, copiedNotebookFileDetail.getName())
+        .addAttachmentKeyValuePair(AttachmentKey.NOTEBOOK_WORKSPACE_NAMESPACE, workspaceName)
+      .build());
     return copiedNotebookFileDetail;
   }
 
