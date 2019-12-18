@@ -1386,7 +1386,21 @@ definitions:
       jupyterUserScriptUri:
         type: string
         description: |
-          Optional bucket URI to a bash script the user wishes to run inside their jupyter docker.
+          Optional GCS object URI to a bash script the user wishes to run inside their jupyter
+          docker. This script runs exactly once when the cluster is first initialized. Logs from
+          this script can be found in the Leo staging bucket for the cluster. Script is run as root
+          and docker --privileged.
+      jupyterStartUserScriptUri:
+        type: string
+        description: |
+          Optional GCS object URI to a bash script the user wishes to run on cluster start inside
+          the jupyter docker. In contrast to jupyterUserScriptUri, this always runs before starting
+          Jupyter, both on initial cluster creation and on cluster resume (jupyterUserScriptUri runs
+          once on cluster creation). This script may be used to launch background processes which
+          would not otherwise survive a cluster stop/start.
+          The script is pulled once at cluster creation time; subsequent client changes to the user
+          script at this URI do not affect the cluster. Timestamped logs for this script can be
+          found in the Leo staging bucket for the cluster. Script is run as root and docker --privileged.
       machineConfig:
         description: The machine configurations for the master and worker nodes
         $ref: '#/definitions/MachineConfig'
