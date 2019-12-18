@@ -40,6 +40,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
+import org.pmiops.workbench.db.dao.UserServiceInterface;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -116,7 +117,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final NotebooksService notebooksService;
-  private final UserServiceImpl userService;
+  private final UserServiceInterface userService;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private WorkspaceAuditor workspaceAuditor;
   private WorkspaceMapper workspaceMapper;
@@ -132,7 +133,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       CloudStorageService cloudStorageService,
       Clock clock,
       NotebooksService notebooksService,
-      UserServiceImpl userService,
+      UserServiceInterface userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
       WorkspaceMapper workspaceMapper) {

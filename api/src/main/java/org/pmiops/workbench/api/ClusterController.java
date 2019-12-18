@@ -20,6 +20,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
+import org.pmiops.workbench.db.dao.UserServiceInterface;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUser.ClusterConfig;
@@ -88,7 +89,7 @@ public class ClusterController implements ClusterApiDelegate {
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final UserServiceImpl userService;
+  private final UserServiceInterface userService;
   private final UserRecentResourceService userRecentResourceService;
   private final UserDao userDao;
   private final Clock clock;
@@ -100,7 +101,7 @@ public class ClusterController implements ClusterApiDelegate {
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      UserServiceImpl userService,
+      UserServiceInterface userService,
       UserRecentResourceService userRecentResourceService,
       UserDao userDao,
       Clock clock) {

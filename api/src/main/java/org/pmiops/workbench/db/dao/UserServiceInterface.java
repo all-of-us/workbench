@@ -11,8 +11,8 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.springframework.data.domain.Sort;
 
-// TODO(jaycarlton) rename to UserService after commiting to avoid confusing git by replacing
-// a renamed file.
+// TODO(jaycarlton) rename to UserService after merging to avoid confusing git diff
+//  by replacing a renamed file.
 public interface UserServiceInterface {
   DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser);
 

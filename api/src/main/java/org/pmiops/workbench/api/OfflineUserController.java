@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
+import org.pmiops.workbench.db.dao.UserServiceInterface;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -29,11 +30,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
           );
 
   private final CloudResourceManagerService cloudResourceManagerService;
-  private final UserServiceImpl userService;
+  private final UserServiceInterface userService;
 
   @Autowired
   public OfflineUserController(
-      CloudResourceManagerService cloudResourceManagerService, UserServiceImpl userService) {
+      CloudResourceManagerService cloudResourceManagerService, UserServiceInterface userService) {
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
   }
