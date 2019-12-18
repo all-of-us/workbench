@@ -1,13 +1,13 @@
 #!/bin/bash
 
-if [ -z "$SNIPPETS_REPO_DIR" ]
+if [ -z "$1" ]
 then
-    >&2 echo "Must set SNIPPETS_REPO_DIR to the location of the workbench-snippets repository"
+    >&2 echo "Missing argument - directory of the workbench-snippets repository"
     exit 1
 fi
 
 # drop trailing slash if exists
-SNIPPETS_REPO_DIR=${SNIPPETS_REPO_DIR%/}
+SNIPPETS_REPO_DIR=${1%/}
 
 snippet_filename_prefixes=("py_gcs" "py_sql" "py_dataset" "r_gcs" "r_sql" "r_dataset")
 
