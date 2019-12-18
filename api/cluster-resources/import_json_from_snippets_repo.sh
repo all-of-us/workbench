@@ -6,6 +6,9 @@ then
     exit 1
 fi
 
+# drop trailing slash if exists
+SNIPPETS_REPO_DIR=${SNIPPETS_REPO_DIR%/}
+
 snippet_filename_prefixes=("py_gcs" "py_sql" "py_dataset" "r_gcs" "r_sql" "r_dataset")
 
 for name in "${snippet_filename_prefixes[@]}"; do
