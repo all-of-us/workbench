@@ -1,8 +1,8 @@
 import * as React from 'react';
+import * as CopyToClipboard from 'react-copy-to-clipboard';
 
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
-import {ClrIcon} from 'app/components/icons';
 import {TextModal} from 'app/components/text-modal';
 import {statusApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -11,17 +11,31 @@ import {globalErrorStore} from 'app/utils/navigation';
 import {ErrorCode, ErrorResponse} from 'generated/fetch';
 import {Button} from './buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faCopy} from '@fortawesome/free-regular-svg-icons';
+import {FlexColumn, FlexRow} from 'app/components/flex';
+import {faTimes} from '@fortawesome/free-solid-svg-icons';
 
 const styles = reactStyles({
+  errorCodeContainer: {
+    alignItems: 'center',
+    flexWrap: 'wrap'
+  },
+  errorContent: {
+    alignItems: 'flex-start'
+  },
   errorHandler: {
     position: 'fixed',
     bottom: '1rem',
     background: colors.white,
     padding: '0.6rem',
-    border: `1px solid ${colors.black}`
+    border: `1px solid ${colors.black}`,
+    width: '10rem'
   },
   iconStyles: {
     cursor: 'pointer',
+    height: 17,
+    width: 17
   },
   serverStatusList: {
     margin: '0.5rem 0'
@@ -98,12 +112,20 @@ export const ErrorHandler = withGlobalError()(class extends React.Component<Prop
 
     return globalError !== undefined && <React.Fragment>
       {globalError.statusCode === 500 && <div style={styles.errorHandler}>
-        Server Error (500)
-        <ClrIcon shape='times' style={styles.iconStyles} onClick={() => this.closeError()} />
-        </div>}
+        <FlexRow style={styles.errorContent}>
+          <FlexColumn>
+          Server Error (500)
+          <div>
+            Please click to copy unique code for support ticket
+            {globalError.errorUniqueId && <CopyToClipboard text={globalError.errorUniqueId}>
+              <FontAwesomeIcon icon={faCopy} style={{...styles.iconStyles, marginLeft: 4}}/></CopyToClipboard>}
+          </div>
+          </FlexColumn>
+          <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.closeError()} />
+        </FlexRow></div>}
       {globalError.statusCode === 503 && <div style={styles.errorHandler}>
         Server is currently busy (503)
-        <ClrIcon shape='times' style={styles.iconStyles} onClick={() => this.closeError()} />
+        <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.closeError()} />
       </div>}
       {globalError.errorCode === ErrorCode.USERDISABLED && <TextModal
           title='This account has been disabled'
