@@ -85,7 +85,14 @@ const styles = reactStyles({
     flexDirection: 'row',
     width: '94.3%',
     flexWrap: 'wrap'
-  }
+  },
+  backBtn: {
+    border: 0,
+    fontSize: '14px',
+    color: colors.accent,
+    background: 'transparent',
+    cursor: 'pointer'
+  },
 });
 
 interface ConceptCacheItem {
@@ -443,50 +450,55 @@ export const ConceptHomepage = withCurrentWorkspace()(
     renderConcepts() {
       const {concepts, searchLoading, conceptDomainCounts, selectedDomain, selectedConceptDomainMap} = this.state;
 
-      return <FadeBox>
-        <FlexRow style={{justifyContent: 'flex-start'}}>
-          {conceptDomainCounts.map((domain) => {
-            return <FlexColumn key={domain.name}>
-              <Clickable style={styles.domainHeaderLink}
-                         onClick={() => this.selectDomain(domain)}
-                         disabled={this.domainLoading(domain)}
-                         data-test-id={'domain-header-' + domain.name}>
-                <div style={{fontSize: '16px'}}>{domain.name}</div>
-                {this.domainLoading(domain) ?
-                    <Spinner style={{height: '15px', width: '15px'}}/> :
-                    <FlexRow style={{justifyContent: 'space-between'}}>
-                      <div>{domain.conceptCount}</div>
-                      {(selectedConceptDomainMap && selectedConceptDomainMap[domain.domain].length > 0) &&
-                      <div style={styles.selectedConceptsCount} data-test-id='selectedConcepts'>
-                        {selectedConceptDomainMap[domain.domain].length}
-                      </div>}
-                    </FlexRow>
-                }
-              </Clickable>
-              {domain === selectedDomain && <hr data-test-id='active-domain'
-                                                key={selectedDomain.domain}
-                                                style={styles.domainHeaderSelected}/>}
-            </FlexColumn>;
-          })}
-        </FlexRow>
-        {!searchLoading && selectedDomain.conceptCount > 1000 && <div style={styles.conceptCounts}>
-          Showing top {concepts.length} {selectedDomain.name}
-        </div>}
-        <ConceptTable concepts={concepts}
-                      loading={searchLoading}
-                      onSelectConcepts={this.selectConcepts.bind(this)}
-                      placeholderValue={this.noConceptsConstant}
-                      searchTerm={this.state.currentSearchString}
-                      selectedConcepts={selectedConceptDomainMap[selectedDomain.domain]}
-                      reactKey={selectedDomain.name}/>
-        <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
-                         iconShape='plus'
-                         tooltip={!this.state.workspacePermissions.canWrite}
-                         tooltipContent={<div>Requires Owner or Writer permission</div>}
-                         expanded={this.addToSetText}
-                         disable={this.activeSelectedConceptCount === 0 ||
-                         !this.state.workspacePermissions.canWrite}/>
-      </FadeBox>;
+      return <React.Fragment>
+        <button style={styles.backBtn} type='button' onClick={() => this.setState({searching: false})}>
+          &lt; Back to Concept Set Homepage
+        </button>
+        <FadeBox>
+          <FlexRow style={{justifyContent: 'flex-start'}}>
+            {conceptDomainCounts.map((domain) => {
+              return <FlexColumn key={domain.name}>
+                <Clickable style={styles.domainHeaderLink}
+                           onClick={() => this.selectDomain(domain)}
+                           disabled={this.domainLoading(domain)}
+                           data-test-id={'domain-header-' + domain.name}>
+                  <div style={{fontSize: '16px'}}>{domain.name}</div>
+                  {this.domainLoading(domain) ?
+                      <Spinner style={{height: '15px', width: '15px'}}/> :
+                      <FlexRow style={{justifyContent: 'space-between'}}>
+                        <div>{domain.conceptCount.toLocaleString()}</div>
+                        {(selectedConceptDomainMap && selectedConceptDomainMap[domain.domain].length > 0) &&
+                        <div style={styles.selectedConceptsCount} data-test-id='selectedConcepts'>
+                          {selectedConceptDomainMap[domain.domain].length}
+                        </div>}
+                      </FlexRow>
+                  }
+                </Clickable>
+                {domain === selectedDomain && <hr data-test-id='active-domain'
+                                                  key={selectedDomain.domain}
+                                                  style={styles.domainHeaderSelected}/>}
+              </FlexColumn>;
+            })}
+          </FlexRow>
+          {!searchLoading && selectedDomain.conceptCount > 1000 && <div style={styles.conceptCounts}>
+            Showing top {concepts.length} {selectedDomain.name}
+          </div>}
+          <ConceptTable concepts={concepts}
+                        loading={searchLoading}
+                        onSelectConcepts={this.selectConcepts.bind(this)}
+                        placeholderValue={this.noConceptsConstant}
+                        searchTerm={this.state.currentSearchString}
+                        selectedConcepts={selectedConceptDomainMap[selectedDomain.domain]}
+                        reactKey={selectedDomain.name}/>
+          <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
+                           iconShape='plus'
+                           tooltip={!this.state.workspacePermissions.canWrite}
+                           tooltipContent={<div>Requires Owner or Writer permission</div>}
+                           expanded={this.addToSetText}
+                           disable={this.activeSelectedConceptCount === 0 ||
+                           !this.state.workspacePermissions.canWrite}/>
+        </FadeBox>
+      </React.Fragment>;
     }
 
     render() {
