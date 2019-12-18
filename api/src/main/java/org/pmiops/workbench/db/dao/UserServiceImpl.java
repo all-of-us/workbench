@@ -400,6 +400,7 @@ public class UserServiceImpl implements UserServiceInterface {
         BypassTimeTargetProperty.BETA_ACCESS_BYPASS_TIME);
   }
 
+  @Override
   public void setEraCommonsBypassTime(Long userId, Timestamp bypassTime) {
     setBypassTimeWithRetries(
         userId,
@@ -408,6 +409,7 @@ public class UserServiceImpl implements UserServiceInterface {
         BypassTimeTargetProperty.ERA_COMMONS_BYPASS_TIME);
   }
 
+  @Override
   public void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime) {
     setBypassTimeWithRetries(
         userId,

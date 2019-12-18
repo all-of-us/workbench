@@ -42,13 +42,17 @@ public interface UserServiceInterface {
   DbUser submitDataUseAgreement(
       DbUser user, Integer dataUseAgreementSignedVersion, String initials);
 
-  void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName)
+  void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName);
 
   void setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime);
 
   void setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime);
 
   void setBetaAccessBypassTime(Long userId, Timestamp bypassTime);
+
+  void setEraCommonsBypassTime(Long userId, Timestamp bypassTime);
+
+  void setTwoFactorAuthBypassTime(Long userId, Timestamp bypassTime);
 
   void setClusterRetryCount(int clusterRetryCount);
 
