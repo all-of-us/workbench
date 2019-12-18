@@ -85,8 +85,7 @@ Prerequisite: Must have `jq` installed (for pretty printing).
 1. Run the following from the `workbench/api/cluster-resources` directory to pull in the updated JSON
 
     ```
-    export SNIPPETS_REPO_DIR="<path to workbench-snippets repo>"
-    ./import_json_from_snippets_repo.sh
+    ./import_json_from_snippets_repo.sh <path to workbench-snippets repo>
     ```
 1. Commit changes and go through normal pull request process.
 1. Wait for a release; note that changes are only visible for clusters started
