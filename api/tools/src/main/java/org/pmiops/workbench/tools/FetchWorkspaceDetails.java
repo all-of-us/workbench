@@ -13,11 +13,8 @@ import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * A tool that takes a Workspace namespace / Firecloud Project ID and returns details for any
@@ -25,9 +22,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  *
  * <p>Details currently include... - Name - Creator Email - Collaborator Emails and Access Levels
  */
-@SpringBootApplication
-@EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
-@EntityScan("org.pmiops.workbench.db.model")
+@Configuration
 public class FetchWorkspaceDetails {
 
   private static final Logger log = Logger.getLogger(FetchWorkspaceDetails.class.getName());
@@ -81,6 +76,6 @@ public class FetchWorkspaceDetails {
   }
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(FetchWorkspaceDetails.class).web(false).run(args);
+    CommandLineToolConfig.runCommandLine(FetchWorkspaceDetails.class, args);
   }
 }
