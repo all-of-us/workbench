@@ -24,7 +24,6 @@ import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserServiceInterface;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
@@ -190,7 +189,7 @@ public class ProfileController implements ProfileApiDelegate {
       Provider<UserAuthentication> userAuthenticationProvider,
       UserDao userDao,
       Clock clock,
-      UserServiceImpl userService,
+      UserServiceInterface userService,
       FireCloudService fireCloudService,
       DirectoryService directoryService,
       CloudStorageService cloudStorageService,

@@ -17,7 +17,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
+import org.pmiops.workbench.db.dao.UserServiceInterface;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -37,11 +37,11 @@ public class OfflineUserControllerTest {
 
   @TestConfiguration
   @Import({OfflineUserController.class})
-  @MockBean({CloudResourceManagerService.class, UserServiceImpl.class})
+  @MockBean({CloudResourceManagerService.class, UserServiceInterface.class})
   static class Configuration {}
 
   @Autowired private CloudResourceManagerService cloudResourceManagerService;
-  @Autowired private UserServiceImpl userService;
+  @Autowired private UserServiceInterface userService;
   @Autowired private OfflineUserController offlineUserController;
 
   private Long incrementedUserId = 1L;

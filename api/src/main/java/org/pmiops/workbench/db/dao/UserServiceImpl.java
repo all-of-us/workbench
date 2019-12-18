@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserServiceInterface {
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
   private final UserServiceAuditor userServiceAuditAdapter;
-  private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
+  private static final Logger log = Logger.getLogger(UserServiceInterface.class.getName());
 
   @Autowired
   public UserServiceImpl(

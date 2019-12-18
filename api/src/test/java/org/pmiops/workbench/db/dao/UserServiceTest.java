@@ -61,11 +61,11 @@ public class UserServiceTest {
   @Autowired private DirectoryService mockDirectoryService;
   @Autowired private UserServiceAuditor mockUserServiceAuditAdapter;
 
-  @Autowired private UserServiceImpl userService;
+  @Autowired private UserServiceInterface userService;
   @Autowired private UserDao userDao;
 
   @TestConfiguration
-  @Import({UserServiceImpl.class})
+  @Import({UserServiceInterface.class})
   @MockBean({
     AdminActionHistoryDao.class,
     FireCloudService.class,
