@@ -47,8 +47,6 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 @EntityScan("org.pmiops.workbench.db.model")
 // Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")
-// Scan the FireCloud module, for FireCloudService bean.
-@ComponentScan("org.pmiops.workbench.firecloud")
 // Scan the ServiceAccounts class, but exclude other classes in auth (since they
 // bring in JPA-related beans, which include a whole bunch of other deps that are
 // more complicated than we need for now).

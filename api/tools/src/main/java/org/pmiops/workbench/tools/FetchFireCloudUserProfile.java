@@ -12,6 +12,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
  * domain-wide delegation to make FireCloud API calls impersonating other users.
  */
 @Configuration
+@ComponentScan("org.pmiops.workbench.firecloud")
 public class FetchFireCloudUserProfile {
   private static final Logger log =
       Logger.getLogger(org.pmiops.workbench.tools.FetchFireCloudUserProfile.class.getName());

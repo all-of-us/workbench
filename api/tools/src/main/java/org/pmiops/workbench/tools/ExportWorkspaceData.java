@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
@@ -43,7 +42,6 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.monitoring.MonitoringServiceImpl;
 import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
 import org.pmiops.workbench.monitoring.StackdriverStatsExporterService;
-import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -51,6 +49,7 @@ import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -64,6 +63,7 @@ import org.springframework.context.annotation.Primary;
   StackdriverStatsExporterService.class,
   UserRecentResourceServiceImpl.class
 })
+@ComponentScan("org.pmiops.workbench.firecloud")
 public class ExportWorkspaceData {
 
   private static final Logger log = Logger.getLogger(ExportWorkspaceData.class.getName());
@@ -87,15 +87,13 @@ public class ExportWorkspaceData {
     return new WorkspaceServiceImpl(null, null, null, null, null, null, null, null, null);
   }
 
-  private WorkspacesApi workspacesApi;
-
   @Bean
   ServiceAccountAPIClientFactory serviceAccountAPIClientFactory(WorkbenchConfig config) {
     return new ServiceAccountAPIClientFactory(config.firecloud.baseUrl);
   }
 
-  @Primary
   @Bean
+  @Primary
   @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
   WorkspacesApi workspaceApi(ServiceAccountAPIClientFactory factory) throws IOException {
     return factory.workspacesApi();
@@ -108,6 +106,7 @@ public class ExportWorkspaceData {
   private NotebooksService notebooksService;
   private WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
   private UserDao userDao;
+  private WorkspacesApi workspacesApi;
 
   @Bean
   public CommandLineRunner run(
@@ -118,7 +117,7 @@ public class ExportWorkspaceData {
       NotebooksService notebooksService,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       UserDao userDao,
-      Provider<WorkspacesApi> workspacesApiProvider) {
+      WorkspacesApi workspacesApi) {
     this.workspaceDao = workspaceDao;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
@@ -126,13 +125,12 @@ public class ExportWorkspaceData {
     this.notebooksService = notebooksService;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.userDao = userDao;
-    workspacesApi = workspacesApiProvider.get();
+    this.workspacesApi = workspacesApi;
 
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
 
       List<WorkspaceExportRow> rows = new ArrayList<>();
-
       Set<DbUser> usersWithoutWorkspaces =
           Streams.stream(userDao.findAll()).collect(Collectors.toSet());
 
