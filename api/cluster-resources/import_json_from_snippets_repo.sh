@@ -6,7 +6,6 @@ then
     exit 1
 fi
 
-
 snippet_filename_prefixes=("py_gcs" "py_sql" "py_dataset" "r_gcs" "r_sql" "r_dataset")
 
 for name in "${snippet_filename_prefixes[@]}"; do
