@@ -49,7 +49,7 @@ export class SignInService {
           client_id: this.clientId,
           hosted_domain: config.gsuiteDomain,
           scope: 'https://www.googleapis.com/auth/plus.login openid profile' +
-            ' https://www.googleapis.com/auth/cloud-billing.readonly https://www.googleapis.com/auth/cloud-billing'
+            ' https://www.googleapis.com/auth/cloud-billing'
         }).then(() => {
           this.subscribeToAuth2User();
         });
