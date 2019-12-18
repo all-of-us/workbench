@@ -1,10 +1,13 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.client.http.HttpStatusCodes;
+import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -37,6 +40,10 @@ import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.monitoring.GaugeDataCollector;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -57,7 +64,7 @@ import org.springframework.transaction.annotation.Transactional;
  * ensuring we call a single updateDataAccessLevel method whenever a User entry is saved.
  */
 @Service
-public class UserService {
+public class UserService implements GaugeDataCollector {
 
   private final int MAX_RETRIES = 3;
   private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
@@ -72,7 +79,7 @@ public class UserService {
   private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
-  private final UserServiceAuditor userServiceAuditAdapter;
+  private final UserServiceAuditor userServiceAuditor;
   private static final Logger log = Logger.getLogger(UserService.class.getName());
 
   @Autowired
@@ -87,7 +94,7 @@ public class UserService {
       Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
       DirectoryService directoryService,
-      UserServiceAuditor userServiceAuditAdapter) {
+      UserServiceAuditor userServiceAuditor) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
@@ -98,7 +105,7 @@ public class UserService {
     this.configProvider = configProvider;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
-    this.userServiceAuditAdapter = userServiceAuditAdapter;
+    this.userServiceAuditor = userServiceAuditor;
   }
 
   /**
@@ -170,7 +177,7 @@ public class UserService {
     }
     if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
       dbUser.setDataAccessLevelEnum(newDataAccessLevel);
-      userServiceAuditAdapter.fireUpdateDataAccessAction(
+      userServiceAuditor.fireUpdateDataAccessAction(
           dbUser, newDataAccessLevel, previousDataAccessLevel);
     }
   }
@@ -435,7 +442,7 @@ public class UserService {
           return u;
         },
         dbUser);
-    userServiceAuditAdapter.fireAdministrativeBypassTime(
+    userServiceAuditor.fireAdministrativeBypassTime(
         dbUser.getUserId(),
         targetProperty,
         Optional.ofNullable(bypassTime).map(Timestamp::toInstant));
@@ -705,5 +712,18 @@ public class UserService {
           return user;
         },
         targetUser);
+  }
+
+  @Override
+  public Collection<MeasurementBundle> getGaugeData() {
+    return ImmutableSet.of(
+        MeasurementBundle.builder()
+            .add(Metric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledTrue())
+            .attach(AttachmentKey.USER_DISABLED, Boolean.valueOf(true).toString())
+            .build(),
+    MeasurementBundle.builder()
+            .add(Metric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledFalse())
+            .attach(AttachmentKey.USER_DISABLED, Boolean.valueOf(false).toString())
+            .build());
   }
 }
