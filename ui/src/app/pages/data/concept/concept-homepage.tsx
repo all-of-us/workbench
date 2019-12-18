@@ -35,10 +35,8 @@ import {SurveyDetails} from './survey-details';
 
 const styles = reactStyles({
   searchBar: {
-    marginLeft: '1%', boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)',
-    height: '3rem', width: '64.3%',
-    backgroundColor: colorWithWhiteness(colors.secondary, 0.85), fontSize: '16px',
-    lineHeight: '19px', paddingLeft: '2rem'
+    boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)', height: '3rem', width: '64.3%', lineHeight: '19px', paddingLeft: '2rem',
+    backgroundColor: colorWithWhiteness(colors.secondary, 0.85), fontSize: '16px'
   },
   domainBoxHeader: {
     color: colors.accent, fontSize: '18px', lineHeight: '22px'
@@ -104,14 +102,14 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
   standardConceptsOnly: boolean, browseInDomain: Function}> =
     ({conceptDomainInfo, standardConceptsOnly, browseInDomain}) => {
       const conceptCount = standardConceptsOnly ?
-          conceptDomainInfo.standardConceptCount : conceptDomainInfo.allConceptCount;
-      return <DomainCardBase style={{minWidth: '11rem'}} data-test-id='domain-box'>
+          conceptDomainInfo.standardConceptCount.toLocaleString() : conceptDomainInfo.allConceptCount.toLocaleString();
+      return <DomainCardBase style={{width: 'calc(25% - 1rem)'}} data-test-id='domain-box'>
         <Clickable style={styles.domainBoxHeader}
              onClick={browseInDomain}
              data-test-id='domain-box-name'>{conceptDomainInfo.name}</Clickable>
         <div style={styles.conceptText}>
-          <span style={{fontSize: 30}}>{conceptCount}</span> concepts in this domain. <p/>
-          <div><b>{conceptDomainInfo.participantCount}</b> participants in domain.</div>
+          <span style={{fontSize: 30}}>{conceptCount.toLocaleString()}</span> concepts in this domain. <p/>
+          <div><b>{conceptDomainInfo.participantCount.toLocaleString()}</b> participants in domain.</div>
         </div>
         <Clickable style={styles.domainBoxLink}
                    onClick={browseInDomain}>Browse Domain</Clickable>
@@ -120,13 +118,13 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
 
 const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: Function}> =
     ({survey, browseSurvey}) => {
-      return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
+      return <DomainCardBase style={{maxHeight: 'auto', width: 'calc(25% - 1rem)'}}>
         <Clickable style={styles.domainBoxHeader}
           onClick={browseSurvey}
           data-test-id='survey-box-name'>{survey.name}</Clickable>
         <div style={styles.conceptText}>
-          <span style={{fontSize: 30}}>{survey.questionCount}</span> survey questions with
-          <div><b>{survey.participantCount}</b> participants</div>
+          <span style={{fontSize: 30}}>{survey.questionCount.toLocaleString()}</span> survey questions with
+          <div><b>{survey.participantCount.toLocaleString()}</b> participants</div>
         </div>
         <div style={{...styles.conceptText, height: '3.5rem'}}>
           {survey.description}
@@ -510,10 +508,10 @@ export const ConceptHomepage = withCurrentWorkspace()(
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
           <Header style={{fontSize: '20px', marginTop: 0, fontWeight: 600}}>Search Concepts</Header>
-          <div style={{marginBottom: '6%', marginTop: '1.5%'}}>
+          <div style={{margin: '1rem 0'}}>
             <div style={{display: 'flex', alignItems: 'center'}}>
               <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
-                fill: colors.accent, left: 'calc(1rem + 4.5%)'}}/>
+                fill: colors.accent, left: 'calc(1rem + 3.5%)'}}/>
               <TextInput style={styles.searchBar} data-test-id='concept-search-input'
                          placeholder='Search concepts in domain'
                          value={this.state.currentSearchString}
