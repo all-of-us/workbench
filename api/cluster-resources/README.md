@@ -1,4 +1,4 @@
-# setup_notebook_cluster.sh
+# initialize_notebook_cluster.sh
 
 This is the script run on the Leonardo Jupyter server at cluster initialization
 time, i.e. the [jupyterUserScriptUri](
@@ -11,14 +11,14 @@ To manually test updates to this script locally:
 - Push the script to GCS (username-suffixed):
 
   ```
-  api$ gsutil cp cluster-resources/setup_notebook_cluster.sh "gs://all-of-us-workbench-test-cluster-resources/setup_notebook_cluster-${USER}.sh"
+  api$ gsutil cp cluster-resources/initialize_notebook_cluster.sh "gs://all-of-us-workbench-test-cluster-resources/initialize_notebook_cluster-${USER}.sh"
   ```
 
 - (**Disclaimer**: local code change, do not submit) Temporarily update your
   local server config to use your custom script:
 
   ```
-  api$ sed -i "s,setup_notebook_cluster\.sh,setup_notebook_cluster-${USER}.sh," src/main/java/org/pmiops/workbench/notebooks/LeonardoNotebooksClientImpl.java
+  api$ sed -i "s,initialize_notebook_cluster\.sh,initialize_notebook_cluster-${USER}.sh," src/main/java/org/pmiops/workbench/notebooks/LeonardoNotebooksClientImpl.java
   ```
 
 - Ensure the change is picked up by your API server and point a local UI to it
@@ -69,7 +69,7 @@ with custom AoU-specific code snippets. The snippets live in
 https://github.com/all-of-us/workbench-snippets. AoU configures Leo clusters as
 follows to enable this:
 
-1. Enable the snippets_menu/main extension in ./setup_notebook_cluster.sh
+1. Enable the snippets_menu/main extension in ./initialize_notebook_cluster.sh
 1. Deploy a Jupyter UI extension to configure the menu with AoU-specific snippets
 
 ## Updating Snippets
