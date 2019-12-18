@@ -57,7 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
  * ensuring we call a single updateDataAccessLevel method whenever a User entry is saved.
  */
 @Service
-public class UserServiceImpl {
+public class UserServiceImpl implements UserServiceInterface {
 
   private final int MAX_RETRIES = 3;
   private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
@@ -118,6 +118,7 @@ public class UserServiceImpl {
    * <p>Ensures that the data access level for the user reflects the state of other fields on the
    * user; handles conflicts with concurrent updates by retrying.
    */
+  @Override
   public DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser) {
     int objectLockingFailureCount = 0;
     int statementClosedCount = 0;
@@ -228,6 +229,7 @@ public class UserServiceImpl {
     return configProvider.get().auth.serviceAccountApiUsers.contains(user.getEmail());
   }
 
+  @Override
   public DbUser createServiceAccountUser(String email) {
     DbUser user = new DbUser();
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
@@ -260,6 +262,7 @@ public class UserServiceImpl {
     }
   }
 
+  @Override
   public DbUser createUser(
       String givenName,
       String familyName,
@@ -281,6 +284,7 @@ public class UserServiceImpl {
         null);
   }
 
+  @Override
   public DbUser createUser(
       String givenName,
       String familyName,
@@ -333,6 +337,7 @@ public class UserServiceImpl {
     return user;
   }
 
+  @Override
   public DbUser submitDataUseAgreement(
       DbUser user, Integer dataUseAgreementSignedVersion, String initials) {
     // FIXME: this should not be hardcoded
@@ -354,6 +359,7 @@ public class UserServiceImpl {
     return userDao.save(user);
   }
 
+  @Override
   @Transactional
   public void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName) {
     List<DbUserDataUseAgreement> dataUseAgreements =
@@ -367,6 +373,7 @@ public class UserServiceImpl {
     userDataUseAgreementDao.save(dataUseAgreements);
   }
 
+  @Override
   public void setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
     setBypassTimeWithRetries(
         userId,
@@ -375,6 +382,7 @@ public class UserServiceImpl {
         BypassTimeTargetProperty.DATA_USE_AGREEMENT_BYPASS_TIME);
   }
 
+  @Override
   public void setComplianceTrainingBypassTime(Long userId, Timestamp bypassTime) {
     setBypassTimeWithRetries(
         userId,
@@ -383,6 +391,7 @@ public class UserServiceImpl {
         BypassTimeTargetProperty.COMPLIANCE_TRAINING_BYPASS_TIME);
   }
 
+  @Override
   public void setBetaAccessBypassTime(Long userId, Timestamp bypassTime) {
     setBypassTimeWithRetries(
         userId,
@@ -441,6 +450,7 @@ public class UserServiceImpl {
         Optional.ofNullable(bypassTime).map(Timestamp::toInstant));
   }
 
+  @Override
   public void setClusterRetryCount(int clusterRetryCount) {
     updateUserWithRetries(
         (user) -> {
@@ -449,6 +459,7 @@ public class UserServiceImpl {
         });
   }
 
+  @Override
   public DbUser setDisabledStatus(Long userId, boolean disabled) {
     DbUser user = userDao.findUserByUserId(userId);
     return updateUserWithRetries(
@@ -459,15 +470,18 @@ public class UserServiceImpl {
         user);
   }
 
+  @Override
   public List<DbUser> getAllUsers() {
     return userDao.findUsers();
   }
 
+  @Override
   public void logAdminUserAction(
       long targetUserId, String targetAction, Object oldValue, Object newValue) {
     logAdminAction(targetUserId, null, targetAction, oldValue, newValue);
   }
 
+  @Override
   public void logAdminWorkspaceAction(
       long targetWorkspaceId, String targetAction, Object oldValue, Object newValue) {
     logAdminAction(null, targetWorkspaceId, targetAction, oldValue, newValue);
@@ -491,6 +505,7 @@ public class UserServiceImpl {
   }
 
   /** Find users matching the user's name or email */
+  @Override
   public List<DbUser> findUsersBySearchString(String term, Sort sort) {
     List<Short> dataAccessLevels =
         Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
@@ -500,6 +515,7 @@ public class UserServiceImpl {
   }
 
   /** Syncs the current user's training status from Moodle. */
+  @Override
   public DbUser syncComplianceTrainingStatus()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     return syncComplianceTrainingStatus(userProvider.get());
@@ -517,6 +533,7 @@ public class UserServiceImpl {
    * MOODLE. 3. If there are no badges for a user set training completion time and expiration date
    * as null
    */
+  @Override
   public DbUser syncComplianceTrainingStatus(DbUser user)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     if (isServiceAccount(user)) {
@@ -639,6 +656,7 @@ public class UserServiceImpl {
   }
 
   /** Syncs the eraCommons access module status for the current user. */
+  @Override
   public DbUser syncEraCommonsStatus() {
     DbUser user = userProvider.get();
     FirecloudNihStatus nihStatus = fireCloudService.getNihStatus();
@@ -653,6 +671,7 @@ public class UserServiceImpl {
    *
    * <p>Returns the updated User object.
    */
+  @Override
   public DbUser syncEraCommonsStatusUsingImpersonation(DbUser user)
       throws IOException, org.pmiops.workbench.firecloud.ApiException {
     if (isServiceAccount(user)) {
@@ -677,11 +696,13 @@ public class UserServiceImpl {
     }
   }
 
+  @Override
   public void syncTwoFactorAuthStatus() {
     syncTwoFactorAuthStatus(userProvider.get());
   }
 
   /** */
+  @Override
   public DbUser syncTwoFactorAuthStatus(DbUser targetUser) {
     if (isServiceAccount(targetUser)) {
       // Skip sync for service account user rows.
