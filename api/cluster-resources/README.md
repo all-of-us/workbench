@@ -81,15 +81,11 @@ manual and can be improved going forwards (see RW-2665):
 Prerequisite: Must have `jq` installed (for pretty printing).
 
 1. In a separate directory, clone the snippets repo and build the menu config:
-    https://github.com/all-of-us/workbench-snippets#auto-generation-of-jupyter-snippets-menu-configuration
-1. Pull the updated JSON into the Workbench repo
+    https://github.com/all-of-us/workbench-snippets/blob/master/CONTRIBUTING.md#auto-generation-of-jupyter-snippets-menu-configuration
+1. Run the following from the `workbench/api/cluster-resources` directory to pull in the updated JSON
 
     ```
-    export SNIPPETS_BUILD_DIR="<path to build dir of workbench-snippets repo (no trailing /)>"
-    for name in py py_dataset r r_dataset; do
-      jq '.' "${SNIPPETS_BUILD_DIR}/${name}_snippets_menu_config.json" > \
-        "$(git rev-parse --show-toplevel)/api/cluster-resources/$(echo ${name} | tr '_' '-')-snippets-menu.json";
-    done
+    ./import_json_from_snippets_repo.sh <path to workbench-snippets repo>
     ```
 1. Commit changes and go through normal pull request process.
 1. Wait for a release; note that changes are only visible for clusters started
