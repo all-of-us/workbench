@@ -18,7 +18,7 @@ import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -50,7 +50,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserDao userDao;
-  private final UserService userService;
+  private final UserServiceImpl userService;
 
   @Autowired
   public AuthInterceptor(
@@ -58,7 +58,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserDao userDao,
-      UserService userService) {
+      UserServiceImpl userService) {
     this.userInfoService = userInfoService;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;

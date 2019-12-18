@@ -29,7 +29,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -89,7 +89,7 @@ public class ClusterControllerTest {
   private static DbUser user = new DbUser();
 
   @TestConfiguration
-  @Import({ClusterController.class, UserService.class})
+  @Import({ClusterController.class, UserServiceImpl.class})
   @MockBean({
     FireCloudService.class,
     LeonardoNotebooksClient.class,

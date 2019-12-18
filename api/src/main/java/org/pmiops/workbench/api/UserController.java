@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -38,7 +38,7 @@ public class UserController implements UserApiDelegate {
 
   private Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> configProvider;
-  private final UserService userService;
+  private final UserServiceImpl userService;
   private final FireCloudService fireCloudService;
 
   @Autowired
@@ -46,7 +46,7 @@ public class UserController implements UserApiDelegate {
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> configProvider,
       FireCloudService fireCloudService,
-      UserService userService) {
+      UserServiceImpl userService) {
     this.userProvider = userProvider;
     this.configProvider = configProvider;
     this.userService = userService;

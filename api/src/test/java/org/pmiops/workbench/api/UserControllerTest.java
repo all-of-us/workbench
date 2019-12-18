@@ -21,7 +21,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -55,7 +55,7 @@ public class UserControllerTest {
   private static long incrementedUserId = 1;
 
   @TestConfiguration
-  @Import({UserController.class, UserService.class})
+  @Import({UserController.class, UserServiceImpl.class})
   @MockBean({
     FireCloudService.class,
     ComplianceService.class,

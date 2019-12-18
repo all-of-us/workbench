@@ -57,7 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
  * ensuring we call a single updateDataAccessLevel method whenever a User entry is saved.
  */
 @Service
-public class UserService {
+public class UserServiceImpl {
 
   private final int MAX_RETRIES = 3;
   private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
@@ -73,10 +73,10 @@ public class UserService {
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
   private final UserServiceAuditor userServiceAuditAdapter;
-  private static final Logger log = Logger.getLogger(UserService.class.getName());
+  private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
   @Autowired
-  public UserService(
+  public UserServiceImpl(
       Provider<DbUser> userProvider,
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
