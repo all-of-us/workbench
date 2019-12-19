@@ -19,19 +19,19 @@ public class StatusAlertController implements StatusAlertApiDelegate {
 
   @Override
   public ResponseEntity<StatusAlert> getStatusAlert() {
-    Optional<DbStatusAlert> dbStatusAlertOptional = statusAlertDao.findFirstByOrderByStatusAlertIdDesc();
+    Optional<DbStatusAlert> dbStatusAlertOptional =
+        statusAlertDao.findFirstByOrderByStatusAlertIdDesc();
     if (dbStatusAlertOptional.isPresent()) {
       DbStatusAlert dbStatusAlert = dbStatusAlertOptional.get();
-      StatusAlert statusAlert = new StatusAlert()
-          .statusAlertId(dbStatusAlert.getStatusAlertId())
-          .title(dbStatusAlert.getTitle())
-          .message(dbStatusAlert.getMessage())
-          .link(dbStatusAlert.getLink());
+      StatusAlert statusAlert =
+          new StatusAlert()
+              .statusAlertId(dbStatusAlert.getStatusAlertId())
+              .title(dbStatusAlert.getTitle())
+              .message(dbStatusAlert.getMessage())
+              .link(dbStatusAlert.getLink());
       return ResponseEntity.ok(statusAlert);
-    }
-    else {
+    } else {
       return ResponseEntity.noContent().build();
     }
   }
-
 }

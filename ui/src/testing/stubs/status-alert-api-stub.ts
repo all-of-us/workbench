@@ -1,4 +1,4 @@
-import {StatusAlertApi, StatusAlert} from 'generated/fetch';
+import {StatusAlert, StatusAlertApi} from 'generated/fetch';
 
 export class StatusAlertApiStub extends StatusAlertApi {
 

@@ -3,9 +3,8 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
-import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {cookiesEnabled, reactStyles} from 'app/utils';
+import {reactStyles} from 'app/utils';
 
 const styles = reactStyles({
   alertBanner: {

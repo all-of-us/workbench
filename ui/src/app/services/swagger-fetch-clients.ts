@@ -36,8 +36,8 @@ import {
   FeaturedWorkspacesConfigApi,
   FetchAPI, // internal
   ProfileApi,
-  StatusApi,
   StatusAlertApi,
+  StatusApi,
   UserApi,
   UserMetricsApi,
   WorkspacesApi,
