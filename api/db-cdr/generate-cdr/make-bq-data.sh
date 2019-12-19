@@ -79,7 +79,7 @@ cb_cri_anc_table_check=\\bcb_criteria_ancestor\\b
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
-create_tables=(concept concept_relationship cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor domain_info survey_module domain vocabulary concept_synonym domain_vocabulary_info)
+create_tables=(concept concept_relationship cb_criteria cb_criteria_attribute cb_criteria_relationship cb_criteria_ancestor domain_info survey_module domain vocabulary concept_synonym)
 
 for t in "${create_tables[@]}"
 do
@@ -368,121 +368,50 @@ and co1.measurement_source_concept_id != 21
 group by co1.measurement_source_concept_id) as r
 where r.concept_id = c.concept_id"
 
-# We're using *_ext tables to limit the count of people that have EHR specific data. This a an effort to exclude PPI related data.
-# PPI specific data is counted in the survey_module table. The only time the *_ext tables should be absent is in the synthetic datasets.
-if [[ "$tables" == *"_ext"* ]]; then
-    # Set participant counts for Condition concept
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
-    set c.count_value = r.count from
-    (select count(distinct person_id) as count
-    from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` co
-    join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on co.condition_concept_id = c.concept_id
-    join \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence_ext\` mc on co.condition_occurrence_id = mc.condition_occurrence_id
-    where c.vocabulary_id != 'PPI'
-    and mc.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence_ext\` where src_id like '%EHR%')) as r
-    where c.concept_id = 19"
+# Set participant counts for Condition domain
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
+set c.count_value = r.count from
+(select count(distinct person_id) as count
+from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` co
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on co.condition_concept_id = c.concept_id) as r
+where c.concept_id = 19"
 
-    # Set participant counts for Measurement domain
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
-    set c.count_value = r.count from
-    (select count(distinct person_id) as count
-    from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
-    join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on m.measurement_concept_id = c.concept_id
-    join \`$BQ_PROJECT.$BQ_DATASET.measurement_ext\` mm on m.measurement_id = mm.measurement_id
-    where c.vocabulary_id != 'PPI'
-    and mm.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.measurement_ext\` where src_id like '%EHR%')) as r
-    where c.concept_id = 21"
+# Set participant counts for Measurement domain
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
+set c.count_value = r.count from
+(select count(distinct person_id) as count
+from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on m.measurement_concept_id = c.concept_id) as r
+where c.concept_id = 21"
 
-    # Set participant counts for Procedure domain
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
-    set c.count_value = r.count from
-    (select count(distinct person_id) as count
-    from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po
-    join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on po.procedure_concept_id = c.concept_id
-    join \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence_ext\` pm on po.procedure_occurrence_id = pm.procedure_occurrence_id
-    where c.vocabulary_id != 'PPI'
-    and pm.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence_ext\` where src_id like '%EHR%')) as r
-    where c.concept_id = 10"
+# Set participant counts for Procedure domain
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
+set c.count_value = r.count from
+(select count(distinct person_id) as count
+from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on po.procedure_concept_id = c.concept_id) as r
+where c.concept_id = 10"
 
-    # Set participant counts for Drug domain
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
-    set c.count_value = r.count from
-    (select count(distinct person_id) as count
-    from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` de
-    join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on de.drug_concept_id = c.concept_id
-    join \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` md on de.drug_exposure_id = md.drug_exposure_id
-    where c.vocabulary_id != 'PPI'
-    and md.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure_ext\` where src_id like '%EHR%')) as r
-    where c.concept_id = 13"
+# Set participant counts for Drug domain
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
+set c.count_value = r.count from
+(select count(distinct person_id) as count
+from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` de
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on de.drug_concept_id = c.concept_id) as r
+where c.concept_id = 13"
 
-    # Set participant counts for Observation domain
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
-    set c.count_value = r.count from
-    (select count(distinct person_id) as count
-    from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
-    join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on o.observation_concept_id = c.concept_id
-    join \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` od on o.observation_id = od.observation_id
-    where c.vocabulary_id != 'PPI'
-    and od.src_id in (select distinct src_id from \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` where src_id like '%EHR%')) as r
-    where c.concept_id = 27"
-else
-    # Set participant counts for Condition domain
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
-    set c.count_value = r.count from
-    (select count(distinct person_id) as count
-    from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` co
-    join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on co.condition_concept_id = c.concept_id
-    where c.vocabulary_id != 'PPI') as r
-    where c.concept_id = 19"
-
-    # Set participant counts for Measurement domain
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
-    set c.count_value = r.count from
-    (select count(distinct person_id) as count
-    from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m
-    join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on m.measurement_concept_id = c.concept_id
-    where c.vocabulary_id != 'PPI'
-    and m.measurement_concept_id not in (3036277,903118,903115,3025315,903135,903136,903126,903111,42528957)) as r
-    where c.concept_id = 21"
-
-    # Set participant counts for Procedure domain
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
-    set c.count_value = r.count from
-    (select count(distinct person_id) as count
-    from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po
-    join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on po.procedure_concept_id = c.concept_id
-    where c.vocabulary_id != 'PPI'
-    and c.concept_id not in (3036277,903133,903118,903115,3025315,903121,903135,903136,903126,903111,42528957,903120)) as r
-    where c.concept_id = 10"
-
-    # Set participant counts for Drug domain
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
-    set c.count_value = r.count from
-    (select count(distinct person_id) as count
-    from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` de
-    join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on de.drug_concept_id = c.concept_id
-    where c.vocabulary_id != 'PPI') as r
-    where c.concept_id = 13"
-
-    # Set participant counts for Observation domain
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-    "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
-    set c.count_value = r.count from
-    (select count(distinct person_id) as count
-    from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
-    join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on o.observation_concept_id = c.concept_id
-    where c.vocabulary_id != 'PPI') as r
-    where c.concept_id = 27"
-fi
+# Set participant counts for Observation domain
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
+set c.count_value = r.count from
+(select count(distinct person_id) as count
+from \`$BQ_PROJECT.$BQ_DATASET.observation\` o
+join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on o.observation_concept_id = c.concept_id) as r
+where c.concept_id = 27"
 
 #Concept prevalence (based on count value and not on source count value)
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -652,18 +581,3 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
  (id, concept_id, concept_synonym_name)
 SELECT 0, c.concept_id, c.concept_synonym_name
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\` c"
-
-###########################
-# Domain_Vocabulary_Info #
-###########################
-echo "Updating all concept count in domain_vocabulary_info"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_vocabulary_info\`
-(domain_id,vocabulary_id,all_concept_count,standard_concept_count)
-select d2.domain_id as domain_id,c.vocabulary_id as vocabulary_id, COUNT(DISTINCT c.concept_id) as all_concept_count,
-COUNT(DISTINCT CASE WHEN c.standard_concept IN ('S', 'C') THEN c.concept_id ELSE NULL END) as standard_concept_count from
-\`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
-join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain\` d2
-on d2.domain_id = c.domain_id
-and (c.count_value > 0 or c.source_count_value > 0)
-group by d2.domain_id,c.vocabulary_id"
