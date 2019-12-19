@@ -17,13 +17,26 @@ function formatCounts(concept: any) {
 }
 
 const styles = reactStyles({
+  datatable: {
+    border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
+    borderBottomLeftRadius: '3px',
+    borderBottomRightRadius: '3px',
+    marginBottom: '1rem'
+  },
+  headerStyle: {
+    color: colors.primary,
+    textAlign: 'left',
+    border: 0,
+  },
   colStyle: {
+    color: colors.primary,
     lineHeight: '0.5rem',
-    textAlign: 'center'
+    border: 0,
+    borderTop: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`
   },
   akaText: {
-    minWidth: '170px',
-    maxWidth: '170px',
+    minWidth: '150px',
+    maxWidth: '150px',
     fontStyle: 'italic',
     color: colors.primary
   },
@@ -61,7 +74,7 @@ export class SynonymsObject extends React.Component<{}, SynonymsObjectState> {
 
   render() {
     const {seeMore, willOverflow} = this.state;
-    return <div style={{display: 'flex'}}>
+    return <div style={{display: 'flex', paddingLeft: '2rem'}}>
       <div style={styles.akaText}>
         Also Known As:
         <TooltipTrigger
@@ -78,8 +91,7 @@ export class SynonymsObject extends React.Component<{}, SynonymsObjectState> {
       </div>
       <div style={{
         textOverflow: seeMore ? 'auto' : 'hidden',
-        minWidth: '810px',
-        maxWidth: '810px',
+        width: `calc(100% - ${willOverflow ? '250' : '180'}px)`,
         fontSize: '12px',
         height: seeMore ? 'auto' : '1rem',
         overflow: seeMore ? 'auto' : 'hidden'
@@ -231,25 +243,42 @@ export class ConceptTable extends React.Component<Props, State> {
     const {selectedConcepts, tableRef} = this.state;
     const {placeholderValue, loading, reactKey} = this.props;
     return <div data-test-id='conceptTable' key={reactKey} style={{position: 'relative', minHeight: '10rem'}}>
-      {loading ? <SpinnerOverlay /> : <DataTable ref={tableRef} emptyMessage={loading ? '' : placeholderValue}
-                 header={this.selectAllHeader()} value={this.props.concepts} scrollable={true}
-                 selection={selectedConcepts} style={{minWidth: 1100}}
-                 totalRecords={this.state.totalRecords}
-                 expandedRows={this.props.concepts
-                   .filter(concept => concept.conceptSynonyms.length > 0)}
-                 rowExpansionTemplate={(data) => this.rowExpansionTemplate(data)}
-                 paginator={true} rows={ROWS_TO_DISPLAY}
-                 data-test-id='conceptRow'
-                 onValueChange={(value) => this.onPageChange()}
-                 onSelectionChange={e => this.updateSelectedConceptList(e.value, 'table')} >
-      <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
-              data-test-id='conceptCheckBox' selectionMode='multiple'/>
-      <Column bodyStyle={styles.colStyle} field='conceptName' header='Name'
-              data-test-id='conceptName'/>
-      <Column bodyStyle={styles.colStyle} field='conceptCode' header='Code'/>
-      <Column field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle} />
-      <Column style={styles.colStyle} field='countValue' header='Count'/>
-    </DataTable>}
+      <style>
+        {`
+          body .p-datatable .p-datatable-tbody > tr:nth-child(even),
+          body .p-datatable .p-datatable-tbody > .p-datatable-row.p-highlight {
+            background: ${colors.white};
+          }
+          body .p-datatable .p-datatable-tbody > tr:not(.p-datatable-row) > td {
+            border: 0;
+          }
+          body .p-datatable > .p-paginator {
+            background: ${colors.white};
+            border: 0;
+            color: ${colors.primary};
+          }
+        `}
+        </style>
+        {loading ? <SpinnerOverlay /> : <DataTable ref={tableRef} emptyMessage={loading ? '' : placeholderValue}
+                                                   style={styles.datatable}
+                                                   header={this.selectAllHeader()} value={this.props.concepts} scrollable={true}
+                                                   selection={selectedConcepts}
+                                                   totalRecords={this.state.totalRecords}
+                                                   expandedRows={this.props.concepts
+                                                     .filter(concept => concept.conceptSynonyms.length > 0)}
+                                                   rowExpansionTemplate={(data) => this.rowExpansionTemplate(data)}
+                                                   paginator={true} rows={ROWS_TO_DISPLAY}
+                                                   data-test-id='conceptRow'
+                                                   onValueChange={(value) => this.onPageChange()}
+                                                   onSelectionChange={e => this.updateSelectedConceptList(e.value, 'table')} >
+            <Column bodyStyle={{...styles.colStyle, textAlign: 'center'}} headerStyle={{...styles.headerStyle, textAlign: 'center', width: '2rem'}}
+                    data-test-id='conceptCheckBox' selectionMode='multiple' />
+            <Column bodyStyle={styles.colStyle} headerStyle={styles.headerStyle} field='conceptName' header='Name'
+                    data-test-id='conceptName'/>
+            <Column bodyStyle={styles.colStyle} headerStyle={styles.headerStyle} field='conceptCode' header='Code' className='divider'/>
+            <Column headerStyle={styles.headerStyle} field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle}  className='divider'/>
+            <Column style={styles.colStyle} headerStyle={styles.headerStyle} field='countValue' header='Count' className='divider'/>
+          </DataTable>}
     </div>;
   }
 }

@@ -56,8 +56,8 @@ const styles = reactStyles({
     height: '4px', width: '100%', backgroundColor: colors.accent, border: 'none'
   },
   conceptCounts: {
-    backgroundColor: colors.white, height: '2rem', border: `1px solid ${colors.dark}`,
-    marginTop: '-1px', paddingLeft: '0.5rem', display: 'flex',
+    backgroundColor: colors.white, height: '2rem', border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`, borderBottom: 0,
+    borderTopLeftRadius: '3px', borderTopRightRadius: '3px', marginTop: '-1px', paddingLeft: '0.5rem', display: 'flex',
     justifyContent: 'flex-start', lineHeight: '15px', fontWeight: 600, fontSize: '14px',
     color: colors.primary, alignItems: 'center'
   },
