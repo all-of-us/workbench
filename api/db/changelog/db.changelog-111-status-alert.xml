@@ -7,10 +7,13 @@
   <changeSet author="aschwart" id="changelog-111-status-alert">
     <createTable tableName="status_alert">
       <column name="status_alert_id" type="bigint" autoIncrement="true">
+        <constraints nullable="false"/>
       </column>
       <column name="title" type="varchar(200)">
+        <constraints nullable="false"/>
       </column>
       <column name="message" type="varchar(4000)">
+        <constraints nullable="false"/>
       </column>
       <column name="link" type="varchar(200)"/>
     </createTable>
