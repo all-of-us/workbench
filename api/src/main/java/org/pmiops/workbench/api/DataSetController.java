@@ -73,6 +73,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.MarkDataSetRequest;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -94,8 +95,6 @@ public class DataSetController implements DataSetApiDelegate {
   private static int NO_OF_PREVIEW_ROWS = 20;
   // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
   private static long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000l;
-  private static String CONCEPT_SET = "conceptSet";
-  private static String COHORT = "cohort";
 
   private static final String DATE_FORMAT_STRING = "yyyy/MM/dd HH:mm:ss";
   public static final String EMPTY_CELL_MARKER = "";
@@ -551,9 +550,9 @@ public class DataSetController implements DataSetApiDelegate {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     List<DbDataset> dbDataSetList = new ArrayList<>();
-    if (markDataSetRequest.getResourceType().equalsIgnoreCase(COHORT)) {
+    if (ResourceType.COHORT.equals(markDataSetRequest.getResourceType())) {
       dbDataSetList = dataSetDao.findDataSetsByCohortIds(markDataSetRequest.getId());
-    } else if (markDataSetRequest.getResourceType().equalsIgnoreCase(CONCEPT_SET)) {
+    } else if (ResourceType.CONCEPT_SET.equals(markDataSetRequest.getResourceType())) {
       dbDataSetList = dataSetDao.findDataSetsByConceptSetIds(markDataSetRequest.getId());
     }
     dbDataSetList =
@@ -628,14 +627,14 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DataSetListResponse> getDataSetByResourceId(
-      String workspaceNamespace, String workspaceId, String resourceType, Long id) {
+      String workspaceNamespace, String workspaceId, ResourceType resourceType, Long id) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    List<DbDataset> dbDataSets = new ArrayList<DbDataset>();
-    if (resourceType.equals(COHORT)) {
+    List<DbDataset> dbDataSets = new ArrayList<>();
+    if (ResourceType.COHORT.equals(resourceType)) {
       dbDataSets = dataSetDao.findDataSetsByCohortIds(id);
-    } else if (resourceType.equals(CONCEPT_SET)) {
+    } else if (ResourceType.CONCEPT_SET.equals(resourceType)) {
       dbDataSets = dataSetDao.findDataSetsByConceptSetIds(id);
     }
     DataSetListResponse dataSetResponse =
