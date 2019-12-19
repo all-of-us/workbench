@@ -122,9 +122,12 @@ paths:
       responses:
         200:
           description: >
-            A list of status alert information, which will be empty if there are no alerts.
+            A status alert information object.
           schema:
-            $ref: "#/definitions/StatusAlertResponse"
+            $ref: "#/definitions/StatusAlert"
+        204:
+          description: >
+            There are no status alerts at this point in time.
 
     # User methods ########################################################################
 
@@ -3819,11 +3822,6 @@ definitions:
           Current size of the billing buffer, i.e. the number of projects ready to be claimed.
         type: integer
         format: int64
-
-  StatusAlertResponse:
-    type: array
-    items:
-      $ref: "#/definitions/StatusAlert"
 
   StatusAlert:
     type: object

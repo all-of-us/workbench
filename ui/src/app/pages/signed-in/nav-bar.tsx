@@ -4,8 +4,9 @@ import {ClrIcon} from 'app/components/icons';
 import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {cookiesEnabled, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import * as React from 'react';
+import {statusAlertApi} from "../../services/swagger-fetch-clients";
 
 const styles = reactStyles({
   headerContainer: {
@@ -78,6 +79,13 @@ export interface Props {
 
 export interface State {
   sideNavVisible: boolean;
+  statusAlertVisible: boolean;
+  statusAlertDetails: {
+    statusAlertId: number;
+    title: string;
+    message: string;
+    link: string;
+  };
   barsTransform: string;
   hovering: boolean;
   wrapperRef: React.RefObject<HTMLDivElement>;
@@ -86,37 +94,60 @@ export interface State {
 const barsTransformNotRotated = 'rotate(0deg)';
 const barsTransformRotated = 'rotate(90deg)';
 
+const cookieKey = 'status-alert-banner-dismissed';
+
 export const NavBar = withUserProfile()(
   class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
       // Bind the this context - this will be passed down into the actual
-      // sidenav so clicks on it can close the nav
+      // sidenav / alert banner so clicks on it can close the modal
       this.onToggleSideNav = this.onToggleSideNav.bind(this);
       this.handleClickOutside = this.handleClickOutside.bind(this);
+      this.handleStatusAlertBannerUnmount = this.handleStatusAlertBannerUnmount.bind(this);
       this.state = {
         sideNavVisible: false,
+        statusAlertVisible: false,
+        statusAlertDetails: {
+          statusAlertId: 0,
+          title: '',
+          message: '',
+          link: '',
+        },
         barsTransform: barsTransformNotRotated,
         hovering: false,
         wrapperRef: React.createRef(),
       };
     }
 
-    onToggleSideNav() {
-      this.setState(previousState => ({sideNavVisible: !previousState.sideNavVisible}));
-      this.setState(previousState => ({
-        barsTransform: previousState.barsTransform === barsTransformNotRotated
-          ? barsTransformRotated
-          : barsTransformNotRotated
-      }));
-    }
-
-    componentDidMount() {
+    async componentDidMount() {
       document.addEventListener('click', this.handleClickOutside);
+      const statusAlert = await statusAlertApi().getStatusAlert();
+      const statusAlertVisible = this.statusAlertVisible(statusAlert.statusAlertId, statusAlert.message);
+      if (!!statusAlert) {
+        this.setState({
+          statusAlertVisible: statusAlertVisible,
+          statusAlertDetails: {
+            statusAlertId: statusAlert.statusAlertId,
+            title: statusAlert.title,
+            message: statusAlert.message,
+            link: statusAlert.link
+          }
+        });
+      }
     }
 
     componentWillUnmount() {
       document.removeEventListener('click', this.handleClickOutside);
+    }
+
+    onToggleSideNav() {
+      this.setState(previousState => ({sideNavVisible: !previousState.sideNavVisible}));
+      this.setState(previousState => ({
+        barsTransform: previousState.barsTransform === barsTransformNotRotated
+            ? barsTransformRotated
+            : barsTransformNotRotated
+      }));
     }
 
     handleClickOutside(event) {
@@ -127,6 +158,22 @@ export const NavBar = withUserProfile()(
       ) {
         this.onToggleSideNav();
       }
+    }
+
+    statusAlertVisible(statusAlertId, statusAlertMessage) {
+      if (cookiesEnabled()) {
+        const cookie = localStorage.getItem(cookieKey);
+        return (!cookie || (cookie && cookie !== `${statusAlertId}`)) && !!statusAlertMessage;
+      } else {
+        return !!statusAlertMessage;
+      }
+    }
+
+    handleStatusAlertBannerUnmount() {
+      if (cookiesEnabled()) {
+        localStorage.setItem(cookieKey, `${this.state.statusAlertDetails.statusAlertId}`);
+      }
+      this.setState({statusAlertVisible: false});
     }
 
     render() {
@@ -166,7 +213,15 @@ export const NavBar = withUserProfile()(
           }
         </div>
         <Breadcrumb/>
-        <StatusAlertBanner/>
+        {
+          this.state.statusAlertVisible && <StatusAlertBanner
+              statusAlertId={this.state.statusAlertDetails.statusAlertId}
+              title={this.state.statusAlertDetails.title}
+              message={this.state.statusAlertDetails.message}
+              link={this.state.statusAlertDetails.link}
+              onClose={this.handleStatusAlertBannerUnmount}
+          />
+        }
         {
           this.state.sideNavVisible
           && <SideNav

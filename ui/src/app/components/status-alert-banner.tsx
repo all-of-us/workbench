@@ -5,9 +5,9 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {cookiesEnabled} from 'app/utils';
+import {cookiesEnabled, reactStyles} from 'app/utils';
 
-const styles = {
+const styles = reactStyles({
   alertBanner: {
     backgroundColor: colorWithWhiteness(colors.highlight, .5),
     color: colors.primary,
@@ -19,81 +19,32 @@ const styles = {
     position: 'absolute',
     top: '0',
     right: '0',
-    zIndex: '1',
+    zIndex: 1,
   }
-};
+});
 
-const cookieKey = 'status-alert-banner-dismissed';
 
-export interface State {
+
+export interface Props {
   statusAlertId: number;
   title: string;
   message: string;
   link: string;
-  isVisible: boolean;
+  onClose: Function;
 }
 
-export class StatusAlertBanner extends React.Component<{}, State> {
+export class StatusAlertBanner extends React.Component<Props, {}> {
   constructor(props) {
     super(props);
-    this.state = {
-      statusAlertId: 0,
-      title: '',
-      message: '',
-      link: '',
-      isVisible: false
-    };
-  }
-
-  async componentDidMount() {
-    const statusAlerts = await statusAlertApi().getStatusAlert();
-    if (statusAlerts.length > 0) {
-      // There should be either one or zero alerts.
-      const statusAlert = statusAlerts[0];
-      this.setState({
-        statusAlertId: statusAlert.statusAlertId,
-        title: statusAlert.title,
-        message: statusAlert.message,
-        link: statusAlert.link
-      });
-      // This needs to happen separately so that the other state is already set in isVisible()
-      this.setState({
-        isVisible: this.isVisible()
-      });
-    }
-  }
-
-  getStyles(isVisible) {
-    if (isVisible) {
-      return {...styles.alertBanner, height: '200px'};
-    } else {
-      return {...styles.alertBanner, height: '0px'};
-    }
   }
 
   navigateToLink(link) {
     window.open(link, '_blank');
   }
 
-  dismiss() {
-    if (cookiesEnabled()) {
-      localStorage.setItem(cookieKey, `${this.state.statusAlertId}`);
-    }
-    this.setState({isVisible: false});
-  }
-
-  isVisible() {
-    if (cookiesEnabled()) {
-      const cookie = localStorage.getItem(cookieKey);
-      return (cookie && cookie !== `${this.state.statusAlertId}`) || !!this.state.message;
-    } else {
-      return !!this.state.message;
-    }
-  }
-
   render() {
-    const {title, message, link, isVisible} = this.state;
-    return isVisible && <FlexColumn style={this.getStyles(isVisible)}>
+    const {title, message, link} = this.props;
+    return <FlexColumn style={styles.alertBanner}>
       <FlexRow style={{width: '100%'}}>
         <ClrIcon
             shape={'warning-standard'}
@@ -116,7 +67,7 @@ export class StatusAlertBanner extends React.Component<{}, State> {
             shape={'times'}
             size={20}
             style={{marginLeft: 'auto', flex: '0 0 auto'}}
-            onClick={() => this.dismiss()}
+            onClick={() => this.props.onClose()}
         />
       </FlexRow>
       <div>{message}</div>

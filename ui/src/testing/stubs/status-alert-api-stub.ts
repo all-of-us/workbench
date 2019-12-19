@@ -1,4 +1,4 @@
-import {StatusAlertApi, StatusAlertResponse} from 'generated/fetch';
+import {StatusAlertApi, StatusAlert} from 'generated/fetch';
 
 export class StatusAlertApiStub extends StatusAlertApi {
 
@@ -8,14 +8,14 @@ export class StatusAlertApiStub extends StatusAlertApi {
     });
   }
 
-  public getStatusAlert(): Promise<StatusAlertResponse> {
+  public getStatusAlert(): Promise<StatusAlert> {
     const statusAlertStub = {
       statusAlertId: 1,
       title: 'lol',
       message: 'lol lol lol',
       link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
     };
-    return new Promise<StatusAlertResponse>(resolve => resolve([statusAlertStub]));
+    return new Promise<StatusAlert>(resolve => resolve(statusAlertStub));
   }
 
 }
