@@ -127,6 +127,52 @@ export const CheckBox = ({onChange, ...props}) => {
   />;
 };
 
+interface LabeledCheckboxProps {
+  initialValue: boolean;
+  disabled: boolean;
+  onChange: Function;
+  style: object;
+  checkboxStyle: object;
+  labelStyle: object;
+  label: string;
+}
+
+interface LabeledCheckboxState {
+  value: boolean;
+}
+
+export class LabeledCheckBox extends React.Component<LabeledCheckboxProps, LabeledCheckboxState> {
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      value: props.initialValue
+    }
+  }
+
+  toggleValue() {
+    if(!this.props.disabled) {
+      this.setState(previousState => ({value: !previousState.value}))
+    }
+  }
+
+  render() {
+    return <div style={this.props.style}>
+      <CheckBox
+          style={{...this.props.checkboxStyle, verticalAlign: 'middle'}}
+          checked={this.state.value}
+          disabled={this.props.disabled}
+          onChange={e => this.props.onChange(e)}
+      />
+      <label
+          style={this.props.labelStyle}
+          onClick={() => this.toggleValue()}
+      >
+        {this.props.label}
+      </label>
+    </div>;
+  }
+};
+
 export const Select = ({value, options, onChange, ...props}) => {
   return <RSelect
     value={options.find(o => o.value === value)}
