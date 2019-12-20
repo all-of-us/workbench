@@ -31,7 +31,7 @@ public class StatusAlertController implements StatusAlertApiDelegate {
               .link(dbStatusAlert.getLink());
       return ResponseEntity.ok(statusAlert);
     } else {
-      return ResponseEntity.noContent().build();
+      return ResponseEntity.ok(new StatusAlert());
     }
   }
 }
