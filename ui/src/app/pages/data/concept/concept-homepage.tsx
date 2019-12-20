@@ -148,16 +148,6 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
       </DomainCardBase>;
     };
 
-// Stub used to mock Physical Measurements data that will be returned from api call. TODO remove when api call is ready
-const physicalMeasurementsStub = {
-  domain: Domain.MEASUREMENT,
-  name: 'Physical Measurements',
-  description: 'Participants have the option to provide a standard set of physical measurements as part of the enrollment process (“program physical measurements”).',
-  allConceptCount: 0,
-  participantCount: 0,
-  standardConceptCount: 0
-};
-
 // Stub used to display placeholder tabs in concept search
 const conceptCacheStub = [
   {
