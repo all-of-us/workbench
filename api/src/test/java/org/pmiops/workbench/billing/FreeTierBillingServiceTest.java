@@ -16,11 +16,9 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.TableResult;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
+import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,28 +53,17 @@ public class FreeTierBillingServiceTest {
   private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.001;
 
   @Autowired BigQueryService bigQueryService;
-
   @Autowired FreeTierBillingService freeTierBillingService;
-
-  @Autowired UserDao userDao;
-
   @Autowired NotificationService notificationService;
 
+  @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
-
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
   private static WorkbenchConfig workbenchConfig;
 
-  // the relevant portion of the BigQuery response for the single-project tests:
-  //
-  //  {
-  //    "id": "aou-test-f1-26",
-  //    "cost": "372.1294129999994"
-  //  }
-
-  private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-f1-26";
-  private static final double SINGLE_WORKSPACE_TEST_COST = 372.1294129999994;
+  private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
+  private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
 
   @TestConfiguration
   @Import({FreeTierBillingService.class})
@@ -91,354 +78,8 @@ public class FreeTierBillingServiceTest {
   }
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-
-    // returns the contents of resources/bigquery/get_billing_project_costs.json
-    InputStream inputStream =
-        getClass().getClassLoader().getResourceAsStream("bigquery/get_billing_project_costs.ser");
-    TableResult tableResult = (TableResult) (new ObjectInputStream(inputStream)).readObject();
-
-    doReturn(tableResult).when(bigQueryService).executeQuery(any());
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_singleProjectExceedsLimit() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-
-    DbUser user = createUser("test@test.com");
-    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUser(eq(user), any());
-
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_disabledUserNotIgnored() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-
-    DbUser user = createUser("test@test.com");
-    user.setDisabled(true);
-    userDao.save(user);
-    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUser(eq(user), any());
-
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_deletedWorkspaceNotIgnored() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-
-    DbUser user = createUser("test@test.com");
-    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-    workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
-    workspaceDao.save(workspace);
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUser(eq(user), any());
-
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_noAlert() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 500.0;
-
-    DbUser user = createUser("test@test.com");
-    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
-
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_workspaceMissingCreator() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 500.0;
-
-    DbUser user = createUser("test@test.com");
-    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-    createWorkspace(null, "rumney");
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
-
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_override() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 10.0;
-
-    DbUser user = createUser("test@test.com");
-    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUser(eq(user), any());
-
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
-
-    user.setFreeTierCreditsLimitDollarsOverride(1000.0);
-    userDao.save(user);
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verifyZeroInteractions(notificationService);
-
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE);
-  }
-
-  // the relevant portion of the BigQuery response for this test:
-  //
-  //  {
-  //    "id": "aou-test-f1-47",
-  //    "cost": "397.5191679999987"
-  //  },
-  //  {
-  //    "id": "aou-test-f1-26",
-  //    "cost": "372.1294129999994"
-  //  }
-
-  @Test
-  public void checkFreeTierBillingUsage_combinedProjectsExceedsLimit() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 500.0;
-
-    DbUser user = createUser("test@test.com");
-    DbWorkspace ws1 = createWorkspace(user, "aou-test-f1-26");
-    DbWorkspace ws2 = createWorkspace(user, "aou-test-f1-47");
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUser(eq(user), any());
-
-    Map<Long, Double> expectedCosts = new HashMap<>();
-    expectedCosts.put(ws1.getWorkspaceId(), 372.1294129999994);
-    expectedCosts.put(ws2.getWorkspaceId(), 397.5191679999987);
-
-    assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(2);
-
-    for (DbWorkspace ws : Arrays.asList(ws1, ws2)) {
-      // retrieve from DB again to reflect update after cron
-      DbWorkspace dbWorkspace = workspaceDao.findOne(ws.getWorkspaceId());
-      assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
-      assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
-
-      DbWorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(ws);
-      assertThat(usage.getUser()).isEqualTo(user);
-      assertThat(usage.getWorkspace()).isEqualTo(ws);
-
-      assertWithinBillingTolerance(usage.getCost(), expectedCosts.get(ws.getWorkspaceId()));
-    }
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_twoUsers() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-
-    DbUser user1 = createUser("test@test.com");
-    DbWorkspace ws1 = createWorkspace(user1, "aou-test-f1-26");
-    DbUser user2 = createUser("more@test.com");
-    DbWorkspace ws2 = createWorkspace(user2, "aou-test-f1-47");
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUser(eq(user1), any());
-    verify(notificationService).alertUser(eq(user2), any());
-
-    Map<Long, Double> expectedCosts = new HashMap<>();
-    expectedCosts.put(ws1.getWorkspaceId(), 372.1294129999994);
-    expectedCosts.put(ws2.getWorkspaceId(), 397.5191679999987);
-
-    assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(2);
-
-    for (DbWorkspace ws : Arrays.asList(ws1, ws2)) {
-      // retrieve from DB again to reflect update after cron
-      DbWorkspace dbWorkspace = workspaceDao.findOne(ws.getWorkspaceId());
-      assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
-      assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
-
-      DbWorkspaceFreeTierUsage usage = workspaceFreeTierUsageDao.findOneByWorkspace(ws);
-      assertThat(usage.getUser()).isEqualTo(ws.getCreator());
-      assertThat(usage.getWorkspace()).isEqualTo(ws);
-      assertWithinBillingTolerance(usage.getCost(), expectedCosts.get(ws.getWorkspaceId()));
-    }
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_ignoreOLDMigrationStatus() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-
-    DbUser user = createUser("test@test.com");
-    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT, BillingMigrationStatus.OLD);
-    freeTierBillingService.checkFreeTierBillingUsage();
-
-    verifyZeroInteractions(notificationService);
-    assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(0);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_ignoreMIGRATEDMigrationStatus() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-
-    DbUser user = createUser("test@test.com");
-    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT, BillingMigrationStatus.MIGRATED);
-    freeTierBillingService.checkFreeTierBillingUsage();
-
-    verifyZeroInteractions(notificationService);
-    assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(0);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_dbUpdate() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-
-    DbUser user = createUser("test@test.com");
-    DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService).alertUser(eq(user), any());
-    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE);
-
-    Timestamp t0 = workspaceFreeTierUsageDao.findAll().iterator().next().getLastUpdateTime();
-
-    // time elapses, and this project incurs additional cost
-
-    Map<String, Double> newCosts = new HashMap<>();
-    newCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, SINGLE_WORKSPACE_TEST_COST * 2);
-    doReturn(mockBQTableResult(newCosts)).when(bigQueryService).executeQuery(any());
-
-    // we alert again, and the cost field is updated in the DB
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    verify(notificationService, times(2)).alertUser(eq(user), any());
-
-    // retrieve from DB again to reflect update after cron
-    DbWorkspace dbWorkspace = workspaceDao.findOne(workspace.getWorkspaceId());
-    assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
-    assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
-
-    assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(1);
-    DbWorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
-    assertThat(dbEntry.getUser()).isEqualTo(user);
-    assertThat(dbEntry.getWorkspace()).isEqualTo(workspace);
-    assertWithinBillingTolerance(dbEntry.getCost(), SINGLE_WORKSPACE_TEST_COST * 2.0);
-    Timestamp t1 = dbEntry.getLastUpdateTime();
-    assertThat(t1.after(t0)).isTrue();
-  }
-
-  @Test
-  public void getUserFreeTierDollarLimit_default() {
-    DbUser user = createUser("test@test.com");
-    final double initialFreeCreditsDollarLimit = 1.0;
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = initialFreeCreditsDollarLimit;
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserFreeTierDollarLimit(user), initialFreeCreditsDollarLimit);
-
-    final double fractionalFreeCreditsDollarLimit = 123.456;
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = fractionalFreeCreditsDollarLimit;
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserFreeTierDollarLimit(user), fractionalFreeCreditsDollarLimit);
-  }
-
-  @Test
-  public void getUserFreeTierDollarLimit_override() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 123.456;
-
-    DbUser user = createUser("test@test.com");
-
-    final double freeTierCreditsDollarLimitOverride = 100.0;
-    user.setFreeTierCreditsLimitDollarsOverride(freeTierCreditsDollarLimitOverride);
-    user = userDao.save(user);
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserFreeTierDollarLimit(user),
-        freeTierCreditsDollarLimitOverride);
-
-    final double doubleFreeTierCreditsDollarLimitOverrideNew = 200.0;
-    user.setFreeTierCreditsLimitDollarsOverride(doubleFreeTierCreditsDollarLimitOverrideNew);
-    user = userDao.save(user);
-
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserFreeTierDollarLimit(user),
-        doubleFreeTierCreditsDollarLimitOverrideNew);
-  }
-
-  @Test
-  public void getUserFreeTierDaysLimit_default() {
-    DbUser user = createUser("test@test.com");
-    final short initialFreeCreditsDaysLimit = 1;
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = initialFreeCreditsDaysLimit;
-    assertThat(freeTierBillingService.getUserFreeTierDaysLimit(user))
-        .isEqualTo(initialFreeCreditsDaysLimit);
-
-    final short freeCreditsDaysLimitNew = 100;
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = freeCreditsDaysLimitNew;
-    assertThat(freeTierBillingService.getUserFreeTierDaysLimit(user))
-        .isEqualTo(freeCreditsDaysLimitNew);
-  }
-
-  @Test
-  public void getUserFreeTierDaysLimit_override() {
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = 123;
-
-    DbUser user = createUser("test@test.com");
-
-    final short freeTierCreditsDaysLimitOverride = 100;
-    user.setFreeTierCreditsLimitDaysOverride(freeTierCreditsDaysLimitOverride);
-    user = userDao.save(user);
-    assertThat(freeTierBillingService.getUserFreeTierDaysLimit(user))
-        .isEqualTo(freeTierCreditsDaysLimitOverride);
-
-    final short freeTierCreditsDaysLimitNew = 200;
-    user.setFreeTierCreditsLimitDaysOverride(freeTierCreditsDaysLimitNew);
-    user = userDao.save(user);
-
-    assertThat(freeTierBillingService.getUserFreeTierDaysLimit(user))
-        .isEqualTo(freeTierCreditsDaysLimitNew);
-  }
-
-  @Test
-  public void getUserCachedFreeTierUsage() {
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
-
-    DbUser user = createUser("test@test.com");
-    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    // we have not yet had a chance to cache this usage
-    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user)).isNull();
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserCachedFreeTierUsage(user), SINGLE_WORKSPACE_TEST_COST);
-
-    createWorkspace(user, "another project");
-    Map<String, Double> newCosts = new HashMap<>();
-    newCosts.put("another project", 100.0);
-    newCosts.put(SINGLE_WORKSPACE_TEST_PROJECT, 1000.0);
-    doReturn(mockBQTableResult(newCosts)).when(bigQueryService).executeQuery(any());
-
-    // we have not yet cached the new workspace costs
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserCachedFreeTierUsage(user), SINGLE_WORKSPACE_TEST_COST);
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-    final double expectedTotalCachedFreeTierUsage = 1100.0;
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserCachedFreeTierUsage(user), expectedTotalCachedFreeTierUsage);
-
-    final double user2Costs = 999.0;
-    DbUser user2 = createUser("another user");
-    createWorkspace(user2, "project 3");
-    newCosts.put("project 3", user2Costs);
-    doReturn(mockBQTableResult(newCosts)).when(bigQueryService).executeQuery(any());
-
-    freeTierBillingService.checkFreeTierBillingUsage();
-
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserCachedFreeTierUsage(user), expectedTotalCachedFreeTierUsage);
-    assertWithinBillingTolerance(
-        freeTierBillingService.getUserCachedFreeTierUsage(user2), user2Costs);
   }
 
   private TableResult mockBQTableResult(Map<String, Double> costMap) {
@@ -459,8 +100,371 @@ public class FreeTierBillingServiceTest {
     return new TableResult(s, tableRows.size(), new PageImpl<>(() -> null, null, tableRows));
   }
 
+  private TableResult mockBQTableSingleResult(final Double cost) {
+    return mockBQTableResult(ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, cost));
+  }
+
+  @Test
+  public void checkFreeTierBillingUsage_singleProjectExceedsLimit() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(notificationService).alertUser(eq(user), any());
+
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
+  }
+
+  @Test
+  public void checkFreeTierBillingUsage_disabledUserNotIgnored() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    user.setDisabled(true);
+    userDao.save(user);
+    final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(notificationService).alertUser(eq(user), any());
+
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
+  }
+
+  @Test
+  public void checkFreeTierBillingUsage_deletedWorkspaceNotIgnored() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+    workspaceDao.save(workspace);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(notificationService).alertUser(eq(user), any());
+
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
+  }
+
+  @Test
+  public void checkFreeTierBillingUsage_noAlert() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(99.99)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verifyZeroInteractions(notificationService);
+
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 99.99);
+  }
+
+  @Test
+  public void checkFreeTierBillingUsage_workspaceMissingCreatorNoNPE() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(99.99)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    createWorkspace(null, "rumney");
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verifyZeroInteractions(notificationService);
+
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 99.99);
+  }
+
+  @Test
+  public void checkFreeTierBillingUsage_override() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(notificationService).alertUser(eq(user), any());
+
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
+
+    user.setFreeTierCreditsLimitDollarsOverride(200.0);
+    userDao.save(user);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verifyZeroInteractions(notificationService);
+
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.ACTIVE, 100.01);
+  }
+
+  @Test
+  public void checkFreeTierBillingUsage_combinedProjectsExceedsLimit() {
+    final String ns1 = "namespace-1";
+    final String ns2 = "namespace-2";
+    final double cost1 = 123.45;
+    final double cost2 = 234.56;
+    final double sum = cost1 + cost2;
+
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = sum - 0.01;
+
+    doReturn(mockBQTableResult(ImmutableMap.of(ns1, cost1, ns2, cost2)))
+        .when(bigQueryService)
+        .executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    final DbWorkspace ws1 = createWorkspace(user, ns1);
+    final DbWorkspace ws2 = createWorkspace(user, ns2);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(notificationService).alertUser(eq(user), any());
+    assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(2);
+
+    // confirm DB updates after checkFreeTierBillingUsage()
+
+    for (DbWorkspace ws : Arrays.asList(ws1, ws2)) {
+      // retrieve from DB again to reflect update after cron
+      DbWorkspace dbWorkspace = workspaceDao.findOne(ws.getWorkspaceId());
+      assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
+      assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
+    }
+
+    final DbWorkspaceFreeTierUsage usage1 = workspaceFreeTierUsageDao.findOneByWorkspace(ws1);
+    assertThat(usage1.getUser()).isEqualTo(user);
+    assertWithinBillingTolerance(usage1.getCost(), cost1);
+
+    final DbWorkspaceFreeTierUsage usage2 = workspaceFreeTierUsageDao.findOneByWorkspace(ws2);
+    assertThat(usage2.getUser()).isEqualTo(user);
+    assertWithinBillingTolerance(usage2.getCost(), cost2);
+  }
+
+  @Test
+  public void checkFreeTierBillingUsage_twoUsers() {
+    final String ns1 = "namespace-1";
+    final String ns2 = "namespace-2";
+    final double cost1 = 123.45;
+    final double cost2 = 234.56;
+
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = Math.min(cost1, cost2) - 0.01;
+
+    doReturn(mockBQTableResult(ImmutableMap.of(ns1, cost1, ns2, cost2)))
+        .when(bigQueryService)
+        .executeQuery(any());
+
+    DbUser user1 = createUser(SINGLE_WORKSPACE_TEST_USER);
+    DbWorkspace ws1 = createWorkspace(user1, ns1);
+    DbUser user2 = createUser("more@test.com");
+    DbWorkspace ws2 = createWorkspace(user2, ns2);
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(notificationService).alertUser(eq(user1), any());
+    verify(notificationService).alertUser(eq(user2), any());
+
+    assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(2);
+
+    // confirm DB updates after checkFreeTierBillingUsage()
+
+    final DbWorkspace dbWorkspace1 = workspaceDao.findOne(ws1.getWorkspaceId());
+    assertThat(dbWorkspace1.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
+    assertThat(dbWorkspace1.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
+
+    final DbWorkspaceFreeTierUsage usage1 = workspaceFreeTierUsageDao.findOneByWorkspace(ws1);
+    assertThat(usage1.getUser()).isEqualTo(user1);
+    assertWithinBillingTolerance(usage1.getCost(), cost1);
+
+    final DbWorkspace dbWorkspace2 = workspaceDao.findOne(ws2.getWorkspaceId());
+    assertThat(dbWorkspace2.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
+    assertThat(dbWorkspace2.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
+
+    final DbWorkspaceFreeTierUsage usage2 = workspaceFreeTierUsageDao.findOneByWorkspace(ws2);
+    assertThat(usage2.getUser()).isEqualTo(user2);
+    assertWithinBillingTolerance(usage2.getCost(), cost2);
+  }
+
+  @Test
+  public void checkFreeTierBillingUsage_ignoreOLDMigrationStatus() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT, BillingMigrationStatus.OLD);
+    freeTierBillingService.checkFreeTierBillingUsage();
+
+    verifyZeroInteractions(notificationService);
+    assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(0);
+  }
+
+  @Test
+  public void checkFreeTierBillingUsage_ignoreMIGRATEDMigrationStatus() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT, BillingMigrationStatus.MIGRATED);
+    freeTierBillingService.checkFreeTierBillingUsage();
+
+    verifyZeroInteractions(notificationService);
+    assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(0);
+  }
+
+  @Test
+  public void checkFreeTierBillingUsage_dbUpdate() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(notificationService).alertUser(eq(user), any());
+    assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.01);
+
+    Timestamp t0 = workspaceFreeTierUsageDao.findAll().iterator().next().getLastUpdateTime();
+
+    // time elapses, and this project incurs additional cost
+
+    doReturn(mockBQTableSingleResult(123.45)).when(bigQueryService).executeQuery(any());
+
+    // we alert again, and the cost field is updated in the DB
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(notificationService, times(2)).alertUser(eq(user), any());
+
+    // retrieve from DB again to reflect update after cron
+    DbWorkspace dbWorkspace = workspaceDao.findOne(workspace.getWorkspaceId());
+    assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
+    assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
+
+    assertThat(workspaceFreeTierUsageDao.count()).isEqualTo(1);
+    DbWorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
+    assertThat(dbEntry.getUser()).isEqualTo(user);
+    assertThat(dbEntry.getWorkspace()).isEqualTo(workspace);
+    assertWithinBillingTolerance(dbEntry.getCost(), 123.45);
+    Timestamp t1 = dbEntry.getLastUpdateTime();
+    assertThat(t1.after(t0)).isTrue();
+  }
+
+  @Test
+  public void getUserFreeTierDollarLimit_default() {
+    DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    final double initialFreeCreditsDollarLimit = 1.0;
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = initialFreeCreditsDollarLimit;
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserFreeTierDollarLimit(user), initialFreeCreditsDollarLimit);
+
+    final double fractionalFreeCreditsDollarLimit = 123.456;
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = fractionalFreeCreditsDollarLimit;
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserFreeTierDollarLimit(user), fractionalFreeCreditsDollarLimit);
+  }
+
+  @Test
+  public void getUserFreeTierDollarLimit_override() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 123.456;
+
+    DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+
+    final double freeTierCreditsDollarLimitOverride = 100.0;
+    user.setFreeTierCreditsLimitDollarsOverride(freeTierCreditsDollarLimitOverride);
+    user = userDao.save(user);
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserFreeTierDollarLimit(user),
+        freeTierCreditsDollarLimitOverride);
+
+    final double doubleFreeTierCreditsDollarLimitOverrideNew = 200.0;
+    user.setFreeTierCreditsLimitDollarsOverride(doubleFreeTierCreditsDollarLimitOverrideNew);
+    user = userDao.save(user);
+
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserFreeTierDollarLimit(user),
+        doubleFreeTierCreditsDollarLimitOverrideNew);
+  }
+
+  @Test
+  public void getUserFreeTierDaysLimit_default() {
+    DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    final short initialFreeCreditsDaysLimit = 1;
+    workbenchConfig.billing.defaultFreeCreditsDaysLimit = initialFreeCreditsDaysLimit;
+    assertThat(freeTierBillingService.getUserFreeTierDaysLimit(user))
+        .isEqualTo(initialFreeCreditsDaysLimit);
+
+    final short freeCreditsDaysLimitNew = 100;
+    workbenchConfig.billing.defaultFreeCreditsDaysLimit = freeCreditsDaysLimitNew;
+    assertThat(freeTierBillingService.getUserFreeTierDaysLimit(user))
+        .isEqualTo(freeCreditsDaysLimitNew);
+  }
+
+  @Test
+  public void getUserFreeTierDaysLimit_override() {
+    workbenchConfig.billing.defaultFreeCreditsDaysLimit = 123;
+
+    DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+
+    final short freeTierCreditsDaysLimitOverride = 100;
+    user.setFreeTierCreditsLimitDaysOverride(freeTierCreditsDaysLimitOverride);
+    user = userDao.save(user);
+    assertThat(freeTierBillingService.getUserFreeTierDaysLimit(user))
+        .isEqualTo(freeTierCreditsDaysLimitOverride);
+
+    final short freeTierCreditsDaysLimitNew = 200;
+    user.setFreeTierCreditsLimitDaysOverride(freeTierCreditsDaysLimitNew);
+    user = userDao.save(user);
+
+    assertThat(freeTierBillingService.getUserFreeTierDaysLimit(user))
+        .isEqualTo(freeTierCreditsDaysLimitNew);
+  }
+
+  @Test
+  public void getUserCachedFreeTierUsage() {
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
+    doReturn(mockBQTableSingleResult(100.01)).when(bigQueryService).executeQuery(any());
+
+    final DbUser user1 = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user1, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    // we have not yet had a chance to cache this usage
+    assertThat(freeTierBillingService.getUserCachedFreeTierUsage(user1)).isNull();
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+
+    assertWithinBillingTolerance(freeTierBillingService.getUserCachedFreeTierUsage(user1), 100.01);
+
+    createWorkspace(user1, "another project");
+
+    doReturn(
+            mockBQTableResult(
+                ImmutableMap.of(SINGLE_WORKSPACE_TEST_PROJECT, 1000.0, "another project", 100.0)))
+        .when(bigQueryService)
+        .executeQuery(any());
+
+    // we have not yet cached the new workspace costs
+    assertWithinBillingTolerance(freeTierBillingService.getUserCachedFreeTierUsage(user1), 100.01);
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+    final double expectedTotalCachedFreeTierUsage = 1100.01;
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
+
+    final double user2Costs = 999.0;
+    final DbUser user2 = createUser("another user");
+    createWorkspace(user2, "project 3");
+
+    doReturn(mockBQTableResult(ImmutableMap.of("project 3", user2Costs)))
+        .when(bigQueryService)
+        .executeQuery(any());
+
+    freeTierBillingService.checkFreeTierBillingUsage();
+
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserCachedFreeTierUsage(user1), expectedTotalCachedFreeTierUsage);
+    assertWithinBillingTolerance(
+        freeTierBillingService.getUserCachedFreeTierUsage(user2), user2Costs);
+  }
+
   private void assertSingleWorkspaceTestDbState(
-      DbUser user, DbWorkspace workspaceForQuerying, BillingStatus billingStatus) {
+      DbUser user, DbWorkspace workspaceForQuerying, BillingStatus billingStatus, double cost) {
 
     final DbWorkspace workspace = workspaceDao.findOne(workspaceForQuerying.getWorkspaceId());
     assertThat(workspace.getBillingStatus()).isEqualTo(billingStatus);
@@ -470,7 +474,7 @@ public class FreeTierBillingServiceTest {
     final DbWorkspaceFreeTierUsage dbEntry = workspaceFreeTierUsageDao.findAll().iterator().next();
     assertThat(dbEntry.getUser()).isEqualTo(user);
     assertThat(dbEntry.getWorkspace()).isEqualTo(workspace);
-    assertWithinBillingTolerance(dbEntry.getCost(), SINGLE_WORKSPACE_TEST_COST);
+    assertWithinBillingTolerance(dbEntry.getCost(), cost);
   }
 
   private DbUser createUser(String email) {
