@@ -303,6 +303,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     renderWorkspaceMenu() {
       const {deleteFunction, shareFunction, workspace, workspace: {accessLevel, id, namespace}} = this.props;
       const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
+      const tooltip = isNotOwner && 'Requires owner permission';
       return <PopupTrigger
         side='bottom'
         closeOnClick
@@ -319,7 +320,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
             </MenuItem>
             <MenuItem
               icon='pencil'
-              tooltip={isNotOwner && 'Requires owner permission'}
+              tooltip={tooltip}
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenEditPage();
@@ -329,7 +330,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
             </MenuItem>
             <MenuItem
               icon='share'
-              tooltip={isNotOwner && 'Requires owner permission'}
+              tooltip={tooltip}
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenShareModal();
@@ -339,7 +340,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
             </MenuItem>
             <MenuItem
               icon='trash'
-              tooltip={isNotOwner && 'Requires owner permission'}
+              tooltip={tooltip}
               disabled={isNotOwner}
               onClick={() => {
                 AnalyticsTracker.Workspaces.OpenDeleteModal();
