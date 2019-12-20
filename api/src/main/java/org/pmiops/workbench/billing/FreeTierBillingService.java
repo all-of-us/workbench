@@ -201,7 +201,8 @@ public class FreeTierBillingService {
    * @param remainingDollarBalance The remaining dollar balance to this user, for reporting purposes
    * @param currentCheckTime a fixed time common to all checks of this run, for comparison purposes
    */
-  private void maybeAlertOnTimeThresholds(DbUser user, double remainingDollarBalance, Instant currentCheckTime) {
+  private void maybeAlertOnTimeThresholds(
+      DbUser user, double remainingDollarBalance, Instant currentCheckTime) {
     final Instant userFreeCreditStartTime = user.getFirstRegistrationCompletionTime().toInstant();
 
     final Instant previousCheckTime =
