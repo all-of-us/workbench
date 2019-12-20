@@ -2,6 +2,7 @@ package org.pmiops.workbench.billing;
 
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.common.collect.Sets;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
@@ -17,7 +18,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.elasticsearch.common.util.set.Sets;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -61,14 +61,18 @@ public class FreeTierBillingService {
     this.workbenchConfigProvider = workbenchConfigProvider;
 
     this.alertThresholdsInDescOrder = new ArrayList<>();
+    initAlertThresholds();
+  }
+
+  private void initAlertThresholds() {
     this.alertThresholdsInDescOrder.add(0.5);
     this.alertThresholdsInDescOrder.add(0.75);
     this.alertThresholdsInDescOrder.sort(Comparator.reverseOrder());
   }
 
   /**
-   * Check whether users have incurred sufficient cost or time in their workspaces to trigger
-   * alerts due to passing thresholds or exceeding limits
+   * Check whether users have incurred sufficient cost or time in their workspaces to trigger alerts
+   * due to passing thresholds or exceeding limits
    */
   public void checkFreeTierBillingUsage() {
     // retrieve the costs stored in the DB from the last time this was run
@@ -94,32 +98,39 @@ public class FreeTierBillingService {
 
     final Set<DbUser> previouslyExpiredUsers = getExpiredUsersFromDb();
 
-    final Set<DbUser> currentCostExpiredUsers = userCosts.entrySet().stream()
-        .filter(
-            entry -> {
-              final DbUser u = entry.getKey();
-              final double currentCost = entry.getValue();
-              return currentCost > getUserFreeTierDollarLimit(u);
-            })
-        .map(Map.Entry::getKey)
-        .collect(Collectors.toSet());
+    final Set<DbUser> currentCostExpiredUsers =
+        userCosts.entrySet().stream()
+            .filter(
+                entry -> {
+                  final DbUser u = entry.getKey();
+                  final double currentCost = entry.getValue();
+                  return currentCost > getUserFreeTierDollarLimit(u);
+                })
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toSet());
 
     // freeze this value, for later consistency
     final Instant expirationCheckTime = Instant.now();
 
     final Set<DbUser> usersToTimeCheck = userDao.findByFirstRegistrationCompletionTimeNotNull();
 
-    final Set<DbUser> currentTimeExpiredUsers = usersToTimeCheck.stream()
-        .filter(
-            u -> {
-              final Instant userFreeCreditStartTime = u.getFirstRegistrationCompletionTime().toInstant();
-              final Duration userFreeCreditDays = Duration.ofDays(getUserFreeTierDaysLimit(u));
-              final Instant userFreeCreditExpirationTime = userFreeCreditStartTime.plus(userFreeCreditDays);
-              return expirationCheckTime.isAfter(userFreeCreditExpirationTime);
-            })
-        .collect(Collectors.toSet());
+    final Set<DbUser> currentTimeExpiredUsers =
+        usersToTimeCheck.stream()
+            .filter(
+                u -> {
+                  final Instant userFreeCreditStartTime =
+                      u.getFirstRegistrationCompletionTime().toInstant();
+                  final Duration userFreeCreditDays = Duration.ofDays(getUserFreeTierDaysLimit(u));
+                  final Instant userFreeCreditExpirationTime =
+                      userFreeCreditStartTime.plus(userFreeCreditDays);
+                  return expirationCheckTime.isAfter(userFreeCreditExpirationTime);
+                })
+            .collect(Collectors.toSet());
 
-    final Set<DbUser> currentExpiredUsers = Sets.union(currentCostExpiredUsers, currentTimeExpiredUsers);
+    final Set<DbUser> currentExpiredUsers =
+        Sets.union(currentCostExpiredUsers, currentTimeExpiredUsers);
+
+    // check for intermediate thresholds and alert, possibly for both cost and time
 
     userCosts.forEach(
         (user, currentCost) -> {
@@ -129,16 +140,23 @@ public class FreeTierBillingService {
           }
         });
 
-    usersToTimeCheck.forEach(
-        user -> {
-          if (!currentExpiredUsers.contains(user)) {
-            final double currentCost = userCosts.getOrDefault(user, 0.0);
-            final double remainingDollarBalance = getUserFreeTierDollarLimit(user) - currentCost;
-            maybeAlertOnTimeThresholds(user, remainingDollarBalance);
-          }
-        });
+    for (final DbUser user : usersToTimeCheck) {
+      if (!currentExpiredUsers.contains(user)) {
+        final double currentCost = userCosts.getOrDefault(user, 0.0);
+        final double remainingDollarBalance = getUserFreeTierDollarLimit(user) - currentCost;
+        maybeAlertOnTimeThresholds(user, remainingDollarBalance);
+      }
+    }
 
-    processExpiringUsers(Sets.difference(currentExpiredUsers, previouslyExpiredUsers));
+    // process newly-expiring users: alert and deactivate workspaces
+
+    for (final DbUser user : Sets.difference(currentExpiredUsers, previouslyExpiredUsers)) {
+      notificationService.alertUserFreeTierExpiration(user);
+      final Set<DbWorkspace> toDeactivate = workspaceDao.findAllByCreator(user);
+      for (final DbWorkspace workspace : toDeactivate) {
+        workspaceDao.updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
+      }
+    }
   }
 
   /**
@@ -176,8 +194,8 @@ public class FreeTierBillingService {
   /**
    * Has this user passed a time threshold between this check and the previous run?
    *
-   * <p>Compare this user's free credits timespan with that of the previous run, and trigger an alert if this
-   * is the run which pushed it over a threshold.
+   * <p>Compare this user's free credits timespan with that of the previous run, and trigger an
+   * alert if this is the run which pushed it over a threshold.
    *
    * @param user The user to check
    * @param remainingDollarBalance The remaining dollar balance to this user, for reporting purposes
@@ -222,16 +240,6 @@ public class FreeTierBillingService {
 
         // break out here to ensure we don't alert for lower thresholds
         break;
-      }
-    }
-  }
-
-  private void processExpiringUsers(Set<DbUser> expiringUsers) {
-    for (final DbUser user : expiringUsers) {
-      notificationService.alertUserFreeTierExpiration(user);
-      final List<DbWorkspace> toDeactivate = workspaceDao.findAllByCreator(user);
-      for (final DbWorkspace workspace : toDeactivate) {
-        workspaceDao.updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
       }
     }
   }

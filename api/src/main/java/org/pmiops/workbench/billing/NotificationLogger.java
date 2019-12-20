@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+// RW-3661: replace this file with an implementation which sends emails instead
+
 @Service
 public class NotificationLogger implements NotificationService {
 

@@ -369,8 +369,7 @@ public class FreeTierBillingServiceTest {
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService)
-        .alertUserFreeTierDollarThreshold(
-            eq(user), eq(0.5), eq(spent), eq(dollarBalance));
+        .alertUserFreeTierDollarThreshold(eq(user), eq(0.5), eq(spent), eq(dollarBalance));
     verify(notificationService)
         .alertUserFreeTierTimeThreshold(
             eq(user), eq(daysRemaining), eq(expirationDate), eq(dollarBalance));
@@ -457,12 +456,11 @@ public class FreeTierBillingServiceTest {
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService, times(1)).alertUserFreeTierExpiration(eq(user));
-    verify(notificationService, times(0)).alertUserFreeTierDollarThreshold(
-        eq(user), eq(0.5), eq(50.1), eq(49.9));
+    verify(notificationService, times(0))
+        .alertUserFreeTierDollarThreshold(eq(user), eq(0.5), eq(50.1), eq(49.9));
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 50.1);
   }
-
 
   @Test
   public void checkFreeTierBillingUsage_costExpirationAndTimeThreshold() {
@@ -491,8 +489,8 @@ public class FreeTierBillingServiceTest {
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService, times(1)).alertUserFreeTierExpiration(eq(user));
-    verify(notificationService, times(0)).alertUserFreeTierTimeThreshold(
-        eq(user), eq(daysRemaining), eq(expirationDate), eq(-0.01));
+    verify(notificationService, times(0))
+        .alertUserFreeTierTimeThreshold(eq(user), eq(daysRemaining), eq(expirationDate), eq(-0.01));
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.1);
   }
