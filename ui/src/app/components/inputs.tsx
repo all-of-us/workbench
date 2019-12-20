@@ -129,11 +129,11 @@ export const CheckBox = ({onChange, ...props}) => {
 
 interface LabeledCheckboxProps {
   initialValue: boolean;
-  disabled: boolean;
-  onChange: Function;
-  style: object;
-  checkboxStyle: object;
-  labelStyle: object;
+  disabled?: boolean;
+  onChange?: Function;
+  style?: object;
+  checkboxStyle?: object;
+  labelStyle?: object;
   label: string;
 }
 

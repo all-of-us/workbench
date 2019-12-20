@@ -817,7 +817,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                       labelStyle={styles.text}
                       label={i.label}
                       key={i.label}
-                      value={this.specificPopulationCheckboxSelected(i.object)}
+                      initialValue={this.specificPopulationCheckboxSelected(i.object)}
                       onChange={v => this.updateSpecificPopulation(i.object, v)}
                       disabled={!this.state.workspace.researchPurpose.population}
                   />
@@ -831,7 +831,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                       labelStyle={styles.text}
                       label={i.label}
                       key={i.label}
-                      value={this.specificPopulationCheckboxSelected(i.object)}
+                      initialValue={this.specificPopulationCheckboxSelected(i.object)}
                       onChange={v => this.updateSpecificPopulation(i.object, v)}
                       disabled={!this.state.workspace.researchPurpose.population}
                   />
@@ -841,7 +841,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                     checkboxStyle={styles.checkboxStyle}
                     labelStyle={styles.text}
                     label='Other'
-                    value={this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
+                    initialValue={this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
                     onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
                     disabled={!this.state.workspace.researchPurpose.population}
                 />
