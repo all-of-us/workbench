@@ -131,8 +131,8 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
 // Placeholder version of Physical Measurements card. TODO update styles when api call is ready
 const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: DomainInfo, browsePhysicalMeasurements: Function}> =
     ({physicalMeasurement, browsePhysicalMeasurements}) => {
-      return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem', opacity: 0.4, cursor: 'not-allowed'}}>
-        <Clickable style={{...styles.domainBoxHeader, cursor: 'not-allowed'}}
+      return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
+        <Clickable style={styles.domainBoxHeader}
           onClick={browsePhysicalMeasurements}
           data-test-id='pm-box-name'>{physicalMeasurement.name}</Clickable>
         <div style={styles.conceptText}>
@@ -142,30 +142,16 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
         <div style={{...styles.conceptText, height: 'auto'}}>
           {physicalMeasurement.description}
         </div>
-        <Clickable style={{...styles.domainBoxLink, cursor: 'not-allowed'}} onClick={browsePhysicalMeasurements}>
+        <Clickable style={styles.domainBoxLink} onClick={browsePhysicalMeasurements}>
           Browse Physical Measurements
         </Clickable>
       </DomainCardBase>;
     };
 
-// Stub used to mock Physical Measurements data that will be returned from api call. TODO remove when api call is ready
-const physicalMeasurementsStub = {
-  domain: Domain.MEASUREMENT,
-  name: 'Physical Measurements',
-  description: 'Participants have the option to provide a standard set of physical measurements as part of the enrollment process (“program physical measurements”).',
-  allConceptCount: 0,
-  participantCount: 0,
-  standardConceptCount: 0
-};
-
 // Stub used to display placeholder tabs in concept search
 const conceptCacheStub = [
   {
     domain: Domain.SURVEY,
-    items: []
-  },
-  {
-    domain: Domain.PHYSICALMEASUREMENT,
     items: []
   }
 ];
@@ -175,11 +161,6 @@ const domainCountStub = [
   {
     domain: Domain.SURVEY,
     name: 'Surveys',
-    conceptCount: 0
-  },
-  {
-    domain: Domain.PHYSICALMEASUREMENT,
-    name: 'Physical Measurements',
     conceptCount: 0
   }
 ];
@@ -293,14 +274,19 @@ export const ConceptHomepage = withCurrentWorkspace()(
         if (environment.enableNewConceptTabs) {
           conceptsCache = [...conceptsCache, ...conceptCacheStub];
           conceptDomainCounts = [...conceptDomainCounts, ...domainCountStub];
+        } else {
+          conceptsCache = conceptsCache.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
+          conceptDomainCounts = conceptDomainCounts.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
         }
+        console.log(conceptsCache);
+        console.log(conceptDomainCounts);
         this.setState({
           conceptsCache: conceptsCache,
-          conceptDomainList: conceptDomainInfo.items,
+          conceptDomainList: conceptDomainInfo.items.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT),
           conceptDomainCounts: conceptDomainCounts,
           conceptSurveysList: surveysInfo.items,
           selectedDomain: conceptDomainCounts[0],
-          conceptPhysicalMeasurementsList: [physicalMeasurementsStub]
+          conceptPhysicalMeasurementsList: conceptDomainInfo.items.filter(item => item.domain === Domain.PHYSICALMEASUREMENT),
         });
       } catch (e) {
         console.error(e);
@@ -357,9 +343,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
       const standardConceptFilter = standardConceptsOnly ?
         StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
       // TODO switch to empty array when we start actually searching surveys and PM
-      const completedDomainSearches = [Domain.SURVEY, Domain.PHYSICALMEASUREMENT];
+      const completedDomainSearches = [Domain.SURVEY];
       // TODO remove filter below when we start actually searching surveys and PM
-      conceptsCache.filter(item => ![Domain.SURVEY, Domain.PHYSICALMEASUREMENT].includes(item.domain)).forEach(async(cacheItem) => {
+      conceptsCache.filter(item => ![Domain.SURVEY].includes(item.domain)).forEach(async(cacheItem) => {
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
         const resp = await conceptsApi().searchConcepts(namespace, id, {
           query: currentSearchString,
@@ -372,9 +358,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
         cacheItem.items = resp.items;
         this.setState({completedDomainSearches: completedDomainSearches});
         if (activeTabSearch) {
+          const conceptDomainCounts = environment.enableNewConceptTabs ? [...resp.domainCounts, ...domainCountStub]
+            : resp.domainCounts.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
           this.setState({
             searchLoading: false,
-            conceptDomainCounts: [...resp.domainCounts, ...(environment.enableNewConceptTabs ? domainCountStub : [])],
+            conceptDomainCounts: conceptDomainCounts,
             selectedDomain: resp.domainCounts
               .find(domainCount => domainCount.domain === cacheItem.domain)});
           this.setConceptsAndVocabularies();
@@ -607,7 +595,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                     <div style={styles.cardList}>
                       {conceptPhysicalMeasurementsList.map((physicalMeasurement, p) => {
                         return <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement} key={p}
-                                           browsePhysicalMeasurements={() => {}}/>; // TODO replace with actual function when api call ready
+                                           browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurement)}/>;
                       })}
                     </div>
                   </React.Fragment>}

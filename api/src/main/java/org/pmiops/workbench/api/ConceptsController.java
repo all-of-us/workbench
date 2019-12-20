@@ -123,7 +123,8 @@ public class ConceptsController implements ConceptsApiDelegate {
       String workspaceNamespace, String workspaceId) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<DbSurveyModule> surveyModules = surveyModuleDao.findByOrderByOrderNumberAsc();
+    List<DbSurveyModule> surveyModules =
+        surveyModuleDao.findByParticipantCountNotOrderByOrderNumberAsc(0L);
 
     SurveysResponse response =
         new SurveysResponse()
