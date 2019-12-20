@@ -122,8 +122,6 @@ export class ResourceCard extends React.Component<Props, State> {
       return ResourceType.CONCEPT_SET;
     } else if (this.props.resourceCard.dataSet) {
       return ResourceType.DATA_SET;
-    } else {
-      return ResourceType.INVALID;
     }
   }
 

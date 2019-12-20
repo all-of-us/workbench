@@ -14,7 +14,6 @@ export enum ResourceType {
   COHORT_REVIEW = 'Cohort Review',
   CONCEPT_SET = 'Concept Set',
   DATA_SET = 'Dataset',
-  INVALID = 'Invalid',
   WORKSPACE = 'Workspace'
 }
 
@@ -30,8 +29,6 @@ export function toDisplay(resourceType: ResourceType): string {
       return 'Concept Set';
     case ResourceType.DATA_SET:
       return 'Dataset';
-    case ResourceType.INVALID:
-      return 'Invalid';
     case ResourceType.WORKSPACE:
       return 'Workspace';
   }
