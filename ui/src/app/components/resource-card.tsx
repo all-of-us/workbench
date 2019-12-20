@@ -9,7 +9,7 @@ import {TextModal} from 'app/components/text-modal';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {navigate, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActions';
+import {ResourceType, toDisplay} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {CopyModal} from 'app/components/copy-modal';
@@ -66,17 +66,16 @@ const styles = reactStyles({
   }
 });
 
-const resourceTypeStyles = reactStyles({
-  'Cohort Review': {
-    backgroundColor: colors.resourceCardHighlights.cohortReview
-  },
-  'Concept Set': {
-    backgroundColor: colors.resourceCardHighlights.conceptSet
-  },
-  'Dataset': {
-    backgroundColor: colors.resourceCardHighlights.dataSet
+const resourceTypeColor = (resourceType: ResourceType) => {
+  switch (resourceType) {
+    case ResourceType.COHORT_REVIEW:
+      return colors.resourceCardHighlights.cohortReview;
+    case ResourceType.CONCEPT_SET:
+      return colors.resourceCardHighlights.conceptSet;
+    case ResourceType.DATA_SET:
+      return colors.resourceCardHighlights.dataSet;
   }
-});
+}
 
 export interface Props {
   resourceCard: RecentResource;
@@ -216,7 +215,7 @@ export class ResourceCard extends React.Component<Props, State> {
         const dataSetList = await dataSetApi().getDataSetByResourceId(
           this.props.resourceCard.workspaceNamespace,
           this.props.resourceCard.workspaceFirecloudName,
-          this.resourceType, id);
+          this.resourceType, id); // TODO Eric: this will be fixed by swapping in the new enum type
         return dataSetList.items;
       } catch (ex) {
         console.log(ex);
@@ -371,7 +370,7 @@ export class ResourceCard extends React.Component<Props, State> {
         this.props.resourceCard.workspaceFirecloudName, {
           id: id,
           resourceType: this.resourceType
-        });
+        }); // TODO eric: this too
       this.receiveDelete();
     } catch (ex) {
       console.log(ex);
@@ -428,16 +427,16 @@ export class ResourceCard extends React.Component<Props, State> {
         <div style={styles.cardFooter}>
           <div style={styles.lastModified} data-test-id='last-modified'>
             Last Modified: {this.displayDate}</div>
-          <div style={{...styles.resourceType, ...resourceTypeStyles[this.resourceType]}}
+          <div style={{...styles.resourceType, ...{backgroundColor: resourceTypeColor(this.resourceType)}}}
                data-test-id='card-type'>
-            {this.resourceType}</div>
+            {toDisplay(this.resourceType)}</div>
         </div>
       </ResourceCardBase>
 
       {this.state.renaming && this.isCohortReview &&
         <RenameModal
           onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
-          type='Cohort Review'
+          type={ResourceType.COHORT_REVIEW}
           onCancel={() => this.cancelRename()}
           oldDescription={this.props.resourceCard.cohortReview.description}
           oldName={this.props.resourceCard.cohortReview.cohortName}
@@ -447,7 +446,7 @@ export class ResourceCard extends React.Component<Props, State> {
       {this.state.renaming && this.isConceptSet &&
         <RenameModal
           onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
-          type='Concept Set'
+          type={ResourceType.CONCEPT_SET}
           onCancel={() => this.cancelRename()}
           oldDescription={this.props.resourceCard.conceptSet.description}
           oldName={this.props.resourceCard.conceptSet.name}
@@ -468,7 +467,7 @@ export class ResourceCard extends React.Component<Props, State> {
             AnalyticsTracker.DatasetBuilder.Rename();
             this.receiveDataSetRename(newName, newDescription);
           }}
-          type='Dataset'
+          type={ResourceType.DATA_SET}
           onCancel={() => this.cancelRename()}
           oldDescription ={this.props.resourceCard.dataSet.description}
           oldName={this.props.resourceCard.dataSet.name}
@@ -487,14 +486,14 @@ export class ResourceCard extends React.Component<Props, State> {
         <ModalTitle>WARNING</ModalTitle>
         <ModalBody>
           <div style={{paddingBottom: '1rem'}}>
-            The {this.resourceType} <b>{fp.startCase(this.displayName)}&nbsp;</b>
+            The {toDisplay(this.resourceType)} <b>{fp.startCase(this.displayName)}&nbsp;</b>
             is referenced by the following datasets:
             <b>
               &nbsp;
               {fp.join(', ' ,
                 this.state.dataSetByResourceIdList.map((data) => data.name))}
             </b>.
-            Deleting the {this.resourceType}
+            Deleting the {toDisplay(this.resourceType)}
             <b>{fp.startCase(this.displayName)} </b> will make these datasets unavailable for use.
             Are you sure you want to delete <b>{fp.startCase(this.displayName)}</b> ?
           </div>

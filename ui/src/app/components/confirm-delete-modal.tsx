@@ -16,7 +16,7 @@ import {
 import {
   ReactWrapperBase
 } from 'app/utils';
-import {ResourceType} from 'app/utils/resourceActions';
+import {ResourceType, toDisplay} from 'app/utils/resourceActions';
 import * as React from 'react';
 
 export interface ConfirmDeleteModalProps {
@@ -47,12 +47,12 @@ export class ConfirmDeleteModal
     return <Modal loading={this.state.loading}>
         <ModalTitle style={{lineHeight: '28px'}}>
           Are you sure you want to
-          delete {this.props.resourceType}
+          delete {toDisplay(this.props.resourceType)}
           : {this.props.resourceName}?
         </ModalTitle>
         <ModalBody style={{marginTop: '0.2rem', lineHeight: '28.px'}}>
           This will permanently delete
-          the {this.props.resourceType}
+          the {toDisplay(this.props.resourceType)}
           {this.props.resourceType === ResourceType.COHORT &&
           <span> and all associated review sets</span>}.
         </ModalBody>
@@ -65,7 +65,7 @@ export class ConfirmDeleteModal
             style={{marginLeft: '0.5rem'}}
             data-test-id='confirm-delete'
             onClick={() => this.emitDelete()}>
-              Delete {this.props.resourceType}
+              Delete {toDisplay(this.props.resourceType)}
           </Button>
         </ModalFooter>
       </Modal>;

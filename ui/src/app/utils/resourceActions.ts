@@ -18,6 +18,25 @@ export enum ResourceType {
   WORKSPACE = 'Workspace'
 }
 
+export function toDisplay(resourceType: ResourceType): string {
+  switch (resourceType) {
+    case ResourceType.NOTEBOOK:
+      return 'Notebook';
+    case ResourceType.COHORT:
+      return 'Cohort';
+    case ResourceType.COHORT_REVIEW:
+      return 'Cohort Review';
+    case ResourceType.CONCEPT_SET:
+      return 'Concept Set';
+    case ResourceType.DATA_SET:
+      return 'Dataset';
+    case ResourceType.INVALID:
+      return 'Invalid';
+    case ResourceType.WORKSPACE:
+      return 'Workspace';
+  }
+}
+
 export function convertToResources(list: FileDetail[] | Cohort[] | CohortReview[] | ConceptSet[]
   | DataSet[], workspaceNamespace: string, workspaceId: string,
   accessLevel: WorkspaceAccessLevel,

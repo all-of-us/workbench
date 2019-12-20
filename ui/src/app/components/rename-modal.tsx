@@ -12,7 +12,7 @@ import {
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';
-import {ResourceType} from 'app/utils/resourceActions';
+import {ResourceType, toDisplay} from 'app/utils/resourceActions';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
@@ -34,8 +34,8 @@ const styles = reactStyles({
  *
  * Other AoU resource types do not have the same name restriction and only block slashes.
  */
-export const nameValidationFormat = (existingNames, type) =>
-  type === ResourceType.NOTEBOOK ?
+export const nameValidationFormat = (existingNames, resourceType: ResourceType) =>
+  resourceType === ResourceType.NOTEBOOK ?
     ({
       presence: {allowEmpty: false},
       format: {
@@ -69,7 +69,7 @@ interface Props {
   onCancel: Function;
   onRename: Function;
   nameFormat?: Function;
-  type: string;
+  type: ResourceType; //TODO eric: rename this to resourceType
 }
 
 interface States {
@@ -126,7 +126,7 @@ export class RenameModal extends React.Component<Props, States> {
                   disabled={!!errors || saving}
                   style={{marginLeft: '0.5rem'}}
                   onClick={() => this.onRename()}>
-            Rename {type}
+            Rename {toDisplay(type)}
           </Button>
         </TooltipTrigger>
       </ModalFooter>
