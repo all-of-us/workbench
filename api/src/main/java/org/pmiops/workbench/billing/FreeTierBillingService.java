@@ -144,7 +144,7 @@ public class FreeTierBillingService {
       if (!currentExpiredUsers.contains(user)) {
         final double currentCost = userCosts.getOrDefault(user, 0.0);
         final double remainingDollarBalance = getUserFreeTierDollarLimit(user) - currentCost;
-        maybeAlertOnTimeThresholds(user, remainingDollarBalance);
+        maybeAlertOnTimeThresholds(user, remainingDollarBalance, expirationCheckTime);
       }
     }
 
@@ -199,8 +199,9 @@ public class FreeTierBillingService {
    *
    * @param user The user to check
    * @param remainingDollarBalance The remaining dollar balance to this user, for reporting purposes
+   * @param currentCheckTime a fixed time common to all checks of this run, for comparison purposes
    */
-  private void maybeAlertOnTimeThresholds(DbUser user, double remainingDollarBalance) {
+  private void maybeAlertOnTimeThresholds(DbUser user, double remainingDollarBalance, Instant currentCheckTime) {
     final Instant userFreeCreditStartTime = user.getFirstRegistrationCompletionTime().toInstant();
 
     final Instant previousCheckTime =
@@ -208,8 +209,7 @@ public class FreeTierBillingService {
             .map(Timestamp::toInstant)
             .orElse(userFreeCreditStartTime);
 
-    // freeze current time for comparisons and save
-    final Instant currentCheckTime = Instant.now();
+    // save current check time
     user.setLastFreeTierCreditsTimeCheck(Timestamp.from(currentCheckTime));
     userDao.save(user);
 
