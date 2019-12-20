@@ -125,9 +125,6 @@ paths:
             A status alert information object.
           schema:
             $ref: "#/definitions/StatusAlert"
-        204:
-          description: >
-            There are no status alerts at this point in time.
 
     # User methods ########################################################################
 
