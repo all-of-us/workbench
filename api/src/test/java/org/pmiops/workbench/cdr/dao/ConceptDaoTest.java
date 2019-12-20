@@ -13,6 +13,10 @@ import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DomainType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -64,10 +68,19 @@ public class ConceptDaoTest {
   }
 
   @Test
-  public void findAll() throws Exception {
+  public void findAll() {
     List<DbConcept> concepts = (List<DbConcept>) conceptDao.findAll();
     assertEquals(2, concepts.size());
     assertTrue(concepts.contains(concept1));
+    assertTrue(concepts.contains(concept2));
+  }
+
+  @Test
+  public void findStandardConcepts() {
+    Pageable page = new PageRequest(0, 100, new Sort(Direction.DESC, "countValue"));
+    List<DbConcept> concepts =
+        conceptDao.findStandardConcepts("history", DomainType.CONDITION.toString(), page);
+    assertEquals(1, concepts.size());
     assertTrue(concepts.contains(concept2));
   }
 }
