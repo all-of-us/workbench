@@ -10,8 +10,8 @@ import colors from 'app/styles/colors';
 import {formatRecentResourceDisplayDate} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {encodeURIComponentStrict} from 'app/utils/navigation';
-import {ResourceType, toDisplay} from 'app/utils/resourceActions';
-import {CopyRequest, RecentResource} from 'generated/fetch';
+import {toDisplay} from 'app/utils/resourceActions';
+import {CopyRequest, RecentResource, ResourceType} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
 

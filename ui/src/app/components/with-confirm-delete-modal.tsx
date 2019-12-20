@@ -1,6 +1,6 @@
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
-import {ResourceType} from 'app/utils/resourceActions';
 import * as React from 'react';
+import {ResourceType} from "generated/fetch";
 
 interface State {
   show: boolean;

@@ -5,17 +5,9 @@ import {
   DataSet,
   FileDetail,
   RecentResource,
+  ResourceType,
   WorkspaceAccessLevel
 } from 'generated/fetch';
-
-export enum ResourceType {
-  NOTEBOOK = 'Notebook',
-  COHORT = 'Cohort',
-  COHORT_REVIEW = 'Cohort Review',
-  CONCEPT_SET = 'Concept Set',
-  DATA_SET = 'Dataset',
-  WORKSPACE = 'Workspace'
-}
 
 export function toDisplay(resourceType: ResourceType): string {
   switch (resourceType) {
@@ -23,11 +15,11 @@ export function toDisplay(resourceType: ResourceType): string {
       return 'Notebook';
     case ResourceType.COHORT:
       return 'Cohort';
-    case ResourceType.COHORT_REVIEW:
+    case ResourceType.COHORTREVIEW:
       return 'Cohort Review';
-    case ResourceType.CONCEPT_SET:
+    case ResourceType.CONCEPTSET:
       return 'Concept Set';
-    case ResourceType.DATA_SET:
+    case ResourceType.DATASET:
       return 'Dataset';
     case ResourceType.WORKSPACE:
       return 'Workspace';
@@ -66,11 +58,11 @@ export function convertToResource(resource: FileDetail | Cohort | CohortReview |
     newResource.notebook = <FileDetail>resource;
   } else if (resourceType === ResourceType.COHORT) {
     newResource.cohort = <Cohort>resource;
-  } else if (resourceType === ResourceType.COHORT_REVIEW) {
+  } else if (resourceType === ResourceType.COHORTREVIEW) {
     newResource.cohortReview = <CohortReview>resource;
-  } else if (resourceType === ResourceType.CONCEPT_SET) {
+  } else if (resourceType === ResourceType.CONCEPTSET) {
     newResource.conceptSet = <ConceptSet>resource;
-  } else if (resourceType === ResourceType.DATA_SET) {
+  } else if (resourceType === ResourceType.DATASET) {
     newResource.dataSet = <DataSet>resource;
   }
   return newResource;

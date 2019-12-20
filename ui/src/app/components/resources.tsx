@@ -5,7 +5,7 @@ import {SnowmanIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import {switchCase} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {ResourceType} from 'app/utils/resourceActions';
+import {ResourceType} from "generated/fetch";
 
 export interface ResourceCardMenuProps {
   resourceType: ResourceType;
@@ -26,7 +26,7 @@ export class ResourceCardMenu extends React.Component<ResourceCardMenuProps> {
       closeOnClick
       content={
         switchCase(this.props.resourceType,
-          [ResourceType.COHORT_REVIEW, () => {
+          [ResourceType.COHORTREVIEW, () => {
             return <React.Fragment>
               <MenuItem icon='note'
                         onClick={this.props.onRenameResource}
@@ -42,7 +42,7 @@ export class ResourceCardMenu extends React.Component<ResourceCardMenuProps> {
               </MenuItem>
             </React.Fragment>;
           }],
-          [ResourceType.CONCEPT_SET, () => {
+          [ResourceType.CONCEPTSET, () => {
             return <React.Fragment>
               <MenuItem icon='pencil'
                         onClick={this.props.onEdit}
@@ -63,7 +63,7 @@ export class ResourceCardMenu extends React.Component<ResourceCardMenuProps> {
               </MenuItem>
             </React.Fragment>;
           }],
-          [ResourceType.DATA_SET, () => {
+          [ResourceType.DATASET, () => {
             return <React.Fragment>
               <MenuItem icon='pencil'
                         onClick={() => {

@@ -12,9 +12,10 @@ import {
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';
-import {ResourceType, toDisplay} from 'app/utils/resourceActions';
+import {toDisplay} from 'app/utils/resourceActions';
 import * as React from 'react';
 import {validate} from 'validate.js';
+import {ResourceType} from "generated/fetch";
 
 const styles = reactStyles({
   fieldHeader: {

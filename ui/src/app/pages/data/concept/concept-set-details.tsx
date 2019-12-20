@@ -25,10 +25,9 @@ import {
   withUrlParams
 } from 'app/utils';
 import {currentConceptSetStore, navigate, navigateByUrl} from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {Concept, ConceptSet, CopyRequest, WorkspaceAccessLevel} from 'generated/fetch';
+import {Concept, ConceptSet, CopyRequest, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = reactStyles({
   conceptSetHeader: {
@@ -349,7 +348,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
           <ConfirmDeleteModal closeFunction={() => this.setState({deleting: false})}
                               receiveDelete={() => this.onDeleteConceptSet()}
                               resourceName={conceptSet.name}
-                              resourceType={ResourceType.CONCEPT_SET}/>}
+                              resourceType={ResourceType.CONCEPTSET}/>}
           {error && <Modal>
               <ModalTitle>Error: {errorMessage}</ModalTitle>
               <ModalFooter>
@@ -374,7 +373,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
             fromWorkspaceNamespace={workspace.namespace}
             fromWorkspaceName={workspace.id}
             fromResourceName={conceptSet.name}
-            resourceType={ResourceType.CONCEPT_SET}
+            resourceType={ResourceType.CONCEPTSET}
             onClose={() => this.setState({copying: false})}
             onCopy={() => this.onCopy()}
             saveFunction={(copyRequest: CopyRequest) => this.copyConceptSet(copyRequest)}/>
