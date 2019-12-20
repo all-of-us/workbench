@@ -142,7 +142,7 @@ interface LabeledCheckboxState {
   value: boolean;
 }
 
-export class LabeledCheckBox extends React.Component<LabeledCheckboxProps, LabeledCheckboxState> {
+export class LabeledCheckbox extends React.Component<LabeledCheckboxProps, LabeledCheckboxState> {
   constructor(props: any) {
     super(props);
     this.state = {

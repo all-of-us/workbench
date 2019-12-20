@@ -4,7 +4,7 @@ import {Button, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
-import {CheckBox, LabeledCheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
+import {CheckBox, LabeledCheckbox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
@@ -811,7 +811,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <FlexRow style={{flex: '1 1 0', marginTop: '0.5rem'}}>
               <FlexColumn>
                 {specificPopulations.slice(0, sliceByHalfLength(specificPopulations) + 1).map(i =>
-                  <LabeledCheckBox
+                  <LabeledCheckbox
                       style={styles.checkboxRow}
                       checkboxStyle={styles.checkboxStyle}
                       labelStyle={styles.text}
@@ -825,7 +825,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </FlexColumn>
               <FlexColumn>
                 {specificPopulations.slice(sliceByHalfLength(specificPopulations) + 1).map(i =>
-                  <LabeledCheckBox
+                  <LabeledCheckbox
                       style={styles.checkboxRow}
                       checkboxStyle={styles.checkboxStyle}
                       labelStyle={styles.text}
@@ -836,7 +836,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                       disabled={!this.state.workspace.researchPurpose.population}
                   />
                 )}
-                <LabeledCheckBox
+                <LabeledCheckbox
                     style={styles.checkboxRow}
                     checkboxStyle={styles.checkboxStyle}
                     labelStyle={styles.text}
