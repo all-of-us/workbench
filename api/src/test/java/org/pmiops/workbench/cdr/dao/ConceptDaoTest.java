@@ -83,4 +83,13 @@ public class ConceptDaoTest {
     assertEquals(1, concepts.size());
     assertTrue(concepts.contains(concept2));
   }
+
+  @Test
+  public void findSourceConcepts() {
+    Pageable page = new PageRequest(0, 100, new Sort(Direction.DESC, "countValue"));
+    List<DbConcept> concepts =
+        conceptDao.findSourceConcepts("history", DomainType.CONDITION.toString(), page);
+    assertEquals(1, concepts.size());
+    assertTrue(concepts.contains(concept1));
+  }
 }
