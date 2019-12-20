@@ -162,7 +162,13 @@ export class LabeledCheckbox extends React.Component<LabeledCheckboxProps, Label
           style={{...this.props.checkboxStyle, verticalAlign: 'middle'}}
           checked={this.state.value}
           disabled={this.props.disabled}
-          onChange={e => this.props.onChange(e)}
+          onChange={
+            e => {
+              if (this.props.onChange) {
+                this.props.onChange(e);
+              }
+            }
+          }
       />
       <label
           style={this.props.labelStyle}
