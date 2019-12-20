@@ -119,6 +119,7 @@ export const RadioButton = ({ onChange, ...props }) => {
   />;
 };
 
+
 export const CheckBox = ({onChange, ...props}) => {
   return <input
     type='checkbox'
@@ -146,12 +147,12 @@ export class LabeledCheckBox extends React.Component<LabeledCheckboxProps, Label
     super(props);
     this.state = {
       value: props.initialValue
-    }
+    };
   }
 
   toggleValue() {
-    if(!this.props.disabled) {
-      this.setState(previousState => ({value: !previousState.value}))
+    if (!this.props.disabled) {
+      this.setState(previousState => ({value: !previousState.value}));
     }
   }
 
@@ -171,7 +172,7 @@ export class LabeledCheckBox extends React.Component<LabeledCheckboxProps, Label
       </label>
     </div>;
   }
-};
+}
 
 export const Select = ({value, options, onChange, ...props}) => {
   return <RSelect
