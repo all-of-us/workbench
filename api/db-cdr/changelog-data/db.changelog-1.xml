@@ -16,7 +16,6 @@
 
     <delete tableName="domain_info"/>
     <delete tableName="survey_module"/>
-    <delete tableName="domain_vocabulary_info"/>
     <delete tableName="domain"/>
     <delete tableName="vocabulary"/>
     <delete tableName="concept"/>
@@ -35,14 +34,6 @@
       <column name="all_concept_count" type="NUMERIC"/>
       <column name="standard_concept_count" type="NUMERIC"/>
       <column name="participant_count" type="NUMERIC"/>
-    </loadData>
-
-    <loadData tableName="domain_vocabulary_info" file="csv/domain_vocabulary_info.csv"
-      encoding="UTF-8" quotchar='"'>
-      <column name="domain_id" type="STRING"/>
-      <column name="vocabulary_id" type="STRING"/>
-      <column name="all_concept_count" type="NUMERIC"/>
-      <column name="standard_concept_count" type="NUMERIC"/>
     </loadData>
 
     <loadData tableName="survey_module" file="csv/survey_module.csv" encoding="UTF-8" quotchar='"'>

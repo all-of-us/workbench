@@ -11,11 +11,9 @@ import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * A tool that takes an AoU username (e.g. gjordan) and fetches the FireCloud profile associated
@@ -24,10 +22,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * <p>This is intended mostly for demonstration / testing purposes, to show how we leverage
  * domain-wide delegation to make FireCloud API calls impersonating other users.
  */
-@SpringBootApplication
-// Load the DBA and DB model classes required for UserDao.
-@EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
-@EntityScan("org.pmiops.workbench.db.model")
+@Configuration
+@ComponentScan("org.pmiops.workbench.firecloud")
 public class FetchFireCloudUserProfile {
   private static final Logger log =
       Logger.getLogger(org.pmiops.workbench.tools.FetchFireCloudUserProfile.class.getName());
@@ -63,6 +59,6 @@ public class FetchFireCloudUserProfile {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(FetchFireCloudUserProfile.class).web(false).run(args);
+    CommandLineToolConfig.runCommandLine(FetchFireCloudUserProfile.class, args);
   }
 }

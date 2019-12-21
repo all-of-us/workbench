@@ -1,15 +1,10 @@
 import {Component, Input} from '@angular/core';
 
-import {Clickable, MenuItem} from 'app/components/buttons';
-import {PopupTrigger} from 'app/components/popups';
-import {CardMenuIconComponentReact} from 'app/icons/card-menu-icon';
+import {Clickable} from 'app/components/buttons';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
-import {withCurrentWorkspace, withUrlParams} from 'app/utils/index';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {NavStore} from 'app/utils/navigation';
-import {WorkspaceAccessLevel} from 'generated';
 
-import {AnalyticsTracker} from 'app/utils/analytics';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -35,18 +30,6 @@ const styles = reactStyles({
   },
   separator: {
     background: 'rgba(255,255,255,0.15)', width: 1, height: 48, flexShrink: 0
-  },
-  dropdownHeader: {
-    fontSize: 12,
-    lineHeight: '30px',
-    color: colors.primary,
-    fontWeight: 600,
-    paddingLeft: 12,
-    width: 160
-  },
-  menuButtonIcon: {
-    width: 27, height: 27,
-    opacity: 0.65, marginRight: 16
   }
 });
 
@@ -62,11 +45,7 @@ export const WorkspaceNavBarReact = fp.flow(
   withCurrentWorkspace(),
   withUrlParams(),
 )(props => {
-  const {
-    shareFunction, deleteFunction, workspace, tabPath,
-    urlParams: {ns: namespace, wsid: id}
-  } = props;
-  const isNotOwner = !workspace || workspace.accessLevel !== WorkspaceAccessLevel.OWNER;
+  const {tabPath, urlParams: {ns: namespace, wsid: id}} = props;
   const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
 
 
@@ -93,61 +72,6 @@ export const WorkspaceNavBarReact = fp.flow(
     {activeTabIndex > 0 && navSeparator}
     {fp.map(tab => navTab(tab), tabs)}
     <div style={{flexGrow: 1}}/>
-    <PopupTrigger
-      side='bottom'
-      closeOnClick={true}
-      content={
-        <React.Fragment>
-          <div style={styles.dropdownHeader}>Workspace Actions</div>
-          <MenuItem
-            icon='copy'
-            onClick={() => {
-              AnalyticsTracker.Workspaces.OpenDuplicatePage();
-              NavStore.navigate(['/workspaces', namespace, id, 'duplicate']);
-            }}>
-            Duplicate
-          </MenuItem>
-          <MenuItem
-            icon='pencil'
-            tooltip={isNotOwner && 'Requires owner permission'}
-            disabled={isNotOwner}
-            onClick={() => {
-              AnalyticsTracker.Workspaces.OpenEditPage();
-              NavStore.navigate(['/workspaces', namespace, id, 'edit']);
-            }}
-          >
-            Edit
-          </MenuItem>
-          <MenuItem
-            icon='share'
-            tooltip={isNotOwner && 'Requires owner permission'}
-            disabled={isNotOwner}
-            onClick={() => {
-              AnalyticsTracker.Workspaces.OpenShareModal();
-              shareFunction();
-            }}>
-            Share
-          </MenuItem>
-          <MenuItem
-            icon='trash'
-            tooltip={isNotOwner && 'Requires owner permission'}
-            disabled={isNotOwner}
-            onClick={() => {
-              AnalyticsTracker.Workspaces.OpenDeleteModal();
-              deleteFunction();
-            }}>
-            Delete
-          </MenuItem>
-        </React.Fragment>
-      }>
-      <Clickable
-        data-test-id='workspace-menu-button'
-        style={styles.menuButtonIcon}
-        hover={{opacity: 1}}
-      >
-        <CardMenuIconComponentReact/>
-      </Clickable>
-    </PopupTrigger>
   </div>;
 });
 
@@ -156,11 +80,9 @@ export const WorkspaceNavBarReact = fp.flow(
   template: '<div #root></div>',
 })
 export class WorkspaceNavBarComponent extends ReactWrapperBase {
-  @Input() shareFunction;
-  @Input() deleteFunction;
   @Input() tabPath;
 
   constructor() {
-    super(WorkspaceNavBarReact, ['shareFunction', 'deleteFunction', 'tabPath']);
+    super(WorkspaceNavBarReact, ['tabPath']);
   }
 }

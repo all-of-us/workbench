@@ -18,5 +18,6 @@ export const testEnvironmentBase = {
   inactivityWarningBeforeSeconds: 5 * 60,
   enableHomepageRestyle: true,
   enableProfileCapsFeatures: true,
-  enableAccountPages: true
+  enableAccountPages: true,
+  enableNewConceptTabs: true
 };

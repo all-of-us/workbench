@@ -58,4 +58,6 @@ export interface Environment {
   enableAccountPages: boolean;
   // Profile changes for CAPS requirements in RW-3441.
   enableProfileCapsFeatures: boolean;
+  // Enable Surveys and Physical Measurements tabs in concept search
+  enableNewConceptTabs: boolean;
 }

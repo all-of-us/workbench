@@ -13,19 +13,16 @@ import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
-import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.monitoring.MonitoringServiceImpl;
-import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
-import org.pmiops.workbench.monitoring.StackdriverStatsExporterService;
-import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
@@ -38,22 +35,18 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
  *
  * <p>The main difference is that request-scoped dependencies cannot be used from a command-line
  * context.
+ *
+ * <p>IMPORTANT: This config should only be used in a database context. In order to implement a tool
+ * which uses this config, that tool must be run with an active SQL server available, e.g. via Cloud
+ * SQL Proxy.
  */
 @Configuration
+@EnableAutoConfiguration
+@Import({RetryConfig.class, CommonConfig.class})
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
-@Import({
-  CommonConfig.class,
-  MonitoringServiceImpl.class,
-  MonitoringSpringConfiguration.class,
-  NotebooksServiceImpl.class,
-  RetryConfig.class,
-  StackdriverStatsExporterService.class,
-  UserRecentResourceServiceImpl.class
-})
+@EntityScan("org.pmiops.workbench.db.model")
 // Scan the google module, for CloudStorageService and DirectoryService beans.
 @ComponentScan("org.pmiops.workbench.google")
-// Scan the FireCloud module, for FireCloudService bean.
-@ComponentScan("org.pmiops.workbench.firecloud")
 // Scan the ServiceAccounts class, but exclude other classes in auth (since they
 // bring in JPA-related beans, which include a whole bunch of other deps that are
 // more complicated than we need for now).
@@ -76,8 +69,6 @@ public class CommandLineToolConfig {
    *
    * <p>Any command-line tool which loads this bean needs to be called from a project.rb command
    * which is preceded with "get_gsuite_admin_key" to ensure the local key file si populated.
-   *
-   * @return
    */
   @Lazy
   @Bean(name = Constants.GSUITE_ADMIN_CREDS)
@@ -112,19 +103,11 @@ public class CommandLineToolConfig {
   /**
    * Instead of using the CacheSpringConfiguration class (which has a request-scoped bean to return
    * a cached workbench config), we load the workbench config once from the database and use that.
-   *
-   * @param configDao
-   * @return
    */
   @Bean
   @Lazy
-  @Scope("prototype")
   WorkbenchConfig workbenchConfig(ConfigDao configDao) {
     DbConfig config = configDao.findOne(DbConfig.MAIN_CONFIG_ID);
-
-    if (config == null) {
-      return null;
-    }
 
     Gson gson = new Gson();
     return gson.fromJson(config.getConfiguration(), WorkbenchConfig.class);
@@ -133,8 +116,6 @@ public class CommandLineToolConfig {
   /**
    * Returns the Apache HTTP transport. Compare to CommonConfig which returns the App Engine HTTP
    * transport.
-   *
-   * @return
    */
   @Bean
   HttpTransport httpTransport() {
@@ -154,5 +135,19 @@ public class CommandLineToolConfig {
     policy.setMaxInterval(20000);
     policy.setSleeper(sleeper);
     return policy;
+  }
+
+  /**
+   * Run a command line spring boot application. The provided configuration should provide a
+   * CommandLineRunner bean. The rest of the configuration is applied as a child to the standard
+   * CommandLineToolConfig context, which provides common database / service access. The child
+   * relationship allows the CLI config class to override parent beans if needed.
+   *
+   * @param cliConfig the class which declares the CommandLineRunner and optionally other
+   *     dependencies
+   * @param args command line args to pass to the program
+   */
+  public static void runCommandLine(Class<?> cliConfig, String[] args) {
+    new SpringApplicationBuilder(CommandLineToolConfig.class).child(cliConfig).web(false).run(args);
   }
 }
