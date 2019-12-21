@@ -245,8 +245,8 @@ public class UserService {
             Level.WARNING,
             String.format(
                 "While creating new user with email %s due to "
-                    + "DataIntegrityViolationException. No user matching this username was found " +
-                    "and none exists in the database",
+                    + "DataIntegrityViolationException. No user matching this username was found "
+                    + "and none exists in the database",
                 username),
             e);
         throw e;
@@ -255,8 +255,8 @@ public class UserService {
             Level.WARNING,
             String.format(
                 "While creating new user with email %s due to "
-                    + "DataIntegrityViolationException. User %d is present however," +,
-                "indicating possible concurrent creation.",
+                    + "DataIntegrityViolationException. User %d is present however, "
+                    + "indicating possible concurrent creation.",
                 username, userByUserName.getUserId()),
             e);
         return userByUserName;
