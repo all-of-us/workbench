@@ -60,8 +60,7 @@ public interface UserServiceInterface {
 
   List<DbUser> getAllUsers();
 
-  void logAdminUserAction(
-      long targetUserId, String targetAction, Object oldValue, Object newValue);
+  void logAdminUserAction(long targetUserId, String targetAction, Object oldValue, Object newValue);
 
   void logAdminWorkspaceAction(
       long targetWorkspaceId, String targetAction, Object oldValue, Object newValue);
@@ -72,7 +71,7 @@ public interface UserServiceInterface {
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
   DbUser syncComplianceTrainingStatus(DbUser user)
-          throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
+      throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
 
   DbUser syncEraCommonsStatus();
 
