@@ -280,8 +280,6 @@ export const ConceptHomepage = withCurrentWorkspace()(
           conceptsCache = conceptsCache.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
           conceptDomainCounts = conceptDomainCounts.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
         }
-        console.log(conceptsCache);
-        console.log(conceptDomainCounts);
         this.setState({
           conceptsCache: conceptsCache,
           conceptDomainList: conceptDomainInfo.items.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT),

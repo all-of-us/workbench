@@ -267,6 +267,7 @@ export class ConceptTable extends React.Component<Props, State> {
                                                    expandedRows={this.props.concepts
                                                      .filter(concept => concept.conceptSynonyms.length > 0)}
                                                    rowExpansionTemplate={(data) => this.rowExpansionTemplate(data)}
+                                                   alwaysShowPaginator={false}
                                                    paginator={true} rows={ROWS_TO_DISPLAY}
                                                    data-test-id='conceptRow'
                                                    onValueChange={(value) => this.onPageChange()}
