@@ -152,6 +152,7 @@ interface State {
   standardData: any;
   error: boolean;
   loading: boolean;
+  loadingStandard: boolean;
   standardOnly: boolean;
   sourceMatch: any;
   ingredients: any;
@@ -167,6 +168,7 @@ export const ListSearch = withCurrentWorkspace()(
         standardData: null,
         error: false,
         loading: false,
+        loadingStandard: false,
         standardOnly: false,
         sourceMatch: undefined,
         ingredients: {},
@@ -186,23 +188,31 @@ export const ListSearch = withCurrentWorkspace()(
     getResults = async(value: string) => {
       let sourceMatch;
       try {
-        this.setState({data: null, error: false, loading: true, standardOnly: false});
+        this.setState({data: null, error: false, loading: true, sourceMatch: null, standardOnly: false});
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
         const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim());
         const data = resp.items;
+        this.setState({data, loading: false});
         if (data.length && this.checkSource) {
           sourceMatch = data.find(item => item.code.toLowerCase() === value.trim().toLowerCase() && !item.isStandard);
+          this.setState({sourceMatch});
           if (sourceMatch) {
-            const stdResp = await cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(+cdrVersionId, domain, sourceMatch.conceptId);
-            this.setState({standardData: stdResp.items});
+            this.getStandardResults(sourceMatch.conceptId);
           }
         }
         this.setState({data});
       } catch (err) {
         this.setState({error: true});
-      } finally {
-        this.setState({loading: false, sourceMatch});
       }
+    }
+
+    getStandardResults(conceptId: number) {
+      const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
+      this.trackEvent('Standard Vocab Hyperlink');
+      this.setState({loadingStandard: true, standardData: null});
+      cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(+cdrVersionId, domain, conceptId).then(resp => {
+        this.setState({loadingStandard: false, standardData: []});
+      });
     }
 
     showStandardResults() {
@@ -333,9 +343,8 @@ export const ListSearch = withCurrentWorkspace()(
 
     render() {
       const {wizard: {domain}} = this.props;
-      const {data, error, ingredients, loading, standardOnly, sourceMatch, standardData} = this.state;
+      const {data, error, ingredients, loading, loadingStandard, standardOnly, sourceMatch, standardData} = this.state;
       const listStyle = domain === DomainType.DRUG ? {...styles.listContainer, marginTop: '4.25rem'} : styles.listContainer;
-      const showStandardOption = !standardOnly && standardData && standardData.length;
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
         <div style={styles.searchContainer}>
@@ -350,9 +359,12 @@ export const ListSearch = withCurrentWorkspace()(
           </div>}
         </div>
         {!loading && !!displayData && <div style={listStyle}>
-          {showStandardOption && <div style={{marginBottom: '0.75rem'}}>
-            There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}. For more results, browse
-            &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.showStandardResults()}>Standard Vocabulary</Clickable>.
+          {sourceMatch && !standardOnly && <div style={{marginBottom: '0.75rem'}}>
+            There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}.
+            {loadingStandard && <span> Checking for standard codes... <Spinner size={16}/></span>}
+            {!!standardData && standardData.length > 0 && <span> For more results, browse
+              &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.showStandardResults()}>Standard Vocabulary</Clickable>.
+            </span>}
           </div>}
           {standardOnly && <div style={{marginBottom: '0.75rem'}}>
             {!!displayData.length && <span>
