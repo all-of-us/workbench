@@ -112,9 +112,7 @@ interface State {
   selectAll: boolean;
   totalRecords: number;
   pageConcepts: Concept[];
-  pageNumber: number;
   tableRef: any;
-  pageNum: number;
 }
 
 export class ConceptTable extends React.Component<Props, State> {
@@ -128,10 +126,8 @@ export class ConceptTable extends React.Component<Props, State> {
       pageLoading: false,
       first: 0,
       totalRecords: props.concepts.length,
-      pageNumber: 1,
       pageConcepts: props.concepts.slice(0, 10).map(formatCounts),
       tableRef: React.createRef(),
-      pageNum: 1
     };
   }
 
