@@ -8,13 +8,13 @@ public interface MonitoringService {
   /**
    * Record an occurrence of a counted event.
    *
-   * @param viewProperties
+   * @param viewInfo
    */
-  default void recordIncrement(OpenCensusStatsViewInfo viewProperties) {
-    recordValue(viewProperties, 1);
+  default void recordIncrement(OpenCensusStatsViewInfo viewInfo) {
+    recordValue(viewInfo, 1);
   }
 
-  void recordValue(OpenCensusStatsViewInfo viewProperties, Number value);
+  void recordValue(OpenCensusStatsViewInfo viewInfo, Number value);
 
-  void recordValue(Map<OpenCensusStatsViewInfo, Number> enumToValue);
+  void recordValues(Map<OpenCensusStatsViewInfo, Number> enumToValue);
 }

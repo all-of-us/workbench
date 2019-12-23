@@ -31,9 +31,6 @@ import org.springframework.context.annotation.Configuration;
  * ManageClusters is an operational utility for interacting with the Leonardo Notebook clusters
  * available to the application default user. This should generally be used while authorized as the
  * App Engine default service account for a given environment.
- *
- * <p>Note: If this utility later needs database access, replace @Configuration
- * with @SpringBootApplication.
  */
 @Configuration
 public class ManageClusters {
@@ -184,6 +181,9 @@ public class ManageClusters {
   }
 
   public static void main(String[] args) throws Exception {
+    // This tool doesn't currently need database access, so it doesn't extend the
+    // CommandLineToolConfig. To add database access, extend from that config and update project.rb
+    // to ensure a Cloud SQL proxy is available when this command is run.
     new SpringApplicationBuilder(ManageClusters.class).web(false).run(args);
   }
 }

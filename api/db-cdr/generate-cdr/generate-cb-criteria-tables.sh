@@ -71,6 +71,47 @@ fi
 ################################################
 # CREATE TABLES
 ################################################
+# table that holds temp data to get ancestor information for parent counts
+echo "CREATE TABLES - prep_concept_ancestor_temp"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+(
+    ancestor_concept_id     INT64,
+    domain_id               STRING,
+    type                    STRING,
+    is_standard             INT64,
+    concept_id_1            INT64,
+    concept_id_2            INT64,
+    concept_id_3            INT64,
+    concept_id_4            INT64,
+    concept_id_5            INT64,
+    concept_id_6            INT64,
+    concept_id_7            INT64,
+    concept_id_8            INT64,
+    concept_id_9            INT64,
+    concept_id_10           INT64,
+    concept_id_11           INT64,
+    concept_id_12           INT64,
+    concept_id_13           INT64,
+    concept_id_14           INT64,
+    concept_id_15           INT64,
+    concept_id_16           INT64,
+    concept_id_17           INT64,
+    concept_id_18           INT64,
+    concept_id_19           INT64,
+    concept_id_20           INT64
+)"
+
+# table that holds ancestor information for parent counts
+echo "CREATE TABLES - prep_concept_ancestor"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+(
+    ancestor_concept_id     INT64,
+    descendant_concept_id   INT64,
+    is_standard             INT64
+)"
+
 echo "CREATE TABLES - cb_criteria"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
@@ -1266,44 +1307,204 @@ do
             )"
 done
 
-# if loop count above is changed, the number of JOINS below must be updated
-echo "CONDITIONS - SOURCE SNOMED - add data into ancestor table"
+# Join Count: 19 - If loop count above is changed, the number of JOINS below must be updated
+echo "CONDITIONS - SOURCE SNOMED - add items into temp ancestor table for use in next query"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\` (ancestor_id, descendant_id)
-select distinct a.ID as ancestor_id,
-    coalesce(t.id, s.id, r.id, q.id, p.id, o.id, n.ID, m.ID, k.ID, j.ID, i.ID, h.ID, g.ID, f.ID, e.ID, d.ID, c.ID, b.ID) as descendant_id
-from (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) a
-    join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) b on a.ID = b.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) c on b.ID = c.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) d on c.ID = d.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) e on d.ID = e.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) f on e.ID = f.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) g on f.ID = g.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) h on g.ID = h.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) i on h.ID = i.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) j on i.ID = j.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) k on j.ID = k.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) m on k.ID = m.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) n on m.ID = n.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) o on n.ID = o.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) p on o.ID = p.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) q on p.ID = q.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) r on q.ID = r.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) s on r.ID = s.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) t on s.ID = t.PARENT_ID
-where a.parent_id != 0 and a.is_group = 1"
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+    (ancestor_concept_id, domain_id, type, is_standard, concept_id_1, concept_id_2, concept_id_3, concept_id_4,
+    concept_id_5, concept_id_6, concept_id_7, concept_id_8, concept_id_9, concept_id_10, concept_id_11, concept_id_12,
+    concept_id_13, concept_id_14, concept_id_15, concept_id_16, concept_id_17, concept_id_18)
+SELECT DISTINCT a.concept_id as ancestor_concept_id
+    , a.domain_id
+    , a.type
+    , a.is_standard
+    , b.concept_id c1
+    , c.concept_id c2
+    , d.concept_id c3
+    , e.concept_id c4
+    , f.concept_id c5
+    , g.concept_id c6
+    , h.concept_id c7
+    , i.concept_id c8
+    , j.concept_id c9
+    , k.concept_id c10
+    , m.concept_id c11
+    , n.concept_id as c12
+    , o.concept_id as c13
+    , p.concept_id as c14
+    , q.concept_id as c15
+    , r.concept_id as c16
+    , s.concept_id as c17
+    , t.concept_id as c18
+FROM (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0 and parent_id != 0 and is_group = 1) a
+    JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) b on a.id = b.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) c on b.id = c.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) d on c.id = d.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) e on d.id = e.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) f on e.id = f.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) g on f.id = g.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) h on g.id = h.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) i on h.id = i.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) j on i.id = j.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) k on j.id = k.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) m on k.id = m.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) n on m.id = n.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) o on n.id = o.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) p on o.id = p.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) q on p.id = q.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) r on q.id = r.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) s on r.id = s.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) t on s.id = t.parent_id"
+
+# Join Count: 19 - If loop count above is changed, the number of JOINS below must be updated
+# there last UNION statement is to add the ancestor item to itself
+echo "CONDITIONS - SOURCE SNOMED - add items into ancestor table"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+    (ancestor_concept_id, descendant_concept_id, is_standard)
+SELECT DISTINCT ancestor_concept_id, concept_id_18 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_18 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_17 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_17 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_16 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_16 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_15 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_15 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_14 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_14 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_13 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_13 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_12 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_12 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_11 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_11 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_10 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_10 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_9 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_9 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_8 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_8 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_7 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_7 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_6 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_6 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_5 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_5 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_4 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_4 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_3 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_3 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_2 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_2 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_1 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_1 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, ancestor_concept_id as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 0"
 
 echo "CONDITIONS - SOURCE SNOMED - child counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
-set x.est_count = y.cnt
-from
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET x.est_count = y.cnt
+FROM
     (
-        select condition_source_concept_id as concept_id, count(distinct person_id) cnt
-        from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\`
-        group by 1
+        SELECT condition_source_concept_id as concept_id, COUNT(distinct person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\`
+        GROUP BY 1
     ) y
-where x.concept_id = y.concept_id
+WHERE x.concept_id = y.concept_id
     and x.domain_id = 'CONDITION'
     and x.type = 'SNOMED'
     and x.is_standard = 0
@@ -1314,47 +1515,33 @@ echo "CONDITIONS - SOURCE SNOMED - parent counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.est_count = y.cnt
-from
+FROM
     (
-        select e.id, count(distinct person_id) cnt
-        from
+        SELECT ancestor_concept_id as concept_id, COUNT(distinct person_id) cnt
+        FROM
             (
-                select *
-                from
+                SELECT *
+                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+                WHERE ancestor_concept_id in
                     (
-                        select id
-                        from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                        where domain_id = 'CONDITION'
+                        SELECT distinct concept_id
+                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                        WHERE domain_id = 'CONDITION'
                             and type = 'SNOMED'
                             and is_standard = 0
                             and parent_id != 0
                             and is_group = 1
-                    ) a
-                left join \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\` b on a.id = b.ancestor_id
-            ) e
-        left join
-            (
-                select c.id, d.*
-                from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
-                join
-                    (
-                        select a.person_id, a.condition_source_concept_id as concept_id
-                        from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` a
-                        join
-                            (
-                                select concept_id, path
-                                from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                                where domain_id = 'CONDITION'
-                                    and type = 'SNOMED'
-                                    and is_standard = 0
-                                    and is_group = 0
-                                    and is_selectable = 1
-                            ) b on a.condition_source_concept_id = b.concept_id
-                    ) d on c.concept_id = d.concept_id
-            ) f on e.descendant_id = f.id
-        group by 1
+                    )
+                    and is_standard = 0
+            ) a
+        JOIN \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` b on a.descendant_concept_id = b.condition_source_concept_id
+        GROUP BY 1
     ) y
-where x.id = y.id"
+WHERE x.concept_id = y.concept_id
+    and x.domain_id = 'CONDITION'
+    and x.type = 'SNOMED'
+    and x.is_standard = 0
+    and x.is_group = 1"
 
 # ----- STANDARD SNOMED -----
 echo "CONDITIONS - STANDARD SNOMED - temp table level 0"
@@ -1429,7 +1616,7 @@ where p.domain_id = 'CONDITION'
             from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_cm_in_data\`
         )"
 
-# currently, there are only 17 levels, but we run it 18 times to be safe
+# currently, there are only 17 levels, but we run it 18 times to be safe. If this changes, change the next query
 for i in {1..18};
 do
     echo "CONDITIONS - STANDARD SNOMED - add level $i"
@@ -1461,6 +1648,193 @@ do
             )"
 done
 
+# Join Count: 19 - If loop count above is changed, the number of JOINS below must be updated
+echo "CONDITIONS - STANDARD SNOMED - add items into temp ancestor table for use in next query"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+    (ancestor_concept_id, domain_id, type, is_standard, concept_id_1, concept_id_2, concept_id_3, concept_id_4,
+    concept_id_5, concept_id_6, concept_id_7, concept_id_8, concept_id_9, concept_id_10, concept_id_11, concept_id_12,
+    concept_id_13, concept_id_14, concept_id_15, concept_id_16, concept_id_17, concept_id_18)
+SELECT DISTINCT a.concept_id as ancestor_concept_id
+    , a.domain_id
+    , a.type
+    , a.is_standard
+    , b.concept_id c1
+    , c.concept_id c2
+    , d.concept_id c3
+    , e.concept_id c4
+    , f.concept_id c5
+    , g.concept_id c6
+    , h.concept_id c7
+    , i.concept_id c8
+    , j.concept_id c9
+    , k.concept_id c10
+    , m.concept_id c11
+    , n.concept_id as c12
+    , o.concept_id as c13
+    , p.concept_id as c14
+    , q.concept_id as c15
+    , r.concept_id as c16
+    , s.concept_id as c17
+    , t.concept_id as c18
+FROM (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1 and parent_id != 0 and is_group = 1) a
+    JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) b on a.id = b.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) c on b.id = c.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) d on c.id = d.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) e on d.id = e.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) f on e.id = f.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) g on f.id = g.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) h on g.id = h.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) i on h.id = i.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) j on i.id = j.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) k on j.id = k.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) m on k.id = m.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) n on m.id = n.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) o on n.id = o.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) p on o.id = p.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) q on p.id = q.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) r on q.id = r.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) s on r.id = s.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 1) t on s.id = t.parent_id"
+
+# Join Count: 19 - If loop count above is changed, the number of JOINS below must be updated
+# there last UNION statement is to add the ancestor item to itself
+echo "CONDITIONS - STANDARD SNOMED - add items into ancestor table"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+    (ancestor_concept_id, descendant_concept_id, is_standard)
+SELECT DISTINCT ancestor_concept_id, concept_id_18 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_18 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_17 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_17 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_16 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_16 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_15 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_15 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_14 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_14 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_13 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_13 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_12 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_12 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_11 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_11 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_10 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_10 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_9 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_9 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_8 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_8 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_7 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_7 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_6 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_6 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_5 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_5 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_4 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_4 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_3 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_3 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_2 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_2 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_1 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_1 is not null
+    and domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, ancestor_concept_id as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE domain_id = 'CONDITION'
+    and type = 'SNOMED'
+    and is_standard = 1"
+
 echo "CONDITIONS - STANDARD SNOMED - child counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
@@ -1488,7 +1862,7 @@ from
         from
             (
                 select *
-                from \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\`
+                from \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
                 where ancestor_concept_id in
                     (
                         select distinct concept_id
@@ -1499,6 +1873,7 @@ from
                             and parent_id != 0
                             and is_group = 1
                     )
+                    and is_standard = 1
             ) a
         join \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` b on a.descendant_concept_id = b.condition_concept_id
         group by 1
@@ -2303,7 +2678,7 @@ from
                 select *
                 from \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\` x
                 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` y on x.ANCESTOR_CONCEPT_ID = y.CONCEPT_ID
-                where VOCABULARY_ID = 'RxNorm'
+                where VOCABULARY_ID in  ('RxNorm', 'RxNorm Extension')
                     and CONCEPT_CLASS_ID = 'Ingredient'
             ) b on a.DRUG_CONCEPT_ID = b.DESCENDANT_CONCEPT_ID
         group by 1
@@ -2386,7 +2761,7 @@ from
                                 select *
                                 from \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\` a
                                 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.ANCESTOR_CONCEPT_ID = b.CONCEPT_ID
-                                where VOCABULARY_ID = 'RxNorm'
+                                where VOCABULARY_ID in  ('RxNorm', 'RxNorm Extension')
                                     and CONCEPT_CLASS_ID = 'Ingredient'
                             ) d on c.DRUG_CONCEPT_ID = d.DESCENDANT_CONCEPT_ID
                     ) f on e.concept_id = f.concept_id
@@ -2473,7 +2848,7 @@ where p.domain_id = 'PROCEDURE'
             from \`$BQ_PROJECT.$BQ_DATASET.snomed_rel_pcs_in_data\`
         )"
 
-# currently, there are only 11 levels, but we run it 12 times to be safe
+# currently, there are only 11 levels, but we run it 12 times to be safe, If this count changes, change the query below
 for i in {1..12};
 do
     echo "PROCEDURES - STANDARD SNOMED - add level $i"
@@ -2505,6 +2880,138 @@ do
             )"
 done
 
+# Join Count: 13 - If loop count above is changed, the number of JOINS below must be updated
+echo "PROCEDURES - STANDARD SNOMED - add items into temp ancestor table for use in next query"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+    (ancestor_concept_id, domain_id, type, is_standard, concept_id_1, concept_id_2, concept_id_3, concept_id_4,
+    concept_id_5, concept_id_6, concept_id_7, concept_id_8, concept_id_9, concept_id_10, concept_id_11, concept_id_12)
+SELECT DISTINCT a.concept_id as ancestor_concept_id
+    , a.domain_id
+    , a.type
+    , a.is_standard
+    , b.concept_id c1
+    , c.concept_id c2
+    , d.concept_id c3
+    , e.concept_id c4
+    , f.concept_id c5
+    , g.concept_id c6
+    , h.concept_id c7
+    , i.concept_id c8
+    , j.concept_id c9
+    , k.concept_id c10
+    , m.concept_id c11
+    , n.concept_id as c12
+FROM (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1 and parent_id != 0 and is_group = 1) a
+    JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) b on a.id = b.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) c on b.id = c.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) d on c.id = d.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) e on d.id = e.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) f on e.id = f.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) g on f.id = g.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) h on g.id = h.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) i on h.id = i.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) j on i.id = j.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) k on j.id = k.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) m on k.id = m.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 1) n on m.id = n.parent_id"
+
+# Join Count: 13 - If loop count above is changed, the number of JOINS below must be updated
+# there last UNION statement is to add the ancestor item to itself
+echo "PROCEDURES - STANDARD SNOMED - add items into ancestor table"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+    (ancestor_concept_id, descendant_concept_id, is_standard)
+SELECT DISTINCT ancestor_concept_id, concept_id_12 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_12 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_11 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_11 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_10 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_10 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_9 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_9 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_8 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_8 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_7 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_7 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_6 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_6 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_5 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_5 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_4 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_4 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_3 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_3 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_2 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_2 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_1 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_1 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, ancestor_concept_id as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 1"
+
 echo "PROCEDURES - STANDARD SNOMED - generate child counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
@@ -2522,7 +3029,7 @@ where x.concept_id = y.concept_id
     and x.is_group = 0
     and x.is_selectable = 1"
 
-echo "PROCEDURES - STANDARD SNOMED - generate parent counts"
+echo "PROCEDURES - STANDARD SNOMED - parent counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.est_count = y.cnt
@@ -2532,7 +3039,7 @@ from
         from
             (
                 select *
-                from \`$BQ_PROJECT.$BQ_DATASET.concept_ancestor\`
+                from \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
                 where ancestor_concept_id in
                     (
                         select distinct concept_id
@@ -2543,6 +3050,7 @@ from
                             and parent_id != 0
                             and is_group = 1
                     )
+                    and is_standard = 1
             ) a
         join \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` b on a.descendant_concept_id = b.procedure_concept_id
         group by 1
@@ -2552,7 +3060,6 @@ where x.concept_id = y.concept_id
     and x.type = 'SNOMED'
     and x.is_standard = 1
     and x.is_group = 1"
-
 
 # ----- SOURCE SNOMED -----
 echo "PROCEDURES - SOURCE SNOMED - temp table level 0"
@@ -2658,26 +3165,137 @@ do
             )"
 done
 
-# if loop count above is changed, the number of JOINS below must be updated
-echo "PROCEDURES - SOURCE SNOMED - add data into ancestor table"
+# Join Count: 13 - If loop count above is changed, the number of JOINS below must be updated
+echo "PROCEDURES - SOURCE SNOMED - add items into temp ancestor table for use in next query"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
-"insert into \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\` (ancestor_id, descendant_id)
-select distinct a.ID as ancestor_id,
-    coalesce(n.ID, m.ID, k.ID, j.ID, i.ID, h.ID, g.ID, f.ID, e.ID, d.ID, c.ID, b.ID) as descendant_id
-from (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) a
-    join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) b on a.ID = b.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) c on b.ID = c.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) d on c.ID = d.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) e on d.ID = e.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) f on e.ID = f.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) g on f.ID = g.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) h on g.ID = h.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) i on h.ID = i.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) j on i.ID = j.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) k on j.ID = k.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) m on k.ID = m.PARENT_ID
-    left join (select id, parent_id, is_group, is_selectable from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` where domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) n on m.ID = n.PARENT_ID
-where a.parent_id != 0 and a.is_group = 1"
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+    (ancestor_concept_id, domain_id, type, is_standard, concept_id_1, concept_id_2, concept_id_3, concept_id_4,
+    concept_id_5, concept_id_6, concept_id_7, concept_id_8, concept_id_9, concept_id_10, concept_id_11, concept_id_12)
+SELECT DISTINCT a.concept_id as ancestor_concept_id
+    , a.domain_id
+    , a.type
+    , a.is_standard
+    , b.concept_id c1
+    , c.concept_id c2
+    , d.concept_id c3
+    , e.concept_id c4
+    , f.concept_id c5
+    , g.concept_id c6
+    , h.concept_id c7
+    , i.concept_id c8
+    , j.concept_id c9
+    , k.concept_id c10
+    , m.concept_id c11
+    , n.concept_id as c12
+FROM (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0 and parent_id != 0 and is_group = 1) a
+    JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) b on a.id = b.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) c on b.id = c.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) d on c.id = d.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) e on d.id = e.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) f on e.id = f.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) g on f.id = g.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) h on g.id = h.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) i on h.id = i.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) j on i.id = j.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) k on j.id = k.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) m on k.id = m.parent_id
+    LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'PROCEDURE' and type = 'SNOMED' and is_standard = 0) n on m.id = n.parent_id"
+
+# Join Count: 13 - If loop count above is changed, the number of JOINS below must be updated
+# there last UNION statement is to add the ancestor item to itself
+echo "PROCEDURES - SOURCE SNOMED - add items into ancestor table"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+    (ancestor_concept_id, descendant_concept_id, is_standard)
+SELECT DISTINCT ancestor_concept_id, concept_id_12 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_12 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_11 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_11 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_10 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_10 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_9 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_9 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_8 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_8 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_7 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_7 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_6 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_6 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_5 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_5 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_4 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_4 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_3 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_3 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_2 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_2 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, concept_id_1 as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE concept_id_1 is not null
+    and domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 0
+UNION DISTINCT
+SELECT DISTINCT ancestor_concept_id, ancestor_concept_id as descendant_concept_id, is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor_temp\`
+WHERE domain_id = 'PROCEDURE'
+    and type = 'SNOMED'
+    and is_standard = 0"
 
 echo "PROCEDURES - SOURCE SNOMED - child counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -2702,45 +3320,31 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 SET x.est_count = y.cnt
 from
     (
-        select e.id, count(distinct person_id) cnt
+        select ancestor_concept_id as concept_id, count(distinct person_id) cnt
         from
             (
                 select *
-                from
+                from \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+                where ancestor_concept_id in
                     (
-                        select id
+                        select distinct concept_id
                         from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                         where domain_id = 'PROCEDURE'
                             and type = 'SNOMED'
                             and is_standard = 0
                             and parent_id != 0
                             and is_group = 1
-                    ) a
-                left join \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\` b on a.id = b.ancestor_id
-            ) e
-        left join
-            (
-                select c.id, d.*
-                from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c
-                join
-                    (
-                        select a.person_id, a.procedure_source_concept_id as concept_id
-                        from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` a
-                        join
-                            (
-                                select concept_id, path
-                                from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                                where domain_id = 'PROCEDURE'
-                                    and type = 'SNOMED'
-                                    and is_standard = 0
-                                    and is_group = 0
-                                    and is_selectable = 1
-                            ) b on a.procedure_source_concept_id = b.concept_id
-                    ) d on c.concept_id = d.concept_id
-            ) f on e.descendant_id = f.id
+                    )
+                    and is_standard = 0
+            ) a
+        join \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` b on a.descendant_concept_id = b.procedure_source_concept_id
         group by 1
     ) y
-where x.id = y.id"
+where x.concept_id = y.concept_id
+    and x.domain_id = 'PROCEDURE'
+    and x.type = 'SNOMED'
+    and x.is_standard = 0
+    and x.is_group = 1"
 
 
 ################################################

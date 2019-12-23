@@ -113,6 +113,18 @@ paths:
           schema:
             $ref: "#/definitions/FeaturedWorkspacesConfigResponse"
 
+  /v1/status-alert:
+    get:
+      tags:
+        - status-alert
+      description: Returns status alert information if any exists.
+      operationId: getStatusAlert
+      responses:
+        200:
+          description: >
+            A status alert information object.
+          schema:
+            $ref: "#/definitions/StatusAlert"
 
     # User methods ########################################################################
 
@@ -176,24 +188,6 @@ paths:
           description: The answer.
           schema:
             $ref: "#/definitions/UsernameTakenResponse"
-
-  /v1/is-contact-email-taken:
-    get:
-      tags:
-        - profile
-      description: Checks to see if the given contact email is not available.
-      operationId: isContactEmailTaken
-      security: []
-      parameters:
-        - in: query
-          name: contactEmail
-          type: string
-          required: true
-      responses:
-        200:
-          description: The answer.
-          schema:
-            $ref: "#/definitions/ContactEmailTakenResponse"
 
   /v1/update-contact-email:
     post:
@@ -1240,6 +1234,22 @@ paths:
           description: No Error
           schema:
             $ref: '#/definitions/BillingProjectBufferStatus'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /v1/cron/monitoring/updateGaugeMetrics:
+    get:
+      tags:
+        - offlineMonitoring
+        - cron
+      description: Trigger recording of all gauge metrics
+      operationId: updateGaugeMetrics
+      security: []
+      responses:
+        204:
+          description: No content
         500:
           description: Internal Error
           schema:
@@ -3645,18 +3655,6 @@ definitions:
     example:
       isTaken: false
 
-  ContactEmailTakenResponse:
-    type: object
-    required:
-      - isTaken
-    properties:
-      isTaken:
-        description: Boolean response to whether contact email is already taken.
-        type: boolean
-        default: false
-    example:
-      isTaken: false
-
   WorkspaceResponse:
     type: object
     required:
@@ -3821,3 +3819,23 @@ definitions:
           Current size of the billing buffer, i.e. the number of projects ready to be claimed.
         type: integer
         format: int64
+
+  StatusAlert:
+    type: object
+    properties:
+      statusAlertId:
+        description: The primary key of the status alert in the database
+        type: integer
+        format: int64
+      title:
+        description: >
+          Title of the status alert, e.g. 'Service Incident: December 6, 2019'
+        type: string
+      message:
+        description: >
+          The actual message of the status alert, e.g. 'AoU RW is down because GCP is down'
+        type: string
+      link:
+        description: >
+          A URL linking to an incident report where users can read more
+        type: string

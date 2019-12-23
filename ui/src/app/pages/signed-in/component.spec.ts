@@ -4,7 +4,6 @@ import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
-import {ErrorHandlingServiceStub} from 'testing/stubs/error-handling-service-stub';
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
@@ -14,7 +13,6 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
@@ -25,8 +23,9 @@ import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component'
 import {TextModalComponent} from 'app/components/text-modal';
 import {SignedInComponent} from 'app/pages/signed-in/component';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
-import {CdrVersionsApi} from 'generated/fetch';
+import {CdrVersionsApi, StatusAlertApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
+import {StatusAlertApiStub} from 'testing/stubs/status-alert-api-stub';
 
 describe('SignedInComponent', () => {
   let fixture: ComponentFixture<SignedInComponent>;
@@ -45,7 +44,6 @@ describe('SignedInComponent', () => {
         NavBarComponent
       ],
       providers: [
-        {provide: ErrorHandlingService, useValue: new ErrorHandlingServiceStub()},
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {
           provide: ServerConfigService,
@@ -64,6 +62,7 @@ describe('SignedInComponent', () => {
 
   beforeEach(() => {
     registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
+    registerApiClient(StatusAlertApi, new StatusAlertApiStub());
   });
 
   it('should render', fakeAsync(() => {

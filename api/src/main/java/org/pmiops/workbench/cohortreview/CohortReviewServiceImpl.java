@@ -1,9 +1,11 @@
 package org.pmiops.workbench.cohortreview;
 
+import com.google.common.collect.ImmutableMap;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
@@ -26,13 +28,16 @@ import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ModifyParticipantCohortAnnotationRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.monitoring.GaugeDataCollector;
+import org.pmiops.workbench.monitoring.views.MonitoringViews;
+import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CohortReviewServiceImpl implements CohortReviewService {
+public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCollector {
 
   private CohortReviewDao cohortReviewDao;
   private CohortDao cohortDao;
@@ -373,5 +378,10 @@ public class CohortReviewServiceImpl implements CohortReviewService {
         String.format(
             "Bad Request: Please provide a valid %s value for annotation defintion id: %s",
             annotationType, cohortAnnotationDefinitionId));
+  }
+
+  @Override
+  public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
+    return ImmutableMap.of(MonitoringViews.COHORT_COUNT, cohortDao.count());
   }
 }

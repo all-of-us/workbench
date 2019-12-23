@@ -50,7 +50,4 @@ apt-get install -y --no-install-recommends iproute2
  git clone https://github.com/magnific0/wondershaper.git &&
  cd wondershaper &&
  make install
-
- # TODO(RW-3784): This approach does not outlive cluster pause/resumes.
- wondershaper -a "eth0" -u 16384
 )

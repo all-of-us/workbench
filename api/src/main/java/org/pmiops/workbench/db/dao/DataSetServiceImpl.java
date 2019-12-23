@@ -42,11 +42,14 @@ import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.monitoring.GaugeDataCollector;
+import org.pmiops.workbench.monitoring.views.MonitoringViews;
+import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DataSetServiceImpl implements DataSetService {
+public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private static final String SELECT_ALL_FROM_DS_LINKING_WHERE_DOMAIN_MATCHES_LIST =
       "SELECT * FROM `${projectId}.${dataSetId}.ds_linking` "
@@ -57,6 +60,11 @@ public class DataSetServiceImpl implements DataSetService {
 
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
   private static final int DATA_SET_VERSION = 1;
+
+  @Override
+  public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
+    return ImmutableMap.of(MonitoringViews.DATASET_COUNT, dataSetDao.count());
+  }
 
   /*
    * Stores the associated set of selects and joins for values for the data set builder,

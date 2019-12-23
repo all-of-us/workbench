@@ -149,9 +149,8 @@ export class ConceptTable extends React.Component<Props, State> {
     if (selectedConcepts.length === this.props.concepts.length && origin === 'table') {
       const startIndex = this.state.tableRef.current.state.first;
       const endIndex = startIndex + ROWS_TO_DISPLAY;
-      const allSelectedConcepts = this.state.selectedConcepts
-          .concat(this.props.concepts.slice(startIndex, endIndex));
-      selectedConcepts = fp.uniqBy( 'conceptId', allSelectedConcepts);
+      selectedConcepts = fp.uniqBy( 'conceptId', this.state.selectedConcepts
+          .concat(this.props.concepts.slice(startIndex, endIndex)));
       this.setState({showBanner: true});
     } else if (selectedConcepts.length === 0 ) {
       // if no concepts are selected remove the banner

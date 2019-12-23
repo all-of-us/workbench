@@ -9,12 +9,14 @@ define([
   // https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/snippets_menu/readme.html
   const load = () => {
     const pyMenus = [
-      {{PY_MENU_JSON}},
-      {{PY_DATASET_MENU_JSON}}
+      {{PY_DATASET_MENU_JSON}},
+      {{PY_GCS_MENU_JSON}},
+      {{PY_SQL_MENU_JSON}}
     ];
     const rMenus = [
-      {{R_MENU_JSON}},
-      {{R_DATASET_MENU_JSON}}
+      {{R_DATASET_MENU_JSON}},
+      {{R_GCS_MENU_JSON}},
+      {{R_SQL_MENU_JSON}}
     ];
 
     const handleKernel = (kernelName) => {

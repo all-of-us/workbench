@@ -46,7 +46,7 @@ definitions:
   Domain:
     type: string
     description: a domain for concepts corresponding to a table in the OMOP schema
-    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT, SURVEY, PERSON]
+    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT, SURVEY, PERSON, PHYSICALMEASUREMENT]
 
   Surveys:
     type: string
@@ -227,6 +227,9 @@ definitions:
       errorCode:
         description: Short description of the type of error
         $ref: "#/definitions/ErrorCode"
+      errorUniqueId:
+        type: string
+        description: Unique ID for this error response, for correlation with backend logs
       # TODO: add list of field-level error messages with field names.
 
   ErrorCode:
