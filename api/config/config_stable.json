@@ -79,9 +79,14 @@
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": false
+    "enableNewAccountCreation": false,
+    "enableRDRExport": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-stable"
+  },
+  "rdrServer": {
+    "host": "all-of-us-rdr-stable.appspot.com",
+    "queueName": "all-of-us-workbench-stable"
   }
 }

@@ -1147,6 +1147,22 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/cron/exportToRDR:
+    get:
+      security: []
+      tags:
+        - offlineRDRExport
+        - cron
+      description: Send workbench data to RDR
+      operationId: syncWithRDR
+      responses:
+        204:
+          description: All modified/created workspaces and users were exported
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   # Billing ##############################################################################
 
   /v1/cron/bufferBillingProjects:
@@ -2148,10 +2164,58 @@ paths:
           schema:
             $ref: "#/definitions/DataSetPreviewResponse"
 
+  /v1/syncResearcherData:
+    post:
+      tags:
+        - offlineRDRExport
+      description: >
+        Send Researcher data
+      operationId: "syncResearcherData"
+      parameters:
+        - in: body
+          name: researchIds
+          required: true
+          description: The IDs of concepts to be added to the concept set.
+          schema:
+            type: object
+      responses:
+        200:
+          description: >
+            A SQL query for each domain in the Data Set
+
+  /v1/syncWorkspaceData:
+    post:
+      tags:
+        - offlineRDRExport
+      description: >
+        Send Researcher data
+      operationId: "syncWorkspaceData"
+      parameters:
+        - in: body
+          name: researchIds
+          required: true
+          description: The IDs of concepts to be added to the concept set.
+          schema:
+            type: object
+      responses:
+        200:
+          description: >
+            A SQL query for each domain in the Data Set
+
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
 definitions:
+  ResearcherId:
+    type: object
+    properties:
+      id:
+        type: array
+        description: The IDs of concepts to be added to the concept set.
+        items:
+          type: integer
+          format: int64
 
   StatusResponse:
     type: object

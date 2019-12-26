@@ -24,6 +24,7 @@ public class WorkbenchConfig {
   public FeatureFlagsConfig featureFlags;
   public BillingConfig billing;
   public ActionAuditConfig actionAudit;
+  public RDRConfig rdrServer;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -44,6 +45,7 @@ public class WorkbenchConfig {
     config.server = new ServerConfig();
     config.billing = new BillingConfig();
     config.actionAudit = new ActionAuditConfig();
+    config.rdrServer = new RDRConfig();
     return config;
   }
 
@@ -186,9 +188,17 @@ public class WorkbenchConfig {
     // Flag to indicate whether to enable the new Create Account flow
     // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
     public boolean enableNewAccountCreation;
+    // Flag to indicate if USER/WORSPACE data is exported to RDR
+    public boolean enableRDRExport;
   }
 
   public static class ActionAuditConfig {
     public String logName;
+  }
+
+  // Defines the rdr host per environment
+  public static class RDRConfig {
+    public String host;
+    public String queueName;
   }
 }

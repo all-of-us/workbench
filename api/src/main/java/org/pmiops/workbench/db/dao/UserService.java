@@ -293,6 +293,9 @@ public class UserService {
       DbDemographicSurvey demographicSurvey,
       List<DbInstitutionalAffiliation> institutionalAffiliations) {
     DbUser user = new DbUser();
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    user.setCreationTime(now);
+    user.setLastModifiedTime(now);
     user.setCreationNonce(Math.abs(random.nextLong()));
     user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
     user.setEmail(email);

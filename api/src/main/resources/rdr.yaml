@@ -1,0 +1,202 @@
+#This file provide the end points for interaction with RDR
+
+
+swagger: '2.0'
+
+info:
+  title: RDR
+  description: |
+    Service for RDR Interactions.
+  version: "0.1"
+#The host will get updated as per the environment it will be pmi-drc-api-test for dev and test
+host: "pmi-drc-api-test.appspot.com"
+schemes:
+  - "https"
+basePath: /rdr/v1
+
+securityDefinitions:
+  googleoauth:
+    type: oauth2
+    authorizationUrl: 'https://accounts.google.com/o/oauth2/auth'
+    flow: implicit
+    scopes:
+      openid: open id authorization
+      email: email authorization
+      profile: profile authorization
+
+security:
+  - googleoauth:
+    - openid
+    - email
+    - profile
+    - https://www.googleapis.com/auth/devstorage.full_control
+
+produces:
+  - application/json
+
+##########################################################################################
+## PATHS
+##########################################################################################
+
+paths:
+  /workbench/directory/workspaces:
+    post:
+      description: Submits one or more workspace snapshots for storage in the RDR.
+      tags:
+        - RDR
+      consumes:
+        - application/json
+      operationId: sendWorkspace
+      parameters:
+        - in: body
+          required: true
+          name: workspaces
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/RDRWorkspace"
+      responses:
+        200:
+          description: successful operation
+
+  /workbench/directory/researchers:
+    post:
+      description: Submits one or more researcher snapshots for storage in the RDR.
+      tags:
+        - RDR
+      operationId: sendResearcher
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          required: true
+          name: researchers
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/RDRResearcher"
+      responses:
+        200:
+          description: successful operation
+
+
+
+definitions:
+  RDRWorkspace:
+    type: object
+    properties:
+      workspaceId:
+        type: integer
+      name:
+        type: string
+      creationTime:
+        type: string
+        format: date-time
+      modifiedTime:
+        type: string
+        format: date-time
+      status:
+        type: string
+        description: Workspace Status
+        enum:
+          - ACTIVE
+          - INACTIVE
+      workspaceUsers:
+        type: array
+        items:
+          $ref: '#/definitions/RDRWorkspaceUser'
+      excludeFromPublicDirectory:
+        type: boolean
+      diseaseFocusedResearch:
+        type: boolean
+      diseaseFocusedResearchName:
+        type: string
+      otherPurposeDetails:
+        type: string
+      methodsDevelopment:
+        type: boolean
+      controlSet:
+        type: boolean
+      ancestry:
+        type: boolean
+      socialBehavioral:
+        type: boolean
+      populationHealth:
+        type: boolean
+      drugDevelopment:
+        type: boolean
+      commercialPurpose:
+        type: boolean
+      educational:
+        type: boolean
+      otherPurpose:
+        type: boolean
+
+  RDRWorkspaceUser:
+    type: object
+    properties:
+      userId:
+        type: integer
+      role:
+        type: string
+        enum:
+          - READER
+          - WRITER
+          - OWNER
+      status:
+        type: string
+        description: Workspace User Status
+        enum:
+          - ACTIVE
+          - INACTIVE
+
+  RDRResearcher:
+    type: object
+    properties:
+      userId:
+        type: integer
+      creationTime:
+        type: string
+        format: date-time
+      modifiedTime:
+        type: string
+        format: date-time
+      givenName:
+        type: string
+      familyName:
+        type: string
+      streetAddress1:
+        type: string
+      streetAddress2:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      zipCode:
+        type: string
+      country:
+        type: string
+      ethnicity:
+        type: string
+#      Need to talk to Yu about this to be a list
+      gender:
+#      Need to talk to yi about this to be a list
+        type: string
+      race:
+        type: string
+      affiliations:
+        type: array
+        items:
+          $ref: '#/definitions/ResearcherAffiliation'
+
+  ResearcherAffiliation:
+    type: object
+    properties:
+      institution:
+        type: string
+      role:
+        type: string
+#        Need to talk to Yu about this to be an ENUM
+      nonAcademicAffiliation:
+        type: boolean

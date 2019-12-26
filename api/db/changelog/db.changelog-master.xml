@@ -117,6 +117,8 @@
     <include file="changelog/db.changelog-107-workspace-free-tier-usage-user-index.xml"/>
     <include file="changelog/db.changelog-108-user-data-use-agreement.xml"/>
     <include file="changelog/db.changelog-109-dataset-prepackaged-conceptsets-nullConstraint.xml"/>
+    <include file="changelog/db.changelog-110-addColumn-user-create-modified.xml"/>
+    <include file="changelog/db.changelog-111-workspace-last-export-date.xml"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`

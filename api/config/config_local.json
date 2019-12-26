@@ -80,9 +80,14 @@
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": true
+    "enableNewAccountCreation": true,
+    "enableRDRExport": true
   },
   "actionAudit": {
     "logName":"workbench-action-audit-local"
+  },
+  "rdrServer": {
+    "host": "pmi-drc-api-test.appspot.com",
+    "queueName": "all-of-us-workbench-test"
   }
 }
