@@ -3,18 +3,19 @@ import * as CopyToClipboard from 'react-copy-to-clipboard';
 
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
+import {faCopy} from '@fortawesome/free-regular-svg-icons';
+import {faTimes} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TextModal} from 'app/components/text-modal';
 import {statusApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, withGlobalError} from 'app/utils';
+import {isBlank, reactStyles, withGlobalError} from 'app/utils';
 import {globalErrorStore} from 'app/utils/navigation';
 import {ErrorCode, ErrorResponse} from 'generated/fetch';
 import {Button} from './buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faCopy} from '@fortawesome/free-regular-svg-icons';
-import {FlexColumn, FlexRow} from 'app/components/flex';
-import {faTimes} from '@fortawesome/free-solid-svg-icons';
+import {TooltipTrigger} from './popups';
 
 const styles = reactStyles({
   errorCodeContainer: {
@@ -53,6 +54,7 @@ interface Props {
 }
 
 interface State {
+  copiedErrorIdToClipboard: boolean;
   serverDownStatus: ServerDownStatus;
   serverStatusAcknowledged: boolean;
 }
@@ -65,6 +67,7 @@ export const ErrorHandler = withGlobalError()(class extends React.Component<Prop
   constructor(props: Props) {
     super(props);
     this.state = {
+      copiedErrorIdToClipboard: false,
       serverDownStatus: {apiDown: false, firecloudDown: false, notebooksDown: false},
       serverStatusAcknowledged: false
     };
@@ -106,20 +109,30 @@ export const ErrorHandler = withGlobalError()(class extends React.Component<Prop
     globalErrorStore.next(undefined);
   }
 
+  copyToClipboard() {
+    this.setState({copiedErrorIdToClipboard: true});
+    setTimeout(() => {this.setState({copiedErrorIdToClipboard: false}); }, 1000);
+  }
+
   render() {
     const {globalError} = this.props;
-    const {apiDown, firecloudDown, notebooksDown} = this.state.serverDownStatus;
+    const {copiedErrorIdToClipboard, serverDownStatus: {apiDown, firecloudDown, notebooksDown}} = this.state;
 
     return globalError !== undefined && <React.Fragment>
       {globalError.statusCode === 500 && <div style={styles.errorHandler}>
         <FlexRow style={styles.errorContent}>
           <FlexColumn>
           Server Error (500)
-          <div>
+          {!isBlank(globalError.errorUniqueId) && <div>
             Please click to copy unique code for support ticket
-            {globalError.errorUniqueId && <CopyToClipboard text={globalError.errorUniqueId}>
-              <FontAwesomeIcon icon={faCopy} style={{...styles.iconStyles, marginLeft: 4}}/></CopyToClipboard>}
-          </div>
+            <TooltipTrigger content={copiedErrorIdToClipboard ? 'Copied to Clipboard' : globalError.errorUniqueId}>
+              <CopyToClipboard text={globalError.errorUniqueId}>
+                  <FontAwesomeIcon icon={faCopy} style={{...styles.iconStyles, marginLeft: 4}}
+                                   onClick={() => {this.copyToClipboard(); }}/>
+              </CopyToClipboard>
+            </TooltipTrigger>
+
+          </div>}
           </FlexColumn>
           <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.closeError()} />
         </FlexRow></div>}
