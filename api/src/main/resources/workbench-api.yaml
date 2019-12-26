@@ -3428,9 +3428,9 @@ definitions:
           "$ref": "#/definitions/ConceptSet"
   ConceptSet:
     type: object
+
     required:
     - name
-    - type
     properties:
       id:
         type: integer
