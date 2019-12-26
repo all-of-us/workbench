@@ -15,7 +15,6 @@ cron-emulator-err.log
 /api/.swagger-codegen/*
 /api/out/*
 /api/sa-key.json
-/api/src/main/resources/merged.yaml
 /api/src/main/webapp/WEB-INF/appengine-web.xml
 /api/src/main/webapp/WEB-INF/cron.yaml
 /api/src/main/webapp/WEB-INF/sa-key.json
