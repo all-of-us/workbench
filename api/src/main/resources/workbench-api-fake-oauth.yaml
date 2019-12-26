@@ -12,11 +12,13 @@ info:
 host: api.pmi-ops.org
 securityDefinitions:
   aou_oauth:
-    authorizationUrl: 'fake-authorization-url.pmi-ops.org'
-    tokenUrl: 'fake-token-url.pmi-ops.org'
+    authorizationUrl: 'https://fake-authorization-url.pmi-ops.org'
+    tokenUrl: 'https://fake-token-url.pmi-ops.org'
     type: oauth2
     flow: accessCode
-    scopes: [] # TODO(jaycarlton): find right scopes
+    scopes:
+      read_aou: 'Read AoU objects'
+      write_aou: 'Create and modify AoU objects'
 schemes:
 - https
 produces:
