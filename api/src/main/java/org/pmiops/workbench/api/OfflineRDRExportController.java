@@ -105,7 +105,10 @@ public class OfflineRDRExportController implements OfflineRDRExportApiDelegate {
       Task task = client.createTask(queuePath, taskBuilder.build());
 
     } catch (IOException ex) {
-      log.severe(String.format("Error while creating task to push to queue for IDS %s and path %s", idAsString, taskUri));
+      log.severe(
+          String.format(
+              "Error while creating task to push to queue for IDS %s and path %s",
+              idAsString, taskUri));
     }
   }
 
