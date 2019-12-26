@@ -4280,7 +4280,7 @@ definitions:
         "$ref": "#/definitions/Workspace"
       accessLevel:
         "$ref": "#/definitions/WorkspaceAccessLevel"
-  userListResponse:
+  UserListResponse:
     type: object
     required:
     - profileList
