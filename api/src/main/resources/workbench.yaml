@@ -627,7 +627,7 @@ paths:
   /v1/billingProjects:
     get:
       tags:
-        - Profile
+        - profile
       operationId: getBillingProjects
       summary: List billing projects for a user
       responses:
