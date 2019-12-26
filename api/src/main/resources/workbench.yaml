@@ -3666,7 +3666,7 @@ definitions:
       accessLevel:
         $ref: '#/definitions/WorkspaceAccessLevel'
 
-  userListResponse:
+  UserListResponse:
     type: object
     required:
       - profileList
