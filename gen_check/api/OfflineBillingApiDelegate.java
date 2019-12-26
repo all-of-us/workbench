@@ -1,0 +1,45 @@
+package org.pmiops.workbench.api;
+
+import org.pmiops.workbench.model.ErrorResponse;
+
+import io.swagger.annotations.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
+/**
+ * A delegate to be called by the {@link OfflineBillingApiController}}.
+ * Should be implemented as a controller but without the {@link org.springframework.stereotype.Controller} annotation.
+ * Instead, use spring to autowire this class into the {@link OfflineBillingApiController}.
+ */
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-12-26T14:42:01.876-06:00")
+
+public interface OfflineBillingApiDelegate {
+
+    /**
+     * @see OfflineBillingApi#billingProjectGarbageCollection
+     */
+    ResponseEntity<Void> billingProjectGarbageCollection();
+
+    /**
+     * @see OfflineBillingApi#bufferBillingProjects
+     */
+    ResponseEntity<Void> bufferBillingProjects();
+
+    /**
+     * @see OfflineBillingApi#checkFreeTierBillingUsage
+     */
+    ResponseEntity<Void> checkFreeTierBillingUsage();
+
+    /**
+     * @see OfflineBillingApi#cleanBillingBuffer
+     */
+    ResponseEntity<Void> cleanBillingBuffer();
+
+    /**
+     * @see OfflineBillingApi#syncBillingProjectStatus
+     */
+    ResponseEntity<Void> syncBillingProjectStatus();
+
+}
