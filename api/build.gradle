@@ -7,16 +7,15 @@ import org.pmiops.workbench.tooling.IncrementalHotSwapTask
 // This path is the Java sources root for finding any overridden Swagger-codegen
 // templates we may be using.
 def swaggerTemplateDir = 'src/main/resources/swaggercodegen'
-def mergedApiSourceFile = 'src/main/resources/merged.yaml'
-def clientApiSourceFile = 'src/main/resources/client_api.yaml'
+def workbenchApiSourceFile = 'src/main/resources/workbench-api.yaml'
 def swaggerTargetFolder = 'src/generated/java'
 
 task generateApi {
-  inputs.file("$projectDir/$mergedApiSourceFile")
+  inputs.file("$projectDir/$workbenchApiSourceFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
     def config = new CodegenConfigurator()
-    config.setInputSpec("file:///$projectDir/$mergedApiSourceFile")
+    config.setInputSpec("file:///$projectDir/$workbenchApiSourceFile")
     config.setOutputDir("$projectDir")
     config.setTemplateDir("$projectDir/$swaggerTemplateDir")
     config.setLang('spring')
