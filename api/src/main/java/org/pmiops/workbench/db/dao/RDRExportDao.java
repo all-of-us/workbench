@@ -21,7 +21,7 @@ public interface RDRExportDao extends CrudRepository<DbRDRExport, Long> {
           "select w.workspace_id from  workspace w LEFT JOIN "
               + "rdr_export rdr on w.workspace_id = rdr.entity_id and rdr.entity = 2 where "
               + "w.last_modified_time > rdr.last_export_date or rdr.entity_id IS NULL")
-  List<Long> findDbWorkspaceToExport();
+  List<BigInteger> findDbWorkspaceToExport();
 
   DbRDRExport findByEntityAndId(short entity, int id);
 }

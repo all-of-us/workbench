@@ -2164,7 +2164,7 @@ paths:
           schema:
             $ref: "#/definitions/DataSetPreviewResponse"
 
-  /v1/syncResearcherData:
+  /v1/offline/syncResearcherData:
     post:
       tags:
         - offlineRDRExport
@@ -2183,7 +2183,7 @@ paths:
           description: >
             A SQL query for each domain in the Data Set
 
-  /v1/syncWorkspaceData:
+  /v1/offline/syncWorkspaceData:
     post:
       tags:
         - offlineRDRExport

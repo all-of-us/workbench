@@ -36,7 +36,7 @@ public class OfflineRDRExportController implements OfflineRDRExportApiDelegate {
   private final String locationId = "us-central1";
   private final String queueName = "rdrQueueTest";
 
-  private final String basePath = "/v1";
+  private final String basePath = "/v1/offline";
   private final String syncResearcherPath = basePath + "/syncResearcherData";
   private final String syncWorkspacePath = basePath + "/syncWorkspaceData";
 

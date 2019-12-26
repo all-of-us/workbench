@@ -90,7 +90,10 @@ public class RDRServiceImpl implements RDRService {
   public List<Long> findAllWorkspacesIdsToExport() {
     List<Long> workspaceListToExport = new ArrayList<Long>();
     try {
-      workspaceListToExport = rdrExportDao.findDbWorkspaceToExport();
+      workspaceListToExport =
+          rdrExportDao.findDbWorkspaceToExport().stream()
+              .map(workspaceId -> workspaceId.longValue())
+              .collect(Collectors.toList());
     } catch (Exception ex) {
       log.severe(
           String.format(
