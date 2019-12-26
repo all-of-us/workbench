@@ -3,33 +3,61 @@ package org.pmiops.workbench.notebooks;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.Blob;
 import java.time.Clock;
+import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.monitoring.MonitoringService;
+import org.pmiops.workbench.monitoring.views.MonitoringViews;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-public class NotebooksServiceImplTest {
+public class NotebooksServiceTest {
+  private static final JSONObject NOTEBOOK_CONTENTS =
+      new JSONObject().put("who", "I'm a notebook!");
+  private static final String BUCKET_NAME = "notebook.bucket";
+  private static final FirecloudWorkspaceResponse WORKSPACE_RESPONSE =
+      new FirecloudWorkspaceResponse().workspace(new FirecloudWorkspace().bucketName(BUCKET_NAME));
+  private static final String NOTEBOOK_NAME = "my first notebook";
+  private static final String NAMESPACE_NAME = "namespace_name";
+  private static final String WORKSPACE_NAME = "workspace_name";
+  private static final DbWorkspace WORKSPACE = new DbWorkspace();
+  private static final String PREVIOUS_NOTEBOOK = "previous notebook";
+
+  private static DbUser DB_USER;
+
+  @Autowired private MonitoringService mockMonitoringService;
+  @Autowired private FireCloudService mockFirecloudService;
+  @Autowired private CloudStorageService mockCloudStorageService;
+  @Autowired private WorkspaceService mockWorkspaceService;
+
+  @Autowired private NotebooksService notebooksService;
 
   @TestConfiguration
   @Import({NotebooksServiceImpl.class})
@@ -37,7 +65,8 @@ public class NotebooksServiceImplTest {
     CloudStorageService.class,
     FireCloudService.class,
     WorkspaceService.class,
-    UserRecentResourceService.class
+    UserRecentResourceService.class,
+    MonitoringService.class
   })
   static class Configuration {
 
@@ -47,15 +76,20 @@ public class NotebooksServiceImplTest {
     }
 
     @Bean
-    DbUser user() {
-      return null;
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    DbUser getDbUser() {
+      return DB_USER;
     }
   }
 
+  @Before
+  public void setup() {
+    DB_USER = new DbUser();
+    DB_USER.setUserId(101L);
+    DB_USER.setEmail("panic@thedis.co");
+  }
+
   @Mock private Blob mockBlob;
-  @Autowired private NotebooksService notebooksService;
-  @Autowired private FireCloudService firecloudService;
-  @Autowired private CloudStorageService cloudStorageService;
 
   @Test
   public void testGetReadOnlyHtml_tooBig() {
@@ -68,13 +102,13 @@ public class NotebooksServiceImplTest {
     } catch (FailedPreconditionException e) {
       // expected
     }
-    verify(firecloudService, never()).staticNotebooksConvert(any());
+    verify(mockFirecloudService, never()).staticNotebooksConvert(any());
   }
 
   @Test
   public void testGetReadOnlyHtml_basicContent() {
     stubNotebookToJson();
-    when(firecloudService.staticNotebooksConvert(any()))
+    when(mockFirecloudService.staticNotebooksConvert(any()))
         .thenReturn("<html><body><div>asdf</div></body></html>");
 
     String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
@@ -85,7 +119,7 @@ public class NotebooksServiceImplTest {
   @Test
   public void testGetReadOnlyHtml_scriptSanitization() {
     stubNotebookToJson();
-    when(firecloudService.staticNotebooksConvert(any()))
+    when(mockFirecloudService.staticNotebooksConvert(any()))
         .thenReturn("<html><script>window.alert('hacked');</script></html>");
 
     String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
@@ -96,7 +130,7 @@ public class NotebooksServiceImplTest {
   @Test
   public void testGetReadOnlyHtml_styleSanitization() {
     stubNotebookToJson();
-    when(firecloudService.staticNotebooksConvert(any()))
+    when(mockFirecloudService.staticNotebooksConvert(any()))
         .thenReturn(
             "<STYLE type=\"text/css\">BODY{background:url(\"javascript:alert('XSS')\")} div {color: 'red'}</STYLE>\n");
 
@@ -114,7 +148,7 @@ public class NotebooksServiceImplTest {
   public void testGetReadOnlyHtml_allowsDataImage() {
     stubNotebookToJson();
     String dataUri = "data:image/png;base64,MTIz";
-    when(firecloudService.staticNotebooksConvert(any()))
+    when(mockFirecloudService.staticNotebooksConvert(any()))
         .thenReturn("<img src=\"" + dataUri + "\" />\n");
 
     String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
@@ -124,18 +158,43 @@ public class NotebooksServiceImplTest {
   @Test
   public void testGetReadOnlyHtml_disallowsRemoteImage() {
     stubNotebookToJson();
-    when(firecloudService.staticNotebooksConvert(any()))
+    when(mockFirecloudService.staticNotebooksConvert(any()))
         .thenReturn("<img src=\"https://eviltrackingpixel.com\" />\n");
 
     String html = new String(notebooksService.getReadOnlyHtml("", "", "").getBytes());
     assertThat(html).doesNotContain("eviltrackingpixel.com");
   }
 
+  @Test
+  public void testSaveNotebook_firesMetric() {
+    notebooksService.saveNotebook(BUCKET_NAME, NOTEBOOK_NAME, NOTEBOOK_CONTENTS);
+    verify(mockMonitoringService).recordIncrement(MonitoringViews.NOTEBOOK_SAVE);
+  }
+
+  @Test
+  public void testDeleteNotebook_firesMetric() {
+    doReturn(WORKSPACE_RESPONSE).when(mockFirecloudService).getWorkspace(anyString(), anyString());
+    doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
+
+    notebooksService.deleteNotebook(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
+    verify(mockMonitoringService).recordIncrement(MonitoringViews.NOTEBOOK_DELETE);
+  }
+
+  @Test
+  public void testCloneNotebook_firesMetric() {
+    doReturn(WORKSPACE_RESPONSE).when(mockFirecloudService).getWorkspace(anyString(), anyString());
+    doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
+
+    notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
+    verify(mockMonitoringService).recordIncrement(MonitoringViews.NOTEBOOK_CLONE);
+  }
+
   private void stubNotebookToJson() {
-    when(firecloudService.getWorkspace(any(), any()))
+    when(mockFirecloudService.getWorkspace(anyString(), anyString()))
         .thenReturn(
-            new FirecloudWorkspaceResponse().workspace(new FirecloudWorkspace().bucketName("bkt")));
+            new FirecloudWorkspaceResponse()
+                .workspace(new FirecloudWorkspace().bucketName("bkt ")));
     when(mockBlob.getContent()).thenReturn("{}".getBytes());
-    when(cloudStorageService.getBlob(any(), any())).thenReturn(mockBlob);
+    when(mockCloudStorageService.getBlob(anyString(), anyString())).thenReturn(mockBlob);
   }
 }

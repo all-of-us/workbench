@@ -15,6 +15,7 @@ import {CriteriaType, DomainType} from 'generated/fetch';
 import * as React from 'react';
 import {Key} from 'ts-key-enum';
 
+const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
   searchContainer: {
     position: 'absolute',
@@ -89,29 +90,30 @@ const styles = reactStyles({
   },
   table: {
     width: '100%',
-    textAlign: 'left',
-    border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
+    border: borderStyle,
     borderRadius: '3px',
     tableLayout: 'fixed',
   },
   columnHeader: {
-    padding: '10px',
+    padding: 0,
     background: colorWithWhiteness(colors.dark, 0.93),
     color: colors.primary,
     border: 0,
-    borderBottom: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
+    borderBottom: borderStyle,
+    borderLeft: borderStyle,
     fontWeight: 600,
-    textAlign: 'left',
+    textAlign: 'center',
     verticalAlign: 'middle',
     lineHeight: '0.75rem'
   },
   columnBody: {
     background: colors.white,
-    padding: '0.4rem',
-    verticalAlign: 'top',
-    textAlign: 'left',
+    verticalAlign: 'middle',
+    textAlign: 'center',
+    padding: 0,
     border: 0,
-    borderBottom: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`,
+    borderBottom: borderStyle,
+    borderLeft: borderStyle,
     color: colors.primary,
     lineHeight: '0.8rem',
   },
@@ -301,8 +303,8 @@ export const ListSearch = withCurrentWorkspace()(
       const loadingIngredients = ingredients[row.id] && ingredients[row.id].loading;
       const columnStyle = child ?
         {...styles.columnBody, paddingLeft: '1.25rem'} : styles.columnBody;
-      return <tr>
-        <td style={columnStyle}>
+      return <tr style={{height: '1.75rem'}}>
+        <td style={{...columnStyle, textAlign: 'left', borderLeft: 0, padding: '0 0.25rem'}}>
           {row.selectable && <div style={{...styles.selectDiv}}>
             {attributes &&
               <ClrIcon style={styles.attrIcon} shape='slider' dir='right' size='20' onClick={() => this.launchAttributes(row)}/>
@@ -327,7 +329,7 @@ export const ListSearch = withCurrentWorkspace()(
         <td style={styles.columnBody}>{row.code}</td>
         <td style={styles.columnBody}>{!brand && row.type}</td>
         <td style={styles.columnBody}>{row.count > -1 && row.count.toLocaleString()}</td>
-        <td style={{...styles.columnBody, textAlign: 'center'}}>
+        <td style={{...styles.columnBody}}>
           {row.hasHierarchy && <i className='pi pi-sitemap' style={styles.treeIcon} onClick={() => this.showHierarchy(row)}/>}
         </td>
       </tr>;
@@ -369,8 +371,8 @@ export const ListSearch = withCurrentWorkspace()(
           </div>}
           {!!data.length && <table className='p-datatable' style={styles.table}>
             <thead className='p-datatable-thead'>
-              <tr>
-                <th style={styles.columnHeader}>Name</th>
+              <tr style={{height: '2rem'}}>
+                <th style={{...styles.columnHeader, borderLeft: 0}}>Name</th>
                 <th style={{...styles.columnHeader, width: '20%'}}>Code</th>
                 <th style={{...styles.columnHeader, width: '10%'}}>Vocab</th>
                 <th style={{...styles.columnHeader, width: '8%'}}>Count</th>

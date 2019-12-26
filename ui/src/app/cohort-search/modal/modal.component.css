@@ -1,3 +1,6 @@
+.container, .container > .row {
+  height: 100%;
+}
 .crit-modal-container {
   position: fixed;
   top: 0;
@@ -22,8 +25,10 @@
   position: absolute;
   top: 50%;
   left: 50%;
+  overflow-y: auto;
   transform: translate(-50%, -50%);
-  width: calc(100vw - calc(19rem + 60px));
+  height: 90vh;
+  width: 80vw;
   background-color: white;
   border-radius: 4px;
   display: flex;
@@ -32,7 +37,7 @@
 }
 
 .crit-modal-content.demographics {
-  width: 70vw;
+  width: 50vw;
   height: auto;
 }
 
@@ -126,6 +131,9 @@ button.tab.active {
   overflow: auto;
 }
 
+.content.left {
+  height: calc(100% - 83px);
+}
 .content.right {
   height: 100%;
 }
@@ -174,8 +182,6 @@ button.tab.active {
   display: block;
   animation: fadeEffect 1s;
   padding-left: 1rem;
-  max-height: 27rem;
-  min-height: 27rem;
   overflow-y: auto;
 }
 .panel-right-container{
@@ -189,16 +195,13 @@ button.tab.active {
 .panel-right.selected {
   width: 95%;
   border: 2px solid #262262;
-  height: 68vh;
+  height: calc(100% - 150px);
   border-radius: 5px;
   overflow-y: auto;
   overflow-x: hidden;
-  min-height: 27.5rem;
-  max-height: 27.5rem;
   background-color: white;
 }
 .demographics .panel-right.selected {
-  height: calc(100% - 5.5rem);
   min-height: 10rem;
 }
 
@@ -209,6 +212,7 @@ button.tab.active {
 }
 
 .title-margin .padding-zero{
+  height: 100%;
   padding-left: 0;
   padding-right: 0;
 }
@@ -244,10 +248,41 @@ h5.selection-title {
   color: #007cbb;
 }
 
-@media all and (max-width: 900px) {
-  .crit-modal-content.demographics {
+@media only screen and (max-width: 1500px) {
+  .crit-modal-content {
     width: 90vw;
   }
+  .crit-modal-content.demographics {
+    width: 70vw;
+  }
+}
+@media only screen and (max-width: 1200px) {
+  .crit-modal-content, .crit-modal-content.demographics {
+    width: 100vw;
+  }
+}
+@media only screen and (max-height: 700px) {
+  .crit-modal-content {
+    height: 100vh;
+  }
+}
+@media only screen and (max-height: 400px) {
+  .crit-modal-content.demographics {
+    height: 100vh;
+  }
+  .crit-modal-content.demographics.age {
+    height: auto;
+  }
+  .demographics .panel-right.selected {
+    min-height: 1px;
+  }
+}
+@media only screen and (max-height: 300px) {
+  .crit-modal-content.demographics.age {
+    height: 100vh;
+  }
+}
+@media only screen and (max-width: 900px) {
   .panel {
     flex-flow: column nowrap;
     justify-content: space-between;
@@ -260,102 +295,6 @@ h5.selection-title {
   .panel-left {
     min-height: 50%;
     padding-bottom: 0.2rem;
-  }
-}
-
-@media only screen and (min-width: 992px) and  (min-height: 400px){
-  .crit-modal-content {
-    width: calc(100vw - calc(1rem + 60px));
-    overflow-y: auto;
-    height: 100%;
-  }
-
-  .panel-right.selected {
-    min-height: 26rem;
-    max-height: 26rem;
-  }
-}
-
-@media only screen and (min-width: 992px) and  (min-height: 780px){
-  .crit-modal-content {
-    width: calc(100vw - calc(1rem + 60px));
-    overflow-y: auto;
-    height: auto;
-  }
-
-  .panel-right.selected {
-    min-height: 26rem;
-    max-height: 26rem;
-  }
-}
-
-@media only screen and (min-width: 1300px) and  (min-height: 400px){
-  .crit-modal-content {
-    width: calc(100vw - calc(6rem + 60px));
-    overflow-y: auto;
-    height: 100%;
-  }
-
-  .crit-modal-content.demographics {
-    width: 60vw;
-  }
-
-  .panel-right.selected {
-    min-height: 24.5rem;
-    max-height: 24.5rem;
-  }
-}
-
-@media only screen and (min-width: 1300px) and  (min-height: 780px){
-  .crit-modal-content {
-    width: calc(100vw - calc(6rem + 60px));
-    overflow-y: auto;
-    height: auto;
-  }
-
-  .crit-modal-content.demographics {
-    width: 60vw;
-  }
-
-  .panel-right.selected {
-    min-height: 24.5rem;
-    max-height: 24.5rem;
-  }
-}
-
-@media only screen and (min-width: 1500px) and  (min-height: 400px){
-  .crit-modal-content {
-    width: calc(100vw - calc(19rem + 60px));
-    height: 100%;
-    overflow-y: auto;
-  }
-
-
-  .crit-modal-content.demographics {
-    width: 50vw;
-  }
-
-  .panel-right.selected {
-    min-height: 24.5rem;
-    max-height: 24.5rem;
-  }
-}
-
-@media only screen and (min-width: 1500px) and  (min-height: 780px){
-  .crit-modal-content {
-    width: calc(100vw - calc(17rem + 60px));
-    overflow-y: auto;
-    height: auto;
-  }
-
-
-  .crit-modal-content.demographics {
-    width: 50vw;
-  }
-
-  .panel-right.selected {
-    min-height: 24.5rem;
-    max-height: 24.5rem;
   }
 }
 @keyframes fadeEffect {

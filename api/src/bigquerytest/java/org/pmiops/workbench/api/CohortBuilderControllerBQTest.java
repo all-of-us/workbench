@@ -60,7 +60,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,7 +69,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 // Note: normally we shouldn't need to explicitly import our own @TestConfiguration. This might be
 // a bad interaction with BeforeAfterSpringTestRunner.
 @Import({TestJpaConfig.class, CohortBuilderControllerBQTest.Configuration.class})
-@ComponentScan(basePackages = "org.pmiops.workbench.cohortbuilder.*")
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @TestConfiguration

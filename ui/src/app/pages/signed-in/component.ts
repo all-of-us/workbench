@@ -2,7 +2,6 @@ import {Location} from '@angular/common';
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
-import {ErrorHandlingService} from 'app/services/error-handling.service';
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
@@ -72,7 +71,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
   constructor(
     /* Ours */
-    public errorHandlingService: ErrorHandlingService,
     private signInService: SignInService,
     private serverConfigService: ServerConfigService,
     private profileStorageService: ProfileStorageService,

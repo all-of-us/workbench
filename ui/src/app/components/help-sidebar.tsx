@@ -1,16 +1,28 @@
 import {Component, Input} from '@angular/core';
+import {faEdit} from '@fortawesome/free-regular-svg-icons';
+import {faEllipsisV, faInfoCircle} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
 import {ClrIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
 import {SidebarContent} from 'app/pages/data/cohort-review/sidebar-content.component';
 import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {highlightSearchTerm, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {highlightSearchTerm, reactStyles, ReactWrapperBase, withCurrentWorkspace, withUserProfile} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
+import {NavStore} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget} from 'app/utils/zendesk';
-import {ParticipantCohortStatus} from 'generated/fetch';
+import {ParticipantCohortStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {MenuItem} from './buttons';
+import {PopupTrigger} from './popups';
 
+const proIcons = {
+  thunderstorm: '/assets/icons/thunderstorm-solid.svg'
+};
 const sidebarContent = require('assets/json/help-sidebar.json');
 
 const styles = reactStyles({
@@ -53,12 +65,16 @@ const styles = reactStyles({
     zIndex: 101
   },
   icon: {
+    background: colorWithWhiteness(colors.primary, 0.48),
     color: colors.white,
-    marginTop: '1rem',
-    padding: '0.25rem 0',
+    display: 'table-cell',
+    height: '46px',
+    width: '45px',
+    borderBottom: `1px solid ${colorWithWhiteness(colors.primary, 0.4)}`,
     cursor: 'pointer',
     textAlign: 'center',
-    transition: 'background 0.2s linear'
+    transition: 'background 0.2s linear',
+    verticalAlign: 'middle'
   },
   topBar: {
     width: '14rem',
@@ -111,6 +127,20 @@ const styles = reactStyles({
     color: colors.accent,
     cursor: 'pointer',
     textDecoration: 'none'
+  },
+  dropdownHeader: {
+    fontSize: 12,
+    lineHeight: '30px',
+    color: colors.primary,
+    fontWeight: 600,
+    paddingLeft: 12,
+    width: 160
+  },
+  menuButtonIcon: {
+    width: 27,
+    height: 27,
+    opacity: 0.65,
+    marginRight: 16
   }
 });
 
@@ -121,16 +151,47 @@ const iconStyles = {
   },
   disabled: {
     ...styles.icon,
-    opacity: 0.4,
     cursor: 'not-allowed'
+  },
+  menu: {
+    ...styles.icon,
+    margin: '0.5rem auto 1.5rem',
+    height: 27,
+    width: 27
   }
 };
 
+const icons = [{
+  id: 'help',
+  disabled: false,
+  faIcon: faInfoCircle,
+  page: null,
+  style: {fontSize: '21px'},
+  tooltip: 'Help Tips',
+}, {
+  id: 'thunderstorm',
+  disabled: true,
+  faIcon: null,
+  page: null,
+  style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
+  tooltip: 'Compute Configuration',
+}, {
+  id: 'annotations',
+  disabled: false,
+  faIcon: faEdit,
+  page: 'reviewParticipantDetail',
+  style: {fontSize: '20px', marginLeft: '3px'},
+  tooltip: 'Annotations',
+}];
+
 interface Props {
+  deleteFunction: Function;
   helpContent: string;
-  setSidebarState: Function;
-  sidebarOpen: boolean;
   profileState: any;
+  setSidebarState: Function;
+  shareFunction: Function;
+  sidebarOpen: boolean;
+  workspace: WorkspaceData;
 }
 
 interface State {
@@ -138,8 +199,9 @@ interface State {
   filteredContent: Array<any>;
   participant: ParticipantCohortStatus;
   searchTerm: string;
+  tooltipId: number;
 }
-export const HelpSidebar = withUserProfile()(
+export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
   class extends React.Component<Props, State> {
     subscription: Subscription;
     constructor(props: Props) {
@@ -148,7 +210,8 @@ export const HelpSidebar = withUserProfile()(
         activeIcon: undefined,
         filteredContent: undefined,
         participant: undefined,
-        searchTerm: ''
+        searchTerm: '',
+        tooltipId: undefined
       };
     }
 
@@ -232,25 +295,74 @@ export const HelpSidebar = withUserProfile()(
       openZendeskWidget(givenName, familyName, username, contactEmail);
     }
 
-    hideSidebar() {
-      this.props.setSidebarState(false);
-      // keep activeIcon set while the sidebar transition completes
-      setTimeout(() => {
-        // check if the sidebar has been opened again before resetting activeIcon
-        if (!this.props.sidebarOpen) {
-          this.setState({activeIcon: undefined});
-        }
-      }, 300);
-    }
-
     highlightMatches(content: string) {
       const {searchTerm} = this.state;
       return highlightSearchTerm(searchTerm, content, colors.success);
     }
 
+    renderWorkspaceMenu() {
+      const {deleteFunction, shareFunction, workspace, workspace: {accessLevel, id, namespace}} = this.props;
+      const isNotOwner = !workspace || accessLevel !== WorkspaceAccessLevel.OWNER;
+      const tooltip = isNotOwner && 'Requires owner permission';
+      return <PopupTrigger
+        side='bottom'
+        closeOnClick
+        content={
+          <React.Fragment>
+            <div style={styles.dropdownHeader}>Workspace Actions</div>
+            <MenuItem
+              icon='copy'
+              onClick={() => {
+                AnalyticsTracker.Workspaces.OpenDuplicatePage();
+                NavStore.navigate(['/workspaces', namespace, id, 'duplicate']);
+              }}>
+              Duplicate
+            </MenuItem>
+            <MenuItem
+              icon='pencil'
+              tooltip={tooltip}
+              disabled={isNotOwner}
+              onClick={() => {
+                AnalyticsTracker.Workspaces.OpenEditPage();
+                NavStore.navigate(['/workspaces', namespace, id, 'edit']);
+              }}>
+              Edit
+            </MenuItem>
+            <MenuItem
+              icon='share'
+              tooltip={tooltip}
+              disabled={isNotOwner}
+              onClick={() => {
+                AnalyticsTracker.Workspaces.OpenShareModal();
+                shareFunction();
+              }}>
+              Share
+            </MenuItem>
+            <MenuItem
+              icon='trash'
+              tooltip={tooltip}
+              disabled={isNotOwner}
+              onClick={() => {
+                AnalyticsTracker.Workspaces.OpenDeleteModal();
+                deleteFunction();
+              }}>
+              Delete
+            </MenuItem>
+          </React.Fragment>
+        }>
+        <div data-test-id='workspace-menu-button'>
+          <TooltipTrigger content={<div>Menu</div>} side='left'>
+            <div style={styles.icon}>
+              <FontAwesomeIcon icon={faEllipsisV} style={{fontSize: '21px'}}/>
+            </div>
+          </TooltipTrigger>
+        </div>
+      </PopupTrigger>;
+    }
+
     render() {
       const {helpContent, setSidebarState, sidebarOpen} = this.props;
-      const {activeIcon, filteredContent, participant, searchTerm} = this.state;
+      const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
       const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContent];
       const contentStyle = (tab: string) => ({
         display: activeIcon === tab ? 'block' : 'none',
@@ -260,22 +372,19 @@ export const HelpSidebar = withUserProfile()(
       });
       return <React.Fragment>
         <div style={styles.iconContainer}>
-          <div style={activeIcon === 'help' ? iconStyles.active : styles.icon}>
-            <ClrIcon className='is-solid' shape='info-standard' size={28} title='Help Tips'
-              onClick={() => this.onIconClick('help')} />
-          </div>
-          <div style={styles.icon}>
-            <a href='https://docs.google.com/spreadsheets/d/1dsvJV8B7EXQj5EWa2XG-KAhs-l7FsQnyJSSFMstLF2U/edit#gid=183931508'
-              target='_blank' style={{color: colors.white}}>
-              <ClrIcon className='is-solid' shape='book' size={32} title='Data Dictionary' />
-            </a>
-          </div>
-          {helpContent === 'reviewParticipantDetail' &&
-            <div style={activeIcon === 'annotations' ? iconStyles.active : styles.icon}>
-              <ClrIcon shape='note' size={32}  title='Participant Status and Annotations'
-                onClick={() => this.onIconClick('annotations')} />
-            </div>
-          }
+          {this.renderWorkspaceMenu()}
+          {icons.map((icon, i) => (!icon.page || icon.page === helpContent) && <div key={i} style={{display: 'table'}}>
+            <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
+              <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
+                   onMouseOver={() => this.setState({tooltipId: i})}
+                   onMouseOut={() => this.setState({tooltipId: undefined})}>
+                {icon.faIcon === null
+                  ? <img src={proIcons[icon.id]} style={icon.style} />
+                  : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} onClick={() => this.onIconClick(icon.id)} />
+                }
+              </div>
+            </TooltipTrigger>
+          </div>)}
         </div>
         <div style={activeIcon ? {...styles.sidebarContainer, ...styles.sidebarContainerActive} : styles.sidebarContainer}>
           <div style={sidebarOpen ? {...styles.sidebar, ...styles.sidebarOpen} : styles.sidebar} data-test-id='sidebar-content'>
@@ -336,11 +445,13 @@ export const HelpSidebar = withUserProfile()(
   template: '<div #root></div>',
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
+  @Input('deleteFunction') deleteFunction: Props['deleteFunction'];
   @Input('helpContent') helpContent: Props['helpContent'];
   @Input('setSidebarState') setSidebarState: Props['setSidebarState'];
+  @Input('shareFunction') shareFunction: Props['shareFunction'];
   @Input('sidebarOpen') sidebarOpen: Props['sidebarOpen'];
 
   constructor() {
-    super(HelpSidebar, ['helpContent', 'setSidebarState', 'sidebarOpen']);
+    super(HelpSidebar, ['deleteFunction', 'helpContent', 'setSidebarState', 'shareFunction', 'sidebarOpen']);
   }
 }

@@ -113,6 +113,18 @@ paths:
           schema:
             $ref: "#/definitions/FeaturedWorkspacesConfigResponse"
 
+  /v1/status-alert:
+    get:
+      tags:
+        - status-alert
+      description: Returns status alert information if any exists.
+      operationId: getStatusAlert
+      responses:
+        200:
+          description: >
+            A status alert information object.
+          schema:
+            $ref: "#/definitions/StatusAlert"
 
     # User methods ########################################################################
 
@@ -176,24 +188,6 @@ paths:
           description: The answer.
           schema:
             $ref: "#/definitions/UsernameTakenResponse"
-
-  /v1/is-contact-email-taken:
-    get:
-      tags:
-        - profile
-      description: Checks to see if the given contact email is not available.
-      operationId: isContactEmailTaken
-      security: []
-      parameters:
-        - in: query
-          name: contactEmail
-          type: string
-          required: true
-      responses:
-        200:
-          description: The answer.
-          schema:
-            $ref: "#/definitions/ContactEmailTakenResponse"
 
   /v1/update-contact-email:
     post:
@@ -1261,6 +1255,22 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/cron/monitoring/updateGaugeMetrics:
+    get:
+      tags:
+        - offlineMonitoring
+        - cron
+      description: Trigger recording of all gauge metrics
+      operationId: updateGaugeMetrics
+      security: []
+      responses:
+        204:
+          description: No content
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   # Notebooks ############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename:
@@ -2116,6 +2126,7 @@ paths:
           description: Mark all dataset with cohort/concept id as dirty
           schema:
             type: boolean
+            default: false
 
   /v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook:
     post:
@@ -2225,8 +2236,10 @@ definitions:
     properties:
       firecloudStatus:
         type: boolean
+        default: false
       notebooksStatus:
         type: boolean
+        default: false
 
   ConfigResponse:
     type: object
@@ -2248,15 +2261,19 @@ definitions:
           domain. If unset, Stackdriver error reporting should be disabled.
       enableComplianceTraining:
         type: boolean
+        default: false
         description: Feature flag for enabling compliance training in registration steps
       enableDataUseAgreement:
         type: boolean
+        default: false
         description: Feature flag for enabling data use agreement
       unsafeAllowSelfBypass:
         type: boolean
+        default: false
         description: Enable a user to bypass themself
       enableEraCommons:
         type: boolean
+        default: false
         description: Feature flag for enabling eRA commons
       firecloudURL:
         type: string
@@ -2313,6 +2330,7 @@ definitions:
         type: string
       transformedByRegisteredTierPrivacyMethods:
         type: boolean
+        default: false
 
   BillingProjectStatus:
     type: string
@@ -2431,6 +2449,7 @@ definitions:
         description: Milliseconds since the UNIX epoch.
       published:
         type: boolean
+        default: false
 
   UserRole:
     type: object
@@ -2496,6 +2515,7 @@ definitions:
     properties:
       includeUserRoles:
         type: boolean
+        default: false
         description: >
           Whether to duplicate the user roles (sharing settings) on the workspace.
           By default, duplicate follows the behavior of CreateWorkspace - it is
@@ -2565,6 +2585,7 @@ definitions:
         type: string
       approved:
         type: boolean
+        default: null
       ancestry:
         type: boolean
         default: false
@@ -2651,6 +2672,7 @@ definitions:
     properties:
       approved:
         type: boolean
+        default: false
 
   ClusterConfig:
     properties:
@@ -2695,6 +2717,7 @@ definitions:
         $ref: "#/definitions/AccessModule"
       isBypassed:
         type: boolean
+        default: false
 
   CohortReviewListResponse:
     type: object
@@ -3006,6 +3029,7 @@ definitions:
         type: string
       newNotebook:
         type: boolean
+        default: false
       kernelType:
         $ref: "#/definitions/KernelTypeEnum"
 
@@ -3050,6 +3074,7 @@ definitions:
           modify a changed resource.
       includesAllParticipants:
         type: boolean
+        default: false
       description:
         type: string
       workspaceId:
@@ -3384,6 +3409,7 @@ definitions:
       contactEmailFailure:
         description: Whether or not contact email could be added to verification list
         type: boolean
+        default: false
       firstSignInTime:
         type: integer
         format: int64
@@ -3421,6 +3447,7 @@ definitions:
         description: Timestamp when the user completed a demographic survey in milliseconds since the UNIX epoch.
       disabled:
         type: boolean
+        default: false
       emailVerificationStatus:
         $ref: "#/definitions/EmailVerificationStatus"
       aboutYou:
@@ -3506,7 +3533,7 @@ definitions:
       freeTierUsage:
         type: number
         format: double
-      freeTierQuota:
+      freeTierDollarQuota:
         type: number
         format: double
 
@@ -3542,6 +3569,7 @@ definitions:
         $ref: '#/definitions/Education'
       disability:
         type: boolean
+        default: false
 
   Address:
     type: object
@@ -3663,6 +3691,7 @@ definitions:
           type: string
       playgroundMode:
         type: boolean
+        default: false
         description: Set to true if playgroundMode needed
 
   ClusterLocalizeResponse:
@@ -3686,17 +3715,7 @@ definitions:
       isTaken:
         description: Boolean response to whether username is already taken.
         type: boolean
-    example:
-      isTaken: false
-
-  ContactEmailTakenResponse:
-    type: object
-    required:
-      - isTaken
-    properties:
-      isTaken:
-        description: Boolean response to whether contact email is already taken.
-        type: boolean
+        default: false
     example:
       isTaken: false
 
@@ -3731,6 +3750,7 @@ definitions:
       disabled:
         description: Set to true to disable user in auth domain, false otherwise
         type: boolean
+        default: false
 
   AuditBigQueryResponse:
     type: object
@@ -3863,3 +3883,23 @@ definitions:
           Current size of the billing buffer, i.e. the number of projects ready to be claimed.
         type: integer
         format: int64
+
+  StatusAlert:
+    type: object
+    properties:
+      statusAlertId:
+        description: The primary key of the status alert in the database
+        type: integer
+        format: int64
+      title:
+        description: >
+          Title of the status alert, e.g. 'Service Incident: December 6, 2019'
+        type: string
+      message:
+        description: >
+          The actual message of the status alert, e.g. 'AoU RW is down because GCP is down'
+        type: string
+      link:
+        description: >
+          A URL linking to an incident report where users can read more
+        type: string

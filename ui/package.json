@@ -68,6 +68,10 @@
     "@clr/angular": "^0.11.12",
     "@clr/icons": "^0.11.12",
     "@clr/ui": "^0.11.12",
+    "@fortawesome/fontawesome-svg-core": "^1.2.25",
+    "@fortawesome/free-regular-svg-icons": "^5.11.2",
+    "@fortawesome/free-solid-svg-icons": "^5.11.2",
+    "@fortawesome/react-fontawesome": "^0.1.7",
     "@types/color": "^3.0.0",
     "@types/core-js": "^2.5.0",
     "@types/geojson": "^1.0.6",
@@ -116,7 +120,7 @@
     "ts-key-enum": "^3.0.0",
     "tslib": "^1.9.0",
     "validate.js": "^0.12.0",
-    "yarn": "^1.17.3",
+    "yarn": "^1.21.1",
     "zone.js": "0.8.26"
   },
   "devDependencies": {
@@ -126,6 +130,7 @@
     "@angular/cli": "^7.1.0",
     "@angular/compiler-cli": "^7.1.1",
     "@angular/language-service": "^7.1.1",
+    "@fortawesome/fontawesome-free": "^5.11.2",
     "@types/enzyme": "^3.1.15",
     "@types/google.analytics": "0.0.39",
     "@types/jasmine": "^3.3.5",

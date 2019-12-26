@@ -493,10 +493,6 @@ public class UserService {
     adminActionHistoryDao.save(adminActionHistory);
   }
 
-  public boolean getContactEmailTaken(String contactEmail) {
-    return (!userDao.findUserByContactEmail(contactEmail).isEmpty());
-  }
-
   /** Find users matching the user's name or email */
   public List<DbUser> findUsersBySearchString(String term, Sort sort) {
     List<Short> dataAccessLevels =

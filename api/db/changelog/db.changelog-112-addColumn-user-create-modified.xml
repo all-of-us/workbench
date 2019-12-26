@@ -4,7 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="nsaxena" id="db.changelog-110-addColumn-user-create-modified">
+  <changeSet author="nsaxena" id="db.changelog-112-addColumn-user-create-modified">
     <addColumn tableName="user">
        <column name="last_modified_time" type="datetime" defaultValueDate="current_timestamp">
         <constraints nullable="true"/>

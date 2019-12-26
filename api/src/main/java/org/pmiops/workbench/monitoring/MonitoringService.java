@@ -1,9 +1,20 @@
 package org.pmiops.workbench.monitoring;
 
-import org.pmiops.workbench.monitoring.signals.Signal;
+import java.util.Map;
+import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 
 public interface MonitoringService {
-  public void registerSignal(Signal signal);
 
-  public void sendSignal(Signal signal, Object value);
+  /**
+   * Record an occurrence of a counted event.
+   *
+   * @param viewInfo
+   */
+  default void recordIncrement(OpenCensusStatsViewInfo viewInfo) {
+    recordValue(viewInfo, 1);
+  }
+
+  void recordValue(OpenCensusStatsViewInfo viewInfo, Number value);
+
+  void recordValues(Map<OpenCensusStatsViewInfo, Number> enumToValue);
 }

@@ -4,12 +4,17 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
+import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -28,29 +33,39 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
+import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.signals.GaugeSignals;
+import org.pmiops.workbench.monitoring.views.MonitoringViews;
+import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BillingProjectBufferService {
+public class BillingProjectBufferService implements GaugeDataCollector {
 
   private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
 
   private static final int PROJECT_BILLING_ID_SIZE = 8;
   @VisibleForTesting static final Duration CREATING_TIMEOUT = Duration.ofMinutes(60);
   @VisibleForTesting static final Duration ASSIGNING_TIMEOUT = Duration.ofMinutes(10);
-  private static ImmutableMap<BufferEntryStatus, Duration> statusToGracePeriod =
+  private static final ImmutableMap<BufferEntryStatus, Duration> STATUS_TO_GRACE_PERIOD =
       ImmutableMap.of(
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
           BufferEntryStatus.ASSIGNING, ASSIGNING_TIMEOUT);
+  private static final ImmutableMap<BufferEntryStatus, MonitoringViews>
+      ENTRY_STATUS_TO_METRIC_VIEW =
+          ImmutableMap.of(
+              BufferEntryStatus.AVAILABLE, MonitoringViews.BILLING_BUFFER_AVAILABLE_PROJECT_COUNT,
+              BufferEntryStatus.ASSIGNING, MonitoringViews.BILLING_BUFFER_ASSIGNING_PROJECT_COUNT,
+              BufferEntryStatus.CREATING, MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT);
+
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
   private final MonitoringService monitoringService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private SecureRandom random;
 
   @Autowired
   public BillingProjectBufferService(
@@ -64,7 +79,7 @@ public class BillingProjectBufferService {
     this.fireCloudService = fireCloudService;
     this.monitoringService = monitoringService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.monitoringService.registerSignal(GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS);
+    this.random = new SecureRandom();
   }
 
   private Timestamp getCurrentTimestamp() {
@@ -73,13 +88,41 @@ public class BillingProjectBufferService {
 
   /** Makes a configurable number of project creation attempts. */
   public void bufferBillingProjects() {
-
-    monitoringService.sendSignal(
-        GaugeSignals.BILLING_BUFFER_AVAILABLE_PROJECTS, getCurrentBufferSize());
     int creationAttempts = this.workbenchConfigProvider.get().billing.bufferRefillProjectsPerTask;
     for (int i = 0; i < creationAttempts; i++) {
       bufferBillingProject();
     }
+  }
+
+  @Override
+  public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
+    ImmutableMap.Builder<OpenCensusStatsViewInfo, Number> signalToValueBuilder =
+        ImmutableMap.builder();
+    signalToValueBuilder.put(MonitoringViews.BILLING_BUFFER_SIZE, getCurrentBufferSize());
+
+    // Toy data series for developing & testing dashboards and alerts in low-traffic environments.
+    signalToValueBuilder.put(MonitoringViews.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis());
+    signalToValueBuilder.put(MonitoringViews.DEBUG_RANDOM_DOUBLE, random.nextDouble());
+
+    // TODO(jaycarlton): set up a DAO/data manager method pair to build this map in one query.
+    ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
+        Arrays.stream(BufferEntryStatus.values())
+            .map(
+                status ->
+                    new SimpleImmutableEntry<>(
+                        status,
+                        billingProjectBufferEntryDao.countByStatus(
+                            DbStorageEnums.billingProjectBufferEntryStatusToStorage(status))))
+            .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
+
+    for (Map.Entry<BufferEntryStatus, MonitoringViews> entry :
+        ENTRY_STATUS_TO_METRIC_VIEW.entrySet()) {
+      final BufferEntryStatus entryStatus = entry.getKey();
+      final OpenCensusStatsViewInfo metricView = entry.getValue();
+      final Long value = entryStatusToCount.get(entryStatus);
+      signalToValueBuilder.put(metricView, value);
+    }
+    return signalToValueBuilder.build();
   }
 
   /**
@@ -199,7 +242,7 @@ public class BillingProjectBufferService {
   private List<DbBillingProjectBufferEntry> findEntriesWithExpiredGracePeriod(
       Instant now, BufferEntryStatus bufferEntryStatus) {
     final Optional<Duration> gracePeriod =
-        Optional.ofNullable(statusToGracePeriod.get(bufferEntryStatus));
+        Optional.ofNullable(STATUS_TO_GRACE_PERIOD.get(bufferEntryStatus));
 
     return gracePeriod
         .map(p -> findEntriesWithExpiredGracePeriod(now, bufferEntryStatus, p))
