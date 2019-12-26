@@ -2809,7 +2809,6 @@ definitions:
     type: object
     required:
       - name
-      - type
     properties:
       id:
         type: integer
