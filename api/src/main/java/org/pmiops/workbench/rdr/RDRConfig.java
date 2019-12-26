@@ -33,7 +33,7 @@ public class RDRConfig {
     try {
       apiClient.setAccessToken(serviceAccounts.workbenchAccessToken(workbenchEnvironment, SCOPES));
       // Todo change to host in config
-      apiClient.setBasePath("https://pmi-drc-api-test.appspot.com/rdr/v1");
+      apiClient.setBasePath("https://" + workbenchConfig.rdrServer.host + "/rdr/v1");
 
     } catch (IOException e) {
       throw new ServerErrorException(e);
