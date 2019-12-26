@@ -2507,7 +2507,6 @@ definitions:
       - commercialPurpose
       - population
       - reviewRequested
-      - containsUnderservedPopulation
       - socialBehavioral
       - populationHealth
       - educational
