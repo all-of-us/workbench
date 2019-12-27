@@ -4075,6 +4075,10 @@ definitions:
         description: The amount of egress detected during the window, in mebibytes (MiB).
         type: number
         format: double
+      egress_mib_threshold:
+        description: The threshold value for which this egress triggered an alert, in mebibytes (MiB).
+        type: number
+        format: double
       project_name:
         description: The Google Cloud project name, e.g. aou-rw-6b66533d. Always present.
         type: string
