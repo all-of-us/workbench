@@ -60,7 +60,7 @@ public class SumoLogicAuditorTest {
     // Import the impl class to allow autowiring the bean.
     SumoLogicAuditorImpl.class,
     // Import common action audit beans.
-    ActionAuditSpringConfiguration.class
+    ActionAuditTestConfig.class
   })
   static class Configuration {}
 
