@@ -12,6 +12,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -160,6 +161,12 @@ public class CloudStorageServiceImpl implements CloudStorageService {
       String garbageCollectionEmail) throws IOException {
     final String objectPath = String.format("garbage-collection/%s.json", garbageCollectionEmail);
     return getCredentials(objectPath);
+  }
+
+  @Override
+  public List<String> getSumoLogicApiKeys() throws IOException {
+    String apiKeys = readBlobAsString(getBlob(getCredentialsBucketName(), "sumologic-api-keys.txt"));
+    return Arrays.asList(apiKeys.split("[\\r\\n]+"));
   }
 
   @Override

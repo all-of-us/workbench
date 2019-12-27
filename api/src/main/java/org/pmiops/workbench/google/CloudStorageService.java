@@ -43,6 +43,8 @@ public interface CloudStorageService {
   ServiceAccountCredentials getGarbageCollectionServiceAccountCredentials(
       String garbageCollectionEmail) throws IOException;
 
+  List<String> getSumoLogicApiKeys() throws IOException;
+
   Map<String, String> getMetadata(String bucketName, String objectPath);
 
   Blob getBlob(String bucketName, String objectPath);

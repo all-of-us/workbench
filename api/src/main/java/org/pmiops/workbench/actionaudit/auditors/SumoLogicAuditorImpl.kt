@@ -85,6 +85,12 @@ constructor(
                 request.eventsJsonArray));
     }
 
+    override fun fireBadApiKeyEgressEvent(apiKey: String, request: EgressEventRequest) {
+        fireGenericEventWithComment(String.format(
+                "Received bad API key from SumoLogic. Bad key: %s, full request: %s",
+                apiKey, request.toString()));
+    }
+
     private fun fireFailedToFindWorkspace(event: EgressEvent) {
        fireGenericEventWithComment(String.format(
                "Failed to find workspace for high-egress event: %s",

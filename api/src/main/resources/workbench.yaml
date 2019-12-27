@@ -1100,6 +1100,13 @@ paths:
           description: Egress event request
           schema:
             $ref: "#/definitions/EgressEventRequest"
+        - in: header
+          name: X-API-KEY
+          description: >
+            Semi-secret API key sent by SumoLogic. This will be checked against the set of valid
+            API keys stored in the per-environment credentials bucket.
+          required: true
+          type: string
       responses:
         200:
           description: Successful response.

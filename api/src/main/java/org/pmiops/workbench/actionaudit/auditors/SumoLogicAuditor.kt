@@ -11,4 +11,8 @@ interface SumoLogicAuditor {
     // Fires an audit event log tracking when a Sumologic-reported egress event
     // request could not successfully be parsed.
     fun fireFailedToParseEgressEvent(request: EgressEventRequest)
+
+    // Fires an audit event log tracking when a Sumologic-reported egress event
+    // request could not successfully be parsed.
+    fun fireBadApiKeyEgressEvent(apiKey: String, request: EgressEventRequest)
 }
