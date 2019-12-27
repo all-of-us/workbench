@@ -11,9 +11,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-/** Common beans used by action audit test classes. */
+/**
+ * Common beans used by action audit test classes.
+ */
 @Configuration
-@Import({ActionAuditSpringConfiguration.class})
 public class ActionAuditTestConfig {
 
   public static final Instant INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
@@ -39,4 +40,6 @@ public class ActionAuditTestConfig {
   public Clock getClock() {
     return new FakeClock(INSTANT);
   }
+
+
 }
