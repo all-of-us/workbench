@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,30 +20,24 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AclTargetProperty;
-import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -71,9 +64,7 @@ public class WorkspaceAuditorTest {
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
 
   @TestConfiguration
-  @Import({WorkspaceAuditorImpl.class,
-      WorkspaceMapperImpl.class,
-      ActionAuditTestConfig.class})
+  @Import({WorkspaceAuditorImpl.class, WorkspaceMapperImpl.class, ActionAuditTestConfig.class})
   static class Config {}
 
   @Before

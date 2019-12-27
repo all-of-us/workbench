@@ -79,8 +79,7 @@ public interface WorkspaceService {
   Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName);
 
-  List<UserRole> getFirecloudUserRoles(
-      String workspaceNamespace, String firecloudName);
+  List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName);
 
   FirecloudWorkspaceACLUpdate updateFirecloudAclsOnUser(
       WorkspaceAccessLevel updatedAccess, FirecloudWorkspaceACLUpdate currentUpdate);

@@ -238,7 +238,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public DbWorkspace getByNamespace(String ns) {
     return workspaceDao.findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
-            ns, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+        ns, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   @Override
@@ -507,8 +507,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
-    Map<String, FirecloudWorkspaceAccessEntry> rolesMap = getFirecloudWorkspaceAcls(workspaceNamespace,
-    firecloudName);
+    Map<String, FirecloudWorkspaceAccessEntry> rolesMap =
+        getFirecloudWorkspaceAcls(workspaceNamespace, firecloudName);
 
     List<UserRole> userRoles = new ArrayList<>();
     for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : rolesMap.entrySet()) {

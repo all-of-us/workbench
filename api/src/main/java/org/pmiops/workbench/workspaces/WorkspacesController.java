@@ -728,7 +728,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    List<UserRole> userRoles = workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
+    List<UserRole> userRoles =
+        workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setItems(userRoles);
     return ResponseEntity.ok(resp);

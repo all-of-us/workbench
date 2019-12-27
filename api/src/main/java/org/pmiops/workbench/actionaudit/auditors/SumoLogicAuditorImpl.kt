@@ -36,15 +36,15 @@ constructor(
 
     override fun fireEgressEvent(event: EgressEvent) {
         // Load the workspace via the GCP project name
-        val dbWorkspace = this.workspaceService.getByNamespace(event.projectName);
+        val dbWorkspace = this.workspaceService.getByNamespace(event.projectName)
         if (dbWorkspace == null) {
-            fireFailedToFindWorkspace(event);
-            return;
+            fireFailedToFindWorkspace(event)
+            return
         }
         // Using service-level creds, load the FireCloud workspace ACLs to find all members
         // of the workspace. Then attempt to find the user who aligns with the named VM.
         val userRoles = workspaceService.getFirecloudUserRoles(dbWorkspace.workspaceNamespace,
-                dbWorkspace.firecloudName);
+                dbWorkspace.firecloudName)
         val vmOwner = userRoles
                 .map { userDao.findUserByEmail(it.email) }
                 .filter { userIdToVmName(it.userId).equals(event.vmName) }
@@ -58,7 +58,7 @@ constructor(
         } else {
             // If the VM name doesn't match a user on the workspace, we'll still log an
             // event in the target workspace, but with nulled-out user info.
-            logger.warning(String.format("Could not find a user for VM name %s in project %s", event.vmName, event.projectName));
+            logger.warning(String.format("Could not find a user for VM name %s in project %s", event.vmName, event.projectName))
         }
 
         actionAuditService.send(ActionAuditEvent(
@@ -82,19 +82,19 @@ constructor(
     override fun fireFailedToParseEgressEvent(request: EgressEventRequest) {
         fireGenericEventWithComment(String.format(
                 "Failed to parse egress event JSON from SumoLogic. Field contents: %s",
-                request.eventsJsonArray));
+                request.eventsJsonArray))
     }
 
     override fun fireBadApiKeyEgressEvent(apiKey: String, request: EgressEventRequest) {
         fireGenericEventWithComment(String.format(
                 "Received bad API key from SumoLogic. Bad key: %s, full request: %s",
-                apiKey, request.toString()));
+                apiKey, request.toString()))
     }
 
     private fun fireFailedToFindWorkspace(event: EgressEvent) {
-       fireGenericEventWithComment(String.format(
-               "Failed to find workspace for high-egress event: %s",
-               event.toString()));
+        fireGenericEventWithComment(String.format(
+                "Failed to find workspace for high-egress event: %s",
+                event.toString()))
     }
 
     private fun fireGenericEventWithComment(comment: String) {

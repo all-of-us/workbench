@@ -1,5 +1,11 @@
 package org.pmiops.workbench.actionaudit.auditors;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,24 +24,11 @@ import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.EgressEventRequest;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.time.Clock;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class SumoLogicAuditorTest {
@@ -64,10 +57,11 @@ public class SumoLogicAuditorTest {
 
   @TestConfiguration
   @Import({
-      // Import the impl class to allow autowiring the bean.
-      SumoLogicAuditorImpl.class,
-      // Import common action audit beans.
-      ActionAuditSpringConfiguration.class})
+    // Import the impl class to allow autowiring the bean.
+    SumoLogicAuditorImpl.class,
+    // Import common action audit beans.
+    ActionAuditSpringConfiguration.class
+  })
   static class Configuration {}
 
   @Before
@@ -90,8 +84,10 @@ public class SumoLogicAuditorTest {
   @Test
   public void testFireEgressEvent() {
     sumoLogicAuditor.fireEgressEvent(
-        new EgressEvent().projectName(EGRESS_EVENT_PROJECT_NAME).vmName(EGRESS_EVENT_VM_NAME)
-    .egressMib(12.3));
+        new EgressEvent()
+            .projectName(EGRESS_EVENT_PROJECT_NAME)
+            .vmName(EGRESS_EVENT_VM_NAME)
+            .egressMib(12.3));
     verify(mockActionAuditService).send(eventCaptor.capture());
 
     final ActionAuditEvent event = eventCaptor.getValue();
@@ -128,8 +124,7 @@ public class SumoLogicAuditorTest {
   public void testFireFailedParsing() {
     // When the inbound request parsing fails, an event is logged at the system agent.
     when(mockWorkspaceService.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(null);
-    sumoLogicAuditor.fireFailedToParseEgressEvent(
-        new EgressEventRequest().eventsJsonArray("asdf"));
+    sumoLogicAuditor.fireFailedToParseEgressEvent(new EgressEventRequest().eventsJsonArray("asdf"));
     verify(mockActionAuditService).send(eventCaptor.capture());
 
     final ActionAuditEvent event = eventCaptor.getValue();
@@ -142,5 +137,4 @@ public class SumoLogicAuditorTest {
     assertThat(event.getTargetPropertyMaybe()).isEqualTo("comment");
     assertThat(event.getNewValueMaybe()).contains("asdf");
   }
-
 }
