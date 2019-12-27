@@ -1085,6 +1085,27 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
+  /v1/admin/sumo/egressEvent:
+    post:
+      tags:
+        - sumoLogic
+      description: >
+        Registers an egress event detected by SumoLogic with the Workbench. Forwards the event
+        to Stackdriver for recording and potential alerting.
+      operationId: logEgressEvent
+      security: []
+      parameters:
+        - in: body
+          name: request
+          description: Egress event request
+          schema:
+            $ref: "#/definitions/EgressEventRequest"
+      responses:
+        200:
+          description: Successful response.
+          schema:
+            $ref: "#/definitions/EmptyResponse"
+
   # Cron ############################################################################
 
   # Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
@@ -4010,4 +4031,46 @@ definitions:
       link:
         description: >
           A URL linking to an incident report where users can read more
+
+  EgressEventRequest:
+    type: object
+    properties:
+      eventsJsonArray:
+        type: string
+        description: >
+          A JSON string containing an array of JSON-encoded egress events. See the EgressEvent
+          definition for the expected schema of each event.
+
+  EgressEvent:
+    type: object
+    properties:
+      environment:
+        description: The AoU environment in which the high-egress event occurred.
+        type: string
+        enum:
+          - test
+          - perf
+          - staging
+          - stable
+          - preprod
+          - prod
+      time_window_duration:
+        description: >
+          The duration of the time window during which the high-egress event occurred, in
+          milliseconds since Unix Epoch.
+        type: integer
+        format: int64
+      time_window_start:
+        description: Beginning of the time window, in milliseconds since Epoch.
+        type: integer
+        format: int64
+      egress_mib:
+        description: The amount of egress detected during the window, in mebibytes (MiB).
+        type: number
+        format: double
+      project_name:
+        description: The Google Cloud project name, e.g. aou-rw-6b66533d. Always present.
+        type: string
+      vm_name:
+        description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.
         type: string

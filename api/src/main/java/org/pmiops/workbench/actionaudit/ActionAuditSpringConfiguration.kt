@@ -4,8 +4,10 @@ import com.google.cloud.logging.Logging
 import com.google.cloud.logging.LoggingOptions
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Scope
+import java.time.Clock
 import java.util.UUID
 
 @Configuration
@@ -21,4 +23,9 @@ open class ActionAuditSpringConfiguration {
         get() {
             return UUID.randomUUID().toString()
         }
+
+    open val clock: Clock
+    @Bean
+    get() = Clock.systemUTC()
+
 }

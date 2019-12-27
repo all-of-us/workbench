@@ -27,19 +27,24 @@ import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AclTargetProperty;
+import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -50,42 +55,29 @@ public class WorkspaceAuditorTest {
       Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
   private static final long REMOVED_USER_ID = 301L;
   private static final long ADDED_USER_ID = 401L;
-  private static final String ACTION_ID = "58cbae08-447f-499f-95b9-7bdedc955f4d";
 
-  private WorkspaceAuditor workspaceAuditor;
   private Workspace workspace1;
   private Workspace workspace2;
   private DbUser user1;
   private DbWorkspace dbWorkspace1;
   private DbWorkspace dbWorkspace2;
 
+  @Autowired private WorkspaceAuditor workspaceAuditor;
   @Autowired private WorkspaceMapper workspaceMapper;
-
-  @Mock private Provider<DbUser> mockUserProvider;
-  @Mock private Clock mockClock;
-  @Mock private ActionAuditService mockActionAuditService;
-  @Mock private Provider<String> mockActionIdProvider;
+  @MockBean private Provider<DbUser> mockUserProvider;
+  @MockBean private ActionAuditService mockActionAuditService;
 
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventCollectionCaptor;
   @Captor private ArgumentCaptor<ActionAuditEvent> eventCaptor;
 
   @TestConfiguration
-  @Import(value = {WorkspaceMapperImpl.class})
-  @MockBean(value = {ActionAuditService.class})
-  static class Configuration {}
+  @Import({WorkspaceAuditorImpl.class,
+      WorkspaceMapperImpl.class,
+      ActionAuditTestConfig.class})
+  static class Config {}
 
   @Before
   public void setUp() {
-    user1 = new DbUser();
-    user1.setUserId(101L);
-    user1.setUsername("fflinstone@slate.com");
-    user1.setGivenName("Fred");
-    user1.setFamilyName("Flintstone");
-    doReturn(user1).when(mockUserProvider).get();
-    workspaceAuditor =
-        new WorkspaceAuditorImpl(
-            mockUserProvider, mockActionAuditService, mockClock, mockActionIdProvider);
-
     final ResearchPurpose researchPurpose1 = new ResearchPurpose();
     researchPurpose1.setIntendedStudy("stubbed toes");
     researchPurpose1.setAdditionalNotes("I really like the cloud.");
@@ -118,8 +110,9 @@ public class WorkspaceAuditorTest {
     dbWorkspace2.setCreator(user1);
 
     workspace2 = workspaceMapper.toApiWorkspace(dbWorkspace2, null);
-    doReturn(Y2K_EPOCH_MILLIS).when(mockClock).millis();
-    doReturn(ACTION_ID).when(mockActionIdProvider).get();
+
+    // By default, have the mock user provider return the test-config default user.
+    doReturn(ActionAuditTestConfig.getUser()).when(mockUserProvider).get();
   }
 
   @Test
@@ -146,7 +139,7 @@ public class WorkspaceAuditorTest {
     verify(mockActionAuditService).send(eventCaptor.capture());
     final ActionAuditEvent eventSent = eventCaptor.getValue();
     assertThat(eventSent.getActionType()).isEqualTo(ActionType.DELETE);
-    assertThat(eventSent.getTimestamp()).isEqualTo(Y2K_EPOCH_MILLIS);
+    assertThat(eventSent.getTimestamp()).isEqualTo(ActionAuditTestConfig.INSTANT.toEpochMilli());
   }
 
   @Test
@@ -180,7 +173,7 @@ public class WorkspaceAuditorTest {
   public void testFiresCollaborateAction() {
     final ImmutableMap<Long, String> aclsByUserId =
         ImmutableMap.of(
-            user1.getUserId(),
+            ActionAuditTestConfig.ADMINISTRATOR_USER_ID,
             WorkspaceAccessLevel.OWNER.toString(),
             REMOVED_USER_ID,
             WorkspaceAccessLevel.NO_ACCESS.toString(),

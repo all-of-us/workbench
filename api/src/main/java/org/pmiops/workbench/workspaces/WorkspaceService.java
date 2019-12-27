@@ -27,6 +27,10 @@ public interface WorkspaceService {
 
   DbWorkspace get(String ns, String firecloudName);
 
+  // Returns the requested workspace looked up by workspace namespace (aka billing project name).
+  // Only active workspaces are searched. Returns null if no active workspace is found.
+  DbWorkspace getByNamespace(String workspaceNamespace);
+
   List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces();
 
   WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId);
@@ -75,8 +79,8 @@ public interface WorkspaceService {
   Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName);
 
-  List<UserRole> convertWorkspaceAclsToUserRoles(
-      Map<String, FirecloudWorkspaceAccessEntry> rolesMap);
+  List<UserRole> getFirecloudUserRoles(
+      String workspaceNamespace, String firecloudName);
 
   FirecloudWorkspaceACLUpdate updateFirecloudAclsOnUser(
       WorkspaceAccessLevel updatedAccess, FirecloudWorkspaceACLUpdate currentUpdate);
