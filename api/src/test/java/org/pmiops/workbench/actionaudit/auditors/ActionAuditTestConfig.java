@@ -2,18 +2,14 @@ package org.pmiops.workbench.actionaudit.auditors;
 
 import java.time.Clock;
 import java.time.Instant;
-import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
-/**
- * Common beans used by action audit test classes.
- */
+/** Common beans used by action audit test classes. */
 @Configuration
 public class ActionAuditTestConfig {
 
@@ -40,6 +36,4 @@ public class ActionAuditTestConfig {
   public Clock getClock() {
     return new FakeClock(INSTANT);
   }
-
-
 }
