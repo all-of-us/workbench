@@ -166,7 +166,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   @Override
   public List<String> getSumoLogicApiKeys() throws IOException {
     String apiKeys =
-        readBlobAsString(getBlob(getCredentialsBucketName(), "sumologic-api-keys.txt"));
+        readBlobAsString(getBlob(getCredentialsBucketName(), "inbound-sumologic-keys.txt"));
     return Arrays.asList(apiKeys.split("[\\r\\n]+"));
   }
 
