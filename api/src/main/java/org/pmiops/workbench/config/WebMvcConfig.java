@@ -5,6 +5,8 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.ServletContext;
+
+import com.google.auth.oauth2.GoogleCredentials;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.DbUser;
@@ -84,11 +86,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
    */
   @Lazy
   @Bean(name = Constants.GSUITE_ADMIN_CREDS)
-  public GoogleCredential gsuiteAdminCredential() {
+  public GoogleCredentials gsuiteAdminCredential() {
     ServletContext context = getRequestServletContext();
     InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/gsuite-admin-sa.json");
     try {
-      return GoogleCredential.fromStream(saFileAsStream);
+      return GoogleCredentials.fromStream(saFileAsStream);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -100,7 +102,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
    */
   @Lazy
   @Bean(name = Constants.FIRECLOUD_ADMIN_CREDS)
-  public GoogleCredential firecloudAdminCredential(CloudStorageService cloudStorageService)
+  public GoogleCredentials firecloudAdminCredential(CloudStorageService cloudStorageService)
       throws IOException {
     return cloudStorageService.getFireCloudAdminCredentials();
   }
@@ -111,7 +113,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
    */
   @Lazy
   @Bean(name = Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
-  public GoogleCredential cloudResourceManagerAdminCredential(
+  public GoogleCredentials cloudResourceManagerAdminCredential(
       CloudStorageService cloudStorageService) throws IOException {
     return cloudStorageService.getCloudResourceManagerAdminCredentials();
   }

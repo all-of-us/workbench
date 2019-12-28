@@ -3,6 +3,7 @@ package org.pmiops.workbench.firecloud;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,6 +11,11 @@ import static org.mockito.Mockito.when;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
+
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -55,9 +61,9 @@ public class FireCloudServiceImplTest {
   @Mock private NihApi nihApi;
   @Mock private StatusApi statusApi;
   @Mock private StaticNotebooksApi staticNotebooksApi;
-  @Mock private GoogleCredential fireCloudCredential;
-  @Mock private ServiceAccounts serviceAccounts;
-  @Mock private GoogleCredential impersonatedCredential;
+  @Mock private ServiceAccountCredentials fireCloudCredentials;
+  @Mock private ServiceAccounts mockServiceAccounts;
+  @Mock private GoogleCredentials mockImpersonatedCredentials;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
@@ -81,8 +87,8 @@ public class FireCloudServiceImplTest {
             Providers.of(statusApi),
             Providers.of(staticNotebooksApi),
             new FirecloudRetryHandler(new NoBackOffPolicy()),
-            serviceAccounts,
-            Providers.of(fireCloudCredential));
+            mockServiceAccounts,
+            Providers.of(fireCloudCredentials));
   }
 
   @Test
@@ -199,11 +205,10 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testGetApiClientWithImpersonation() throws IOException {
-    when(serviceAccounts.getImpersonatedCredential(any(), eq("asdf@fake-research-aou.org"), any()))
-        .thenReturn(impersonatedCredential);
-
+    when(mockServiceAccounts.getImpersonatedCredential(any(), any(), anyList()))
+        .thenReturn(mockImpersonatedCredentials);
     // Pretend we retrieved the given access token.
-    when(impersonatedCredential.getAccessToken()).thenReturn("impersonated-access-token");
+    when(mockImpersonatedCredentials.getAccessToken()).thenReturn(new AccessToken("impersonated-access-token", new Date()));
 
     ApiClient apiClient = service.getApiClientWithImpersonation("asdf@fake-research-aou.org");
 

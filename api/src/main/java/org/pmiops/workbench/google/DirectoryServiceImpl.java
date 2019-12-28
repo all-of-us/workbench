@@ -14,6 +14,9 @@ import com.google.api.services.directory.DirectoryScopes;
 import com.google.api.services.directory.model.User;
 import com.google.api.services.directory.model.UserEmail;
 import com.google.api.services.directory.model.UserName;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -25,6 +28,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
+
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,42 +70,38 @@ public class DirectoryServiceImpl implements DirectoryService {
               DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
           DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY);
 
-  private final Provider<GoogleCredential> googleCredentialProvider;
+  private final Provider<ServiceAccountCredentials> googleCredentialsProvider;
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
+  private final ServiceAccounts serviceAccounts;
 
   @Autowired
   public DirectoryServiceImpl(
-      @Qualifier("gsuiteAdminCredentials") Provider<GoogleCredential> googleCredentialProvider,
+      @Qualifier("gsuiteAdminCredentials") Provider<ServiceAccountCredentials> googleCredentialsProvider,
       Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
-      GoogleRetryHandler retryHandler) {
-    this.googleCredentialProvider = googleCredentialProvider;
+      GoogleRetryHandler retryHandler,
+      ServiceAccounts serviceAccounts) {
+    this.googleCredentialsProvider = googleCredentialsProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
+    this.serviceAccounts = serviceAccounts;
   }
 
-  private GoogleCredential createCredentialWithImpersonation() {
-    GoogleCredential googleCredential = googleCredentialProvider.get();
+  private GoogleCredentials createCredentialWithImpersonation() throws IOException {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
-    return new GoogleCredential.Builder()
-        .setTransport(httpTransport)
-        .setJsonFactory(getDefaultJsonFactory())
-        // Must be an admin user in the GSuite domain.
-        .setServiceAccountUser("directory-service@" + gSuiteDomain)
-        .setServiceAccountId(googleCredential.getServiceAccountId())
-        .setServiceAccountScopes(SCOPES)
-        .setServiceAccountPrivateKey(googleCredential.getServiceAccountPrivateKey())
-        .setServiceAccountPrivateKeyId(googleCredential.getServiceAccountPrivateKeyId())
-        .setTokenServerEncodedUrl(googleCredential.getTokenServerEncodedUrl())
-        .build();
+
+    return serviceAccounts.getImpersonatedCredential(
+        googleCredentialsProvider.get(),
+        "directory-service@" + gSuiteDomain,
+    SCOPES);
   }
 
-  private Directory getGoogleDirectoryService() {
+  private Directory getGoogleDirectoryService() throws IOException {
     return new Directory.Builder(
-            httpTransport, getDefaultJsonFactory(), createCredentialWithImpersonation())
+            httpTransport, getDefaultJsonFactory(), new HttpCredentialsAdapter(createCredentialWithImpersonation()))
         .setApplicationName(APPLICATION_NAME)
         .build();
   }

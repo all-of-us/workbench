@@ -2,6 +2,8 @@ package org.pmiops.workbench.firecloud;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpStatusCodes;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
@@ -58,7 +60,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<StatusApi> statusApiProvider;
   private final Provider<StaticNotebooksApi> staticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
-  private final Provider<GoogleCredential> fcAdminCredsProvider;
+  private final Provider<ServiceAccountCredentials> fcAdminCredsProvider;
   private final ServiceAccounts serviceAccounts;
 
   private static final String MEMBER_ROLE = "member";
@@ -106,7 +108,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<StaticNotebooksApi> staticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
       ServiceAccounts serviceAccounts,
-      @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS) Provider<GoogleCredential> fcAdminCredsProvider) {
+      @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS) Provider<ServiceAccountCredentials> fcAdminCredsProvider) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
@@ -134,14 +136,12 @@ public class FireCloudServiceImpl implements FireCloudService {
   public ApiClient getApiClientWithImpersonation(String userEmail) throws IOException {
     // Load credentials for the firecloud-admin Service Account. This account has been granted
     // domain-wide delegation for the OAuth scopes required by FireCloud.
-    GoogleCredential googleCredential = fcAdminCredsProvider.get();
-
-    GoogleCredential impersonatedUserCredential =
+    GoogleCredentials impersonatedUserCredentials =
         serviceAccounts.getImpersonatedCredential(
-            googleCredential, userEmail, FIRECLOUD_API_OAUTH_SCOPES);
+            fcAdminCredsProvider.get(), userEmail, FIRECLOUD_API_OAUTH_SCOPES);
 
     ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
-    apiClient.setAccessToken(impersonatedUserCredential.getAccessToken());
+    apiClient.setAccessToken(impersonatedUserCredentials.getAccessToken().getTokenValue());
     return apiClient;
   }
 
