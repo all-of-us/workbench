@@ -1,6 +1,5 @@
 package org.pmiops.workbench.billing;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;

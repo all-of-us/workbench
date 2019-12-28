@@ -1,6 +1,5 @@
 package org.pmiops.workbench.firecloud;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
@@ -108,7 +107,8 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<StaticNotebooksApi> staticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
       ServiceAccounts serviceAccounts,
-      @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS) Provider<ServiceAccountCredentials> fcAdminCredsProvider) {
+      @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
+          Provider<ServiceAccountCredentials> fcAdminCredsProvider) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;

@@ -1,12 +1,10 @@
 package org.pmiops.workbench.config;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.ServletContext;
-
-import com.google.auth.oauth2.GoogleCredentials;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.DbUser;
