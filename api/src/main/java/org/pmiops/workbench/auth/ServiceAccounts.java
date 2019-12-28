@@ -1,18 +1,10 @@
 package org.pmiops.workbench.auth;
 
-import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
-
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.HttpTransport;
-import com.google.appengine.api.appidentity.AppIdentityService;
-import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
-import java.io.IOException;
-import java.util.List;
-
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import java.io.IOException;
+import java.util.List;
 import org.pmiops.workbench.config.WorkbenchEnvironment;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,7 +20,10 @@ public class ServiceAccounts {
    */
   public String workbenchAccessToken(WorkbenchEnvironment workbenchEnvironment, List<String> scopes)
       throws IOException {
-    return GoogleCredentials.getApplicationDefault().createScoped(scopes).refreshAccessToken().getTokenValue();
+    return GoogleCredentials.getApplicationDefault()
+        .createScoped(scopes)
+        .refreshAccessToken()
+        .getTokenValue();
   }
 
   /**
@@ -47,7 +42,8 @@ public class ServiceAccounts {
   public GoogleCredentials getImpersonatedCredential(
       ServiceAccountCredentials originalCredentials, String userEmail, List<String> scopes)
       throws IOException {
-    GoogleCredentials delegatedCreds = originalCredentials.createScoped(scopes).createDelegated(userEmail);
+    GoogleCredentials delegatedCreds =
+        originalCredentials.createScoped(scopes).createDelegated(userEmail);
     delegatedCreds.refreshAccessToken();
     return delegatedCreds;
   }

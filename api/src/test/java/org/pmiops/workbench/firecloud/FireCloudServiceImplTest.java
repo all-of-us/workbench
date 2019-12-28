@@ -4,18 +4,15 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
 
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Date;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -208,7 +205,8 @@ public class FireCloudServiceImplTest {
     when(mockServiceAccounts.getImpersonatedCredential(any(), any(), anyList()))
         .thenReturn(mockImpersonatedCredentials);
     // Pretend we retrieved the given access token.
-    when(mockImpersonatedCredentials.getAccessToken()).thenReturn(new AccessToken("impersonated-access-token", new Date()));
+    when(mockImpersonatedCredentials.getAccessToken())
+        .thenReturn(new AccessToken("impersonated-access-token", new Date()));
 
     ApiClient apiClient = service.getApiClientWithImpersonation("asdf@fake-research-aou.org");
 

@@ -6,7 +6,6 @@ package org.pmiops.workbench.google;
 
 import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.directory.Directory;
@@ -28,7 +27,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
-
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
@@ -78,7 +76,8 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   @Autowired
   public DirectoryServiceImpl(
-      @Qualifier("gsuiteAdminCredentials") Provider<ServiceAccountCredentials> googleCredentialsProvider,
+      @Qualifier("gsuiteAdminCredentials")
+          Provider<ServiceAccountCredentials> googleCredentialsProvider,
       Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
       GoogleRetryHandler retryHandler,
@@ -94,14 +93,14 @@ public class DirectoryServiceImpl implements DirectoryService {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
 
     return serviceAccounts.getImpersonatedCredential(
-        googleCredentialsProvider.get(),
-        "directory-service@" + gSuiteDomain,
-    SCOPES);
+        googleCredentialsProvider.get(), "directory-service@" + gSuiteDomain, SCOPES);
   }
 
   private Directory getGoogleDirectoryService() throws IOException {
     return new Directory.Builder(
-            httpTransport, getDefaultJsonFactory(), new HttpCredentialsAdapter(createCredentialWithImpersonation()))
+            httpTransport,
+            getDefaultJsonFactory(),
+            new HttpCredentialsAdapter(createCredentialWithImpersonation()))
         .setApplicationName(APPLICATION_NAME)
         .build();
   }
