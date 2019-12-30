@@ -1,6 +1,7 @@
 package org.pmiops.workbench.google;
 
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import java.io.IOException;
@@ -32,15 +33,15 @@ public interface CloudStorageService {
 
   JSONObject getElasticCredentials();
 
-  GoogleCredentials getGSuiteAdminCredentials() throws IOException;
+  ServiceAccountCredentials getGSuiteAdminCredentials() throws IOException;
 
-  GoogleCredentials getFireCloudAdminCredentials() throws IOException;
+  ServiceAccountCredentials getFireCloudAdminCredentials() throws IOException;
 
-  GoogleCredentials getCloudResourceManagerAdminCredentials() throws IOException;
+  ServiceAccountCredentials getCloudResourceManagerAdminCredentials() throws IOException;
 
-  GoogleCredentials getDefaultServiceAccountCredentials() throws IOException;
+  ServiceAccountCredentials getDefaultServiceAccountCredentials() throws IOException;
 
-  GoogleCredentials getGarbageCollectionServiceAccountCredentials(String garbageCollectionEmail)
+  ServiceAccountCredentials getGarbageCollectionServiceAccountCredentials(String garbageCollectionEmail)
       throws IOException;
 
   Map<String, String> getMetadata(String bucketName, String objectPath);

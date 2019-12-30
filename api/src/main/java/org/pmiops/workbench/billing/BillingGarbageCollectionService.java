@@ -139,8 +139,7 @@ public class BillingGarbageCollectionService {
     try {
       final GoogleCredentials gcsaCredential =
           garbageCollectionSACredentials.get(garbageCollectionSA);
-
-      gcsaCredential.refreshAccessToken();
+      gcsaCredential.refresh();
 
       fireCloudService.removeOwnerFromBillingProject(
           projectName, appEngineSA, gcsaCredential.getAccessToken().getTokenValue());

@@ -137,7 +137,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     // Load credentials for the firecloud-admin Service Account. This account has been granted
     // domain-wide delegation for the OAuth scopes required by FireCloud.
     GoogleCredentials impersonatedUserCredentials =
-        serviceAccounts.getImpersonatedCredential(
+        serviceAccounts.getImpersonatedCredentials(
             fcAdminCredsProvider.get(), userEmail, FIRECLOUD_API_OAUTH_SCOPES);
 
     ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());

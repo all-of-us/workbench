@@ -202,7 +202,7 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testGetApiClientWithImpersonation() throws IOException {
-    when(mockServiceAccounts.getImpersonatedCredential(any(), any(), anyList()))
+    when(mockServiceAccounts.getImpersonatedCredentials(any(), any(), anyList()))
         .thenReturn(mockImpersonatedCredentials);
     // Pretend we retrieved the given access token.
     when(mockImpersonatedCredentials.getAccessToken())

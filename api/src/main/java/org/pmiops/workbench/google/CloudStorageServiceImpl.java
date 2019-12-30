@@ -1,6 +1,7 @@
 package org.pmiops.workbench.google;
 
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
@@ -130,33 +131,33 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return readBlobAsString(getBlob(getCredentialsBucketName(), objectPath));
   }
 
-  private GoogleCredentials getCredentials(final String objectPath) throws IOException {
+  private ServiceAccountCredentials getCredentials(final String objectPath) throws IOException {
     final String json = readCredentialsBucketString(objectPath);
-    return GoogleCredentials.fromStream(new ByteArrayInputStream(json.getBytes()));
+    return ServiceAccountCredentials.fromStream(new ByteArrayInputStream(json.getBytes()));
   }
 
   @Override
-  public GoogleCredentials getGSuiteAdminCredentials() throws IOException {
+  public ServiceAccountCredentials getGSuiteAdminCredentials() throws IOException {
     return getCredentials("gsuite-admin-sa.json");
   }
 
   @Override
-  public GoogleCredentials getFireCloudAdminCredentials() throws IOException {
+  public ServiceAccountCredentials getFireCloudAdminCredentials() throws IOException {
     return getCredentials("firecloud-admin-sa.json");
   }
 
   @Override
-  public GoogleCredentials getCloudResourceManagerAdminCredentials() throws IOException {
+  public ServiceAccountCredentials getCloudResourceManagerAdminCredentials() throws IOException {
     return getCredentials("cloud-resource-manager-admin-sa.json");
   }
 
   @Override
-  public GoogleCredentials getDefaultServiceAccountCredentials() throws IOException {
+  public ServiceAccountCredentials getDefaultServiceAccountCredentials() throws IOException {
     return getCredentials("app-engine-default-sa.json");
   }
 
   @Override
-  public GoogleCredentials getGarbageCollectionServiceAccountCredentials(
+  public ServiceAccountCredentials getGarbageCollectionServiceAccountCredentials(
       String garbageCollectionEmail) throws IOException {
     final String objectPath = String.format("garbage-collection/%s.json", garbageCollectionEmail);
     return getCredentials(objectPath);

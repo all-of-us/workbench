@@ -3,6 +3,9 @@ package org.pmiops.workbench;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.storage.ServiceAccount;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import java.io.IOException;
@@ -55,20 +58,16 @@ public class FireCloudIntegrationTest {
   // is set when running integration tests. This should be the test environment.
   @Autowired
   @Qualifier(Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
-  private GoogleCredential serviceAccountCredential;
+  private ServiceAccountCredentials defaultServiceAccountCredentials;
 
   @Autowired private ServiceAccounts serviceAccounts;
 
   @Autowired
   @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
-  private GoogleCredential fireCloudAdminCredential;
+  private ServiceAccountCredentials fireCloudAdminCredentials;
 
   @Before
   public void setUp() throws IOException {
-    // Get a refreshed access token for the FireCloud service account credentials.
-    serviceAccountCredential =
-        serviceAccountCredential.createScoped(FireCloudServiceImpl.FIRECLOUD_API_OAUTH_SCOPES);
-    serviceAccountCredential.refreshToken();
   }
 
   /**
@@ -80,12 +79,15 @@ public class FireCloudIntegrationTest {
    * <p>This method mostly exists to allow us to run a status-check against both FC dev & prod
    * within the same integration test run.
    */
-  private FireCloudService createService(WorkbenchConfig config) {
+  private FireCloudService createService(WorkbenchConfig config) throws IOException {
+    ServiceAccountCredentials scopedCreds = (ServiceAccountCredentials) defaultServiceAccountCredentials.createScoped(FireCloudServiceImpl.FIRECLOUD_API_OAUTH_SCOPES);
+    scopedCreds.refresh();
+
     ApiClient apiClient =
         new ApiClient()
             .setBasePath(config.firecloud.baseUrl)
             .setDebugging(config.firecloud.debugEndpoints);
-    apiClient.setAccessToken(serviceAccountCredential.getAccessToken());
+    apiClient.setAccessToken(scopedCreds.getAccessToken().getTokenValue());
 
     return new FireCloudServiceImpl(
         Providers.of(config),
@@ -99,7 +101,7 @@ public class FireCloudIntegrationTest {
         Providers.of(staticNotebooksApi),
         new FirecloudRetryHandler(new NoBackOffPolicy()),
         serviceAccounts,
-        Providers.of(fireCloudAdminCredential));
+        Providers.of(fireCloudAdminCredentials));
   }
 
   private WorkbenchConfig loadConfig(String filename) throws Exception {
