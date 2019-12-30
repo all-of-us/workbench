@@ -9,29 +9,49 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.Clock;
 import java.util.Map;
+
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.pmiops.workbench.IntegrationTestConfig;
+import org.pmiops.workbench.auth.Constants;
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.test.Providers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = {IntegrationTestConfig.class})
 public class DirectoryServiceImplIntegrationTest {
   private DirectoryServiceImpl service;
-  private final GoogleCredential googleCredential = getGoogleCredential();
-  private final WorkbenchConfig workbenchConfig = createConfig();
-  private final ApacheHttpTransport httpTransport = new ApacheHttpTransport();
+  @Autowired
+  @Qualifier(Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
+  private ServiceAccountCredentials gSuiteAdminCredentials;
+  @Autowired
+  private WorkbenchConfig workbenchConfig;
+  @Autowired
+  private ApacheHttpTransport httpTransport;
+  @Autowired
+  private ServiceAccounts serviceAccounts;
 
   @Before
   public void setUp() {
     service =
         new DirectoryServiceImpl(
-            Providers.of(googleCredential),
+            Providers.of(gSuiteAdminCredentials),
             Providers.of(workbenchConfig),
             httpTransport,
-            new GoogleRetryHandler(new NoBackOffPolicy()));
+            new GoogleRetryHandler(new NoBackOffPolicy()),
+            serviceAccounts);
   }
 
   @Test
@@ -79,21 +99,5 @@ public class DirectoryServiceImplIntegrationTest {
     tmpl.setRetryPolicy(retry);
     tmpl.setThrowLastExceptionOnExhausted(true);
     return tmpl;
-  }
-
-  private static GoogleCredential getGoogleCredential() {
-    try {
-      String saKeyPath = "src/main/webapp/WEB-INF/gsuite-admin-sa.json";
-      return GoogleCredential.fromStream(new FileInputStream(new File(saKeyPath)));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private static WorkbenchConfig createConfig() {
-    WorkbenchConfig config = new WorkbenchConfig();
-    config.googleDirectoryService = new WorkbenchConfig.GoogleDirectoryServiceConfig();
-    config.googleDirectoryService.gSuiteDomain = "fake-research-aou.org";
-    return config;
   }
 }

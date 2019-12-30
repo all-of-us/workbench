@@ -15,6 +15,8 @@ import com.google.api.services.directory.model.UserEmail;
 import com.google.api.services.directory.model.UserName;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ImpersonatedCredentials;
+import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -24,9 +26,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
+
+import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
@@ -76,7 +81,7 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   @Autowired
   public DirectoryServiceImpl(
-      @Qualifier("gsuiteAdminCredentials")
+      @Qualifier(Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
           Provider<ServiceAccountCredentials> googleCredentialsProvider,
       Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
@@ -89,11 +94,24 @@ public class DirectoryServiceImpl implements DirectoryService {
     this.serviceAccounts = serviceAccounts;
   }
 
-  private GoogleCredentials createCredentialWithImpersonation() throws IOException {
+  private OAuth2Credentials createCredentialWithImpersonation() throws IOException {
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
+    Logger log = Logger.getLogger("debug");
+    log.info("Google creds: " + googleCredentialsProvider.get().toString());
+    ImpersonatedCredentials gsuiteCreds = ImpersonatedCredentials.newBuilder()
+        .setSourceCredentials(googleCredentialsProvider.get())
+        .setTargetPrincipal("gsuite-admin@all-of-us-workbench-test.iam.gserviceaccount.com")
+        .setScopes(Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"))
+        .setLifetime(3600).build();
+    gsuiteCreds.refresh();
+    log.info("Gsuite creds: " + gsuiteCreds.toString());
+    //log.info(gsuiteCreds.refreshAccessToken().toString());
 
-    return serviceAccounts.getImpersonatedCredential(
-        googleCredentialsProvider.get(), "directory-service@" + gSuiteDomain, SCOPES);
+    return OAuth2Credentials.newBuilder().setAccessToken(
+        serviceAccounts.getImpersonatedAccessToken(
+          "gsuite-admin@all-of-us-workbench-test.iam.gserviceaccount.com",
+          "directory-service@" + gSuiteDomain,
+          SCOPES)).build();
   }
 
   private Directory getGoogleDirectoryService() throws IOException {

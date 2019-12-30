@@ -72,26 +72,14 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   }
 
   /**
-   * Service account credentials for Gsuite administration. These are derived from a key JSON file
-   * copied from GCS deployed to /WEB-INF/gsuite-admin-sa.json during the build step. They can be
-   * used to make API calls to directory service on behalf of AofU (as opposed to using end user
-   * credentials.)
+   * Service account credentials for Gsuite administration, corresponding to the "gsuite-admin"
+   * service account in each environment. Enabled for domain-wide delegation of authority.
    *
-   * <p>We may in future rotate key files in production, but will be sure to keep the ones currently
-   * in use in cloud environments working when that happens.
-   *
-   * <p>TODO(gjuggler): should we start pulling this file from GCS instead?
-   */
+   * */
   @Lazy
   @Bean(name = Constants.GSUITE_ADMIN_CREDS)
-  public GoogleCredentials gsuiteAdminCredential() {
-    ServletContext context = getRequestServletContext();
-    InputStream saFileAsStream = context.getResourceAsStream("/WEB-INF/gsuite-admin-sa.json");
-    try {
-      return GoogleCredentials.fromStream(saFileAsStream);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  public GoogleCredentials gsuiteAdminCredential(CloudStorageService cloudStorageService) throws IOException {
+    return cloudStorageService.getGSuiteAdminCredentials();
   }
 
   /**

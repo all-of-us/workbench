@@ -5,6 +5,8 @@ import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import java.io.IOException;
@@ -47,7 +49,7 @@ public class IntegrationTestConfig {
 
   @Lazy
   @Bean(name = Constants.GSUITE_ADMIN_CREDS)
-  GoogleCredential gsuiteAdminCredentials(CloudStorageService cloudStorageService) {
+  ServiceAccountCredentials gsuiteAdminCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getGSuiteAdminCredentials();
     } catch (IOException e) {
@@ -57,7 +59,7 @@ public class IntegrationTestConfig {
 
   @Lazy
   @Bean(name = Constants.FIRECLOUD_ADMIN_CREDS)
-  GoogleCredential fireCloudCredentials(CloudStorageService cloudStorageService) {
+  ServiceAccountCredentials fireCloudCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getFireCloudAdminCredentials();
     } catch (IOException e) {
@@ -67,7 +69,7 @@ public class IntegrationTestConfig {
 
   @Lazy
   @Bean(name = Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
-  GoogleCredential cloudResourceManagerCredentials(CloudStorageService cloudStorageService) {
+  ServiceAccountCredentials cloudResourceManagerCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getCloudResourceManagerAdminCredentials();
     } catch (IOException e) {
@@ -77,7 +79,7 @@ public class IntegrationTestConfig {
 
   @Lazy
   @Bean(name = Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
-  GoogleCredential defaultServiceAccountCredentials(CloudStorageService cloudStorageService) {
+  ServiceAccountCredentials defaultServiceAccountCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getDefaultServiceAccountCredentials();
     } catch (IOException e) {

@@ -7,6 +7,9 @@ import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.services.cloudresourcemanager.model.Project;
 import java.io.IOException;
 import java.util.List;
+
+import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.storage.ServiceAccount;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,27 +36,21 @@ public class CloudResourceManagerServiceImplIntegrationTest {
   private final String CLOUD_RESOURCE_MANAGER_TEST_USER_EMAIL =
       "cloud-resource-manager-integration-test@fake-research-aou.org";
 
-  // N.B. this will load the default service account credentials for whatever AoU environment
-  // is set when running integration tests. This should be the test environment.
-  @Autowired
-  @Qualifier(Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
-  private GoogleCredential serviceAccountCredential;
-
   @Autowired private ServiceAccounts serviceAccounts;
 
   @Autowired
   @Qualifier(Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
-  private GoogleCredential cloudResourceManagerAdminCredential;
+  private ServiceAccountCredentials cloudResourceManagerAdminCredentials;
 
   @Before
   public void setUp() throws IOException {
     // Get a refreshed access token for the CloudResourceManager service account credentials.
-    serviceAccountCredential =
-        serviceAccountCredential.createScoped(CloudResourceManagerServiceImpl.SCOPES);
-    serviceAccountCredential.refreshToken();
+    ServiceAccountCredentials scopedCreds =
+        (ServiceAccountCredentials) cloudResourceManagerAdminCredentials.createScoped(CloudResourceManagerServiceImpl.SCOPES);
+    scopedCreds.refresh();
     service =
         new CloudResourceManagerServiceImpl(
-            Providers.of(cloudResourceManagerAdminCredential),
+            Providers.of(scopedCreds),
             httpTransport,
             new GoogleRetryHandler(new NoBackOffPolicy()),
             serviceAccounts);
