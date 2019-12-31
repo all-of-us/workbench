@@ -64,9 +64,10 @@ public class FireCloudIntegrationTest {
   @ComponentScan("org.pmiops.workbench.firecloud")
   @Import({FireCloudServiceImpl.class, IntegrationTestConfig.class})
   static class Configuration {
-    // By defining a request-scoped
+    // Because we want to be able to adjust the config from within individual test cases, we need
+    // to provide a prototype-scoped bean override. This will cause the autowired service to call
+    // this method as its Provider<WorkbenchConfig>.
     @Bean
-    @Lazy
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     WorkbenchConfig workbenchConfig() {
       return config;

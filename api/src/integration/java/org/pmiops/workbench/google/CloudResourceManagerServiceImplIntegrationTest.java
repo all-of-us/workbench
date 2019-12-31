@@ -20,22 +20,27 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {IntegrationTestConfig.class})
 public class CloudResourceManagerServiceImplIntegrationTest {
   @Autowired
   private CloudResourceManagerService service;
+
+  @TestConfiguration
+  @Import({CloudResourceManagerServiceImpl.class, IntegrationTestConfig.class})
+  static class Configuration {}
 
   // This is a single hand created user in the fake-research-aou.org gsuite.
   // It has one project that has been shared with it, AoU CRM Integration Test
   // in the firecloud dev domain.
   private final String CLOUD_RESOURCE_MANAGER_TEST_USER_EMAIL =
       "cloud-resource-manager-integration-test@fake-research-aou.org";
-  
+
   @Test
   public void testGetAllProjectsForUser() {
     DbUser testUser = new DbUser();
