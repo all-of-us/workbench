@@ -3,6 +3,8 @@ package org.pmiops.workbench.tools;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.Arrays;
+
+import com.google.auth.oauth2.GoogleCredentials;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
