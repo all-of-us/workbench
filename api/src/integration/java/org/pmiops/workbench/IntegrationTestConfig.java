@@ -2,17 +2,14 @@ package org.pmiops.workbench;
 
 import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.logging.Logger;
-
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.CommonConfig;
@@ -24,7 +21,6 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.backoff.BackOffPolicy;
@@ -35,11 +31,11 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 @TestConfiguration
 @Import({RetryConfig.class, CommonConfig.class})
 // Scan the google package to pull in Google cloud storage & retry handler beans.
-@ComponentScan(basePackages={
-    "org.pmiops.workbench.google"
-    // Fails when I include the following scan:
-//    "org.pmiops.workbench.notebooks"
-})
+@ComponentScan(
+    basePackages = {"org.pmiops.workbench.google"
+      // Fails when I include the following scan:
+      //    "org.pmiops.workbench.notebooks"
+    })
 // Scan the ServiceAccounts class, but exclude other classes in auth (since they
 // bring in JPA-related beans, which include a whole bunch of other deps that are
 // more complicated than we need for now).
@@ -79,7 +75,8 @@ public class IntegrationTestConfig {
 
   @Lazy
   @Bean(name = Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
-  ServiceAccountCredentials cloudResourceManagerCredentials(CloudStorageService cloudStorageService) {
+  ServiceAccountCredentials cloudResourceManagerCredentials(
+      CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getCloudResourceManagerAdminCredentials();
     } catch (IOException e) {
@@ -89,7 +86,8 @@ public class IntegrationTestConfig {
 
   @Lazy
   @Bean(name = Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
-  ServiceAccountCredentials defaultServiceAccountCredentials(CloudStorageService cloudStorageService) {
+  ServiceAccountCredentials defaultServiceAccountCredentials(
+      CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getDefaultServiceAccountCredentials();
     } catch (IOException e) {

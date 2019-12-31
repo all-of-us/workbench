@@ -3,7 +3,6 @@ package org.pmiops.workbench.config;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
-import java.io.InputStream;
 import javax.servlet.ServletContext;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.UserAuthentication;
@@ -69,11 +68,11 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   /**
    * Service account credentials for Gsuite administration, corresponding to the "gsuite-admin"
    * service account in each environment. Enabled for domain-wide delegation of authority.
-   *
-   * */
+   */
   @Lazy
   @Bean(name = Constants.GSUITE_ADMIN_CREDS)
-  public GoogleCredentials gsuiteAdminCredential(CloudStorageService cloudStorageService) throws IOException {
+  public GoogleCredentials gsuiteAdminCredential(CloudStorageService cloudStorageService)
+      throws IOException {
     return cloudStorageService.getGSuiteAdminCredentials();
   }
 

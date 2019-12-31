@@ -1,7 +1,6 @@
 package org.pmiops.workbench.auth;
 
 import com.google.auth.oauth2.GoogleCredentials;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -18,10 +17,8 @@ public class ServiceAccounts {
    * Retrieves an access token for the Workbench server service account. This should be used
    * carefully, as this account is generally more privileged than an end user researcher account.
    */
-  public static String workbenchAccessToken(List<String> scopes)
-      throws IOException {
-    GoogleCredentials scopedCreds = GoogleCredentials.getApplicationDefault()
-        .createScoped(scopes);
+  public static String workbenchAccessToken(List<String> scopes) throws IOException {
+    GoogleCredentials scopedCreds = GoogleCredentials.getApplicationDefault().createScoped(scopes);
     scopedCreds.refresh();
     return scopedCreds.getAccessToken().getTokenValue();
   }
