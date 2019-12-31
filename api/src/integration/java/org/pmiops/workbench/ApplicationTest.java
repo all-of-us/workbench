@@ -18,7 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * Services, Controllers, Components and Configurations.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestWebMvcConfig.class})
+@SpringBootTest
 public class ApplicationTest {
 
   @Autowired private ApplicationContext context;
@@ -40,7 +40,6 @@ public class ApplicationTest {
     // This loads all @Service, @Controller, @Component and @Configuration annotations
     beans.addAll(context.getBeansWithAnnotation(Component.class).values());
     for (Object object : beans) {
-      System.out.println(object);
       assertThat(object).isNotNull();
     }
   }

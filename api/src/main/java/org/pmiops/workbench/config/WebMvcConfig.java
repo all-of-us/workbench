@@ -66,11 +66,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     return userAuthentication.getUser();
   }
 
-  @Bean
-  public WorkbenchEnvironment workbenchEnvironment() {
-    return new WorkbenchEnvironment();
-  }
-
   /**
    * Service account credentials for Gsuite administration, corresponding to the "gsuite-admin"
    * service account in each environment. Enabled for domain-wide delegation of authority.

@@ -11,6 +11,8 @@ import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.logging.Logger;
+
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.CommonConfig;
@@ -19,6 +21,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -29,10 +32,14 @@ import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.backoff.Sleeper;
 import org.springframework.retry.backoff.ThreadWaitSleeper;
 
-@Configuration
+@TestConfiguration
 @Import({RetryConfig.class, CommonConfig.class})
-// Scan the google package, which we need for the CloudStorage bean.
-@ComponentScan("org.pmiops.workbench.google")
+// Scan the google package to pull in Google cloud storage & retry handler beans.
+@ComponentScan(basePackages={
+    "org.pmiops.workbench.google"
+    // Fails when I include the following scan:
+//    "org.pmiops.workbench.notebooks"
+})
 // Scan the ServiceAccounts class, but exclude other classes in auth (since they
 // bring in JPA-related beans, which include a whole bunch of other deps that are
 // more complicated than we need for now).
@@ -51,6 +58,9 @@ public class IntegrationTestConfig {
   @Bean(name = Constants.GSUITE_ADMIN_CREDS)
   ServiceAccountCredentials gsuiteAdminCredentials(CloudStorageService cloudStorageService) {
     try {
+      Logger log = Logger.getLogger("asdf");
+      log.info("cloud storage: " + cloudStorageService);
+      log.info("gsuite creds: " + cloudStorageService.getGSuiteAdminCredentials());
       return cloudStorageService.getGSuiteAdminCredentials();
     } catch (IOException e) {
       throw new RuntimeException(e);

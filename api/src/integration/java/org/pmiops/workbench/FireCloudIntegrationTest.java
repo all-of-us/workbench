@@ -38,7 +38,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {IntegrationTestConfig.class})
 public class FireCloudIntegrationTest {
 
   /*
@@ -59,8 +58,6 @@ public class FireCloudIntegrationTest {
   @Autowired
   @Qualifier(Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
   private ServiceAccountCredentials defaultServiceAccountCredentials;
-
-  @Autowired private ServiceAccounts serviceAccounts;
 
   @Autowired
   @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
@@ -100,7 +97,6 @@ public class FireCloudIntegrationTest {
         Providers.of(new StatusApi(apiClient)),
         Providers.of(staticNotebooksApi),
         new FirecloudRetryHandler(new NoBackOffPolicy()),
-        serviceAccounts,
         Providers.of(fireCloudAdminCredentials));
   }
 

@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
@@ -56,13 +55,11 @@ public class FireCloudConfig {
   @Bean(name = SERVICE_ACCOUNT_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient allOfUsApiClient(
-      WorkbenchEnvironment workbenchEnvironment,
-      WorkbenchConfig workbenchConfig,
-      ServiceAccounts serviceAccounts) {
+      WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
     try {
       apiClient.setAccessToken(
-          serviceAccounts.workbenchAccessToken(workbenchEnvironment, BILLING_SCOPES));
+          ServiceAccounts.workbenchAccessToken(BILLING_SCOPES));
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }

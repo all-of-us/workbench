@@ -27,35 +27,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {IntegrationTestConfig.class})
 public class CloudResourceManagerServiceImplIntegrationTest {
-  private CloudResourceManagerServiceImpl service;
-  private final ApacheHttpTransport httpTransport = new ApacheHttpTransport();
+  @Autowired
+  private CloudResourceManagerService service;
 
   // This is a single hand created user in the fake-research-aou.org gsuite.
   // It has one project that has been shared with it, AoU CRM Integration Test
   // in the firecloud dev domain.
   private final String CLOUD_RESOURCE_MANAGER_TEST_USER_EMAIL =
       "cloud-resource-manager-integration-test@fake-research-aou.org";
-
-  @Autowired private ServiceAccounts serviceAccounts;
-
-  @Autowired
-  @Qualifier(Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
-  private ServiceAccountCredentials cloudResourceManagerAdminCredentials;
-
-  @Before
-  public void setUp() throws IOException {
-    // Get a refreshed access token for the CloudResourceManager service account credentials.
-    ServiceAccountCredentials scopedCreds =
-        (ServiceAccountCredentials) cloudResourceManagerAdminCredentials.createScoped(CloudResourceManagerServiceImpl.SCOPES);
-    scopedCreds.refresh();
-    service =
-        new CloudResourceManagerServiceImpl(
-            Providers.of(scopedCreds),
-            httpTransport,
-            new GoogleRetryHandler(new NoBackOffPolicy()),
-            serviceAccounts);
-  }
-
+  
   @Test
   public void testGetAllProjectsForUser() {
     DbUser testUser = new DbUser();

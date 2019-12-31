@@ -28,10 +28,4 @@ public class CommonConfig {
   Random random() {
     return new SecureRandom();
   }
-
-  @Bean
-  @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  GoogleCredential.Builder googleCredentialBuilder() {
-    return new GoogleCredential.Builder();
-  }
 }

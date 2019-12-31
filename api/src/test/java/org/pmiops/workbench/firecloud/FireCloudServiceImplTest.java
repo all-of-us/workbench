@@ -59,8 +59,6 @@ public class FireCloudServiceImplTest {
   @Mock private StatusApi statusApi;
   @Mock private StaticNotebooksApi staticNotebooksApi;
   @Mock private ServiceAccountCredentials fireCloudCredentials;
-  @Mock private ServiceAccounts mockServiceAccounts;
-  @Mock private GoogleCredentials mockImpersonatedCredentials;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
@@ -84,7 +82,6 @@ public class FireCloudServiceImplTest {
             Providers.of(statusApi),
             Providers.of(staticNotebooksApi),
             new FirecloudRetryHandler(new NoBackOffPolicy()),
-            mockServiceAccounts,
             Providers.of(fireCloudCredentials));
   }
 
@@ -198,21 +195,6 @@ public class FireCloudServiceImplTest {
   public void testNihCallbackServerError() throws Exception {
     when(nihApi.nihCallback(any())).thenThrow(new ApiException(500, "Internal Server Error"));
     service.postNihCallback(any());
-  }
-
-  @Test
-  public void testGetApiClientWithImpersonation() throws IOException {
-    when(mockServiceAccounts.getImpersonatedCredentials(any(), any(), anyList()))
-        .thenReturn(mockImpersonatedCredentials);
-    // Pretend we retrieved the given access token.
-    when(mockImpersonatedCredentials.getAccessToken())
-        .thenReturn(new AccessToken("impersonated-access-token", new Date()));
-
-    ApiClient apiClient = service.getApiClientWithImpersonation("asdf@fake-research-aou.org");
-
-    // The impersonated access token should be assigned to the generated API client.
-    OAuth oauth = (OAuth) apiClient.getAuthentication("googleoauth");
-    assertThat(oauth.getAccessToken()).isEqualTo("impersonated-access-token");
   }
 
   @Test

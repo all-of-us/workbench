@@ -60,7 +60,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<StaticNotebooksApi> staticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
   private final Provider<ServiceAccountCredentials> fcAdminCredsProvider;
-  private final ServiceAccounts serviceAccounts;
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -106,7 +105,6 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<StatusApi> statusApiProvider,
       Provider<StaticNotebooksApi> staticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
-      ServiceAccounts serviceAccounts,
       @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
           Provider<ServiceAccountCredentials> fcAdminCredsProvider) {
     this.configProvider = configProvider;
@@ -118,7 +116,6 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.workspaceAclsApiProvider = workspaceAclsApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.retryHandler = retryHandler;
-    this.serviceAccounts = serviceAccounts;
     this.fcAdminCredsProvider = fcAdminCredsProvider;
     this.staticNotebooksApiProvider = staticNotebooksApiProvider;
   }
@@ -137,7 +134,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     // Load credentials for the firecloud-admin Service Account. This account has been granted
     // domain-wide delegation for the OAuth scopes required by FireCloud.
     GoogleCredentials impersonatedUserCredentials =
-        serviceAccounts.getImpersonatedCredentials(
+        ServiceAccounts.getImpersonatedCredentials(
             fcAdminCredsProvider.get(), userEmail, FIRECLOUD_API_OAUTH_SCOPES);
 
     ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());

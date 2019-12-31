@@ -19,9 +19,12 @@ import org.pmiops.workbench.IntegrationTestConfig;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
 import org.pmiops.workbench.test.Providers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
@@ -30,29 +33,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {IntegrationTestConfig.class})
 public class DirectoryServiceImplIntegrationTest {
-  private DirectoryServiceImpl service;
   @Autowired
-  @Qualifier(Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
-  private ServiceAccountCredentials gSuiteAdminCredentials;
-  @Autowired
-  private WorkbenchConfig workbenchConfig;
-  @Autowired
-  private ApacheHttpTransport httpTransport;
-  @Autowired
-  private ServiceAccounts serviceAccounts;
+  private DirectoryService service;
 
-  @Before
-  public void setUp() {
-    service =
-        new DirectoryServiceImpl(
-            Providers.of(gSuiteAdminCredentials),
-            Providers.of(workbenchConfig),
-            httpTransport,
-            new GoogleRetryHandler(new NoBackOffPolicy()),
-            serviceAccounts);
-  }
+  @TestConfiguration
+  @Import({DirectoryServiceImpl.class, IntegrationTestConfig.class})
+  static class Configuration {}
 
   @Test
   public void testDummyUsernameIsNotTaken() {
