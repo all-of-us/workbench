@@ -4,6 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
 import org.pmiops.workbench.google.GoogleRetryHandler;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +18,7 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 
 @Configuration
-@Import({NotebooksRetryHandler.class, GoogleRetryHandler.class})
+@Import({NotebooksRetryHandler.class, GoogleRetryHandler.class, FirecloudRetryHandler.class})
 public class RetryConfig {
 
   public abstract static class ResponseCodeRetryPolicy extends SimpleRetryPolicy {

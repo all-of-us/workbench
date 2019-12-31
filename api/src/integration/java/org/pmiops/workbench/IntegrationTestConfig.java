@@ -98,7 +98,6 @@ public class IntegrationTestConfig {
   }
 
   @Bean
-  @Lazy
   WorkbenchConfig workbenchConfig() throws IOException {
     String testConfig =
         Resources.toString(Resources.getResource("config_test.json"), Charset.defaultCharset());

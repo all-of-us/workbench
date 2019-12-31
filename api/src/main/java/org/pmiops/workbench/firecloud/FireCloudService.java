@@ -24,6 +24,8 @@ public interface FireCloudService {
 
   String WORKSPACE_DELIMITER = "__";
 
+  String getBasePath();
+
   /** @return true if firecloud is okay, false if firecloud is down. */
   boolean getFirecloudStatus();
 
