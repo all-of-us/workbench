@@ -6,7 +6,6 @@ import java.time.Clock;
 import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.IntegrationTestConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
@@ -20,7 +19,7 @@ public class DirectoryServiceImplIntegrationTest {
   @Autowired private DirectoryService service;
 
   @TestConfiguration
-  @Import({DirectoryServiceImpl.class, IntegrationTestConfig.class})
+  @Import({DirectoryServiceImpl.class})
   static class Configuration {}
 
   @Test
