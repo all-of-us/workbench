@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
@@ -41,13 +40,11 @@ public class NotebooksConfig {
   @Bean(name = NOTEBOOKS_SERVICE_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient workbenchServiceAccountClient(
-      WorkbenchEnvironment workbenchEnvironment,
-      WorkbenchConfig workbenchConfig,
-      ServiceAccounts serviceAccounts) {
+      WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
     try {
       apiClient.setAccessToken(
-          serviceAccounts.workbenchAccessToken(workbenchEnvironment, NOTEBOOK_SCOPES));
+          ServiceAccounts.workbenchAccessToken(NOTEBOOK_SCOPES));
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }

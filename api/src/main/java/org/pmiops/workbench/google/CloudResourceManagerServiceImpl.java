@@ -31,16 +31,13 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
   private final Provider<ServiceAccountCredentials> cloudResourceManagerAdminCredsProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
-  private final ServiceAccounts serviceAccounts;
 
   @Autowired
   public CloudResourceManagerServiceImpl(
       @Qualifier(Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
           Provider<ServiceAccountCredentials> cloudResourceManagerAdminCredsProvider,
       HttpTransport httpTransport,
-      GoogleRetryHandler retryHandler,
-      ServiceAccounts serviceAccounts) {
-    this.serviceAccounts = serviceAccounts;
+      GoogleRetryHandler retryHandler) {
     this.cloudResourceManagerAdminCredsProvider = cloudResourceManagerAdminCredsProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
@@ -52,7 +49,7 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
     // granted
     // domain-wide delegation for the OAuth scopes required by cloud apis.
     GoogleCredentials credentials =
-        serviceAccounts.getImpersonatedCredentials(
+        ServiceAccounts.getImpersonatedCredentials(
             cloudResourceManagerAdminCredsProvider.get(), user.getContactEmail(), SCOPES);
 
     return new CloudResourceManager.Builder(

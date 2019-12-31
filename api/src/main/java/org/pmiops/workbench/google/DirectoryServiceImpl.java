@@ -77,41 +77,30 @@ public class DirectoryServiceImpl implements DirectoryService {
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
-  private final ServiceAccounts serviceAccounts;
 
   @Autowired
   public DirectoryServiceImpl(
-      @Qualifier(Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
+      @Qualifier(Constants.GSUITE_ADMIN_CREDS)
           Provider<ServiceAccountCredentials> googleCredentialsProvider,
       Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
-      GoogleRetryHandler retryHandler,
-      ServiceAccounts serviceAccounts) {
+      GoogleRetryHandler retryHandler) {
     this.googleCredentialsProvider = googleCredentialsProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
-    this.serviceAccounts = serviceAccounts;
   }
 
-  private OAuth2Credentials createCredentialWithImpersonation() throws IOException {
+  private GoogleCredentials createCredentialWithImpersonation() throws IOException {
+    Logger log = Logger.getLogger("asdfasdf");
     String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
-    Logger log = Logger.getLogger("debug");
-    log.info("Google creds: " + googleCredentialsProvider.get().toString());
-    ImpersonatedCredentials gsuiteCreds = ImpersonatedCredentials.newBuilder()
-        .setSourceCredentials(googleCredentialsProvider.get())
-        .setTargetPrincipal("gsuite-admin@all-of-us-workbench-test.iam.gserviceaccount.com")
-        .setScopes(Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"))
-        .setLifetime(3600).build();
-    gsuiteCreds.refresh();
-    log.info("Gsuite creds: " + gsuiteCreds.toString());
-    //log.info(gsuiteCreds.refreshAccessToken().toString());
-
-    return OAuth2Credentials.newBuilder().setAccessToken(
-        serviceAccounts.getImpersonatedAccessToken(
-          "gsuite-admin@all-of-us-workbench-test.iam.gserviceaccount.com",
-          "directory-service@" + gSuiteDomain,
-          SCOPES)).build();
+    log.info("Provider: " + googleCredentialsProvider);
+    log.info("Provider.get: " + googleCredentialsProvider.get());
+    log.info("Input creds: " + googleCredentialsProvider.get().toString());
+    return ServiceAccounts.getImpersonatedCredentials(
+        googleCredentialsProvider.get(),
+    "directory-service@" + gSuiteDomain,
+    SCOPES);
   }
 
   private Directory getGoogleDirectoryService() throws IOException {
@@ -127,6 +116,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     return configProvider.get().googleDirectoryService.gSuiteDomain;
   }
 
+  @Override
   public User getUserByUsername(String username) {
     return getUser(username + "@" + gSuiteDomain());
   }
@@ -164,6 +154,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   // Returns a user's contact email address via the custom schema in the directory API.
+  @Override
   public String getContactEmailAddress(String username) {
     return (String)
         getUserByUsername(username)
