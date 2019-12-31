@@ -1,7 +1,4 @@
-<app-workspace-nav-bar *ngIf="displayNavBar"
-                       [shareFunction]="handleShareAction"
-                       [deleteFunction]="openConfirmDelete"
-                       [tabPath]="tabPath"></app-workspace-nav-bar>
+<app-workspace-nav-bar *ngIf="displayNavBar" [tabPath]="tabPath"></app-workspace-nav-bar>
 <span *ngIf="menuDataLoading" class="spinner spinner-lg" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"></span>
 <ng-container *ngIf="workspace">
   <clr-modal [(clrModalOpen)]="workspaceDeletionError">
@@ -26,8 +23,10 @@
                   [bugReportDescription]="bugReportDescription"
                   [onClose]="closeBugReport"></app-bug-report>
   <app-help-sidebar *ngIf="helpContent"
+                    [deleteFunction]="openConfirmDelete"
                     [helpContent]="helpContent"
                     [setSidebarState]="setSidebarState"
+                    [shareFunction]="handleShareAction"
                     [sidebarOpen]="sidebarOpen"></app-help-sidebar>
   <div [style.margin-right]="helpContent ? '45px' : 0" [style.height]="helpContent ? 'auto': '100%'">
     <router-outlet *ngIf="workspace"></router-outlet>

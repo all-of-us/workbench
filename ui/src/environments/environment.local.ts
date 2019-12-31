@@ -22,4 +22,5 @@ export const environment: Environment = {
   enablePublishedWorkspaces: true,
   enableAccountPages: true,
   enableProfileCapsFeatures: true,
+  enableNewConceptTabs: true
 };

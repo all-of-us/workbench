@@ -113,6 +113,18 @@ paths:
           schema:
             $ref: "#/definitions/FeaturedWorkspacesConfigResponse"
 
+  /v1/status-alert:
+    get:
+      tags:
+        - status-alert
+      description: Returns status alert information if any exists.
+      operationId: getStatusAlert
+      responses:
+        200:
+          description: >
+            A status alert information object.
+          schema:
+            $ref: "#/definitions/StatusAlert"
 
     # User methods ########################################################################
 
@@ -615,7 +627,7 @@ paths:
   /v1/billingProjects:
     get:
       tags:
-        - Profile
+        - profile
       operationId: getBillingProjects
       summary: List billing projects for a user
       responses:
@@ -2495,7 +2507,6 @@ definitions:
       - commercialPurpose
       - population
       - reviewRequested
-      - containsUnderservedPopulation
       - socialBehavioral
       - populationHealth
       - educational
@@ -2797,7 +2808,6 @@ definitions:
     type: object
     required:
       - name
-      - type
     properties:
       id:
         type: integer
@@ -3654,7 +3664,7 @@ definitions:
       accessLevel:
         $ref: '#/definitions/WorkspaceAccessLevel'
 
-  userListResponse:
+  UserListResponse:
     type: object
     required:
       - profileList
@@ -3807,3 +3817,23 @@ definitions:
           Current size of the billing buffer, i.e. the number of projects ready to be claimed.
         type: integer
         format: int64
+
+  StatusAlert:
+    type: object
+    properties:
+      statusAlertId:
+        description: The primary key of the status alert in the database
+        type: integer
+        format: int64
+      title:
+        description: >
+          Title of the status alert, e.g. 'Service Incident: December 6, 2019'
+        type: string
+      message:
+        description: >
+          The actual message of the status alert, e.g. 'AoU RW is down because GCP is down'
+        type: string
+      link:
+        description: >
+          A URL linking to an incident report where users can read more
+        type: string

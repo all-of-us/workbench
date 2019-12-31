@@ -46,7 +46,7 @@ definitions:
   Domain:
     type: string
     description: a domain for concepts corresponding to a table in the OMOP schema
-    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT, SURVEY, PERSON]
+    enum: &DOMAIN [OBSERVATION, PROCEDURE, DRUG, CONDITION, MEASUREMENT, DEVICE, DEATH, VISIT, SURVEY, PERSON, PHYSICALMEASUREMENT]
 
   Surveys:
     type: string

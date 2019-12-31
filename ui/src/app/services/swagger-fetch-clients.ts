@@ -36,6 +36,7 @@ import {
   FeaturedWorkspacesConfigApi,
   FetchAPI, // internal
   ProfileApi,
+  StatusAlertApi,
   StatusApi,
   UserApi,
   UserMetricsApi,
@@ -91,6 +92,7 @@ export const dataSetApi = bindCtor(DataSetApi);
 export const featuredWorkspacesConfigApi = bindCtor(FeaturedWorkspacesConfigApi);
 export const profileApi = bindCtor(ProfileApi);
 export const statusApi = bindCtor(StatusApi);
+export const statusAlertApi = bindCtor(StatusAlertApi);
 export const userApi = bindCtor(UserApi);
 export const userMetricsApi = bindCtor(UserMetricsApi);
 export const workspacesApi = bindCtor(WorkspacesApi);

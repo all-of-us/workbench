@@ -354,7 +354,7 @@ definitions:
       - name
       - group
       - selectable
-      - hasAttribute
+      - hasAttributes
     properties:
       id:
         description: >

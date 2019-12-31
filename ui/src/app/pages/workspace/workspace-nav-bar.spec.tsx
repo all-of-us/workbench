@@ -40,24 +40,4 @@ describe('WorkspaceNavBarComponent', () => {
       ['/workspaces', workspaceDataStub.namespace, workspaceDataStub.id, 'data']);
   });
 
-  it('should call delete method when clicked', () => {
-    const deleteSpy = jest.fn();
-    props = {deleteFunction: deleteSpy};
-    const wrapper = component();
-
-    wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
-    wrapper.find({'data-test-id': 'Delete-menu-item'}).first().simulate('click');
-    expect(deleteSpy).toHaveBeenCalled();
-  });
-
-  it('should call share method when clicked', () => {
-    const shareSpy = jest.fn();
-    props = {shareFunction: shareSpy};
-    const wrapper = component();
-
-    wrapper.find({'data-test-id': 'workspace-menu-button'}).first().simulate('click');
-    wrapper.find({'data-test-id': 'Share-menu-item'}).first().simulate('click');
-    expect(shareSpy).toHaveBeenCalled();
-  });
-
 });
