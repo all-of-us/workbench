@@ -1,15 +1,11 @@
 package org.pmiops.workbench.tools;
 
-import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
-
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.gson.Gson;
 import java.io.IOException;
 import org.pmiops.workbench.auth.Constants;
-import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -21,7 +17,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
@@ -80,7 +75,8 @@ public class CommandLineToolConfig {
 
   @Lazy
   @Bean(name = Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
-  ServiceAccountCredentials cloudResourceManagerCredentials(CloudStorageService cloudStorageService) {
+  ServiceAccountCredentials cloudResourceManagerCredentials(
+      CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getCloudResourceManagerAdminCredentials();
     } catch (IOException e) {

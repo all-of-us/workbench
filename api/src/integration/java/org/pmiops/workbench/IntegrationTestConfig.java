@@ -1,7 +1,5 @@
 package org.pmiops.workbench;
 
-import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
-
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.auth.oauth2.ServiceAccountCredentials;
@@ -9,9 +7,7 @@ import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.logging.Logger;
 import org.pmiops.workbench.auth.Constants;
-import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -21,7 +17,6 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.CloudStorageServiceImpl;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.backoff.BackOffPolicy;
