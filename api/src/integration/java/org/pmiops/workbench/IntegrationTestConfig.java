@@ -18,6 +18,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageServiceImpl;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -29,25 +30,7 @@ import org.springframework.retry.backoff.Sleeper;
 import org.springframework.retry.backoff.ThreadWaitSleeper;
 
 @TestConfiguration
-@Import({RetryConfig.class, CommonConfig.class})
-// Scan the google package to pull in Google cloud storage & retry handler beans.
-@ComponentScan(
-    basePackages = {"org.pmiops.workbench.google"
-      // Fails when I include the following scan:
-      //    "org.pmiops.workbench.notebooks"
-    })
-// Scan the ServiceAccounts class, but exclude other classes in auth (since they
-// bring in JPA-related beans, which include a whole bunch of other deps that are
-// more complicated than we need for now).
-//
-// TODO(gjuggler): move ServiceAccounts out of the auth package, or move the more
-// dependency-ridden classes (e.g. ProfileService) out instead.
-@ComponentScan(
-    basePackageClasses = ServiceAccounts.class,
-    useDefaultFilters = false,
-    includeFilters = {
-      @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = ServiceAccounts.class),
-    })
+@Import({RetryConfig.class, CommonConfig.class, CloudStorageServiceImpl.class})
 public class IntegrationTestConfig {
 
   @Lazy
