@@ -5,8 +5,6 @@ import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
-import java.io.IOException;
-import java.nio.charset.Charset;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
@@ -15,8 +13,8 @@ import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.CloudStorageServiceImpl;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.backoff.BackOffPolicy;
@@ -24,7 +22,10 @@ import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.backoff.Sleeper;
 import org.springframework.retry.backoff.ThreadWaitSleeper;
 
-@Configuration
+import java.io.IOException;
+import java.nio.charset.Charset;
+
+@TestConfiguration
 @Import({RetryConfig.class, CommonConfig.class, CloudStorageServiceImpl.class})
 public class IntegrationTestConfig {
 
