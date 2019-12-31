@@ -5,6 +5,7 @@ import static org.springframework.context.annotation.FilterType.ASSIGNABLE_TYPE;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.gson.Gson;
 import java.io.IOException;
 import org.pmiops.workbench.auth.Constants;
@@ -15,6 +16,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageServiceImpl;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -42,23 +44,9 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
  */
 @Configuration
 @EnableAutoConfiguration
-@Import({RetryConfig.class, CommonConfig.class})
+@Import({RetryConfig.class, CommonConfig.class, CloudStorageServiceImpl.class})
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @EntityScan("org.pmiops.workbench.db.model")
-// Scan the google module, for CloudStorageService and DirectoryService beans.
-@ComponentScan("org.pmiops.workbench.google")
-// Scan the ServiceAccounts class, but exclude other classes in auth (since they
-// bring in JPA-related beans, which include a whole bunch of other deps that are
-// more complicated than we need for now).
-//
-// TODO(gjuggler): move ServiceAccounts out of the auth package, or move the more
-// dependency-ridden classes (e.g. ProfileService) out instead.
-@ComponentScan(
-    basePackageClasses = ServiceAccounts.class,
-    useDefaultFilters = false,
-    includeFilters = {
-      @ComponentScan.Filter(type = ASSIGNABLE_TYPE, value = ServiceAccounts.class),
-    })
 public class CommandLineToolConfig {
 
   /**
@@ -72,7 +60,7 @@ public class CommandLineToolConfig {
    */
   @Lazy
   @Bean(name = Constants.GSUITE_ADMIN_CREDS)
-  GoogleCredential gsuiteAdminCredentials(CloudStorageService cloudStorageService) {
+  ServiceAccountCredentials gsuiteAdminCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getGSuiteAdminCredentials();
     } catch (IOException e) {
@@ -82,7 +70,7 @@ public class CommandLineToolConfig {
 
   @Lazy
   @Bean(name = Constants.FIRECLOUD_ADMIN_CREDS)
-  GoogleCredential fireCloudCredentials(CloudStorageService cloudStorageService) {
+  ServiceAccountCredentials fireCloudCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getFireCloudAdminCredentials();
     } catch (IOException e) {
@@ -92,7 +80,7 @@ public class CommandLineToolConfig {
 
   @Lazy
   @Bean(name = Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
-  GoogleCredential cloudResourceManagerCredentials(CloudStorageService cloudStorageService) {
+  ServiceAccountCredentials cloudResourceManagerCredentials(CloudStorageService cloudStorageService) {
     try {
       return cloudStorageService.getCloudResourceManagerAdminCredentials();
     } catch (IOException e) {

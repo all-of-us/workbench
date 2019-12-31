@@ -37,9 +37,6 @@ public class IntegrationTestConfig {
   @Bean(name = Constants.GSUITE_ADMIN_CREDS)
   ServiceAccountCredentials gsuiteAdminCredentials(CloudStorageService cloudStorageService) {
     try {
-      Logger log = Logger.getLogger("asdf");
-      log.info("cloud storage: " + cloudStorageService);
-      log.info("gsuite creds: " + cloudStorageService.getGSuiteAdminCredentials());
       return cloudStorageService.getGSuiteAdminCredentials();
     } catch (IOException e) {
       throw new RuntimeException(e);
