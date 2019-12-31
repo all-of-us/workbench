@@ -34,14 +34,6 @@ public interface CloudStorageService {
 
   JSONObject getElasticCredentials();
 
-  ServiceAccountCredentials getGSuiteAdminCredentials() throws IOException;
-
-  ServiceAccountCredentials getFireCloudAdminCredentials() throws IOException;
-
-  ServiceAccountCredentials getCloudResourceManagerAdminCredentials() throws IOException;
-
-  ServiceAccountCredentials getDefaultServiceAccountCredentials() throws IOException;
-
   ServiceAccountCredentials getGarbageCollectionServiceAccountCredentials(
       String garbageCollectionEmail) throws IOException;
 

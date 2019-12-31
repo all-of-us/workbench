@@ -14,8 +14,6 @@ import com.google.api.services.directory.model.User;
 import com.google.api.services.directory.model.UserEmail;
 import com.google.api.services.directory.model.UserName;
 import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -27,12 +25,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
-import org.pmiops.workbench.auth.Constants;
+import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -69,43 +66,31 @@ public class DirectoryServiceImpl implements DirectoryService {
               DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
           DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY);
 
-  private final Provider<ServiceAccountCredentials> googleCredentialsProvider;
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
+  private final Directory service;
 
   @Autowired
   public DirectoryServiceImpl(
-      @Qualifier(Constants.GSUITE_ADMIN_CREDS)
-          Provider<ServiceAccountCredentials> googleCredentialsProvider,
       Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
       GoogleRetryHandler retryHandler) {
-    this.googleCredentialsProvider = googleCredentialsProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
+
+    this.service = buildService();
   }
 
-  private GoogleCredentials createCredentialWithImpersonation() throws IOException {
-    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
-    return ServiceAccounts.getImpersonatedCredentials(
-        googleCredentialsProvider.get(), "directory-service@" + gSuiteDomain, SCOPES);
-  }
-
-  /**
-   * Creates a G Suite Directory API client instance. This requires loading the gsuite-admin service
-   * account credentials from GCS and using domain-wide-delegation to impersonate the
-   * 'directory-service@researchallofus.org' admin user.
-   *
-   * @throws IOException if the GCS-stored credentials cannot be loaded.
-   */
-  private Directory getGoogleDirectoryService() throws IOException {
+  private Directory buildService() {
+    DelegatedUserCredentials delegatedCreds =
+        new DelegatedUserCredentials(
+            ServiceAccounts.getServiceAccountEmail("gsuite-admin", configProvider.get()),
+            "directory-service@" + gSuiteDomain(),
+            SCOPES);
     return new Directory.Builder(
-            httpTransport,
-            getDefaultJsonFactory(),
-            new HttpCredentialsAdapter(createCredentialWithImpersonation()))
-        .setApplicationName(APPLICATION_NAME)
+            httpTransport, getDefaultJsonFactory(), new HttpCredentialsAdapter(delegatedCreds))
         .build();
   }
 
@@ -113,7 +98,6 @@ public class DirectoryServiceImpl implements DirectoryService {
     return configProvider.get().googleDirectoryService.gSuiteDomain;
   }
 
-  @Override
   public User getUserByUsername(String username) {
     return getUser(username + "@" + gSuiteDomain());
   }
@@ -131,8 +115,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     try {
       // We use the "full" projection to include custom schema fields in the Directory API response.
       return retryHandler.runAndThrowChecked(
-          (context) ->
-              getGoogleDirectoryService().users().get(email).setProjection("full").execute());
+          (context) -> service.users().get(email).setProjection("full").execute());
     } catch (GoogleJsonResponseException e) {
       // Handle the special case where we're looking for a not found user by returning
       // null.
@@ -151,7 +134,6 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   // Returns a user's contact email address via the custom schema in the directory API.
-  @Override
   public String getContactEmailAddress(String username) {
     return (String)
         getUserByUsername(username)
@@ -205,7 +187,7 @@ public class DirectoryServiceImpl implements DirectoryService {
             .setOrgUnitPath(GSUITE_WORKBENCH_ORG_UNIT_PATH);
     addCustomSchemaAndEmails(user, primaryEmail, contactEmail);
 
-    retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
+    retryHandler.run((context) -> service.users().insert(user).execute());
     return user;
   }
 
@@ -214,8 +196,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     User user = getUser(email);
     String password = randomString();
     user.setPassword(password);
-    retryHandler.run(
-        (context) -> getGoogleDirectoryService().users().update(email, user).execute());
+    retryHandler.run((context) -> service.users().update(email, user).execute());
     return user;
   }
 
@@ -223,11 +204,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   public void deleteUser(String username) {
     try {
       retryHandler.runAndThrowChecked(
-          (context) ->
-              getGoogleDirectoryService()
-                  .users()
-                  .delete(username + "@" + gSuiteDomain())
-                  .execute());
+          (context) -> service.users().delete(username + "@" + gSuiteDomain()).execute());
     } catch (GoogleJsonResponseException e) {
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         // Deleting a user that doesn't exist will have no effect.
