@@ -17,8 +17,10 @@ import org.mockito.Mock;
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.FirecloudRetryHandler;
@@ -30,77 +32,58 @@ import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.test.Providers;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.context.annotation.RequestScope;
 
 @RunWith(SpringRunner.class)
 public class FireCloudIntegrationTest {
 
-  /*
-   * Mocked service providers are (currently) not available for functional integration tests.
-   * Integration tests with real users/workspaces against production FireCloud is not
-   * recommended at this time.
-   */
-  @Mock private BillingApi billingApi;
-  @Mock private WorkspacesApi workspacesApi;
-  @Mock private GroupsApi allOfUsGroupsApi;
-  @Mock private WorkspacesApi workspaceAclsApi;
-  @Mock private StaticNotebooksApi staticNotebooksApi;
-  @Mock private ProfileApi profileApi;
-  @Mock private NihApi nihApi;
-
-  // N.B. this will load the default service account credentials for whatever AoU environment
-  // is set when running integration tests. This should be the test environment.
   @Autowired
-  @Qualifier(Constants.DEFAULT_SERVICE_ACCOUNT_CREDS)
-  private ServiceAccountCredentials defaultServiceAccountCredentials;
+  private FireCloudService service;
 
-  @Autowired
-  @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
-  private ServiceAccountCredentials fireCloudAdminCredentials;
+  private static WorkbenchConfig config;
+  private static final FireCloudConfig fireCloudConfig = new FireCloudConfig();
 
-  @Before
-  public void setUp() throws IOException {
+  @TestConfiguration
+  @ComponentScan("org.pmiops.workbench.firecloud")
+  @Import({FireCloudServiceImpl.class, IntegrationTestConfig.class})
+  static class Configuration {
+    // By defining a request-scoped
+    @Bean
+    @Lazy
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    WorkbenchConfig workbenchConfig() {
+      return config;
+    }
+
+    // We need to redefine a bean for any API clients that are used within these integration tests.
+    // This is because FireCloudConfig defines the beans as request-scoped, but there's no request
+    // scope available from an integration test setting.
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public StatusApi statusApi() {
+      return fireCloudConfig.statusApi(config);
+    }
+
   }
 
-  /**
-   * Creates a FireCloudService instance with the FireCloud base URL corresponding to the given
-   * WorkbenchConfig. Note that this will always use the test environment's default service account
-   * credentials when making API calls. It shouldn't be possible to make authenticated calls to the
-   * FireCloud prod environment.
-   *
-   * <p>This method mostly exists to allow us to run a status-check against both FC dev & prod
-   * within the same integration test run.
-   */
-  private FireCloudService createService(WorkbenchConfig config) throws IOException {
-    ServiceAccountCredentials scopedCreds = (ServiceAccountCredentials) defaultServiceAccountCredentials.createScoped(FireCloudServiceImpl.FIRECLOUD_API_OAUTH_SCOPES);
-    scopedCreds.refresh();
-
-    ApiClient apiClient =
-        new ApiClient()
-            .setBasePath(config.firecloud.baseUrl)
-            .setDebugging(config.firecloud.debugEndpoints);
-    apiClient.setAccessToken(scopedCreds.getAccessToken().getTokenValue());
-
-    return new FireCloudServiceImpl(
-        Providers.of(config),
-        Providers.of(profileApi),
-        Providers.of(billingApi),
-        Providers.of(allOfUsGroupsApi),
-        Providers.of(nihApi),
-        Providers.of(workspacesApi),
-        Providers.of(workspaceAclsApi),
-        Providers.of(new StatusApi(apiClient)),
-        Providers.of(staticNotebooksApi),
-        new FirecloudRetryHandler(new NoBackOffPolicy()),
-        Providers.of(fireCloudAdminCredentials));
-  }
-
-  private WorkbenchConfig loadConfig(String filename) throws Exception {
+  private WorkbenchConfig loadConfig(String filename) throws IOException {
     String testConfig =
         Resources.toString(Resources.getResource(filename), Charset.defaultCharset());
     WorkbenchConfig workbenchConfig = new Gson().fromJson(testConfig, WorkbenchConfig.class);
@@ -108,22 +91,23 @@ public class FireCloudIntegrationTest {
     return workbenchConfig;
   }
 
-  private FireCloudService getTestService() throws Exception {
-    return createService(loadConfig("config_test.json"));
-  }
-
-  private FireCloudService getProdService() throws Exception {
-    return createService(loadConfig("config_prod.json"));
+  @Before
+  public void setUp() throws IOException {
+    config = loadConfig("config_test.json");
   }
 
   @Test
-  public void testStatusProd() throws Exception {
-    assertThat(getProdService().getFirecloudStatus()).isTrue();
+  public void testStatusProd() throws IOException {
+    config = loadConfig("config_prod.json");
+    assertThat(service.getBasePath()).isEqualTo("https://api.firecloud.org");
+    assertThat(service.getFirecloudStatus()).isTrue();
   }
 
   @Test
-  public void testStatusDev() throws Exception {
-    assertThat(getTestService().getFirecloudStatus()).isTrue();
+  public void testStatusDev() {
+    assertThat(service.getBasePath())
+        .isEqualTo("https://firecloud-orchestration.dsde-dev.broadinstitute.org");
+    assertThat(service.getFirecloudStatus()).isTrue();
   }
 
   /**
@@ -136,7 +120,7 @@ public class FireCloudIntegrationTest {
   @Test
   public void testImpersonatedProfileCall() throws Exception {
     ApiClient apiClient =
-        getTestService()
+        service
             .getApiClientWithImpersonation("integration-test-user@fake-research-aou.org");
 
     // Run the most basic API call against the /me/ endpoint.

@@ -3,6 +3,7 @@ package org.pmiops.workbench.firecloud;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
@@ -147,6 +148,12 @@ public class FireCloudServiceImpl implements FireCloudService {
     FirecloudManagedGroupRef registeredDomain = new FirecloudManagedGroupRef();
     registeredDomain.setMembersGroupName(configProvider.get().firecloud.registeredDomainName);
     workspaceIngest.setAuthorizationDomain(ImmutableList.of(registeredDomain));
+  }
+
+  @Override
+  @VisibleForTesting
+  public String getBasePath() {
+    return statusApiProvider.get().getApiClient().getBasePath();
   }
 
   @Override
