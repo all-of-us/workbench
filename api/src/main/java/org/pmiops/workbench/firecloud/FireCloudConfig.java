@@ -54,12 +54,10 @@ public class FireCloudConfig {
 
   @Bean(name = SERVICE_ACCOUNT_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient allOfUsApiClient(
-      WorkbenchConfig workbenchConfig) {
+  public ApiClient allOfUsApiClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
     try {
-      apiClient.setAccessToken(
-          ServiceAccounts.workbenchAccessToken(BILLING_SCOPES));
+      apiClient.setAccessToken(ServiceAccounts.workbenchAccessToken(BILLING_SCOPES));
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }

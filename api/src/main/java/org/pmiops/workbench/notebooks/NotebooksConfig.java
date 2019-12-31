@@ -39,12 +39,10 @@ public class NotebooksConfig {
 
   @Bean(name = NOTEBOOKS_SERVICE_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient workbenchServiceAccountClient(
-      WorkbenchConfig workbenchConfig) {
+  public ApiClient workbenchServiceAccountClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
     try {
-      apiClient.setAccessToken(
-          ServiceAccounts.workbenchAccessToken(NOTEBOOK_SCOPES));
+      apiClient.setAccessToken(ServiceAccounts.workbenchAccessToken(NOTEBOOK_SCOPES));
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }

@@ -15,8 +15,6 @@ import com.google.api.services.directory.model.UserEmail;
 import com.google.api.services.directory.model.UserName;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.auth.oauth2.ImpersonatedCredentials;
-import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -30,7 +28,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
-
 import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -98,9 +95,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     log.info("Provider.get: " + googleCredentialsProvider.get());
     log.info("Input creds: " + googleCredentialsProvider.get().toString());
     return ServiceAccounts.getImpersonatedCredentials(
-        googleCredentialsProvider.get(),
-    "directory-service@" + gSuiteDomain,
-    SCOPES);
+        googleCredentialsProvider.get(), "directory-service@" + gSuiteDomain, SCOPES);
   }
 
   private Directory getGoogleDirectoryService() throws IOException {
