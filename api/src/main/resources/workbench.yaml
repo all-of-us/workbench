@@ -627,7 +627,7 @@ paths:
   /v1/billingProjects:
     get:
       tags:
-        - Profile
+        - profile
       operationId: getBillingProjects
       summary: List billing projects for a user
       responses:
@@ -2507,7 +2507,6 @@ definitions:
       - commercialPurpose
       - population
       - reviewRequested
-      - containsUnderservedPopulation
       - socialBehavioral
       - populationHealth
       - educational
@@ -2809,7 +2808,6 @@ definitions:
     type: object
     required:
       - name
-      - type
     properties:
       id:
         type: integer
@@ -3666,7 +3664,7 @@ definitions:
       accessLevel:
         $ref: '#/definitions/WorkspaceAccessLevel'
 
-  userListResponse:
+  UserListResponse:
     type: object
     required:
       - profileList
