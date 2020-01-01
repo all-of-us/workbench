@@ -70,6 +70,7 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserServiceInterface;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -223,7 +224,7 @@ public class DataSetControllerTest {
     CohortFactoryImpl.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
-    UserServiceInterface.class,
+    UserServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     WorkspaceMapperImpl.class
