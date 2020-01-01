@@ -22,12 +22,12 @@ import java.util.function.Function;
  * we may wish to support other metrics backends, and don't want to depend on Stackdriver concepts
  * or implementation details.
  */
-public interface OpenCensusStatsViewInfo {
+public interface OpenCensusView {
 
-  Map<Class, Function<OpenCensusStatsViewInfo, Measure>> MEASURE_CLASS_TO_MEASURE_FUNCTION =
+  Map<Class, Function<OpenCensusView, Measure>> MEASURE_CLASS_TO_MEASURE_FUNCTION =
       ImmutableMap.of(
-          MeasureLong.class, OpenCensusStatsViewInfo::getMeasureLong,
-          MeasureDouble.class, OpenCensusStatsViewInfo::getMeasureDouble);
+          MeasureLong.class, OpenCensusView::getMeasureLong,
+          MeasureDouble.class, OpenCensusView::getMeasureDouble);
 
   String UNITLESS_UNIT = "1";
 
@@ -63,9 +63,10 @@ public interface OpenCensusStatsViewInfo {
 
   Aggregation getAggregation();
 
+  // TODO(jaycarlton) What is this for?
   List<TagKey> getColumns();
 
-  default View toOpenCensusView() {
+  default View toView() {
     return View.create(
         getStatsName(), getDescription(), getMeasure(), getAggregation(), getColumns());
   }

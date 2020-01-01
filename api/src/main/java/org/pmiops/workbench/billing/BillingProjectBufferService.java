@@ -1,16 +1,17 @@
 package org.pmiops.workbench.billing;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
-import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +35,11 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
+import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,19 +56,17 @@ public class BillingProjectBufferService implements GaugeDataCollector {
       ImmutableMap.of(
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
           BufferEntryStatus.ASSIGNING, ASSIGNING_TIMEOUT);
-  private static final ImmutableMap<BufferEntryStatus, MonitoringViews>
-      ENTRY_STATUS_TO_METRIC_VIEW =
-          ImmutableMap.of(
-              BufferEntryStatus.AVAILABLE, MonitoringViews.BILLING_BUFFER_AVAILABLE_PROJECT_COUNT,
-              BufferEntryStatus.ASSIGNING, MonitoringViews.BILLING_BUFFER_ASSIGNING_PROJECT_COUNT,
-              BufferEntryStatus.CREATING, MonitoringViews.BILLING_BUFFER_CREATING_PROJECT_COUNT);
+  private static final ImmutableMap<BufferEntryStatus, Metric> ENTRY_STATUS_TO_METRIC_VIEW =
+      ImmutableMap.of(
+          BufferEntryStatus.AVAILABLE, Metric.BILLING_BUFFER_AVAILABLE_PROJECT_COUNT,
+          BufferEntryStatus.ASSIGNING, Metric.BILLING_BUFFER_ASSIGNING_PROJECT_COUNT,
+          BufferEntryStatus.CREATING, Metric.BILLING_BUFFER_CREATING_PROJECT_COUNT);
 
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
   private final MonitoringService monitoringService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private SecureRandom random;
 
   @Autowired
   public BillingProjectBufferService(
@@ -79,7 +80,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     this.fireCloudService = fireCloudService;
     this.monitoringService = monitoringService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.random = new SecureRandom();
   }
 
   private Timestamp getCurrentTimestamp() {
@@ -95,17 +95,15 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   }
 
   @Override
-  public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
-    ImmutableMap.Builder<OpenCensusStatsViewInfo, Number> signalToValueBuilder =
-        ImmutableMap.builder();
-    signalToValueBuilder.put(MonitoringViews.BILLING_BUFFER_SIZE, getCurrentBufferSize());
-
-    // Toy data series for developing & testing dashboards and alerts in low-traffic environments.
-    signalToValueBuilder.put(MonitoringViews.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis());
-    signalToValueBuilder.put(MonitoringViews.DEBUG_RANDOM_DOUBLE, random.nextDouble());
+  public Collection<MeasurementBundle> getGaugeData() {
+    final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
+    resultBuilder.add(
+        MeasurementBundle.builder()
+            .add(Metric.BILLING_BUFFER_SIZE, getCurrentBufferSize())
+            .build());
 
     // TODO(jaycarlton): set up a DAO/data manager method pair to build this map in one query.
-    ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
+    final ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
         Arrays.stream(BufferEntryStatus.values())
             .map(
                 status ->
@@ -115,14 +113,24 @@ public class BillingProjectBufferService implements GaugeDataCollector {
                             DbStorageEnums.billingProjectBufferEntryStatusToStorage(status))))
             .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
 
-    for (Map.Entry<BufferEntryStatus, MonitoringViews> entry :
-        ENTRY_STATUS_TO_METRIC_VIEW.entrySet()) {
+    for (Map.Entry<BufferEntryStatus, Metric> entry : ENTRY_STATUS_TO_METRIC_VIEW.entrySet()) {
       final BufferEntryStatus entryStatus = entry.getKey();
-      final OpenCensusStatsViewInfo metricView = entry.getValue();
-      final Long value = entryStatusToCount.get(entryStatus);
-      signalToValueBuilder.put(metricView, value);
+      final OpenCensusView view = entry.getValue();
+      final Long statusCount = entryStatusToCount.get(entryStatus);
+      // Add the status-specific
+      resultBuilder.add(MeasurementBundle.builder().add(view, statusCount).build());
     }
-    return signalToValueBuilder.build();
+
+    // Add a bundle specifically for the overall
+    entryStatusToCount.entrySet().stream()
+        .map(
+            entry ->
+                MeasurementBundle.builder()
+                    .add(Metric.BILLING_BUFFER_COUNT_BY_STATUS, entry.getValue())
+                    .attach(AttachmentKey.BUFFER_ENTRY_STATUS, entry.getKey().toString())
+                    .build())
+        .forEach(resultBuilder::add);
+    return resultBuilder.build();
   }
 
   /**

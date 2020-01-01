@@ -1,5 +1,6 @@
 package org.pmiops.workbench.monitoring;
 
+import io.opencensus.metrics.data.AttachmentValue;
 import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
 import io.opencensus.stats.MeasureMap;
@@ -10,8 +11,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,13 +43,11 @@ public class MonitoringServiceImpl implements MonitoringService {
   }
 
   private void registerSignals() {
-    Arrays.stream(MonitoringViews.values())
-        .map(MonitoringViews::toOpenCensusView)
-        .forEach(viewManager::registerView);
+    Arrays.stream(Metric.values()).map(OpenCensusView::toView).forEach(viewManager::registerView);
   }
 
   @Override
-  public void recordValue(OpenCensusStatsViewInfo viewInfo, Number value) {
+  public void recordValue(OpenCensusView viewInfo, Number value) {
     try {
       initStatsConfigurationIdempotent();
       if (value == null) {
@@ -73,22 +72,31 @@ public class MonitoringServiceImpl implements MonitoringService {
   }
 
   /**
-   * Record multiple values at once, indexed by keys in the StatsViewProperties enum. This should
-   * save calls to Stackdriver.
+   * Record multiple values at once. An attachment map allows associating these measurements with
+   * metadata (shared across all samples). We use a single MeasureMap for all the entries in both
+   * maps.
    *
-   * @param enumToValue
+   * @param viewInfoToValue key/value pairs for time series. These need not be related, but any
+   *     attachments should apply to all entries in this map.
+   * @param attachmentKeyToValue Map of String/AttachmentValue pairs to be associated with these
+   *     data.
    */
   @Override
-  public void recordValues(Map<OpenCensusStatsViewInfo, Number> enumToValue) {
+  public void recordValues(
+      Map<OpenCensusView, Number> viewInfoToValue,
+      Map<String, AttachmentValue> attachmentKeyToValue) {
     try {
       initStatsConfigurationIdempotent();
-      if (enumToValue.isEmpty()) {
+      if (viewInfoToValue.isEmpty()) {
         logger.warning("recordValue() called with empty map.");
         return;
       }
       final MeasureMap measureMap = statsRecorder.newMeasureMap();
-      enumToValue.forEach(
+      viewInfoToValue.forEach(
           (viewProperties, value) -> addToMeasureMap(measureMap, viewProperties, value));
+      attachmentKeyToValue.forEach(measureMap::putAttachment);
+
+      // Finally, send the data to the backend (Stackdriver/Cloud Monitoring for now).
       measureMap.record();
     } catch (RuntimeException e) {
       logAndSwallow(e);
@@ -105,7 +113,7 @@ public class MonitoringServiceImpl implements MonitoringService {
    */
   private void addToMeasureMap(
       @NotNull MeasureMap measureMap,
-      @NotNull OpenCensusStatsViewInfo viewProperties,
+      @NotNull OpenCensusView viewProperties,
       @NotNull Number value) {
     if (viewProperties.getMeasureClass().equals(MeasureLong.class)) {
       measureMap.put(viewProperties.getMeasureLong(), value.longValue());

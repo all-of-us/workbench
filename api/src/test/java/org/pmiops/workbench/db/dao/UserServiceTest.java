@@ -65,7 +65,7 @@ public class UserServiceTest {
   @Autowired private UserDao userDao;
 
   @TestConfiguration
-  @Import({UserServiceInterface.class})
+  @Import({UserServiceImpl.class})
   @MockBean({
     AdminActionHistoryDao.class,
     FireCloudService.class,

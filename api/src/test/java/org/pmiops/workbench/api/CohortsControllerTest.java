@@ -42,6 +42,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserServiceInterface;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohortReview;
@@ -176,7 +177,7 @@ public class CohortsControllerTest {
     CohortCloningService.class,
     CohortFactoryImpl.class,
     NotebooksServiceImpl.class,
-    UserServiceInterface.class,
+    UserServiceImpl.class,
     WorkspacesController.class,
     CohortsController.class,
     ConceptSetsController.class,

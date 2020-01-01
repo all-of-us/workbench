@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +44,8 @@ import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,8 +63,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final int DATA_SET_VERSION = 1;
 
   @Override
-  public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
-    return ImmutableMap.of(MonitoringViews.DATASET_COUNT, dataSetDao.count());
+  public Collection<MeasurementBundle> getGaugeData() {
+    return Collections.singleton(
+        MeasurementBundle.builder().add(Metric.DATASET_COUNT, dataSetDao.count()).build());
   }
 
   /*

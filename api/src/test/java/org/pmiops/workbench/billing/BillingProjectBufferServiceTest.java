@@ -17,9 +17,10 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -48,9 +49,9 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -671,9 +672,14 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void testGetGaugeData() {
-    final Map<OpenCensusStatsViewInfo, Number> result = billingProjectBufferService.getGaugeData();
-    assertThat(result.size()).isGreaterThan(0);
-    assertThat(result.get(MonitoringViews.BILLING_BUFFER_SIZE)).isEqualTo(0);
+    final Collection<MeasurementBundle> bundles = billingProjectBufferService.getGaugeData();
+    assertThat(bundles.size()).isGreaterThan(0);
+    Optional<MeasurementBundle> entryStatusBundle =
+        bundles.stream()
+            .filter(b -> b.getMeasurements().containsKey(Metric.BILLING_BUFFER_COUNT_BY_STATUS))
+            .findFirst();
+    assertThat(entryStatusBundle.isPresent()).isTrue();
+    assertThat(entryStatusBundle.get().getAttachments()).isNotEmpty();
   }
 
   private Timestamp getCurrentTimestamp() {
