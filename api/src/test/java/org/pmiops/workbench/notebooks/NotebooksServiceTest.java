@@ -196,7 +196,7 @@ public class NotebooksServiceTest {
 
     final MeasurementBundle bundle = measurementBundleCaptor.getValue();
     assertThat(bundle).isNotNull();
-    assertThat(bundle.getAttachments().get(AttachmentKey.NOTEBOOK_NAME.getKeyName())).isEqualTo(clonedFileDetail.getName());
+    assertThat(bundle.getAttachments().get(AttachmentKey.NOTEBOOK_NAME.getKeyName()).getValue()).isEqualTo(clonedFileDetail.getName());
     assertThat(bundle.getMeasurements().get(Metric.NOTEBOOK_CLONE)).isEqualTo(1L);
   }
 
