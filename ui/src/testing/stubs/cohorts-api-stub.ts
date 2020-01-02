@@ -4,7 +4,8 @@ import {
   CohortAnnotationsResponse,
   CohortsApi,
   EmptyResponse,
-  RecentResource, ResourceType,
+  RecentResource,
+  ResourceType,
   Workspace,
   WorkspaceAccessLevel
 } from 'generated/fetch';
