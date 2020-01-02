@@ -6,7 +6,6 @@ import {
   DomainCount,
   DomainInfo,
   DomainInfoResponse,
-  DomainValuesResponse,
   SearchConceptsRequest,
   StandardConceptFilter,
   SurveyModule,
