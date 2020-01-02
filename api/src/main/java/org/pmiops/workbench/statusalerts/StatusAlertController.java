@@ -1,8 +1,6 @@
 package org.pmiops.workbench.statusalerts;
 
-import java.util.List;
 import java.util.Optional;
-
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.StatusAlertApiDelegate;
 import org.pmiops.workbench.db.dao.StatusAlertDao;
@@ -37,13 +35,16 @@ public class StatusAlertController implements StatusAlertApiDelegate {
   @Override
   @AuthorityRequired(Authority.COMMUNICATIONS_ADMIN)
   public ResponseEntity<StatusAlert> postStatusAlert(StatusAlert statusAlert) {
-    // Current assumption is only one banner at a time, therefore, we must delete all old banners before saving
+    // Current assumption is only one banner at a time, therefore, we must delete all old banners
+    // before saving
     // a new one.
     Iterable<DbStatusAlert> dbStatusAlertList = statusAlertDao.findAll();
-    dbStatusAlertList.forEach(statusAlert1 -> statusAlertDao.delete(statusAlert1.getStatusAlertId()));
+    dbStatusAlertList.forEach(
+        statusAlert1 -> statusAlertDao.delete(statusAlert1.getStatusAlertId()));
     // If we support multiple banners at a time, the above lines can be deleted.
 
-    DbStatusAlert dbStatusAlert = statusAlertDao.save(StatusAlertConversionUtils.toDbStatusAlert(statusAlert));
+    DbStatusAlert dbStatusAlert =
+        statusAlertDao.save(StatusAlertConversionUtils.toDbStatusAlert(statusAlert));
     return ResponseEntity.ok(StatusAlertConversionUtils.toApiStatusAlert(dbStatusAlert));
   }
 }

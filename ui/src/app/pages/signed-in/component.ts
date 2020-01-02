@@ -196,6 +196,10 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       `out if there is no action in the next ${this.secondsToText(environment.inactivityWarningBeforeSeconds)}.`;
   }
 
+  get bannerAdminActive(): boolean {
+    return this.locationService.path() === '/admin/banner';
+  }
+
   get userAdminActive(): boolean {
     return this.locationService.path() === '/admin/user';
   }
