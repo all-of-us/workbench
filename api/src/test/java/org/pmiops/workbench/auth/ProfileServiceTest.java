@@ -1,0 +1,40 @@
+package org.pmiops.workbench.auth;
+
+import static com.google.common.truth.Truth.assertThat;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.db.model.DbDemographicSurvey;
+import org.pmiops.workbench.db.model.DbUser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit4.SpringRunner;
+
+@RunWith(SpringRunner.class)
+@DataJpaTest
+public class ProfileServiceTest {
+
+  @TestConfiguration
+  @MockBean({FreeTierBillingService.class})
+  @Import(ProfileService.class)
+  static class Configuration {}
+
+  @Autowired ProfileService profileService;
+
+  @Test
+  public void testGetProfile_empty() {
+    assertThat(profileService.getProfile(new DbUser())).isNotNull();
+  }
+
+  @Test
+  public void testGetProfile_emptyDemographics() {
+    // Regression coverage for RW-4219.
+    DbUser user = new DbUser();
+    user.setDemographicSurvey(new DbDemographicSurvey());
+    assertThat(profileService.getProfile(user)).isNotNull();
+  }
+}

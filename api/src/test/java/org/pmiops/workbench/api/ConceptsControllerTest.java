@@ -1,12 +1,8 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.bigquery.Field;
-import com.google.cloud.bigquery.FieldList;
-import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -46,7 +42,6 @@ import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfo;
-import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
@@ -227,7 +222,6 @@ public class ConceptsControllerTest {
     }
   }
 
-  @Autowired private BigQueryService bigQueryService;
   @Autowired private ConceptDao conceptDao;
   @Autowired private WorkspaceService workspaceService;
   @Autowired private WorkspaceDao workspaceDao;
@@ -251,7 +245,6 @@ public class ConceptsControllerTest {
     ConceptService conceptService = new ConceptService(entityManager, conceptDao);
     conceptsController =
         new ConceptsController(
-            bigQueryService,
             conceptService,
             conceptBigQueryService,
             workspaceService,
@@ -802,25 +795,6 @@ public class ConceptsControllerTest {
                 .allConceptCount(PROCEDURE_DOMAIN.getAllConceptCount())
                 .standardConceptCount(PROCEDURE_DOMAIN.getStandardConceptCount()))
         .inOrder();
-  }
-
-  @Test
-  public void testGetValuesFromDomain() {
-    when(bigQueryService.getTableFieldsFromDomain(Domain.CONDITION))
-        .thenReturn(
-            FieldList.of(
-                Field.of("FIELD_ONE", LegacySQLTypeName.STRING),
-                Field.of("FIELD_TWO", LegacySQLTypeName.STRING)));
-    List<DomainValue> domainValues =
-        conceptsController
-            .getValuesFromDomain("ns", "name", Domain.CONDITION.toString())
-            .getBody()
-            .getItems();
-    verify(bigQueryService).getTableFieldsFromDomain(Domain.CONDITION);
-
-    assertThat(domainValues)
-        .containsExactly(
-            new DomainValue().value("FIELD_ONE"), new DomainValue().value("FIELD_TWO"));
   }
 
   public static DbConcept makeConcept(Concept concept) {
