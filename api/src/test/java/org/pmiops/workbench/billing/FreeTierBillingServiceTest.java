@@ -2,6 +2,8 @@ package org.pmiops.workbench.billing;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -457,7 +459,7 @@ public class FreeTierBillingServiceTest {
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService, times(1)).alertUserFreeTierExpiration(eq(user));
     verify(notificationService, times(0))
-        .alertUserFreeTierDollarThreshold(eq(user), eq(0.5), eq(50.1), eq(49.9));
+        .alertUserFreeTierDollarThreshold(eq(user), anyDouble(), anyDouble(), anyDouble());
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 50.1);
   }
@@ -483,14 +485,10 @@ public class FreeTierBillingServiceTest {
     // we expect to see ONE alert due to cost expiration
     // and NO alert for crossing the 50% time threshold
 
-    final Instant expirationTime = registrationTime.plus(Period.ofDays(10));
-    final long daysRemaining = Duration.between(testStartTime, expirationTime).toDays();
-    final LocalDate expirationDate = expirationTime.atZone(ZoneId.systemDefault()).toLocalDate();
-
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService, times(1)).alertUserFreeTierExpiration(eq(user));
     verify(notificationService, times(0))
-        .alertUserFreeTierTimeThreshold(eq(user), eq(daysRemaining), eq(expirationDate), eq(-0.01));
+        .alertUserFreeTierTimeThreshold(eq(user), anyLong(), any(), anyDouble());
 
     assertSingleWorkspaceTestDbState(user, workspace, BillingStatus.INACTIVE, 100.1);
   }
