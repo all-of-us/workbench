@@ -31,6 +31,7 @@ import org.pmiops.workbench.workspaces.WorkspaceService;
 public interface WorkspaceMapper {
 
   @Mapping(target = "role", source = "dataAccessLevel")
+  @Mapping(target = "email", source = "username")
   UserRole userToUserRole(DbUser user);
 
   default WorkspaceAccessLevel roleToWorkspaceAccessLevel(Short dataAccessLevel) {

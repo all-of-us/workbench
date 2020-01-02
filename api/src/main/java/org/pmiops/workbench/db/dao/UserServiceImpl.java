@@ -179,21 +179,21 @@ public class UserServiceImpl implements UserServiceInterface {
   private void removeFromRegisteredTierGroupIdempotent(DbUser dbUser) {
     if (isUserMemberOfRegisteredTierGroup(dbUser)) {
       this.fireCloudService.removeUserFromGroup(
-          dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
-      log.info(String.format("Removed user %s from registered-tier group.", dbUser.getEmail()));
+          dbUser.getUsername(), configProvider.get().firecloud.registeredDomainName);
+      log.info(String.format("Removed user %s from registered-tier group.", dbUser.getUsername()));
     }
   }
 
   private boolean isUserMemberOfRegisteredTierGroup(DbUser dbUser) {
     return this.fireCloudService.isUserMemberOfGroup(
-        dbUser.getEmail(), configProvider.get().firecloud.registeredDomainName);
+        dbUser.getUsername(), configProvider.get().firecloud.registeredDomainName);
   }
 
   private void addToRegisteredTierGroupIdempotent(DbUser user) {
     if (!isUserMemberOfRegisteredTierGroup(user)) {
       this.fireCloudService.addUserToGroup(
-          user.getEmail(), configProvider.get().firecloud.registeredDomainName);
-      log.info(String.format("Added user %s to registered-tier group.", user.getEmail()));
+          user.getUsername(), configProvider.get().firecloud.registeredDomainName);
+      log.info(String.format("Added user %s to registered-tier group.", user.getUsername()));
     }
   }
 
@@ -226,27 +226,31 @@ public class UserServiceImpl implements UserServiceInterface {
   }
 
   private boolean isServiceAccount(DbUser user) {
-    return configProvider.get().auth.serviceAccountApiUsers.contains(user.getEmail());
+    return configProvider.get().auth.serviceAccountApiUsers.contains(user.getUsername());
   }
 
+
   @Override
-  public DbUser createServiceAccountUser(String email) {
+  public DbUser createServiceAccountUser(String username) {
     DbUser user = new DbUser();
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
-    user.setEmail(email);
+    user.setUsername(username);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     try {
       return userDao.save(user);
     } catch (DataIntegrityViolationException e) {
-      final DbUser userByEmail = userDao.findUserByEmail(email);
-      if (userByEmail == null) {
+      // For certain test workflows, it's possible to have concurrent user creation.
+      // We attempt to handle that gracefully here.
+      final DbUser userByUserName = userDao.findUserByUsername(username);
+      if (userByUserName == null) {
         log.log(
             Level.WARNING,
             String.format(
                 "While creating new user with email %s due to "
-                    + "DataIntegrityViolationException. No user was persisted",
-                email),
+                    + "DataIntegrityViolationException. No user matching this username was found "
+                    + "and none exists in the database",
+                username),
             e);
         throw e;
       } else {
@@ -254,10 +258,11 @@ public class UserServiceImpl implements UserServiceInterface {
             Level.WARNING,
             String.format(
                 "While creating new user with email %s due to "
-                    + "DataIntegrityViolationException. However, user %d was persisted",
-                email, userByEmail.getUserId()),
+                    + "DataIntegrityViolationException. User %d is present however, "
+                    + "indicating possible concurrent creation.",
+                username, userByUserName.getUserId()),
             e);
-        return userByEmail;
+        return userByUserName;
       }
     }
   }
@@ -266,7 +271,7 @@ public class UserServiceImpl implements UserServiceInterface {
   public DbUser createUser(
       String givenName,
       String familyName,
-      String email,
+      String userName,
       String contactEmail,
       String currentPosition,
       String organization,
@@ -274,7 +279,7 @@ public class UserServiceImpl implements UserServiceInterface {
     return createUser(
         givenName,
         familyName,
-        email,
+        userName,
         contactEmail,
         currentPosition,
         organization,
@@ -288,7 +293,7 @@ public class UserServiceImpl implements UserServiceInterface {
   public DbUser createUser(
       String givenName,
       String familyName,
-      String email,
+      String userName,
       String contactEmail,
       String currentPosition,
       String organization,
@@ -296,50 +301,52 @@ public class UserServiceImpl implements UserServiceInterface {
       DbAddress address,
       DbDemographicSurvey demographicSurvey,
       List<DbInstitutionalAffiliation> institutionalAffiliations) {
-    DbUser user = new DbUser();
-    user.setCreationNonce(Math.abs(random.nextLong()));
-    user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
-    user.setEmail(email);
-    user.setContactEmail(contactEmail);
-    user.setCurrentPosition(currentPosition);
-    user.setOrganization(organization);
-    user.setAreaOfResearch(areaOfResearch);
-    user.setFamilyName(familyName);
-    user.setGivenName(givenName);
-    user.setDisabled(false);
-    user.setAboutYou(null);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
-    user.setAddress(address);
-    user.setDemographicSurvey(demographicSurvey);
+    DbUser dbUser = new DbUser();
+    dbUser.setCreationNonce(Math.abs(random.nextLong()));
+    dbUser.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
+    dbUser.setUsername(userName);
+    dbUser.setContactEmail(contactEmail);
+    dbUser.setCurrentPosition(currentPosition);
+    dbUser.setOrganization(organization);
+    dbUser.setAreaOfResearch(areaOfResearch);
+    dbUser.setFamilyName(familyName);
+    dbUser.setGivenName(givenName);
+    dbUser.setDisabled(false);
+    dbUser.setAboutYou(null);
+    dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
+    dbUser.setAddress(address);
+    dbUser.setDemographicSurvey(demographicSurvey);
     // For existing user that do not have address
     if (address != null) {
-      address.setUser(user);
+      address.setUser(dbUser);
     }
-    if (demographicSurvey != null) demographicSurvey.setUser(user);
+    if (demographicSurvey != null) demographicSurvey.setUser(dbUser);
     if (institutionalAffiliations != null) {
-      final DbUser u = user;
+      // We need an "effectively final" variable to be captured in the lambda
+      // to pass to forEach.
+      final DbUser finalDbUserReference = dbUser;
       institutionalAffiliations.forEach(
           affiliation -> {
-            affiliation.setUser(u);
-            u.addInstitutionalAffiliation(affiliation);
+            affiliation.setUser(finalDbUserReference);
+            finalDbUserReference.addInstitutionalAffiliation(affiliation);
           });
     }
     try {
-      userDao.save(user);
+      dbUser = userDao.save(dbUser);
     } catch (DataIntegrityViolationException e) {
-      user = userDao.findUserByEmail(email);
-      if (user == null) {
+      dbUser = userDao.findUserByUsername(userName);
+      if (dbUser == null) {
         throw e;
       }
       // If a user already existed (due to multiple requests trying to create a user simultaneously)
       // just return it.
     }
-    return user;
+    return dbUser;
   }
 
   @Override
   public DbUser submitDataUseAgreement(
-      DbUser user, Integer dataUseAgreementSignedVersion, String initials) {
+      DbUser dbUser, Integer dataUseAgreementSignedVersion, String initials) {
     // FIXME: this should not be hardcoded
     if (dataUseAgreementSignedVersion != CURRENT_DATA_USE_AGREEMENT_VERSION) {
       throw new BadRequestException("Data Use Agreement Version is not up to date");
@@ -347,16 +354,16 @@ public class UserServiceImpl implements UserServiceInterface {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
     dataUseAgreement.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
-    dataUseAgreement.setUserId(user.getUserId());
-    dataUseAgreement.setUserFamilyName(user.getFamilyName());
-    dataUseAgreement.setUserGivenName(user.getGivenName());
+    dataUseAgreement.setUserId(dbUser.getUserId());
+    dataUseAgreement.setUserFamilyName(dbUser.getFamilyName());
+    dataUseAgreement.setUserGivenName(dbUser.getGivenName());
     dataUseAgreement.setUserInitials(initials);
     dataUseAgreement.setCompletionTime(timestamp);
     userDataUseAgreementDao.save(dataUseAgreement);
     // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
-    user.setDataUseAgreementCompletionTime(timestamp);
-    user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
-    return userDao.save(user);
+    dbUser.setDataUseAgreementCompletionTime(timestamp);
+    dbUser.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+    return userDao.save(dbUser);
   }
 
   @Override
@@ -536,23 +543,23 @@ public class UserServiceImpl implements UserServiceInterface {
    * as null
    */
   @Override
-  public DbUser syncComplianceTrainingStatus(DbUser user)
+  public DbUser syncComplianceTrainingStatus(DbUser dbUser)
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    if (isServiceAccount(user)) {
+    if (isServiceAccount(dbUser)) {
       // Skip sync for service account user rows.
-      return user;
+      return dbUser;
     }
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     try {
-      Integer moodleId = user.getMoodleId();
+      Integer moodleId = dbUser.getMoodleId();
       if (moodleId == null) {
-        moodleId = complianceService.getMoodleId(user.getEmail());
+        moodleId = complianceService.getMoodleId(dbUser.getUsername());
         if (moodleId == null) {
           // User has not yet created/logged into MOODLE
-          return user;
+          return dbUser;
         }
-        user.setMoodleId(moodleId);
+        dbUser.setMoodleId(moodleId);
       }
 
       List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
@@ -564,33 +571,33 @@ public class UserServiceImpl implements UserServiceInterface {
                 ? null
                 : new Timestamp(Long.parseLong(badge.getDateexpire()));
 
-        if (user.getComplianceTrainingCompletionTime() == null) {
+        if (dbUser.getComplianceTrainingCompletionTime() == null) {
           // This is the user's first time with a Moodle badge response, so we reset the completion
           // time.
-          user.setComplianceTrainingCompletionTime(now);
+          dbUser.setComplianceTrainingCompletionTime(now);
         } else if (badgeExpiration != null
-            && !badgeExpiration.equals(user.getComplianceTrainingExpirationTime())) {
+            && !badgeExpiration.equals(dbUser.getComplianceTrainingExpirationTime())) {
           // The badge has a new expiration date, suggesting some sort of course completion change.
           // Reset the completion time.
-          user.setComplianceTrainingCompletionTime(now);
+          dbUser.setComplianceTrainingCompletionTime(now);
         }
 
-        user.setComplianceTrainingExpirationTime(badgeExpiration);
+        dbUser.setComplianceTrainingExpirationTime(badgeExpiration);
       } else {
         // Moodle has returned zero badges for the given user -- we should clear the user's
         // training completion & expiration time.
-        user.setComplianceTrainingCompletionTime(null);
-        user.setComplianceTrainingExpirationTime(null);
+        dbUser.setComplianceTrainingCompletionTime(null);
+        dbUser.setComplianceTrainingExpirationTime(null);
       }
 
       return updateUserWithRetries(
-          dbUser -> {
-            dbUser.setMoodleId(user.getMoodleId());
-            dbUser.setComplianceTrainingExpirationTime(user.getComplianceTrainingExpirationTime());
-            dbUser.setComplianceTrainingCompletionTime(user.getComplianceTrainingCompletionTime());
-            return dbUser;
+          u -> {
+            u.setMoodleId(u.getMoodleId());
+            u.setComplianceTrainingExpirationTime(u.getComplianceTrainingExpirationTime());
+            u.setComplianceTrainingCompletionTime(u.getComplianceTrainingCompletionTime());
+            return u;
           },
-          user);
+          dbUser);
 
     } catch (NumberFormatException e) {
       log.severe("Incorrect date expire format from Moodle");
@@ -600,7 +607,7 @@ public class UserServiceImpl implements UserServiceInterface {
         log.severe(
             String.format(
                 "Error while retrieving Badge for user %s: %s ",
-                user.getUserId(), ex.getMessage()));
+                dbUser.getUserId(), ex.getMessage()));
         throw new NotFoundException(ex.getMessage());
       }
       throw ex;
@@ -681,7 +688,7 @@ public class UserServiceImpl implements UserServiceInterface {
       return user;
     }
 
-    ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getEmail());
+    ApiClient apiClient = fireCloudService.getApiClientWithImpersonation(user.getUsername());
     NihApi api = new NihApi(apiClient);
     try {
       FirecloudNihStatus nihStatus = api.nihStatus();
@@ -690,7 +697,7 @@ public class UserServiceImpl implements UserServiceInterface {
       if (e.getCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
         // We'll catch the NOT_FOUND ApiException here, since we expect many users to have an empty
         // eRA Commons linkage.
-        log.info(String.format("NIH Status not found for user %s", user.getEmail()));
+        log.info(String.format("NIH Status not found for user %s", user.getUsername()));
         return user;
       } else {
         throw e;
@@ -713,7 +720,8 @@ public class UserServiceImpl implements UserServiceInterface {
 
     return updateUserWithRetries(
         user -> {
-          boolean isEnrolledIn2FA = directoryService.getUser(user.getEmail()).getIsEnrolledIn2Sv();
+          boolean isEnrolledIn2FA =
+              directoryService.getUser(user.getUsername()).getIsEnrolledIn2Sv();
           if (isEnrolledIn2FA) {
             if (user.getTwoFactorAuthCompletionTime() == null) {
               user.setTwoFactorAuthCompletionTime(new Timestamp(clock.instant().toEpochMilli()));

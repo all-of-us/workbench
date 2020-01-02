@@ -3709,7 +3709,10 @@ definitions:
     type: object
     properties:
       email:
-        description: researchallofus email address
+        description: researchallofus email address (deprecated in favor of userName)
+        type: string
+      userName:
+        description: Unique researchallofus username (a Google account email)
         type: string
       givenName:
         description: the user's given name (e.g. Alice)

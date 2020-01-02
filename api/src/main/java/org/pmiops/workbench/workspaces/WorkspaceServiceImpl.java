@@ -485,7 +485,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     List<UserRole> userRoles = new ArrayList<>();
     for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : rolesMap.entrySet()) {
       // Filter out groups
-      DbUser user = userDao.findUserByEmail(entry.getKey());
+      DbUser user = userDao.findUserByUsername(entry.getKey());
       if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       } else {

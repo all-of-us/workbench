@@ -211,7 +211,7 @@ public class ProfileControllerTest {
   public void testCreateAccount_success() throws Exception {
     createUser();
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
-    final DbUser dbUser = userDao.findUserByEmail(PRIMARY_EMAIL);
+    final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(dbUser).isNotNull();
     assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
   }
@@ -405,7 +405,7 @@ public class ProfileControllerTest {
         profileController.updateContactEmail(
             new UpdateContactEmailRequest()
                 .contactEmail("newContactEmail@whatever.com")
-                .username(dbUser.getEmail())
+                .username(dbUser.getUsername())
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     assertThat(dbUser.getContactEmail()).isEqualTo(originalEmail);
@@ -422,7 +422,7 @@ public class ProfileControllerTest {
         profileController.updateContactEmail(
             new UpdateContactEmailRequest()
                 .contactEmail("bad email address *(SD&(*D&F&*(DS ")
-                .username(dbUser.getEmail())
+                .username(dbUser.getUsername())
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(dbUser.getContactEmail()).isEqualTo(originalEmail);
@@ -438,7 +438,7 @@ public class ProfileControllerTest {
         profileController.updateContactEmail(
             new UpdateContactEmailRequest()
                 .contactEmail("newContactEmail@whatever.com")
-                .username(dbUser.getEmail())
+                .username(dbUser.getUsername())
                 .creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     assertThat(dbUser.getContactEmail()).isEqualTo("newContactEmail@whatever.com");
@@ -507,7 +507,7 @@ public class ProfileControllerTest {
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
-            new ResendWelcomeEmailRequest().username(dbUser.getEmail()).creationNonce(NONCE));
+            new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     // called twice, once during account creation, once on resend
     verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
@@ -522,7 +522,7 @@ public class ProfileControllerTest {
 
     ResponseEntity<Void> response =
         profileController.resendWelcomeEmail(
-            new ResendWelcomeEmailRequest().username(dbUser.getEmail()).creationNonce(NONCE));
+            new ResendWelcomeEmailRequest().username(dbUser.getUsername()).creationNonce(NONCE));
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     // called twice, once during account creation, once on resend
     verify(mailService, times(2)).sendWelcomeEmail(any(), any(), any());
@@ -568,10 +568,10 @@ public class ProfileControllerTest {
     createUser();
 
     profileController.syncEraCommonsStatus();
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsLinkedNihUsername())
+    assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsLinkedNihUsername())
         .isEqualTo(linkedUsername);
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsLinkExpireTime()).isNotNull();
-    assertThat(userDao.findUserByEmail(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
+    assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsLinkExpireTime()).isNotNull();
+    assertThat(userDao.findUserByUsername(PRIMARY_EMAIL).getEraCommonsCompletionTime()).isNotNull();
   }
 
   @Test
@@ -608,7 +608,7 @@ public class ProfileControllerTest {
     createUser();
 
     profileController.deleteProfile();
-    verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getEmail());
+    verify(mockProfileAuditor).fireDeleteAction(dbUser.getUserId(), dbUser.getUsername());
   }
 
   private Profile createUser() throws Exception {
@@ -616,7 +616,7 @@ public class ProfileControllerTest {
     when(directoryService.createUser(GIVEN_NAME, FAMILY_NAME, USERNAME, CONTACT_EMAIL))
         .thenReturn(googleUser);
     Profile result = profileController.createAccount(createAccountRequest).getBody();
-    dbUser = userDao.findUserByEmail(PRIMARY_EMAIL);
+    dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     userDao.save(dbUser);
     when(userProvider.get()).thenReturn(dbUser);
@@ -650,7 +650,7 @@ public class ProfileControllerTest {
       String givenName,
       DataAccessLevel dataAccessLevel,
       Timestamp firstSignInTime) {
-    DbUser user = userDao.findUserByEmail(primaryEmail);
+    DbUser user = userDao.findUserByUsername(primaryEmail);
     assertThat(user).isNotNull();
     assertThat(user.getContactEmail()).isEqualTo(contactEmail);
     assertThat(user.getFamilyName()).isEqualTo(familyName);

@@ -144,7 +144,7 @@ public class AuthInterceptorTest {
     FirecloudMe me = new FirecloudMe();
     me.setUserInfo(fcUserInfo);
     when(fireCloudService.getMe()).thenReturn(me);
-    when(userDao.findUserByEmail("bob@fake-domain.org")).thenReturn(user);
+    when(userDao.findUserByUsername("bob@fake-domain.org")).thenReturn(user);
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
   }
 
@@ -161,7 +161,7 @@ public class AuthInterceptorTest {
     FirecloudMe me = new FirecloudMe();
     me.setUserInfo(fcUserInfo);
     when(fireCloudService.getMe()).thenReturn(me);
-    when(userDao.findUserByEmail("bob@also-bad-domain.org")).thenReturn(null);
+    when(userDao.findUserByUsername("bob@also-bad-domain.org")).thenReturn(null);
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
     verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
@@ -174,7 +174,7 @@ public class AuthInterceptorTest {
     Userinfoplus userInfo = new Userinfoplus();
     userInfo.setEmail("bob@fake-domain.org");
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
-    when(userDao.findUserByEmail("bob@fake-domain.org")).thenReturn(user);
+    when(userDao.findUserByUsername("bob@fake-domain.org")).thenReturn(user);
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
   }
 
@@ -188,7 +188,7 @@ public class AuthInterceptorTest {
     userInfo.setFamilyName("Jones");
     userInfo.setEmail("bob@fake-domain.org");
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
-    when(userDao.findUserByEmail("bob@fake-domain.org")).thenReturn(null);
+    when(userDao.findUserByUsername("bob@fake-domain.org")).thenReturn(null);
     when(userService.createUser(
             "Bob", "Jones", "bob@fake-domain.org", null, null, null, null, null, null, null))
         .thenReturn(user);

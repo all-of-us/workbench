@@ -233,7 +233,7 @@ public class CohortsControllerTest {
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
     DbUser user = new DbUser();
-    user.setEmail(CREATOR_EMAIL);
+    user.setUsername(CREATOR_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);

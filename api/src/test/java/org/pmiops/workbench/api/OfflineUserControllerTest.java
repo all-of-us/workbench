@@ -53,7 +53,7 @@ public class OfflineUserControllerTest {
 
   private DbUser createUser(String email) {
     DbUser user = new DbUser();
-    user.setEmail(email);
+    user.setUsername(email);
     user.setUserId(incrementedUserId);
     incrementedUserId++;
     return user;
@@ -82,7 +82,7 @@ public class OfflineUserControllerTest {
     doThrow(new org.pmiops.workbench.moodle.ApiException("Unknown error"))
         .when(userService)
         .syncComplianceTrainingStatus(
-            argThat(user -> user.getEmail().equals("a@fake-research-aou.org")));
+            argThat(user -> user.getUsername().equals("a@fake-research-aou.org")));
     offlineUserController.bulkSyncComplianceTrainingStatus();
     // Even when a single call throws an exception, we call the service for all users.
     verify(userService, times(3)).syncComplianceTrainingStatus(any());
@@ -104,7 +104,7 @@ public class OfflineUserControllerTest {
     doThrow(new org.pmiops.workbench.firecloud.ApiException("Unknown error"))
         .when(userService)
         .syncEraCommonsStatusUsingImpersonation(
-            argThat(user -> user.getEmail().equals("a@fake-research-aou.org")));
+            argThat(user -> user.getUsername().equals("a@fake-research-aou.org")));
     offlineUserController.bulkSyncEraCommonsStatus();
     // Even when a single call throws an exception, we call the service for all users.
     verify(userService, times(3)).syncEraCommonsStatusUsingImpersonation(any());

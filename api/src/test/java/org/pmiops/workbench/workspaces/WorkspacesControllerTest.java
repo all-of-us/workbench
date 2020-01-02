@@ -343,7 +343,7 @@ public class WorkspacesControllerTest {
 
   private DbUser createUser(String email) {
     DbUser user = new DbUser();
-    user.setEmail(email);
+    user.setUsername(email);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
     return userDao.save(user);
@@ -353,7 +353,7 @@ public class WorkspacesControllerTest {
     return createWorkspaceACL(
         new JSONObject()
             .put(
-                currentUser.getEmail(),
+                currentUser.getUsername(),
                 new JSONObject()
                     .put("accessLevel", "OWNER")
                     .put("canCompute", true)
@@ -837,7 +837,7 @@ public class WorkspacesControllerTest {
     shareWorkspaceRequest.setWorkspaceEtag(originalWorkspace.getEtag());
 
     addUserRoleToShareWorkspaceRequest(
-        shareWorkspaceRequest, writerUser.getEmail(), WorkspaceAccessLevel.WRITER);
+        shareWorkspaceRequest, writerUser.getUsername(), WorkspaceAccessLevel.WRITER);
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
@@ -921,7 +921,7 @@ public class WorkspacesControllerTest {
 
   private DbUser createAndSaveUser(String email, long userId) {
     DbUser writerUser = new DbUser();
-    writerUser.setEmail(email);
+    writerUser.setUsername(email);
     writerUser.setUserId(userId);
     writerUser.setDisabled(false);
 
@@ -1517,7 +1517,7 @@ public class WorkspacesControllerTest {
     workspace = workspacesController.createWorkspace(workspace).getBody();
 
     DbUser cloner = new DbUser();
-    cloner.setEmail("cloner@gmail.com");
+    cloner.setUsername("cloner@gmail.com");
     cloner.setUserId(456L);
     cloner.setDisabled(false);
     currentUser = userDao.save(cloner);
@@ -1540,7 +1540,7 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
 
-    assertThat(workspace2.getCreator()).isEqualTo(cloner.getEmail());
+    assertThat(workspace2.getCreator()).isEqualTo(cloner.getUsername());
   }
 
   @Test
@@ -1619,10 +1619,10 @@ public class WorkspacesControllerTest {
     List<UserRole> collaborators =
         new ArrayList<>(
             Arrays.asList(
-                new UserRole().email(cloner.getEmail()).role(WorkspaceAccessLevel.OWNER),
+                new UserRole().email(cloner.getUsername()).role(WorkspaceAccessLevel.OWNER),
                 new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER),
-                new UserRole().email(reader.getEmail()).role(WorkspaceAccessLevel.READER),
-                new UserRole().email(writer.getEmail()).role(WorkspaceAccessLevel.WRITER)));
+                new UserRole().email(reader.getUsername()).role(WorkspaceAccessLevel.READER),
+                new UserRole().email(writer.getUsername()).role(WorkspaceAccessLevel.WRITER)));
 
     stubFcUpdateWorkspaceACL();
     FirecloudWorkspaceACL workspaceAclsFromCloned =
@@ -1676,7 +1676,7 @@ public class WorkspacesControllerTest {
             .name("cloned")
             .researchPurpose(workspace.getResearchPurpose());
 
-    stubCloneWorkspace("cloned-ns", "cloned", cloner.getEmail());
+    stubCloneWorkspace("cloned-ns", "cloned", cloner.getUsername());
     mockBillingProjectBuffer("cloned-ns");
 
     Workspace workspace2 =
@@ -1688,7 +1688,7 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
 
-    assertThat(workspace2.getCreator()).isEqualTo(cloner.getEmail());
+    assertThat(workspace2.getCreator()).isEqualTo(cloner.getUsername());
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList =
         convertUserRolesToUpdateAclRequestList(collaborators);
 
@@ -1721,7 +1721,7 @@ public class WorkspacesControllerTest {
 
     // Clone with a different user.
     DbUser cloner = new DbUser();
-    cloner.setEmail("cloner@gmail.com");
+    cloner.setUsername("cloner@gmail.com");
     cloner.setUserId(456L);
     cloner.setDisabled(false);
     currentUser = userDao.save(cloner);
@@ -1824,16 +1824,16 @@ public class WorkspacesControllerTest {
             .addItemsItem(
                 new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER))
             .addItemsItem(
-                new UserRole().email(writerUser.getEmail()).role(WorkspaceAccessLevel.WRITER))
+                new UserRole().email(writerUser.getUsername()).role(WorkspaceAccessLevel.WRITER))
             .addItemsItem(
-                new UserRole().email(ownerUser.getEmail()).role(WorkspaceAccessLevel.OWNER));
+                new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.OWNER));
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
     verify(fireCloudService, times(1))
-        .addUserToBillingProject(ownerUser.getEmail(), workspace.getNamespace());
-    verify(fireCloudService, never()).addUserToBillingProject(eq(writerUser.getEmail()), any());
+        .addUserToBillingProject(ownerUser.getUsername(), workspace.getNamespace());
+    verify(fireCloudService, never()).addUserToBillingProject(eq(writerUser.getUsername()), any());
     verify(fireCloudService, never()).removeUserFromBillingProject(any(), any());
   }
 
@@ -1848,19 +1848,19 @@ public class WorkspacesControllerTest {
             createWorkspaceACL(
                 new JSONObject()
                     .put(
-                        currentUser.getEmail(),
+                        currentUser.getUsername(),
                         new JSONObject()
                             .put("accessLevel", "OWNER")
                             .put("canCompute", true)
                             .put("canShare", true))
                     .put(
-                        writerUser.getEmail(),
+                        writerUser.getUsername(),
                         new JSONObject()
                             .put("accessLevel", "WRITER")
                             .put("canCompute", true)
                             .put("canShare", true))
                     .put(
-                        ownerUser.getEmail(),
+                        ownerUser.getUsername(),
                         new JSONObject()
                             .put("accessLevel", "OWNER")
                             .put("canCompute", true)
@@ -1875,15 +1875,15 @@ public class WorkspacesControllerTest {
                 new UserRole().email(LOGGED_IN_USER_EMAIL).role(WorkspaceAccessLevel.OWNER))
             // Removed WRITER, demoted OWNER to READER.
             .addItemsItem(
-                new UserRole().email(ownerUser.getEmail()).role(WorkspaceAccessLevel.READER));
+                new UserRole().email(ownerUser.getUsername()).role(WorkspaceAccessLevel.READER));
 
     stubFcUpdateWorkspaceACL();
     workspacesController.shareWorkspace(
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
     verify(fireCloudService, times(1))
-        .removeUserFromBillingProject(ownerUser.getEmail(), workspace.getNamespace());
+        .removeUserFromBillingProject(ownerUser.getUsername(), workspace.getNamespace());
     verify(fireCloudService, never())
-        .removeUserFromBillingProject(eq(writerUser.getEmail()), any());
+        .removeUserFromBillingProject(eq(writerUser.getUsername()), any());
     verify(fireCloudService, never()).addUserToBillingProject(any(), any());
   }
 
@@ -2532,7 +2532,7 @@ public class WorkspacesControllerTest {
         createWorkspaceACL(
             new JSONObject()
                 .put(
-                    currentUser.getEmail(),
+                    currentUser.getUsername(),
                     new JSONObject()
                         .put("accessLevel", "OWNER")
                         .put("canCompute", true)

@@ -475,7 +475,7 @@ public class FreeTierBillingServiceTest {
 
   private DbUser createUser(String email) {
     DbUser user = new DbUser();
-    user.setEmail(email);
+    user.setUsername(email);
     return userDao.save(user);
   }
 
