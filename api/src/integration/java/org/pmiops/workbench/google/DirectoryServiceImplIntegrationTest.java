@@ -1,27 +1,23 @@
 package org.pmiops.workbench.google;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import java.time.Clock;
+import java.util.Map;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.pmiops.workbench.IntegrationTestConfig;
+import org.pmiops.workbench.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.Clock;
-import java.util.Map;
-
-import static com.google.common.truth.Truth.assertThat;
-
-@RunWith(SpringRunner.class)
-public class DirectoryServiceImplIntegrationTest {
+public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
   @Autowired private DirectoryService service;
 
   @TestConfiguration
-  @Import({DirectoryServiceImpl.class, IntegrationTestConfig.class})
+  @Import(DirectoryServiceImpl.class)
   static class Configuration {}
 
   @Test
