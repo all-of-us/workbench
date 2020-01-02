@@ -77,7 +77,8 @@ public class MeasurementBundle {
 
   @Override
   public String toString() {
-    return String.format("measurements: [%s] attachments: [%s]",
+    return String.format(
+        "measurements: [%s] attachments: [%s]",
         getMeasurements().entrySet().stream()
             .map(e -> String.format("%s: %s", e.getKey().getName(), e.getValue()))
             .collect(Collectors.joining(", ")),
