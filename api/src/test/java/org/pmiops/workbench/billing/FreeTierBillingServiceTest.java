@@ -165,6 +165,82 @@ public class FreeTierBillingServiceTest {
   }
 
   @Test
+  public void checkFreeTierBillingUsage_altDollarThresholds() {
+
+    // set alert thresholds at 30% and 65% instead
+
+    workbenchConfig.billing.freeTierCostAlertThresholds = new ArrayList<>(Doubles.asList(.3, .65));
+
+    final double limit = 100.0;
+    final double costUnderThreshold = 29.9;
+
+    double threshold = 0.3;
+    double costOverThreshold = 30.1;
+    double remaining = limit - costOverThreshold;
+
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = limit;
+
+    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
+    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+
+    // check that we have not alerted before the threshold
+
+    doReturn(mockBQTableSingleResult(costUnderThreshold)).when(bigQueryService).executeQuery(any());
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verifyZeroInteractions(notificationService);
+
+    // check that we alert for the 30% threshold
+
+    doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(notificationService)
+        .alertUserFreeTierDollarThreshold(
+            eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
+
+    // check that we do not alert twice for the 30% threshold
+
+    doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verifyZeroInteractions(notificationService);
+
+    // check that we alert for the 65% threshold
+
+    threshold = 0.65;
+    costOverThreshold = 65.01;
+    remaining = limit - costOverThreshold;
+
+    doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(notificationService)
+        .alertUserFreeTierDollarThreshold(
+            eq(user), eq(threshold), eq(costOverThreshold), eq(remaining));
+
+    // check that we do not alert twice for the 75% threshold
+
+    doReturn(mockBQTableSingleResult(costOverThreshold)).when(bigQueryService).executeQuery(any());
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verifyZeroInteractions(notificationService);
+
+    // check that we alert for expiration when we hit 100%
+
+    final double costToTriggerExpiration = 100.01;
+
+    doReturn(mockBQTableSingleResult(costToTriggerExpiration))
+        .when(bigQueryService)
+        .executeQuery(any());
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verify(notificationService).alertUserFreeTierExpiration(eq(user));
+
+    // check that we do not alert twice for 100%
+
+    doReturn(mockBQTableSingleResult(costToTriggerExpiration))
+        .when(bigQueryService)
+        .executeQuery(any());
+    freeTierBillingService.checkFreeTierBillingUsage();
+    verifyZeroInteractions(notificationService);
+  }
+
+  @Test
   public void checkFreeTierBillingUsage_doesNotExceedDayThresholds() {
 
     // set cost values to ensure we don't alert from cost
