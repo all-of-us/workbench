@@ -9,13 +9,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
+import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.Concept;
@@ -45,7 +44,6 @@ public class ConceptsController implements ConceptsApiDelegate {
   private final ConceptBigQueryService conceptBigQueryService;
   private final WorkspaceService workspaceService;
   private final DomainInfoDao domainInfoDao;
-  private final ConceptDao conceptDao;
   private final SurveyModuleDao surveyModuleDao;
 
   static final Function<DbConcept, Concept> TO_CLIENT_CONCEPT =
@@ -69,13 +67,11 @@ public class ConceptsController implements ConceptsApiDelegate {
       ConceptBigQueryService conceptBigQueryService,
       WorkspaceService workspaceService,
       DomainInfoDao domainInfoDao,
-      ConceptDao conceptDao,
       SurveyModuleDao surveyModuleDao) {
     this.conceptService = conceptService;
     this.conceptBigQueryService = conceptBigQueryService;
     this.workspaceService = workspaceService;
     this.domainInfoDao = domainInfoDao;
-    this.conceptDao = conceptDao;
     this.surveyModuleDao = surveyModuleDao;
   }
 
@@ -84,11 +80,10 @@ public class ConceptsController implements ConceptsApiDelegate {
       String workspaceNamespace, String workspaceId) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    List<DbDomainInfo> domains = ImmutableList.copyOf(domainInfoDao.findByOrderByDomainId());
     DomainInfoResponse response =
         new DomainInfoResponse()
             .items(
-                domains.stream()
+                domainInfoDao.findByOrderByDomainId().stream()
                     .map(DbDomainInfo.TO_CLIENT_DOMAIN_INFO)
                     .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
@@ -137,7 +132,7 @@ public class ConceptsController implements ConceptsApiDelegate {
               request.getQuery(), ConceptService.SearchType.CONCEPT_SEARCH);
       List<DbDomainInfo> allDomainInfos = domainInfoDao.findByOrderByDomainId();
       List<DbDomainInfo> domainInfos = matchExp == null ? allDomainInfos : new ArrayList<>();
-      if (matchExp != null) {
+      if (domainInfos.isEmpty()) {
         domainInfos =
             standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS
                 ? domainInfoDao.findAllMatchConceptCounts(matchExp)

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.cdr.dao;
+package org.pmiops.workbench.concept;
 
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.apache.commons.lang3.StringUtils;
+import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConceptService {
 
-  public static enum SearchType {
+  public enum SearchType {
     CONCEPT_SEARCH,
     SURVEY_COUNTS,
     DOMAIN_COUNTS;
@@ -44,17 +45,11 @@ public class ConceptService {
     }
   }
 
-  public enum StandardConceptFilter {
-    ALL_CONCEPTS,
-    STANDARD_CONCEPTS,
-    NON_STANDARD_CONCEPTS,
-    STANDARD_OR_CODE_ID_MATCH
-  }
-
   @PersistenceContext(unitName = "cdr")
   private EntityManager entityManager;
 
   @Autowired private ConceptDao conceptDao;
+  public static final String STANDARD_CONCEPTS = "STANDARD_CONCEPTS";
   public static final String STANDARD_CONCEPT_CODE = "S";
   public static final String CLASSIFICATION_CONCEPT_CODE = "C";
   public static final String EMPTY_CONCEPT_CODE = "";
@@ -133,7 +128,7 @@ public class ConceptService {
     final String keyword = modifyMultipleMatchKeyword(query, SearchType.CONCEPT_SEARCH);
     Pageable pageable = new PageRequest(page, limit, new Sort(Direction.DESC, "countValue"));
     List<String> conceptTypes =
-        StandardConceptFilter.STANDARD_CONCEPTS.toString().equals(standardConceptFilter)
+        STANDARD_CONCEPTS.equals(standardConceptFilter)
             ? STANDARD_CONCEPT_CODES
             : ALL_CONCEPT_CODES;
     return StringUtils.isBlank(keyword)
