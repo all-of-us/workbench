@@ -1845,26 +1845,6 @@ paths:
           schema:
             $ref: "#/definitions/DomainInfoResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/domainValues/{domain}:
-    get:
-      tags:
-        - concepts
-      description: >
-        Returns all column names/values for a given domain.
-      operationId: "getValuesFromDomain"
-      parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
-        - in: path
-          name: domain
-          required: true
-          type: string
-      responses:
-        200:
-          description: the values/column names in the domain.
-          schema:
-            $ref: "#/definitions/DomainValuesResponse"
-
   ### Surveys #############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyInfo:
     get:
@@ -2158,6 +2138,26 @@ paths:
             A SQL query for each domain in the Data Set
           schema:
             $ref: "#/definitions/DataSetPreviewResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/domainValues/{domain}:
+    get:
+      tags:
+        - dataSet
+      description: >
+        Returns all column names/values for a given domain.
+      operationId: "getValuesFromDomain"
+      parameters:
+        - $ref: '#/parameters/workspaceNamespace'
+        - $ref: '#/parameters/workspaceId'
+        - in: path
+          name: domain
+          required: true
+          type: string
+      responses:
+        200:
+          description: the values/column names in the domain.
+          schema:
+            $ref: "#/definitions/DomainValuesResponse"
 
 ##########################################################################################
 ## DEFINITIONS

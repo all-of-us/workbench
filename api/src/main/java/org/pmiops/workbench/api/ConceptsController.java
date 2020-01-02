@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import com.google.cloud.bigquery.FieldList;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
@@ -24,8 +23,6 @@ import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfoResponse;
-import org.pmiops.workbench.model.DomainValue;
-import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
 import org.pmiops.workbench.model.SurveyAnswerResponse;
@@ -44,7 +41,6 @@ public class ConceptsController implements ConceptsApiDelegate {
   private static final Integer DEFAULT_MAX_RESULTS = 20;
   private static final int MAX_MAX_RESULTS = 1000;
 
-  private final BigQueryService bigQueryService;
   private final ConceptService conceptService;
   private final ConceptBigQueryService conceptBigQueryService;
   private final WorkspaceService workspaceService;
@@ -69,14 +65,12 @@ public class ConceptsController implements ConceptsApiDelegate {
 
   @Autowired
   public ConceptsController(
-      BigQueryService bigQueryService,
       ConceptService conceptService,
       ConceptBigQueryService conceptBigQueryService,
       WorkspaceService workspaceService,
       DomainInfoDao domainInfoDao,
       ConceptDao conceptDao,
       SurveyModuleDao surveyModuleDao) {
-    this.bigQueryService = bigQueryService;
     this.conceptService = conceptService;
     this.conceptBigQueryService = conceptBigQueryService;
     this.workspaceService = workspaceService;
@@ -196,23 +190,6 @@ public class ConceptsController implements ConceptsApiDelegate {
       response.setItems(
           concepts.getContent().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
     }
-    return ResponseEntity.ok(response);
-  }
-
-  @Override
-  public ResponseEntity<DomainValuesResponse> getValuesFromDomain(
-      String workspaceNamespace, String workspaceId, String domainValue) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    DomainValuesResponse response = new DomainValuesResponse();
-
-    Domain domain = Domain.valueOf(domainValue);
-    FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
-    response.setItems(
-        fieldList.stream()
-            .map(field -> new DomainValue().value(field.getName()))
-            .collect(Collectors.toList()));
-
     return ResponseEntity.ok(response);
   }
 }

@@ -13,7 +13,6 @@ import {CircleWithText} from 'app/icons/circleWithText';
 import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
 import {
   cohortsApi,
-  conceptsApi,
   conceptSetsApi,
   dataSetApi
 } from 'app/services/swagger-fetch-clients';
@@ -507,7 +506,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           ({domain: domain, values: valueSet, survey: survey}),
         domains,
         await Promise.all(domains.map((domain) =>
-          conceptsApi().getValuesFromDomain(namespace, id, domain.toString()))));
+          dataSetApi().getValuesFromDomain(namespace, id, domain.toString()))));
       return valueSets;
     }
 
