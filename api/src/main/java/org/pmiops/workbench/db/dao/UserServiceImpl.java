@@ -229,7 +229,6 @@ public class UserServiceImpl implements UserServiceInterface {
     return configProvider.get().auth.serviceAccountApiUsers.contains(user.getUsername());
   }
 
-
   @Override
   public DbUser createServiceAccountUser(String username) {
     DbUser user = new DbUser();
