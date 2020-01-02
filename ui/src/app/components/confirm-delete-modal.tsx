@@ -17,8 +17,8 @@ import {
   ReactWrapperBase
 } from 'app/utils';
 import {toDisplay} from 'app/utils/resourceActions';
+import {ResourceType} from 'generated/fetch';
 import * as React from 'react';
-import {ResourceType} from "generated/fetch";
 
 export interface ConfirmDeleteModalProps {
   closeFunction: Function;

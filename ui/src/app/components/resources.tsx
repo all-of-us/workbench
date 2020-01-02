@@ -5,7 +5,7 @@ import {SnowmanIcon} from 'app/components/icons';
 import {PopupTrigger} from 'app/components/popups';
 import {switchCase} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {ResourceType} from "generated/fetch";
+import {ResourceType} from 'generated/fetch';
 
 export interface ResourceCardMenuProps {
   resourceType: ResourceType;

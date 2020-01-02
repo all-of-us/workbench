@@ -75,7 +75,7 @@ const resourceTypeColor = (resourceType: ResourceType) => {
     case ResourceType.DATASET:
       return colors.resourceCardHighlights.dataSet;
   }
-}
+};
 
 export interface Props {
   resourceCard: RecentResource;
