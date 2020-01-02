@@ -42,10 +42,6 @@ public class FreeTierBillingService {
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  // alerting thresholds, in descending order
-  private final List<Double> costThresholdsInDescOrder;
-  private final List<Double> timeThresholdsInDescOrder;
-
   @Autowired
   public FreeTierBillingService(
       BigQueryService bigQueryService,
@@ -60,14 +56,6 @@ public class FreeTierBillingService {
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
-
-    this.costThresholdsInDescOrder =
-        workbenchConfigProvider.get().billing.freeTierCostAlertThresholds;
-    this.costThresholdsInDescOrder.sort(Comparator.reverseOrder());
-
-    this.timeThresholdsInDescOrder =
-        workbenchConfigProvider.get().billing.freeTierTimeAlertThresholds;
-    this.timeThresholdsInDescOrder.sort(Comparator.reverseOrder());
   }
 
   /**
@@ -108,21 +96,30 @@ public class FreeTierBillingService {
 
     // by cost
 
+    final List<Double> costThresholdsInDescOrder =
+        workbenchConfigProvider.get().billing.freeTierCostAlertThresholds;
+    costThresholdsInDescOrder.sort(Comparator.reverseOrder());
+
     userCosts.forEach(
         (user, currentCost) -> {
           if (!currentExpiredUsers.contains(user)) {
             final double previousCost = previousUserCosts.getOrDefault(user, 0.0);
-            maybeAlertOnCostThresholds(user, currentCost, previousCost);
+            maybeAlertOnCostThresholds(user, currentCost, previousCost, costThresholdsInDescOrder);
           }
         });
 
     // by time
 
+    final List<Double> timeThresholdsInDescOrder =
+        workbenchConfigProvider.get().billing.freeTierTimeAlertThresholds;
+    timeThresholdsInDescOrder.sort(Comparator.reverseOrder());
+
     for (final DbUser user : userDao.findByFirstRegistrationCompletionTimeNotNull()) {
       if (!currentExpiredUsers.contains(user)) {
         final double currentCost = userCosts.getOrDefault(user, 0.0);
         final double remainingDollarBalance = getUserFreeTierDollarLimit(user) - currentCost;
-        maybeAlertOnTimeThresholds(user, remainingDollarBalance, currentCheckTime);
+        maybeAlertOnTimeThresholds(
+            user, remainingDollarBalance, currentCheckTime, timeThresholdsInDescOrder);
 
         // save current check time
         user.setLastFreeTierCreditsTimeCheck(Timestamp.from(currentCheckTime));
@@ -179,15 +176,17 @@ public class FreeTierBillingService {
    * @param currentCost The current total cost incurred by this user, according to BigQuery
    * @param previousCost The total cost incurred by this user at the time of the previous check, as
    *     stored in the database
+   * @param thresholdsInDescOrder the cost alerting thresholds, in descending order
    */
-  private void maybeAlertOnCostThresholds(DbUser user, double currentCost, double previousCost) {
+  private void maybeAlertOnCostThresholds(
+      DbUser user, double currentCost, double previousCost, List<Double> thresholdsInDescOrder) {
     final double limit = getUserFreeTierDollarLimit(user);
     final double remainingBalance = limit - currentCost;
 
     final double currentFraction = currentCost / limit;
     final double previousFraction = previousCost / limit;
 
-    for (final double threshold : costThresholdsInDescOrder) {
+    for (final double threshold : thresholdsInDescOrder) {
       if (currentFraction > threshold) {
         // only alert if we have not done so previously
         if (previousFraction <= threshold) {
@@ -210,9 +209,13 @@ public class FreeTierBillingService {
    * @param user The user to check
    * @param remainingDollarBalance The remaining dollar balance to this user, for reporting purposes
    * @param currentCheckTime a fixed time common to all checks of this run, for comparison purposes
+   * @param thresholdsInDescOrder the time alerting thresholds, in descending order
    */
   private void maybeAlertOnTimeThresholds(
-      DbUser user, double remainingDollarBalance, Instant currentCheckTime) {
+      DbUser user,
+      double remainingDollarBalance,
+      Instant currentCheckTime,
+      List<Double> thresholdsInDescOrder) {
     final Instant userFreeCreditStartTime = user.getFirstRegistrationCompletionTime().toInstant();
 
     final Instant previousCheckTime =
@@ -234,7 +237,7 @@ public class FreeTierBillingService {
     final Instant userFreeCreditExpirationTime = userFreeCreditStartTime.plus(userFreeCreditDays);
     final Duration timeRemaining = Duration.between(currentCheckTime, userFreeCreditExpirationTime);
 
-    for (final double threshold : timeThresholdsInDescOrder) {
+    for (final double threshold : thresholdsInDescOrder) {
       if (currentFraction > threshold) {
         // only alert if we have not done so previously
         if (previousFraction <= threshold) {
