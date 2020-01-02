@@ -5,8 +5,6 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,8 +36,6 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
-  @PersistenceContext private EntityManager entityManager;
-
   @Autowired private ConceptDao conceptDao;
 
   @Autowired private DomainInfoDao domainInfoDao;
@@ -59,8 +55,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    ConceptService conceptService =
-        new ConceptService(entityManager, conceptDao, domainInfoDao, surveyModuleDao);
+    ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
     conceptBigQueryService =
         new ConceptBigQueryService(bigQueryService, cdrBigQuerySchemaConfigService, conceptService);
 

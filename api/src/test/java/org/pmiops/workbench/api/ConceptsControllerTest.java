@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -233,8 +231,6 @@ public class ConceptsControllerTest {
   @Mock Provider<DbUser> userProvider;
   @Autowired SurveyModuleDao surveyModuleDao;
 
-  @PersistenceContext private EntityManager entityManager;
-
   private ConceptsController conceptsController;
 
   @Before
@@ -242,8 +238,7 @@ public class ConceptsControllerTest {
     // Injecting ConceptsController and ConceptService doesn't work well without using
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
-    ConceptService conceptService =
-        new ConceptService(entityManager, conceptDao, domainInfoDao, surveyModuleDao);
+    ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
     conceptsController =
         new ConceptsController(conceptService, conceptBigQueryService, workspaceService);
 

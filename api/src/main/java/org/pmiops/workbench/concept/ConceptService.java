@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
@@ -43,9 +41,6 @@ public class ConceptService {
     }
   }
 
-  @PersistenceContext(unitName = "cdr")
-  private EntityManager entityManager;
-
   @Autowired private ConceptDao conceptDao;
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private SurveyModuleDao surveyModuleDao;
@@ -62,11 +57,7 @@ public class ConceptService {
 
   // Used for tests
   public ConceptService(
-      EntityManager entityManager,
-      ConceptDao conceptDao,
-      DomainInfoDao domainInfoDao,
-      SurveyModuleDao surveyModuleDao) {
-    this.entityManager = entityManager;
+      ConceptDao conceptDao, DomainInfoDao domainInfoDao, SurveyModuleDao surveyModuleDao) {
     this.conceptDao = conceptDao;
     this.domainInfoDao = domainInfoDao;
     this.surveyModuleDao = surveyModuleDao;

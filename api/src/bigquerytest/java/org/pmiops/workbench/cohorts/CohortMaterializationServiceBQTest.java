@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
 import org.junit.Test;
@@ -101,8 +99,6 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Autowired private SurveyModuleDao surveyModuleDao;
 
-  @PersistenceContext private EntityManager entityManager;
-
   @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
 
   @Autowired private FieldSetQueryBuilder fieldSetQueryBuilder;
@@ -166,8 +162,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     participantCohortStatusDao.save(
         makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
 
-    ConceptService conceptService =
-        new ConceptService(entityManager, conceptDao, domainInfoDao, surveyModuleDao);
+    ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
 
     this.cohortMaterializationService =
         new CohortMaterializationService(
