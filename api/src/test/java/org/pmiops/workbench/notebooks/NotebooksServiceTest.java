@@ -191,12 +191,14 @@ public class NotebooksServiceTest {
     doReturn(WORKSPACE_RESPONSE).when(mockFirecloudService).getWorkspace(anyString(), anyString());
     doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
 
-    final FileDetail clonedFileDetail = notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
+    final FileDetail clonedFileDetail =
+        notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
     verify(mockMonitoringService).recordBundle(measurementBundleCaptor.capture());
 
     final MeasurementBundle bundle = measurementBundleCaptor.getValue();
     assertThat(bundle).isNotNull();
-    assertThat(bundle.getAttachments().get(AttachmentKey.NOTEBOOK_NAME.getKeyName())).isEqualTo(clonedFileDetail.getName());
+    assertThat(bundle.getAttachments().get(AttachmentKey.NOTEBOOK_NAME.getKeyName()))
+        .isEqualTo(clonedFileDetail.getName());
     assertThat(bundle.getMeasurements().get(Metric.NOTEBOOK_CLONE)).isEqualTo(1L);
   }
 
