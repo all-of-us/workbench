@@ -77,15 +77,13 @@ public class MeasurementBundle {
 
   @Override
   public String toString() {
-    return "{ [ "
-        + getMeasurements().entrySet().stream()
-        .map(e -> String.format("%s: %s", e.getKey().getName(), e.getValue()))
-        .collect(Collectors.joining(", "))
-        + " ] [ "
-        + getAttachments().entrySet().stream()
-        .map(e -> String.format("%s: %s", e.getKey(), e.getValue().getValue()))
-        .collect(Collectors.joining(", "))
-        + " ] }";
+    return String.format("measurements: [%s] attachments: [%s]",
+        getMeasurements().entrySet().stream()
+            .map(e -> String.format("%s: %s", e.getKey().getName(), e.getValue()))
+            .collect(Collectors.joining(", ")),
+        getAttachments().entrySet().stream()
+            .map(e -> String.format("%s: %s", e.getKey(), e.getValue().getValue()))
+            .collect(Collectors.joining(", ")));
   }
 
   public static class Builder {
