@@ -7,7 +7,6 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +43,8 @@ public class FreeTierBillingService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   // alerting thresholds, in descending order
-  private final List<Double> alertThresholdsInDescOrder;
+  private final List<Double> costThresholdsInDescOrder;
+  private final List<Double> timeThresholdsInDescOrder;
 
   @Autowired
   public FreeTierBillingService(
@@ -61,14 +61,13 @@ public class FreeTierBillingService {
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
 
-    this.alertThresholdsInDescOrder = new ArrayList<>();
-    initAlertThresholds();
-  }
+    this.costThresholdsInDescOrder =
+        workbenchConfigProvider.get().billing.freeTierCostAlertThresholds;
+    this.costThresholdsInDescOrder.sort(Comparator.reverseOrder());
 
-  private void initAlertThresholds() {
-    this.alertThresholdsInDescOrder.add(0.5);
-    this.alertThresholdsInDescOrder.add(0.75);
-    this.alertThresholdsInDescOrder.sort(Comparator.reverseOrder());
+    this.timeThresholdsInDescOrder =
+        workbenchConfigProvider.get().billing.freeTierTimeAlertThresholds;
+    this.timeThresholdsInDescOrder.sort(Comparator.reverseOrder());
   }
 
   /**
@@ -188,7 +187,7 @@ public class FreeTierBillingService {
     final double currentFraction = currentCost / limit;
     final double previousFraction = previousCost / limit;
 
-    for (final double threshold : alertThresholdsInDescOrder) {
+    for (final double threshold : costThresholdsInDescOrder) {
       if (currentFraction > threshold) {
         // only alert if we have not done so previously
         if (previousFraction <= threshold) {
@@ -235,7 +234,7 @@ public class FreeTierBillingService {
     final Instant userFreeCreditExpirationTime = userFreeCreditStartTime.plus(userFreeCreditDays);
     final Duration timeRemaining = Duration.between(currentCheckTime, userFreeCreditExpirationTime);
 
-    for (final double threshold : alertThresholdsInDescOrder) {
+    for (final double threshold : timeThresholdsInDescOrder) {
       if (currentFraction > threshold) {
         // only alert if we have not done so previously
         if (previousFraction <= threshold) {
