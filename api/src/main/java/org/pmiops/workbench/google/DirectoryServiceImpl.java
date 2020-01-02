@@ -70,28 +70,25 @@ public class DirectoryServiceImpl implements DirectoryService {
               DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
           DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY);
 
-  private final Provider<ServiceAccountCredentials> credentialsProvider;
+  private final Provider<ServiceAccountCredentials> googleCredentialsProvider;
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
-  private final Directory service;
 
   @Autowired
   public DirectoryServiceImpl(
       @Qualifier(Constants.GSUITE_ADMIN_CREDS)
-          Provider<ServiceAccountCredentials> credentialsProvider,
-      Provider<WorkbenchConfig> configProvider,
+          Provider<ServiceAccountCredentials> googleCredentialsProvider,
+          Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
       GoogleRetryHandler retryHandler) {
-    this.credentialsProvider = credentialsProvider;
+    this.googleCredentialsProvider = googleCredentialsProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
-
-    this.service = buildService();
   }
 
-  private Directory buildService() {
+  private Directory service() {
     OAuth2Credentials delegatedCreds;
     if (configProvider.get().featureFlags.useKeylessDelegatedCredentials) {
       delegatedCreds =
@@ -101,7 +98,7 @@ public class DirectoryServiceImpl implements DirectoryService {
               SCOPES);
     } else {
       delegatedCreds =
-          credentialsProvider
+          googleCredentialsProvider
               .get()
               .createScoped(SCOPES)
               .createDelegated("directory-service@" + gSuiteDomain());
@@ -116,6 +113,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     return configProvider.get().googleDirectoryService.gSuiteDomain;
   }
 
+  @Override
   public User getUserByUsername(String username) {
     return getUser(username + "@" + gSuiteDomain());
   }
@@ -133,7 +131,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     try {
       // We use the "full" projection to include custom schema fields in the Directory API response.
       return retryHandler.runAndThrowChecked(
-          (context) -> service.users().get(email).setProjection("full").execute());
+          (context) -> service().users().get(email).setProjection("full").execute());
     } catch (GoogleJsonResponseException e) {
       // Handle the special case where we're looking for a not found user by returning
       // null.
@@ -205,7 +203,7 @@ public class DirectoryServiceImpl implements DirectoryService {
             .setOrgUnitPath(GSUITE_WORKBENCH_ORG_UNIT_PATH);
     addCustomSchemaAndEmails(user, primaryEmail, contactEmail);
 
-    retryHandler.run((context) -> service.users().insert(user).execute());
+    retryHandler.run((context) -> service().users().insert(user).execute());
     return user;
   }
 
@@ -214,7 +212,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     User user = getUser(email);
     String password = randomString();
     user.setPassword(password);
-    retryHandler.run((context) -> service.users().update(email, user).execute());
+    retryHandler.run((context) -> service().users().update(email, user).execute());
     return user;
   }
 
@@ -222,7 +220,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   public void deleteUser(String username) {
     try {
       retryHandler.runAndThrowChecked(
-          (context) -> service.users().delete(username + "@" + gSuiteDomain()).execute());
+          (context) -> service().users().delete(username + "@" + gSuiteDomain()).execute());
     } catch (GoogleJsonResponseException e) {
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         // Deleting a user that doesn't exist will have no effect.
