@@ -13,7 +13,6 @@ import {CircleWithText} from 'app/icons/circleWithText';
 import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
 import {
   cohortsApi,
-  conceptsApi,
   conceptSetsApi,
   dataSetApi
 } from 'app/services/swagger-fetch-clients';
