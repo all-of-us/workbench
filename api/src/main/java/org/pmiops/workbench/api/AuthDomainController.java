@@ -3,7 +3,7 @@ package org.pmiops.workbench.api;
 import org.pmiops.workbench.actionaudit.auditors.AuthDomainAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceInterface;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.Authority;
@@ -18,14 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthDomainController implements AuthDomainApiDelegate {
 
   private final FireCloudService fireCloudService;
-  private final UserService userService;
+  private final UserServiceInterface userService;
   private final UserDao userDao;
   private AuthDomainAuditor authDomainAuditAdapter;
 
   @Autowired
   AuthDomainController(
       FireCloudService fireCloudService,
-      UserService userService,
+      UserServiceInterface userService,
       UserDao userDao,
       AuthDomainAuditor authDomainAuditAdapter) {
     this.fireCloudService = fireCloudService;

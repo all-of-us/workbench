@@ -83,7 +83,7 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceInterface;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -249,7 +249,7 @@ public class WorkspacesControllerTest {
     CloudStorageService.class,
     BigQueryService.class,
     CohortQueryBuilder.class,
-    UserService.class,
+    UserServiceInterface.class,
     UserRecentResourceService.class,
     ConceptService.class,
     MonitoringService.class,
