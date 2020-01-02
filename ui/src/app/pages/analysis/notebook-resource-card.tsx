@@ -184,7 +184,7 @@ export const NotebookResourceCard = fp.flow(
       }
 
       {this.state.showRenameModal &&
-      <RenameModal type={this.resourceType}
+      <RenameModal resourceType={this.resourceType}
                    onRename={(newName) => {
                      AnalyticsTracker.Notebooks.Rename();
                      this.renameNotebook(newName);

@@ -160,7 +160,7 @@ export const CohortResourceCard = fp.flow(
     return <React.Fragment>
       {this.state.showRenameModal &&
       <RenameModal onRename={(name, description) => this.rename(name, description)}
-                   type={this.resourceType}
+                   resourceType={this.resourceType}
                    onCancel={() => this.setState({showRenameModal: false})}
                    oldDescription={this.props.resource.cohort.description}
                    oldName={this.displayName}

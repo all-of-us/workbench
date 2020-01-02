@@ -364,7 +364,7 @@ export class ResourceCard extends React.Component<Props, State> {
         this.props.resourceCard.workspaceFirecloudName, {
           id: id,
           resourceType: this.resourceType
-        }); // TODO eric: this too
+        });
       this.receiveDelete();
     } catch (ex) {
       console.log(ex);
@@ -430,7 +430,7 @@ export class ResourceCard extends React.Component<Props, State> {
       {this.state.renaming && this.isCohortReview &&
         <RenameModal
           onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
-          type={ResourceType.COHORTREVIEW}
+          resourceType={ResourceType.COHORTREVIEW}
           onCancel={() => this.cancelRename()}
           oldDescription={this.props.resourceCard.cohortReview.description}
           oldName={this.props.resourceCard.cohortReview.cohortName}
@@ -440,7 +440,7 @@ export class ResourceCard extends React.Component<Props, State> {
       {this.state.renaming && this.isConceptSet &&
         <RenameModal
           onRename={(newName, newDescription) => this.receiveRename(newName, newDescription)}
-          type={ResourceType.CONCEPTSET}
+          resourceType={ResourceType.CONCEPTSET}
           onCancel={() => this.cancelRename()}
           oldDescription={this.props.resourceCard.conceptSet.description}
           oldName={this.props.resourceCard.conceptSet.name}
@@ -461,7 +461,7 @@ export class ResourceCard extends React.Component<Props, State> {
             AnalyticsTracker.DatasetBuilder.Rename();
             this.receiveDataSetRename(newName, newDescription);
           }}
-          type={ResourceType.DATASET}
+          resourceType={ResourceType.DATASET}
           onCancel={() => this.cancelRename()}
           oldDescription ={this.props.resourceCard.dataSet.description}
           oldName={this.props.resourceCard.dataSet.name}

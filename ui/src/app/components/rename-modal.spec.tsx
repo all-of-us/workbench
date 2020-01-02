@@ -10,7 +10,7 @@ describe('RenameModal', () => {
   it('should render', () => {
     const wrapper = mount(<RenameModal
         onRename={(newName) => {}}
-        type={ResourceType.NOTEBOOK}
+        resourceType={ResourceType.NOTEBOOK}
         onCancel={() => {}}
         oldName=''
         existingNames={existingNames}
@@ -23,7 +23,7 @@ describe('RenameModal', () => {
   it('should display description only if props hideDescription is set to true', () => {
     const wrapper = mount(<RenameModal
         onRename={(newName) => {}}
-        type={ResourceType.NOTEBOOK}
+        resourceType={ResourceType.NOTEBOOK}
         onCancel={() => {}}
         oldName=''
         existingNames={existingNames}

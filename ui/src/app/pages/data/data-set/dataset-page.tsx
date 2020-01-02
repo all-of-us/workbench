@@ -46,7 +46,8 @@ import {
   DomainValuesResponse,
   ErrorResponse,
   PrePackagedConceptSetEnum,
-  Profile, ResourceType,
+  Profile,
+  ResourceType,
   Surveys,
   ValueSet,
 } from 'generated/fetch';

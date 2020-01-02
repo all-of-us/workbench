@@ -70,7 +70,7 @@ interface Props {
   onCancel: Function;
   onRename: Function;
   nameFormat?: Function;
-  type: ResourceType; //TODO eric: rename this to resourceType
+  resourceType: ResourceType;
 }
 
 interface States {
@@ -96,14 +96,14 @@ export class RenameModal extends React.Component<Props, States> {
   }
 
   render() {
-    const {hideDescription, existingNames, oldName, type} = this.props;
+    const {hideDescription, existingNames, oldName, resourceType} = this.props;
     let {newName, nameTouched, resourceDescription, saving} = this.state;
     if (this.props.nameFormat) {
       newName = this.props.nameFormat(newName);
     }
     const errors = validate(
       {newName: newName},
-      {newName: nameValidationFormat(existingNames, type)}
+      {newName: nameValidationFormat(existingNames, resourceType)}
       );
     return <Modal loading={saving}>
       <ModalTitle>Enter new name for {oldName}</ModalTitle>
@@ -127,7 +127,7 @@ export class RenameModal extends React.Component<Props, States> {
                   disabled={!!errors || saving}
                   style={{marginLeft: '0.5rem'}}
                   onClick={() => this.onRename()}>
-            Rename {toDisplay(type)}
+            Rename {toDisplay(resourceType)}
           </Button>
         </TooltipTrigger>
       </ModalFooter>
