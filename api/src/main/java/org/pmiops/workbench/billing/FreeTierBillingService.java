@@ -261,8 +261,8 @@ public class FreeTierBillingService {
     }
   }
 
-  // we set Workspaces to EXPIRED when their creators have exceeded their free credits
-  // so we can retrieve these users by querying for expired workspaces
+  // we set Workspaces to INACTIVE when their creators have exceeded their free credits
+  // so we can retrieve these users by querying for inactive workspaces
   private Set<DbUser> getExpiredUsersFromDb() {
     return workspaceDao.findAllCreatorsByBillingStatus(BillingStatus.INACTIVE);
   }
