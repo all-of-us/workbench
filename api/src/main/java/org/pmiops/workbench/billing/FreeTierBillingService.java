@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.Sets;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -42,6 +43,8 @@ public class FreeTierBillingService {
 
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
+  private final Clock clock;
+
   @Autowired
   public FreeTierBillingService(
       BigQueryService bigQueryService,
@@ -49,13 +52,15 @@ public class FreeTierBillingService {
       UserDao userDao,
       WorkspaceDao workspaceDao,
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      Clock clock) {
     this.bigQueryService = bigQueryService;
     this.notificationService = notificationService;
     this.userDao = userDao;
     this.workspaceDao = workspaceDao;
     this.workspaceFreeTierUsageDao = workspaceFreeTierUsageDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.clock = clock;
   }
 
   /**
@@ -64,7 +69,7 @@ public class FreeTierBillingService {
    */
   public void checkFreeTierBillingUsage() {
     // freeze this value, for later consistency
-    final Instant currentCheckTime = Instant.now();
+    final Instant currentCheckTime = this.clock.instant();
 
     // retrieve the costs stored in the DB from the last time this was run
     final Map<DbUser, Double> previousUserCosts = workspaceFreeTierUsageDao.getUserCostMap();

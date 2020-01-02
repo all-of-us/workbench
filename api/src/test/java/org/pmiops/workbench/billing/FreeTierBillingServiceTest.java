@@ -21,6 +21,7 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Doubles;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +48,7 @@ import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -75,10 +78,20 @@ public class FreeTierBillingServiceTest {
   private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
   private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
 
+  // An arbitrary timestamp to use as the anchor time for access module test cases.
+  private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
+  private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
+
   @TestConfiguration
   @Import({FreeTierBillingService.class})
   @MockBean({BigQueryService.class, NotificationService.class})
   static class Configuration {
+    @Bean
+    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public Clock clock() {
+      return CLOCK;
+    }
+
     @Bean
     @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WorkbenchConfig workbenchConfig() {
@@ -91,6 +104,11 @@ public class FreeTierBillingServiceTest {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.freeTierCostAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
     workbenchConfig.billing.freeTierTimeAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
+  }
+
+  @After
+  public void resetClock() {
+    CLOCK.setInstant(START_INSTANT);
   }
 
   @Test
@@ -256,24 +274,24 @@ public class FreeTierBillingServiceTest {
     final short limit = 1000;
     workbenchConfig.billing.defaultFreeCreditsDaysLimit = limit;
 
-    final Instant testStartTime = Instant.now();
+    // set an arbitrary registration time
 
-    // still have over half my free credit time remaining
-    final Instant registrationTime =
-        testStartTime.minus(Period.ofDays(limit / 2)).plus(Period.ofDays(1));
+    final Instant registrationTime = START_INSTANT.minus(Period.ofDays(2000));
     user.setFirstRegistrationCompletionTime(Timestamp.from(registrationTime));
     userDao.save(user);
 
-    // check that we do not alert
+    // check that we do not alert below the 50% threshold
+
+    final Instant checkTime =
+        registrationTime.plus(Period.ofDays(limit / 2)).minus(Period.ofDays(1));
+    CLOCK.setInstant(checkTime);
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verifyZeroInteractions(notificationService);
   }
 
-  // TODO: can we test multiple time thresholds in the same test?
-
   @Test
-  public void checkFreeTierBillingUsage_exceeds50PctDayThreshold() {
+  public void checkFreeTierBillingUsage_exceedsDayThresholds() {
 
     // set cost values to ensure we don't alert from cost
 
@@ -284,28 +302,24 @@ public class FreeTierBillingServiceTest {
     doReturn(mockBQTableSingleResult(spent)).when(bigQueryService).executeQuery(any());
 
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
+    final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
     final short limit = 1000;
     workbenchConfig.billing.defaultFreeCreditsDaysLimit = limit;
 
-    final Instant testStartTime = Instant.now();
+    // set an arbitrary registration time
+
+    final Instant registrationTime = START_INSTANT.minus(Period.ofDays(2000));
+    user.setFirstRegistrationCompletionTime(Timestamp.from(registrationTime));
+    userDao.save(user);
+    final Instant expirationTime = registrationTime.plus(Period.ofDays(limit));
+    final LocalDate expirationDate = expirationTime.atZone(ZoneId.systemDefault()).toLocalDate();
 
     // check that we alert for the 50% threshold
 
-    // set my registration time to "more than half of my free credits ago"
-    final Instant registrationTime =
-        testStartTime
-            .minus(Period.ofDays(limit / 2))
-            .minus(Period.ofDays(1))
-            // avoid silly test errors due to comparing too close to day boundaries
-            .minus(Duration.ofMinutes(1));
-    user.setFirstRegistrationCompletionTime(Timestamp.from(registrationTime));
-    userDao.save(user);
-
-    final Instant expirationTime = registrationTime.plus(Period.ofDays(limit));
-    final long daysRemaining = Duration.between(testStartTime, expirationTime).toDays();
-    final LocalDate expirationDate = expirationTime.atZone(ZoneId.systemDefault()).toLocalDate();
+    Instant checkTime = registrationTime.plus(Period.ofDays(limit / 2)).plus(Period.ofDays(1));
+    CLOCK.setInstant(checkTime);
+    long daysRemaining = Duration.between(checkTime, expirationTime).toDays();
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService)
@@ -316,42 +330,12 @@ public class FreeTierBillingServiceTest {
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verifyZeroInteractions(notificationService);
-  }
-
-  @Test
-  public void checkFreeTierBillingUsage_exceeds75PctDayThreshold() {
-
-    // set cost values to ensure we don't alert from cost
-
-    final double dollarLimit = 100.0;
-    final double spent = 0.0;
-    final double dollarBalance = dollarLimit - spent;
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = dollarLimit;
-    doReturn(mockBQTableSingleResult(spent)).when(bigQueryService).executeQuery(any());
-
-    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    final short limit = 1000;
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = limit;
-
-    final Instant testStartTime = Instant.now();
 
     // check that we alert for the 75% threshold
 
-    // set my registration time to "more than 3/4 of my free credits ago"
-    final Instant registrationTime =
-        testStartTime
-            .minus(Period.ofDays(limit * 3 / 4))
-            .minus(Period.ofDays(1))
-            // avoid silly test errors due to comparing too close to day boundaries
-            .minus(Duration.ofMinutes(1));
-    user.setFirstRegistrationCompletionTime(Timestamp.from(registrationTime));
-    userDao.save(user);
-
-    final Instant expirationTime = registrationTime.plus(Period.ofDays(limit));
-    long daysRemaining = Duration.between(testStartTime, expirationTime).toDays();
-    final LocalDate expirationDate = expirationTime.atZone(ZoneId.systemDefault()).toLocalDate();
+    checkTime = registrationTime.plus(Period.ofDays(limit * 3 / 4)).plus(Period.ofDays(1));
+    CLOCK.setInstant(checkTime);
+    daysRemaining = Duration.between(checkTime, expirationTime).toDays();
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService)
@@ -362,25 +346,11 @@ public class FreeTierBillingServiceTest {
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verifyZeroInteractions(notificationService);
-  }
 
-  @Test
-  public void checkFreeTierBillingUsage_exceeds100PctDayThreshold() {
+    // check that we alert for the 100% threshold
 
-    // set cost values to ensure we don't alert from cost
-
-    final double dollarLimit = 100.0;
-    final double spent = 0.0;
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = dollarLimit;
-    doReturn(mockBQTableSingleResult(spent)).when(bigQueryService).executeQuery(any());
-
-    final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    final DbWorkspace workspace = createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
-
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = 30;
-    final Instant tooLongAgo = Instant.now().minus(Period.ofDays(40));
-    user.setFirstRegistrationCompletionTime(Timestamp.from(tooLongAgo));
-    userDao.save(user);
+    checkTime = registrationTime.plus(Period.ofDays(limit)).plus(Period.ofDays(1));
+    CLOCK.setInstant(checkTime);
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService).alertUserFreeTierExpiration(eq(user));
@@ -406,7 +376,7 @@ public class FreeTierBillingServiceTest {
     // expire due to time
 
     workbenchConfig.billing.defaultFreeCreditsDaysLimit = 10;
-    final Instant tooLongAgo = Instant.now().minus(Period.ofDays(11));
+    final Instant tooLongAgo = START_INSTANT.minus(Period.ofDays(11));
     user.setFirstRegistrationCompletionTime(Timestamp.from(tooLongAgo));
     userDao.save(user);
 
@@ -431,23 +401,20 @@ public class FreeTierBillingServiceTest {
     final short daysLimit = 1000;
     workbenchConfig.billing.defaultFreeCreditsDaysLimit = daysLimit;
 
-    final Instant testStartTime = Instant.now();
+    // set an arbitrary registration time
+
+    final Instant registrationTime = START_INSTANT.minus(Period.ofDays(2000));
+    user.setFirstRegistrationCompletionTime(Timestamp.from(registrationTime));
+    userDao.save(user);
+    final Instant expirationTime = registrationTime.plus(Period.ofDays(daysLimit));
+    final LocalDate expirationDate = expirationTime.atZone(ZoneId.systemDefault()).toLocalDate();
 
     // check that we alert for both 50% thresholds
 
-    // set my registration time to "more than half of my free credits ago"
-    final Instant registrationTime =
-        testStartTime
-            .minus(Period.ofDays(daysLimit / 2))
-            .minus(Period.ofDays(1))
-            // avoid silly test errors due to comparing too close to day boundaries
-            .minus(Duration.ofMinutes(1));
-    user.setFirstRegistrationCompletionTime(Timestamp.from(registrationTime));
-    userDao.save(user);
-
-    final Instant expirationTime = registrationTime.plus(Period.ofDays(daysLimit));
-    final long daysRemaining = Duration.between(testStartTime, expirationTime).toDays();
-    final LocalDate expirationDate = expirationTime.atZone(ZoneId.systemDefault()).toLocalDate();
+    final Instant checkTime =
+        registrationTime.plus(Period.ofDays(daysLimit / 2)).plus(Period.ofDays(1));
+    CLOCK.setInstant(checkTime);
+    final long daysRemaining = Duration.between(checkTime, expirationTime).toDays();
 
     freeTierBillingService.checkFreeTierBillingUsage();
     verify(notificationService)
@@ -479,7 +446,7 @@ public class FreeTierBillingServiceTest {
     // expire due to time
 
     workbenchConfig.billing.defaultFreeCreditsDaysLimit = 10;
-    final Instant tooLongAgo = Instant.now().minus(Period.ofDays(11));
+    final Instant tooLongAgo = START_INSTANT.minus(Period.ofDays(11));
     user.setFirstRegistrationCompletionTime(Timestamp.from(tooLongAgo));
     userDao.save(user);
 
@@ -499,7 +466,7 @@ public class FreeTierBillingServiceTest {
     // expire due to time
 
     workbenchConfig.billing.defaultFreeCreditsDaysLimit = 10;
-    final Instant tooLongAgo = Instant.now().minus(Period.ofDays(11));
+    final Instant tooLongAgo = START_INSTANT.minus(Period.ofDays(11));
     user.setFirstRegistrationCompletionTime(Timestamp.from(tooLongAgo));
     userDao.save(user);
 
@@ -529,7 +496,7 @@ public class FreeTierBillingServiceTest {
     doReturn(mockBQTableSingleResult(50.1)).when(bigQueryService).executeQuery(any());
 
     workbenchConfig.billing.defaultFreeCreditsDaysLimit = 10;
-    final Instant tooLongAgo = Instant.now().minus(Period.ofDays(11));
+    final Instant tooLongAgo = START_INSTANT.minus(Period.ofDays(11));
     user.setFirstRegistrationCompletionTime(Timestamp.from(tooLongAgo));
     userDao.save(user);
 
@@ -555,12 +522,21 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
     doReturn(mockBQTableSingleResult(100.1)).when(bigQueryService).executeQuery(any());
 
-    final Instant testStartTime = Instant.now();
+    final short daysLimit = 10;
+    workbenchConfig.billing.defaultFreeCreditsDaysLimit = daysLimit;
 
-    workbenchConfig.billing.defaultFreeCreditsDaysLimit = 10;
-    final Instant registrationTime = testStartTime.minus(Period.ofDays(6));
+    // set an arbitrary registration time
+
+    final Instant registrationTime = START_INSTANT.minus(Period.ofDays(2000));
     user.setFirstRegistrationCompletionTime(Timestamp.from(registrationTime));
     userDao.save(user);
+
+    // set check time to trigger the 50% time threshold
+    // but the 100% cost threshold will supersede this
+
+    final Instant checkTime =
+        registrationTime.plus(Period.ofDays(daysLimit / 2)).plus(Period.ofDays(1));
+    CLOCK.setInstant(checkTime);
 
     // we expect to see ONE alert due to cost expiration
     // and NO alert for crossing the 50% time threshold
