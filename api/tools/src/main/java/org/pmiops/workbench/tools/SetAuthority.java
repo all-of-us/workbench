@@ -9,18 +9,13 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Authority;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * See api/project.rb set-authority. Adds or removes authorities (permissions) from users in the db.
  */
-@SpringBootApplication
-@EnableJpaRepositories("org.pmiops.workbench.db.dao")
-@EntityScan("org.pmiops.workbench.db.model")
+@Configuration
 public class SetAuthority {
 
   private static final Logger log = Logger.getLogger(SetAuthority.class.getName());
@@ -61,7 +56,7 @@ public class SetAuthority {
 
       for (String email : emails) {
         numUsers++;
-        DbUser user = userDao.findUserByEmail(email);
+        DbUser user = userDao.findUserByUsername(email);
         if (user == null) {
           log.log(Level.SEVERE, "No user for {0}.", email);
           numErrors++;
@@ -97,6 +92,6 @@ public class SetAuthority {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(SetAuthority.class).web(false).run(args);
+    CommandLineToolConfig.runCommandLine(SetAuthority.class, args);
   }
 }

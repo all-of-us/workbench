@@ -94,7 +94,7 @@ describe('ConceptHomepage', () => {
         standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
         domain: domain.domain,
         includeDomainCounts: includeDomainCounts,
-        maxResults: 100
+        maxResults: 1000
       };
       expect(spy).toHaveBeenCalledWith(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -140,7 +140,7 @@ describe('ConceptHomepage', () => {
         standardConceptFilter: StandardConceptFilter.ALLCONCEPTS,
         domain: domain.domain,
         includeDomainCounts: includeDomainCounts,
-        maxResults: 100
+        maxResults: 1000
       };
       expect(spy).toHaveBeenCalledWith(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
@@ -213,6 +213,26 @@ describe('ConceptHomepage', () => {
       .toBe(DomainStubVariables.STUB_DOMAINS.length);
     expect(wrapper.find('[data-test-id="survey-box-name"]').length)
       .toBe(SurveyStubVariables.STUB_SURVEYS.length);
+
+  });
+
+  it('should display all Concept selected message when header checkbox is selected', async() => {
+    const wrapper = mount(<ConceptHomepage />);
+    await waitOneTickAndUpdate(wrapper);
+    searchTable('Stub Concept', wrapper);
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('span.p-checkbox-icon.p-clickable').at(1).simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find('[data-test-id="selection"]').text()).toContain('All concepts on this page are selected.');
+    expect(wrapper.find('[data-test-id="banner-link"]').text()).toEqual('Select 1');
+    wrapper.find('[data-test-id="banner-link"]').simulate('click');
+    expect(wrapper.find('[data-test-id="selectedConcepts"]').length).toEqual(1);
+
+    expect(wrapper.find('[data-test-id="banner-link"]').text()).toEqual('Clear Selection');
+    wrapper.find('[data-test-id="banner-link"]').simulate('click');
+    expect(wrapper.find('[data-test-id="selectedConcepts"]').length).toEqual(0);
 
   });
 });

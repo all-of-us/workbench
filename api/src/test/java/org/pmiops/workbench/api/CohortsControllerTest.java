@@ -43,6 +43,7 @@ import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
@@ -176,7 +177,7 @@ public class CohortsControllerTest {
     CohortCloningService.class,
     CohortFactoryImpl.class,
     NotebooksServiceImpl.class,
-    UserService.class,
+    UserServiceImpl.class,
     WorkspacesController.class,
     CohortsController.class,
     ConceptSetsController.class,
@@ -232,7 +233,7 @@ public class CohortsControllerTest {
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
     DbUser user = new DbUser();
-    user.setEmail(CREATOR_EMAIL);
+    user.setUsername(CREATOR_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);

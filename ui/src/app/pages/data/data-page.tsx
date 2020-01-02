@@ -18,6 +18,7 @@ import {
   convertToResources,
   ResourceType
 } from 'app/utils/resourceActions';
+import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Domain, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
 
@@ -114,7 +115,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
         isLoading: true
       });
       const [cohorts, cohortReviews, conceptSets, dataSets] = await Promise.all([
-        cohortsApi().getCohortsInWorkspace(namespace, id),
+        fetchWithGlobalErrorHandler(() => cohortsApi().getCohortsInWorkspace(namespace, id)),
         cohortReviewApi().getCohortReviewsInWorkspace(namespace, id),
         conceptSetsApi().getConceptSetsInWorkspace(namespace, id),
         dataSetApi().getDataSetsInWorkspace(namespace, id)

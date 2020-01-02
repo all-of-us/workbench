@@ -4,6 +4,7 @@ import java.util.List;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 public interface SurveyModuleDao extends CrudRepository<DbSurveyModule, Long> {
 
@@ -39,5 +40,6 @@ public interface SurveyModuleDao extends CrudRepository<DbSurveyModule, Long> {
 
   DbSurveyModule findByConceptId(long conceptId);
 
-  List<DbSurveyModule> findByOrderByOrderNumberAsc();
+  List<DbSurveyModule> findByParticipantCountNotOrderByOrderNumberAsc(
+      @Param("participantCount") Long participantCount);
 }

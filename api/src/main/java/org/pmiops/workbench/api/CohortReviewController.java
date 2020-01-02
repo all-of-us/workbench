@@ -804,7 +804,11 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   /** Build a map that contains all gender/race/ethnicity names with the concept id as the key. */
   private Map<Long, String> getGenderRaceEthnicityMap() {
     return cbCriteriaDao.findGenderRaceEthnicity().stream()
-        .collect(Collectors.toMap(DbCriteria::getLongConceptId, DbCriteria::getName));
+        .collect(
+            Collectors.toMap(
+                DbCriteria::getLongConceptId,
+                DbCriteria::getName,
+                (oldValue, newValue) -> oldValue));
   }
 
   /**
