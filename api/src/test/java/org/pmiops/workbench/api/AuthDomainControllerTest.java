@@ -20,7 +20,7 @@ import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
-import org.pmiops.workbench.db.dao.UserServiceInterface;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -76,7 +76,7 @@ public class AuthDomainControllerTest {
     config.access = new WorkbenchConfig.AccessConfig();
     config.access.enableDataUseAgreement = true;
     FakeClock clock = new FakeClock(Instant.now());
-    UserServiceInterface userService =
+    UserService userService =
         new UserServiceImpl(
             userProvider,
             userDao,

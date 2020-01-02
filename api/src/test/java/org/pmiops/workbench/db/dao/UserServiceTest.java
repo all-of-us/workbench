@@ -61,7 +61,7 @@ public class UserServiceTest {
   @Autowired private DirectoryService mockDirectoryService;
   @Autowired private UserServiceAuditor mockUserServiceAuditAdapter;
 
-  @Autowired private UserServiceInterface userService;
+  @Autowired private UserService userService;
   @Autowired private UserDao userDao;
 
   @TestConfiguration

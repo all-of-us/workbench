@@ -26,7 +26,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.AuthConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.GoogleDirectoryServiceConfig;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserServiceInterface;
+import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -57,7 +57,7 @@ public class AuthInterceptorTest {
   @Mock private HttpServletRequest request;
   @Mock private HttpServletResponse response;
   @Mock private HandlerMethod handler;
-  @Mock private UserServiceInterface userService;
+  @Mock private UserService userService;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
