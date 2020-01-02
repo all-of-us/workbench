@@ -2027,7 +2027,7 @@ paths:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-    get:
+    post:
       parameters:
         - in: body
           name: resourceType

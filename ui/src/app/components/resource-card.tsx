@@ -209,15 +209,11 @@ export class ResourceCard extends React.Component<Props, State> {
 
   async getDataSetByResourceId(id) {
     if (this.state.dataSetByResourceIdList.length === 0) {
-      try {
-        const dataSetList = await dataSetApi().getDataSetByResourceId(
-          this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName,
-          this.resourceType, id); // TODO Eric: this will be fixed by swapping in the new enum type
-        return dataSetList.items;
-      } catch (ex) {
-        console.log(ex);
-      }
+      const dataSetList = await dataSetApi().getDataSetByResourceId(
+        this.props.resourceCard.workspaceNamespace,
+        this.props.resourceCard.workspaceFirecloudName,
+        this.resourceType, id);
+      return dataSetList.items;
     } else {
       this.setState({dataSetByResourceIdList: []});
     }
