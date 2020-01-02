@@ -80,15 +80,20 @@ export class AdminBanner extends React.Component<{}, AdminBannerState> {
 
   render() {
     const {bannerDescription, bannerEnabled, bannerHeadline, readMoreLink} = this.state;
-    const errors = validate({
-      bannerDescription, bannerHeadline, readMoreLink
-    }, validators, {
-      prettify: v => ({
-        bannerDescription: 'Banner Description',
-        bannerHeadline: 'Banner Headline',
-        readMoreLink: 'Read More Button'
-      }[v] || validate.prettify(v))
-    });
+    const errors = validate(
+      {
+        bannerDescription,
+        bannerHeadline,
+        readMoreLink
+      },
+      validators,
+      {
+        prettify: v => ({
+          bannerDescription: 'Banner Description',
+          bannerHeadline: 'Banner Headline',
+          readMoreLink: 'Read More Button'
+        }[v] || validate.prettify(v))
+      });
     return <div style={{width: '24rem'}}>
       <BoldHeader style={{fontSize: 18}}>Service Banners</BoldHeader>
       <Header style={{...styles.smallHeaderStyles, marginTop: '0.5rem'}}>Banner Headline</Header>
