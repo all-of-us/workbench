@@ -18,11 +18,11 @@ public interface MonitoringService {
    *
    * @param viewInfo
    */
-  default void recordDelta(OpenCensusView viewInfo) {
+  default void recordEvent(OpenCensusView viewInfo) {
     recordValue(viewInfo, DELTA_VALUE);
   }
 
-  default void recordDelta(OpenCensusView viewInfo, Map<String, AttachmentValue> attachments) {
+  default void recordEvent(OpenCensusView viewInfo, Map<String, AttachmentValue> attachments) {
     recordValues(ImmutableMap.of(viewInfo, DELTA_VALUE), attachments);
   }
 

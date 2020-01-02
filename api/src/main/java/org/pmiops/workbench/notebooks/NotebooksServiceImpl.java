@@ -25,7 +25,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
-import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -170,7 +170,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             newName);
     monitoringService.recordBundle(
         MeasurementBundle.builder()
-            .addValue(Metric.NOTEBOOK_CLONE, 1L)
+            .addValue(EventMetric.NOTEBOOK_CLONE, 1L)
             .attach(AttachmentKey.NOTEBOOK_NAME, copiedNotebookFileDetail.getName())
             .attach(AttachmentKey.NOTEBOOK_WORKSPACE_NAMESPACE, workspaceName)
             .build());
@@ -186,7 +186,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         workspaceService.getRequired(workspaceNamespace, workspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
         notebookLocators.fullPath);
-    monitoringService.recordDelta(Metric.NOTEBOOK_DELETE);
+    monitoringService.recordEvent(EventMetric.NOTEBOOK_DELETE);
   }
 
   @Override
@@ -229,7 +229,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         bucketName,
         "notebooks/" + NotebooksService.withNotebookExtension(notebookName),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
-    monitoringService.recordDelta(Metric.NOTEBOOK_SAVE);
+    monitoringService.recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
 
   @Override

@@ -7,7 +7,7 @@ import java.util.Collection;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
-import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,9 +28,9 @@ public class ToyGaugeDataCollector implements GaugeDataCollector {
     return ImmutableSet.<MeasurementBundle>builder()
         .add(
             MeasurementBundle.builder()
-                .addValue(Metric.DEBUG_CONSTANT_VALUE, TOY_CONSTANT_VALUE)
-                .addValue(Metric.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis())
-                .addValue(Metric.DEBUG_RANDOM_DOUBLE, random.nextDouble())
+                .addValue(GaugeMetric.DEBUG_CONSTANT_VALUE, TOY_CONSTANT_VALUE)
+                .addValue(GaugeMetric.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis())
+                .addValue(GaugeMetric.DEBUG_RANDOM_DOUBLE, random.nextDouble())
                 .attach(AttachmentKey.DEBUG_COLOR, COLOR_LABEL)
                 .build())
         .build();

@@ -51,7 +51,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.Creati
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -672,7 +672,8 @@ public class BillingProjectBufferServiceTest {
     assertThat(bundles.size()).isGreaterThan(0);
     Optional<MeasurementBundle> entryStatusBundle =
         bundles.stream()
-            .filter(b -> b.getMeasurements().containsKey(Metric.BILLING_BUFFER_COUNT_BY_STATUS))
+            .filter(
+                b -> b.getMeasurements().containsKey(GaugeMetric.BILLING_BUFFER_COUNT_BY_STATUS))
             .findFirst();
     assertThat(entryStatusBundle.isPresent()).isTrue();
     assertThat(entryStatusBundle.get().getAttachments()).isNotEmpty();

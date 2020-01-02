@@ -30,7 +30,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -383,6 +383,6 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
     return Collections.singleton(
-        MeasurementBundle.builder().addValue(Metric.COHORT_COUNT, cohortDao.count()).build());
+        MeasurementBundle.builder().addValue(GaugeMetric.COHORT_COUNT, cohortDao.count()).build());
   }
 }

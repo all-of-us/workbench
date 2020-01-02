@@ -46,7 +46,7 @@ import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
-import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -66,13 +66,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
     return ImmutableSet.of(
-        MeasurementBundle.builder().addValue(Metric.DATASET_COUNT, dataSetDao.count()).build(),
+        MeasurementBundle.builder().addValue(GaugeMetric.DATASET_COUNT, dataSetDao.count()).build(),
         MeasurementBundle.builder()
-            .addValue(Metric.DATASET_COUNT_BY_INVALID, dataSetDao.countByInvalidFalse())
+            .addValue(GaugeMetric.DATASET_COUNT_BY_INVALID, dataSetDao.countByInvalidFalse())
             .attach(AttachmentKey.DATASET_INVALID, Boolean.valueOf(false).toString())
             .build(),
         MeasurementBundle.builder()
-            .addValue(Metric.DATASET_COUNT_BY_INVALID, dataSetDao.countByInvalidTrue())
+            .addValue(GaugeMetric.DATASET_COUNT_BY_INVALID, dataSetDao.countByInvalidTrue())
             .attach(AttachmentKey.DATASET_INVALID, Boolean.valueOf(true).toString())
             .build());
   }

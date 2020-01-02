@@ -36,7 +36,7 @@ import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
-import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -88,7 +88,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
     resultBuilder.add(
         MeasurementBundle.builder()
-            .addValue(Metric.BILLING_BUFFER_SIZE, getCurrentBufferSize())
+            .addValue(GaugeMetric.BILLING_BUFFER_SIZE, getCurrentBufferSize())
             .build());
 
     // TODO(jaycarlton): set up a DAO/data manager method pair to build this map in one query.
@@ -107,7 +107,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
         .map(
             entry ->
                 MeasurementBundle.builder()
-                    .addValue(Metric.BILLING_BUFFER_COUNT_BY_STATUS, entry.getValue())
+                    .addValue(GaugeMetric.BILLING_BUFFER_COUNT_BY_STATUS, entry.getValue())
                     .attach(AttachmentKey.BUFFER_ENTRY_STATUS, entry.getKey().toString())
                     .build())
         .forEach(resultBuilder::add);

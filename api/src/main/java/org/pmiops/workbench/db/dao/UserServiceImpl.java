@@ -42,7 +42,7 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
-import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -744,11 +744,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return ImmutableSet.of(
         MeasurementBundle.builder()
-            .addValue(Metric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledFalse())
+            .addValue(GaugeMetric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledFalse())
             .attach(AttachmentKey.USER_DISABLED, Boolean.valueOf(false).toString())
             .build(),
         MeasurementBundle.builder()
-            .addValue(Metric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledTrue())
+            .addValue(GaugeMetric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledTrue())
             .attach(AttachmentKey.USER_DISABLED, Boolean.valueOf(true).toString())
             .build());
   }

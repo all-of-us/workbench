@@ -24,7 +24,7 @@ public class GaugeRecorderService {
     ImmutableList.Builder<MeasurementBundle> bundlesToLogBuilder = ImmutableList.builder();
     for (GaugeDataCollector collector : gaugeDataCollectors) {
       Collection<MeasurementBundle> bundles = collector.getGaugeData();
-      bundles.forEach(monitoringService::recordBundle);
+      monitoringService.recordBundles(bundles);
       bundlesToLogBuilder.addAll(bundles);
     }
     logValues(bundlesToLogBuilder.build());

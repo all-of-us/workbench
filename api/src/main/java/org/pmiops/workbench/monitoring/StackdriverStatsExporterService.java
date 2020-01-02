@@ -1,5 +1,7 @@
 package org.pmiops.workbench.monitoring;
 
+import com.google.api.MonitoredResource;
+import com.google.protobuf.Descriptors;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
 import java.io.IOException;
@@ -38,6 +40,11 @@ public class StackdriverStatsExporterService {
             StackdriverStatsConfiguration.builder()
                 .setMetricNamePrefix(buildMetricNamePrefix())
                 .setProjectId(workbenchConfigProvider.get().server.projectId)
+                .setMonitoredResource(MonitoredResource.newBuilder()
+                    .setType("generic_node")
+                    .setField(new Descriptors.FieldDescriptor("project_id"), workbenchConfigProvider.get().server.projectId)
+                    .setField("")
+                    .build())
                 .build();
         StackdriverStatsExporter.createAndRegister(configuration);
         initialized = true;

@@ -7,7 +7,7 @@ import io.opencensus.tags.TagKey;
 import java.util.Collections;
 import java.util.List;
 
-public enum Metric implements OpenCensusView {
+public enum GaugeMetric implements OpenCensusView {
   BILLING_BUFFER_SIZE(
       "billing_project_buffer_entries", "The number of billing project buffer entries."),
   BILLING_BUFFER_COUNT_BY_STATUS(
@@ -29,9 +29,6 @@ public enum Metric implements OpenCensusView {
       "MHz",
       MeasureDouble.class,
       Aggregation.Sum.create()),
-  NOTEBOOK_SAVE("notebook_save", "Save (or create) a notebook"),
-  NOTEBOOK_CLONE("notebook_clone", "Clone (duplicate) a notebook"),
-  NOTEBOOK_DELETE("notebook_delete", "Delete a notebook"),
   WORKSPACE_TOTAL_COUNT("workspace_total_count", "Count of all workspaces (including inactive)"),
   DATASET_COUNT("dataset_count", "Count of all datasets in existence"),
   DATASET_COUNT_BY_INVALID("dataset_count_by_invalid", "Count of all datasets by invalid status"),
@@ -46,20 +43,20 @@ public enum Metric implements OpenCensusView {
   private List<TagKey> columns;
   private final Class measureClass;
 
-  Metric(String name, String description) {
+  GaugeMetric(String name, String description) {
     this(name, description, OpenCensusView.UNITLESS_UNIT, MeasureLong.class);
   }
 
-  Metric(String name, String description, String unit, Class measureClass) {
+  GaugeMetric(String name, String description, String unit, Class measureClass) {
     this(name, description, unit, measureClass, Aggregation.LastValue.create());
   }
 
-  Metric(
+  GaugeMetric(
       String name, String description, String unit, Class measureClass, Aggregation aggregation) {
     this(name, description, unit, measureClass, aggregation, Collections.emptyList());
   }
 
-  Metric(
+  GaugeMetric(
       String name,
       String description,
       String unit,
