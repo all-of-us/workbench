@@ -1,10 +1,12 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.client.http.HttpStatusCodes;
+import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -37,6 +39,10 @@ import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.monitoring.GaugeDataCollector;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -57,7 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
  * ensuring we call a single updateDataAccessLevel method whenever a User entry is saved.
  */
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private final int MAX_RETRIES = 3;
   private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
@@ -731,5 +737,19 @@ public class UserServiceImpl implements UserService {
           return user;
         },
         targetUser);
+  }
+
+  @Override
+  public Collection<MeasurementBundle> getGaugeData() {
+
+    return ImmutableSet.of(
+        MeasurementBundle.builder()
+            .addDelta(Metric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledFalse())
+            .attach(AttachmentKey.USER_DISABLED, Boolean.valueOf(false).toString())
+            .build(),
+        MeasurementBundle.builder()
+            .addDelta(Metric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledTrue())
+            .attach(AttachmentKey.USER_DISABLED, Boolean.valueOf(true).toString())
+            .build());
   }
 }

@@ -28,9 +28,9 @@ public class ToyGaugeDataCollector implements GaugeDataCollector {
     return ImmutableSet.<MeasurementBundle>builder()
         .add(
             MeasurementBundle.builder()
-                .add(Metric.DEBUG_CONSTANT_VALUE, TOY_CONSTANT_VALUE)
-                .add(Metric.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis())
-                .add(Metric.DEBUG_RANDOM_DOUBLE, random.nextDouble())
+                .addDelta(Metric.DEBUG_CONSTANT_VALUE, TOY_CONSTANT_VALUE)
+                .addDelta(Metric.DEBUG_MILLISECONDS_SINCE_EPOCH, clock.millis())
+                .addDelta(Metric.DEBUG_RANDOM_DOUBLE, random.nextDouble())
                 .attach(AttachmentKey.DEBUG_COLOR, COLOR_LABEL)
                 .build())
         .build();

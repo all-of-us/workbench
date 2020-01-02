@@ -383,6 +383,6 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
     return Collections.singleton(
-        MeasurementBundle.builder().add(Metric.COHORT_COUNT, cohortDao.count()).build());
+        MeasurementBundle.builder().addDelta(Metric.COHORT_COUNT, cohortDao.count()).build());
   }
 }

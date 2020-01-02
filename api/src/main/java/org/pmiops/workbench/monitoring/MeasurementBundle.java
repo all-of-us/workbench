@@ -7,6 +7,7 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
 import org.pmiops.workbench.monitoring.views.OpenCensusView;
 
@@ -52,6 +53,10 @@ public class MeasurementBundle {
     return new Builder();
   }
 
+  public static MeasurementBundle ofDelta(OpenCensusView view) {
+    return builder().addDelta(view).build();
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -72,23 +77,15 @@ public class MeasurementBundle {
 
   @Override
   public String toString() {
-    final StringBuilder sb = new StringBuilder("MeasurementBundle\n").append("\tMeasurements:\n");
-    getMeasurements()
-        .forEach(
-            (key, value) ->
-                sb.append("\t\t").append(key.getName()).append(" = ").append(value).append("\n"));
-    if (!getAttachments().isEmpty()) {
-      sb.append("\tAttachments:\n");
-      getAttachments()
-          .forEach(
-              (key, value) ->
-                  sb.append("\t\t")
-                      .append(key)
-                      .append(" = ")
-                      .append(value.getValue())
-                      .append("\n"));
-    }
-    return sb.toString();
+    return "{ [ "
+        + getMeasurements().entrySet().stream()
+        .map(e -> String.format("%s: %s", e.getKey().getName(), e.getValue()))
+        .collect(Collectors.joining(", "))
+        + " ] [ "
+        + getAttachments().entrySet().stream()
+        .map(e -> String.format("%s: %s", e.getKey(), e.getValue().getValue()))
+        .collect(Collectors.joining(", "))
+        + " ] }";
   }
 
   public static class Builder {
@@ -100,12 +97,12 @@ public class MeasurementBundle {
       attachmentsBuilder = ImmutableMap.builder();
     }
 
-    public Builder add(OpenCensusView viewInfo) {
+    public Builder addDelta(OpenCensusView viewInfo) {
       measurementsBuilder.put(viewInfo, MonitoringService.DELTA_VALUE);
       return this;
     }
 
-    public Builder add(OpenCensusView viewInfo, Number value) {
+    public Builder addDelta(OpenCensusView viewInfo, Number value) {
       measurementsBuilder.put(viewInfo, value);
       return this;
     }
