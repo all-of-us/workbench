@@ -7,11 +7,12 @@ import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
-import {debouncer, hasRegisteredAccess, resettableTimeout} from 'app/utils';
+import {debouncer, hasRegisteredAccessFetch, resettableTimeout} from 'app/utils';
 import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
-import {Authority} from 'generated';
+import {Profile} from 'generated';
+import {Profile as FetchProfile} from 'generated/fetch';
 import Timeout = NodeJS.Timeout;
 
 /*
@@ -39,20 +40,10 @@ export const INACTIVITY_CONFIG = {
   templateUrl: './component.html'
 })
 export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
-  hasDataAccess = true;
-  hasReviewResearchPurpose = false;
-  hasAccessModuleAdmin = false;
+  profile: FetchProfile;
   headerImg = '/assets/images/all-of-us-logo.svg';
   displayTag = environment.displayTag;
   shouldShowDisplayTag = environment.shouldShowDisplayTag;
-  givenName = '';
-  familyName = '';
-  // The email address of the AoU researcher's Google Account. Note that this
-  // address should *not* be used for contact purposes, since the AoU GSuite
-  // doesn't provide Gmail!
-  aouAccountEmailAddress = '';
-  // The researcher's preferred contact email address.
-  contactEmailAddress = '';
   minimizeChrome = false;
   // True if the user tried to open the Zendesk support widget and an error
   // occurred.
@@ -84,21 +75,12 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     this.serverConfigService.getConfig().subscribe((config) => {
       this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
-        this.hasDataAccess = hasRegisteredAccess(profile.dataAccessLevel);
-        if (this.hasDataAccess) {
+        this.profile = profile as unknown as FetchProfile;
+        if (hasRegisteredAccessFetch(this.profile.dataAccessLevel)) {
           cdrVersionsApi().getCdrVersions().then(resp => {
             cdrVersionStore.next(resp);
           });
         }
-
-        this.hasReviewResearchPurpose =
-          profile.authorities.includes(Authority.REVIEWRESEARCHPURPOSE);
-        this.hasAccessModuleAdmin =
-          profile.authorities.includes(Authority.ACCESSCONTROLADMIN);
-        this.givenName = profile.givenName;
-        this.familyName = profile.familyName;
-        this.aouAccountEmailAddress = profile.username;
-        this.contactEmailAddress = profile.contactEmail;
       });
     });
 

@@ -125,6 +125,23 @@ paths:
             A status alert information object.
           schema:
             $ref: "#/definitions/StatusAlert"
+    post:
+      tags:
+        - status-alert
+      description: Pushes new status alert information to all users
+      operationId: postStatusAlert
+      parameters:
+        - in: body
+          name: statusAlert
+          description: the new status alert to use
+          schema:
+            $ref: "#/definitions/StatusAlert"
+      responses:
+        200:
+          description: >
+            A status alert information object.
+          schema:
+            $ref: "#/definitions/StatusAlert"
 
     # User methods ########################################################################
 
@@ -2313,7 +2330,8 @@ definitions:
       REVIEW_RESEARCH_PURPOSE,
       DEVELOPER,
       ACCESS_CONTROL_ADMIN,
-      FEATURED_WORKSPACE_ADMIN
+      FEATURED_WORKSPACE_ADMIN,
+      COMMUNICATIONS_ADMIN
     ]
 
   PageVisit:
