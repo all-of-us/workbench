@@ -66,9 +66,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
     return ImmutableSet.of(
-        MeasurementBundle.builder()
-            .addValue(Metric.DATASET_COUNT, dataSetDao.count())
-            .build(),
+        MeasurementBundle.builder().addValue(Metric.DATASET_COUNT, dataSetDao.count()).build(),
         MeasurementBundle.builder()
             .addValue(Metric.DATASET_COUNT_BY_INVALID, dataSetDao.countByInvalidFalse())
             .attach(AttachmentKey.DATASET_INVALID, Boolean.valueOf(false).toString())
