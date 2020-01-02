@@ -4,7 +4,6 @@ import {TextArea, TextInput} from 'app/components/inputs';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {ReactWrapperBase} from 'app/utils';
-import {StatusAlert} from 'generated/fetch';
 import * as React from 'react';
 import ReactSwitch from 'react-switch';
 
@@ -31,7 +30,7 @@ export class AdminBanner extends React.Component<{}, AdminBannerState> {
       bannerEnabled: false,
       bannerHeadline: '',
       readMoreLink: ''
-    }
+    };
   }
 
   componentDidMount(): void {
@@ -62,7 +61,7 @@ export class AdminBanner extends React.Component<{}, AdminBannerState> {
         bannerDescription: '',
         bannerHeadline: '',
         readMoreLink: ''
-      })
+      });
     }
   }
 

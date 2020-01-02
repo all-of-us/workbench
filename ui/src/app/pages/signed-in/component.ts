@@ -11,7 +11,6 @@ import {debouncer, hasRegisteredAccessFetch, resettableTimeout} from 'app/utils'
 import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
-import {Profile} from 'generated';
 import {Profile as FetchProfile} from 'generated/fetch';
 import Timeout = NodeJS.Timeout;
 

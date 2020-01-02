@@ -1,7 +1,7 @@
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {hasRegisteredAccess, hasRegisteredAccessFetch, reactStyles} from 'app/utils';
+import {hasRegisteredAccessFetch, reactStyles} from 'app/utils';
 import {navigate, navigateSignOut, signInStore} from 'app/utils/navigation';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
