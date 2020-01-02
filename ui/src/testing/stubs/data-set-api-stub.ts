@@ -7,7 +7,7 @@ import {
   DataSetListResponse,
   DataSetPreviewRequest,
   DataSetPreviewResponse,
-  DataSetRequest,
+  DataSetRequest, DomainValuesResponse,
   EmptyResponse,
   KernelTypeEnum
 } from 'generated/fetch';
@@ -84,5 +84,25 @@ export class DataSetApiStub extends DataSetApi {
       fieldType: 'bigint',
       dataProvenance: 'Blah'
     });
+  }
+
+  public getValuesFromDomain(workspaceNamespace: string, workspaceId: string, domain: string)
+    : Promise<DomainValuesResponse> {
+    const domainValueItems = [];
+    switch (domain) {
+      case 'CONDITION':
+        domainValueItems.push({value: 'Condition1'});
+        domainValueItems.push({value: 'Condition2'});
+        break;
+      case 'MEASUREMENT':
+        domainValueItems.push({value: 'Measurement1'});
+        domainValueItems.push({value: 'Measurement2'});
+        domainValueItems.push({value: 'Measurement3'});
+        break;
+      case 'DRUG':
+        domainValueItems.push({value: 'Drug1'});
+        break;
+    }
+    return Promise.resolve({items: domainValueItems});
   }
 }

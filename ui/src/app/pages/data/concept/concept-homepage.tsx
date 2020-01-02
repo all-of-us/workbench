@@ -131,8 +131,8 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
 // Placeholder version of Physical Measurements card. TODO update styles when api call is ready
 const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: DomainInfo, browsePhysicalMeasurements: Function}> =
     ({physicalMeasurement, browsePhysicalMeasurements}) => {
-      return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem', opacity: 0.4, cursor: 'not-allowed'}}>
-        <Clickable style={{...styles.domainBoxHeader, cursor: 'not-allowed'}}
+      return <DomainCardBase style={{maxHeight: 'auto', width: '11.5rem'}}>
+        <Clickable style={styles.domainBoxHeader}
           onClick={browsePhysicalMeasurements}
           data-test-id='pm-box-name'>{physicalMeasurement.name}</Clickable>
         <div style={styles.conceptText}>
@@ -142,30 +142,16 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
         <div style={{...styles.conceptText, height: 'auto'}}>
           {physicalMeasurement.description}
         </div>
-        <Clickable style={{...styles.domainBoxLink, cursor: 'not-allowed'}} onClick={browsePhysicalMeasurements}>
+        <Clickable style={styles.domainBoxLink} onClick={browsePhysicalMeasurements}>
           Browse Physical Measurements
         </Clickable>
       </DomainCardBase>;
     };
 
-// Stub used to mock Physical Measurements data that will be returned from api call. TODO remove when api call is ready
-const physicalMeasurementsStub = {
-  domain: Domain.MEASUREMENT,
-  name: 'Physical Measurements',
-  description: 'Participants have the option to provide a standard set of physical measurements as part of the enrollment process (“program physical measurements”).',
-  allConceptCount: 0,
-  participantCount: 0,
-  standardConceptCount: 0
-};
-
 // Stub used to display placeholder tabs in concept search
 const conceptCacheStub = [
   {
     domain: Domain.SURVEY,
-    items: []
-  },
-  {
-    domain: Domain.PHYSICALMEASUREMENT,
     items: []
   }
 ];
@@ -175,11 +161,6 @@ const domainCountStub = [
   {
     domain: Domain.SURVEY,
     name: 'Surveys',
-    conceptCount: 0
-  },
-  {
-    domain: Domain.PHYSICALMEASUREMENT,
-    name: 'Physical Measurements',
     conceptCount: 0
   }
 ];
@@ -207,8 +188,6 @@ interface State { // Browse survey
   conceptsSavedText: string;
   // Array of surveys
   conceptSurveysList: Array<SurveyModule>;
-  // Array of concepts that have been selected
-  conceptsToAdd: Concept[];
   // Current string in search box
   currentSearchString: string;
   // If concept metadata is still being gathered for any domain
@@ -217,8 +196,8 @@ interface State { // Browse survey
   searchLoading: boolean;
   // If we are in 'search mode' and should show the table
   searching: boolean;
-  // Map of domain to number of selected concepts in domain
-  selectedConceptDomainMap: Map<String, number>;
+  // Map of domain to selected concepts in domain
+  selectedConceptDomainMap: Map<String, Concept[]>;
   // Domain being viewed. Will be the domain that the add button uses.
   selectedDomain: DomainCount;
   // Name of the survey selected
@@ -237,7 +216,7 @@ interface State { // Browse survey
 export const ConceptHomepage = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
 
-    private MAX_CONCEPT_FETCH = 100;
+    private MAX_CONCEPT_FETCH = 1000;
     constructor(props) {
       super(props);
       this.state = {
@@ -252,12 +231,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
         conceptsCache: [],
         conceptsSavedText: '',
         conceptSurveysList: [],
-        conceptsToAdd: [],
         currentSearchString: '',
         loadingDomains: true,
         searchLoading: false,
         searching: false,
-        selectedConceptDomainMap: new Map<string, number>(),
+        selectedConceptDomainMap: new Map<string, Concept[]>(),
         selectedDomain: {
           name: '',
           domain: undefined,
@@ -293,14 +271,19 @@ export const ConceptHomepage = withCurrentWorkspace()(
         if (environment.enableNewConceptTabs) {
           conceptsCache = [...conceptsCache, ...conceptCacheStub];
           conceptDomainCounts = [...conceptDomainCounts, ...domainCountStub];
+        } else {
+          conceptsCache = conceptsCache.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
+          conceptDomainCounts = conceptDomainCounts.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
         }
+        console.log(conceptsCache);
+        console.log(conceptDomainCounts);
         this.setState({
           conceptsCache: conceptsCache,
-          conceptDomainList: conceptDomainInfo.items,
+          conceptDomainList: conceptDomainInfo.items.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT),
           conceptDomainCounts: conceptDomainCounts,
           conceptSurveysList: surveysInfo.items,
           selectedDomain: conceptDomainCounts[0],
-          conceptPhysicalMeasurementsList: [physicalMeasurementsStub]
+          conceptPhysicalMeasurementsList: conceptDomainInfo.items.filter(item => item.domain === Domain.PHYSICALMEASUREMENT),
         });
       } catch (e) {
         console.error(e);
@@ -350,16 +333,18 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     async searchConcepts() {
-      const {standardConceptsOnly, currentSearchString, conceptsCache, selectedDomain} = this.state;
+      const {standardConceptsOnly, currentSearchString, conceptsCache, selectedDomain,
+        selectedConceptDomainMap} = this.state;
       const {namespace, id} = this.props.workspace;
-      this.setState({concepts: [], searchLoading: true, searching: true, conceptsToAdd: [],
-        selectedConceptDomainMap: new Map<string, number>(), completedDomainSearches: []});
+      this.setState({concepts: [], searchLoading: true, searching: true, completedDomainSearches: []});
       const standardConceptFilter = standardConceptsOnly ?
         StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
+      selectedConceptDomainMap[Domain.SURVEY] = [];
       // TODO switch to empty array when we start actually searching surveys and PM
-      const completedDomainSearches = [Domain.SURVEY, Domain.PHYSICALMEASUREMENT];
+      const completedDomainSearches = [Domain.SURVEY];
       // TODO remove filter below when we start actually searching surveys and PM
-      conceptsCache.filter(item => ![Domain.SURVEY, Domain.PHYSICALMEASUREMENT].includes(item.domain)).forEach(async(cacheItem) => {
+      conceptsCache.filter(item => ![Domain.SURVEY].includes(item.domain)).forEach(async(cacheItem) => {
+        selectedConceptDomainMap[cacheItem.domain] = [];
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
         const resp = await conceptsApi().searchConcepts(namespace, id, {
           query: currentSearchString,
@@ -372,40 +357,25 @@ export const ConceptHomepage = withCurrentWorkspace()(
         cacheItem.items = resp.items;
         this.setState({completedDomainSearches: completedDomainSearches});
         if (activeTabSearch) {
+          const conceptDomainCounts = environment.enableNewConceptTabs ? [...resp.domainCounts, ...domainCountStub]
+            : resp.domainCounts.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
           this.setState({
             searchLoading: false,
-            conceptDomainCounts: [...resp.domainCounts, ...(environment.enableNewConceptTabs ? domainCountStub : [])],
+            conceptDomainCounts: conceptDomainCounts,
             selectedDomain: resp.domainCounts
               .find(domainCount => domainCount.domain === cacheItem.domain)});
           this.setConceptsAndVocabularies();
         }
       });
-    }
-
-    async getNextConceptSet(pageNumber) {
-      const {standardConceptsOnly, currentSearchString, selectedDomain} = this.state;
-      const {namespace, id} = this.props.workspace;
-      const standardConceptFilter = standardConceptsOnly ?
-          StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
-
-      const concepts = this.state.concepts;
-      const resp = await conceptsApi().searchConcepts(namespace, id, {
-        query: currentSearchString,
-        standardConceptFilter: standardConceptFilter,
-        domain: selectedDomain.domain,
-        includeDomainCounts: true,
-        maxResults: this.MAX_CONCEPT_FETCH,
-        pageNumber: pageNumber ? pageNumber : 0
-      });
-      this.setState({concepts: concepts.concat(resp.items)});
+      this.setState({selectedConceptDomainMap: selectedConceptDomainMap});
     }
 
     selectConcepts(concepts: Concept[]) {
       const {selectedDomain, selectedConceptDomainMap} = this.state;
       selectedConceptDomainMap[selectedDomain.domain] = concepts.filter(concept => {
         return concept.domainId.toLowerCase() === selectedDomain.domain.toString().toLowerCase();
-      }).length;
-      this.setState({selectedConceptDomainMap: selectedConceptDomainMap, conceptsToAdd: concepts});
+      });
+      this.setState({selectedConceptDomainMap: selectedConceptDomainMap});
     }
 
     clearSearch() {
@@ -444,7 +414,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         || !selectedConceptDomainMap[selectedDomain.domain]) {
         return 0;
       }
-      return selectedConceptDomainMap[selectedDomain.domain];
+      return selectedConceptDomainMap[selectedDomain.domain].length;
     }
 
     selectedQuestion(selectedQues) {
@@ -471,8 +441,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     renderConcepts() {
-      const {concepts, searchLoading, conceptDomainCounts, selectedDomain,
-        conceptsToAdd, selectedConceptDomainMap} = this.state;
+      const {concepts, searchLoading, conceptDomainCounts, selectedDomain, selectedConceptDomainMap} = this.state;
 
       return <FadeBox>
         <FlexRow style={{justifyContent: 'flex-start'}}>
@@ -486,10 +455,10 @@ export const ConceptHomepage = withCurrentWorkspace()(
                 {this.domainLoading(domain) ?
                     <Spinner style={{height: '15px', width: '15px'}}/> :
                     <FlexRow style={{justifyContent: 'space-between'}}>
-                      <div>{domain.conceptCount.toLocaleString()}</div>
-                      {(selectedConceptDomainMap[domain.domain] > 0) &&
+                      <div>{domain.conceptCount}</div>
+                      {(selectedConceptDomainMap && selectedConceptDomainMap[domain.domain].length > 0) &&
                       <div style={styles.selectedConceptsCount} data-test-id='selectedConcepts'>
-                        {selectedConceptDomainMap[domain.domain]}
+                        {selectedConceptDomainMap[domain.domain].length}
                       </div>}
                     </FlexRow>
                 }
@@ -500,17 +469,16 @@ export const ConceptHomepage = withCurrentWorkspace()(
             </FlexColumn>;
           })}
         </FlexRow>
-        {!searchLoading && <div style={styles.conceptCounts}>
-          Showing top {concepts.length} of {selectedDomain.conceptCount.toLocaleString()} {selectedDomain.name}
+        {!searchLoading && selectedDomain.conceptCount > 1000 && <div style={styles.conceptCounts}>
+          Showing top {concepts.length} {selectedDomain.name}
         </div>}
         <ConceptTable concepts={concepts}
                       loading={searchLoading}
                       onSelectConcepts={this.selectConcepts.bind(this)}
                       placeholderValue={this.noConceptsConstant}
                       searchTerm={this.state.currentSearchString}
-                      selectedConcepts={conceptsToAdd}
-                      reactKey={selectedDomain.name}
-                      nextPage={(page) => this.getNextConceptSet(page)}/>
+                      selectedConcepts={selectedConceptDomainMap[selectedDomain.domain]}
+                      reactKey={selectedDomain.name}/>
         <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
                          iconShape='plus'
                          tooltip={!this.state.workspacePermissions.canWrite}
@@ -524,8 +492,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
     render() {
       const {loadingDomains, browsingSurvey, conceptDomainList, conceptPhysicalMeasurementsList, conceptSurveysList,
         standardConceptsOnly, showSearchError, searching, selectedDomain, conceptAddModalOpen,
-        conceptsToAdd, currentSearchString, conceptsSavedText, selectedSurvey, surveyAddModalOpen,
-        selectedSurveyQuestions} =
+        currentSearchString, conceptsSavedText, selectedSurvey, surveyAddModalOpen,
+        selectedSurveyQuestions, selectedConceptDomainMap} =
           this.state;
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
@@ -607,7 +575,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                     <div style={styles.cardList}>
                       {conceptPhysicalMeasurementsList.map((physicalMeasurement, p) => {
                         return <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement} key={p}
-                                           browsePhysicalMeasurements={() => {}}/>; // TODO replace with actual function when api call ready
+                                           browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurement)}/>;
                       })}
                     </div>
                   </React.Fragment>}
@@ -615,7 +583,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
           }
           {conceptAddModalOpen &&
             <ConceptAddModal selectedDomain={selectedDomain}
-                             selectedConcepts={conceptsToAdd}
+                             selectedConcepts={selectedConceptDomainMap[selectedDomain.domain]}
                              onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
                              onClose={() => this.setState({conceptAddModalOpen: false})}/>}
           {surveyAddModalOpen &&

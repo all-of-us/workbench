@@ -436,7 +436,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferEntryDao.save(entry);
 
     DbUser user = mock(DbUser.class);
-    doReturn("fake-email@aou.org").when(user).getEmail();
+    doReturn("fake-email@aou.org").when(user).getUsername();
 
     DbBillingProjectBufferEntry assignedEntry =
         billingProjectBufferService.assignBillingProject(user);
@@ -465,7 +465,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferEntryDao.save(firstEntry);
 
     DbUser firstUser = new DbUser();
-    firstUser.setEmail("fake-email-1@aou.org");
+    firstUser.setUsername("fake-email-1@aou.org");
     userDao.save(firstUser);
 
     DbBillingProjectBufferEntry secondEntry = new DbBillingProjectBufferEntry();
@@ -475,7 +475,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferEntryDao.save(secondEntry);
 
     DbUser secondUser = new DbUser();
-    secondUser.setEmail("fake-email-2@aou.org");
+    secondUser.setUsername("fake-email-2@aou.org");
     userDao.save(secondUser);
 
     doAnswer(new CallsRealMethodsWithDelay(500))

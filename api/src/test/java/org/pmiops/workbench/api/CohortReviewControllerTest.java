@@ -149,7 +149,9 @@ public class CohortReviewControllerTest {
     WHITE("White", 8527),
     MALE("MALE", 8507),
     FEMALE("FEMALE", 8532),
-    NOT_HISPANIC("Not Hispanic or Latino", 38003564);
+    NOT_HISPANIC("Not Hispanic or Latino", 38003564),
+    PREFER_NOT_TO_ANSWER_RACE("I Prefer not to answer", 1177221),
+    PREFER_NOT_TO_ANSWER_ETH("I Prefer not to answer", 1177221);
 
     private final String name;
     private final long conceptId;
@@ -169,7 +171,11 @@ public class CohortReviewControllerTest {
 
     public static Map<Long, String> asMap() {
       return Arrays.stream(TestConcepts.values())
-          .collect(Collectors.toMap(TestConcepts::getConceptId, TestConcepts::getName));
+          .collect(
+              Collectors.toMap(
+                  TestConcepts::getConceptId,
+                  TestConcepts::getName,
+                  (oldValue, newValue) -> oldValue));
     }
   }
 
@@ -205,7 +211,7 @@ public class CohortReviewControllerTest {
   @Before
   public void setUp() {
     user = new DbUser();
-    user.setEmail("bob@gmail.com");
+    user.setUsername("bob@gmail.com");
     user.setUserId(123L);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
@@ -246,6 +252,20 @@ public class CohortReviewControllerTest {
             .parentId(1L)
             .conceptId(String.valueOf(TestConcepts.WHITE.conceptId))
             .name(TestConcepts.WHITE.name));
+    cbCriteriaDao.save(
+        new DbCriteria()
+            .domainId(DomainType.PERSON.toString())
+            .type(CriteriaType.RACE.toString())
+            .parentId(1L)
+            .conceptId(String.valueOf(TestConcepts.PREFER_NOT_TO_ANSWER_RACE.conceptId))
+            .name(TestConcepts.PREFER_NOT_TO_ANSWER_RACE.name));
+    cbCriteriaDao.save(
+        new DbCriteria()
+            .domainId(DomainType.PERSON.toString())
+            .type(CriteriaType.RACE.toString())
+            .parentId(1L)
+            .conceptId(String.valueOf(TestConcepts.PREFER_NOT_TO_ANSWER_ETH.conceptId))
+            .name(TestConcepts.PREFER_NOT_TO_ANSWER_ETH.name));
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset("dataSetId");
