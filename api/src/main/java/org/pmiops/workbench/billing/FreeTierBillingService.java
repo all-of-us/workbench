@@ -124,6 +124,10 @@ public class FreeTierBillingService {
         final double currentCost = userCosts.getOrDefault(user, 0.0);
         final double remainingDollarBalance = getUserFreeTierDollarLimit(user) - currentCost;
         maybeAlertOnTimeThresholds(user, remainingDollarBalance, currentCheckTime);
+
+        // save current check time
+        user.setLastFreeTierCreditsTimeCheck(Timestamp.from(currentCheckTime));
+        userDao.save(user);
       }
     }
   }
@@ -216,10 +220,6 @@ public class FreeTierBillingService {
         Optional.ofNullable(user.getLastFreeTierCreditsTimeCheck())
             .map(Timestamp::toInstant)
             .orElse(userFreeCreditStartTime);
-
-    // save current check time
-    user.setLastFreeTierCreditsTimeCheck(Timestamp.from(currentCheckTime));
-    userDao.save(user);
 
     final Duration userFreeCreditDays = Duration.ofDays(getUserFreeTierDaysLimit(user));
     final Duration currentTimeElapsed = Duration.between(userFreeCreditStartTime, currentCheckTime);
