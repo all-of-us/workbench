@@ -1,13 +1,13 @@
 import {Component} from '@angular/core';
 import {BoldHeader, Header} from 'app/components/headers';
 import {TextArea, TextInput} from 'app/components/inputs';
+import {TooltipTrigger} from 'app/components/popups';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {ReactWrapperBase} from 'app/utils';
 import * as React from 'react';
 import ReactSwitch from 'react-switch';
 import * as validate from 'validate.js';
-import {TooltipTrigger} from "../../components/popups";
 
 const styles = {
   smallHeaderStyles: {
