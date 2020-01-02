@@ -621,7 +621,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public Collection<MeasurementBundle> getGaugeData() {
     return Collections.singleton(
         MeasurementBundle.builder()
-            .addDelta(Metric.WORKSPACE_TOTAL_COUNT, workspaceDao.count())
+            .addValue(Metric.WORKSPACE_TOTAL_COUNT, workspaceDao.count())
             .build());
   }
 }

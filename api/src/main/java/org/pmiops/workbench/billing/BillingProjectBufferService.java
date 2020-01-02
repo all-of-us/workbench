@@ -88,7 +88,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
     resultBuilder.add(
         MeasurementBundle.builder()
-            .addDelta(Metric.BILLING_BUFFER_SIZE, getCurrentBufferSize())
+            .addValue(Metric.BILLING_BUFFER_SIZE, getCurrentBufferSize())
             .build());
 
     // TODO(jaycarlton): set up a DAO/data manager method pair to build this map in one query.
@@ -107,7 +107,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
         .map(
             entry ->
                 MeasurementBundle.builder()
-                    .addDelta(Metric.BILLING_BUFFER_COUNT_BY_STATUS, entry.getValue())
+                    .addValue(Metric.BILLING_BUFFER_COUNT_BY_STATUS, entry.getValue())
                     .attach(AttachmentKey.BUFFER_ENTRY_STATUS, entry.getKey().toString())
                     .build())
         .forEach(resultBuilder::add);

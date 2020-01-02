@@ -744,11 +744,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return ImmutableSet.of(
         MeasurementBundle.builder()
-            .addDelta(Metric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledFalse())
+            .addValue(Metric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledFalse())
             .attach(AttachmentKey.USER_DISABLED, Boolean.valueOf(false).toString())
             .build(),
         MeasurementBundle.builder()
-            .addDelta(Metric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledTrue())
+            .addValue(Metric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledTrue())
             .attach(AttachmentKey.USER_DISABLED, Boolean.valueOf(true).toString())
             .build());
   }

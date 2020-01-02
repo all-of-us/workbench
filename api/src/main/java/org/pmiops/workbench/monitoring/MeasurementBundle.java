@@ -101,7 +101,7 @@ public class MeasurementBundle {
       return this;
     }
 
-    public Builder addDelta(OpenCensusView viewInfo, Number value) {
+    public Builder addValue(OpenCensusView viewInfo, Number value) {
       measurementsBuilder.put(viewInfo, value);
       return this;
     }

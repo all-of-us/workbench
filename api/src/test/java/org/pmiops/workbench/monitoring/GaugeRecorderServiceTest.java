@@ -50,18 +50,18 @@ public class GaugeRecorderServiceTest {
       ImmutableList.of(
           MeasurementBundle.builder().addAll(BILLING_BUFFER_INDIVIDUAL_GAUGE_MAP).build(),
           MeasurementBundle.builder()
-              .addDelta(Metric.BILLING_BUFFER_COUNT_BY_STATUS, 22L)
+              .addValue(Metric.BILLING_BUFFER_COUNT_BY_STATUS, 22L)
               .attach(AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
               .build(),
           MeasurementBundle.builder()
-              .addDelta(Metric.BILLING_BUFFER_COUNT_BY_STATUS, 3L)
+              .addValue(Metric.BILLING_BUFFER_COUNT_BY_STATUS, 3L)
               .attach(AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.CREATING.toString())
               .build());
 
   private static final long WORKSPACES_COUNT = 101L;
   private static final MeasurementBundle WORKSPACE_MEASUREMENT_BUNDLE =
-      MeasurementBundle.builder().addDelta(Metric.WORKSPACE_TOTAL_COUNT, WORKSPACES_COUNT).build();
-  public static final String TEST_GAUGE_DATA_COLLECTOR = "test gauge data collector";
+      MeasurementBundle.builder().addValue(Metric.WORKSPACE_TOTAL_COUNT, WORKSPACES_COUNT).build();
+  private static final String TEST_GAUGE_DATA_COLLECTOR = "test gauge data collector";
 
   @Captor private ArgumentCaptor<MeasurementBundle> measurementBundleCaptor;
   @Captor private ArgumentCaptor<Collection<MeasurementBundle>> gaugeDataCaptor;
@@ -106,8 +106,8 @@ public class GaugeRecorderServiceTest {
       return () ->
           Collections.singleton(
               MeasurementBundle.builder()
-                  .addDelta(Metric.DATASET_COUNT, 999L)
-                  .addDelta(Metric.DEBUG_CONSTANT_VALUE, 100L)
+                  .addValue(Metric.DATASET_COUNT, 999L)
+                  .addValue(Metric.DEBUG_CONSTANT_VALUE, 100L)
                   .build());
     }
   }

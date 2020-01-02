@@ -12,4 +12,8 @@ public interface DataSetDao extends CrudRepository<DbDataset, Long> {
   List<DbDataset> findDataSetsByConceptSetIds(long conceptId);
 
   List<DbDataset> findByWorkspaceId(long workspaceId);
+
+  long countByInvalidTrue();
+
+  long countByInvalidFalse();
 }
