@@ -78,7 +78,7 @@ public class WorkspaceAuditorTest {
   public void setUp() {
     user1 = new DbUser();
     user1.setUserId(101L);
-    user1.setEmail("fflinstone@slate.com");
+    user1.setUsername("fflinstone@slate.com");
     user1.setGivenName("Fred");
     user1.setFamilyName("Flintstone");
     doReturn(user1).when(mockUserProvider).get();
