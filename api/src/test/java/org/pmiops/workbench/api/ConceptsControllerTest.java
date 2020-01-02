@@ -19,12 +19,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cohorts.CohortCloningService;
+import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataSetService;
@@ -249,7 +249,6 @@ public class ConceptsControllerTest {
             conceptBigQueryService,
             workspaceService,
             domainInfoDao,
-            conceptDao,
             surveyModuleDao);
 
     DbUser user = new DbUser();
@@ -802,7 +801,7 @@ public class ConceptsControllerTest {
     result.setConceptId(concept.getConceptId());
     result.setConceptName(concept.getConceptName());
     result.setStandardConcept(
-        concept.getStandardConcept() == null ? null : (concept.getStandardConcept() ? "S" : null));
+        concept.getStandardConcept() == null ? "" : (concept.getStandardConcept() ? "S" : ""));
     result.setConceptCode(concept.getConceptCode());
     result.setConceptClassId(concept.getConceptClassId());
     result.setVocabularyId(concept.getVocabularyId());
