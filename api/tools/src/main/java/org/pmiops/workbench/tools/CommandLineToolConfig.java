@@ -2,12 +2,16 @@ package org.pmiops.workbench.tools;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.gson.Gson;
+import java.io.IOException;
+import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.DbConfig;
+import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.CloudStorageServiceImpl;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -39,6 +43,46 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @EntityScan("org.pmiops.workbench.db.model")
 public class CommandLineToolConfig {
+
+  /**
+   * Loads the GSuite admin service account key from GCS.
+   *
+   * <p>This needs to be annotated with @Lazy so only classes that use it (e.g. backfill scripts
+   * which require a WorkbenchConfig instance) will trigger the file load attempt.
+   *
+   * <p>Any command-line tool which loads this bean needs to be called from a project.rb command
+   * which is preceded with "get_gsuite_admin_key" to ensure the local key file si populated.
+   */
+  @Lazy
+  @Bean(name = Constants.GSUITE_ADMIN_CREDS)
+  ServiceAccountCredentials gsuiteAdminCredentials(CloudStorageService cloudStorageService) {
+    try {
+      return cloudStorageService.getGSuiteAdminCredentials();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Lazy
+  @Bean(name = Constants.FIRECLOUD_ADMIN_CREDS)
+  ServiceAccountCredentials fireCloudCredentials(CloudStorageService cloudStorageService) {
+    try {
+      return cloudStorageService.getFireCloudAdminCredentials();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Lazy
+  @Bean(name = Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
+  ServiceAccountCredentials cloudResourceManagerCredentials(
+      CloudStorageService cloudStorageService) {
+    try {
+      return cloudStorageService.getCloudResourceManagerAdminCredentials();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   /**
    * Instead of using the CacheSpringConfiguration class (which has a request-scoped bean to return

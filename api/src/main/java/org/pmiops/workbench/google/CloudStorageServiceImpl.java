@@ -137,6 +137,26 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
+  public ServiceAccountCredentials getGSuiteAdminCredentials() throws IOException {
+    return getCredentials("gsuite-admin-sa.json");
+  }
+
+  @Override
+  public ServiceAccountCredentials getFireCloudAdminCredentials() throws IOException {
+    return getCredentials("firecloud-admin-sa.json");
+  }
+
+  @Override
+  public ServiceAccountCredentials getCloudResourceManagerAdminCredentials() throws IOException {
+    return getCredentials("cloud-resource-manager-admin-sa.json");
+  }
+
+  @Override
+  public ServiceAccountCredentials getDefaultServiceAccountCredentials() throws IOException {
+    return getCredentials("app-engine-default-sa.json");
+  }
+
+  @Override
   public ServiceAccountCredentials getGarbageCollectionServiceAccountCredentials(
       String garbageCollectionEmail) throws IOException {
     final String objectPath = String.format("garbage-collection/%s.json", garbageCollectionEmail);

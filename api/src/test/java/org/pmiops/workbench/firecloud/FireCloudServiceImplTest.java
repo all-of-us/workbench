@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
@@ -50,6 +51,7 @@ public class FireCloudServiceImplTest {
   @Mock private NihApi nihApi;
   @Mock private StatusApi statusApi;
   @Mock private StaticNotebooksApi staticNotebooksApi;
+  @Mock private ServiceAccountCredentials fireCloudCredentials;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
@@ -72,7 +74,8 @@ public class FireCloudServiceImplTest {
             Providers.of(workspaceAclsApi),
             Providers.of(statusApi),
             Providers.of(staticNotebooksApi),
-            new FirecloudRetryHandler(new NoBackOffPolicy()));
+            new FirecloudRetryHandler(new NoBackOffPolicy()),
+            Providers.of(fireCloudCredentials));
   }
 
   @Test

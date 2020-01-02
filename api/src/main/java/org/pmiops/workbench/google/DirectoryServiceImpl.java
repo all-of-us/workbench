@@ -14,6 +14,8 @@ import com.google.api.services.directory.model.User;
 import com.google.api.services.directory.model.UserEmail;
 import com.google.api.services.directory.model.UserName;
 import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.OAuth2Credentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -25,11 +27,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
+import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -66,6 +70,7 @@ public class DirectoryServiceImpl implements DirectoryService {
               DirectoryScopes.ADMIN_DIRECTORY_USER_ALIAS_READONLY,
           DirectoryScopes.ADMIN_DIRECTORY_USER, DirectoryScopes.ADMIN_DIRECTORY_USER_READONLY);
 
+  private final Provider<ServiceAccountCredentials> credentialsProvider;
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
@@ -73,9 +78,12 @@ public class DirectoryServiceImpl implements DirectoryService {
 
   @Autowired
   public DirectoryServiceImpl(
+      @Qualifier(Constants.GSUITE_ADMIN_CREDS)
+          Provider<ServiceAccountCredentials> credentialsProvider,
       Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
       GoogleRetryHandler retryHandler) {
+    this.credentialsProvider = credentialsProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
@@ -84,11 +92,21 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   private Directory buildService() {
-    DelegatedUserCredentials delegatedCreds =
-        new DelegatedUserCredentials(
-            ServiceAccounts.getServiceAccountEmail("gsuite-admin", configProvider.get()),
-            "directory-service@" + gSuiteDomain(),
-            SCOPES);
+    OAuth2Credentials delegatedCreds;
+    if (configProvider.get().featureFlags.useKeylessDelegatedCredentials) {
+      delegatedCreds =
+          new DelegatedUserCredentials(
+              ServiceAccounts.getServiceAccountEmail("gsuite-admin", configProvider.get()),
+              "directory-service@" + gSuiteDomain(),
+              SCOPES);
+    } else {
+      delegatedCreds =
+          credentialsProvider
+              .get()
+              .createScoped(SCOPES)
+              .createDelegated("directory-service@" + gSuiteDomain());
+    }
+
     return new Directory.Builder(
             httpTransport, getDefaultJsonFactory(), new HttpCredentialsAdapter(delegatedCreds))
         .build();

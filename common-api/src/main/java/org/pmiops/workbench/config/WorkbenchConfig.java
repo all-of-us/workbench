@@ -209,6 +209,10 @@ public class WorkbenchConfig {
     // Whether or not AoU should handle inbound SumoLogic high-egress event requests.
     // See RW-2253.
     public boolean enableSumoLogicEventHandling;
+    // Causes the server to use an API-based method for generating delegated user credentials,
+    // as opposed to reading service account private keys from GCS.
+    // See https://precisionmedicineinitiative.atlassian.net/browse/RW-2840 for details.
+    public boolean useKeylessDelegatedCredentials;
   }
 
   public static class ActionAuditConfig {

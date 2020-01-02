@@ -87,6 +87,7 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": true,
+    "useKeylessDelegatedCredentials": true
     "enableRdrExport": true,
     "enableBillingLockout": true,
     "enableSumoLogicEventHandling": true

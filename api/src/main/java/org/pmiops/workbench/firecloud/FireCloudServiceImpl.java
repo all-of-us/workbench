@@ -1,6 +1,8 @@
 package org.pmiops.workbench.firecloud;
 
 import com.google.api.client.http.HttpStatusCodes;
+import com.google.auth.oauth2.OAuth2Credentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
@@ -11,6 +13,7 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -58,6 +61,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<StatusApi> statusApiProvider;
   private final Provider<StaticNotebooksApi> staticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
+  private final Provider<ServiceAccountCredentials> fcAdminCredsProvider;
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -102,7 +106,9 @@ public class FireCloudServiceImpl implements FireCloudService {
           Provider<WorkspacesApi> workspaceAclsApiProvider,
       Provider<StatusApi> statusApiProvider,
       Provider<StaticNotebooksApi> staticNotebooksApiProvider,
-      FirecloudRetryHandler retryHandler) {
+      FirecloudRetryHandler retryHandler,
+      @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
+          Provider<ServiceAccountCredentials> fcAdminCredsProvider) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
@@ -112,6 +118,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.workspaceAclsApiProvider = workspaceAclsApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.retryHandler = retryHandler;
+    this.fcAdminCredsProvider = fcAdminCredsProvider;
     this.staticNotebooksApiProvider = staticNotebooksApiProvider;
   }
 
@@ -126,11 +133,20 @@ public class FireCloudServiceImpl implements FireCloudService {
    * @return
    */
   public ApiClient getApiClientWithImpersonation(String userEmail) throws IOException {
-    DelegatedUserCredentials delegatedCreds =
-        new DelegatedUserCredentials(
-            ServiceAccounts.getServiceAccountEmail("firecloud-admin", configProvider.get()),
-            userEmail,
-            FIRECLOUD_API_OAUTH_SCOPES);
+    OAuth2Credentials delegatedCreds;
+    if (configProvider.get().featureFlags.useKeylessDelegatedCredentials) {
+      delegatedCreds =
+          new DelegatedUserCredentials(
+              ServiceAccounts.getServiceAccountEmail("firecloud-admin", configProvider.get()),
+              userEmail,
+              FIRECLOUD_API_OAUTH_SCOPES);
+    } else {
+      delegatedCreds =
+          fcAdminCredsProvider
+              .get()
+              .createScoped(FIRECLOUD_API_OAUTH_SCOPES)
+              .createDelegated(userEmail);
+    }
     delegatedCreds.refreshIfExpired();
 
     ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
