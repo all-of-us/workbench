@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
@@ -138,8 +137,6 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public ServiceAccountCredentials getGSuiteAdminCredentials() throws IOException {
-    Logger log = Logger.getLogger("asdf");
-    log.info("Getting gsuite creds");
     return getCredentials("gsuite-admin-sa.json");
   }
 
