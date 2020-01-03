@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -38,10 +39,10 @@ public interface BillingProjectBufferEntryDao
   Long countByStatus(short status);
 
   default Map<BufferEntryStatus, Long> getCountByStatusMap() {
-    return StreamSupport.stream(findAll().spliterator(), false)
+    return ImmutableMap.copyOf(StreamSupport.stream(findAll().spliterator(), false)
         .collect(
             Collectors.groupingBy(
-                DbBillingProjectBufferEntry::getStatusEnum, Collectors.counting()));
+                DbBillingProjectBufferEntry::getStatusEnum, Collectors.counting())));
   }
 
   @Query(value = "SELECT GET_LOCK('" + ASSIGNING_LOCK + "', 1)", nativeQuery = true)

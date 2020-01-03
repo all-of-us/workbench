@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.utils.DaoUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -44,8 +45,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   Set<DbUser> findByFirstRegistrationCompletionTimeNotNull();
 
   default Map<Boolean, Long> getDisabledToCountMap() {
-    return ImmutableMap.copyOf(
-        StreamSupport.stream(findAll().spliterator(), false)
-            .collect(Collectors.groupingBy(DbUser::getDisabled, Collectors.counting())));
+    return DaoUtils.getAttributeToCountMap(findAll(), DbUser::getDisabled);
   }
 }
