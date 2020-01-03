@@ -37,17 +37,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class RdrExportServiceImpl implements RdrExportService {
 
-  ZoneOffset offset = OffsetDateTime.now().getOffset();
-
   private Clock clock;
-
+  private FireCloudService fireCloudService;
   private Provider<RdrApi> RdrApiProvider;
-
   private RdrExportDao rdrExportDao;
   private WorkspaceDao workspaceDao;
-  private FireCloudService fireCloudService;
   private UserDao userDao;
+
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
+  ZoneOffset offset = OffsetDateTime.now().getOffset();
 
   @Autowired
   public RdrExportServiceImpl(
@@ -127,7 +125,7 @@ public class RdrExportServiceImpl implements RdrExportService {
       RdrApiProvider.get().getApiClient().setDebugging(true);
       RdrApiProvider.get().exportResearcheres(RdrResearchersList);
 
-      updateRDRExport(RdrEntity.USER, userIds);
+      updateDBRdrExport(RdrEntity.USER, userIds);
     } catch (ApiException ex) {
       log.severe("Error while sending researcher data to RDR");
     }
@@ -151,36 +149,36 @@ public class RdrExportServiceImpl implements RdrExportService {
               .collect(Collectors.toList());
       RdrApiProvider.get().getApiClient().setDebugging(true);
       RdrApiProvider.get().exportWorkspaces(RdrWorkspacesList);
-      updateRDRExport(RdrEntity.WORKSPACE, workspaceIds);
+      updateDBRdrExport(RdrEntity.WORKSPACE, workspaceIds);
     } catch (ApiException ex) {
       log.severe("Error while sending workspace data to RDR");
     }
   }
 
   // Convert workbench DBUser to RDR Model
-  private RdrResearcher toRdrResearcher(DbUser workbenchUser) {
+  private RdrResearcher toRdrResearcher(DbUser dbUser) {
     RdrResearcher researcher = new RdrResearcher();
-    researcher.setUserId((int) workbenchUser.getUserId());
-    researcher.setCreationTime(workbenchUser.getCreationTime().toLocalDateTime().atOffset(offset));
-    if (workbenchUser.getLastModifiedTime() != null)
+    researcher.setUserId((int) dbUser.getUserId());
+    researcher.setCreationTime(dbUser.getCreationTime().toLocalDateTime().atOffset(offset));
+    if (dbUser.getLastModifiedTime() != null)
       researcher.setModifiedTime(
-          workbenchUser.getLastModifiedTime().toLocalDateTime().atOffset(offset));
-    researcher.setGivenName(workbenchUser.getGivenName());
-    researcher.setFamilyName(workbenchUser.getFamilyName());
-    if (workbenchUser.getAddress() != null) {
-      researcher.setStreetAddress1(workbenchUser.getAddress().getStreetAddress1());
-      researcher.setStreetAddress2(workbenchUser.getAddress().getStreetAddress2());
-      researcher.setCity(workbenchUser.getAddress().getCity());
-      researcher.setState(workbenchUser.getAddress().getState());
-      researcher.setCountry(workbenchUser.getAddress().getCountry());
-      researcher.setZipCode(workbenchUser.getAddress().getZipCode());
+          dbUser.getLastModifiedTime().toLocalDateTime().atOffset(offset));
+    researcher.setGivenName(dbUser.getGivenName());
+    researcher.setFamilyName(dbUser.getFamilyName());
+    if (dbUser.getAddress() != null) {
+      researcher.setStreetAddress1(dbUser.getAddress().getStreetAddress1());
+      researcher.setStreetAddress2(dbUser.getAddress().getStreetAddress2());
+      researcher.setCity(dbUser.getAddress().getCity());
+      researcher.setState(dbUser.getAddress().getState());
+      researcher.setCountry(dbUser.getAddress().getCountry());
+      researcher.setZipCode(dbUser.getAddress().getZipCode());
     }
     // TODO Gender and Race will change in RDR API from string to array
 
     // researcher.setGender(workbenchUser.getDemographicSurvey().getGenderEnum());
     // researcher.setRace(workbenchUser.getDemographicSurvey().getRace());
     researcher.setAffiliations(
-        workbenchUser.getInstitutionalAffiliations().stream()
+        dbUser.getInstitutionalAffiliations().stream()
             .map(
                 inst -> {
                   return new ResearcherAffiliation()
@@ -191,36 +189,36 @@ public class RdrExportServiceImpl implements RdrExportService {
     return researcher;
   }
 
-  private RdrWorkspace toRdrWorkspace(DbWorkspace workbenchWorkspace) {
+  private RdrWorkspace toRdrWorkspace(DbWorkspace dbWorkspace) {
     RdrWorkspace RdrWorkspace = new RdrWorkspace();
-    RdrWorkspace.setWorkspaceId((int) workbenchWorkspace.getWorkspaceId());
-    RdrWorkspace.setName(workbenchWorkspace.getName());
+    RdrWorkspace.setWorkspaceId((int) dbWorkspace.getWorkspaceId());
+    RdrWorkspace.setName(dbWorkspace.getName());
 
     RdrWorkspace.setCreationTime(
-        workbenchWorkspace.getCreationTime().toLocalDateTime().atOffset(offset));
+        dbWorkspace.getCreationTime().toLocalDateTime().atOffset(offset));
     RdrWorkspace.setModifiedTime(
-        workbenchWorkspace.getLastModifiedTime().toLocalDateTime().atOffset(offset));
+        dbWorkspace.getLastModifiedTime().toLocalDateTime().atOffset(offset));
     RdrWorkspace.setStatus(
         org.pmiops.workbench.rdr.model.RdrWorkspace.StatusEnum.fromValue(
-            workbenchWorkspace.getWorkspaceActiveStatusEnum().toString()));
+            dbWorkspace.getWorkspaceActiveStatusEnum().toString()));
     RdrWorkspace.setExcludeFromPublicDirectory(false);
-    RdrWorkspace.setDiseaseFocusedResearch(workbenchWorkspace.getDiseaseFocusedResearch());
-    RdrWorkspace.setDiseaseFocusedResearchName(workbenchWorkspace.getDiseaseOfFocus());
-    RdrWorkspace.setOtherPurpose(workbenchWorkspace.getOtherPurpose());
-    RdrWorkspace.setOtherPurposeDetails(workbenchWorkspace.getOtherPurposeDetails());
-    RdrWorkspace.setMethodsDevelopment(workbenchWorkspace.getMethodsDevelopment());
-    RdrWorkspace.setControlSet(workbenchWorkspace.getControlSet());
-    RdrWorkspace.setAncestry(workbenchWorkspace.getAncestry());
-    RdrWorkspace.setSocialBehavioral(workbenchWorkspace.getSocialBehavioral());
-    RdrWorkspace.setPopulationHealth(workbenchWorkspace.getPopulationHealth());
-    RdrWorkspace.setDrugDevelopment(workbenchWorkspace.getDrugDevelopment());
-    RdrWorkspace.setCommercialPurpose(workbenchWorkspace.getCommercialPurpose());
-    RdrWorkspace.setEducational(workbenchWorkspace.getEducational());
+    RdrWorkspace.setDiseaseFocusedResearch(dbWorkspace.getDiseaseFocusedResearch());
+    RdrWorkspace.setDiseaseFocusedResearchName(dbWorkspace.getDiseaseOfFocus());
+    RdrWorkspace.setOtherPurpose(dbWorkspace.getOtherPurpose());
+    RdrWorkspace.setOtherPurposeDetails(dbWorkspace.getOtherPurposeDetails());
+    RdrWorkspace.setMethodsDevelopment(dbWorkspace.getMethodsDevelopment());
+    RdrWorkspace.setControlSet(dbWorkspace.getControlSet());
+    RdrWorkspace.setAncestry(dbWorkspace.getAncestry());
+    RdrWorkspace.setSocialBehavioral(dbWorkspace.getSocialBehavioral());
+    RdrWorkspace.setPopulationHealth(dbWorkspace.getPopulationHealth());
+    RdrWorkspace.setDrugDevelopment(dbWorkspace.getDrugDevelopment());
+    RdrWorkspace.setCommercialPurpose(dbWorkspace.getCommercialPurpose());
+    RdrWorkspace.setEducational(dbWorkspace.getEducational());
 
     // Call Firecloud to get a list of Collaborators
     FirecloudWorkspaceACL firecloudResponse =
         fireCloudService.getWorkspaceAcl(
-            workbenchWorkspace.getWorkspaceNamespace(), workbenchWorkspace.getFirecloudName());
+            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     Map<String, FirecloudWorkspaceAccessEntry> aclMap = firecloudResponse.getAcl();
     aclMap.forEach(
         (email, access) -> {
@@ -240,7 +238,7 @@ public class RdrExportServiceImpl implements RdrExportService {
    * @param entity
    * @param idList
    */
-  private void updateRDRExport(RdrEntity entity, List<Long> idList) {
+  private void updateDBRdrExport(RdrEntity entity, List<Long> idList) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     List<DbRdrExport> exportList =
