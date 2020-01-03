@@ -15,6 +15,9 @@ public class GaugeRecorderService {
   private final List<GaugeDataCollector> gaugeDataCollectors;
   private final MonitoringService monitoringService;
 
+  // For local debugging, change this to Level.INFO or higher
+  private final Level logLevel = Level.INFO;
+
   public GaugeRecorderService(
       List<GaugeDataCollector> gaugeDataCollectors, MonitoringService monitoringService) {
     this.gaugeDataCollectors = gaugeDataCollectors;
@@ -33,7 +36,7 @@ public class GaugeRecorderService {
 
   private void logValues(Collection<MeasurementBundle> bundles) {
     logger.log(
-        Level.FINE,
+        logLevel,
         bundles.stream()
             .map(MeasurementBundle::toString)
             .sorted()
