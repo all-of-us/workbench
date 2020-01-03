@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.utils.DaoUtils;
 import org.springframework.data.repository.CrudRepository;
 
 public interface DataSetDao extends CrudRepository<DbDataset, Long> {
@@ -18,8 +19,6 @@ public interface DataSetDao extends CrudRepository<DbDataset, Long> {
   List<DbDataset> findByWorkspaceId(long workspaceId);
 
   default Map<Boolean, Long> getInvalidToCountMap() {
-    return ImmutableMap.copyOf(
-        StreamSupport.stream(findAll().spliterator(), false)
-            .collect(Collectors.groupingBy(DbDataset::getInvalid, Collectors.counting())));
+    return DaoUtils.getAttributeToCountMap(findAll(), DbDataset::getInvalid);
   }
 }

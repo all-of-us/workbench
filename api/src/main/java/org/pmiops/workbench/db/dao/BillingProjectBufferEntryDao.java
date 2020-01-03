@@ -11,6 +11,7 @@ import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStat
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.utils.DaoUtils;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -39,10 +40,7 @@ public interface BillingProjectBufferEntryDao
   Long countByStatus(short status);
 
   default Map<BufferEntryStatus, Long> getCountByStatusMap() {
-    return ImmutableMap.copyOf(StreamSupport.stream(findAll().spliterator(), false)
-        .collect(
-            Collectors.groupingBy(
-                DbBillingProjectBufferEntry::getStatusEnum, Collectors.counting())));
+    return DaoUtils.getAttributeToCountMap(findAll(), DbBillingProjectBufferEntry::getStatusEnum);
   }
 
   @Query(value = "SELECT GET_LOCK('" + ASSIGNING_LOCK + "', 1)", nativeQuery = true)
