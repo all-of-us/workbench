@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -90,42 +89,36 @@ public class FreeTierBillingService {
     //    check for intermediate thresholds and alert, possibly for both cost and time
 
     final Set<DbUser> previouslyExpiredUsers = getExpiredUsersFromDb();
-    final Set<DbUser> currentExpiredUsers =
-        Sets.union(getCostExpiredUsers(userCosts), getTimeExpiredUsers());
-    processNewlyExpiredUsers(Sets.difference(currentExpiredUsers, previouslyExpiredUsers));
 
-    // check for intermediate thresholds and alert, possibly for both cost and time
+    final Set<DbUser> costExpiredUsers =
+        userCosts.entrySet().stream()
+            .filter(this::expiredByCost)
+            .map(Entry::getKey)
+            .collect(Collectors.toSet());
+
+    final Set<DbUser> timeExpiredUsers =
+        userDao.findByFirstRegistrationCompletionTimeNotNull().stream()
+            .filter(this::expiredByTime)
+            .collect(Collectors.toSet());
+
+    final Set<DbUser> currentExpiredUsers = Sets.union(costExpiredUsers, timeExpiredUsers);
+    processNewlyExpiredUsers(Sets.difference(currentExpiredUsers, previouslyExpiredUsers));
 
     sendAlertsForCostThresholds(previousUserCosts, userCosts, currentExpiredUsers);
     sendAlertsForTimeThresholds(userCosts, currentExpiredUsers);
   }
 
-  @NotNull
-  private Set<DbUser> getTimeExpiredUsers() {
-    return userDao.findByFirstRegistrationCompletionTimeNotNull().stream()
-        .filter(
-            u -> {
-              final Instant userFreeCreditStartTime =
-                  u.getFirstRegistrationCompletionTime().toInstant();
-              final Duration userFreeCreditDays = Duration.ofDays(getUserFreeTierDaysLimit(u));
-              final Instant userFreeCreditExpirationTime =
-                  userFreeCreditStartTime.plus(userFreeCreditDays);
-              return clock.instant().isAfter(userFreeCreditExpirationTime);
-            })
-        .collect(Collectors.toSet());
+  private boolean expiredByCost(final Entry<DbUser, Double> entry) {
+    final DbUser u = entry.getKey();
+    final double currentCost = entry.getValue();
+    return currentCost > getUserFreeTierDollarLimit(u);
   }
 
-  @NotNull
-  private Set<DbUser> getCostExpiredUsers(Map<DbUser, Double> userCosts) {
-    return userCosts.entrySet().stream()
-        .filter(
-            entry -> {
-              final DbUser u = entry.getKey();
-              final double currentCost = entry.getValue();
-              return currentCost > getUserFreeTierDollarLimit(u);
-            })
-        .map(Entry::getKey)
-        .collect(Collectors.toSet());
+  private boolean expiredByTime(final DbUser u) {
+    final Instant userFreeCreditStartTime = u.getFirstRegistrationCompletionTime().toInstant();
+    final Duration userFreeCreditDays = Duration.ofDays(getUserFreeTierDaysLimit(u));
+    final Instant userFreeCreditExpirationTime = userFreeCreditStartTime.plus(userFreeCreditDays);
+    return clock.instant().isAfter(userFreeCreditExpirationTime);
   }
 
   private void processNewlyExpiredUsers(Set<DbUser> newlyExpiredUsers) {
