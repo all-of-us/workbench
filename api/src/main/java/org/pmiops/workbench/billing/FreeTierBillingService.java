@@ -102,7 +102,13 @@ public class FreeTierBillingService {
             .collect(Collectors.toSet());
 
     final Set<DbUser> currentExpiredUsers = Sets.union(costExpiredUsers, timeExpiredUsers);
-    processNewlyExpiredUsers(Sets.difference(currentExpiredUsers, previouslyExpiredUsers));
+
+    final Set<DbUser> newlyExpiredUsers =
+        Sets.difference(currentExpiredUsers, previouslyExpiredUsers);
+    for (final DbUser user : newlyExpiredUsers) {
+      notificationService.alertUserFreeTierExpiration(user);
+      deactivateUserWorkspaces(user);
+    }
 
     sendAlertsForCostThresholds(previousUserCosts, userCosts, currentExpiredUsers);
     sendAlertsForTimeThresholds(userCosts, currentExpiredUsers);
@@ -119,13 +125,10 @@ public class FreeTierBillingService {
     return clock.instant().isAfter(userFreeCreditExpirationTime);
   }
 
-  private void processNewlyExpiredUsers(Set<DbUser> newlyExpiredUsers) {
-    for (final DbUser user : newlyExpiredUsers) {
-      notificationService.alertUserFreeTierExpiration(user);
-      final Set<DbWorkspace> toDeactivate = workspaceDao.findAllByCreator(user);
-      for (final DbWorkspace workspace : toDeactivate) {
-        workspaceDao.updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
-      }
+  private void deactivateUserWorkspaces(final DbUser user) {
+    final Set<DbWorkspace> toDeactivate = workspaceDao.findAllByCreator(user);
+    for (final DbWorkspace workspace : toDeactivate) {
+      workspaceDao.updateBillingStatus(workspace.getWorkspaceId(), BillingStatus.INACTIVE);
     }
   }
 
