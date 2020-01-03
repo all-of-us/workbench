@@ -20,6 +20,7 @@ import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -76,7 +77,7 @@ public class AuthDomainControllerTest {
     config.access.enableDataUseAgreement = true;
     FakeClock clock = new FakeClock(Instant.now());
     UserService userService =
-        new UserService(
+        new UserServiceImpl(
             userProvider,
             userDao,
             adminActionHistoryDao,
@@ -111,7 +112,7 @@ public class AuthDomainControllerTest {
     verify(mockAuthDomainAuditAdapter)
         .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
+    DbUser updatedUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled()).isTrue();
   }
 
@@ -128,7 +129,7 @@ public class AuthDomainControllerTest {
     verify(mockAuthDomainAuditAdapter)
         .fireSetAccountDisabledStatus(createdUser.getUserId(), newDisabledValue, oldDisabledValue);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    DbUser updatedUser = userDao.findUserByEmail(PRIMARY_EMAIL);
+    DbUser updatedUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(updatedUser.getDisabled()).isFalse();
   }
 
@@ -136,7 +137,7 @@ public class AuthDomainControllerTest {
     DbUser user = new DbUser();
     user.setGivenName(GIVEN_NAME);
     user.setFamilyName(FAMILY_NAME);
-    user.setEmail(PRIMARY_EMAIL);
+    user.setUsername(PRIMARY_EMAIL);
     user.setContactEmail(CONTACT_EMAIL);
     user.setOrganization(ORGANIZATION);
     user.setCurrentPosition(CURRENT_POSITION);

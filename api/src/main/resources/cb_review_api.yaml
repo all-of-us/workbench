@@ -713,7 +713,6 @@ definitions:
     required:
       - items
       - count
-      - pageRequest
     properties:
       items:
         type: "array"

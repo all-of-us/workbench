@@ -34,11 +34,21 @@
                 </button>
               </ng-container>
             </div>
-            <div class="explore-link" *ngIf="wizard.domain === domainType[domainType.DRUG]">
-              <a href="https://mor.nlm.nih.gov/RxNav/" target="_blank" rel="noopener noreferrer">
-                Explore
-              </a>
-              drugs by brand names outside of <i>All of Us</i>
+            <div class="link-container">
+              <div class="inner-link-container">
+                <div *ngIf="wizard.domain === domainType[domainType.DRUG]">
+                  <a href="https://mor.nlm.nih.gov/RxNav/" target="_blank" rel="noopener noreferrer">
+                    Explore
+                  </a>
+                  drugs by brand names outside of <i>All of Us</i>.
+                </div>
+                <div *ngIf="showDataBrowserLink">
+                  Explore Source information on the
+                  <a [href]="publicUiUrl" target="_blank" rel="noopener noreferrer">
+                    Data Browser.
+                  </a>
+                </div>
+              </div>
             </div>
             <button *ngIf="mode === 'attributes'"
               (click)="back()"

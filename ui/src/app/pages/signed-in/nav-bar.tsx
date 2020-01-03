@@ -6,6 +6,7 @@ import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {cookiesEnabled, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {Profile} from 'generated/fetch';
 import * as React from 'react';
 
 const styles = reactStyles({
@@ -59,15 +60,11 @@ const styles = reactStyles({
 });
 
 export interface Props {
-  hasDataAccess: boolean;
-  hasAccessModuleAdmin;
+  profile: Profile;
+  bannerAdminActive: boolean;
   headerImg: string;
   displayTag: string;
   shouldShowDisplayTag: boolean;
-  givenName: string;
-  familyName: string;
-  aouAccountEmailAddress: string;
-  contactEmailAddress: string;
   profileImage: string;
   sidenavToggle: boolean;
   homeActive: boolean;
@@ -225,20 +222,16 @@ export const NavBar = withUserProfile()(
         {
           this.state.sideNavVisible
           && <SideNav
+            profile={this.props.profile}
+            bannerAdminActive={this.props.bannerAdminActive}
             homeActive={this.props.homeActive}
-            workspacesActive={this.props.workspacesActive}
             libraryActive={this.props.libraryActive}
-            profileActive={this.props.profileActive}
-            userAdminActive={this.props.userAdminActive}
-            hasDataAccess={this.props.hasDataAccess}
-            hasAccessModuleAdmin={this.props.hasAccessModuleAdmin}
-            aouAccountEmailAddress={this.props.aouAccountEmailAddress}
-            contactEmailAddress={this.props.contactEmailAddress}
-            givenName={this.props.givenName}
-            familyName={this.props.familyName}
             // Passing the function itself deliberately, we want to be able to
             // toggle the nav whenever we click anything in it
             onToggleSideNav={this.onToggleSideNav}
+            profileActive={this.props.profileActive}
+            userAdminActive={this.props.userAdminActive}
+            workspacesActive={this.props.workspacesActive}
           />
         }
       </div>;
@@ -251,15 +244,11 @@ export const NavBar = withUserProfile()(
   template: '<div #root></div>'
 })
 export class NavBarComponent extends ReactWrapperBase {
-  @Input('hasDataAccess') hasDataAccess: Props['hasDataAccess'];
-  @Input('hasAccessModuleAdmin') hasAccessModuleAdmin: Props['hasAccessModuleAdmin'];
+  @Input('profile') profile: Props['profile'];
   @Input('headerImg') headerImg: Props['headerImg'];
   @Input('displayTag') displayTag: Props['displayTag'];
   @Input('shouldShowDisplayTag') shouldShowDisplayTag: Props['shouldShowDisplayTag'];
-  @Input('givenName') givenName: Props['givenName'];
-  @Input('familyName') familyName: Props['familyName'];
-  @Input('aouAccountEmailAddress') aouAccountEmailAddress: Props['aouAccountEmailAddress'];
-  @Input('contactEmailAddress') contactEmailAddress: Props['contactEmailAddress'];
+  @Input('bannerAdminActive') bannerAdminActive: Props['bannerAdminActive'];
   @Input('homeActive') homeActive: Props['homeActive'];
   @Input('workspacesActive') workspacesActive: Props['workspacesActive'];
   @Input('libraryActive') libraryActive: Props['libraryActive'];
@@ -267,15 +256,11 @@ export class NavBarComponent extends ReactWrapperBase {
   @Input('userAdminActive') userAdminActive: Props['userAdminActive'];
   constructor() {
     super(NavBar, [
-      'hasDataAccess',
-      'hasAccessModuleAdmin',
+      'profile',
       'headerImg',
       'displayTag',
       'shouldShowDisplayTag',
-      'givenName',
-      'familyName',
-      'aouAccountEmailAddress',
-      'contactEmailAddress',
+      'bannerAdminActive',
       'homeActive',
       'workspacesActive',
       'libraryActive',

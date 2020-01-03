@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.BillingStatus;
@@ -49,6 +50,8 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
   DbWorkspace findDbWorkspaceByWorkspaceId(long workspaceId);
 
+  Set<DbWorkspace> findAllByCreator(DbUser user);
+
   default List<DbWorkspace> findAllByBillingMigrationStatus(BillingMigrationStatus status) {
     return findAllByBillingMigrationStatus(DbStorageEnums.billingMigrationStatusToStorage(status));
   }
@@ -58,4 +61,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
     toUpdate.setBillingStatus(status);
     save(toUpdate);
   }
+
+  @Query("SELECT w.creator FROM DbWorkspace w WHERE w.billingStatus = (:status)")
+  Set<DbUser> findAllCreatorsByBillingStatus(@Param("status") BillingStatus status);
 }

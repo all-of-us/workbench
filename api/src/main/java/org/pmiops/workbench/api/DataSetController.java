@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -68,7 +69,9 @@ import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
+import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.MarkDataSetRequest;
@@ -665,6 +668,23 @@ public class DataSetController implements DataSetApiDelegate {
     }
 
     return ResponseEntity.ok(dataSetMapper.toApi(dataDictionaryEntries.get(0)));
+  }
+
+  @Override
+  public ResponseEntity<DomainValuesResponse> getValuesFromDomain(
+      String workspaceNamespace, String workspaceId, String domainValue) {
+    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DomainValuesResponse response = new DomainValuesResponse();
+
+    Domain domain = Domain.valueOf(domainValue);
+    FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
+    response.setItems(
+        fieldList.stream()
+            .map(field -> new DomainValue().value(field.getName()))
+            .collect(Collectors.toList()));
+
+    return ResponseEntity.ok(response);
   }
 
   // TODO(jaycarlton) create a class that knows about code cells and their properties,

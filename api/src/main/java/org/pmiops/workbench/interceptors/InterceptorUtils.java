@@ -13,7 +13,9 @@ public class InterceptorUtils {
           "org.pmiops.workbench.api.WorkspacesApiController",
               "org.pmiops.workbench.workspaces.WorkspacesController",
           "org.pmiops.workbench.api.BillingApiController",
-              "org.pmiops.workbench.billing.BillingController");
+              "org.pmiops.workbench.billing.BillingController",
+          "org.pmiops.workbench.api.StatusAlertApiController",
+              "org.pmiops.workbench.statusalerts.StatusAlertController");
 
   private InterceptorUtils() {}
 

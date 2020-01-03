@@ -62,7 +62,7 @@ public class CloudResourceManagerServiceImplIntegrationTest {
   @Test
   public void testGetAllProjectsForUser() {
     DbUser testUser = new DbUser();
-    testUser.setEmail(CLOUD_RESOURCE_MANAGER_TEST_USER_EMAIL);
+    testUser.setUsername(CLOUD_RESOURCE_MANAGER_TEST_USER_EMAIL);
     List<Project> projectList = service.getAllProjectsForUser(testUser);
     assertThat(projectList.size()).isEqualTo(1);
   }

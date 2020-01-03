@@ -1,4 +1,5 @@
-import {Link} from 'app/components/buttons';
+import {Clickable, Link} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -16,13 +17,26 @@ function formatCounts(concept: any) {
 }
 
 const styles = reactStyles({
+  datatable: {
+    border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
+    borderBottomLeftRadius: '3px',
+    borderBottomRightRadius: '3px',
+    marginBottom: '1rem'
+  },
+  headerStyle: {
+    color: colors.primary,
+    textAlign: 'left',
+    border: 0,
+  },
   colStyle: {
+    color: colors.primary,
     lineHeight: '0.5rem',
-    textAlign: 'center'
+    border: 0,
+    borderTop: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`
   },
   akaText: {
-    minWidth: '170px',
-    maxWidth: '170px',
+    minWidth: '150px',
+    maxWidth: '150px',
     fontStyle: 'italic',
     color: colors.primary
   },
@@ -43,7 +57,7 @@ interface SynonymsObjectState {
   seeMore: boolean;
   willOverflow: boolean;
 }
-const ROWS_TO_DISPLAY = 10;
+const ROWS_TO_DISPLAY = 20;
 export class SynonymsObject extends React.Component<{}, SynonymsObjectState> {
   domElement: any;
   constructor(props) {
@@ -60,7 +74,7 @@ export class SynonymsObject extends React.Component<{}, SynonymsObjectState> {
 
   render() {
     const {seeMore, willOverflow} = this.state;
-    return <div style={{display: 'flex'}}>
+    return <div style={{display: 'flex', paddingLeft: '2rem'}}>
       <div style={styles.akaText}>
         Also Known As:
         <TooltipTrigger
@@ -77,8 +91,7 @@ export class SynonymsObject extends React.Component<{}, SynonymsObjectState> {
       </div>
       <div style={{
         textOverflow: seeMore ? 'auto' : 'hidden',
-        minWidth: '810px',
-        maxWidth: '810px',
+        width: `calc(100% - ${willOverflow ? '250' : '180'}px)`,
         fontSize: '12px',
         height: seeMore ? 'auto' : '1rem',
         overflow: seeMore ? 'auto' : 'hidden'
@@ -97,7 +110,6 @@ interface Props {
   concepts: Concept[];
   loading: boolean;
   onSelectConcepts: Function;
-  nextPage?: Function;
   placeholderValue: string;
   reactKey: string;
   searchTerm?: string;
@@ -108,9 +120,11 @@ interface State {
   first: number;
   pageLoading: boolean;
   selectedConcepts: Concept[];
+  showBanner: boolean;
+  selectAll: boolean;
   totalRecords: number;
   pageConcepts: Concept[];
-  pageNumber: number;
+  tableRef: any;
 }
 
 export class ConceptTable extends React.Component<Props, State> {
@@ -119,11 +133,13 @@ export class ConceptTable extends React.Component<Props, State> {
     super(props);
     this.state = {
       selectedConcepts: props.selectedConcepts,
+      showBanner: false,
+      selectAll: false,
       pageLoading: false,
       first: 0,
       totalRecords: props.concepts.length,
-      pageNumber: 0,
-      pageConcepts: props.concepts.slice(0, 10).map(formatCounts)
+      pageConcepts: props.concepts.slice(0, 10).map(formatCounts),
+      tableRef: React.createRef(),
     };
   }
 
@@ -134,8 +150,21 @@ export class ConceptTable extends React.Component<Props, State> {
     }
   }
 
-  updateSelectedConceptList(selectedConcepts) {
-    this.setState({selectedConcepts : selectedConcepts});
+  updateSelectedConceptList(selectedConcepts, origin) {
+    // By default Data table will select all the concepts in the table but since we have first give
+    // an option to user to select all concepts in a page
+    // we will just add the the concepts in the page to selected concept list
+    if (selectedConcepts.length === this.props.concepts.length && origin === 'table') {
+      const startIndex = this.state.tableRef.current.state.first;
+      const endIndex = startIndex + ROWS_TO_DISPLAY;
+      selectedConcepts = fp.uniqBy( 'conceptId', this.state.selectedConcepts
+          .concat(this.props.concepts.slice(startIndex, endIndex)));
+      this.setState({showBanner: true});
+    } else if (selectedConcepts.length === 0 ) {
+      // if no concepts are selected remove the banner
+      this.setState({showBanner: false});
+    }
+    this.setState({selectedConcepts: selectedConcepts});
     this.props.onSelectConcepts(selectedConcepts);
   }
 
@@ -145,14 +174,13 @@ export class ConceptTable extends React.Component<Props, State> {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.concepts !==  this.props.concepts) {
-      this.setState({totalRecords: nextProps.concepts.length});
-
-      // Update pageConcepts only for the first time/page.
-      // onPage() will update for the rest of the pages
-      if (this.state.pageNumber === 0 ) {
-        this.setState({pageConcepts: nextProps.concepts.slice(0, 10).map(formatCounts)});
+    if ((nextProps.concepts !==  this.props.concepts)) {
+      if (nextProps.concepts !== this.props.concepts && nextProps.concepts.length > 0 ) {
+        this.setState({totalRecords: nextProps.concepts.length});
       }
+    }
+    if (nextProps.reactKey !== this.props.reactKey) {
+      this.setState({showBanner: false});
     }
   }
 
@@ -187,51 +215,72 @@ export class ConceptTable extends React.Component<Props, State> {
       </span>);
   }
 
-  async onPage(event) {
-    this.setState({pageLoading: true});
+  selectAll() {
+    this.setState({selectAll: !this.state.selectAll});
+    const selectedConcept = this.state.selectAll ? [] : this.props.concepts;
+    this.updateSelectedConceptList(selectedConcept, 'link');
+  }
 
-    // Call next set of concepts only if user is on the last page
-    if ((event.page + 1) === event.pageCount) {
-      const pageCount = Math.ceil(this.state.totalRecords / 100);
-      await this.props.nextPage(pageCount);
-      this.setState({pageNumber: pageCount, pageLoading: true});
+  selectAllHeader() {
+    if (this.state.showBanner) {
+      const {concepts} = this.props;
+      const bannerText = this.state.selectAll ? 'Clear Selection' : 'Select ' + concepts.length;
+      return <FlexRow  data-test-id='selection' style={{fontWeight: '200'}}>
+        All concepts on this page are selected.&nbsp;
+        <Clickable data-test-id='banner-link' style={{color: 'blue'}} onClick={() => this.selectAll()}>
+          {bannerText}
+        </Clickable>
+      </FlexRow>;
     }
+    return;
+  }
 
-    const startIndex = event.first;
-    const endIndex = event.first + event.rows;
-
-    this.setState({
-      first: event.first,
-      pageConcepts: this.props.concepts.slice(startIndex, endIndex).map(formatCounts),
-      pageLoading: false
-    });
+  onPageChange() {
+    this.setState({showBanner: false});
   }
 
   render() {
-    const {pageConcepts, pageLoading, selectedConcepts} = this.state;
+    const {selectedConcepts, tableRef} = this.state;
     const {placeholderValue, loading, reactKey} = this.props;
     return <div data-test-id='conceptTable' key={reactKey} style={{position: 'relative', minHeight: '10rem'}}>
-      {loading ? <SpinnerOverlay /> : <DataTable emptyMessage={loading ? '' : placeholderValue}
-                 value={pageConcepts} scrollable={true}
-                 selection={selectedConcepts} style={{minWidth: 1100}}
-                 totalRecords={this.state.totalRecords}
-                 expandedRows={this.props.concepts
-                   .filter(concept => concept.conceptSynonyms.length > 0)}
-                 rowExpansionTemplate={(data) => this.rowExpansionTemplate(data)}
-                 paginator={true} rows={ROWS_TO_DISPLAY}
-                 onPage={(event) => this.onPage(event)}
-                 loading={pageLoading}
-                 lazy={true} first={this.state.first}
-                 data-test-id='conceptRow'
-                 onSelectionChange={e => this.updateSelectedConceptList(e.value)} >
-        <Column bodyStyle={{...styles.colStyle, width: '3rem'}} headerStyle = {{width: '3rem'}}
-                data-test-id='conceptCheckBox' selectionMode='multiple' />
-        <Column bodyStyle={styles.colStyle} field='conceptName' header='Name'
-                data-test-id='conceptName'/>
-        <Column bodyStyle={styles.colStyle} field='conceptCode' header='Code'/>
-        <Column field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle} />
-        <Column style={styles.colStyle} field='countValue' header='Count'/>
-      </DataTable>}
+      <style>
+        {`
+          body .p-datatable .p-datatable-tbody > tr:nth-child(even),
+          body .p-datatable .p-datatable-tbody > .p-datatable-row.p-highlight {
+            background: ${colors.white};
+          }
+          body .p-datatable .p-datatable-tbody > tr:not(.p-datatable-row) > td {
+            border: 0;
+          }
+          body .p-datatable > .p-paginator {
+            background: ${colors.white};
+            border: 0;
+            color: ${colors.primary};
+          }
+        `}
+        </style>
+        {loading ? <SpinnerOverlay /> : <DataTable ref={tableRef} emptyMessage={loading ? '' : placeholderValue}
+                                                   style={styles.datatable}
+                                                   header={this.selectAllHeader()}
+                                                   value={this.props.concepts.map(formatCounts)} scrollable={true}
+                                                   selection={selectedConcepts}
+                                                   totalRecords={this.state.totalRecords}
+                                                   expandedRows={this.props.concepts
+                                                     .filter(concept => concept.conceptSynonyms.length > 0)}
+                                                   rowExpansionTemplate={(data) => this.rowExpansionTemplate(data)}
+                                                   alwaysShowPaginator={false}
+                                                   paginator={true} rows={ROWS_TO_DISPLAY}
+                                                   data-test-id='conceptRow'
+                                                   onValueChange={(value) => this.onPageChange()}
+                                                   onSelectionChange={e => this.updateSelectedConceptList(e.value, 'table')} >
+            <Column bodyStyle={{...styles.colStyle, textAlign: 'center'}} headerStyle={{...styles.headerStyle, textAlign: 'center', width: '2rem'}}
+                    data-test-id='conceptCheckBox' selectionMode='multiple' />
+            <Column bodyStyle={styles.colStyle} headerStyle={styles.headerStyle} field='conceptName' header='Name'
+                    data-test-id='conceptName'/>
+            <Column bodyStyle={styles.colStyle} headerStyle={styles.headerStyle} field='conceptCode' header='Code' className='divider'/>
+            <Column headerStyle={styles.headerStyle} field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle}  className='divider'/>
+            <Column style={styles.colStyle} headerStyle={styles.headerStyle} field='countValue' header='Count' className='divider'/>
+          </DataTable>}
     </div>;
   }
 }
