@@ -17,7 +17,7 @@ public class DbRdrExport {
   private int exportId;
   private Short entityType;
   private Long entityId;
-  private Timestamp exportDate;
+  private Timestamp lastExportDate;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,11 +59,11 @@ public class DbRdrExport {
   }
 
   @Column(name = "last_export_date")
-  public Timestamp getExportDate() {
-    return exportDate;
+  public Timestamp getLastExportDate() {
+    return lastExportDate;
   }
 
-  public void setExportDate(Timestamp exportDate) {
-    this.exportDate = exportDate;
+  public void setLastExportDate(Timestamp exportDate) {
+    this.lastExportDate = exportDate;
   }
 }

@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import main.java.org.pmiops.workbench.db.model.RdrEntityEnums;
-import org.pmiops.workbench.db.dao.RDRExportDao;
+import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbRdrExport;
@@ -37,13 +37,14 @@ import org.springframework.stereotype.Service;
 public class RdrExportServiceImpl implements RdrExportService {
 
   ZoneOffset offset = OffsetDateTime.now().getOffset();
+
   private Clock clock;
 
   private Provider<RdrApi> RdrApiProvider;
 
-  private RDRExportDao rdrExportDao;
+  private RdrExportDao rdrExportDao;
   private WorkspaceDao workspaceDao;
-  private final FireCloudService fireCloudService;
+  private FireCloudService fireCloudService;
   private UserDao userDao;
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
 
@@ -52,7 +53,7 @@ public class RdrExportServiceImpl implements RdrExportService {
       Clock clock,
       FireCloudService fireCloudService,
       Provider<RdrApi> RdrApiProvider,
-      RDRExportDao rdrExportDao,
+      RdrExportDao rdrExportDao,
       WorkspaceDao workspaceDao,
       UserDao userDao) {
     this.clock = clock;
@@ -250,7 +251,7 @@ public class RdrExportServiceImpl implements RdrExportService {
                     rd.setEntityTypeEnum(entity);
                     rd.setEntityId(id);
                   }
-                  rd.setExportDate(now);
+                  rd.setLastExportDate(now);
                   return rd;
                 })
             .collect(Collectors.toList());

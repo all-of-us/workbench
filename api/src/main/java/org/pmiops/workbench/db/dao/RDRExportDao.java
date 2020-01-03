@@ -6,7 +6,7 @@ import org.pmiops.workbench.db.model.DbRdrExport;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-public interface RDRExportDao extends CrudRepository<DbRdrExport, Long> {
+public interface RdrExportDao extends CrudRepository<DbRdrExport, Long> {
 
   @Query(
       nativeQuery = true,
@@ -24,5 +24,5 @@ public interface RDRExportDao extends CrudRepository<DbRdrExport, Long> {
               + "w.last_modified_time > rdr.last_export_date or rdr.entity_id IS NULL")
   List<BigInteger> findDbWorkspaceIdsToExport();
 
-  DbRdrExport findByEntityTypeAndEntityId(short entity, long id);
+  DbRdrExport findByEntityTypeAndEntityId(short entity_type, long entity_id);
 }

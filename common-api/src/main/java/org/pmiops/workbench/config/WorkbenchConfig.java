@@ -207,7 +207,7 @@ public class WorkbenchConfig {
     public String host;
     // Google cloud Queue name to which the task will be pushed to
     public String queueName;
-
+    // Number of ids per task
     public Integer exportObjectsPerTask;
   }
 }
