@@ -321,6 +321,10 @@ public class UserServiceImpl implements UserService {
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     dbUser.setAddress(address);
     dbUser.setDemographicSurvey(demographicSurvey);
+    DbUser user = new DbUser();
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    user.setCreationTime(now);
+    user.setLastModifiedTime(now);
     // For existing user that do not have address
     if (address != null) {
       address.setUser(dbUser);
