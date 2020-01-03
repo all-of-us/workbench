@@ -220,7 +220,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     aclMap.forEach(
         (email, access) -> {
           RdrWorkspaceUser workspaceUderMap = new RdrWorkspaceUser();
-          workspaceUderMap.setUserId((int) userDao.findUserByEmail(email).getUserId());
+          workspaceUderMap.setUserId((int) userDao.findUserByUsername(email).getUserId());
           workspaceUderMap.setRole(RdrWorkspaceUser.RoleEnum.fromValue(access.getAccessLevel()));
           RdrWorkspace.addWorkspaceUsersItem(workspaceUderMap);
         });

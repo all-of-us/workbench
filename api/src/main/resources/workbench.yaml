@@ -2172,7 +2172,6 @@ paths:
           schema:
             $ref: "#/definitions/DataSetPreviewResponse"
 
-<<<<<<< HEAD
   /v1/offline/exportResearcherData:
     post:
       tags:
@@ -2211,7 +2210,6 @@ paths:
           description: >
             A SQL query for each domain in the Data Set
 
-=======
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/domainValues/{domain}:
     get:
       tags:

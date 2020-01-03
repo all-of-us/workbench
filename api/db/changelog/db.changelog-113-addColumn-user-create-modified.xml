@@ -15,9 +15,9 @@
     </addColumn>
   </changeSet>
   <changeSet id="update creation time" author="nsaxena">
-    <sql>update user set creation_time = first_sign_in_time where creation_time is null</sql>
+    <sql>update user set creation_time = first_sign_in_time</sql>
   </changeSet>
   <changeSet id="update modified time" author="nsaxena">
-    <sql>update user set last_modified_time = first_sign_in_time where last_modified_time is null</sql>
+    <sql>update user set last_modified_time = first_sign_in_time</sql>
   </changeSet>
 </databaseChangeLog>
