@@ -550,6 +550,7 @@ paths:
       operationId: listClusters
       tags:
         - cluster
+        - compute
       parameters:
         - in: path
           name: billingProjectId
@@ -607,6 +608,7 @@ paths:
       operationId: localize
       tags:
         - cluster
+        - compute
       consumes:
         - application/json
       parameters:
@@ -1281,6 +1283,7 @@ paths:
     post:
       tags:
         - workspaces
+        - compute
       consumes:
         - application/json
       description: Renames specified notebook
@@ -1311,6 +1314,7 @@ paths:
     post:
       tags:
         - workspaces
+        - compute
       description: Duplicates specified notebook
       operationId: "cloneNotebook"
       parameters:
@@ -1335,6 +1339,7 @@ paths:
     post:
       tags:
         - workspaces
+        - compute
       description: Copy specified notebook in path to specified workspace in body
       operationId: "copyNotebook"
       parameters:
@@ -1376,6 +1381,7 @@ paths:
     post:
       tags:
         - workspaces
+        - compute
       description: Get the HTML for a read only view of the notebook
       operationId: "readOnlyNotebook"
       parameters:
@@ -1396,6 +1402,7 @@ paths:
     get:
       tags:
         - workspaces
+        - compute
       summary: Get the locking metadata for a notebook
       description: |
         Get the locking metadata for a notebook, if available.  If the notebook is not locked
@@ -2113,6 +2120,7 @@ paths:
     post:
       tags:
         - dataSet
+        - compute
       description: >
         Exports a data set query to a notebook
       operationId: "exportToNotebook"
