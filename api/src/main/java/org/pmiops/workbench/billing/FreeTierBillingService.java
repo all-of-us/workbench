@@ -92,7 +92,7 @@ public class FreeTierBillingService {
 
     final Set<DbUser> costExpiredUsers =
         userCosts.entrySet().stream()
-            .filter(this::expiredByCost)
+            .filter(e -> expiredByCost(e.getKey(), e.getValue()))
             .map(Entry::getKey)
             .collect(Collectors.toSet());
 
@@ -108,16 +108,14 @@ public class FreeTierBillingService {
     sendAlertsForTimeThresholds(userCosts, currentExpiredUsers);
   }
 
-  private boolean expiredByCost(final Entry<DbUser, Double> entry) {
-    final DbUser u = entry.getKey();
-    final double currentCost = entry.getValue();
-    return currentCost > getUserFreeTierDollarLimit(u);
+  private boolean expiredByCost(final DbUser user, final double currentCost) {
+    return currentCost > getUserFreeTierDollarLimit(user);
   }
 
-  private boolean expiredByTime(final DbUser u) {
-    final Instant userFreeCreditStartTime = u.getFirstRegistrationCompletionTime().toInstant();
-    final Duration userFreeCreditDays = Duration.ofDays(getUserFreeTierDaysLimit(u));
-    final Instant userFreeCreditExpirationTime = userFreeCreditStartTime.plus(userFreeCreditDays);
+  private boolean expiredByTime(final DbUser user) {
+    final Instant userFreeCreditStartTime = user.getFirstRegistrationCompletionTime().toInstant();
+    final Instant userFreeCreditExpirationTime =
+        userFreeCreditStartTime.plus(Duration.ofDays(getUserFreeTierDaysLimit(user)));
     return clock.instant().isAfter(userFreeCreditExpirationTime);
   }
 

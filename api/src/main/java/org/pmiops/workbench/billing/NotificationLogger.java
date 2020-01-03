@@ -17,7 +17,7 @@ public class NotificationLogger implements NotificationService {
 
   @Override
   public void alertUserFreeTierDollarThreshold(
-      DbUser user, double threshold, double currentUsage, double remainingBalance) {
+      final DbUser user, double threshold, double currentUsage, double remainingBalance) {
     final String logMsg =
         String.format(
             "User %s has passed the %.2f free tier dollar threshold.  Current total usage is $%.2f with remaining balance $%.2f",
@@ -27,7 +27,10 @@ public class NotificationLogger implements NotificationService {
 
   @Override
   public void alertUserFreeTierTimeThreshold(
-      DbUser user, long daysRemaining, LocalDate expirationDate, double remainingDollarBalance) {
+      final DbUser user,
+      long daysRemaining,
+      final LocalDate expirationDate,
+      double remainingDollarBalance) {
 
     // TODO choose desired date format
     final String dateStr =
@@ -43,7 +46,7 @@ public class NotificationLogger implements NotificationService {
   }
 
   @Override
-  public void alertUserFreeTierExpiration(DbUser user) {
+  public void alertUserFreeTierExpiration(final DbUser user) {
     final String logMsg =
         String.format("Free credits have expired for User %s", user.getUsername());
     logger.info(logMsg);

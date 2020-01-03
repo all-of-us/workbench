@@ -5,10 +5,13 @@ import org.pmiops.workbench.db.model.DbUser;
 
 public interface NotificationService {
   void alertUserFreeTierDollarThreshold(
-      DbUser user, double threshold, double currentUsage, double remainingBalance);
+      final DbUser user, double threshold, double currentUsage, double remainingBalance);
 
   void alertUserFreeTierTimeThreshold(
-      DbUser user, long daysRemaining, LocalDate expirationDate, double remainingDollarBalance);
+      final DbUser user,
+      long daysRemaining,
+      final LocalDate expirationDate,
+      double remainingDollarBalance);
 
-  void alertUserFreeTierExpiration(DbUser user);
+  void alertUserFreeTierExpiration(final DbUser user);
 }
