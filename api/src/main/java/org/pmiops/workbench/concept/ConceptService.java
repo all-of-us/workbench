@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
@@ -44,6 +45,7 @@ public class ConceptService {
   @Autowired private ConceptDao conceptDao;
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private SurveyModuleDao surveyModuleDao;
+  @Autowired private CBCriteriaDao cbCriteriaDao;
   public static final String STANDARD_CONCEPTS = "STANDARD_CONCEPTS";
   public static final String STANDARD_CONCEPT_CODE = "S";
   public static final String CLASSIFICATION_CONCEPT_CODE = "C";
@@ -116,12 +118,24 @@ public class ConceptService {
     return domainInfoDao.findAllMatchConceptCounts(matchExp);
   }
 
+  public DbDomainInfo findPhysicalMeasurementConceptCounts(String matchExp) {
+    return domainInfoDao.findPhysicalMeasurementConceptCounts(matchExp);
+  }
+
   public List<DbDomainInfo> getStandardConceptCounts(String matchExp) {
     return domainInfoDao.findStandardConceptCounts(matchExp);
   }
 
   public List<DbSurveyModule> getSurveyInfo() {
     return surveyModuleDao.findByParticipantCountNotOrderByOrderNumberAsc(0L);
+  }
+
+  public long findSurveyCountByTerm(String matchExp) {
+    return cbCriteriaDao.findSurveyCountByTerm(matchExp);
+  }
+
+  public long findSurveyCountBySurveyName(String surveyName) {
+    return cbCriteriaDao.findSurveyCountBySurveyName(surveyName);
   }
 
   public Slice<DbConcept> searchConcepts(

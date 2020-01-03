@@ -117,15 +117,20 @@ public class ConceptsController implements ConceptsApiDelegate {
   private void addDomainCounts(SearchConceptsRequest request, ConceptListResponse response) {
     if (request.getIncludeDomainCounts()) {
       StandardConceptFilter standardConceptFilter = request.getStandardConceptFilter();
+      boolean allConcepts = standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS;
+      DbDomainInfo pmDomainInfo = null;
       String matchExp = ConceptService.modifyMultipleMatchKeyword(request.getQuery());
       List<DbDomainInfo> allDbDomainInfos = conceptService.getAllDomainsOrderByDomainId();
       List<DbDomainInfo> matchingDbDomainInfos =
           matchExp == null ? allDbDomainInfos : new ArrayList<>();
       if (matchingDbDomainInfos.isEmpty()) {
         matchingDbDomainInfos =
-            standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS
+            allConcepts
                 ? conceptService.getAllConceptCounts(matchExp)
                 : conceptService.getStandardConceptCounts(matchExp);
+        if (allConcepts) {
+          pmDomainInfo = conceptService.findPhysicalMeasurementConceptCounts(matchExp);
+        }
       }
       Map<Domain, DbDomainInfo> domainCountMap =
           Maps.uniqueIndex(matchingDbDomainInfos, DbDomainInfo::getDomainEnum);
@@ -134,17 +139,32 @@ public class ConceptsController implements ConceptsApiDelegate {
       for (DbDomainInfo allDbDomainInfo : allDbDomainInfos) {
         Domain domain = allDbDomainInfo.getDomainEnum();
         DbDomainInfo matchingDbDomainInfo = domainCountMap.get(domain);
+        if (domain.equals(Domain.PHYSICALMEASUREMENT) && pmDomainInfo != null) {
+          matchingDbDomainInfo = pmDomainInfo;
+        }
         response.addDomainCountsItem(
             new DomainCount()
                 .domain(domain)
                 .conceptCount(
                     matchingDbDomainInfo == null
                         ? 0L
-                        : (standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS
+                        : (allConcepts
                             ? matchingDbDomainInfo.getAllConceptCount()
                             : matchingDbDomainInfo.getStandardConceptCount()))
                 .name(allDbDomainInfo.getName()));
       }
+      long conceptCount = 0;
+      if (allConcepts) {
+        conceptCount =
+            matchExp == null
+                ? conceptService.findSurveyCountBySurveyName("The Basics")
+                : conceptService.findSurveyCountByTerm(matchExp);
+      }
+      response.addDomainCountsItem(
+          new DomainCount()
+              .domain(Domain.SURVEY)
+              .conceptCount(conceptCount)
+              .name(Domain.SURVEY.toString()));
     }
   }
 
