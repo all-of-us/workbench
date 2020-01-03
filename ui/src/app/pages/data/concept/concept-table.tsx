@@ -261,7 +261,8 @@ export class ConceptTable extends React.Component<Props, State> {
         </style>
         {loading ? <SpinnerOverlay /> : <DataTable ref={tableRef} emptyMessage={loading ? '' : placeholderValue}
                                                    style={styles.datatable}
-                                                   header={this.selectAllHeader()} value={this.props.concepts} scrollable={true}
+                                                   header={this.selectAllHeader()}
+                                                   value={this.props.concepts.map(formatCounts)} scrollable={true}
                                                    selection={selectedConcepts}
                                                    totalRecords={this.state.totalRecords}
                                                    expandedRows={this.props.concepts
