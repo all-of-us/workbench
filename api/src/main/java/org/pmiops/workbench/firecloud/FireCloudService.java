@@ -24,6 +24,7 @@ public interface FireCloudService {
 
   String WORKSPACE_DELIMITER = "__";
 
+  /** Returns the base path for the FireCloud API. Exposed for integration testing purposes only. */
   String getBasePath();
 
   /** @return true if firecloud is okay, false if firecloud is down. */
