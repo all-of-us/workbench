@@ -5,6 +5,7 @@ import io.opencensus.metrics.data.AttachmentValue;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.OpenCensusView;
 
 public interface MonitoringService {
@@ -16,14 +17,14 @@ public interface MonitoringService {
    * Record an occurrence of a counted (a.k.a. delta or cumulative) time series. These are events
    * that are typically measured more for frequency than for absolute value.
    *
-   * @param viewInfo
+   * @param eventMetric
    */
-  default void recordEvent(OpenCensusView viewInfo) {
-    recordValue(viewInfo, DELTA_VALUE);
+  default void recordEvent(EventMetric eventMetric) {
+    recordValue(eventMetric, DELTA_VALUE);
   }
 
-  default void recordEvent(OpenCensusView viewInfo, Map<String, AttachmentValue> attachments) {
-    recordValues(ImmutableMap.of(viewInfo, DELTA_VALUE), attachments);
+  default void recordEvent(EventMetric eventMetric, Map<String, AttachmentValue> attachments) {
+    recordValues(ImmutableMap.of(eventMetric, DELTA_VALUE), attachments);
   }
 
   default void recordValue(OpenCensusView viewInfo, Number value) {

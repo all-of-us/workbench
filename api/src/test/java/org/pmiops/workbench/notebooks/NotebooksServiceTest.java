@@ -30,7 +30,7 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
-import org.pmiops.workbench.monitoring.views.GaugeMetric;
+import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -174,7 +174,7 @@ public class NotebooksServiceTest {
   @Test
   public void testSaveNotebook_firesMetric() {
     notebooksService.saveNotebook(BUCKET_NAME, NOTEBOOK_NAME, NOTEBOOK_CONTENTS);
-    verify(mockMonitoringService).recordEvent(GaugeMetric.NOTEBOOK_SAVE);
+    verify(mockMonitoringService).recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
 
   @Test
@@ -183,7 +183,7 @@ public class NotebooksServiceTest {
     doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
 
     notebooksService.deleteNotebook(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
-    verify(mockMonitoringService).recordEvent(GaugeMetric.NOTEBOOK_DELETE);
+    verify(mockMonitoringService).recordEvent(EventMetric.NOTEBOOK_DELETE);
   }
 
   @Test
@@ -199,7 +199,7 @@ public class NotebooksServiceTest {
     assertThat(bundle).isNotNull();
     assertThat(bundle.getAttachments().get(AttachmentKey.NOTEBOOK_NAME.getKeyName()).getValue())
         .isEqualTo(clonedFileDetail.getName());
-    assertThat(bundle.getMeasurements().get(GaugeMetric.NOTEBOOK_CLONE)).isEqualTo(1L);
+    assertThat(bundle.getMeasurements().get(EventMetric.NOTEBOOK_CLONE)).isEqualTo(1L);
   }
 
   private void stubNotebookToJson() {

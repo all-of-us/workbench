@@ -1,7 +1,6 @@
 package org.pmiops.workbench.monitoring;
 
 import com.google.api.MonitoredResource;
-import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
 import java.io.IOException;
@@ -22,15 +21,6 @@ public class StackdriverStatsExporterService {
   private static final String STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME = "custom.googleapis.com";
   private boolean initialized;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
-
-  private static final FieldDescriptor PROJECT_ID_DESCRIPTOR =
-      MonitoredResource.getDescriptor().findFieldByName("project_id");
-  private static final FieldDescriptor LOCATION_DESCRIPTOR =
-      MonitoredResource.getDescriptor().findFieldByName("location");
-  private static final FieldDescriptor NAMESPACE_DESCRIPTOR =
-      MonitoredResource.getDescriptor().findFieldByName("namespace");
-  private static final FieldDescriptor NODE_ID_DESCRIPTOR =
-      MonitoredResource.getDescriptor().findFieldByName("node_id");
 
   public StackdriverStatsExporterService(Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.workbenchConfigProvider = workbenchConfigProvider;

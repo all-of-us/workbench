@@ -3,6 +3,7 @@ package org.pmiops.workbench.monitoring;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,8 @@ public class GaugeRecorderService {
   }
 
   private void logValues(Collection<MeasurementBundle> bundles) {
-    logger.info(
+    logger.log(
+        Level.FINE,
         bundles.stream()
             .map(MeasurementBundle::toString)
             .sorted()
