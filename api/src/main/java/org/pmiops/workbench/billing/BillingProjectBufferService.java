@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
@@ -91,26 +92,17 @@ public class BillingProjectBufferService implements GaugeDataCollector {
             .addValue(GaugeMetric.BILLING_BUFFER_SIZE, getCurrentBufferSize())
             .build());
 
-    // TODO(jaycarlton): set up a DAO/data manager method pair to build this map in one query.
     final ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
-        Arrays.stream(BufferEntryStatus.values())
-            .map(
-                status ->
-                    new SimpleImmutableEntry<>(
-                        status,
-                        billingProjectBufferEntryDao.countByStatus(
-                            DbStorageEnums.billingProjectBufferEntryStatusToStorage(status))))
-            .collect(ImmutableMap.toImmutableMap(Entry::getKey, Entry::getValue));
+        ImmutableMap.copyOf(billingProjectBufferEntryDao.getCountByStatusMap());
 
-    // Add a bundle specifically for the overall
-    entryStatusToCount.entrySet().stream()
-        .map(
-            entry ->
-                MeasurementBundle.builder()
-                    .addValue(GaugeMetric.BILLING_BUFFER_COUNT_BY_STATUS, entry.getValue())
-                    .attach(AttachmentKey.BUFFER_ENTRY_STATUS, entry.getKey().toString())
-                    .build())
-        .forEach(resultBuilder::add);
+    for (BufferEntryStatus status : BufferEntryStatus.values()) {
+      long count = entryStatusToCount.getOrDefault(status, 0L);
+      resultBuilder.add(MeasurementBundle.builder()
+          .addValue(GaugeMetric.BILLING_BUFFER_COUNT_BY_STATUS, count)
+          .attach(AttachmentKey.BUFFER_ENTRY_STATUS, status.toString())
+          .build());
+    }
+
     return resultBuilder.build();
   }
 
