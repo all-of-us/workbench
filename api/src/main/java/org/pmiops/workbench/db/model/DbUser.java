@@ -1,7 +1,9 @@
 package org.pmiops.workbench.db.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -255,6 +257,11 @@ public class DbUser {
     return firstRegistrationCompletionTime;
   }
 
+  public void setFirstRegistrationCompletionTime() {
+    setFirstRegistrationCompletionTime(Timestamp.from(Instant.now()));
+  }
+
+  @VisibleForTesting
   public void setFirstRegistrationCompletionTime(Timestamp registrationCompletionTime) {
     this.firstRegistrationCompletionTime = registrationCompletionTime;
   }

@@ -165,6 +165,12 @@ public class UserServiceImpl implements UserService {
     if (shouldUserBeRegistered(dbUser)) {
       addToRegisteredTierGroupIdempotent(dbUser);
       newDataAccessLevel = DataAccessLevel.REGISTERED;
+
+      // if this is the first time the user has completed registration, record it
+      // this starts the Free Tier Credits countdown clock
+      if (dbUser.getFirstRegistrationCompletionTime() == null) {
+        dbUser.setFirstRegistrationCompletionTime();
+      }
     } else {
       removeFromRegisteredTierGroupIdempotent(dbUser);
       newDataAccessLevel = DataAccessLevel.UNREGISTERED;

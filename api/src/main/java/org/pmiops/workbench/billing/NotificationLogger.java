@@ -44,7 +44,8 @@ public class NotificationLogger implements NotificationService {
 
   @Override
   public void alertUserFreeTierExpiration(DbUser user) {
-    final String logMsg = String.format("Free credits have expired for User %s", user.getUsername());
+    final String logMsg =
+        String.format("Free credits have expired for User %s", user.getUsername());
     logger.info(logMsg);
   }
 }
