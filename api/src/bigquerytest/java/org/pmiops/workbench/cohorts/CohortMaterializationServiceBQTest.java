@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,12 +25,14 @@ import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryTestService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cdr.dao.DomainInfoDao;
+import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
+import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -95,7 +95,9 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Autowired private ConceptDao conceptDao;
 
-  @PersistenceContext private EntityManager entityManager;
+  @Autowired private DomainInfoDao domainInfoDao;
+
+  @Autowired private SurveyModuleDao surveyModuleDao;
 
   @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
 
@@ -160,7 +162,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     participantCohortStatusDao.save(
         makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
 
-    ConceptService conceptService = new ConceptService(entityManager, conceptDao);
+    ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
 
     this.cohortMaterializationService =
         new CohortMaterializationService(

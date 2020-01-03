@@ -5,8 +5,6 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,8 +13,10 @@ import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.BigQueryTestService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.ConceptService;
+import org.pmiops.workbench.cdr.dao.DomainInfoDao;
+import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
@@ -36,9 +36,11 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
-  @PersistenceContext private EntityManager entityManager;
-
   @Autowired private ConceptDao conceptDao;
+
+  @Autowired private DomainInfoDao domainInfoDao;
+
+  @Autowired private SurveyModuleDao surveyModuleDao;
 
   @Autowired private BigQueryService bigQueryService;
 
@@ -53,7 +55,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
-    ConceptService conceptService = new ConceptService(entityManager, conceptDao);
+    ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
     conceptBigQueryService =
         new ConceptBigQueryService(bigQueryService, cdrBigQuerySchemaConfigService, conceptService);
 

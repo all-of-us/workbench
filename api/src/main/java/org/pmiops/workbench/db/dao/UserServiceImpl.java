@@ -8,6 +8,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.BiConsumer;
@@ -171,6 +172,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     if (shouldUserBeRegistered(dbUser)) {
       addToRegisteredTierGroupIdempotent(dbUser);
       newDataAccessLevel = DataAccessLevel.REGISTERED;
+
+      // if this is the first time the user has completed registration, record it
+      // this starts the Free Tier Credits countdown clock
+      if (dbUser.getFirstRegistrationCompletionTime() == null) {
+        dbUser.setFirstRegistrationCompletionTime();
+      }
     } else {
       removeFromRegisteredTierGroupIdempotent(dbUser);
       newDataAccessLevel = DataAccessLevel.UNREGISTERED;
@@ -741,14 +748,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-
+    Map<Boolean, Long> userCountByDisabled = userDao.findAllByDisabled();
     return ImmutableSet.of(
         MeasurementBundle.builder()
-            .addValue(GaugeMetric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledFalse())
+            .addValue(GaugeMetric.USER_COUNT_BY_DISABLED_STATUS, userCountByDisabled.getOrDefault(false, 0L))
             .attach(AttachmentKey.USER_DISABLED, Boolean.valueOf(false).toString())
             .build(),
         MeasurementBundle.builder()
-            .addValue(GaugeMetric.USER_COUNT_BY_DISABLED_STATUS, userDao.countByDisabledTrue())
+            .addValue(GaugeMetric.USER_COUNT_BY_DISABLED_STATUS, userCountByDisabled.getOrDefault(true, 0L))
             .attach(AttachmentKey.USER_DISABLED, Boolean.valueOf(true).toString())
             .build());
   }

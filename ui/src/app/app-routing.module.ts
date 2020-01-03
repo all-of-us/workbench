@@ -7,6 +7,7 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {DataUseAgreementComponent} from 'app/pages/profile/data-use-agreement';
+import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
@@ -275,6 +276,10 @@ const routes: Routes = [
         path: 'admin/user',
         component: AdminUserComponent,
         data: {title: 'User Admin Table'}
+      }, {
+        path: 'admin/banner',
+        component: AdminBannerComponent,
+        data: {title: 'Create Banner'}
       }, {
         path: 'profile',
         component: ProfilePageComponent,

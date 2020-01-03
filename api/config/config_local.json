@@ -25,6 +25,8 @@
     "defaultFreeCreditsLimit": 100.0,
     "defaultFreeCreditsDollarLimit": 100.0,
     "defaultFreeCreditsDaysLimit": 180,
+    "freeTierCostAlertThresholds": [0.5, 0.75],
+    "freeTierTimeAlertThresholds": [0.5, 0.75],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-test-1@all-of-us-workbench-test.iam.gserviceaccount.com"

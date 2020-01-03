@@ -1,6 +1,10 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -36,7 +40,10 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   List<DbUser> findUsersByDataAccessLevelsAndSearchString(
       @Param("dals") List<Short> dataAccessLevels, @Param("term") String term, Sort sort);
 
-  long countByDisabledTrue();
+  Set<DbUser> findByFirstRegistrationCompletionTimeNotNull();
 
-  long countByDisabledFalse();
+  default Map<Boolean, Long> findAllByDisabled() {
+    return StreamSupport.stream(findAll().spliterator(), false)
+        .collect(Collectors.groupingBy(DbUser::getDisabled, Collectors.counting()));
+  }
 }

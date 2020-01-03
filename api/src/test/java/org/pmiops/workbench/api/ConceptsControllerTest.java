@@ -11,20 +11,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cohorts.CohortCloningService;
+import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataSetService;
@@ -233,8 +231,6 @@ public class ConceptsControllerTest {
   @Mock Provider<DbUser> userProvider;
   @Autowired SurveyModuleDao surveyModuleDao;
 
-  @PersistenceContext private EntityManager entityManager;
-
   private ConceptsController conceptsController;
 
   @Before
@@ -242,15 +238,9 @@ public class ConceptsControllerTest {
     // Injecting ConceptsController and ConceptService doesn't work well without using
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
-    ConceptService conceptService = new ConceptService(entityManager, conceptDao);
+    ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
     conceptsController =
-        new ConceptsController(
-            conceptService,
-            conceptBigQueryService,
-            workspaceService,
-            domainInfoDao,
-            conceptDao,
-            surveyModuleDao);
+        new ConceptsController(conceptService, conceptBigQueryService, workspaceService);
 
     DbUser user = new DbUser();
     user.setUsername(USER_EMAIL);
@@ -802,7 +792,7 @@ public class ConceptsControllerTest {
     result.setConceptId(concept.getConceptId());
     result.setConceptName(concept.getConceptName());
     result.setStandardConcept(
-        concept.getStandardConcept() == null ? null : (concept.getStandardConcept() ? "S" : null));
+        concept.getStandardConcept() == null ? "" : (concept.getStandardConcept() ? "S" : ""));
     result.setConceptCode(concept.getConceptCode());
     result.setConceptClassId(concept.getConceptClassId());
     result.setVocabularyId(concept.getVocabularyId());
