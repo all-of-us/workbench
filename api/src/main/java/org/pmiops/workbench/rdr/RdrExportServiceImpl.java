@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * The purpose of this service is to export user/workspace data from workbench to Research Directory
+ *
  * @author nsaxena
  */
 @Service
@@ -65,9 +66,9 @@ public class RdrExportServiceImpl implements RdrExportService {
   }
 
   /**
-   * Retrieve the list of all users ids that are either
-   * a) not in rdr_Export table or
-   * b) have last_modified_time (user table) > export_time (rdr_export table)
+   * Retrieve the list of all users ids that are either a) not in rdr_Export table or b) have
+   * last_modified_time (user table) > export_time (rdr_export table)
+   *
    * @return list of User Ids
    */
   @Override
@@ -87,9 +88,9 @@ public class RdrExportServiceImpl implements RdrExportService {
   }
 
   /**
-   * Retrieve the list of all workspace ids that are either
-   * a) not in rdr_Export table or
-   * b) have last_modified_time (workspace table) > export_time (rdr_export table)
+   * Retrieve the list of all workspace ids that are either a) not in rdr_Export table or b) have
+   * last_modified_time (workspace table) > export_time (rdr_export table)
+   *
    * @return list of Workspace Ids
    */
   @Override
@@ -111,6 +112,7 @@ public class RdrExportServiceImpl implements RdrExportService {
   /**
    * Call the Rdr API to send researcher data and if successful store all the ids in rdr_export
    * table with current date as the lastExport date
+   *
    * @param userIds
    */
   @Override
@@ -134,6 +136,7 @@ public class RdrExportServiceImpl implements RdrExportService {
   /**
    * Call the Rdr API to send researcher data and if successful store all the ids in rdr_export
    * table with current date as the lastExport date
+   *
    * @param workspaceIds
    */
   @Override
@@ -143,7 +146,8 @@ public class RdrExportServiceImpl implements RdrExportService {
       RdrWorkspacesList =
           workspaceIds.stream()
               .map(
-                  workspaceId -> toRdrWorkspace(workspaceDao.findDbWorkspaceByWorkspaceId(workspaceId)))
+                  workspaceId ->
+                      toRdrWorkspace(workspaceDao.findDbWorkspaceByWorkspaceId(workspaceId)))
               .collect(Collectors.toList());
       RdrApiProvider.get().getApiClient().setDebugging(true);
       RdrApiProvider.get().exportWorkspaces(RdrWorkspacesList);
@@ -196,7 +200,8 @@ public class RdrExportServiceImpl implements RdrExportService {
         workbenchWorkspace.getCreationTime().toLocalDateTime().atOffset(offset));
     RdrWorkspace.setModifiedTime(
         workbenchWorkspace.getLastModifiedTime().toLocalDateTime().atOffset(offset));
-    RdrWorkspace.setStatus(org.pmiops.workbench.rdr.model.RdrWorkspace.StatusEnum.fromValue(
+    RdrWorkspace.setStatus(
+        org.pmiops.workbench.rdr.model.RdrWorkspace.StatusEnum.fromValue(
             workbenchWorkspace.getWorkspaceActiveStatusEnum().toString()));
     RdrWorkspace.setExcludeFromPublicDirectory(false);
     RdrWorkspace.setDiseaseFocusedResearch(workbenchWorkspace.getDiseaseFocusedResearch());
@@ -231,6 +236,7 @@ public class RdrExportServiceImpl implements RdrExportService {
   /**
    * For Each entityType and entity id update lastExportDate to current date time if it exist in
    * rdr_export table else add a new entry
+   *
    * @param entity
    * @param idList
    */
@@ -242,7 +248,8 @@ public class RdrExportServiceImpl implements RdrExportService {
             .map(
                 id -> {
                   DbRdrExport rd =
-                      rdrExportDao.findByEntityTypeAndEntityId(RdrEntityEnums.entityToStorage(entity), id);
+                      rdrExportDao.findByEntityTypeAndEntityId(
+                          RdrEntityEnums.entityToStorage(entity), id);
                   // If Entry doesn't exist in rdr_export create an object else just update the
                   // export Date
                   // to right now

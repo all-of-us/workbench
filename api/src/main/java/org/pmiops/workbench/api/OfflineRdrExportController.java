@@ -21,8 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * This offline process is responsible to daily sync up with RDR by sending all the
- * created/modified User and workspace information.
+ * This offline process is responsible to daily sync up with RDR by sending all the created/modified
+ * User and workspace information.
+ *
  * @author nsaxena
  */
 @RestController
@@ -38,7 +39,8 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
 
   private final String IDS_STRING_SPLIT = ", ";
 
-  OfflineRdrExportController(RdrExportService rdrExportService, Provider<WorkbenchConfig> configProvider) {
+  OfflineRdrExportController(
+      RdrExportService rdrExportService, Provider<WorkbenchConfig> configProvider) {
     this.rdrExportService = rdrExportService;
     this.workbenchConfigProvider = configProvider;
   }
@@ -46,6 +48,7 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
   /**
    * Purpose of this method will be to create multiple task of 2 categories, user (researcher) and
    * workspace.
+   *
    * @return
    */
   @Override
@@ -56,38 +59,44 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
       try {
         groupIdsAndPushTask(rdrExportService.findAllUserIdsToExport(), EXPORT_RESEARCHER_PATH);
       } catch (Exception ex) {
-        log.severe(String.format("Error while exporting researcher data to RDR: %s", ex.getMessage()));
+        log.severe(
+            String.format("Error while exporting researcher data to RDR: %s", ex.getMessage()));
       }
       try {
         groupIdsAndPushTask(rdrExportService.findAllWorkspacesIdsToExport(), EXPORT_USER_PATH);
       } catch (Exception ex) {
-        log.severe(String.format("Error while exporting workspace data to RDR: %s", ex.getMessage()));
+        log.severe(
+            String.format("Error while exporting workspace data to RDR: %s", ex.getMessage()));
       }
     }
     return ResponseEntity.noContent().build();
   }
 
   /**
-   * For the list of Ids passed
-   *  Create task with n ids (where n is configured in config files) and
-   *  Push them in queue
+   * For the list of Ids passed Create task with n ids (where n is configured in config files) and
+   * Push them in queue
+   *
    * @param idList : Lis of Ids
    * @param taskUri: The destination URL the task will be calling with group of 10 ids
    */
   private void groupIdsAndPushTask(List<Long> idList, String taskUri) {
-    if (idList.size() == 0)
-      return;
+    if (idList.size() == 0) return;
     WorkbenchConfig workbenchConfig = workbenchConfigProvider.get();
     final AtomicInteger counter = new AtomicInteger();
 
     final Collection<List<Long>> idGroups =
         idList.stream()
-            .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / workbenchConfig.rdrExport.exportObjectsPerTask))
+            .collect(
+                Collectors.groupingBy(
+                    it ->
+                        counter.getAndIncrement() / workbenchConfig.rdrExport.exportObjectsPerTask))
             .values();
     Iterator<List<Long>> idIterator = idGroups.iterator();
     String queuePath =
-        QueueName.of(workbenchConfig.server.projectId, workbenchConfig.server.location,
-            workbenchConfig.rdrExport.queueName)
+        QueueName.of(
+                workbenchConfig.server.projectId,
+                workbenchConfig.server.location,
+                workbenchConfig.rdrExport.queueName)
             .toString();
     while (idIterator.hasNext()) {
       createAndPushTask(idIterator.next(), queuePath, taskUri);
@@ -120,6 +129,7 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
   /**
    * This endpoint will be called by the task in queue. The task will contain user ID whose
    * information needs to be send to RdrExportService
+   *
    * @param request: Type: ByteString will contain comma separated User ids
    * @return
    */
@@ -140,6 +150,7 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
 
   /**
    * Send all the IDS passed in request body to RDRService
+   *
    * @param researchIds: Type: ByteString will contain comma separated Workspace ids
    * @return
    */
