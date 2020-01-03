@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,8 +43,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
   Set<DbUser> findByFirstRegistrationCompletionTimeNotNull();
 
-  default Map<Boolean, Long> findAllByDisabled() {
-    return StreamSupport.stream(findAll().spliterator(), false)
-        .collect(Collectors.groupingBy(DbUser::getDisabled, Collectors.counting()));
+  default Map<Boolean, Long> getDisabledToCountMap() {
+    return ImmutableMap.copyOf(StreamSupport.stream(findAll().spliterator(), false)
+        .collect(Collectors.groupingBy(DbUser::getDisabled, Collectors.counting())));
   }
 }

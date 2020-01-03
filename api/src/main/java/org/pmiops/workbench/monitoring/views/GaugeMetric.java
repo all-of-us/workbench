@@ -30,9 +30,11 @@ public enum GaugeMetric implements OpenCensusView {
       MeasureDouble.class,
       Aggregation.Sum.create()),
   WORKSPACE_TOTAL_COUNT("workspace_total_count", "Count of all workspaces (including inactive)"),
+  WORKSPACE_COUNT_BY_ACTIVE_STATUS("workspace_count_by_active_status", "Count of workspaces by active status"),
   DATASET_COUNT("dataset_count", "Count of all datasets in existence"),
   DATASET_COUNT_BY_INVALID("dataset_count_by_invalid", "Count of all datasets by invalid status"),
   COHORT_COUNT("cohort_count", "Count of all cohorts in existence"),
+  COHORT_REVIEW_COUNT("cohort_review_count", "Total number of cohort reviews in existence"),
   USER_COUNT_BY_DISABLED_STATUS(
       "user_count_by_disabled_status", "Count of users, labeled by disabled status");
 

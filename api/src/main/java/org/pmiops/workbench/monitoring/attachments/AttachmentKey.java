@@ -6,7 +6,8 @@ public enum AttachmentKey implements AttachmentKeyBase {
   NOTEBOOK_NAME("notebook_name"),
   NOTEBOOK_WORKSPACE_NAMESPACE("notebook_workspace_namespace"),
   USER_DISABLED("user_disabled"),
-  DATASET_INVALID("dataset_invalid");
+  DATASET_INVALID("dataset_invalid"),
+  WORKSPACE_ACTIVE_STATUS("workspace_active_status");
 
   private String keyName;
 

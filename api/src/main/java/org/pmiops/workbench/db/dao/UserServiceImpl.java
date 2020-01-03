@@ -748,7 +748,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    Map<Boolean, Long> userCountByDisabled = userDao.findAllByDisabled();
+    Map<Boolean, Long> userCountByDisabled = userDao.getDisabledToCountMap();
     return ImmutableSet.of(
         MeasurementBundle.builder()
             .addValue(GaugeMetric.USER_COUNT_BY_DISABLED_STATUS, userCountByDisabled.getOrDefault(false, 0L))

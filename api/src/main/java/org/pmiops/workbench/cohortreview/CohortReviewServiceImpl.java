@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cohortreview;
 
+import com.google.common.collect.ImmutableSet;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -382,7 +383,12 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    return Collections.singleton(
-        MeasurementBundle.builder().addValue(GaugeMetric.COHORT_COUNT, cohortDao.count()).build());
+    return ImmutableSet.of(
+        MeasurementBundle.builder()
+            .addValue(GaugeMetric.COHORT_COUNT, cohortDao.count())
+            .build(),
+        MeasurementBundle.builder()
+            .addValue(GaugeMetric.COHORT_REVIEW_COUNT, cohortReviewDao.count())
+            .build());
   }
 }

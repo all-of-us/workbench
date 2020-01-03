@@ -9,7 +9,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +52,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -619,9 +619,18 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    return Collections.singleton(
-        MeasurementBundle.builder()
-            .addValue(GaugeMetric.WORKSPACE_TOTAL_COUNT, workspaceDao.count())
-            .build());
+    final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
+    resultBuilder.add(MeasurementBundle.builder()
+        .addValue(GaugeMetric.WORKSPACE_TOTAL_COUNT, workspaceDao.count())
+        .build());
+    final Map<WorkspaceActiveStatus, Long> activeStatusToCount = workspaceDao.getActiveStatusToCountMap();
+    for (WorkspaceActiveStatus status : WorkspaceActiveStatus.values()) {
+      final long count = activeStatusToCount.getOrDefault(status, 0L);
+      resultBuilder.add(MeasurementBundle.builder()
+          .addValue(GaugeMetric.WORKSPACE_COUNT_BY_ACTIVE_STATUS, count)
+          .attach(AttachmentKey.WORKSPACE_ACTIVE_STATUS, status.toString())
+          .build());
+    }
+    return resultBuilder.build();
   }
 }
