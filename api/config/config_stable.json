@@ -51,7 +51,8 @@
     "projectId": "all-of-us-rw-stable",
     "shortName": "Stable",
     "oauthClientId": "56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com",
-    "traceAllRequests": false
+    "traceAllRequests": false,
+    "location": "us-central1"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-stable.appspot.com/login",
@@ -82,13 +83,14 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": false,
-    "enableRDRExport": false
+    "enableRdrExport": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-stable"
   },
-  "rdrServer": {
+  "rdrExport": {
     "host": "all-of-us-rdr-stable.appspot.com",
-    "queueName": "all-of-us-workbench-stable"
+    "queueName": "all-of-us-workbench-stable",
+    "exportObjectsPerTask" : 10
   }
 }

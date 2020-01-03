@@ -9,7 +9,7 @@
       <column name="export_id" type="bigint" autoIncrement="true">
         <constraints primaryKey="true" nullable="false"/>
       </column>
-      <column name="entity" type="tinyint">
+      <column name="entity_type" type="tinyint">
         <constraints nullable="false"/>
       </column>
       <column name="entity_id" type="bigint">

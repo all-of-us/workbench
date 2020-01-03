@@ -1141,14 +1141,14 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  /v1/cron/exportToRDR:
+  /v1/cron/exportToRdr:
     get:
       security: []
       tags:
-        - offlineRDRExport
+        - offlineRdrExport
         - cron
       description: Send workbench data to RDR
-      operationId: syncWithRDR
+      operationId: exportData
       responses:
         204:
           description: All modified/created workspaces and users were exported
@@ -2175,13 +2175,13 @@ paths:
           schema:
             $ref: "#/definitions/DataSetPreviewResponse"
 
-  /v1/offline/syncResearcherData:
+  /v1/offline/exportResearcherData:
     post:
       tags:
-        - offlineRDRExport
+        - offlineRdrExport
       description: >
         Send Researcher data
-      operationId: "syncResearcherData"
+      operationId: "exportResearcherData"
       parameters:
         - in: body
           name: researchIds
@@ -2194,13 +2194,13 @@ paths:
           description: >
             A SQL query for each domain in the Data Set
 
-  /v1/offline/syncWorkspaceData:
+  /v1/offline/exportWorkspaceData:
     post:
       tags:
-        - offlineRDRExport
+        - offlineRdrExport
       description: >
         Send Researcher data
-      operationId: "syncWorkspaceData"
+      operationId: "exportWorkspaceData"
       parameters:
         - in: body
           name: researchIds
@@ -2218,16 +2218,6 @@ paths:
 ## DEFINITIONS
 ##########################################################################################
 definitions:
-  ResearcherId:
-    type: object
-    properties:
-      id:
-        type: array
-        description: The IDs of concepts to be added to the concept set.
-        items:
-          type: integer
-          format: int64
-
   StatusResponse:
     type: object
     required:

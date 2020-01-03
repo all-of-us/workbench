@@ -52,7 +52,8 @@
     "projectId": "all-of-us-workbench-test",
     "shortName": "Test",
     "oauthClientId": "602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com",
-    "traceAllRequests": true
+    "traceAllRequests": true,
+    "location": "us-central1"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-workbench-test.appspot.com/login",
@@ -83,13 +84,14 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": true,
-    "enableRDRExport": true
+    "enableRdrExport": true
   },
   "actionAudit": {
     "logName":"workbench-action-audit-test"
   },
-  "rdrServer": {
+  "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",
-    "queueName": "all-of-us-workbench-test"
+    "queueName": "all-of-us-workbench-test",
+    "exportObjectsPerTask" : 10
   }
 }

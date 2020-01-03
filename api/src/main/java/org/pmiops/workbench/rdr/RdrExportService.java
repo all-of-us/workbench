@@ -2,12 +2,12 @@ package org.pmiops.workbench.rdr;
 
 import java.util.List;
 
-public interface RDRService {
+public interface RdrExportService {
   List<Long> findAllUserIdsToExport();
 
   List<Long> findAllWorkspacesIdsToExport();
 
-  void sendUser(List<Long> usersToExport);
+  void exportUsers(List<Long> usersToExport);
 
-  void sendWorkspace(List<Long> workspacesToExport);
+  void exportWorkspaces(List<Long> workspacesToExport);
 }

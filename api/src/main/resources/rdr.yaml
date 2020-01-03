@@ -43,10 +43,10 @@ paths:
     post:
       description: Submits one or more workspace snapshots for storage in the RDR.
       tags:
-        - RDR
+        - Rdr
       consumes:
         - application/json
-      operationId: sendWorkspace
+      operationId: exportWorkspaces
       parameters:
         - in: body
           required: true
@@ -54,7 +54,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/RDRWorkspace"
+              $ref: "#/definitions/RdrWorkspace"
       responses:
         200:
           description: successful operation
@@ -63,8 +63,8 @@ paths:
     post:
       description: Submits one or more researcher snapshots for storage in the RDR.
       tags:
-        - RDR
-      operationId: sendResearcher
+        - Rdr
+      operationId: exportResearcheres
       consumes:
         - application/json
       parameters:
@@ -74,7 +74,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/RDRResearcher"
+              $ref: "#/definitions/RdrResearcher"
       responses:
         200:
           description: successful operation
@@ -82,7 +82,7 @@ paths:
 
 
 definitions:
-  RDRWorkspace:
+  RdrWorkspace:
     type: object
     properties:
       workspaceId:
@@ -104,7 +104,7 @@ definitions:
       workspaceUsers:
         type: array
         items:
-          $ref: '#/definitions/RDRWorkspaceUser'
+          $ref: '#/definitions/RdrWorkspaceUser'
       excludeFromPublicDirectory:
         type: boolean
       diseaseFocusedResearch:
@@ -132,7 +132,7 @@ definitions:
       otherPurpose:
         type: boolean
 
-  RDRWorkspaceUser:
+  RdrWorkspaceUser:
     type: object
     properties:
       userId:
@@ -150,7 +150,7 @@ definitions:
           - ACTIVE
           - INACTIVE
 
-  RDRResearcher:
+  RdrResearcher:
     type: object
     properties:
       userId:
@@ -181,7 +181,7 @@ definitions:
         type: string
 #      Need to talk to Yu about this to be a list
       gender:
-#      Need to talk to yi about this to be a list
+#      Need to talk to yu about this to be a list
         type: string
       race:
         type: string

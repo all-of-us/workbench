@@ -8,15 +8,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import main.java.org.pmiops.workbench.db.model.RDREntityEnums;
-import org.pmiops.workbench.model.RDREntity;
+import main.java.org.pmiops.workbench.db.model.RdrEntityEnums;
+import org.pmiops.workbench.model.RdrEntity;
 
 @Entity
 @Table(name = "rdr_export")
-public class DbRDRExport {
+public class DbRdrExport {
   private int exportId;
-  private Short entity;
-  private int id;
+  private Short entityType;
+  private Long entityId;
   private Timestamp exportDate;
 
   @Id
@@ -30,32 +30,32 @@ public class DbRDRExport {
     this.exportId = exportId;
   }
 
-  @Column(name = "entity")
-  public Short getEntity() {
-    return entity;
+  @Column(name = "entity_type")
+  public Short getEntityType() {
+    return entityType;
   }
 
-  public void setEntity(Short entity) {
-    this.entity = entity;
+  public void setEntityType(Short entityType) {
+    this.entityType = entityType;
   }
 
   @Transient
-  public RDREntity getEntityEnum() {
-    if (entity == null) return null;
-    return RDREntityEnums.entityFromStorage(entity);
+  public RdrEntity getEntityTypeEnum() {
+    if (entityType == null) return null;
+    return RdrEntityEnums.entityFromStorage(entityType);
   }
 
-  public void setEntityEnum(RDREntity entityEnum) {
-    this.entity = RDREntityEnums.entityToStorage(entityEnum);
+  public void setEntityTypeEnum(RdrEntity entityTypeEnum) {
+    this.entityType = RdrEntityEnums.entityToStorage(entityTypeEnum);
   }
 
   @Column(name = "entity_id")
-  public int getId() {
-    return id;
+  public long getEntityId() {
+    return entityId;
   }
 
-  public void setId(int id) {
-    this.id = id;
+  public void setEntityId(long id) {
+    this.entityId = id;
   }
 
   @Column(name = "last_export_date")

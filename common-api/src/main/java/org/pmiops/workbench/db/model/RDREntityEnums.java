@@ -2,20 +2,20 @@ package main.java.org.pmiops.workbench.db.model;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import org.pmiops.workbench.model.RDREntity;
+import org.pmiops.workbench.model.RdrEntity;
 
-public class RDREntityEnums {
-  private static final BiMap<RDREntity, Short> CLIENT_TO_STORAGE_ENTITY =
-      ImmutableBiMap.<RDREntity, Short>builder()
-          .put(RDREntity.USER, (short) 1)
-          .put(RDREntity.WORKSPACE, (short) 2)
+public class RdrEntityEnums {
+  private static final BiMap<RdrEntity, Short> CLIENT_TO_STORAGE_ENTITY =
+      ImmutableBiMap.<RdrEntity, Short>builder()
+          .put(RdrEntity.USER, (short) 1)
+          .put(RdrEntity.WORKSPACE, (short) 2)
           .build();
 
-  public static RDREntity entityFromStorage(Short entity) {
+  public static RdrEntity entityFromStorage(Short entity) {
     return CLIENT_TO_STORAGE_ENTITY.inverse().get(entity);
   }
 
-  public static Short entityToStorage(RDREntity entity) {
+  public static Short entityToStorage(RdrEntity entity) {
     return CLIENT_TO_STORAGE_ENTITY.get(entity);
   }
 }

@@ -24,7 +24,7 @@ public class WorkbenchConfig {
   public FeatureFlagsConfig featureFlags;
   public BillingConfig billing;
   public ActionAuditConfig actionAudit;
-  public RDRConfig rdrServer;
+  public RdrExportConfig rdrExport;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -45,7 +45,7 @@ public class WorkbenchConfig {
     config.server = new ServerConfig();
     config.billing = new BillingConfig();
     config.actionAudit = new ActionAuditConfig();
-    config.rdrServer = new RDRConfig();
+    config.rdrExport = new RdrExportConfig();
     return config;
   }
 
@@ -141,6 +141,7 @@ public class WorkbenchConfig {
     // Controls whether all api requests are traced and sent to Stackdriver tracing, or
     // whether we only trace at the default frequency.
     public boolean traceAllRequests;
+    public String location;
   }
 
   public static class AdminConfig {
@@ -193,17 +194,20 @@ public class WorkbenchConfig {
     // Flag to indicate whether to enable the new Create Account flow
     // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
     public boolean enableNewAccountCreation;
-    // Flag to indicate if USER/WORSPACE data is exported to RDR
-    public boolean enableRDRExport;
+    // Flag to indicate if USER/WORKSPACE data is exported to RDR
+    public boolean enableRdrExport;
   }
 
   public static class ActionAuditConfig {
     public String logName;
   }
 
-  // Defines the rdr host per environment
-  public static class RDRConfig {
+  public static class RdrExportConfig {
+    // RDR Host to connect to to export data
     public String host;
+    // Google cloud Queue name to which the task will be pushed to
     public String queueName;
+
+    public Integer exportObjectsPerTask;
   }
 }

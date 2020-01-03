@@ -51,7 +51,8 @@
     "projectId": "all-of-us-rw-prod",
     "shortName": "Prod",
     "oauthClientId": "684273740878-d7i68in5d9hqr6n9mfvrdh53snekp79f.apps.googleusercontent.com",
-    "traceAllRequests": false
+    "traceAllRequests": false,
+    "location": "us-central1"
   },
   "admin": {
     "adminIdVerification": "support@researchallofus.org",
@@ -82,13 +83,14 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": false,
-    "enableRDRExport": false
+    "enableRdrExport": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-prod"
   },
-  "rdrServer": {
+  "rdrExport": {
     "host": "all-of-us-rdr-prod.appspot.com",
-    "queueName": "all-of-us-workbench-prod"
+    "queueName": "rdrQueueTest",
+    "exportObjectsPerTask" : 10
   }
 }

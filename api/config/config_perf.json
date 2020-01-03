@@ -54,7 +54,8 @@
     "projectId": "all-of-us-rw-perf",
     "shortName": "Perf",
     "oauthClientId": "63939010390-aj0r8hro7r8lkt7a45gissu3m73ietl2.apps.googleusercontent.com",
-    "traceAllRequests": true
+    "traceAllRequests": true,
+    "location": "us-central1"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-perf.appspot.com/login",
@@ -85,13 +86,14 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": false,
-    "enableRDRExport": false
+    "enableRdrExport": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf"
   },
-  "rdrServer": {
+  "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",
-    "queueName": "all-of-us-workbench-perf"
+    "queueName": "all-of-us-workbench-perf",
+    "exportObjectsPerTask" : 10
   }
 }

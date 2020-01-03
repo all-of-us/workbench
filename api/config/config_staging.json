@@ -51,7 +51,8 @@
     "projectId": "all-of-us-rw-staging",
     "shortName": "Staging",
     "oauthClientId": "657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com",
-    "traceAllRequests": false
+    "traceAllRequests": false,
+    "location": "us-central1"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-staging.appspot.com/login",
@@ -82,13 +83,14 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": false,
-    "enableRDRExport": false
+    "enableRdrExport": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-staging"
   },
-  "rdrServer": {
+  "rdrExport": {
     "host": "all-of-us-rdr-staging.appspot.com",
-    "queueName": "all-of-us-workbench-staging"
+    "queueName": "all-of-us-workbench-staging",
+    "exportObjectsPerTask" : 10
   }
 }

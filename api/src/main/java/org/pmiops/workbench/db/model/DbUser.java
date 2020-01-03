@@ -606,7 +606,7 @@ public class DbUser {
     this.lastModifiedTime = lastModifiedTime;
   }
 
-  @Column(name = "create_time")
+  @Column(name = "creation_time")
   public Timestamp getCreationTime() {
     return creationTime;
   }

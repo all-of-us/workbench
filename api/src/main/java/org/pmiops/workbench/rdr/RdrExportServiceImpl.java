@@ -10,67 +10,71 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import main.java.org.pmiops.workbench.db.model.RDREntityEnums;
+import main.java.org.pmiops.workbench.db.model.RdrEntityEnums;
 import org.pmiops.workbench.db.dao.RDRExportDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbRDRExport;
+import org.pmiops.workbench.db.model.DbRdrExport;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.model.RDREntity;
-import org.pmiops.workbench.rdr.api.RDRApi;
-import org.pmiops.workbench.rdr.model.RDRResearcher;
-import org.pmiops.workbench.rdr.model.RDRWorkspace;
-import org.pmiops.workbench.rdr.model.RDRWorkspaceUser;
+import org.pmiops.workbench.model.RdrEntity;
+import org.pmiops.workbench.rdr.api.RdrApi;
+import org.pmiops.workbench.rdr.model.RdrResearcher;
+import org.pmiops.workbench.rdr.model.RdrWorkspace;
+import org.pmiops.workbench.rdr.model.RdrWorkspaceUser;
 import org.pmiops.workbench.rdr.model.ResearcherAffiliation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * The purpose of this service is to export user/workspace data from workbench to Research Directory
+ * @author nsaxena
+ */
 @Service
-public class RDRServiceImpl implements RDRService {
+public class RdrExportServiceImpl implements RdrExportService {
 
   ZoneOffset offset = OffsetDateTime.now().getOffset();
   private Clock clock;
 
-  private Provider<RDRApi> rdrApiProvider;
+  private Provider<RdrApi> RdrApiProvider;
 
   private RDRExportDao rdrExportDao;
   private WorkspaceDao workspaceDao;
   private final FireCloudService fireCloudService;
   private UserDao userDao;
-  private static final Logger log = Logger.getLogger(RDRService.class.getName());
+  private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
 
   @Autowired
-  public RDRServiceImpl(
+  public RdrExportServiceImpl(
       Clock clock,
       FireCloudService fireCloudService,
-      Provider<RDRApi> rdrApiProvider,
+      Provider<RdrApi> RdrApiProvider,
       RDRExportDao rdrExportDao,
       WorkspaceDao workspaceDao,
       UserDao userDao) {
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.rdrExportDao = rdrExportDao;
-    this.rdrApiProvider = rdrApiProvider;
+    this.RdrApiProvider = RdrApiProvider;
     this.workspaceDao = workspaceDao;
     this.userDao = userDao;
   }
 
-  /*
-  Return the list of all users ids that are either
-   a) not in rdr_Export table or
-   b) have last_modified_time (user table) > export_time (rdr_export table)
+  /**
+   * Retrieve the list of all users ids that are either
+   * a) not in rdr_Export table or
+   * b) have last_modified_time (user table) > export_time (rdr_export table)
+   * @return list of User Ids
    */
-
   @Override
   public List<Long> findAllUserIdsToExport() {
     List<Long> userIdList = new ArrayList<Long>();
     try {
       userIdList =
-          rdrExportDao.findDbUserToExport().stream()
+          rdrExportDao.findDbUserIdsToExport().stream()
               .map(user -> user.longValue())
               .collect(Collectors.toList());
     } catch (Exception ex) {
@@ -81,17 +85,18 @@ public class RDRServiceImpl implements RDRService {
     return userIdList;
   }
 
-  /*
-  Return the list of all workspaces that are either
-    a) not in rdr_Export table OR
-    b) last_modified_time (workspace) > export_time (rdr_export table)
+  /**
+   * Retrieve the list of all workspace ids that are either
+   * a) not in rdr_Export table or
+   * b) have last_modified_time (workspace table) > export_time (rdr_export table)
+   * @return list of Workspace Ids
    */
   @Override
   public List<Long> findAllWorkspacesIdsToExport() {
     List<Long> workspaceListToExport = new ArrayList<Long>();
     try {
       workspaceListToExport =
-          rdrExportDao.findDbWorkspaceToExport().stream()
+          rdrExportDao.findDbWorkspaceIdsToExport().stream()
               .map(workspaceId -> workspaceId.longValue())
               .collect(Collectors.toList());
     } catch (Exception ex) {
@@ -102,58 +107,54 @@ public class RDRServiceImpl implements RDRService {
     return workspaceListToExport;
   }
 
-  /* Call the RDR API to send researcher data and if successful store all the ids in
-  rdr_export table with current date as the lastExport date*/
+  /**
+   * Call the Rdr API to send researcher data and if successful store all the ids in rdr_export
+   * table with current date as the lastExport date
+   * @param userIds
+   */
   @Override
-  public void sendUser(List<Long> usersToExport) {
-    List<RDRResearcher> rdrResearchersList;
+  public void exportUsers(List<Long> userIds) {
+    List<RdrResearcher> RdrResearchersList;
     try {
-      rdrResearchersList =
-          usersToExport.stream()
-              .map(user -> toRDRResearcher(userDao.findUserByUserId(user)))
+      RdrResearchersList =
+          userIds.stream()
+              .map(userId -> toRdrResearcher(userDao.findUserByUserId(userId)))
               .collect(Collectors.toList());
       // TODO: REMOVE DEBUGGER
-      rdrApiProvider.get().getApiClient().setDebugging(true);
-      rdrApiProvider.get().sendResearcher(rdrResearchersList);
+      RdrApiProvider.get().getApiClient().setDebugging(true);
+      RdrApiProvider.get().exportResearcheres(RdrResearchersList);
 
-      List<Integer> successfulExportedIds =
-          rdrResearchersList.stream()
-              .map(researcher -> researcher.getUserId())
-              .collect(Collectors.toList());
-      updateRDRExport(RDREntity.USER, successfulExportedIds);
+      updateRDRExport(RdrEntity.USER, userIds);
     } catch (ApiException ex) {
       log.severe("Error while sending researcher data to RDR");
     }
   }
 
-  /*
-   * Call the RDR API to send workspace data and if successful store all the ids in rdr_export table
-   * with current date as the lastExport date
+  /**
+   * Call the Rdr API to send researcher data and if successful store all the ids in rdr_export
+   * table with current date as the lastExport date
+   * @param workspaceIds
    */
   @Override
-  public void sendWorkspace(List<Long> workspacesToExport) {
-    List<RDRWorkspace> rdrWorkspacesList;
+  public void exportWorkspaces(List<Long> workspaceIds) {
+    List<RdrWorkspace> RdrWorkspacesList;
     try {
-      rdrWorkspacesList =
-          workspacesToExport.stream()
+      RdrWorkspacesList =
+          workspaceIds.stream()
               .map(
-                  workspace -> toRDRWorkspace(workspaceDao.findDbWorkspaceByWorkspaceId(workspace)))
+                  workspaceId -> toRdrWorkspace(workspaceDao.findDbWorkspaceByWorkspaceId(workspaceId)))
               .collect(Collectors.toList());
-      rdrApiProvider.get().getApiClient().setDebugging(true);
-      rdrApiProvider.get().sendWorkspace(rdrWorkspacesList);
-      List<Integer> successfulExportedIds =
-          rdrWorkspacesList.stream()
-              .map(researcher -> researcher.getWorkspaceId())
-              .collect(Collectors.toList());
-      updateRDRExport(RDREntity.WORKSPACE, successfulExportedIds);
+      RdrApiProvider.get().getApiClient().setDebugging(true);
+      RdrApiProvider.get().exportWorkspaces(RdrWorkspacesList);
+      updateRDRExport(RdrEntity.WORKSPACE, workspaceIds);
     } catch (ApiException ex) {
       log.severe("Error while sending workspace data to RDR");
     }
   }
 
   // Convert workbench DBUser to RDR Model
-  private RDRResearcher toRDRResearcher(DbUser workbenchUser) {
-    RDRResearcher researcher = new RDRResearcher();
+  private RdrResearcher toRdrResearcher(DbUser workbenchUser) {
+    RdrResearcher researcher = new RdrResearcher();
     researcher.setUserId((int) workbenchUser.getUserId());
     researcher.setCreationTime(workbenchUser.getCreationTime().toLocalDateTime().atOffset(offset));
     if (workbenchUser.getLastModifiedTime() != null)
@@ -185,31 +186,30 @@ public class RDRServiceImpl implements RDRService {
     return researcher;
   }
 
-  private RDRWorkspace toRDRWorkspace(DbWorkspace workbenchWorkspace) {
-    RDRWorkspace rdrWorkspace = new RDRWorkspace();
-    rdrWorkspace.setWorkspaceId((int) workbenchWorkspace.getWorkspaceId());
-    rdrWorkspace.setName(workbenchWorkspace.getName());
+  private RdrWorkspace toRdrWorkspace(DbWorkspace workbenchWorkspace) {
+    RdrWorkspace RdrWorkspace = new RdrWorkspace();
+    RdrWorkspace.setWorkspaceId((int) workbenchWorkspace.getWorkspaceId());
+    RdrWorkspace.setName(workbenchWorkspace.getName());
 
-    rdrWorkspace.setCreationTime(
+    RdrWorkspace.setCreationTime(
         workbenchWorkspace.getCreationTime().toLocalDateTime().atOffset(offset));
-    rdrWorkspace.setModifiedTime(
+    RdrWorkspace.setModifiedTime(
         workbenchWorkspace.getLastModifiedTime().toLocalDateTime().atOffset(offset));
-    rdrWorkspace.setStatus(
-        RDRWorkspace.StatusEnum.fromValue(
+    RdrWorkspace.setStatus(org.pmiops.workbench.rdr.model.RdrWorkspace.StatusEnum.fromValue(
             workbenchWorkspace.getWorkspaceActiveStatusEnum().toString()));
-    rdrWorkspace.setExcludeFromPublicDirectory(false);
-    rdrWorkspace.setDiseaseFocusedResearch(workbenchWorkspace.getDiseaseFocusedResearch());
-    rdrWorkspace.setDiseaseFocusedResearchName(workbenchWorkspace.getDiseaseOfFocus());
-    rdrWorkspace.setOtherPurpose(workbenchWorkspace.getOtherPurpose());
-    rdrWorkspace.setOtherPurposeDetails(workbenchWorkspace.getOtherPurposeDetails());
-    rdrWorkspace.setMethodsDevelopment(workbenchWorkspace.getMethodsDevelopment());
-    rdrWorkspace.setControlSet(workbenchWorkspace.getControlSet());
-    rdrWorkspace.setAncestry(workbenchWorkspace.getAncestry());
-    rdrWorkspace.setSocialBehavioral(workbenchWorkspace.getSocialBehavioral());
-    rdrWorkspace.setPopulationHealth(workbenchWorkspace.getPopulationHealth());
-    rdrWorkspace.setDrugDevelopment(workbenchWorkspace.getDrugDevelopment());
-    rdrWorkspace.setCommercialPurpose(workbenchWorkspace.getCommercialPurpose());
-    rdrWorkspace.setEducational(workbenchWorkspace.getEducational());
+    RdrWorkspace.setExcludeFromPublicDirectory(false);
+    RdrWorkspace.setDiseaseFocusedResearch(workbenchWorkspace.getDiseaseFocusedResearch());
+    RdrWorkspace.setDiseaseFocusedResearchName(workbenchWorkspace.getDiseaseOfFocus());
+    RdrWorkspace.setOtherPurpose(workbenchWorkspace.getOtherPurpose());
+    RdrWorkspace.setOtherPurposeDetails(workbenchWorkspace.getOtherPurposeDetails());
+    RdrWorkspace.setMethodsDevelopment(workbenchWorkspace.getMethodsDevelopment());
+    RdrWorkspace.setControlSet(workbenchWorkspace.getControlSet());
+    RdrWorkspace.setAncestry(workbenchWorkspace.getAncestry());
+    RdrWorkspace.setSocialBehavioral(workbenchWorkspace.getSocialBehavioral());
+    RdrWorkspace.setPopulationHealth(workbenchWorkspace.getPopulationHealth());
+    RdrWorkspace.setDrugDevelopment(workbenchWorkspace.getDrugDevelopment());
+    RdrWorkspace.setCommercialPurpose(workbenchWorkspace.getCommercialPurpose());
+    RdrWorkspace.setEducational(workbenchWorkspace.getEducational());
 
     // Call Firecloud to get a list of Collaborators
     FirecloudWorkspaceACL firecloudResponse =
@@ -218,33 +218,37 @@ public class RDRServiceImpl implements RDRService {
     Map<String, FirecloudWorkspaceAccessEntry> aclMap = firecloudResponse.getAcl();
     aclMap.forEach(
         (email, access) -> {
-          RDRWorkspaceUser workspaceUderMap = new RDRWorkspaceUser();
+          RdrWorkspaceUser workspaceUderMap = new RdrWorkspaceUser();
           workspaceUderMap.setUserId((int) userDao.findUserByEmail(email).getUserId());
-          workspaceUderMap.setRole(RDRWorkspaceUser.RoleEnum.fromValue(access.getAccessLevel()));
-          rdrWorkspace.addWorkspaceUsersItem(workspaceUderMap);
+          workspaceUderMap.setRole(RdrWorkspaceUser.RoleEnum.fromValue(access.getAccessLevel()));
+          RdrWorkspace.addWorkspaceUsersItem(workspaceUderMap);
         });
 
-    return rdrWorkspace;
+    return RdrWorkspace;
   }
 
-  // For Each id passed check if entity and id is already in rdr_export if yes update the
-  // lastExportDate otherwise add a new entry to rdr_export table
-  private void updateRDRExport(RDREntity entity, List<Integer> idList) {
+  /**
+   * For Each entityType and entity id update lastExportDate to current date time if it exist in
+   * rdr_export table else add a new entry
+   * @param entity
+   * @param idList
+   */
+  private void updateRDRExport(RdrEntity entity, List<Long> idList) {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
-    List<DbRDRExport> exportList =
+    List<DbRdrExport> exportList =
         idList.stream()
             .map(
                 id -> {
-                  DbRDRExport rd =
-                      rdrExportDao.findByEntityAndId(RDREntityEnums.entityToStorage(entity), id);
+                  DbRdrExport rd =
+                      rdrExportDao.findByEntityTypeAndEntityId(RdrEntityEnums.entityToStorage(entity), id);
                   // If Entry doesn't exist in rdr_export create an object else just update the
                   // export Date
                   // to right now
                   if (rd == null) {
-                    rd = new DbRDRExport();
-                    rd.setEntityEnum(entity);
-                    rd.setId(id);
+                    rd = new DbRdrExport();
+                    rd.setEntityTypeEnum(entity);
+                    rd.setEntityId(id);
                   }
                   rd.setExportDate(now);
                   return rd;

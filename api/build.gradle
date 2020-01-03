@@ -162,7 +162,7 @@ task generateMoodleClient {
 
 def rdrApiFile = 'src/main/resources/rdr.yaml'
 
-task generateRDRClient {
+task generateRdrClient {
   inputs.file("$projectDir/$rdrApiFile")
   outputs.dir("$projectDir/$swaggerTargetFolder")
   doLast {
@@ -346,8 +346,8 @@ ideaModule.dependsOn generateMandrillClient
 compileGeneratedJava.dependsOn generateMandrillClient
 ideaModule.dependsOn generateMoodleClient
 compileGeneratedJava.dependsOn generateMoodleClient
-ideaModule.dependsOn generateRDRClient
-compileGeneratedJava.dependsOn generateRDRClient
+ideaModule.dependsOn generateRdrClient
+compileGeneratedJava.dependsOn generateRdrClient
 classes.dependsOn generatedClasses
 compileJava.dependsOn compileGeneratedJava
 
