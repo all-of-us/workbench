@@ -68,9 +68,6 @@ public class FreeTierBillingService {
    * due to passing thresholds or exceeding limits
    */
   public void checkFreeTierBillingUsage() {
-    // freeze this value, for later consistency
-    final Instant currentCheckTime = this.clock.instant();
-
     // retrieve the costs stored in the DB from the last time this was run
     final Map<DbUser, Double> previousUserCosts = workspaceFreeTierUsageDao.getUserCostMap();
 
@@ -94,17 +91,17 @@ public class FreeTierBillingService {
 
     final Set<DbUser> previouslyExpiredUsers = getExpiredUsersFromDb();
     final Set<DbUser> currentExpiredUsers =
-        Sets.union(getCostExpiredUsers(userCosts), getTimeExpiredUsers(currentCheckTime));
+        Sets.union(getCostExpiredUsers(userCosts), getTimeExpiredUsers());
     processNewlyExpiredUsers(Sets.difference(currentExpiredUsers, previouslyExpiredUsers));
 
     // check for intermediate thresholds and alert, possibly for both cost and time
 
     sendAlertsForCostThresholds(previousUserCosts, userCosts, currentExpiredUsers);
-    sendAlertsForTimeThresholds(currentCheckTime, userCosts, currentExpiredUsers);
+    sendAlertsForTimeThresholds(userCosts, currentExpiredUsers);
   }
 
   @NotNull
-  private Set<DbUser> getTimeExpiredUsers(Instant expirationCheckTime) {
+  private Set<DbUser> getTimeExpiredUsers() {
     return userDao.findByFirstRegistrationCompletionTimeNotNull().stream()
         .filter(
             u -> {
@@ -113,7 +110,7 @@ public class FreeTierBillingService {
               final Duration userFreeCreditDays = Duration.ofDays(getUserFreeTierDaysLimit(u));
               final Instant userFreeCreditExpirationTime =
                   userFreeCreditStartTime.plus(userFreeCreditDays);
-              return expirationCheckTime.isAfter(userFreeCreditExpirationTime);
+              return clock.instant().isAfter(userFreeCreditExpirationTime);
             })
         .collect(Collectors.toSet());
   }
@@ -159,7 +156,7 @@ public class FreeTierBillingService {
   }
 
   private void sendAlertsForTimeThresholds(
-      Instant currentCheckTime, Map<DbUser, Double> userCosts, Set<DbUser> currentExpiredUsers) {
+      Map<DbUser, Double> userCosts, Set<DbUser> currentExpiredUsers) {
     final List<Double> timeThresholdsInDescOrder =
         workbenchConfigProvider.get().billing.freeTierTimeAlertThresholds;
     timeThresholdsInDescOrder.sort(Comparator.reverseOrder());
@@ -168,11 +165,10 @@ public class FreeTierBillingService {
       if (!currentExpiredUsers.contains(user)) {
         final double currentCost = userCosts.getOrDefault(user, 0.0);
         final double remainingDollarBalance = getUserFreeTierDollarLimit(user) - currentCost;
-        maybeAlertOnTimeThresholds(
-            user, remainingDollarBalance, currentCheckTime, timeThresholdsInDescOrder);
+        maybeAlertOnTimeThresholds(user, remainingDollarBalance, timeThresholdsInDescOrder);
 
         // save current check time
-        user.setLastFreeTierCreditsTimeCheck(Timestamp.from(currentCheckTime));
+        user.setLastFreeTierCreditsTimeCheck(Timestamp.from(clock.instant()));
         userDao.save(user);
       }
     }
@@ -220,14 +216,10 @@ public class FreeTierBillingService {
    *
    * @param user The user to check
    * @param remainingDollarBalance The remaining dollar balance to this user, for reporting purposes
-   * @param currentCheckTime a fixed time common to all checks of this run, for comparison purposes
    * @param thresholdsInDescOrder the time alerting thresholds, in descending order
    */
   private void maybeAlertOnTimeThresholds(
-      DbUser user,
-      double remainingDollarBalance,
-      Instant currentCheckTime,
-      List<Double> thresholdsInDescOrder) {
+      DbUser user, double remainingDollarBalance, List<Double> thresholdsInDescOrder) {
     final Instant userFreeCreditStartTime = user.getFirstRegistrationCompletionTime().toInstant();
 
     final Instant previousCheckTime =
@@ -236,7 +228,7 @@ public class FreeTierBillingService {
             .orElse(userFreeCreditStartTime);
 
     final Duration userFreeCreditDays = Duration.ofDays(getUserFreeTierDaysLimit(user));
-    final Duration currentTimeElapsed = Duration.between(userFreeCreditStartTime, currentCheckTime);
+    final Duration currentTimeElapsed = Duration.between(userFreeCreditStartTime, clock.instant());
     final Duration previousTimeElapsed =
         Duration.between(userFreeCreditStartTime, previousCheckTime);
 
@@ -247,7 +239,7 @@ public class FreeTierBillingService {
         (double) previousTimeElapsed.toMillis() / userFreeCreditDays.toMillis();
 
     final Instant userFreeCreditExpirationTime = userFreeCreditStartTime.plus(userFreeCreditDays);
-    final Duration timeRemaining = Duration.between(currentCheckTime, userFreeCreditExpirationTime);
+    final Duration timeRemaining = Duration.between(clock.instant(), userFreeCreditExpirationTime);
 
     for (final double threshold : thresholdsInDescOrder) {
       if (currentFraction > threshold) {
