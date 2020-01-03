@@ -90,7 +90,7 @@
   },
   "rdrExport": {
     "host": "all-of-us-rdr-prod.appspot.com",
-    "queueName": "rdrQueueTest",
+    "queueName": "rdrQueue",
     "exportObjectsPerTask" : 10
   }
 }

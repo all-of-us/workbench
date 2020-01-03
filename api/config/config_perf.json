@@ -93,7 +93,7 @@
   },
   "rdrExport": {
     "host": "pmi-drc-api-test.appspot.com",
-    "queueName": "all-of-us-workbench-perf",
+    "queueName": "rdrQueue",
     "exportObjectsPerTask" : 10
   }
 }
