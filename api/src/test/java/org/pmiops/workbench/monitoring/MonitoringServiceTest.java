@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig;
+import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.monitoring.views.OpenCensusView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,12 +73,12 @@ public class MonitoringServiceTest {
 
   @Test
   public void testRecordIncrement() {
-    monitoringService.recordEvent(GaugeMetric.NOTEBOOK_SAVE);
+    monitoringService.recordEvent(EventMetric.NOTEBOOK_SAVE);
 
     verify(mockInitService).createAndRegister();
     verify(mockViewManager, times(GaugeMetric.values().length)).registerView(any(View.class));
     verify(mockStatsRecorder).newMeasureMap();
-    verify(mockMeasureMap).put(GaugeMetric.NOTEBOOK_SAVE.getMeasureLong(), 1L);
+    verify(mockMeasureMap).put(EventMetric.NOTEBOOK_SAVE.getMeasureLong(), 1L);
     verify(mockMeasureMap).record();
   }
 
