@@ -9,13 +9,9 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -97,10 +93,11 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
     for (BufferEntryStatus status : BufferEntryStatus.values()) {
       long count = entryStatusToCount.getOrDefault(status, 0L);
-      resultBuilder.add(MeasurementBundle.builder()
-          .addValue(GaugeMetric.BILLING_BUFFER_COUNT_BY_STATUS, count)
-          .attach(AttachmentKey.BUFFER_ENTRY_STATUS, status.toString())
-          .build());
+      resultBuilder.add(
+          MeasurementBundle.builder()
+              .addValue(GaugeMetric.BILLING_BUFFER_COUNT_BY_STATUS, count)
+              .attach(AttachmentKey.BUFFER_ENTRY_STATUS, status.toString())
+              .build());
     }
 
     return resultBuilder.build();

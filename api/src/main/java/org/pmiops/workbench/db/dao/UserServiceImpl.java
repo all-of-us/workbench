@@ -751,11 +751,15 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     Map<Boolean, Long> userCountByDisabled = userDao.getDisabledToCountMap();
     return ImmutableSet.of(
         MeasurementBundle.builder()
-            .addValue(GaugeMetric.USER_COUNT_BY_DISABLED_STATUS, userCountByDisabled.getOrDefault(false, 0L))
+            .addValue(
+                GaugeMetric.USER_COUNT_BY_DISABLED_STATUS,
+                userCountByDisabled.getOrDefault(false, 0L))
             .attach(AttachmentKey.USER_DISABLED, Boolean.valueOf(false).toString())
             .build(),
         MeasurementBundle.builder()
-            .addValue(GaugeMetric.USER_COUNT_BY_DISABLED_STATUS, userCountByDisabled.getOrDefault(true, 0L))
+            .addValue(
+                GaugeMetric.USER_COUNT_BY_DISABLED_STATUS,
+                userCountByDisabled.getOrDefault(true, 0L))
             .attach(AttachmentKey.USER_DISABLED, Boolean.valueOf(true).toString())
             .build());
   }

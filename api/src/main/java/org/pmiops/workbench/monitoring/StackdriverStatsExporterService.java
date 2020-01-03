@@ -1,7 +1,6 @@
 package org.pmiops.workbench.monitoring;
 
 import com.google.api.MonitoredResource;
-import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
@@ -24,10 +23,14 @@ public class StackdriverStatsExporterService {
   private boolean initialized;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  private static final FieldDescriptor PROJECT_ID_DESCRIPTOR = MonitoredResource.getDescriptor().findFieldByName("project_id");
-  private static final FieldDescriptor LOCATION_DESCRIPTOR = MonitoredResource.getDescriptor().findFieldByName("location");
-  private static final FieldDescriptor NAMESPACE_DESCRIPTOR = MonitoredResource.getDescriptor().findFieldByName("namespace");
-  private static final FieldDescriptor NODE_ID_DESCRIPTOR = MonitoredResource.getDescriptor().findFieldByName("node_id");
+  private static final FieldDescriptor PROJECT_ID_DESCRIPTOR =
+      MonitoredResource.getDescriptor().findFieldByName("project_id");
+  private static final FieldDescriptor LOCATION_DESCRIPTOR =
+      MonitoredResource.getDescriptor().findFieldByName("location");
+  private static final FieldDescriptor NAMESPACE_DESCRIPTOR =
+      MonitoredResource.getDescriptor().findFieldByName("namespace");
+  private static final FieldDescriptor NODE_ID_DESCRIPTOR =
+      MonitoredResource.getDescriptor().findFieldByName("node_id");
 
   public StackdriverStatsExporterService(Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -45,13 +48,14 @@ public class StackdriverStatsExporterService {
             StackdriverStatsConfiguration.builder()
                 .setMetricNamePrefix(buildMetricNamePrefix())
                 .setProjectId(workbenchConfigProvider.get().server.projectId)
-                .setMonitoredResource(MonitoredResource.newBuilder()
-                    .setType("generic_node")
-                    .putLabels("project_id", workbenchConfigProvider.get().server.projectId)
-                    .putLabels("location", "global")
-                    .putLabels("namespace", "aou-test1")
-                    .putLabels("node_id", "1")
-                    .build())
+                .setMonitoredResource(
+                    MonitoredResource.newBuilder()
+                        .setType("generic_node")
+                        .putLabels("project_id", workbenchConfigProvider.get().server.projectId)
+                        .putLabels("location", "global")
+                        .putLabels("namespace", "aou-test1")
+                        .putLabels("node_id", "1")
+                        .build())
                 .build();
         StackdriverStatsExporter.createAndRegister(configuration);
         initialized = true;

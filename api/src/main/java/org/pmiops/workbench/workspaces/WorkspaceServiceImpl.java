@@ -46,6 +46,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -620,17 +621,32 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
     final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
-    resultBuilder.add(MeasurementBundle.builder()
-        .addValue(GaugeMetric.WORKSPACE_TOTAL_COUNT, workspaceDao.count())
-        .build());
-    final Map<WorkspaceActiveStatus, Long> activeStatusToCount = workspaceDao.getActiveStatusToCountMap();
+    resultBuilder.add(
+        MeasurementBundle.builder()
+            .addValue(GaugeMetric.WORKSPACE_TOTAL_COUNT, workspaceDao.count())
+            .build());
+    final Map<WorkspaceActiveStatus, Long> activeStatusToCount =
+        workspaceDao.getActiveStatusToCountMap();
     for (WorkspaceActiveStatus status : WorkspaceActiveStatus.values()) {
       final long count = activeStatusToCount.getOrDefault(status, 0L);
-      resultBuilder.add(MeasurementBundle.builder()
-          .addValue(GaugeMetric.WORKSPACE_COUNT_BY_ACTIVE_STATUS, count)
-          .attach(AttachmentKey.WORKSPACE_ACTIVE_STATUS, status.toString())
-          .build());
+      resultBuilder.add(
+          MeasurementBundle.builder()
+              .addValue(GaugeMetric.WORKSPACE_COUNT_BY_ACTIVE_STATUS, count)
+              .attach(AttachmentKey.WORKSPACE_ACTIVE_STATUS, status.toString())
+              .build());
     }
+
+    final Map<DataAccessLevel, Long> dataAccessLevelToCount =
+        workspaceDao.getDataAccessLevelToCountMap();
+    for (DataAccessLevel status : DataAccessLevel.values()) {
+      final long count = dataAccessLevelToCount.getOrDefault(status, 0L);
+      resultBuilder.add(
+          MeasurementBundle.builder()
+              .addValue(GaugeMetric.WORKSPACE_COUNT_BY_DATA_ACCESS_LEVEL, count)
+              .attach(AttachmentKey.WORKSPACE_DATA_ACCESS_LEVEL, status.toString())
+              .build());
+    }
+
     return resultBuilder.build();
   }
 }

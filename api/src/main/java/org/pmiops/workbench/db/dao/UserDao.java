@@ -44,7 +44,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   Set<DbUser> findByFirstRegistrationCompletionTimeNotNull();
 
   default Map<Boolean, Long> getDisabledToCountMap() {
-    return ImmutableMap.copyOf(StreamSupport.stream(findAll().spliterator(), false)
-        .collect(Collectors.groupingBy(DbUser::getDisabled, Collectors.counting())));
+    return ImmutableMap.copyOf(
+        StreamSupport.stream(findAll().spliterator(), false)
+            .collect(Collectors.groupingBy(DbUser::getDisabled, Collectors.counting())));
   }
 }

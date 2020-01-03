@@ -8,7 +8,6 @@ import java.util.stream.StreamSupport;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;
-import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.data.jpa.repository.Query;
@@ -40,7 +39,9 @@ public interface BillingProjectBufferEntryDao
 
   default Map<BufferEntryStatus, Long> getCountByStatusMap() {
     return StreamSupport.stream(findAll().spliterator(), false)
-        .collect(Collectors.groupingBy(DbBillingProjectBufferEntry::getStatusEnum, Collectors.counting()));
+        .collect(
+            Collectors.groupingBy(
+                DbBillingProjectBufferEntry::getStatusEnum, Collectors.counting()));
   }
 
   @Query(value = "SELECT GET_LOCK('" + ASSIGNING_LOCK + "', 1)", nativeQuery = true)

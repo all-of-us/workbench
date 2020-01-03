@@ -5,7 +5,6 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -384,9 +383,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
     return ImmutableSet.of(
-        MeasurementBundle.builder()
-            .addValue(GaugeMetric.COHORT_COUNT, cohortDao.count())
-            .build(),
+        MeasurementBundle.builder().addValue(GaugeMetric.COHORT_COUNT, cohortDao.count()).build(),
         MeasurementBundle.builder()
             .addValue(GaugeMetric.COHORT_REVIEW_COUNT, cohortReviewDao.count())
             .build());
