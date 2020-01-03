@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="thibault" id="db.changelog-112-free-credits-time-management">
+    <addColumn tableName="user">
+      <column name="last_free_tier_credits_time_check" type="datetime">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+    <addColumn tableName="user">
+      <column name="first_registration_completion_time" type="datetime">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

@@ -1,5 +1,8 @@
 package org.pmiops.workbench.db.dao;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
@@ -24,4 +27,22 @@ public interface WorkspaceFreeTierUsageDao extends CrudRepository<DbWorkspaceFre
 
   @Query("SELECT SUM(cost) FROM DbWorkspaceFreeTierUsage u WHERE user = :user")
   Double totalCostByUser(@Param("user") DbUser user);
+
+  interface UserCostPair {
+    DbUser getUser();
+
+    Double getCost();
+  }
+
+  @Query(
+      "SELECT u.user, SUM(u.cost) "
+          + "FROM DbWorkspaceFreeTierUsage u "
+          + "WHERE u.cost IS NOT NULL "
+          + "GROUP BY u.user")
+  Collection<UserCostPair> totalCostByUser();
+
+  default Map<DbUser, Double> getUserCostMap() {
+    return totalCostByUser().stream()
+        .collect(Collectors.toMap(UserCostPair::getUser, UserCostPair::getCost));
+  }
 }
