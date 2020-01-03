@@ -10,12 +10,14 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TextModal} from 'app/components/text-modal';
 import {statusApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {isBlank, reactStyles, withGlobalError} from 'app/utils';
+import {isBlank, reactStyles, withGlobalError, withUserProfile} from 'app/utils';
 import {globalErrorStore} from 'app/utils/navigation';
-import {ErrorCode, ErrorResponse} from 'generated/fetch';
-import {Button} from './buttons';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
-import {TooltipTrigger} from './popups';
+import {ErrorCode, ErrorResponse, Profile} from 'generated/fetch';
+import {Button} from 'app/components/buttons';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {TooltipTrigger} from 'app/components/popups';
+import {openZendeskWidget} from 'app/utils/zendesk';
+import * as fp from 'lodash/fp';
 
 const styles = reactStyles({
   errorCodeContainer: {
@@ -31,7 +33,7 @@ const styles = reactStyles({
     background: colors.white,
     padding: '0.6rem',
     border: `1px solid ${colors.black}`,
-    width: '10rem'
+    width: '12rem'
   },
   iconStyles: {
     cursor: 'pointer',
@@ -51,6 +53,7 @@ interface ServerDownStatus {
 
 interface Props {
   globalError: ErrorResponse;
+  profileState: {profile: Profile, reload: Function, updateCache: Function};
 }
 
 interface State {
@@ -63,7 +66,7 @@ interface State {
 // have it reconstruct/reinitialize with new errors.
 const shouldCheckStatus = new BehaviorSubject<any>(true);
 
-export const ErrorHandler = withGlobalError()(class extends React.Component<Props, State> {
+export const ErrorHandler = fp.flow(withUserProfile(), withGlobalError())(class extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -114,6 +117,16 @@ export const ErrorHandler = withGlobalError()(class extends React.Component<Prop
     setTimeout(() => {this.setState({copiedErrorIdToClipboard: false}); }, 1000);
   }
 
+  openContactWidget() {
+    const {profile} = this.props.profileState;
+    profile !== undefined ? openZendeskWidget(
+      profile.givenName,
+      profile.familyName,
+      profile.username,
+      profile.contactEmail,
+    ) : openZendeskWidget('', '', '', '');
+  }
+
   render() {
     const {globalError} = this.props;
     const {copiedErrorIdToClipboard, serverDownStatus: {apiDown, firecloudDown, notebooksDown}} = this.state;
@@ -122,16 +135,12 @@ export const ErrorHandler = withGlobalError()(class extends React.Component<Prop
       {globalError.statusCode === 500 && <div style={styles.errorHandler}>
         <FlexRow style={styles.errorContent}>
           <FlexColumn>
-          Server Error (500)
+          Unexpected Error
           {!isBlank(globalError.errorUniqueId) && <div>
-            Please click to copy unique code for support ticket
-            <TooltipTrigger content={copiedErrorIdToClipboard ? 'Copied to Clipboard' : globalError.errorUniqueId}>
-              <CopyToClipboard text={globalError.errorUniqueId}>
-                  <FontAwesomeIcon icon={faCopy} style={{...styles.iconStyles, marginLeft: 4}}
-                                   onClick={() => {this.copyToClipboard(); }}/>
-              </CopyToClipboard>
-            </TooltipTrigger>
-
+            Please <Button style={{display: 'inline', padding: 0, fontSize: 14}} type='link'
+                           onClick={() => this.openContactWidget()}>
+              contact support
+            </Button> and use this error code: {globalError.errorUniqueId}
           </div>}
           </FlexColumn>
           <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.closeError()} />
