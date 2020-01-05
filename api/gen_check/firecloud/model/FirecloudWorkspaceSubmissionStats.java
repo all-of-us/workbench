@@ -29,7 +29,7 @@ import java.io.Serializable;
  * Statistics about submissions in a workspace
  */
 @ApiModel(description = "Statistics about submissions in a workspace")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-12-26T15:08:18.272-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T11:48:20.657-05:00")
 public class FirecloudWorkspaceSubmissionStats implements Serializable {
   private static final long serialVersionUID = 1L;
 

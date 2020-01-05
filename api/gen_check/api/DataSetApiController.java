@@ -8,6 +8,7 @@ import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ErrorResponse;
 import org.pmiops.workbench.model.MarkDataSetRequest;
@@ -28,7 +29,7 @@ import java.util.List;
 
 import javax.validation.constraints.*;
 import javax.validation.Valid;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-12-26T15:08:16.594-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T11:48:19.506-05:00")
 
 @Controller
 public class DataSetApiController implements DataSetApi {
@@ -95,6 +96,13 @@ public class DataSetApiController implements DataSetApi {
         @ApiParam(value = "The Workspace ID (a.k.a. the workspace's Firecloud name)",required=true ) @PathVariable("workspaceId") String workspaceId) {
         // do some magic!
         return delegate.getDataSetsInWorkspace(workspaceNamespace, workspaceId);
+    }
+
+    public ResponseEntity<DomainValuesResponse> getValuesFromDomain(@ApiParam(value = "The Workspace namespace",required=true ) @PathVariable("workspaceNamespace") String workspaceNamespace,
+        @ApiParam(value = "The Workspace ID (a.k.a. the workspace's Firecloud name)",required=true ) @PathVariable("workspaceId") String workspaceId,
+        @ApiParam(value = "",required=true ) @PathVariable("domain") String domain) {
+        // do some magic!
+        return delegate.getValuesFromDomain(workspaceNamespace, workspaceId, domain);
     }
 
     public ResponseEntity<Boolean> markDirty(@ApiParam(value = "The Workspace namespace",required=true ) @PathVariable("workspaceNamespace") String workspaceNamespace,

@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  * A list of filters applied to the results of a query. Only results matching the filter criteria should be returned. Exactly one of \&quot;allOf\&quot;, \&quot;anyOf\&quot;, and \&quot;columnFilter\&quot; should be set. 
  */
 @ApiModel(description = "A list of filters applied to the results of a query. Only results matching the filter criteria should be returned. Exactly one of \"allOf\", \"anyOf\", and \"columnFilter\" should be set. ")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-12-26T15:08:16.594-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T11:48:19.506-05:00")
 
 public class ResultFilters   {
   @JsonProperty("if_not")

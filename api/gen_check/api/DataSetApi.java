@@ -13,6 +13,7 @@ import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
 import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ErrorResponse;
 import org.pmiops.workbench.model.MarkDataSetRequest;
@@ -31,7 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import javax.validation.constraints.*;
 import javax.validation.Valid;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-12-26T15:08:16.594-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T11:48:19.506-05:00")
 
 @Api(value = "DataSet", description = "the DataSet API")
 public interface DataSetApi {
@@ -149,6 +150,20 @@ public interface DataSetApi {
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<DataSetListResponse> getDataSetsInWorkspace(@ApiParam(value = "The Workspace namespace",required=true ) @PathVariable("workspaceNamespace") String workspaceNamespace,@ApiParam(value = "The Workspace ID (a.k.a. the workspace's Firecloud name)",required=true ) @PathVariable("workspaceId") String workspaceId);
+
+
+    @ApiOperation(value = "", notes = "Returns all column names/values for a given domain. ", response = DomainValuesResponse.class, authorizations = {
+        @Authorization(value = "aou_oauth", scopes = {
+            
+            })
+    }, tags={ "dataSet", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "the values/column names in the domain.", response = DomainValuesResponse.class) })
+    
+    @RequestMapping(value = "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/domainValues/{domain}",
+        produces = { "application/json" }, 
+        method = RequestMethod.GET)
+    ResponseEntity<DomainValuesResponse> getValuesFromDomain(@ApiParam(value = "The Workspace namespace",required=true ) @PathVariable("workspaceNamespace") String workspaceNamespace,@ApiParam(value = "The Workspace ID (a.k.a. the workspace's Firecloud name)",required=true ) @PathVariable("workspaceId") String workspaceId,@ApiParam(value = "",required=true ) @PathVariable("domain") String domain);
 
 
     @ApiOperation(value = "", notes = "", response = Boolean.class, authorizations = {

@@ -27,7 +27,7 @@ import java.io.Serializable;
 /**
  * RecipientAddress
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-12-26T15:08:18.649-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T11:48:20.952-05:00")
 public class RecipientAddress implements Serializable {
   private static final long serialVersionUID = 1L;
 

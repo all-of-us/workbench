@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  * A SearchGroupItem is the \&quot;line item\&quot; of the Cohort Builder.  It specifies a set of criteria of a given kind, possibly alongside a set of modifiers, the results of which are &#x60;OR&#x60;ed together with the other criteria in the group. 
  */
 @ApiModel(description = "A SearchGroupItem is the \"line item\" of the Cohort Builder.  It specifies a set of criteria of a given kind, possibly alongside a set of modifiers, the results of which are `OR`ed together with the other criteria in the group. ")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-12-26T15:08:16.594-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T11:48:19.506-05:00")
 
 public class SearchGroupItem   {
   @JsonProperty("id")

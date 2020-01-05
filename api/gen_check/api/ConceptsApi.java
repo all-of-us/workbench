@@ -7,7 +7,6 @@ package org.pmiops.workbench.api;
 
 import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.DomainInfoResponse;
-import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.SurveyAnswerResponse;
 import org.pmiops.workbench.model.SurveyQuestionsResponse;
@@ -27,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import javax.validation.constraints.*;
 import javax.validation.Valid;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-12-26T15:08:16.594-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T11:48:19.506-05:00")
 
 @Api(value = "Concepts", description = "the Concepts API")
 public interface ConceptsApi {
@@ -86,20 +85,6 @@ public interface ConceptsApi {
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<List<SurveyQuestionsResponse>> getSurveyQuestions(@ApiParam(value = "The Workspace namespace",required=true ) @PathVariable("workspaceNamespace") String workspaceNamespace,@ApiParam(value = "The Workspace ID (a.k.a. the workspace's Firecloud name)",required=true ) @PathVariable("workspaceId") String workspaceId,@ApiParam(value = "",required=true ) @PathVariable("surveyName") String surveyName);
-
-
-    @ApiOperation(value = "", notes = "Returns all column names/values for a given domain. ", response = DomainValuesResponse.class, authorizations = {
-        @Authorization(value = "aou_oauth", scopes = {
-            
-            })
-    }, tags={ "concepts", })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "the values/column names in the domain.", response = DomainValuesResponse.class) })
-    
-    @RequestMapping(value = "/v1/workspaces/{workspaceNamespace}/{workspaceId}/domainValues/{domain}",
-        produces = { "application/json" }, 
-        method = RequestMethod.GET)
-    ResponseEntity<DomainValuesResponse> getValuesFromDomain(@ApiParam(value = "The Workspace namespace",required=true ) @PathVariable("workspaceNamespace") String workspaceNamespace,@ApiParam(value = "The Workspace ID (a.k.a. the workspace's Firecloud name)",required=true ) @PathVariable("workspaceId") String workspaceId,@ApiParam(value = "",required=true ) @PathVariable("domain") String domain);
 
 
     @ApiOperation(value = "", notes = "Searches for concepts in concept table by name, and optionally filter on domain, vocabulary IDs, or standard concept status. Uses the CDR version affiliated with the workspace specified in the path. ", response = ConceptListResponse.class, authorizations = {

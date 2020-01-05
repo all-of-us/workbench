@@ -28,7 +28,7 @@ import java.io.Serializable;
  * The configuration for a single Dataproc cluster
  */
 @ApiModel(description = "The configuration for a single Dataproc cluster")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-12-26T15:08:18.819-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T11:48:21.101-05:00")
 public class MachineConfig implements Serializable {
   private static final long serialVersionUID = 1L;
 

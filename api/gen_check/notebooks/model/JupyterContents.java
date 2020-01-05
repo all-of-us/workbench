@@ -28,7 +28,7 @@ import java.io.Serializable;
  * A contents object.  The content and format keys may be null if content is not contained.  If type is &#39;file&#39;, then the mimetype will be null.
  */
 @ApiModel(description = "A contents object.  The content and format keys may be null if content is not contained.  If type is 'file', then the mimetype will be null.")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-12-26T15:08:18.819-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T11:48:21.101-05:00")
 public class JupyterContents implements Serializable {
   private static final long serialVersionUID = 1L;
 

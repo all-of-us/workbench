@@ -27,7 +27,7 @@ import java.io.Serializable;
 /**
  * FirecloudEnabled
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-12-26T15:08:18.272-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T11:48:20.657-05:00")
 public class FirecloudEnabled implements Serializable {
   private static final long serialVersionUID = 1L;
 

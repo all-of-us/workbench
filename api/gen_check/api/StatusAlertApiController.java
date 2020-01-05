@@ -18,7 +18,7 @@ import java.util.List;
 
 import javax.validation.constraints.*;
 import javax.validation.Valid;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-12-26T15:08:16.594-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T11:48:19.506-05:00")
 
 @Controller
 public class StatusAlertApiController implements StatusAlertApi {
@@ -33,6 +33,11 @@ public class StatusAlertApiController implements StatusAlertApi {
     public ResponseEntity<StatusAlert> getStatusAlert() {
         // do some magic!
         return delegate.getStatusAlert();
+    }
+
+    public ResponseEntity<StatusAlert> postStatusAlert(@ApiParam(value = "the new status alert to use"  )  @Valid @RequestBody StatusAlert statusAlert) {
+        // do some magic!
+        return delegate.postStatusAlert(statusAlert);
     }
 
 }

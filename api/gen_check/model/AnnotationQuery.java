@@ -14,7 +14,7 @@ import javax.validation.constraints.*;
  * A specification for retrieving annotation values or review statuses entered for participants. 
  */
 @ApiModel(description = "A specification for retrieving annotation values or review statuses entered for participants. ")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-12-26T15:08:16.594-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T11:48:19.506-05:00")
 
 public class AnnotationQuery   {
   @JsonProperty("columns")

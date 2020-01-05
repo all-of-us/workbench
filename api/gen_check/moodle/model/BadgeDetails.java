@@ -27,7 +27,7 @@ import java.io.Serializable;
 /**
  * BadgeDetails
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-12-26T15:08:18.728-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T11:48:21.031-05:00")
 public class BadgeDetails implements Serializable {
   private static final long serialVersionUID = 1L;
 

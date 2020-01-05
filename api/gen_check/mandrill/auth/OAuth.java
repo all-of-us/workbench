@@ -18,7 +18,7 @@ import org.pmiops.workbench.mandrill.Pair;
 import java.util.Map;
 import java.util.List;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-12-26T15:08:18.649-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T11:48:20.952-05:00")
 public class OAuth implements Authentication {
   private String accessToken;
 

@@ -11,11 +11,14 @@ import javax.validation.constraints.*;
 /**
  * User
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-12-26T15:08:16.594-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T11:48:19.506-05:00")
 
 public class User   {
   @JsonProperty("email")
   private String email = null;
+
+  @JsonProperty("username")
+  private String username = null;
 
   @JsonProperty("givenName")
   private String givenName = null;
@@ -29,10 +32,10 @@ public class User   {
   }
 
    /**
-   * researchallofus email address
+   * researchallofus email address (deprecated in favor of username)
    * @return email
   **/
-  @ApiModelProperty(value = "researchallofus email address")
+  @ApiModelProperty(value = "researchallofus email address (deprecated in favor of username)")
 
 
   public String getEmail() {
@@ -41,6 +44,26 @@ public class User   {
 
   public void setEmail(String email) {
     this.email = email;
+  }
+
+  public User username(String username) {
+    this.username = username;
+    return this;
+  }
+
+   /**
+   * Unique researchallofus username (a Google account email)
+   * @return username
+  **/
+  @ApiModelProperty(value = "Unique researchallofus username (a Google account email)")
+
+
+  public String getUsername() {
+    return username;
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
   }
 
   public User givenName(String givenName) {
@@ -94,13 +117,14 @@ public class User   {
     }
     User user = (User) o;
     return Objects.equals(this.email, user.email) &&
+        Objects.equals(this.username, user.username) &&
         Objects.equals(this.givenName, user.givenName) &&
         Objects.equals(this.familyName, user.familyName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(email, givenName, familyName);
+    return Objects.hash(email, username, givenName, familyName);
   }
 
   @Override
@@ -109,6 +133,7 @@ public class User   {
     sb.append("class User {\n");
     
     sb.append("    email: ").append(toIndentedString(email)).append("\n");
+    sb.append("    username: ").append(toIndentedString(username)).append("\n");
     sb.append("    givenName: ").append(toIndentedString(givenName)).append("\n");
     sb.append("    familyName: ").append(toIndentedString(familyName)).append("\n");
     sb.append("}");

@@ -21,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import javax.validation.constraints.*;
 import javax.validation.Valid;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-12-26T15:08:16.594-06:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T11:48:19.506-05:00")
 
 @Api(value = "StatusAlert", description = "the StatusAlert API")
 public interface StatusAlertApi {
@@ -38,5 +38,19 @@ public interface StatusAlertApi {
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<StatusAlert> getStatusAlert();
+
+
+    @ApiOperation(value = "", notes = "Pushes new status alert information to all users", response = StatusAlert.class, authorizations = {
+        @Authorization(value = "aou_oauth", scopes = {
+            
+            })
+    }, tags={ "status-alert", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "A status alert information object. ", response = StatusAlert.class) })
+    
+    @RequestMapping(value = "/v1/status-alert",
+        produces = { "application/json" }, 
+        method = RequestMethod.POST)
+    ResponseEntity<StatusAlert> postStatusAlert(@ApiParam(value = "the new status alert to use"  )  @Valid @RequestBody StatusAlert statusAlert);
 
 }
