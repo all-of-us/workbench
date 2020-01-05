@@ -13,7 +13,7 @@ import javax.validation.constraints.*;
  * Request to update the default cluster configuration for a given user. Fields of the config may be omitted, in which case a default will be used. Set clusterConfig to null to clear it. 
  */
 @ApiModel(description = "Request to update the default cluster configuration for a given user. Fields of the config may be omitted, in which case a default will be used. Set clusterConfig to null to clear it. ")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T12:00:54.413-05:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T14:04:58.961-05:00")
 
 public class UpdateClusterConfigRequest   {
   @JsonProperty("userEmail")

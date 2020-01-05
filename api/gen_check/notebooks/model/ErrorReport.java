@@ -32,7 +32,7 @@ import java.io.Serializable;
  * 
  */
 @ApiModel(description = "")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T12:00:56.660-05:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T14:05:00.794-05:00")
 public class ErrorReport implements Serializable {
   private static final long serialVersionUID = 1L;
 

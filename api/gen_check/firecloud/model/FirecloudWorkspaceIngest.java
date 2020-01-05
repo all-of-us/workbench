@@ -32,7 +32,7 @@ import java.io.Serializable;
 /**
  * FirecloudWorkspaceIngest
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T12:00:56.068-05:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T14:05:00.360-05:00")
 public class FirecloudWorkspaceIngest implements Serializable {
   private static final long serialVersionUID = 1L;
 

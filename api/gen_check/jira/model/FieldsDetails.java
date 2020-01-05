@@ -30,7 +30,7 @@ import java.io.Serializable;
  * Fields information like project id, issue type etc
  */
 @ApiModel(description = "Fields information like project id, issue type etc")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T12:00:56.301-05:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T14:05:00.589-05:00")
 public class FieldsDetails implements Serializable {
   private static final long serialVersionUID = 1L;
 

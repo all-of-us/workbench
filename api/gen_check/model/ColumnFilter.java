@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  * A filter applied to the results of a query, based on a column value in a table. Only results matching the filter will be returned. One (and only one) of the value columns should be populated. values and valueNumbers should only be used in conjunction with the \&quot;in\&quot; operator. 
  */
 @ApiModel(description = "A filter applied to the results of a query, based on a column value in a table. Only results matching the filter will be returned. One (and only one) of the value columns should be populated. values and valueNumbers should only be used in conjunction with the \"in\" operator. ")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T12:00:54.413-05:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T14:04:58.961-05:00")
 
 public class ColumnFilter   {
   @JsonProperty("columnName")

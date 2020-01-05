@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  * A specification for retrieving data from a single table. 
  */
 @ApiModel(description = "A specification for retrieving data from a single table. ")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T12:00:54.413-05:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T14:04:58.961-05:00")
 
 public class TableQuery   {
   @JsonProperty("tableName")

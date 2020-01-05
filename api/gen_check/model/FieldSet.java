@@ -14,7 +14,7 @@ import javax.validation.constraints.*;
  * A specification for fields to retrieve about participants in a cohort. Exactly one of the properties below should be specified. 
  */
 @ApiModel(description = "A specification for fields to retrieve about participants in a cohort. Exactly one of the properties below should be specified. ")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T12:00:54.413-05:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T14:04:58.961-05:00")
 
 public class FieldSet   {
   @JsonProperty("tableQuery")

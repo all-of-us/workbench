@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  * The SearchRequest describes the state of the Cohort Builder at any given moment. It contains two keys, &#x60;include&#x60; and &#x60;exclude&#x60;, each of which specifies an array of SearchGroups which are &#x60;AND&#x60;ed together, and which collectively specify which subjects to include or exclude from the cohort. 
  */
 @ApiModel(description = "The SearchRequest describes the state of the Cohort Builder at any given moment. It contains two keys, `include` and `exclude`, each of which specifies an array of SearchGroups which are `AND`ed together, and which collectively specify which subjects to include or exclude from the cohort. ")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T12:00:54.413-05:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-01-05T14:04:58.961-05:00")
 
 public class SearchRequest   {
   @JsonProperty("includes")

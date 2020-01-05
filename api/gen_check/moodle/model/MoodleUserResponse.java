@@ -27,7 +27,7 @@ import java.io.Serializable;
 /**
  * MoodleUserResponse
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T12:00:56.505-05:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T14:05:00.714-05:00")
 public class MoodleUserResponse implements Serializable {
   private static final long serialVersionUID = 1L;
 

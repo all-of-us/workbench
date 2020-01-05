@@ -28,7 +28,7 @@ import java.io.Serializable;
  * an element of a list of groups a user has access to
  */
 @ApiModel(description = "an element of a list of groups a user has access to")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T12:00:56.068-05:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T14:05:00.360-05:00")
 public class FirecloudManagedGroupAccessResponse implements Serializable {
   private static final long serialVersionUID = 1L;
 

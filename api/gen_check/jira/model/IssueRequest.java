@@ -29,7 +29,7 @@ import java.io.Serializable;
  * Details required for creating issue project info, summary, description etc
  */
 @ApiModel(description = "Details required for creating issue project info, summary, description etc")
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T12:00:56.301-05:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2020-01-05T14:05:00.589-05:00")
 public class IssueRequest implements Serializable {
   private static final long serialVersionUID = 1L;
 
