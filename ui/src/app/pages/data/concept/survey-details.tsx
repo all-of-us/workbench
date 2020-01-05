@@ -108,6 +108,7 @@ export const SurveyDetails = withCurrentWorkspace()(
     }
 
     getQuestion(row, col) {
+      const showAnswers = false; // Hides answers since they are currently not selectable
       return <FlexColumn>
       <div style={{display: 'flex'}}>
         <CheckBox style={{marginTop: '0.3rem'}}
@@ -117,10 +118,15 @@ export const SurveyDetails = withCurrentWorkspace()(
          <div style={style.columnLabel}>{row.question}</div>
        </div>
       </div>
-        <a href='#' onClick={(e) => {e.preventDefault(); this.updateSeeMyAnswer(col.rowIndex); }}>
-          See my Answers
-        </a>
-        {this.state.seeMyAnswers[col.rowIndex] && this.renderAnswerTable(col.rowIndex)}
+        {showAnswers && <React.Fragment>
+          <a href='#' onClick={(e) => {
+            e.preventDefault();
+            this.updateSeeMyAnswer(col.rowIndex);
+          }}>
+            See my Answers
+          </a>
+          {this.state.seeMyAnswers[col.rowIndex] && this.renderAnswerTable(col.rowIndex)}
+        </React.Fragment>}
       </FlexColumn>;
     }
 

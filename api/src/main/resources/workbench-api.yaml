@@ -133,6 +133,23 @@ paths:
 '
           schema:
             "$ref": "#/definitions/StatusAlert"
+    post:
+      tags:
+      - status-alert
+      description: Pushes new status alert information to all users
+      operationId: postStatusAlert
+      parameters:
+      - in: body
+        name: statusAlert
+        description: the new status alert to use
+        schema:
+          "$ref": "#/definitions/StatusAlert"
+      responses:
+        200:
+          description: 'A status alert information object.
+'
+          schema:
+            "$ref": "#/definitions/StatusAlert"
   "/v1/profile":
     get:
       tags:
@@ -1778,26 +1795,7 @@ paths:
           description: information on the domains
           schema:
             "$ref": "#/definitions/DomainInfoResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/domainValues/{domain}":
-    get:
-      tags:
-      - concepts
-      description: 'Returns all column names/values for a given domain.
 
-'
-      operationId: getValuesFromDomain
-      parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-      - in: path
-        name: domain
-        required: true
-        type: string
-      responses:
-        200:
-          description: the values/column names in the domain.
-          schema:
-            "$ref": "#/definitions/DomainValuesResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyInfo":
     get:
       tags:
@@ -2089,6 +2087,25 @@ paths:
 '
           schema:
             "$ref": "#/definitions/DataSetPreviewResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/domainValues/{domain}":
+    get:
+      tags:
+      - dataSet
+      description: 'Returns all column names/values for a given domain.
+'
+      operationId: getValuesFromDomain
+      parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - in: path
+        name: domain
+        required: true
+        type: string
+      responses:
+        200:
+          description: the values/column names in the domain.
+          schema:
+            "$ref": "#/definitions/DomainValuesResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/getDataTableQuery":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2935,6 +2952,7 @@ definitions:
     - DEVELOPER
     - ACCESS_CONTROL_ADMIN
     - FEATURED_WORKSPACE_ADMIN
+    - COMMUNICATIONS_ADMIN
   PageVisit:
     type: object
     properties:
@@ -4321,7 +4339,10 @@ definitions:
     type: object
     properties:
       email:
-        description: researchallofus email address
+        description: researchallofus email address (deprecated in favor of username)
+        type: string
+      username:
+        description: Unique researchallofus username (a Google account email)
         type: string
       givenName:
         description: the user's given name (e.g. Alice)

@@ -1,0 +1,918 @@
+# Endpoints in this API are intended to be used by researchers in notebooks; make sure they
+# are extra-well documented and designed and that we do not break backwards compatibility!
+
+# For separate validation (with some false positives), do:
+#     ./project.rb validate-swagger
+swagger: '2.0'
+info:
+  version: "0.1.0"
+  title: "AllOfUs Client API"
+  description: "The API used by AllOfUs workbench clients (including both notebooks and our UI.)"
+  termsOfService: "http://www.pmi-ops.org/terms_of_service.html"
+  contact:
+    name: "developer_help@pmi-ops.org"
+  license:
+    name: "BSD"
+host: "api.pmi-ops.org"
+securityDefinitions:
+  # Establish the fact that *some endpoints* are OAuth protected
+  # by defining an `aou_oauth` security mode, which we'll assing
+  # to any protected endpoints below.
+  aou_oauth:
+    # TODO: Vet/fix this token and/or authorization URL to work in practice.
+    # These are currently included simply to satisfy the Swagger specification,
+    # as this is not directly used to dictate oauth details (just used to
+    # annotate which methods require oauth).
+    authorizationUrl: ""
+    tokenUrl: ""
+    type: oauth2
+    flow: accessCode
+schemes:
+  - "https"
+produces:
+  - "application/json"
+# Establish the fact that all endpoints are protected: this annotation
+# ensures that client libraries know to send bearer tokens when calling
+security:
+  - aou_oauth: []
+
+## Common Path Parameters
+parameters:
+  cohortId:
+    in: path
+    name: cohortId
+    type: integer
+    format: int64
+    required: true
+    description: Cohort ID
+  cohortReviewId:
+    in: path
+    name: cohortReviewId
+    type: integer
+    format: int64
+    required: true
+    description: Cohort Review ID
+  cdrVersionId:
+    in: path
+    name: cdrVersionId
+    type: integer
+    format: int64
+    required: true
+    description: specifies which cdr version
+  participantId:
+    in: path
+    name: participantId
+    type: integer
+    format: int64
+    required: true
+    description: specifies which participant
+
+paths:
+
+  # Cohort Review  #######################################################################
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+    post:
+      tags:
+        - cohortReview
+      consumes:
+        - application/json
+      description:  >
+        This endpoint will create an cohort review which is a participant cohort sample
+        specified by the review size parameter.
+      operationId: "createCohortReview"
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: cohort review creation request body
+          schema:
+            $ref: "#/definitions/CreateReviewRequest"
+      responses:
+        200:
+          description: A cohortReviewId and cohort count
+          schema:
+            $ref: "#/definitions/CohortReview"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}/participants:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - $ref: '#/parameters/cdrVersionId'
+    post:
+      tags:
+        - cohortReview
+      consumes:
+        - application/json
+      description:  >
+        Returns a collection of participants for the specified cohortId and cdrVersionId. This endpoint
+        does pagination based on page, limit, order and column.
+      operationId: "getParticipantCohortStatuses"
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: request body for getting list of ParticipantCohortStatuses.
+          schema:
+            $ref: "#/definitions/PageFilterRequest"
+      responses:
+        200:
+          description: A collection of participants
+          schema:
+            $ref: "#/definitions/CohortReview"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortReviewId'
+      - $ref: '#/parameters/participantId'
+    get:
+      tags:
+        - cohortReview
+      description: This endpoint will return a ParticipantCohortStatus
+      operationId: "getParticipantCohortStatus"
+      responses:
+        200:
+          description: The ParticipantCohortStatus definition
+          schema:
+            $ref: "#/definitions/ParticipantCohortStatus"
+    put:
+      tags:
+        - cohortReview
+      consumes:
+        - application/json
+      description: Modifies the ParticipantCohortStatus status
+      operationId: updateParticipantCohortStatus
+      parameters:
+        - in: body
+          name: cohortStatusRequest
+          description: Contains the new review status
+          schema:
+            $ref: "#/definitions/ModifyCohortStatusRequest"
+      responses:
+        200:
+          description: The updated ParticipantCohortStatus definition
+          schema:
+            $ref: "#/definitions/ParticipantCohortStatus"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/charts/{domain}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortReviewId'
+      - $ref: '#/parameters/participantId'
+    get:
+      tags:
+        - cohortReview
+      description: This endpoint will return a ParticipantCohortStatus
+      operationId: "getParticipantChartData"
+      parameters:
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: specifies which domain the chart data should belong to.
+        - in: query
+          name: limit
+          type: integer
+          required: false
+          description: the limit search results to
+      responses:
+        200:
+          description: The Participant Chart data
+          schema:
+            $ref: "#/definitions/ParticipantChartDataListResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/charts/{domain}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortReviewId'
+    get:
+      tags:
+        - cohortReview
+      description: Returns a collection of CohortChartData for UI charting in cohort review.
+      operationId: "getCohortChartData"
+      parameters:
+        - in: path
+          name: domain
+          type: string
+          required: true
+          description: specifies which domain the CohortChartData should belong to.
+        - in: query
+          name: limit
+          type: integer
+          required: false
+          description: the limit search results to
+      responses:
+        200:
+          description: A collection of CohortChartData
+          schema:
+            $ref: "#/definitions/CohortChartDataListResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortReviewId'
+      - $ref: '#/parameters/participantId'
+    post:
+      tags:
+        - cohortReview
+      consumes:
+        - application/json
+      description: This endpoint will create a ParticipantCohortAnnotation.
+      operationId: "createParticipantCohortAnnotation"
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: ParticipantCohortAnnotation creation request body
+          schema:
+            $ref: "#/definitions/ParticipantCohortAnnotation"
+      responses:
+        200:
+          description: A ParticipantCohortAnnotation.
+          schema:
+            $ref: "#/definitions/ParticipantCohortAnnotation"
+    get:
+      tags:
+        - cohortReview
+      description: This endpoint will get a collection of ParticipantCohortAnnotations.
+      operationId: "getParticipantCohortAnnotations"
+      responses:
+        200:
+          description: A collection of ParticipantCohortAnnotation.
+          schema:
+            $ref: "#/definitions/ParticipantCohortAnnotationListResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/data:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortReviewId'
+      - $ref: '#/parameters/participantId'
+    post:
+      tags:
+        - cohortReview
+      consumes:
+        - application/json
+      description:  >
+        Returns a collection of participant data for the specified params based off the PageFilterRequest. This endpoint
+        does pagination based on page, limit, order and column.
+      operationId: "getParticipantData"
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: request body for getting list of participant data.
+          schema:
+            $ref: "#/definitions/PageFilterRequest"
+      responses:
+        200:
+          description: A collection of ParticipantConditions.
+          schema:
+            $ref: "#/definitions/ParticipantDataListResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}/annotations/{annotationId}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortReviewId'
+      - $ref: '#/parameters/participantId'
+      - in: path
+        name: annotationId
+        type: integer
+        format: int64
+        required: true
+        description: specifies which annotation
+    put:
+      tags:
+        - cohortReview
+      consumes:
+        - application/json
+      description: This endpoint will modify a ParticipantCohortAnnotation.
+      operationId: "updateParticipantCohortAnnotation"
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: ParticipantCohortAnnotation modification request body
+          schema:
+            $ref: "#/definitions/ModifyParticipantCohortAnnotationRequest"
+      responses:
+        200:
+          description: A ParticipantCohortAnnotation.
+          schema:
+            $ref: "#/definitions/ParticipantCohortAnnotation"
+    delete:
+      tags:
+        - cohortReview
+      description: Deletes the ParticipantCohortAnnotation with the specified ID
+      operationId: "deleteParticipantCohortAnnotation"
+      responses:
+        202:
+          description: ParticipantCohortAnnotation deletion request accepted
+          schema:
+            $ref: '#/definitions/EmptyResponse'
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/vocabularies:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortReviewId'
+    get:
+      tags:
+        - cohortReview
+      description: This endpoint will get a collection of OMOP vocabularies per cdrVersionId.
+      operationId: "getVocabularies"
+      responses:
+        200:
+          description: A collection of OMOP vocabularies.
+          schema:
+            $ref: "#/definitions/VocabularyListResponse"
+
+  # Cohort Annotation Definition Controller ###################################################
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+    post:
+      tags:
+        - cohortAnnotationDefinition
+      consumes:
+        - application/json
+      description: This endpoint will create a CohortAnnotationDefinition.
+      operationId: "createCohortAnnotationDefinition"
+      parameters:
+        - in: body
+          name: request
+          required: true
+          description: CohortAnnotationDefinition creation request body
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinition"
+      responses:
+        200:
+          description: A CohortAnnotationDefinition.
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinition"
+    get:
+      tags:
+        - cohortAnnotationDefinition
+      description: Returns a collection of CohortAnnotationDefinition.
+      operationId: "getCohortAnnotationDefinitions"
+      responses:
+        200:
+          description: A collection of CohortAnnotationDefinition
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinitionListResponse"
+
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/annotationdefinitions/{annotationDefinitionId}:
+    parameters:
+      - $ref: '#/parameters/workspaceNamespace'
+      - $ref: '#/parameters/workspaceId'
+      - $ref: '#/parameters/cohortId'
+      - in: path
+        name: annotationDefinitionId
+        type: integer
+        format: int64
+        required: true
+        description: specifies which CohortAnnotationDefinition.
+    get:
+      tags:
+        - cohortAnnotationDefinition
+      description: Returns a CohortAnnotationDefinition.
+      operationId: "getCohortAnnotationDefinition"
+      responses:
+        200:
+          description: A CohortAnnotationDefinition
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinition"
+    put:
+      tags:
+        - cohortAnnotationDefinition
+      consumes:
+        - application/json
+      description: modify the CohortAnnotationDefinition.
+      operationId: updateCohortAnnotationDefinition
+      parameters:
+        - in: body
+          name: cohortAnnotationDefinition
+          description: Contains the new CohortAnnotationDefinition
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinition"
+      responses:
+        200:
+          description: The updated CohortAnnotationDefinition definition
+          schema:
+            $ref: "#/definitions/CohortAnnotationDefinition"
+    delete:
+      tags:
+        - cohortAnnotationDefinition
+      description: Deletes the CohortAnnotationDefinition with the specified ID
+      operationId: "deleteCohortAnnotationDefinition"
+      responses:
+        202:
+          description: CohortAnnotationDefinition deletion request accepted
+          schema:
+            $ref: '#/definitions/EmptyResponse'
+
+##########################################################################################
+## DEFINITIONS
+##########################################################################################
+definitions:
+
+  CreateReviewRequest:
+    type: object
+    required:
+      - size
+    properties:
+      size:
+        description: A sample size to review
+        type: integer
+
+  CohortReview:
+    type: object
+    required:
+      - cohortReviewId
+      - cohortId
+      - cdrVersionId
+      - creationTime
+      - matchedParticipantCount
+      - reviewStatus
+      - cohortDefinition
+      - cohortName
+    properties:
+      cohortReviewId:
+        type: integer
+        format: int64
+      cohortId:
+        type: integer
+        format: int64
+      cdrVersionId:
+        type: integer
+        format: int64
+      etag:
+        type: string
+        description: >
+          Entity tag for optimistic concurrency control. To be set during a
+          read-modify-write to ensure that the client has not attempted to
+          modify a changed resource.
+      creationTime:
+        type: string
+      lastModifiedTime:
+        type: integer
+        format: int64
+        description: Milliseconds since the UNIX epoch.
+      cohortDefinition:
+        type: string
+      cohortName:
+        type: string
+      description:
+        type: string
+      matchedParticipantCount:
+        type: integer
+        format: int64
+      reviewSize:
+        type: integer
+        format: int64
+      reviewedCount:
+        type: integer
+        format: int64
+      queryResultSize:
+        type: integer
+        format: int64
+      reviewStatus:
+        $ref: "#/definitions/ReviewStatus"
+      participantCohortStatuses:
+        type: "array"
+        items:
+          $ref: "#/definitions/ParticipantCohortStatus"
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      sortOrder:
+        type: string
+      sortColumn:
+        type: string
+
+  PageFilterRequest:
+    required:
+      - page
+      - pageSize
+      - sortOrder
+    properties:
+      page:
+        type: integer
+        description: specific page (default is 0)
+      pageSize:
+        type: integer
+        description: page size of results (default is 25)
+      sortOrder:
+        $ref: "#/definitions/SortOrder"
+      sortColumn:
+        $ref: "#/definitions/FilterColumns"
+        description: Column upon which to sort (default is 'participantId')
+      filters:
+        $ref: "#/definitions/FilterList"
+      domain:
+        $ref: "#/definitions/DomainType"
+        description: Different domain types in omop
+
+  FilterColumns:
+    type: string
+    enum: [PARTICIPANTID, STATUS, GENDER, BIRTHDATE, RACE, ETHNICITY, DECEASED, START_DATE, STANDARD_CODE, STANDARD_VOCAB, STANDARD_NAME, STANDARD_CONCEPT_ID,
+           SOURCE_CODE, SOURCE_VOCAB, SOURCE_NAME, SOURCE_CONCEPT_ID, DOMAIN, AGE_AT_EVENT, NUM_OF_MENTIONS, FIRST_MENTION, LAST_MENTION, VISIT_TYPE,
+           ROUTE, DOSE, STRENGTH, VAL_AS_NUMBER, UNIT, REF_RANGE, SURVEY_NAME, QUESTION, ANSWER]
+
+  DomainType:
+    type: string
+    enum: [CONDITION, PROCEDURE, OBSERVATION, DRUG, ALL_EVENTS, DEVICE, VISIT, MEASUREMENT, PHYSICAL_MEASUREMENT, LAB, VITAL, SURVEY, PERSON]
+
+  SortOrder:
+    type: string
+    enum: [asc, desc]
+
+  FilterList:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/Filter"
+
+  Filter:
+    required:
+      - property
+      - operator
+      - values
+    properties:
+      property:
+        $ref: "#/definitions/FilterColumns"
+      operator:
+        $ref: "#/definitions/Operator"
+      values:
+        type: "array"
+        items:
+          type: string
+
+  ParticipantCohortStatus:
+    type: object
+    required:
+      - participantId
+      - status
+    properties:
+      participantId:
+        type: integer
+        format: int64
+      status:
+        $ref: "#/definitions/CohortStatus"
+      genderConceptId:
+        type: integer
+        format: int64
+      gender:
+        type: string
+      birthDate:
+        type: string
+      raceConceptId:
+        type: integer
+        format: int64
+      race:
+        type: string
+      ethnicityConceptId:
+        type: integer
+        format: int64
+      ethnicity:
+        type: string
+      deceased:
+        type: boolean
+        default: false
+  ModifyCohortStatusRequest:
+    type: object
+    required:
+      - status
+    properties:
+      status:
+        $ref: "#/definitions/CohortStatus"
+
+  ParticipantChartDataListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/ParticipantChartData"
+
+  VocabularyListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/Vocabulary"
+
+  Vocabulary:
+    type: object
+    required:
+      - type
+      - domain
+      - vocabulary
+    properties:
+      type:
+        type: string
+        description: Source or Standard
+      domain:
+        type: string
+        description: OMOP domain
+      vocabulary:
+        type: string
+        description: Vocabulary
+
+  CohortChartDataListResponse:
+    type: object
+    required:
+      - count
+      - items
+    properties:
+      count:
+        type: integer
+        format: int64
+        description: total count for cohort.
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/CohortChartData"
+
+  ParticipantCohortAnnotation:
+    type: object
+    required:
+      - cohortReviewId
+      - participantId
+      - cohortAnnotationDefinitionId
+    properties:
+      annotationId:
+        type: integer
+        format: int64
+        description: participant annotation id.
+      cohortAnnotationDefinitionId:
+        type: integer
+        format: int64
+        description: annotation definition id.
+      cohortReviewId:
+        type: integer
+        format: int64
+        description: the cohort reivew id.
+      participantId:
+        type: integer
+        format: int64
+        description: the participant id.
+      # These property names should match what is in ModifyParticipantCohortAnnotationRequest
+      annotationValueString:
+        type: string
+        description: The Value of the annotation if the AnnotationType is STRING
+      annotationValueEnum:
+        type: string
+        description: The option chosen for the annotation if the AnnotationType is ENUM
+      annotationValueDate:
+        type: string
+        description: The Value of the annotation if the AnnotationType is DATE
+      annotationValueBoolean:
+        type: boolean
+        default: null
+        description: The Value of the annotation if the AnnotationType is BOOLEAN
+      annotationValueInteger:
+        type: integer
+        description: The Value of the annotation if the AnnotationType is INTEGER
+
+  ParticipantCohortAnnotationListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/ParticipantCohortAnnotation"
+
+  ParticipantDataListResponse:
+    type: object
+    required:
+      - items
+      - count
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/ParticipantData"
+      count:
+        type: integer
+        format: int64
+        description: the total count of items.
+
+  ModifyParticipantCohortAnnotationRequest:
+    type: object
+    properties:
+      annotationValueString:
+        type: string
+        description: The Value of the annotation if the AnnotationType is STRING
+      annotationValueEnum:
+        type: string
+        description: The option chosen for the annotation if the AnnotationType is ENUM
+      annotationValueDate:
+        type: string
+        description: The Value of the annotation if the AnnotationType is DATE
+      annotationValueBoolean:
+        type: boolean
+        default: null
+        description: The Value of the annotation if the AnnotationType is BOOLEAN
+      annotationValueInteger:
+        type: integer
+        description: The Value of the annotation if the AnnotationType is INTEGER
+
+  ReviewStatus:
+    type: string
+    description: possible values indicating whether review has been created
+    enum: [NONE, CREATED]
+
+  CohortChartData:
+    type: object
+    required:
+      - name
+      - conceptId
+      - count
+    properties:
+      name:
+        type: string
+        description: the name of this data
+      conceptId:
+        type: integer
+        format: int64
+        description: the source concept id for this data
+      count:
+        type: integer
+        format: int64
+        description: the count for this data
+
+  ParticipantChartData:
+    type: object
+    required:
+      - standardName
+      - standardVocabulary
+      - startDate
+      - ageAtEvent
+      - rank
+    properties:
+      standardName:
+        type: string
+        description: the standard name
+      standardVocabulary:
+        type: string
+        description: the standard vocabulary
+      startDate:
+        type: string
+        description: the date of the event
+      ageAtEvent:
+        type: integer
+        description: The age at event for the participant
+      rank:
+        type: integer
+        description: the rank of the data
+
+  ParticipantData:
+    required:
+      - itemDate
+    properties:
+      itemDate:
+        type: string
+        description: The date of the event
+      domain:
+        type: string
+        description: the domain of this data.
+      standardName:
+        type: string
+        description: The standard name of this data
+      ageAtEvent:
+        type: integer
+        description: The age at event for the participant
+      standardConceptId:
+        type: integer
+        format: int64
+        description: The standard concept id
+      sourceConceptId:
+        type: integer
+        format: int64
+        description: The source concept id
+      sourceVocabulary:
+        type: string
+        description: The source vocabulary type of this data
+      standardVocabulary:
+        type: string
+        description: The standard vocabulary of this data
+      sourceName:
+        type: string
+        description: The source name of this data
+      sourceCode:
+        type: string
+        description: The source code of this data
+      standardCode:
+        type: string
+        description: The standard code of this data
+      value:
+        type: string
+        description: The source value of this data
+      visitType:
+        type: string
+        description: The visit type of this data
+      numMentions:
+        type: string
+        description: The number of mentions of this data
+      firstMention:
+        type: string
+        description: The date of first mention of this data
+      lastMention:
+        type: string
+        description: The date of last mention of this data
+      unit:
+        type: string
+        description: The unit of this data
+      dose:
+        type: string
+        description: The quantity of this data
+      strength:
+        type: string
+        description: The strength of this data
+      route:
+        type: string
+        description: The route of this data
+      refRange:
+        type: string
+        description: The reference range of this data
+      survey:
+        type: string
+        description: The name of this survey
+      question:
+        type: string
+        description: a question in this survey
+      answer:
+        type: string
+        description: an answer in this survey
+
+  AnnotationType:
+    type: string
+    description: possible values representing the type of annotation.
+    enum: [STRING, ENUM, DATE, BOOLEAN, INTEGER]
+
+  CohortAnnotationDefinition:
+    type: object
+    required:
+      - cohortId
+      - columnName
+      - annotationType
+    properties:
+      cohortAnnotationDefinitionId:
+        type: integer
+        format: int64
+        description: the annotation definition id.
+      etag:
+        type: string
+        description: >
+          Entity tag for optimistic concurrency control. To be set during a
+          read-modify-write to ensure that the client has not attempted to
+          modify a changed resource.
+      cohortId:
+        type: integer
+        format: int64
+        description: the cohort id.
+      columnName:
+        type: string
+        description: the name of this annotation.
+      annotationType:
+        $ref: "#/definitions/AnnotationType"
+      enumValues:
+        type: array
+        items:
+          type: string
+
+  CohortAnnotationDefinitionListResponse:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/CohortAnnotationDefinition"

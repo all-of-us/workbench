@@ -78,7 +78,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
                   .participantCount(conceptSet.getParticipantCount())
                   .survey(conceptSet.getSurveysEnum());
           if (conceptSet.getCreator() != null) {
-            result.creator(conceptSet.getCreator().getEmail());
+            result.creator(conceptSet.getCreator().getUsername());
           }
           return result;
         }

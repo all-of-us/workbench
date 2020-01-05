@@ -56,7 +56,7 @@ public class SetAuthority {
 
       for (String email : emails) {
         numUsers++;
-        DbUser user = userDao.findUserByEmail(email);
+        DbUser user = userDao.findUserByUsername(email);
         if (user == null) {
           log.log(Level.SEVERE, "No user for {0}.", email);
           numErrors++;

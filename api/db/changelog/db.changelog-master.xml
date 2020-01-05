@@ -119,6 +119,7 @@
     <include file="changelog/db.changelog-109-dataset-prepackaged-conceptsets-nullConstraint.xml"/>
     <include file="changelog/db.changelog-110-free-credits-days-override.xml"/>
     <include file="changelog/db.changelog-111-status-alert.xml"/>
+    <include file="changelog/db.changelog-112-free-credits-time-management.xml"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`

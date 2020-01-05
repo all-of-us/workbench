@@ -43,6 +43,7 @@ public final class DbStorageEnums {
           .put(Authority.DEVELOPER, (short) 1)
           .put(Authority.ACCESS_CONTROL_ADMIN, (short) 2)
           .put(Authority.FEATURED_WORKSPACE_ADMIN, (short) 3)
+          .put(Authority.COMMUNICATIONS_ADMIN, (short) 4)
           .build();
 
   public static Authority authorityFromStorage(Short authority) {
