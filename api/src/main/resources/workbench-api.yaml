@@ -2935,6 +2935,7 @@ definitions:
     - DEVELOPER
     - ACCESS_CONTROL_ADMIN
     - FEATURED_WORKSPACE_ADMIN
+    - COMMUNICATIONS_ADMIN
   PageVisit:
     type: object
     properties:
