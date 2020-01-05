@@ -1,12 +1,8 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.bigquery.Field;
-import com.google.cloud.bigquery.FieldList;
-import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -15,20 +11,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.ConceptService;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cohorts.CohortCloningService;
+import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataSetService;
@@ -46,7 +40,6 @@ import org.pmiops.workbench.model.ConceptListResponse;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainCount;
 import org.pmiops.workbench.model.DomainInfo;
-import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.SearchConceptsRequest;
 import org.pmiops.workbench.model.StandardConceptFilter;
@@ -227,7 +220,6 @@ public class ConceptsControllerTest {
     }
   }
 
-  @Autowired private BigQueryService bigQueryService;
   @Autowired private ConceptDao conceptDao;
   @Autowired private WorkspaceService workspaceService;
   @Autowired private WorkspaceDao workspaceDao;
@@ -239,8 +231,6 @@ public class ConceptsControllerTest {
   @Mock Provider<DbUser> userProvider;
   @Autowired SurveyModuleDao surveyModuleDao;
 
-  @PersistenceContext private EntityManager entityManager;
-
   private ConceptsController conceptsController;
 
   @Before
@@ -248,19 +238,12 @@ public class ConceptsControllerTest {
     // Injecting ConceptsController and ConceptService doesn't work well without using
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
-    ConceptService conceptService = new ConceptService(entityManager, conceptDao);
+    ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
     conceptsController =
-        new ConceptsController(
-            bigQueryService,
-            conceptService,
-            conceptBigQueryService,
-            workspaceService,
-            domainInfoDao,
-            conceptDao,
-            surveyModuleDao);
+        new ConceptsController(conceptService, conceptBigQueryService, workspaceService);
 
     DbUser user = new DbUser();
-    user.setEmail(USER_EMAIL);
+    user.setUsername(USER_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
@@ -804,31 +787,12 @@ public class ConceptsControllerTest {
         .inOrder();
   }
 
-  @Test
-  public void testGetValuesFromDomain() {
-    when(bigQueryService.getTableFieldsFromDomain(Domain.CONDITION))
-        .thenReturn(
-            FieldList.of(
-                Field.of("FIELD_ONE", LegacySQLTypeName.STRING),
-                Field.of("FIELD_TWO", LegacySQLTypeName.STRING)));
-    List<DomainValue> domainValues =
-        conceptsController
-            .getValuesFromDomain("ns", "name", Domain.CONDITION.toString())
-            .getBody()
-            .getItems();
-    verify(bigQueryService).getTableFieldsFromDomain(Domain.CONDITION);
-
-    assertThat(domainValues)
-        .containsExactly(
-            new DomainValue().value("FIELD_ONE"), new DomainValue().value("FIELD_TWO"));
-  }
-
   public static DbConcept makeConcept(Concept concept) {
     DbConcept result = new DbConcept();
     result.setConceptId(concept.getConceptId());
     result.setConceptName(concept.getConceptName());
     result.setStandardConcept(
-        concept.getStandardConcept() == null ? null : (concept.getStandardConcept() ? "S" : null));
+        concept.getStandardConcept() == null ? "" : (concept.getStandardConcept() ? "S" : ""));
     result.setConceptCode(concept.getConceptCode());
     result.setConceptClassId(concept.getConceptClassId());
     result.setVocabularyId(concept.getVocabularyId());

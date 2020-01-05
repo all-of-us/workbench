@@ -53,8 +53,9 @@ public class ProfileService {
             @Override
             public DemographicSurvey apply(DbDemographicSurvey demographicSurvey) {
               DemographicSurvey result = new DemographicSurvey();
-              if (result.getDisability() != null)
-                result.setDisability(demographicSurvey.getDisabilityEnum().equals(Disability.TRUE));
+              if (demographicSurvey.getDisability() != null) {
+                result.setDisability(Disability.TRUE.equals(demographicSurvey.getDisabilityEnum()));
+              }
               result.setEducation(demographicSurvey.getEducationEnum());
               result.setEthnicity(demographicSurvey.getEthnicityEnum());
               result.setGender(demographicSurvey.getGenderEnum());
@@ -104,7 +105,7 @@ public class ProfileService {
 
     Profile profile = new Profile();
     profile.setUserId(user.getUserId());
-    profile.setUsername(user.getEmail());
+    profile.setUsername(user.getUsername());
     if (user.getCreationNonce() != null) {
       profile.setCreationNonce(user.getCreationNonce().toString());
     }

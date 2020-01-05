@@ -21,13 +21,14 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -55,7 +56,7 @@ public class UserControllerTest {
   private static long incrementedUserId = 1;
 
   @TestConfiguration
-  @Import({UserController.class, UserService.class})
+  @Import({UserController.class, UserServiceImpl.class})
   @MockBean({
     FireCloudService.class,
     ComplianceService.class,
@@ -109,11 +110,12 @@ public class UserControllerTest {
   @Test
   public void testUserSearch() {
     when(fireCloudService.isUserMemberOfGroup(any(), any())).thenReturn(true);
-    DbUser john = userDao.findUserByEmail("john@lis.org");
+    DbUser john = userDao.findUserByUsername("john@lis.org");
 
     UserResponse response = userController.user("John", null, null, null).getBody();
     assertThat(response.getUsers()).hasSize(1);
-    assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getEmail());
+    assertThat(response.getUsers().get(0).getEmail()).isSameAs(john.getUsername());
+    assertThat(response.getUsers().get(0).getUserName()).isSameAs(john.getUsername());
   }
 
   @Test
@@ -224,14 +226,12 @@ public class UserControllerTest {
     assertThat(robinsonsAsc.getUsers()).containsAllIn(robinsonsDesc.getUsers());
 
     // Now reverse one and assert both in the same order
-    List<org.pmiops.workbench.model.User> descendingReversed =
-        Lists.reverse(robinsonsDesc.getUsers());
+    List<User> descendingReversed = Lists.reverse(robinsonsDesc.getUsers());
     assertThat(robinsonsAsc.getUsers()).containsAllIn(descendingReversed).inOrder();
 
     // Test that JPA sorting is really what we expected it to be by re-sorting one into a new list
-    List<org.pmiops.workbench.model.User> newAscending =
-        Lists.newArrayList(robinsonsAsc.getUsers());
-    newAscending.sort(Comparator.comparing(org.pmiops.workbench.model.User::getEmail));
+    List<User> newAscending = Lists.newArrayList(robinsonsAsc.getUsers());
+    newAscending.sort(Comparator.comparing(User::getUserName));
     assertThat(robinsonsAsc.getUsers()).containsAllIn(newAscending).inOrder();
   }
 
@@ -252,7 +252,7 @@ public class UserControllerTest {
   @SuppressWarnings("SameParameterValue")
   private void saveUser(String email, String givenName, String familyName, boolean registered) {
     DbUser user = new DbUser();
-    user.setEmail(email);
+    user.setUsername(email);
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
@@ -271,7 +271,7 @@ public class UserControllerTest {
   private void saveUserNotInFirecloud(
       String email, String givenName, String familyName, boolean registered) {
     DbUser user = new DbUser();
-    user.setEmail(email);
+    user.setUsername(email);
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
     user.setFamilyName(familyName);

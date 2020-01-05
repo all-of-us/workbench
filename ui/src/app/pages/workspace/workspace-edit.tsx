@@ -4,7 +4,7 @@ import {Button, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon, InfoIcon} from 'app/components/icons';
-import {CheckBox, LabeledCheckbox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
+import {CheckBox, RadioButton, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
@@ -257,7 +257,7 @@ const styles = reactStyles({
   categoryRow: {
     display: 'flex', flexDirection: 'row', padding: '0.6rem 0',
   },
-  checkboxStyle: {
+  checkBoxStyle: {
     marginRight: '.31667rem', zoom: '1.5'
   },
   checkboxRow: {
@@ -297,8 +297,8 @@ export const WorkspaceEditSection = (props) => {
 
 export const WorkspaceCategory = (props) => {
   return <div style={...fp.merge(styles.categoryRow, props.style)}>
-    <CheckBox style={styles.checkboxStyle} checked={!!props.value}
-              onChange={e => props.onChange(e)}/>
+    <CheckBox style={styles.checkBoxStyle} checked={!!props.value}
+      onChange={e => props.onChange(e)}/>
     <FlexColumn style={{marginTop: '-0.2rem'}}>
       <label style={styles.shortDescription}>
         {props.shortDescription}
@@ -310,6 +310,15 @@ export const WorkspaceCategory = (props) => {
         {props.children}
       </div>
     </FlexColumn>
+  </div>;
+};
+
+export const LabeledCheckBox = (props) => {
+  return <div style={...fp.merge(styles.checkboxRow, props.style)}>
+    <CheckBox style={{...styles.checkBoxStyle, verticalAlign: 'middle'}}
+              checked={!!props.value} disabled={props.disabled}
+              onChange={e => props.onChange(e)}/>
+    <label style={styles.text}>{props.label}</label>
   </div>;
 };
 
@@ -811,40 +820,23 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <FlexRow style={{flex: '1 1 0', marginTop: '0.5rem'}}>
               <FlexColumn>
                 {specificPopulations.slice(0, sliceByHalfLength(specificPopulations) + 1).map(i =>
-                  <LabeledCheckbox
-                      style={styles.checkboxRow}
-                      checkboxStyle={styles.checkboxStyle}
-                      labelStyle={styles.text}
-                      label={i.label}
-                      key={i.label}
-                      initialValue={this.specificPopulationCheckboxSelected(i.object)}
-                      onChange={v => this.updateSpecificPopulation(i.object, v)}
-                      disabled={!this.state.workspace.researchPurpose.population}
-                  />
+                  <LabeledCheckBox label={i.label} key={i.label}
+                                   value={this.specificPopulationCheckboxSelected(i.object)}
+                                   onChange={v => this.updateSpecificPopulation(i.object, v)}
+                                   disabled={!this.state.workspace.researchPurpose.population}/>
                 )}
               </FlexColumn>
               <FlexColumn>
                 {specificPopulations.slice(sliceByHalfLength(specificPopulations) + 1).map(i =>
-                  <LabeledCheckbox
-                      style={styles.checkboxRow}
-                      checkboxStyle={styles.checkboxStyle}
-                      labelStyle={styles.text}
-                      label={i.label}
-                      key={i.label}
-                      initialValue={this.specificPopulationCheckboxSelected(i.object)}
-                      onChange={v => this.updateSpecificPopulation(i.object, v)}
-                      disabled={!this.state.workspace.researchPurpose.population}
-                  />
+                  <LabeledCheckBox label={i.label} key={i.label}
+                                   value={this.specificPopulationCheckboxSelected(i.object)}
+                                   onChange={v => this.updateSpecificPopulation(i.object, v)}
+                                   disabled={!this.state.workspace.researchPurpose.population}/>
                 )}
-                <LabeledCheckbox
-                    style={styles.checkboxRow}
-                    checkboxStyle={styles.checkboxStyle}
-                    labelStyle={styles.text}
-                    label='Other'
-                    initialValue={this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
-                    onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
-                    disabled={!this.state.workspace.researchPurpose.population}
-                />
+                <LabeledCheckBox label='Other'
+                   value={this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
+                   onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
+                   disabled={!this.state.workspace.researchPurpose.population}/>
                 <TextInput type='text' autoFocus placeholder='Please specify'
                            value={this.state.workspace.researchPurpose.otherPopulationDetails}
                            disabled={!fp.includes(SpecificPopulationEnum.OTHER,

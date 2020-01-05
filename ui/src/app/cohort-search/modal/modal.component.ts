@@ -12,6 +12,7 @@ import {
 } from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, stripHtml, typeToTitle} from 'app/cohort-search/utils';
 import {triggerEvent} from 'app/utils/analytics';
+import {environment} from 'environments/environment';
 import {CriteriaType, DomainType, TemporalMention, TemporalTime} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -44,6 +45,7 @@ export class ModalComponent implements OnInit, OnDestroy {
   wizard: any;
   attributesNode: any;
   hierarchyNode: any;
+  publicUiUrl = environment.publicUiUrl;
 
   constructor() {}
 
@@ -182,6 +184,14 @@ export class ModalComponent implements OnInit, OnDestroy {
     return this.wizard.domain === DomainType.PHYSICALMEASUREMENT
       || this.wizard.domain === DomainType.SURVEY
       || this.wizard.domain === DomainType.VISIT;
+  }
+
+  get showDataBrowserLink() {
+    return (this.wizard.domain === DomainType.CONDITION
+      || this.wizard.domain === DomainType.PROCEDURE
+      || this.wizard.domain === DomainType.MEASUREMENT
+      || this.wizard.domain === DomainType.DRUG)
+      && (this.mode === 'list' || this.mode === 'tree');
   }
 
   get showNext() {

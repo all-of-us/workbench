@@ -84,7 +84,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     @Bean
     public DbUser user() {
       DbUser user = new DbUser();
-      user.setEmail("bob@gmail.com");
+      user.setUsername("bob@gmail.com");
       return user;
     }
   }

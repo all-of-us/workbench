@@ -22,6 +22,7 @@ import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 import {BugReportComponent} from './components/bug-report';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
+import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
@@ -126,6 +127,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ClarityModule,
   ],
   declarations: [
+    AdminBannerComponent,
     AdminReviewWorkspaceComponent,
     AdminUserComponent,
     AppComponent,
