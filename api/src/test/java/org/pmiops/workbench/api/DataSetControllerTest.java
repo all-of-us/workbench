@@ -71,6 +71,7 @@ import org.pmiops.workbench.db.dao.DataSetServiceImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -92,6 +93,7 @@ import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.KernelTypeEnum;
@@ -223,7 +225,7 @@ public class DataSetControllerTest {
     CohortFactoryImpl.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
-    UserService.class,
+    UserServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
     WorkspaceMapperImpl.class
@@ -359,7 +361,7 @@ public class DataSetControllerTest {
     when(cdrBigQuerySchemaConfigService.getConfig()).thenReturn(cdrBigQuerySchemaConfig);
 
     DbUser user = new DbUser();
-    user.setEmail(USER_EMAIL);
+    user.setUsername(USER_EMAIL);
     user.setUserId(123L);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
@@ -1010,5 +1012,25 @@ public class DataSetControllerTest {
     final Map<String, QueryJobConfiguration> result =
         dataSetService.generateQueryJobConfigurationsByDomainName(dataSetRequest);
     assertThat(result).isNotEmpty();
+  }
+
+  @Test
+  public void testGetValuesFromDomain() {
+    when(bigQueryService.getTableFieldsFromDomain(Domain.CONDITION))
+        .thenReturn(
+            FieldList.of(
+                Field.of("FIELD_ONE", LegacySQLTypeName.STRING),
+                Field.of("FIELD_TWO", LegacySQLTypeName.STRING)));
+    List<DomainValue> domainValues =
+        dataSetController
+            .getValuesFromDomain(
+                workspace.getNamespace(), WORKSPACE_NAME, Domain.CONDITION.toString())
+            .getBody()
+            .getItems();
+    verify(bigQueryService).getTableFieldsFromDomain(Domain.CONDITION);
+
+    assertThat(domainValues)
+        .containsExactly(
+            new DomainValue().value("FIELD_ONE"), new DomainValue().value("FIELD_TWO"));
   }
 }

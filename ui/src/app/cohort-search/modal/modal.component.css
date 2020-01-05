@@ -240,11 +240,18 @@ h5.selection-title {
   padding: 0;
 }
 
-.explore-link {
-  padding-bottom: 0.8rem;
+.link-container {
+  display: table;
+  height: 100%;
 }
 
-.explore-link >a:visited {
+.inner-link-container {
+  display: table-cell;
+  height: 100%;
+  vertical-align: middle;
+}
+
+.inner-link-container a:visited {
   color: #007cbb;
 }
 
