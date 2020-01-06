@@ -607,10 +607,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String fromWorkspaceId,
       String fromNotebookName,
       CopyRequest copyRequest) {
-    if (BillingStatus.INACTIVE.equals(workspaceService.get(copyRequest.getToWorkspaceNamespace(), copyRequest.getToWorkspaceName()).getBillingStatus())) {
+    if (BillingStatus.INACTIVE.equals(
+        workspaceService
+            .get(copyRequest.getToWorkspaceNamespace(), copyRequest.getToWorkspaceName())
+            .getBillingStatus())) {
       throw new ForbiddenException("Invalid billing account");
     }
-    
+
     FileDetail fileDetail;
     try {
       fileDetail =
@@ -631,7 +634,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<FileDetail> cloneNotebook(
       String workspace, String workspaceName, String notebookName) {
-    if (BillingStatus.INACTIVE.equals(workspaceService.get(workspace, workspaceName).getBillingStatus())) {
+    if (BillingStatus.INACTIVE.equals(
+        workspaceService.get(workspace, workspaceName).getBillingStatus())) {
       throw new ForbiddenException("Invalid billing account");
     }
 

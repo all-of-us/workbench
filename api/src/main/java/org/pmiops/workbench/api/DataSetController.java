@@ -441,7 +441,8 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> exportToNotebook(
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
-    if (BillingStatus.INACTIVE.equals(workspaceService.get(workspaceNamespace, workspaceId).getBillingStatus())) {
+    if (BillingStatus.INACTIVE.equals(
+        workspaceService.get(workspaceNamespace, workspaceId).getBillingStatus())) {
       throw new ForbiddenException("Invalid billing account");
     }
 
