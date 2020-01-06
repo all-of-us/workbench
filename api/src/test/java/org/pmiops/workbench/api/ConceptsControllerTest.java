@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
@@ -196,6 +197,17 @@ public class ConceptsControllerTest {
           .standardConceptCount(3)
           .allConceptCount(4);
 
+  private static final DbDomainInfo SURVEY_DOMAIN =
+      new DbDomainInfo()
+          .domainEnum(Domain.SURVEY)
+          .domainId("Survey")
+          .name("SURVEY")
+          .description("SURVEY")
+          .conceptId(CONCEPT_4.getConceptId())
+          .participantCount(0)
+          .standardConceptCount(0)
+          .allConceptCount(0);
+
   private static final String WORKSPACE_NAMESPACE = "ns";
   private static final String WORKSPACE_NAME = "name";
   private static final String USER_EMAIL = "bob@gmail.com";
@@ -226,6 +238,7 @@ public class ConceptsControllerTest {
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private DomainInfoDao domainInfoDao;
+  @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired FireCloudService fireCloudService;
   @Autowired UserDao userDao;
   @Mock Provider<DbUser> userProvider;
@@ -238,7 +251,8 @@ public class ConceptsControllerTest {
     // Injecting ConceptsController and ConceptService doesn't work well without using
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
-    ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
+    ConceptService conceptService =
+        new ConceptService(conceptDao, domainInfoDao, surveyModuleDao, cbCriteriaDao);
     conceptsController =
         new ConceptsController(conceptService, conceptBigQueryService, workspaceService);
 
@@ -323,7 +337,8 @@ public class ConceptsControllerTest {
             toDomainCount(CONDITION_DOMAIN, false),
             toDomainCount(DRUG_DOMAIN, false),
             toDomainCount(MEASUREMENT_DOMAIN, false),
-            toDomainCount(PROCEDURE_DOMAIN, false)),
+            toDomainCount(PROCEDURE_DOMAIN, false),
+            toDomainCount(SURVEY_DOMAIN, false)),
         ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_3, CLIENT_CONCEPT_1));
   }
 
@@ -346,7 +361,8 @@ public class ConceptsControllerTest {
             toDomainCount(CONDITION_DOMAIN, true),
             toDomainCount(DRUG_DOMAIN, true),
             toDomainCount(MEASUREMENT_DOMAIN, true),
-            toDomainCount(PROCEDURE_DOMAIN, true)),
+            toDomainCount(PROCEDURE_DOMAIN, true),
+            toDomainCount(SURVEY_DOMAIN, true)),
         ImmutableList.of(CLIENT_CONCEPT_5, CLIENT_CONCEPT_1));
   }
 
@@ -369,7 +385,8 @@ public class ConceptsControllerTest {
             toDomainCount(CONDITION_DOMAIN, true),
             toDomainCount(DRUG_DOMAIN, true),
             toDomainCount(MEASUREMENT_DOMAIN, true),
-            toDomainCount(PROCEDURE_DOMAIN, true)),
+            toDomainCount(PROCEDURE_DOMAIN, true),
+            toDomainCount(SURVEY_DOMAIN, true)),
         ImmutableList.of(CLIENT_CONCEPT_5, CLIENT_CONCEPT_1));
   }
 
@@ -515,7 +532,8 @@ public class ConceptsControllerTest {
             toDomainCount(CONDITION_DOMAIN, 2),
             toDomainCount(DRUG_DOMAIN, 0),
             toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(PROCEDURE_DOMAIN, 0)),
+            toDomainCount(PROCEDURE_DOMAIN, 0),
+            toDomainCount(SURVEY_DOMAIN, 0)),
         ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5));
   }
 
@@ -536,7 +554,8 @@ public class ConceptsControllerTest {
             toDomainCount(CONDITION_DOMAIN, 1),
             toDomainCount(DRUG_DOMAIN, 0),
             toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(PROCEDURE_DOMAIN, 0)),
+            toDomainCount(PROCEDURE_DOMAIN, 0),
+            toDomainCount(SURVEY_DOMAIN, 0)),
         ImmutableList.of(CLIENT_CONCEPT_4));
   }
 
@@ -591,7 +610,8 @@ public class ConceptsControllerTest {
             toDomainCount(CONDITION_DOMAIN, 1),
             toDomainCount(DRUG_DOMAIN, 0),
             toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(PROCEDURE_DOMAIN, 0)),
+            toDomainCount(PROCEDURE_DOMAIN, 0),
+            toDomainCount(SURVEY_DOMAIN, 0)),
         ImmutableList.of(CLIENT_CONCEPT_5));
   }
 
@@ -612,7 +632,8 @@ public class ConceptsControllerTest {
             toDomainCount(CONDITION_DOMAIN, 2),
             toDomainCount(DRUG_DOMAIN, 0),
             toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(PROCEDURE_DOMAIN, 0)),
+            toDomainCount(PROCEDURE_DOMAIN, 0),
+            toDomainCount(SURVEY_DOMAIN, 0)),
         ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5));
   }
 
@@ -636,7 +657,8 @@ public class ConceptsControllerTest {
             // Although it doesn't match the domain filter, we still include the measurement concept
             // in domain counts
             toDomainCount(MEASUREMENT_DOMAIN, 1),
-            toDomainCount(PROCEDURE_DOMAIN, 0)),
+            toDomainCount(PROCEDURE_DOMAIN, 0),
+            toDomainCount(SURVEY_DOMAIN, 0)),
         ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_3, CLIENT_CONCEPT_1));
   }
 

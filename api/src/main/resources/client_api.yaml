@@ -521,6 +521,9 @@ definitions:
           The domain for the concepts returned (e.g. OBSERVATION, DRUG). Note that this may map
           to multiple domain ID values in OMOP.
         $ref: "#/definitions/Domain"
+      surveyName:
+        description: The name of the survey clicked
+        type: string
       maxResults:
         type: integer
         format: int32
@@ -543,6 +546,10 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Concept"
+      questions:
+        type: "array"
+        items:
+          $ref: "#/definitions/SurveyQuestions"
       domainCounts:
         type: "array"
         items:

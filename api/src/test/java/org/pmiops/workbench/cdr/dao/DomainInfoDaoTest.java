@@ -88,9 +88,10 @@ public class DomainInfoDaoTest {
   @Test
   public void findByOrderByDomainId() {
     List<DbDomainInfo> infos = domainInfoDao.findByOrderByDomainId();
-    assertEquals(2, infos.size());
+    assertEquals(3, infos.size());
     assertEquals(domainInfoCondition, infos.get(0));
     assertEquals(domainInfoObservation, infos.get(1));
+    assertEquals(domainInfoPM, infos.get(2));
   }
 
   @Test

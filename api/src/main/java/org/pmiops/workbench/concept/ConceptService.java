@@ -59,10 +59,14 @@ public class ConceptService {
 
   // Used for tests
   public ConceptService(
-      ConceptDao conceptDao, DomainInfoDao domainInfoDao, SurveyModuleDao surveyModuleDao) {
+      ConceptDao conceptDao,
+      DomainInfoDao domainInfoDao,
+      SurveyModuleDao surveyModuleDao,
+      CBCriteriaDao cbCriteriaDao) {
     this.conceptDao = conceptDao;
     this.domainInfoDao = domainInfoDao;
     this.surveyModuleDao = surveyModuleDao;
+    this.cbCriteriaDao = cbCriteriaDao;
   }
 
   public static String modifyMultipleMatchKeyword(String query) {
