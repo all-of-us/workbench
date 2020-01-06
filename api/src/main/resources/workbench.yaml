@@ -550,7 +550,6 @@ paths:
       operationId: listClusters
       tags:
         - cluster
-        - compute
       parameters:
         - in: path
           name: billingProjectId
@@ -608,7 +607,6 @@ paths:
       operationId: localize
       tags:
         - cluster
-        - compute
       consumes:
         - application/json
       parameters:
@@ -1313,7 +1311,6 @@ paths:
     post:
       tags:
         - workspaces
-        - compute
       description: Duplicates specified notebook
       operationId: "cloneNotebook"
       parameters:
@@ -1338,7 +1335,6 @@ paths:
     post:
       tags:
         - workspaces
-        - compute
       description: Copy specified notebook in path to specified workspace in body
       operationId: "copyNotebook"
       parameters:
@@ -2117,7 +2113,6 @@ paths:
     post:
       tags:
         - dataSet
-        - compute
       description: >
         Exports a data set query to a notebook
       operationId: "exportToNotebook"

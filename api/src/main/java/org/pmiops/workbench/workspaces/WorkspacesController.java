@@ -50,6 +50,7 @@ import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
@@ -61,6 +62,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.CloneWorkspaceResponse;
 import org.pmiops.workbench.model.CopyRequest;
@@ -605,6 +607,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String fromWorkspaceId,
       String fromNotebookName,
       CopyRequest copyRequest) {
+    if (BillingStatus.INACTIVE.equals(workspaceService.get(copyRequest.getToWorkspaceNamespace(), copyRequest.getToWorkspaceName()).getBillingStatus())) {
+      throw new ForbiddenException("Invalid billing account");
+    }
+    
     FileDetail fileDetail;
     try {
       fileDetail =
@@ -625,6 +631,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<FileDetail> cloneNotebook(
       String workspace, String workspaceName, String notebookName) {
+    if (BillingStatus.INACTIVE.equals(workspaceService.get(workspace, workspaceName).getBillingStatus())) {
+      throw new ForbiddenException("Invalid billing account");
+    }
+
     FileDetail fileDetail;
     try {
       fileDetail = notebooksService.cloneNotebook(workspace, workspaceName, notebookName);

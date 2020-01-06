@@ -24,11 +24,13 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUser.ClusterConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
@@ -122,6 +124,10 @@ public class ClusterController implements ClusterApiDelegate {
       throw new BadRequestException("Must specify billing project");
     }
 
+    if (BillingStatus.INACTIVE.equals(workspaceService.get(billingProjectId, workspaceFirecloudName).getBillingStatus())) {
+      throw new ForbiddenException("Invalid billing account");
+    }
+
     DbUser user = this.userProvider.get();
 
     String clusterName = clusterNameForUser(user);
@@ -169,6 +175,10 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<ClusterLocalizeResponse> localize(
       String projectName, String clusterName, ClusterLocalizeRequest body) {
+    if (BillingStatus.INACTIVE.equals(workspaceService.get(body.getWorkspaceNamespace(), body.getWorkspaceId()).getBillingStatus())) {
+      throw new ForbiddenException("Invalid billing account");
+    }
+
     FirecloudWorkspace fcWorkspace;
     try {
       fcWorkspace =
