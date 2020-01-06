@@ -177,7 +177,6 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
   };
 
   handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    console.log('change', e.target.checked, this.props);
     if (this.props.manageOwnState) {
       // We only track state internally if props aren't being used to render
       // the checkbox value.
