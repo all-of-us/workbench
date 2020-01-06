@@ -2,26 +2,40 @@ import * as React from 'react';
 
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
-import {ClrIcon} from 'app/components/icons';
+import {faTimes} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {Button} from 'app/components/buttons';
+import {FlexColumn, FlexRow} from 'app/components/flex';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TextModal} from 'app/components/text-modal';
 import {statusApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, withGlobalError} from 'app/utils';
+import {isBlank, reactStyles, withGlobalError, withUserProfile} from 'app/utils';
 import {globalErrorStore} from 'app/utils/navigation';
-import {ErrorCode, ErrorResponse} from 'generated/fetch';
-import {Button} from './buttons';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from './modals';
+import {openZendeskWidget} from 'app/utils/zendesk';
+import {ErrorCode, ErrorResponse, Profile} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 
 const styles = reactStyles({
+  errorCodeContainer: {
+    alignItems: 'center',
+    flexWrap: 'wrap'
+  },
+  errorContent: {
+    alignItems: 'flex-start'
+  },
   errorHandler: {
     position: 'fixed',
     bottom: '1rem',
     background: colors.white,
     padding: '0.6rem',
-    border: `1px solid ${colors.black}`
+    border: `1px solid ${colors.black}`,
+    width: '12rem'
   },
   iconStyles: {
     cursor: 'pointer',
+    height: 17,
+    width: 17
   },
   serverStatusList: {
     margin: '0.5rem 0'
@@ -36,9 +50,11 @@ interface ServerDownStatus {
 
 interface Props {
   globalError: ErrorResponse;
+  profileState: {profile: Profile, reload: Function, updateCache: Function};
 }
 
 interface State {
+  copiedErrorIdToClipboard: boolean;
   serverDownStatus: ServerDownStatus;
   serverStatusAcknowledged: boolean;
 }
@@ -47,10 +63,11 @@ interface State {
 // have it reconstruct/reinitialize with new errors.
 const shouldCheckStatus = new BehaviorSubject<any>(true);
 
-export const ErrorHandler = withGlobalError()(class extends React.Component<Props, State> {
+export const ErrorHandler = fp.flow(withUserProfile(), withGlobalError())(class extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
+      copiedErrorIdToClipboard: false,
       serverDownStatus: {apiDown: false, firecloudDown: false, notebooksDown: false},
       serverStatusAcknowledged: false
     };
@@ -92,18 +109,42 @@ export const ErrorHandler = withGlobalError()(class extends React.Component<Prop
     globalErrorStore.next(undefined);
   }
 
+  copyToClipboard() {
+    this.setState({copiedErrorIdToClipboard: true});
+    setTimeout(() => {this.setState({copiedErrorIdToClipboard: false}); }, 1000);
+  }
+
+  openContactWidget() {
+    const {profile} = this.props.profileState;
+    profile !== undefined ? openZendeskWidget(
+      profile.givenName,
+      profile.familyName,
+      profile.username,
+      profile.contactEmail,
+    ) : openZendeskWidget('', '', '', '');
+  }
+
   render() {
     const {globalError} = this.props;
-    const {apiDown, firecloudDown, notebooksDown} = this.state.serverDownStatus;
+    const {serverDownStatus: {apiDown, firecloudDown, notebooksDown}} = this.state;
 
     return globalError !== undefined && <React.Fragment>
       {globalError.statusCode === 500 && <div style={styles.errorHandler}>
-        Server Error (500)
-        <ClrIcon shape='times' style={styles.iconStyles} onClick={() => this.closeError()} />
-        </div>}
+        <FlexRow style={styles.errorContent}>
+          <FlexColumn>
+          Unexpected Error
+          {!isBlank(globalError.errorUniqueId) && <div>
+            Please <Button style={{display: 'inline', padding: 0, fontSize: 14}} type='link'
+                           onClick={() => this.openContactWidget()}>
+              contact support
+            </Button> and use this error code: {globalError.errorUniqueId}
+          </div>}
+          </FlexColumn>
+          <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.closeError()} />
+        </FlexRow></div>}
       {globalError.statusCode === 503 && <div style={styles.errorHandler}>
         Server is currently busy (503)
-        <ClrIcon shape='times' style={styles.iconStyles} onClick={() => this.closeError()} />
+        <FontAwesomeIcon icon={faTimes} style={styles.iconStyles} onClick={() => this.closeError()} />
       </div>}
       {globalError.errorCode === ErrorCode.USERDISABLED && <TextModal
           title='This account has been disabled'
