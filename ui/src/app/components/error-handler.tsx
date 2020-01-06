@@ -4,16 +4,16 @@ import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 import {faTimes} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TextModal} from 'app/components/text-modal';
 import {statusApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {isBlank, reactStyles, withGlobalError, withUserProfile} from 'app/utils';
 import {globalErrorStore} from 'app/utils/navigation';
-import {ErrorCode, ErrorResponse, Profile} from 'generated/fetch';
-import {Button} from 'app/components/buttons';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {openZendeskWidget} from 'app/utils/zendesk';
+import {ErrorCode, ErrorResponse, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
 const styles = reactStyles({
