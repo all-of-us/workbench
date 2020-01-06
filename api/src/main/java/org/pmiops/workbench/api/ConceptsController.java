@@ -174,8 +174,8 @@ public class ConceptsController implements ConceptsApiDelegate {
       String workspaceNamespace, String workspaceId, SearchConceptsRequest request) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    Integer maxResults = Optional.ofNullable(request.getMaxResults()).orElse(DEFAULT_MAX_RESULTS);
-    maxResults = maxResults > MAX_MAX_RESULTS ? MAX_MAX_RESULTS : maxResults;
+    int maxResults = Optional.ofNullable(request.getMaxResults()).orElse(DEFAULT_MAX_RESULTS);
+    maxResults = Math.min(maxResults, MAX_MAX_RESULTS);
     if (maxResults < 1) {
       throw new BadRequestException("Invalid value for maxResults: " + maxResults);
     }
