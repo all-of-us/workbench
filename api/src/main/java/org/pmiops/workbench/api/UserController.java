@@ -31,7 +31,7 @@ public class UserController implements UserApiDelegate {
       user -> {
         org.pmiops.workbench.model.User modelUser = new org.pmiops.workbench.model.User();
         modelUser.setEmail(user.getUsername()); // deprecated, but kept for compatibility
-        modelUser.setUserName(user.getUsername());
+        modelUser.setUsername(user.getUsername());
         modelUser.setGivenName(user.getGivenName());
         modelUser.setFamilyName(user.getFamilyName());
         return modelUser;

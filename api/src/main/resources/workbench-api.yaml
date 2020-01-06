@@ -4339,9 +4339,9 @@ definitions:
     type: object
     properties:
       email:
-        description: researchallofus email address (deprecated in favor of userName)
+        description: researchallofus email address (deprecated in favor of username)
         type: string
-      userName:
+      username:
         description: Unique researchallofus username (a Google account email)
         type: string
       givenName:
