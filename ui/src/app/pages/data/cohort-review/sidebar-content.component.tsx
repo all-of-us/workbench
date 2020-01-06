@@ -203,6 +203,7 @@ const AnnotationItem = fp.flow(
         />;
       case AnnotationType.BOOLEAN:
         return <CheckBox
+          manageOwnState={false}
           checked={value}
           onChange={v => this.save(v)}
           disabled={disabled}

@@ -27,7 +27,14 @@ export const ResearchPurposeDescription =
    for each workspace they create. The responses provided below will be posted publicly in
    the <i>All of Us</i> Research Hub website to inform research participants.</div>;
 
-export const ResearchPurposeItems = [
+interface ResearchPurposeItem {
+  shortName: string;
+  shortDescription: string;
+  longDescription: React.ReactNode;
+  uniqueId?: string;
+}
+
+export const ResearchPurposeItems: Array<ResearchPurposeItem> = [
   {
     shortName: 'diseaseFocusedResearch',
     shortDescription: 'Disease-focused research',
@@ -87,6 +94,9 @@ export const ResearchPurposeItems = [
       (500 character limit).</div>
   }
 ];
+ResearchPurposeItems.forEach(item => {
+  item.uniqueId = fp.uniqueId('research-purpose');
+});
 
 export const toolTipText = {
   header: <div>A Workspace is your place to store and analyze data for a specific project.Each
@@ -244,7 +254,8 @@ const styles = reactStyles({
     color: colors.primary,
     fontSize: '16px',
     fontWeight: 600,
-    lineHeight: '24px'
+    lineHeight: '24px',
+    cursor: 'pointer'
   },
   longDescription : {
     position: 'relative',
@@ -257,7 +268,7 @@ const styles = reactStyles({
   categoryRow: {
     display: 'flex', flexDirection: 'row', padding: '0.6rem 0',
   },
-  checkBoxStyle: {
+  checkboxStyle: {
     marginRight: '.31667rem', zoom: '1.5'
   },
   checkboxRow: {
@@ -297,10 +308,10 @@ export const WorkspaceEditSection = (props) => {
 
 export const WorkspaceCategory = (props) => {
   return <div style={...fp.merge(styles.categoryRow, props.style)}>
-    <CheckBox style={styles.checkBoxStyle} checked={!!props.value}
+    <CheckBox style={styles.checkboxStyle} checked={!!props.value}
       onChange={e => props.onChange(e)}/>
     <FlexColumn style={{marginTop: '-0.2rem'}}>
-      <label style={styles.shortDescription}>
+      <label style={styles.shortDescription} htmlFor={props.uniqueId}>
         {props.shortDescription}
       </label>
       <div>
@@ -310,15 +321,6 @@ export const WorkspaceCategory = (props) => {
         {props.children}
       </div>
     </FlexColumn>
-  </div>;
-};
-
-export const LabeledCheckBox = (props) => {
-  return <div style={...fp.merge(styles.checkboxRow, props.style)}>
-    <CheckBox style={{...styles.checkBoxStyle, verticalAlign: 'middle'}}
-              checked={!!props.value} disabled={props.disabled}
-              onChange={e => props.onChange(e)}/>
-    <label style={styles.text}>{props.label}</label>
   </div>;
 };
 
@@ -530,7 +532,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     specificPopulationCheckboxSelected(populationEnum): boolean {
-      return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
+      return !!fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
     }
 
     onSaveClick() {
@@ -686,7 +688,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             width: '100%',
           }}/>}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
-                              section={{marginTop: '24px'}} largeHeader required>
+                              section={{marginTop: '24px'}} largeHeader required={!this.isMode(WorkspaceEditMode.Duplicate)}>
           <FlexRow>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
               value = {this.state.workspace.name}
@@ -716,13 +718,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </FlexRow>
         </WorkspaceEditSection>
         {this.isMode(WorkspaceEditMode.Duplicate) &&
-        <FlexRow>
+        <WorkspaceEditSection header='Options for duplicate workspace'
+          >
           <CheckBox
-                 style={{height: '.66667rem', marginRight: '.31667rem', marginTop: '1.2rem'}}
-          onChange={v => this.setState({cloneUserRole: v})}/>
-          <WorkspaceEditSection header='Copy Original workspace Collaborators'
-            description='Share cloned workspace with same collaborators'/>
-        </FlexRow>
+            style={styles.checkboxStyle}
+            label='Share workspace with the same set of collaborators'
+            labelStyle={styles.text}
+            onChange={v => this.setState({cloneUserRole: v})}/>
+        </WorkspaceEditSection>
         }
         <WorkspaceEditSection header='Billing Account' subHeader='National Institutes of Health'
             tooltip={toolTipText.billingAccount}/>
@@ -743,6 +746,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 .map((rp, i) =>
                   <WorkspaceCategory shortDescription={rp.shortDescription} key={i}
                     longDescription={rp.longDescription}
+                     uniqueId={rp.uniqueId}
                     value={this.state.workspace.researchPurpose[rp.shortName]}
                     onChange={v => this.updateResearchPurpose(rp.shortName, v)}
                     children={rp.shortName === 'diseaseFocusedResearch' ?
@@ -753,6 +757,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 .map((rp, i) =>
                   <WorkspaceCategory shortDescription={rp.shortDescription}
                     longDescription={rp.longDescription} key={i}
+                                     uniqueId={rp.uniqueId}
                     value={this.state.workspace.researchPurpose[rp.shortName]}
                     onChange={v => this.updateResearchPurpose(rp.shortName, v)}
                     children={rp.shortName === 'otherPurpose' ?
@@ -820,23 +825,40 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <FlexRow style={{flex: '1 1 0', marginTop: '0.5rem'}}>
               <FlexColumn>
                 {specificPopulations.slice(0, sliceByHalfLength(specificPopulations) + 1).map(i =>
-                  <LabeledCheckBox label={i.label} key={i.label}
-                                   value={this.specificPopulationCheckboxSelected(i.object)}
-                                   onChange={v => this.updateSpecificPopulation(i.object, v)}
-                                   disabled={!this.state.workspace.researchPurpose.population}/>
+                  <CheckBox
+                      wrapperStyle={styles.checkboxRow}
+                      style={styles.checkboxStyle}
+                      label={i.label}
+                      labelStyle={styles.text}
+                      key={i.label}
+                      checked={this.specificPopulationCheckboxSelected(i.object)}
+                      onChange={v => this.updateSpecificPopulation(i.object, v)}
+                      disabled={!this.state.workspace.researchPurpose.population}
+                  />
                 )}
               </FlexColumn>
               <FlexColumn>
                 {specificPopulations.slice(sliceByHalfLength(specificPopulations) + 1).map(i =>
-                  <LabeledCheckBox label={i.label} key={i.label}
-                                   value={this.specificPopulationCheckboxSelected(i.object)}
-                                   onChange={v => this.updateSpecificPopulation(i.object, v)}
-                                   disabled={!this.state.workspace.researchPurpose.population}/>
+                  <CheckBox
+                      wrapperStyle={styles.checkboxRow}
+                      style={styles.checkboxStyle}
+                      label={i.label}
+                      labelStyle={styles.text}
+                      key={i.label}
+                      checked={this.specificPopulationCheckboxSelected(i.object)}
+                      onChange={v => this.updateSpecificPopulation(i.object, v)}
+                      disabled={!this.state.workspace.researchPurpose.population}
+                  />
                 )}
-                <LabeledCheckBox label='Other'
-                   value={this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
-                   onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
-                   disabled={!this.state.workspace.researchPurpose.population}/>
+                <CheckBox
+                    wrapperStyle={styles.checkboxRow}
+                    style={styles.checkboxStyle}
+                    label='Other'
+                    labelStyle={styles.text}
+                    checked={this.specificPopulationCheckboxSelected(SpecificPopulationEnum.OTHER)}
+                    onChange={v => this.updateSpecificPopulation(SpecificPopulationEnum.OTHER, v)}
+                    disabled={!this.state.workspace.researchPurpose.population}
+                />
                 <TextInput type='text' autoFocus placeholder='Please specify'
                            value={this.state.workspace.researchPurpose.otherPopulationDetails}
                            disabled={!fp.includes(SpecificPopulationEnum.OTHER,

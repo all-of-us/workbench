@@ -31,7 +31,9 @@ const styles = {
     fontFamily: 'Montserrat',
     fontSize: '14px',
     fontWeight: 400,
-  }
+  },
+  checkboxWrapper: {display: 'flex', width: '9rem', marginBottom: '0.5rem', marginTop: '0.3rem'},
+  checkboxLabel: {paddingLeft: '0.5rem', paddingRight: '0.5rem'}
 };
 
 export const DropDownSection = (props) => {
@@ -40,16 +42,6 @@ export const DropDownSection = (props) => {
               value={props.value}
               onChange={(e) => props.onChange(e.value)}/>
   </Section>;
-};
-
-export const CheckBoxWithLabel = (props) => {
-  return <div style={{display: 'flex', width: '9rem', marginBottom: '0.5rem'}}>
-    <CheckBox style={{marginTop: '0.3rem'}}
-              checked={props.checked} onChange={(value) => props.onChange(value)}/>
-    <div style={{paddingLeft: '0.5rem', paddingRight: '0.5rem'}}>
-      <label style={{...styles.questionLabel, ...props.style}}>{props.label}</label>
-    </div>
-  </div>;
 };
 
 export interface AccountCreationSurveyProps {
@@ -114,6 +106,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     // Toggle Includes removes the element if it already exist and adds if not
     const attributeList = toggleIncludes(value, this.state.profile.demographicSurvey[attribute]);
     this.setState(fp.set(['profile', 'demographicSurvey', attribute], attributeList));
+    console.log(this.state);
   }
 
   toggleDisability(value) {
@@ -139,9 +132,10 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       <Section header='1. Race'>
         <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
           {AccountCreationOptions.race.map((race) => {
-            return <CheckBoxWithLabel attribute='race' label={race.label}
-                                      onChange={(value) => this.updateList('race', race.value)}
-                                      value={race.value}/>; })
+            return <CheckBox label={race.label}
+                             wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
+                             onChange={(value) => this.updateList('race', race.value)}
+                             />; })
           }
         </div>
       </Section>
@@ -155,9 +149,10 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       <Section header='3. Gender'>
         <FlexRow style={{flexWrap: 'wrap'}}>
           {AccountCreationOptions.gender.map((gender) => {
-            return <CheckBoxWithLabel attribute='gender'
-                                      onChange={(value) => this.updateList('gender', gender.value)}
-                                      label={gender.label} value={gender.value}/>;
+            return <CheckBox label={gender.label}
+                        onChange={(value) => this.updateList('gender', gender.value)}
+                        wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
+                        />;
           })
           }
         </FlexRow>
@@ -166,9 +161,10 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       <Section header='4. Sex at birth'>
         <FlexRow style={{flexWrap: 'wrap'}}>
           {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
-            return <CheckBoxWithLabel attribute='sexAtBirth'
-                                      onChange={(value) => this.updateList('sexAtBirth', sexAtBirth.value)}
-                                      label={sexAtBirth.label} value={sexAtBirth.value}/>;
+            return <CheckBox label={sexAtBirth.label}
+                             onChange={(value) => this.updateList('sexAtBirth', sexAtBirth.value)}
+                             wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
+            />;
           })
           }
         </FlexRow>
@@ -177,9 +173,10 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       <Section header='5. Sexual Orientation'>
         <FlexRow style={{flexWrap: 'wrap'}}>
           {AccountCreationOptions.sexualOrientation.map((sexualOrientation) => {
-            return <CheckBoxWithLabel attribute='sexualOrientation'
-                                      onChange={(value) => this.updateList('sexualOrientation', sexualOrientation.value)}
-                                      label={sexualOrientation.label} value={sexualOrientation.value}/>;
+            return <CheckBox label={sexualOrientation.label}
+                             onChange={(value) => this.updateList('sexualOrientation', sexualOrientation.value)}
+                             wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
+            />;
           })
           }
         </FlexRow>
