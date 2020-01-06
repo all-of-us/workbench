@@ -1,9 +1,7 @@
 import * as React from 'react';
-import * as CopyToClipboard from 'react-copy-to-clipboard';
 
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
-import {faCopy} from '@fortawesome/free-regular-svg-icons';
 import {faTimes} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -15,7 +13,6 @@ import {globalErrorStore} from 'app/utils/navigation';
 import {ErrorCode, ErrorResponse, Profile} from 'generated/fetch';
 import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
-import {TooltipTrigger} from 'app/components/popups';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import * as fp from 'lodash/fp';
 
@@ -129,7 +126,7 @@ export const ErrorHandler = fp.flow(withUserProfile(), withGlobalError())(class 
 
   render() {
     const {globalError} = this.props;
-    const {copiedErrorIdToClipboard, serverDownStatus: {apiDown, firecloudDown, notebooksDown}} = this.state;
+    const {serverDownStatus: {apiDown, firecloudDown, notebooksDown}} = this.state;
 
     return globalError !== undefined && <React.Fragment>
       {globalError.statusCode === 500 && <div style={styles.errorHandler}>
