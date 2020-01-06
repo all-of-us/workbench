@@ -14,7 +14,7 @@ import {
   ConceptSet,
   CreateConceptSetRequest,
   Domain,
-  SurveyQuestionsResponse,
+  SurveyQuestions,
   Surveys,
   UpdateConceptSetRequest
 } from 'generated/fetch';
@@ -34,7 +34,7 @@ const styles = reactStyles({
 export const ConceptSurveyAddModal = withCurrentWorkspace()
 (class extends React.Component<{
   workspace: WorkspaceData,
-  selectedSurvey: Array<SurveyQuestionsResponse>,
+  selectedSurvey: Array<SurveyQuestions>,
   onSave: Function,
   onClose: Function,
   surveyName: string

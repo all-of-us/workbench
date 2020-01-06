@@ -33,6 +33,7 @@ public class CBCriteriaDaoTest {
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private JdbcTemplate jdbcTemplate;
   private DbCriteria surveyCriteria;
+  private DbCriteria questionCriteria;
   private DbCriteria sourceCriteria;
   private DbCriteria standardCriteria;
   private DbCriteria icd9Criteria;
@@ -52,7 +53,19 @@ public class CBCriteriaDaoTest {
                 .subtype(CriteriaSubType.SURVEY.toString())
                 .group(false)
                 .standard(false)
-                .selectable(true));
+                .selectable(true)
+                .name("The Basics"));
+    questionCriteria =
+        cbCriteriaDao.save(
+            new DbCriteria()
+                .domainId(DomainType.SURVEY.toString())
+                .type(CriteriaType.PPI.toString())
+                .subtype(CriteriaSubType.QUESTION.toString())
+                .group(false)
+                .standard(false)
+                .selectable(true)
+                .parentId(surveyCriteria.getId())
+                .synonyms("test"));
     sourceCriteria =
         cbCriteriaDao.save(
             new DbCriteria()
@@ -331,5 +344,15 @@ public class CBCriteriaDaoTest {
     assertEquals(DomainType.SURVEY.toString(), option.getDomain());
     assertEquals("PPI", option.getType());
     assertFalse(option.getStandard());
+  }
+
+  @Test
+  public void findSurveyCountByTerm() {
+    assertEquals(1, cbCriteriaDao.findSurveyCountByTerm("test"));
+  }
+
+  @Test
+  public void findSurveyCountBySurveyName() {
+    assertEquals(1, cbCriteriaDao.findSurveyCountBySurveyName("The Basics"));
   }
 }
