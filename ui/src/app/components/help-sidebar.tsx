@@ -165,6 +165,7 @@ const icons = [{
   id: 'help',
   disabled: false,
   faIcon: faInfoCircle,
+  label: 'Help Icon',
   page: null,
   style: {fontSize: '21px'},
   tooltip: 'Help Tips',
@@ -172,6 +173,7 @@ const icons = [{
   id: 'thunderstorm',
   disabled: true,
   faIcon: null,
+  label: 'Cloud Icon',
   page: null,
   style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
   tooltip: 'Compute Configuration',
@@ -179,10 +181,22 @@ const icons = [{
   id: 'annotations',
   disabled: false,
   faIcon: faEdit,
+  label: 'Annotations Icon',
   page: 'reviewParticipantDetail',
   style: {fontSize: '20px', marginLeft: '3px'},
   tooltip: 'Annotations',
 }];
+
+const analyticsLabels = {
+  about: 'About Page',
+  cohortBuilder: 'Cohort Builder',
+  conceptSets: 'Concept Set',
+  data: 'Data Landing Page',
+  datasetBuilder: 'Dataset Builder',
+  notebooks: 'Analysis Tab Landing Page',
+  reviewParticipants: 'Review Participant List',
+  reviewParticipantDetail: 'Review Individual',
+};
 
 interface Props {
   deleteFunction: Function;
@@ -244,6 +258,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     }
 
     searchHelpTips(input: string) {
+      this.analyticsEvent('Search');
       // For each object, we check the title first. If it matches, we return the entire content array.
       // If the title doesn't match, we check each element of the content array for matches
       const filteredContent = fp.values(JSON.parse(JSON.stringify(sidebarContent))).reduce((acc, section) => {
@@ -273,13 +288,15 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
       this.setState({filteredContent});
     }
 
-    onIconClick(icon: string) {
+    onIconClick(icon: any) {
       const {setSidebarState, sidebarOpen} = this.props;
       const {activeIcon} = this.state;
-      const newSidebarOpen = !(icon === activeIcon && sidebarOpen);
+      const {id, label} = icon;
+      const newSidebarOpen = !(id === activeIcon && sidebarOpen);
       if (newSidebarOpen) {
-        this.setState({activeIcon: icon});
+        this.setState({activeIcon: id});
         setSidebarState(true);
+        this.analyticsEvent('OpenSidebar', `Sidebar - ${label}`);
       } else {
         setSidebarState(false);
       }
@@ -292,12 +309,21 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
 
     openContactWidget() {
       const {profileState: {profile: {contactEmail, familyName, givenName, username}}} = this.props;
+      this.analyticsEvent('ContactUs');
       openZendeskWidget(givenName, familyName, username, contactEmail);
     }
 
     highlightMatches(content: string) {
       const {searchTerm} = this.state;
       return highlightSearchTerm(searchTerm, content, colors.success);
+    }
+
+    analyticsEvent(type: string, label?: string) {
+      const {helpContent} = this.props;
+      if (analyticsLabels[helpContent]) {
+        const eventLabel = label ? `${label} - ${analyticsLabels[helpContent]}` : analyticsLabels[helpContent];
+        AnalyticsTracker.Sidebar[type](eventLabel);
+      }
     }
 
     renderWorkspaceMenu() {
@@ -352,7 +378,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
         }>
         <div data-test-id='workspace-menu-button'>
           <TooltipTrigger content={<div>Menu</div>} side='left'>
-            <div style={styles.icon}>
+            <div style={styles.icon} onClick={() => this.analyticsEvent('OpenSidebar', 'Sidebar - Menu Icon')}>
               <FontAwesomeIcon icon={faEllipsisV} style={{fontSize: '21px'}}/>
             </div>
           </TooltipTrigger>
@@ -380,7 +406,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
                    onMouseOut={() => this.setState({tooltipId: undefined})}>
                 {icon.faIcon === null
                   ? <img src={proIcons[icon.id]} style={icon.style} />
-                  : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} onClick={() => this.onIconClick(icon.id)} />
+                  : <FontAwesomeIcon icon={icon.faIcon} style={icon.style} onClick={() => this.onIconClick(icon)} />
                 }
               </div>
             </TooltipTrigger>
@@ -411,8 +437,8 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
                       : <div key={c}>
                         <h4 style={styles.contentTitle}>{this.highlightMatches(content.title)}</h4>
                         {content.content.map((item, i) =>
-                          <p key={i} style={styles.contentItem}>{this.highlightMatches(item)}</p>)
-                        }
+                          <p key={i} style={styles.contentItem}>{this.highlightMatches(item)}</p>
+                        )}
                       </div>;
                   })}
                 </div>)
@@ -426,11 +452,9 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
               <p style={styles.contentItem}>
                 Visit the
-                <a style={styles.link}
-                  href='https://www.researchallofus.org/frequently-asked-questions/'
-                  target='_blank'> FAQs here </a>
-                or <span style={styles.link}
-                  onClick={() => this.openContactWidget()}> contact us</span>.
+                <a style={styles.link} href='https://www.researchallofus.org/frequently-asked-questions/' target='_blank'
+                  onClick={() => this.analyticsEvent('FAQ')}> FAQs here </a>
+                or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
               </p>
             </div>
           </div>
