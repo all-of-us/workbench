@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryTestService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
@@ -101,6 +102,8 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
 
+  @Autowired private CBCriteriaDao cbCriteriaDao;
+
   @Autowired private FieldSetQueryBuilder fieldSetQueryBuilder;
 
   @Autowired private AnnotationQueryBuilder annotationQueryBuilder;
@@ -162,7 +165,8 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     participantCohortStatusDao.save(
         makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
 
-    ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
+    ConceptService conceptService =
+        new ConceptService(conceptDao, domainInfoDao, surveyModuleDao, cbCriteriaDao);
 
     this.cohortMaterializationService =
         new CohortMaterializationService(

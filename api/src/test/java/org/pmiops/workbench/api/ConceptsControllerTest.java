@@ -201,7 +201,7 @@ public class ConceptsControllerTest {
       new DbDomainInfo()
           .domainEnum(Domain.SURVEY)
           .domainId("Survey")
-          .name("SURVEY")
+          .name("Surveys")
           .description("SURVEY")
           .conceptId(CONCEPT_4.getConceptId())
           .participantCount(0)
