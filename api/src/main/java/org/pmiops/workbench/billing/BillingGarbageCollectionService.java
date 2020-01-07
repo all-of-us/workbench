@@ -35,7 +35,7 @@ public class BillingGarbageCollectionService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<CloudStorageService> cloudStorageServiceProvider;
   private final Clock clock;
-  private final LoadingCache<String, GoogleCredentials> garbageCollectionSACredentials;
+  private final LoadingCache<String, GoogleCredentials> credentialsLoadingCache;
   private static final Logger log =
       Logger.getLogger(BillingGarbageCollectionService.class.getName());
 
@@ -54,10 +54,10 @@ public class BillingGarbageCollectionService {
     this.cloudStorageServiceProvider = cloudStorageServiceProvider;
     this.clock = clock;
 
-    this.garbageCollectionSACredentials = initializeCredentialCache();
+    this.credentialsLoadingCache = initializeCredentialsLoadingCache();
   }
 
-  private LoadingCache<String, GoogleCredentials> initializeCredentialCache() {
+  private LoadingCache<String, GoogleCredentials> initializeCredentialsLoadingCache() {
     return CacheBuilder.newBuilder()
         .expireAfterWrite(24, TimeUnit.HOURS)
         .build(
@@ -137,12 +137,12 @@ public class BillingGarbageCollectionService {
     fireCloudService.addOwnerToBillingProject(garbageCollectionSA, projectName);
 
     try {
-      final GoogleCredentials gcsaCredential =
-          garbageCollectionSACredentials.get(garbageCollectionSA);
-      gcsaCredential.refresh();
+      final GoogleCredentials garbageCollectionCredentials =
+          credentialsLoadingCache.get(garbageCollectionSA);
+      garbageCollectionCredentials.refresh();
 
       fireCloudService.removeOwnerFromBillingProject(
-          projectName, appEngineSA, gcsaCredential.getAccessToken().getTokenValue());
+          projectName, appEngineSA, garbageCollectionCredentials.getAccessToken().getTokenValue());
     } catch (final ExecutionException e) {
       final String msg =
           String.format(

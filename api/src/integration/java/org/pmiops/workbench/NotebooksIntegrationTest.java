@@ -14,7 +14,7 @@ public class NotebooksIntegrationTest extends BaseIntegrationTest {
   @Autowired private LeonardoNotebooksClient leonardoNotebooksClient;
 
   @TestConfiguration
-  @ComponentScan("org.pmiops.workbench.notebooks")
+  @ComponentScan(basePackageClasses = LeonardoNotebooksClientImpl.class)
   @Import({LeonardoNotebooksClientImpl.class})
   static class Configuration {}
 
