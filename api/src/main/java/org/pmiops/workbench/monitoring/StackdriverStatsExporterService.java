@@ -3,12 +3,11 @@ package org.pmiops.workbench.monitoring;
 import com.google.api.MonitoredResource;
 import com.google.appengine.api.modules.ModulesException;
 import com.google.appengine.api.modules.ModulesService;
+import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -36,8 +35,8 @@ public class StackdriverStatsExporterService {
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private ModulesService modulesService;
 
-  public StackdriverStatsExporterService(Provider<WorkbenchConfig> workbenchConfigProvider,
-      ModulesService modulesService) {
+  public StackdriverStatsExporterService(
+      Provider<WorkbenchConfig> workbenchConfigProvider, ModulesService modulesService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.modulesService = modulesService;
     this.initialized = false;
@@ -51,14 +50,12 @@ public class StackdriverStatsExporterService {
     if (!initialized) {
       try {
         final StackdriverStatsConfiguration configuration =
-            StackdriverStatsConfiguration.builder()
-                .setMetricNamePrefix(buildMetricNamePrefix())
-                .setProjectId(getProjectId())
-                .setMonitoredResource(makeMonitoredResource())
-                .build();
+            makeStackdriverStatsConfiguration();
         StackdriverStatsExporter.createAndRegister(configuration);
-        logger.info(String.format("Configured StackDriver exports with configuration:\n%s",
-            configuration.toString()));
+        logger.info(
+            String.format(
+                "Configured StackDriver exports with configuration:\n%s",
+                configuration.toString()));
         initialized = true;
       } catch (IOException e) {
         logger.log(Level.WARNING, "Failed to initialize global StackdriverStatsExporter.", e);
@@ -66,13 +63,23 @@ public class StackdriverStatsExporterService {
     }
   }
 
+  @VisibleForTesting
+  public StackdriverStatsConfiguration makeStackdriverStatsConfiguration() {
+    return StackdriverStatsConfiguration.builder()
+        .setMetricNamePrefix(buildMetricNamePrefix())
+        .setProjectId(getProjectId())
+        .setMonitoredResource(makeMonitoredResource())
+        .build();
+  }
+
   private MonitoredResource makeMonitoredResource() {
-    final MonitoredResource.Builder resultBuilder = MonitoredResource.newBuilder()
-        .setType(MONITORED_RESOURCE_TYPE)
-        .putLabels(PROJECT_ID_LABEL, getProjectId())
-        .putLabels(LOCATION_LABEL, getLocation())
-        .putLabels(NAMESPACE_LABEL, getEnvironmentShortName())
-        .putLabels(NODE_ID_LABEL, getNodeId());
+    final MonitoredResource.Builder resultBuilder =
+        MonitoredResource.newBuilder()
+            .setType(MONITORED_RESOURCE_TYPE)
+            .putLabels(PROJECT_ID_LABEL, getProjectId())
+            .putLabels(LOCATION_LABEL, getLocation())
+            .putLabels(NAMESPACE_LABEL, getEnvironmentShortName())
+            .putLabels(NODE_ID_LABEL, getNodeId());
 
     return resultBuilder.build();
   }
@@ -100,9 +107,7 @@ public class StackdriverStatsExporterService {
 
   private String buildMetricNamePrefix() {
     return String.format(
-        "%s/%s/",
-        STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME,
-        getEnvironmentShortName());
+        "%s/%s/", STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME, getEnvironmentShortName());
   }
 
   @NotNull
