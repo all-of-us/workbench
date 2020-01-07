@@ -347,12 +347,12 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findSurveyCountByTerm() {
-    assertEquals(1, cbCriteriaDao.findSurveyCountByTerm("test"));
+  public void countSurveyBySearchTerm() {
+    assertEquals(1, cbCriteriaDao.countSurveyBySearchTerm("test"));
   }
 
   @Test
-  public void findSurveyCountBySurveyName() {
-    assertEquals(1, cbCriteriaDao.findSurveyCountBySurveyName("The Basics"));
+  public void countSurveyByName() {
+    assertEquals(1, cbCriteriaDao.countSurveyByName("The Basics"));
   }
 }
