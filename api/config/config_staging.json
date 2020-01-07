@@ -53,7 +53,8 @@
     "projectId": "all-of-us-rw-staging",
     "shortName": "Staging",
     "oauthClientId": "657299777109-kvb5qafr70bl01i6bnpgsiq5nt6v1o8u.apps.googleusercontent.com",
-    "traceAllRequests": false
+    "traceAllRequests": false,
+    "appEngineLocationId": "us-central"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-staging.appspot.com/login",
