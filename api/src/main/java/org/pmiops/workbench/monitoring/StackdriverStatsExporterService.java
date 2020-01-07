@@ -7,12 +7,11 @@ import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
-import javax.swing.text.html.Option;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.stereotype.Service;
@@ -32,7 +31,6 @@ public class StackdriverStatsExporterService {
   private static final String LOCATION_LABEL = "location";
   private static final String NAMESPACE_LABEL = "namespace";
   private static final String NODE_ID_LABEL = "node_id";
-  public static final String UNKNOWN_LOCATION = "global";
 
   private boolean initialized;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -52,12 +50,11 @@ public class StackdriverStatsExporterService {
   public void createAndRegister() {
     if (!initialized) {
       try {
-        final String projectId = workbenchConfigProvider.get().server.projectId;
         final StackdriverStatsConfiguration configuration =
             StackdriverStatsConfiguration.builder()
                 .setMetricNamePrefix(buildMetricNamePrefix())
-                .setProjectId(projectId)
-                .setMonitoredResource(makeMonitoredResource(projectId))
+                .setProjectId(getProjectId())
+                .setMonitoredResource(makeMonitoredResource())
                 .build();
         StackdriverStatsExporter.createAndRegister(configuration);
         logger.info(String.format("Configured StackDriver exports with configuration:\n%s",
@@ -69,46 +66,47 @@ public class StackdriverStatsExporterService {
     }
   }
 
-  private Optional<String> getOptionalFromThrowable(Supplier<String> extractor) {
-    Optional<String> result = Optional.empty();
-    try {
-      result = Optional.of(extractor.get());
-    } catch (RuntimeException e) {
-      logger.log(Level.INFO, "Failed to retrieve String ", e);
-    }
-    return result;
-  }
-
-  private MonitoredResource makeMonitoredResource(String projectId) {
+  private MonitoredResource makeMonitoredResource() {
     final MonitoredResource.Builder resultBuilder = MonitoredResource.newBuilder()
         .setType(MONITORED_RESOURCE_TYPE)
-        .putLabels(PROJECT_ID_LABEL, projectId)
-        .putLabels(LOCATION_LABEL, UNKNOWN_LOCATION);
-    getCurrentModule().ifPresent(m -> resultBuilder.putLabels(NAMESPACE_LABEL, m));
-    getInstanceId().ifPresent(id -> resultBuilder.putLabels(NODE_ID_LABEL, id));
+        .putLabels(PROJECT_ID_LABEL, getProjectId())
+        .putLabels(LOCATION_LABEL, getLocation())
+        .putLabels(NAMESPACE_LABEL, getEnvironmentShortName())
+        .putLabels(NODE_ID_LABEL, getNodeId());
 
     return resultBuilder.build();
   }
 
-  private Optional<String> getCurrentModule() {
-    return getOptionalFromThrowable(modulesService::getCurrentModule);
-//    Optional<String> result = Optional.empty();
-//    try {
-//      result = Optional.of(modulesService.getCurrentModule());
-//    } catch (IllegalStateException e) {
-//      logger.log(Level.INFO, "AppEngine Module not available", e);
-//    }
-//    return result;
+  private String getProjectId() {
+    return workbenchConfigProvider.get().server.projectId;
   }
 
-  private Optional<String> getInstanceId() {
-    return getOptionalFromThrowable(modulesService::getCurrentInstanceId);
+  private String getLocation() {
+    return workbenchConfigProvider.get().server.appEngineLocationId;
+  }
+
+  private String getNodeId() {
+    try {
+      return modulesService.getCurrentInstanceId();
+    } catch (ModulesException e) {
+      logger.log(Level.INFO, "Failed to retrieve instance ID from ModulesService");
+      return makeRandomNodeId();
+    }
+  }
+
+  private String makeRandomNodeId() {
+    return UUID.randomUUID().toString();
   }
 
   private String buildMetricNamePrefix() {
     return String.format(
         "%s/%s/",
         STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME,
-        workbenchConfigProvider.get().server.shortName.toLowerCase());
+        getEnvironmentShortName());
+  }
+
+  @NotNull
+  private String getEnvironmentShortName() {
+    return workbenchConfigProvider.get().server.shortName.toLowerCase();
   }
 }
