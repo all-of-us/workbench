@@ -1,5 +1,6 @@
 import {
-  AcademicRole, Degree,
+  AcademicRole,
+  Degree,
   Education,
   EducationalRole,
   Ethnicity,
@@ -25,6 +26,8 @@ export const AccountCreationOptions = {
     {label: 'B.A.', value: Degree.BA},
     {label: 'B.S.', value: Degree.BS},
     {label: 'B.S.N.', value: Degree.BSN},
+    // This label can have a space in it when the following issue is resolved:
+    // https://github.com/primefaces/primereact/issues/1137
     {label: 'None(blank)', value: Degree.NONE},
   ],
   roles: [

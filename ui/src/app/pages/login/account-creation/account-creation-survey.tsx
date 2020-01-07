@@ -11,7 +11,9 @@ import {
   DataAccessLevel,
   Gender,
   Profile,
-  Race, SexAtBirth, SexualOrientation
+  Race,
+  SexAtBirth,
+  SexualOrientation
 } from 'generated/fetch';
 import {Section} from './account-creation';
 
