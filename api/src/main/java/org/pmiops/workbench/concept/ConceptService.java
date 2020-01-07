@@ -169,7 +169,7 @@ public class ConceptService {
 
   public Slice<DbCriteria> searchSurveys(String query, String surveyName, int limit, int page) {
     final String keyword = modifyMultipleMatchKeyword(query);
-    Pageable pageable = new PageRequest(page, limit, new Sort(Direction.DESC, "countValue"));
+    Pageable pageable = new PageRequest(page, limit, new Sort(Direction.ASC, "id"));
     return StringUtils.isBlank(keyword)
         ? cbCriteriaDao.findSurveysByName(surveyName, pageable)
         : cbCriteriaDao.findSurveys(keyword, pageable);
