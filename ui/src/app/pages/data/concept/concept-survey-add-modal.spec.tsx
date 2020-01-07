@@ -3,14 +3,14 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {ConceptSetsApi, Domain, SurveyQuestionsResponse, Surveys} from 'generated/fetch';
+import {ConceptSetsApi, Domain, SurveyQuestions, Surveys} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {ConceptStubVariables} from 'testing/stubs/concepts-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {ConceptSurveyAddModal} from './concept-survey-add-modal';
 
-const surveyList: Array<SurveyQuestionsResponse> = [{
+const surveyList: Array<SurveyQuestions> = [{
   question: 'Lifestyle',
   conceptId: 5
 }];

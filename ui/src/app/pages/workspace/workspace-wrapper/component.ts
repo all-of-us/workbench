@@ -38,8 +38,8 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   menuDataLoading = false;
   resourceType: ResourceType = ResourceType.WORKSPACE;
   userRoles?: UserRole[];
-  helpContent: string;
-  sidebarOpen = false;
+  helpContent = 'data';
+  sidebarOpen = true;
 
   bugReportOpen: boolean;
   bugReportDescription = '';
