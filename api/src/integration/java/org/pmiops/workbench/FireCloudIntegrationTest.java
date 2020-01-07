@@ -3,7 +3,6 @@ package org.pmiops.workbench;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.io.IOException;
-import org.junit.Before;
 import org.junit.Test;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.ApiException;
@@ -22,25 +21,20 @@ public class FireCloudIntegrationTest extends BaseIntegrationTest {
   @Autowired private FireCloudService service;
 
   @TestConfiguration
-  @ComponentScan("org.pmiops.workbench.firecloud")
+  @ComponentScan(basePackageClasses = FireCloudServiceImpl.class)
   @Import({FireCloudServiceImpl.class})
   static class Configuration {}
 
-  @Before
-  public void setUp() throws IOException {
-    config = loadConfig("config_test.json");
-  }
-
   @Test
   public void testStatusProd() throws IOException {
-    config = loadConfig("config_prod.json");
-    assertThat(service.getBasePath()).isEqualTo("https://api.firecloud.org");
+    config = loadProdConfig();
+    assertThat(service.getApiBasePath()).isEqualTo("https://api.firecloud.org");
     assertThat(service.getFirecloudStatus()).isTrue();
   }
 
   @Test
   public void testStatusDev() {
-    assertThat(service.getBasePath())
+    assertThat(service.getApiBasePath())
         .isEqualTo("https://firecloud-orchestration.dsde-dev.broadinstitute.org");
     assertThat(service.getFirecloudStatus()).isTrue();
   }

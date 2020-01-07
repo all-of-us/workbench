@@ -152,7 +152,7 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   @VisibleForTesting
-  public String getBasePath() {
+  public String getApiBasePath() {
     return statusApiProvider.get().getApiClient().getBasePath();
   }
 

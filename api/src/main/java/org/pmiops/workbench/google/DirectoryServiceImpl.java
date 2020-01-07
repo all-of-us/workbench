@@ -93,6 +93,13 @@ public class DirectoryServiceImpl implements DirectoryService {
         googleCredentialsProvider.get(), "directory-service@" + gSuiteDomain, SCOPES);
   }
 
+  /**
+   * Creates a G Suite Directory API client instance. This requires loading the gsuite-admin service
+   * account credentials from GCS and using domain-wide-delegation to impersonate the
+   * 'directory-service@researchallofus.org' admin user.
+   *
+   * @throws IOException if the GCS-stored credentials cannot be loaded.
+   */
   private Directory getGoogleDirectoryService() throws IOException {
     return new Directory.Builder(
             httpTransport,

@@ -14,11 +14,12 @@ public class ServiceAccounts {
       "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/%s:signJwt";
 
   /**
-   * Retrieves an access token for the Workbench server service account. This should be used
-   * carefully, as this account is generally more privileged than an end user researcher account.
+   * Retrieves an access token with the specified set of scopes derived from a given set of Google
+   * credentials.
    */
-  public static String workbenchAccessToken(List<String> scopes) throws IOException {
-    GoogleCredentials scopedCreds = GoogleCredentials.getApplicationDefault().createScoped(scopes);
+  public static String getScopedAccessToken(
+      GoogleCredentials originalCredentials, List<String> scopes) throws IOException {
+    GoogleCredentials scopedCreds = originalCredentials.createScoped(scopes);
     scopedCreds.refresh();
     return scopedCreds.getAccessToken().getTokenValue();
   }
