@@ -446,7 +446,8 @@ set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.stan
 (SELECT count(distinct concept_id) as all_concept_count, 0 as standard_concept_count
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
 WHERE vocabulary_id = 'PPI'
-AND domain_id = 'Measurement') c
+AND domain_id = 'Measurement'
+AND concept_class_id = 'Clinical Observation') c
 where d.domain = 8"
 
 # Set participant counts for Condition domain
@@ -499,7 +500,8 @@ WHERE measurement_source_concept_id IN (
 SELECT concept_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
 WHERE vocabulary_id = 'PPI'
-AND domain_id = 'Measurement')) as r
+AND domain_id = 'Measurement'
+AND concept_class_id = 'Clinical Observation')) as r
 where d.domain = 8"
 
 ##########################################

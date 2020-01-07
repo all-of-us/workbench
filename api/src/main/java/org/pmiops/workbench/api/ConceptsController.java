@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.concept.ConceptService;
@@ -42,21 +42,6 @@ public class ConceptsController implements ConceptsApiDelegate {
   private final ConceptService conceptService;
   private final ConceptBigQueryService conceptBigQueryService;
   private final WorkspaceService workspaceService;
-
-  static final Function<DbConcept, Concept> TO_CLIENT_CONCEPT =
-      (concept) ->
-          new Concept()
-              .conceptClassId(concept.getConceptClassId())
-              .conceptCode(concept.getConceptCode())
-              .conceptName(concept.getConceptName())
-              .conceptId(concept.getConceptId())
-              .countValue(concept.getCountValue())
-              .domainId(concept.getDomainId())
-              .prevalence(concept.getPrevalence())
-              .standardConcept(
-                  ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept()))
-              .vocabularyId(concept.getVocabularyId())
-              .conceptSynonyms(concept.getSynonyms());
 
   @Autowired
   public ConceptsController(
@@ -158,8 +143,8 @@ public class ConceptsController implements ConceptsApiDelegate {
       if (allConcepts) {
         conceptCount =
             matchExp == null
-                ? conceptService.findSurveyCountBySurveyName(request.getSurveyName())
-                : conceptService.findSurveyCountByTerm(matchExp);
+                ? conceptService.countSurveyByName(request.getSurveyName())
+                : conceptService.countSurveyBySearchTerm(matchExp);
       }
       response.addDomainCountsItem(
           new DomainCount()
@@ -182,9 +167,16 @@ public class ConceptsController implements ConceptsApiDelegate {
 
     ConceptListResponse response = new ConceptListResponse();
     if (request.getDomain().equals(Domain.SURVEY)) {
-      List<SurveyQuestions> surveyQuestionList =
-          conceptBigQueryService.getSurveyQuestions(request.getSurveyName());
-      response.setQuestions(surveyQuestionList);
+      Slice<DbCriteria> questionList =
+          conceptService.searchSurveys(
+              request.getQuery(),
+              request.getSurveyName(),
+              maxResults,
+              (request.getPageNumber() == null) ? 0 : request.getPageNumber());
+      response.setQuestions(
+          questionList.getContent().stream()
+              .map(this::toClientSurveyQuestions)
+              .collect(Collectors.toList()));
     } else {
       Slice<DbConcept> concepts =
           conceptService.searchConcepts(
@@ -195,12 +187,32 @@ public class ConceptsController implements ConceptsApiDelegate {
               (request.getPageNumber() == null) ? 0 : request.getPageNumber());
       if (concepts != null) {
         response.setItems(
-            concepts.getContent().stream().map(TO_CLIENT_CONCEPT).collect(Collectors.toList()));
+            concepts.getContent().stream().map(this::toClientConcept).collect(Collectors.toList()));
       }
     }
 
     // TODO: consider doing these queries in parallel
     addDomainCounts(request, response);
     return ResponseEntity.ok(response);
+  }
+
+  private Concept toClientConcept(DbConcept concept) {
+    return new Concept()
+        .conceptClassId(concept.getConceptClassId())
+        .conceptCode(concept.getConceptCode())
+        .conceptName(concept.getConceptName())
+        .conceptId(concept.getConceptId())
+        .countValue(concept.getCountValue())
+        .domainId(concept.getDomainId())
+        .prevalence(concept.getPrevalence())
+        .standardConcept(ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept()))
+        .vocabularyId(concept.getVocabularyId())
+        .conceptSynonyms(concept.getSynonyms());
+  }
+
+  private SurveyQuestions toClientSurveyQuestions(DbCriteria dbCriteria) {
+    return new SurveyQuestions()
+        .conceptId(dbCriteria.getLongConceptId())
+        .question(dbCriteria.getName());
   }
 }

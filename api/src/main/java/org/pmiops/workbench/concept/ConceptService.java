@@ -10,8 +10,11 @@ import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
+import org.pmiops.workbench.db.model.CommonStorageEnums;
+import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +49,8 @@ public class ConceptService {
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private SurveyModuleDao surveyModuleDao;
   @Autowired private CBCriteriaDao cbCriteriaDao;
+  public static final String VOCAB_ID = "PPI";
+  public static final String CONCEPT_CLASS_ID = "Clinical Observation";
   public static final String STANDARD_CONCEPTS = "STANDARD_CONCEPTS";
   public static final String STANDARD_CONCEPT_CODE = "S";
   public static final String CLASSIFICATION_CONCEPT_CODE = "C";
@@ -134,12 +139,12 @@ public class ConceptService {
     return surveyModuleDao.findByParticipantCountNotOrderByOrderNumberAsc(0L);
   }
 
-  public long findSurveyCountByTerm(String matchExp) {
-    return cbCriteriaDao.findSurveyCountByTerm(matchExp);
+  public long countSurveyBySearchTerm(String matchExp) {
+    return cbCriteriaDao.countSurveyBySearchTerm(matchExp);
   }
 
-  public long findSurveyCountBySurveyName(String surveyName) {
-    return cbCriteriaDao.findSurveyCountBySurveyName(surveyName);
+  public long countSurveyByName(String surveyName) {
+    return cbCriteriaDao.countSurveyByName(surveyName);
   }
 
   public Slice<DbConcept> searchConcepts(
@@ -150,9 +155,24 @@ public class ConceptService {
         STANDARD_CONCEPTS.equals(standardConceptFilter)
             ? STANDARD_CONCEPT_CODES
             : ALL_CONCEPT_CODES;
+    if (domainIds.contains(CommonStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT))) {
+      return StringUtils.isBlank(keyword)
+          ? conceptDao.findConcepts(conceptTypes, domainIds, VOCAB_ID, CONCEPT_CLASS_ID, pageable)
+          : conceptDao.findConcepts(
+              keyword, conceptTypes, domainIds, VOCAB_ID, CONCEPT_CLASS_ID, pageable);
+    } else {
+      return StringUtils.isBlank(keyword)
+          ? conceptDao.findConcepts(conceptTypes, domainIds, pageable)
+          : conceptDao.findConcepts(keyword, conceptTypes, domainIds, pageable);
+    }
+  }
+
+  public Slice<DbCriteria> searchSurveys(String query, String surveyName, int limit, int page) {
+    final String keyword = modifyMultipleMatchKeyword(query);
+    Pageable pageable = new PageRequest(page, limit, new Sort(Direction.DESC, "countValue"));
     return StringUtils.isBlank(keyword)
-        ? conceptDao.findConcepts(conceptTypes, domainIds, pageable)
-        : conceptDao.findConcepts(keyword, conceptTypes, domainIds, pageable);
+        ? cbCriteriaDao.findSurveysByName(surveyName, pageable)
+        : cbCriteriaDao.findSurveys(keyword, pageable);
   }
 
   public ConceptIds classifyConceptIds(Set<Long> conceptIds) {
