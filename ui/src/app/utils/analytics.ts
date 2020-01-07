@@ -32,7 +32,9 @@ export function triggerEvent(
 enum ANALYTICS_CATEGORIES {
   WORKSPACES = 'Workspaces',
   DATASET_BUILDER = 'Dataset Builder',
-  NOTEBOOKS = 'Notebooks'
+  NOTEBOOKS = 'Notebooks',
+  SIDEBAR = 'Sidebar Menu',
+  HELP = 'Help'
 }
 
 export const AnalyticsTracker = {
@@ -77,6 +79,13 @@ export const AnalyticsTracker = {
     Preview: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Preview'),
     Edit: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Edit'),
     Run: () => triggerEvent(ANALYTICS_CATEGORIES.NOTEBOOKS, 'Run (Playground Mode)')
+  },
+  Sidebar: {
+    OpenSidebar: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.SIDEBAR, 'Click', suffix),
+    Search: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.HELP, 'Search', `Help - Search - ${suffix}`),
+    ContactUs: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.HELP, 'Click', `Help - Contact Us - ${suffix}`),
+    FAQ: (suffix) => triggerEvent(ANALYTICS_CATEGORIES.HELP, 'Click', `Help - FAQs - ${suffix}`),
+
   }
 };
 
