@@ -221,7 +221,7 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
     constructor(props: Props) {
       super(props);
       this.state = {
-        activeIcon: undefined,
+        activeIcon: 'help',
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
@@ -320,8 +320,9 @@ export const HelpSidebar = fp.flow(withCurrentWorkspace(), withUserProfile())(
 
     analyticsEvent(type: string, label?: string) {
       const {helpContent} = this.props;
-      if (analyticsLabels[helpContent]) {
-        const eventLabel = label ? `${label} - ${analyticsLabels[helpContent]}` : analyticsLabels[helpContent];
+      const analyticsLabel = analyticsLabels[helpContent];
+      if (analyticsLabel) {
+        const eventLabel = label ? `${label} - ${analyticsLabel}` : analyticsLabel;
         AnalyticsTracker.Sidebar[type](eventLabel);
       }
     }
