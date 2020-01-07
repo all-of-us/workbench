@@ -256,19 +256,17 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select count(*) "
-              + "from cb_criteria "
-              + "where domain_id = 'SURVEY' and type = 'PPI' and subtype = 'QUESTION' "
-              + "and parent_id in (select id from cb_criteria where domain_id = 'SURVEY' and type = 'PPI' and name = :surveyName)",
-      nativeQuery = true)
+          "select count(c) "
+              + "from DbCriteria c "
+              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION' "
+              + "and c.parentId in (select dc.id from DbCriteria dc where dc.domainId = 'SURVEY' and dc.type = 'PPI' and dc.name = :surveyName)")
   long countSurveyByName(@Param("surveyName") String surveyName);
 
   @Query(
       value =
-          "select * "
-              + "from cb_criteria "
-              + "where domain_id = 'SURVEY' and type = 'PPI' and subtype = 'QUESTION' "
-              + "and parent_id in (select id from cb_criteria where domain_id = 'SURVEY' and type = 'PPI' and name = :surveyName)",
-      nativeQuery = true)
+          "select c "
+              + "from DbCriteria c "
+              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION' "
+              + "and c.parentId in (select dc.id from DbCriteria dc where dc.domainId = 'SURVEY' and dc.type = 'PPI' and dc.name = :surveyName)")
   Page<DbCriteria> findSurveysByName(@Param("surveyName") String surveyName, Pageable page);
 }
