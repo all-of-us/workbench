@@ -161,8 +161,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     researcher.setUserId((int) dbUser.getUserId());
     researcher.setCreationTime(dbUser.getCreationTime().toLocalDateTime().atOffset(offset));
     if (dbUser.getLastModifiedTime() != null)
-      researcher.setModifiedTime(
-          dbUser.getLastModifiedTime().toLocalDateTime().atOffset(offset));
+      researcher.setModifiedTime(dbUser.getLastModifiedTime().toLocalDateTime().atOffset(offset));
     researcher.setGivenName(dbUser.getGivenName());
     researcher.setFamilyName(dbUser.getFamilyName());
     if (dbUser.getAddress() != null) {
@@ -194,8 +193,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     RdrWorkspace.setWorkspaceId((int) dbWorkspace.getWorkspaceId());
     RdrWorkspace.setName(dbWorkspace.getName());
 
-    RdrWorkspace.setCreationTime(
-        dbWorkspace.getCreationTime().toLocalDateTime().atOffset(offset));
+    RdrWorkspace.setCreationTime(dbWorkspace.getCreationTime().toLocalDateTime().atOffset(offset));
     RdrWorkspace.setModifiedTime(
         dbWorkspace.getLastModifiedTime().toLocalDateTime().atOffset(offset));
     RdrWorkspace.setStatus(
