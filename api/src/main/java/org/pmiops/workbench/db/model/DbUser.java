@@ -27,6 +27,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
@@ -69,6 +70,7 @@ public class DbUser {
   private Timestamp firstRegistrationCompletionTime;
   private Set<Short> authorities = new HashSet<>();
   private Boolean idVerificationIsValid;
+  private List<Short> degrees;
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
   private Short emailVerificationStatus;
@@ -292,6 +294,38 @@ public class DbUser {
         newAuthorities.stream()
             .map(DbStorageEnums::authorityToStorage)
             .collect(Collectors.toSet()));
+  }
+
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(name = "user_degree", joinColumns = @JoinColumn(name = "user_id"))
+  @Column(name = "degree")
+  public List<Short> getDegrees() {
+    return degrees;
+  }
+
+  public void setDegrees(List<Short> degree) {
+    this.degrees = degree;
+  }
+
+  @Transient
+  public List<Degree> getDegreesEnum() {
+    if (degrees == null) return null;
+    return this.degrees.stream()
+        .map(
+            (degreeObject) -> {
+              return DbStorageEnums.degreeFromStorage(degreeObject);
+            })
+        .collect(Collectors.toList());
+  }
+
+  public void setDegreesEnum(List<Degree> degreeList) {
+    this.degrees =
+        degreeList.stream()
+            .map(
+                (degree) -> {
+                  return DbStorageEnums.degreeToStorage(degree);
+                })
+            .collect(Collectors.toList());
   }
 
   @OneToMany(

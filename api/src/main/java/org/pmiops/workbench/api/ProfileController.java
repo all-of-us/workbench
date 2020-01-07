@@ -157,6 +157,10 @@ public class ProfileController implements ProfileApiDelegate {
               if (demographicSurvey.getDisability() != null)
                 result.setDisabilityEnum(
                     demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
+              if (demographicSurvey.getSexAtBirth() != null)
+                result.setSexAtBirthEnum(demographicSurvey.getSexAtBirth());
+              if (demographicSurvey.getSexualOrientation() != null)
+                result.setSexualOrientationEnum(demographicSurvey.getSexualOrientation());
               if (demographicSurvey.getYearOfBirth() != null)
                 result.setYear_of_birth(demographicSurvey.getYearOfBirth().intValue());
               return result;
@@ -359,6 +363,7 @@ public class ProfileController implements ProfileApiDelegate {
             request.getProfile().getCurrentPosition(),
             request.getProfile().getOrganization(),
             request.getProfile().getAreaOfResearch(),
+            request.getProfile().getDegrees(),
             FROM_CLIENT_ADDRESS.apply(request.getProfile().getAddress()),
             FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(request.getProfile().getDemographicSurvey()),
             request.getProfile().getInstitutionalAffiliations().stream()

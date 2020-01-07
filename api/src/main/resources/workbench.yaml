@@ -3368,6 +3368,10 @@ definitions:
       dataAccessLevel:
         description: what level of data access the user has
         $ref: "#/definitions/DataAccessLevel"
+      degrees:
+        type: array
+        items:
+          $ref: '#/definitions/Degree'
       givenName:
         description: the user's given name (e.g. Alice)
         type: string
@@ -3515,6 +3519,14 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Gender'
+      sexAtBirth:
+        type: array
+        items:
+          $ref: '#/definitions/SexAtBirth'
+      sexualOrientation:
+        type: array
+        items:
+          $ref: '#/definitions/SexualOrientation'
       yearOfBirth:
         type: number
       education:
