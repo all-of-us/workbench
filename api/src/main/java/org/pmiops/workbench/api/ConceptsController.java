@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbCriteria;
@@ -150,7 +149,7 @@ public class ConceptsController implements ConceptsApiDelegate {
           new DomainCount()
               .domain(Domain.SURVEY)
               .conceptCount(conceptCount)
-              .name(StringUtils.capitalize(Domain.SURVEY.toString().toLowerCase()).concat("s")));
+              .name(CommonStorageEnums.domainToDomainId(Domain.SURVEY).concat("s")));
     }
   }
 
@@ -187,7 +186,9 @@ public class ConceptsController implements ConceptsApiDelegate {
               (request.getPageNumber() == null) ? 0 : request.getPageNumber());
       if (concepts != null) {
         response.setItems(
-            concepts.getContent().stream().map(this::toClientConcept).collect(Collectors.toList()));
+            concepts.getContent().stream()
+                .map(ConceptsController::toClientConcept)
+                .collect(Collectors.toList()));
       }
     }
 
@@ -196,7 +197,7 @@ public class ConceptsController implements ConceptsApiDelegate {
     return ResponseEntity.ok(response);
   }
 
-  private Concept toClientConcept(DbConcept concept) {
+  public static Concept toClientConcept(DbConcept concept) {
     return new Concept()
         .conceptClassId(concept.getConceptClassId())
         .conceptCode(concept.getConceptCode())

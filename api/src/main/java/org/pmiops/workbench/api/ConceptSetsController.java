@@ -177,7 +177,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       Iterable<DbConcept> concepts = conceptDao.findAll(conceptSet.getConceptIds());
       result.setConcepts(
           Streams.stream(concepts)
-              .map(ConceptsController.TO_CLIENT_CONCEPT)
+              .map(ConceptsController::toClientConcept)
               .sorted(CONCEPT_NAME_ORDERING)
               .collect(Collectors.toList()));
     }
