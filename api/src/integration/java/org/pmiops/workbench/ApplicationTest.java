@@ -31,11 +31,9 @@ public class ApplicationTest {
    * of spring.datasource.platform. This allows you to switch to database-specific scripts if
    * necessary. For example, you might choose to set it to the vendor name of the database (hsqldb,
    * h2, oracle, mysql, postgresql, and so on).
-   *
-   * @throws Exception
    */
   @Test
-  public void contextLoads() throws Exception {
+  public void contextLoads() {
     List<Object> beans = new ArrayList<>();
     // This loads all dao's that implement JPA repositories
     beans.addAll(context.getBeansWithAnnotation(NoRepositoryBean.class).values());

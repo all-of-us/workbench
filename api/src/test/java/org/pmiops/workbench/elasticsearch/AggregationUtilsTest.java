@@ -15,7 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class AggregationUtilsTest {
 
   @Test
-  public void buildDemoChartAggregation() throws Exception {
+  public void buildDemoChartAggregation() {
     AggregationBuilder actualBuilder = AggregationUtils.buildDemoChartAggregation(RANGE_18_44);
     assertThat(actualBuilder.getName()).isEqualTo(DATE + RANGE_18_44);
     assertThat(actualBuilder.getType()).isEqualTo("date_range");

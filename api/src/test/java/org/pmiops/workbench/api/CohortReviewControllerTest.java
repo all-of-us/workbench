@@ -900,13 +900,7 @@ public class CohortReviewControllerTest {
     assertThat(participantCohortStatus.getStatus()).isEqualTo(CohortStatus.INCLUDED);
   }
 
-  /**
-   * Helper method to consolidate assertions for all the {@link AnnotationType}s.
-   *
-   * @param participantId
-   * @param annotationDefinitionId
-   * @param request
-   */
+  /** Helper method to consolidate assertions for all the {@link AnnotationType}s. */
   private void assertCreateParticipantCohortAnnotation(
       Long participantId, Long annotationDefinitionId, ParticipantCohortAnnotation request) {
     when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
@@ -936,10 +930,6 @@ public class CohortReviewControllerTest {
   /**
    * Helper method to consolidate assertions for {@link BadRequestException}s for all {@link
    * AnnotationType}s.
-   *
-   * @param participantId
-   * @param cohortAnnotationDefId
-   * @param type
    */
   private void assertBadRequestExceptionForAnnotationType(
       Long participantId, Long cohortAnnotationDefId, String type) {
@@ -975,12 +965,6 @@ public class CohortReviewControllerTest {
    * Helper method to assert results for {@link
    * CohortReviewController#getParticipantCohortStatuses(String, String, Long, Long,
    * PageFilterRequest)}.
-   *
-   * @param expectedReview
-   * @param page
-   * @param pageSize
-   * @param sortOrder
-   * @param sortColumn
    */
   private void assertParticipantCohortStatuses(
       CohortReview expectedReview,

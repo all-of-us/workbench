@@ -499,7 +499,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void findCriteriaMenuOptions() throws Exception {
+  public void findCriteriaMenuOptions() {
     cbCriteriaDao.save(
         new DbCriteria()
             .domainId(DomainType.CONDITION.toString())
@@ -558,7 +558,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void validateAttribute() throws Exception {
+  public void validateAttribute() {
     SearchParameter demo = age();
     Attribute attribute = new Attribute().name(AttrName.NUM);
     demo.attributes(Arrays.asList(attribute));
@@ -611,7 +611,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void validateModifiers() throws Exception {
+  public void validateModifiers() {
     Modifier modifier = ageModifier().operator(null).operands(new ArrayList<>());
     SearchRequest searchRequest =
         createSearchRequests(
@@ -672,7 +672,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChild() throws Exception {
+  public void countSubjectsICD9ConditionOccurrenceChild() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(), Arrays.asList(icd9()), new ArrayList<>());
@@ -681,7 +681,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void temporalGroupExceptions() throws Exception {
+  public void temporalGroupExceptions() {
     SearchGroupItem icd9SGI =
         new SearchGroupItem().type(DomainType.CONDITION.toString()).addSearchParametersItem(icd9());
 
@@ -708,8 +708,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void firstMentionOfICD9WithModifiersOrSnomed5DaysAfterICD10WithModifiers()
-      throws Exception {
+  public void firstMentionOfICD9WithModifiersOrSnomed5DaysAfterICD10WithModifiers() {
     SearchGroupItem icd9SGI =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
@@ -744,7 +743,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void firstMentionOfDrug5DaysBeforeICD10WithModifiers() throws Exception {
+  public void firstMentionOfDrug5DaysBeforeICD10WithModifiers() {
     DbCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
     DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
@@ -781,7 +780,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void anyMentionOfCPTParent5DaysAfterICD10Child() throws Exception {
+  public void anyMentionOfCPTParent5DaysAfterICD10Child() {
     DbCriteria icd9Parent =
         new DbCriteria()
             .ancestorData(false)
@@ -836,7 +835,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void anyMentionOfCPTWithIn5DaysOfVisit() throws Exception {
+  public void anyMentionOfCPTWithIn5DaysOfVisit() {
     SearchGroupItem cptSGI =
         new SearchGroupItem()
             .type(DomainType.PROCEDURE.toString())
@@ -863,7 +862,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void firstMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
+  public void firstMentionOfDrugDuringSameEncounterAsMeasurement() {
     jdbcTemplate.execute(
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
 
@@ -894,7 +893,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void lastMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
+  public void lastMentionOfDrugDuringSameEncounterAsMeasurement() {
     jdbcTemplate.execute(
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
 
@@ -925,7 +924,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void lastMentionOfDrugDuringSameEncounterAsMeasurementOrVisit() throws Exception {
+  public void lastMentionOfDrugDuringSameEncounterAsMeasurementOrVisit() {
     jdbcTemplate.execute(
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
 
@@ -961,7 +960,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void lastMentionOfMeasurementOrVisit5DaysAfterDrug() throws Exception {
+  public void lastMentionOfMeasurementOrVisit5DaysAfterDrug() {
     DbCriteria drugCriteria1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugCriteria1);
     DbCriteria drugCriteria2 = drugCriteriaChild(drugCriteria1.getId());
@@ -1003,7 +1002,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditionChildAgeAtEvent() throws Exception {
+  public void countSubjectsICD9ConditionChildAgeAtEvent() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(ageModifier()));
@@ -1012,7 +1011,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditionChildEncounter() throws Exception {
+  public void countSubjectsICD9ConditionChildEncounter() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(visitModifier()));
@@ -1021,7 +1020,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditionChildAgeAtEventBetween() throws Exception {
+  public void countSubjectsICD9ConditionChildAgeAtEventBetween() {
     Modifier modifier =
         ageModifier().operator(Operator.BETWEEN).operands(Arrays.asList("37", "39"));
 
@@ -1034,7 +1033,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrences() throws Exception {
+  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrences() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
@@ -1045,8 +1044,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditioChildAgeAtEventAndOccurrencesAndEventDate()
-      throws Exception {
+  public void countSubjectsICD9ConditioChildAgeAtEventAndOccurrencesAndEventDate() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
@@ -1057,7 +1055,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditionChildEventDate() throws Exception {
+  public void countSubjectsICD9ConditionChildEventDate() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
@@ -1068,7 +1066,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditionNumOfOccurrences() throws Exception {
+  public void countSubjectsICD9ConditionNumOfOccurrences() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
@@ -1079,7 +1077,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9Child() throws Exception {
+  public void countSubjectsICD9Child() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(), Arrays.asList(icd9()), new ArrayList<>());
@@ -1088,7 +1086,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditionParent() throws Exception {
+  public void countSubjectsICD9ConditionParent() {
     DbCriteria criteriaParent = icd9CriteriaParent();
     saveCriteriaWithPath("0", criteriaParent);
     DbCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
@@ -1107,7 +1105,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDemoGender() throws Exception {
+  public void countSubjectsDemoGender() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.PERSON.toString(), Arrays.asList(male()), new ArrayList<>());
@@ -1116,7 +1114,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDemoRace() throws Exception {
+  public void countSubjectsDemoRace() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.PERSON.toString(), Arrays.asList(race()), new ArrayList<>());
@@ -1125,7 +1123,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDemoEthnicity() throws Exception {
+  public void countSubjectsDemoEthnicity() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.PERSON.toString(), Arrays.asList(ethnicity()), new ArrayList<>());
@@ -1134,7 +1132,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDemoDec() throws Exception {
+  public void countSubjectsDemoDec() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.PERSON.toString(), Arrays.asList(deceased()), new ArrayList<>());
@@ -1143,7 +1141,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDemoAge() throws Exception {
+  public void countSubjectsDemoAge() {
     Integer lo = getTestPeriod().getYears() - 1;
     Integer hi = getTestPeriod().getYears() + 1;
     SearchParameter demo = age();
@@ -1160,7 +1158,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9AndDemo() throws Exception {
+  public void countSubjectsICD9AndDemo() {
     SearchParameter demoAgeSearchParam = age();
     Integer lo = getTestPeriod().getYears() - 1;
     Integer hi = getTestPeriod().getYears() + 1;
@@ -1195,7 +1193,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDemoExcluded() throws Exception {
+  public void countSubjectsDemoExcluded() {
     SearchGroupItem excludeSearchGroupItem =
         new SearchGroupItem()
             .type(DomainType.PERSON.toString())
@@ -1212,7 +1210,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ParentAndICD10ChildCondition() throws Exception {
+  public void countSubjectsICD9ParentAndICD10ChildCondition() {
     DbCriteria criteriaParent = icd9CriteriaParent();
     saveCriteriaWithPath("0", criteriaParent);
     DbCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
@@ -1231,7 +1229,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsCPTProcedure() throws Exception {
+  public void countSubjectsCPTProcedure() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.PROCEDURE.toString(),
@@ -1242,7 +1240,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsSnomedChildCondition() throws Exception {
+  public void countSubjectsSnomedChildCondition() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
@@ -1253,7 +1251,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsSnomedParentProcedure() throws Exception {
+  public void countSubjectsSnomedParentProcedure() {
     SearchParameter snomed = snomed().group(true).standard(true).conceptId(4302541L);
 
     DbCriteria criteriaParent =
@@ -1298,7 +1296,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsVisit() throws Exception {
+  public void countSubjectsVisit() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.VISIT.toString(), Arrays.asList(visit().conceptId(10L)), new ArrayList<>());
@@ -1307,7 +1305,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsVisitModifiers() throws Exception {
+  public void countSubjectsVisitModifiers() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.VISIT.toString(),
@@ -1318,7 +1316,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDrugChild() throws Exception {
+  public void countSubjectsDrugChild() {
     jdbcTemplate.execute(
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     SearchRequest searchRequest =
@@ -1330,7 +1328,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDrugParent() throws Exception {
+  public void countSubjectsDrugParent() {
     DbCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
     DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
@@ -1351,7 +1349,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDrugParentAndChild() throws Exception {
+  public void countSubjectsDrugParentAndChild() {
     DbCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
     DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
@@ -1372,7 +1370,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDrugChildEncounter() throws Exception {
+  public void countSubjectsDrugChildEncounter() {
     jdbcTemplate.execute(
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     SearchRequest searchRequest =
@@ -1385,7 +1383,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDrugChildAgeAtEvent() throws Exception {
+  public void countSubjectsDrugChildAgeAtEvent() {
     jdbcTemplate.execute(
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     SearchRequest searchRequest =
@@ -1398,7 +1396,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabEncounter() throws Exception {
+  public void countSubjectsLabEncounter() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.MEASUREMENT.toString(),
@@ -1409,7 +1407,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabNumericalBetween() throws Exception {
+  public void countSubjectsLabNumericalBetween() {
     SearchParameter lab = measurement();
     lab.attributes(
         Arrays.asList(
@@ -1425,7 +1423,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabCategoricalIn() throws Exception {
+  public void countSubjectsLabCategoricalIn() {
     SearchParameter lab = measurement();
     lab.attributes(
         Arrays.asList(
@@ -1437,7 +1435,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabBothNumericalAndCategorical() throws Exception {
+  public void countSubjectsLabBothNumericalAndCategorical() {
     SearchParameter lab = measurement();
     Attribute numerical =
         new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("0.1"));
@@ -1451,7 +1449,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabCategoricalAgeAtEvent() throws Exception {
+  public void countSubjectsLabCategoricalAgeAtEvent() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.MEASUREMENT.toString(),
@@ -1462,7 +1460,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabMoreThanOneSearchParameter() throws Exception {
+  public void countSubjectsLabMoreThanOneSearchParameter() {
     SearchParameter lab1 = measurement();
     SearchParameter lab2 = measurement().conceptId(9L);
     SearchParameter lab3 = measurement().conceptId(9L);
@@ -1476,7 +1474,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabMoreThanOneSearchParameterSourceAndStandard() throws Exception {
+  public void countSubjectsLabMoreThanOneSearchParameterSourceAndStandard() {
     SearchParameter icd9 = icd9();
     SearchParameter snomed = snomed().standard(true);
     SearchRequest searchRequest =
@@ -1486,7 +1484,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsBloodPressure() throws Exception {
+  public void countSubjectsBloodPressure() {
     SearchParameter pm = bloodPressure().attributes(bpAttributes());
     SearchRequest searchRequest =
         createSearchRequests(pm.getType(), Arrays.asList(pm), new ArrayList<>());
@@ -1495,7 +1493,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsBloodPressureAny() throws Exception {
+  public void countSubjectsBloodPressureAny() {
     List<Attribute> attributes =
         Arrays.asList(
             new Attribute().name(AttrName.ANY).operands(new ArrayList<>()).conceptId(903118L),
@@ -1509,7 +1507,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsBloodPressureOrHeartRateDetail() throws Exception {
+  public void countSubjectsBloodPressureOrHeartRateDetail() {
     SearchParameter bpPm = bloodPressure().attributes(bpAttributes());
 
     List<Attribute> hrAttributes =
@@ -1531,7 +1529,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsBloodPressureOrHeartRateDetailOrHeartRateIrr() throws Exception {
+  public void countSubjectsBloodPressureOrHeartRateDetailOrHeartRateIrr() {
     SearchParameter bpPm = bloodPressure().attributes(bpAttributes());
     SearchRequest searchRequest =
         createSearchRequests(
@@ -1572,7 +1570,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsHeartRateAny() throws Exception {
+  public void countSubjectsHeartRateAny() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.PHYSICAL_MEASUREMENT.toString(),
@@ -1583,7 +1581,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsHeartRate() throws Exception {
+  public void countSubjectsHeartRate() {
     List<Attribute> attributes =
         Arrays.asList(
             new Attribute()
@@ -1600,7 +1598,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsHeight() throws Exception {
+  public void countSubjectsHeight() {
     List<Attribute> attributes =
         Arrays.asList(
             new Attribute()
@@ -1617,7 +1615,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsWeight() throws Exception {
+  public void countSubjectsWeight() {
     List<Attribute> attributes =
         Arrays.asList(
             new Attribute()
@@ -1634,7 +1632,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsBMI() throws Exception {
+  public void countSubjectsBMI() {
     List<Attribute> attributes =
         Arrays.asList(
             new Attribute()
@@ -1651,7 +1649,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectWaistCircumferenceAndHipCircumference() throws Exception {
+  public void countSubjectWaistCircumferenceAndHipCircumference() {
     List<Attribute> attributes =
         Arrays.asList(
             new Attribute()
@@ -1669,7 +1667,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectPregnant() throws Exception {
+  public void countSubjectPregnant() {
     List<Attribute> attributes =
         Arrays.asList(
             new Attribute()
@@ -1686,7 +1684,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectWheelChairUser() throws Exception {
+  public void countSubjectWheelChairUser() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     SearchRequest searchRequest =
         createSearchRequests(
@@ -1697,7 +1695,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsPPI() throws Exception {
+  public void countSubjectsPPI() {
     List<DbCriteria> surveys = insertSurveyCriteria();
 
     // Survey
@@ -1752,7 +1750,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getDemoChartInfo() throws Exception {
+  public void getDemoChartInfo() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     SearchRequest searchRequest =
         createSearchRequests(
@@ -1770,7 +1768,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void filterBigQueryConfig_WithoutTableName() throws Exception {
+  public void filterBigQueryConfig_WithoutTableName() {
     final String statement = "my statement ${projectId}.${dataSetId}.myTableName";
     QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(statement).setUseLegacySql(false).build();
