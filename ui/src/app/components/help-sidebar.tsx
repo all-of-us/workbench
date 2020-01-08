@@ -160,7 +160,7 @@ const iconStyles = {
     width: 27
   }
 };
-
+// TODO uncomment 'thunderstorm' icon when cluster configuration function is ready
 const icons = [{
   id: 'help',
   disabled: false,
@@ -169,14 +169,14 @@ const icons = [{
   page: null,
   style: {fontSize: '21px'},
   tooltip: 'Help Tips',
-}, {
-  id: 'thunderstorm',
-  disabled: true,
-  faIcon: null,
-  label: 'Cloud Icon',
-  page: null,
-  style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
-  tooltip: 'Compute Configuration',
+// }, {
+//   id: 'thunderstorm',
+//   disabled: true,
+//   faIcon: null,
+//   label: 'Cloud Icon',
+//   page: null,
+//   style: {height: '22px', width: '22px', marginTop: '0.25rem', opacity: 0.5},
+//   tooltip: 'Compute Configuration',
 }, {
   id: 'annotations',
   disabled: false,
