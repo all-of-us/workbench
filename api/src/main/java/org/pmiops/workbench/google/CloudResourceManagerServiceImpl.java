@@ -50,7 +50,7 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
     // domain-wide delegation for the OAuth scopes required by cloud apis.
     GoogleCredentials credentials =
         ServiceAccounts.getImpersonatedCredentials(
-            cloudResourceManagerAdminCredsProvider.get(), user.getContactEmail(), SCOPES);
+            cloudResourceManagerAdminCredsProvider.get(), user.getUsername(), SCOPES);
 
     return new CloudResourceManager.Builder(
             httpTransport, getDefaultJsonFactory(), new HttpCredentialsAdapter(credentials))
