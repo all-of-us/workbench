@@ -1,47 +1,66 @@
 package org.pmiops.workbench.db.dao;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.collect.ImmutableList;
+import java.sql.Timestamp;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.DbCohort;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class CohortDaoTest {
 
   public static final long WORKSPACE_ID = 9999;
   @Autowired CohortDao cohortDao;
+  @Autowired WorkspaceDao workspaceDao;
+  private DbCohort dbCohort;
 
-  @Autowired JdbcTemplate jdbcTemplate;
+  @Before
+  public void setUp() {
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+    DbWorkspace dbWorkspace = new DbWorkspace();
+    dbWorkspace.setName("name");
+    dbWorkspace.setWorkspaceNamespace("name");
+    dbWorkspace.setFirecloudName("name");
+    dbWorkspace.setDataAccessLevel((short) 1);
+    dbWorkspace.setCreationTime(timestamp);
+    dbWorkspace.setLastModifiedTime(timestamp);
+    workspaceDao.save(dbWorkspace);
 
-  @Test
-  public void findCohortByCohortId() {
     String cohortJson =
         "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":"
             + "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":"
             + "{\"operator\":\"between\",\"operands\":[18,66]}}],\"modifiers\":[]}]}],\"excludes\":[]}";
+    dbCohort = new DbCohort();
+    dbCohort.setWorkspaceId(dbWorkspace.getWorkspaceId());
+    dbCohort.setName("name");
+    dbCohort.setCriteria(cohortJson);
+    dbCohort = cohortDao.save(dbCohort);
+  }
 
-    DbCohort cohort = new DbCohort();
-    cohort.setWorkspaceId(WORKSPACE_ID);
-    cohort.setCriteria(cohortJson);
+  @Test
+  public void findCohortByCohortId() {
+    assertThat(cohortDao.findAllByCohortIdIn(ImmutableList.of(dbCohort.getCohortId())).get(0))
+        .isEqualTo(dbCohort);
+  }
 
-    // need to insert a workspace to satisfy the foreign key contraint of cohort
-    jdbcTemplate.execute(
-        "insert into workspace"
-            + "(workspace_id, name, workspace_namespace, firecloud_name, data_access_level, creation_time, last_modified_time)"
-            + "values ("
-            + WORKSPACE_ID
-            + ", 'name', 'name', 'name', 1, sysdate(), sysdate())");
+  @Test
+  public void findCohortByNameAndWorkspaceId() {
+    assertThat(cohortDao.findCohortByNameAndWorkspaceId("name", dbCohort.getWorkspaceId()))
+        .isEqualTo(dbCohort);
+  }
 
-    cohortDao.save(cohort);
-
-    assertEquals(cohortJson, cohort.getCriteria());
+  @Test
+  public void findByWorkspaceId() {
+    assertThat(cohortDao.findByWorkspaceId(dbCohort.getWorkspaceId()).get(0)).isEqualTo(dbCohort);
   }
 }
