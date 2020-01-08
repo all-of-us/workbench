@@ -30,7 +30,7 @@ public class CohortAnnotationDefinitionDaoTest {
   }
 
   @Test
-  public void saveNoEnumValues() throws Exception {
+  public void saveNoEnumValues() {
     assertEquals(
         cohortAnnotationDefinition,
         cohortAnnotationDefinitionDao.findOne(
@@ -38,7 +38,7 @@ public class CohortAnnotationDefinitionDaoTest {
   }
 
   @Test
-  public void saveWithEnumValues() throws Exception {
+  public void saveWithEnumValues() {
     DbCohortAnnotationDefinition cohortAnnotationDefinition = createCohortAnnotationDefinition();
     DbCohortAnnotationEnumValue enumValue1 =
         new DbCohortAnnotationEnumValue()
@@ -69,7 +69,7 @@ public class CohortAnnotationDefinitionDaoTest {
   }
 
   @Test
-  public void findByCohortIdAndColumnName() throws Exception {
+  public void findByCohortIdAndColumnName() {
     assertEquals(
         cohortAnnotationDefinition,
         cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(
@@ -77,7 +77,7 @@ public class CohortAnnotationDefinitionDaoTest {
   }
 
   @Test
-  public void findByCohortIdOrderByEnumValuesAsc() throws Exception {
+  public void findByCohortIdOrderByEnumValuesAsc() {
     assertEquals(
         cohortAnnotationDefinition,
         cohortAnnotationDefinitionDao

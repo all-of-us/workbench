@@ -29,7 +29,7 @@ public class ParticipantCohortAnnotationDaoTest {
   private long participantId = 4L;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     DbCohortAnnotationDefinition enumAnnotationDefinition =
         new DbCohortAnnotationDefinition()
             .cohortId(COHORT_ID)
@@ -81,13 +81,12 @@ public class ParticipantCohortAnnotationDaoTest {
   }
 
   @Test
-  public void save() throws Exception {
+  public void save() {
     assertEquals(pca, participantCohortAnnotationDao.findOne(pca.getAnnotationId()));
   }
 
   @Test
-  public void findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId()
-      throws Exception {
+  public void findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId() {
     assertEquals(
         pca,
         participantCohortAnnotationDao
@@ -96,7 +95,7 @@ public class ParticipantCohortAnnotationDaoTest {
   }
 
   @Test
-  public void findByAnnotationIdAndCohortReviewIdAndParticipantId() throws Exception {
+  public void findByAnnotationIdAndCohortReviewIdAndParticipantId() {
     assertEquals(
         pca,
         participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(
@@ -104,7 +103,7 @@ public class ParticipantCohortAnnotationDaoTest {
   }
 
   @Test
-  public void findByCohortReviewIdAndParticipantId() throws Exception {
+  public void findByCohortReviewIdAndParticipantId() {
     List<DbParticipantCohortAnnotation> annotations =
         participantCohortAnnotationDao.findByCohortReviewIdAndParticipantId(
             cohortReviewId, participantId);
