@@ -52,7 +52,7 @@ public class DbUser {
   // A nonce which can be used during the account creation flow to verify
   // unauthenticated API calls after account creation, but before initial login.
   private Long creationNonce;
-  // The Google email address that the user signs in with.
+  // The full G Suite email address that the user signs in with, e.g. "joe@researchallofus.org".
   private String username;
   // The email address that can be used to contact the user.
   private String contactEmail;
@@ -134,6 +134,12 @@ public class DbUser {
     this.creationNonce = creationNonce;
   }
 
+  /**
+   * Returns the user's full G Suite email address, e.g. "joe@researchallofus.org". This is named
+   * "username" in this entity class to distinguish it from getContactEmail, which is the user's
+   * designated contact email address.
+   * @return
+   */
   @Column(name = "email")
   public String getUsername() {
     return username;
@@ -143,6 +149,10 @@ public class DbUser {
     this.username = userName;
   }
 
+  /**
+   * Returns the user's designated contact email address, e.g. "joe@gmail.com".
+   * @return
+   */
   @Column(name = "contact_email")
   public String getContactEmail() {
     return contactEmail;
