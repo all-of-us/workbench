@@ -289,36 +289,42 @@ export const DetailTabTable = withCurrentWorkspace()(
         this.setState({
           data: null,
           filteredData: null,
-          lazyLoad: false,
           loading: true,
           error: false,
-          totalCount: null
+          page: 0,
+          start: 0,
         }, () => this.getParticipantData(true));
       } else if (prevProps.updateState !== updateState) {
         this.filterData();
       }
     }
 
-    getParticipantData(getCount: boolean) {
+    async getParticipantData(getCount: boolean) {
       try {
-        const {columns, domain} = this.props;
+        const {columns, domain, participantId, workspace: {id, namespace}} = this.props;
         const {sortOrder} = this.state;
-        let {lazyLoad} = this.state;
+        let {lazyLoad, totalCount} = this.state;
+        const {cohortReviewId} = cohortReviewStore.getValue();
         const pageFilterRequest = {
           page: 0,
-          pageSize: lazyLoad ? 125 : 1000,
+          pageSize: 125,
           sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
           sortColumn: columns[0].name,
           domain: domain,
           filters: {items: []}
         } as PageFilterRequest;
-        this.callApi(pageFilterRequest, getCount).then(response => {
-          const {count, data} = response;
-          lazyLoad = count > 1000;
+        if (getCount) {
+          await cohortReviewApi().getParticipantCount(namespace, id, cohortReviewId, participantId, pageFilterRequest).then(response => {
+            totalCount = response.count;
+            lazyLoad = totalCount > 1000;
+            pageFilterRequest.pageSize = lazyLoad ? 125 : totalCount;
+          });
+        }
+        this.callApi(pageFilterRequest).then(data => {
           if (lazyLoad) {
-            this.setState({data, filteredData: data, loading: false, lazyLoad, totalCount: count, range: [0, 124]});
+            this.setState({data, filteredData: data, loading: false, lazyLoad, range: [0, 124], totalCount});
           } else {
-            this.setState({data, loading: false, lazyLoad, range: [0, count - 1]});
+            this.setState({data, loading: false, lazyLoad, range: [0, totalCount - 1]});
             this.filterData();
           }
         });
@@ -342,9 +348,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         domain: domain,
         filters: {items: []}
       } as PageFilterRequest;
-      this.callApi(pageFilterRequest, false).then(response => {
-        const {data} = response;
-        console.log(data);
+      this.callApi(pageFilterRequest).then(data => {
         if (previous) {
           filteredData = [...data, ...filteredData];
           if (filteredData.length > 425) {
@@ -362,27 +366,20 @@ export const DetailTabTable = withCurrentWorkspace()(
       });
     }
 
-    async callApi(request: PageFilterRequest, getCount: boolean) {
+    async callApi(request: PageFilterRequest) {
       const {domain, participantId, workspace: {id, namespace}} = this.props;
       const {cohortReviewId} = cohortReviewStore.getValue();
-      const responses = {data: [], count: this.state.totalCount};
-      const promises = [cohortReviewApi().getParticipantData(namespace, id, cohortReviewId, participantId, request).then(response => {
-        responses.data = response.items.map(item => {
+      let data = [];
+      await cohortReviewApi().getParticipantData(namespace, id, cohortReviewId, participantId, request).then(response => {
+        data = response.items.map(item => {
           if (domain === DomainType.VITAL || domain === DomainType.LAB) {
             item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
           }
           item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
           return item;
         });
-      })];
-      if (getCount) {
-        promises.push(cohortReviewApi().getParticipantCount(namespace, id, cohortReviewId, participantId, request).then(response => {
-          console.log(response);
-          responses.count = response.count;
-        }));
-      }
-      await Promise.all(promises);
-      return responses;
+      });
+      return data;
     }
 
     onSort = (event: any) => {
@@ -756,15 +753,6 @@ export const DetailTabTable = withCurrentWorkspace()(
       return {'graphExpander' : noConcept};
     }
 
-    get totalCount() {
-      const {filteredData, lazyLoad, totalCount} = this.state;
-      if (lazyLoad) {
-        return totalCount;
-      } else {
-        return !!filteredData ? filteredData.length : null;
-      }
-    }
-
     render() {
       const {expandedRows, loading, lazyLoad, loadingPrevious, range, start, sortField, sortOrder, totalCount, updating} = this.state;
       const {columns, filterState: {vocab}, tabName} = this.props;
@@ -855,6 +843,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           paginatorTemplate={!spinner && !!filteredData ? paginatorTemplate : ''}
           currentPageReportTemplate={!spinner && !!filteredData ? pageReportTemplate : ''}
           onPage={this.onPage}
+          alwaysShowPaginator={false}
           first={start}
           rows={rowsPerPage}
           totalRecords={max}
@@ -864,7 +853,6 @@ export const DetailTabTable = withCurrentWorkspace()(
           footer={this.errorMessage()}>
           {cols}
         </DataTable>
-        <div>{max} {lazyLoad.toString()}</div>
         {spinner && <SpinnerOverlay />}
       </div>;
     }
