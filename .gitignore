@@ -20,6 +20,7 @@ cron-emulator-err.log
 /api/src/main/webapp/WEB-INF/cron.yaml
 /api/src/main/webapp/WEB-INF/sa-key.json
 /api/src/main/webapp/WEB-INF/gsuite-admin-sa.json
+/api/src/main/webapp/static/generated/*
 /api/src/generated
 /api/tools/build/*
 /api/bin

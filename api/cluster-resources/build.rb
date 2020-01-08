@@ -27,6 +27,9 @@ def build_snippets_menu()
 
   FileUtils.mkdir_p "generated"
   File.write("generated/aou-snippets-menu.js", tmpl)
+
+  FileUtils.mkdir_p "../src/main/webapp/static/generated"
+  File.write("../src/main/webapp/static/generated/aou-snippets-menu.js", tmpl)
 end
 
 Common.register_command({

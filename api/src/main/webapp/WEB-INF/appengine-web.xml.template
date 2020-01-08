@@ -4,7 +4,6 @@
   <threadsafe>true</threadsafe>
   <!-- Deploy complains about this tag, bug BigQuery needs it. -->
   <application>all-of-us-workbench-test</application>
-
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
 
@@ -25,6 +24,15 @@
   <static-error-handlers>
     <handler file="server_unavailable.html" />
   </static-error-handlers>
+
+  <static-files>
+    <include path="static/activity-checker-extension.js" />
+    <include path="static/aou-download-policy-extension.js" />
+    <include path="static/initialize_notebook_cluster.sh" />
+    <include path="static/start_notebook_cluster.sh" />
+    <include path="static/generated/aou-snippets-menu.js" />
+    <include path="server_unavailable.html" />
+  </static-files>
 
   <automatic-scaling>
     <min-idle-instances>${GAE_MIN_IDLE_INSTANCES}</min-idle-instances>
