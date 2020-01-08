@@ -93,7 +93,8 @@
     "enableBillingLockout": false,
     "enableSumoLogicEventHandling": false,
     "useKeylessDelegatedCredentials": false,
-    "sendFreeTierAlertEmails": false
+    "sendFreeTierAlertEmails": false,
+    "enableMoodleV2Api": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf"

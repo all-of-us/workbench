@@ -76,7 +76,7 @@
     "enableMoodleBackend": true
   },
   "access": {
-    "enableComplianceTraining": false,
+    "enableComplianceTraining": true,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
@@ -91,7 +91,8 @@
     "enableBillingLockout": false,
     "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
-    "sendFreeTierAlertEmails": false
+    "sendFreeTierAlertEmails": false,
+    "enableMoodleV2Api": true
   },
   "actionAudit": {
     "logName":"workbench-action-audit-local"

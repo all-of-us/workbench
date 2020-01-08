@@ -216,6 +216,9 @@ public class WorkbenchConfig {
     // Whether we send emails to users after they pass Free Tier usage thresholds
     // Blocked by RW-4135: do not enable in an environment where contact_email can be NULL
     public boolean sendFreeTierAlertEmails;
+    // Flag to indicate whether to use the new Moodle badges API
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-2957
+    public boolean enableMoodleV2Api;
   }
 
   public static class ActionAuditConfig {

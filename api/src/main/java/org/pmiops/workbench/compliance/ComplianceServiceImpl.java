@@ -73,8 +73,14 @@ public class ComplianceServiceImpl implements ComplianceService {
     if (!enableMoodleCalls()) {
       return null;
     }
-    UserBadgeResponse response =
-        moodleApiProvider.get().getMoodleBadge(RESPONSE_FORMAT, getToken(), userMoodleId);
+    UserBadgeResponse response;
+    if(configProvider.get().featureFlags.enableMoodleV2Api) {
+      response = moodleApiProvider.get().getMoodleBadge(RESPONSE_FORMAT, getToken(), userMoodleId);
+    }
+    else {
+      response = moodleApiProvider.get().getMoodleBadgeV1(RESPONSE_FORMAT, getToken(), userMoodleId);
+    }
+    System.err.println(response);
     if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
       if (response.getErrorcode().equals(MOODLE_USER_NOT_ALLOWED_ERROR_CODE)) {
         throw new ApiException(HttpStatus.NOT_FOUND.value(), response.getMessage());

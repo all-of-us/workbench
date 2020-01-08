@@ -70,7 +70,7 @@ paths:
        - Moodle
      consumes:
        - application/json
-     operationId: getMoodleBadge
+     operationId: getMoodleBadgeV1
      parameters:
        - name: moodlewsrestformat
          in: query
@@ -97,6 +97,41 @@ paths:
          description: Moodle Internal Error
      security:
        - AdminSecurity: []
+
+  /server.php?wsfunction=local_workbenchapiv2_check_user_badge:
+    get:
+      summary: Get information of badges earned/completed by user.
+      tags:
+        - Moodle
+      consumes:
+        - application/json
+      operationId: getMoodleBadge
+      parameters:
+        - name: moodlewsrestformat
+          in: query
+          description: Format of the response which will be json for AoU
+          type: string
+          required: true
+        - name: userid
+          in: query
+          type: integer
+        - name: wstoken
+          in: query
+          description: Secret Token associated with All of us
+          type: string
+          required: true
+
+      responses:
+        200:
+          description: Badge /error response
+          schema:
+            $ref: '#/definitions/UserBadgeResponse'
+        400:
+          description: Bad request
+        500:
+          description: Moodle Internal Error
+      security:
+        - AdminSecurity: []
 
 ##########################################################################################
 ## DEFINITIONS
