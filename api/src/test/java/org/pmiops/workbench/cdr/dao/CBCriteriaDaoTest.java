@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
+import com.google.common.collect.ImmutableList;
 import java.util.HashSet;
 import java.util.List;
 import org.junit.Before;
@@ -260,7 +260,7 @@ public class CBCriteriaDaoTest {
         icd10Criteria,
         cbCriteriaDao
             .findStandardCriteriaByDomainAndConceptId(
-                DomainType.CONDITION.toString(), false, Arrays.asList("1"))
+                DomainType.CONDITION.toString(), false, ImmutableList.of("1"))
             .get(0));
   }
 

@@ -6,13 +6,13 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -145,7 +145,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return Arrays.asList(
+    return ImmutableList.of(
         "cb_review_all_events", "person", "cb_search_person", "cb_search_all_events", "death");
   }
 
@@ -381,7 +381,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedCondition1(), expectedCondition2()), 2);
+    assertResponse(response, ImmutableList.of(expectedCondition1(), expectedCondition2()), 2);
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -391,7 +391,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedCondition2(), expectedCondition1()), 2);
+    assertResponse(response, ImmutableList.of(expectedCondition2(), expectedCondition1()), 2);
   }
 
   @Test
@@ -408,7 +408,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedCondition1()), 2);
+    assertResponse(response, ImmutableList.of(expectedCondition1()), 2);
 
     // page 2 should have 1 item
     testFilter.page(1);
@@ -417,7 +417,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .getParticipantData(
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
-    assertResponse(response, Arrays.asList(expectedCondition2()), 2);
+    assertResponse(response, ImmutableList.of(expectedCondition2()), 2);
   }
 
   @Test
@@ -432,7 +432,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedAllEvents1()), 2);
+    assertResponse(response, ImmutableList.of(expectedAllEvents1()), 2);
 
     // page 2 should have 1 item
     testFilter.page(1);
@@ -442,7 +442,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedAllEvents2()), 2);
+    assertResponse(response, ImmutableList.of(expectedAllEvents2()), 2);
   }
 
   @Test
@@ -456,7 +456,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedAllEvents1(), expectedAllEvents2()), 2);
+    assertResponse(response, ImmutableList.of(expectedAllEvents1(), expectedAllEvents2()), 2);
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -466,7 +466,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedAllEvents2(), expectedAllEvents1()), 2);
+    assertResponse(response, ImmutableList.of(expectedAllEvents2(), expectedAllEvents1()), 2);
   }
 
   @Test

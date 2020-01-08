@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -781,7 +782,7 @@ public class CohortReviewControllerTest {
     CohortReview expectedReview1 =
         createCohortReview(
             cohortReview,
-            Arrays.asList(participantCohortStatus1, participantCohortStatus2),
+            ImmutableList.of(participantCohortStatus1, participantCohortStatus2),
             page,
             pageSize,
             SortOrder.DESC,
@@ -789,7 +790,7 @@ public class CohortReviewControllerTest {
     CohortReview expectedReview2 =
         createCohortReview(
             cohortReview,
-            Arrays.asList(participantCohortStatus2, participantCohortStatus1),
+            ImmutableList.of(participantCohortStatus2, participantCohortStatus1),
             page,
             pageSize,
             SortOrder.DESC,
@@ -797,7 +798,7 @@ public class CohortReviewControllerTest {
     CohortReview expectedReview3 =
         createCohortReview(
             cohortReview,
-            Arrays.asList(participantCohortStatus1, participantCohortStatus2),
+            ImmutableList.of(participantCohortStatus1, participantCohortStatus2),
             page,
             pageSize,
             SortOrder.ASC,
@@ -805,7 +806,7 @@ public class CohortReviewControllerTest {
     CohortReview expectedReview4 =
         createCohortReview(
             cohortReview,
-            Arrays.asList(participantCohortStatus1, participantCohortStatus2),
+            ImmutableList.of(participantCohortStatus1, participantCohortStatus2),
             page,
             pageSize,
             SortOrder.ASC,

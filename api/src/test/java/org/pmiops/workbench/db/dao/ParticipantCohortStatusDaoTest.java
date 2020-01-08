@@ -3,9 +3,9 @@ package org.pmiops.workbench.db.dao;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.ImmutableList;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -157,7 +157,7 @@ public class ParticipantCohortStatusDaoTest {
             .raceConceptId(1L)
             .deceased(false);
 
-    participantCohortStatusDao.saveParticipantCohortStatusesCustom(Arrays.asList(pcs1, pcs2));
+    participantCohortStatusDao.saveParticipantCohortStatusesCustom(ImmutableList.of(pcs1, pcs2));
 
     String sql = "select count(*) from participant_cohort_status where cohort_review_id = ?";
     final Object[] sqlParams = {key1.getCohortReviewId()};
@@ -220,32 +220,32 @@ public class ParticipantCohortStatusDaoTest {
         new Filter()
             .property(FilterColumns.PARTICIPANTID)
             .operator(Operator.EQUAL)
-            .values(Arrays.asList("1")));
+            .values(ImmutableList.of("1")));
     filters.add(
         new Filter()
             .property(FilterColumns.STATUS)
             .operator(Operator.EQUAL)
-            .values(Arrays.asList(CohortStatus.INCLUDED.toString())));
+            .values(ImmutableList.of(CohortStatus.INCLUDED.toString())));
     filters.add(
         new Filter()
             .property(FilterColumns.BIRTHDATE)
             .operator(Operator.EQUAL)
-            .values(Arrays.asList(new Date(System.currentTimeMillis()).toString())));
+            .values(ImmutableList.of(new Date(System.currentTimeMillis()).toString())));
     filters.add(
         new Filter()
             .property(FilterColumns.GENDER)
             .operator(Operator.EQUAL)
-            .values(Arrays.asList("8507")));
+            .values(ImmutableList.of("8507")));
     filters.add(
         new Filter()
             .property(FilterColumns.RACE)
             .operator(Operator.EQUAL)
-            .values(Arrays.asList("8515")));
+            .values(ImmutableList.of("8515")));
     filters.add(
         new Filter()
             .property(FilterColumns.ETHNICITY)
             .operator(Operator.EQUAL)
-            .values(Arrays.asList("38003564")));
+            .values(ImmutableList.of("38003564")));
     pageRequest.filters(filters);
     List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
@@ -273,33 +273,34 @@ public class ParticipantCohortStatusDaoTest {
         new Filter()
             .property(FilterColumns.PARTICIPANTID)
             .operator(Operator.IN)
-            .values(Arrays.asList("1", "2")));
+            .values(ImmutableList.of("1", "2")));
     filters.add(
         new Filter()
             .property(FilterColumns.STATUS)
             .operator(Operator.IN)
             .values(
-                Arrays.asList(CohortStatus.INCLUDED.toString(), CohortStatus.EXCLUDED.toString())));
+                ImmutableList.of(
+                    CohortStatus.INCLUDED.toString(), CohortStatus.EXCLUDED.toString())));
     filters.add(
         new Filter()
             .property(FilterColumns.BIRTHDATE)
             .operator(Operator.IN)
-            .values(Arrays.asList(new Date(System.currentTimeMillis()).toString())));
+            .values(ImmutableList.of(new Date(System.currentTimeMillis()).toString())));
     filters.add(
         new Filter()
             .property(FilterColumns.GENDER)
             .operator(Operator.IN)
-            .values(Arrays.asList("8507", "8532")));
+            .values(ImmutableList.of("8507", "8532")));
     filters.add(
         new Filter()
             .property(FilterColumns.RACE)
             .operator(Operator.IN)
-            .values(Arrays.asList("8515", "8527")));
+            .values(ImmutableList.of("8515", "8527")));
     filters.add(
         new Filter()
             .property(FilterColumns.ETHNICITY)
             .operator(Operator.IN)
-            .values(Arrays.asList("38003564", "38003563")));
+            .values(ImmutableList.of("38003564", "38003563")));
     pageRequest.filters(filters);
     List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
@@ -488,7 +489,7 @@ public class ParticipantCohortStatusDaoTest {
         new Filter()
             .property(FilterColumns.PARTICIPANTID)
             .operator(Operator.EQUAL)
-            .values(Arrays.asList("z")));
+            .values(ImmutableList.of("z")));
     pageRequest.filters(filters);
     assertBadRequest(
         pageRequest, "Bad Request: Problems parsing PARTICIPANTID: For input string: \"z\"");
@@ -498,7 +499,7 @@ public class ParticipantCohortStatusDaoTest {
         new Filter()
             .property(FilterColumns.STATUS)
             .operator(Operator.EQUAL)
-            .values(Arrays.asList("z")));
+            .values(ImmutableList.of("z")));
     pageRequest.filters(filters);
     assertBadRequest(
         pageRequest,
@@ -509,7 +510,7 @@ public class ParticipantCohortStatusDaoTest {
         new Filter()
             .property(FilterColumns.BIRTHDATE)
             .operator(Operator.EQUAL)
-            .values(Arrays.asList("z")));
+            .values(ImmutableList.of("z")));
     pageRequest.filters(filters);
     assertBadRequest(
         pageRequest, "Bad Request: Problems parsing BIRTHDATE: Unparseable date: \"z\"");
@@ -529,7 +530,7 @@ public class ParticipantCohortStatusDaoTest {
         new Filter()
             .property(FilterColumns.PARTICIPANTID)
             .operator(Operator.EQUAL)
-            .values(Arrays.asList("1", "2")));
+            .values(ImmutableList.of("1", "2")));
     pageRequest.filters(filters);
     assertBadRequest(
         pageRequest,

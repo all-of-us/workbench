@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import org.junit.Before;
@@ -102,7 +102,7 @@ public class CriteriaLookupUtilTest {
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (1036094, 1036094)");
 
-    List<Long> childConceptIds = Arrays.asList(19069022L, 1036094L);
+    List<Long> childConceptIds = ImmutableList.of(19069022L, 1036094L);
     SearchParameter searchParameter =
         new SearchParameter()
             .domain(DomainType.DRUG.toString())
@@ -151,7 +151,7 @@ public class CriteriaLookupUtilTest {
     jdbcTemplate.execute(
         "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values (19069022, 1666666)");
 
-    List<Long> childConceptIds = Arrays.asList(1666666L);
+    List<Long> childConceptIds = ImmutableList.of(1666666L);
     SearchParameter searchParameter =
         new SearchParameter()
             .domain(DomainType.DRUG.toString())
@@ -211,7 +211,7 @@ public class CriteriaLookupUtilTest {
     saveCriteriaWithPath(questionNode.getPath(), answerNode);
 
     // Survey search
-    List<Long> childConceptIds = Arrays.asList(5L, 1586135L);
+    List<Long> childConceptIds = ImmutableList.of(5L, 1586135L);
     SearchParameter searchParameter =
         new SearchParameter()
             .domain(DomainType.SURVEY.toString())
@@ -231,7 +231,7 @@ public class CriteriaLookupUtilTest {
         lookupUtil.buildCriteriaLookupMap(searchRequest));
 
     // Question search
-    childConceptIds = Arrays.asList(5L);
+    childConceptIds = ImmutableList.of(5L);
     searchParameter =
         new SearchParameter()
             .domain(DomainType.SURVEY.toString())
@@ -302,7 +302,7 @@ public class CriteriaLookupUtilTest {
             .synonyms("[CONDITION_rank1]");
     saveCriteriaWithPath(snomedParent2.getPath(), snomedChild);
 
-    List<Long> childConceptIds = Arrays.asList(27835L, 4099351L);
+    List<Long> childConceptIds = ImmutableList.of(27835L, 4099351L);
     SearchParameter searchParameter =
         new SearchParameter()
             .domain(DomainType.CONDITION.toString())
@@ -357,7 +357,7 @@ public class CriteriaLookupUtilTest {
             .synonyms("[CONDITION_rank1]");
     saveCriteriaWithPath(icd9Parent.getPath(), icd9Child2);
 
-    List<Long> childConceptIds = Arrays.asList(44829697L, 44835564L);
+    List<Long> childConceptIds = ImmutableList.of(44829697L, 44835564L);
     SearchParameter searchParameter =
         new SearchParameter()
             .domain(DomainType.CONDITION.toString())
