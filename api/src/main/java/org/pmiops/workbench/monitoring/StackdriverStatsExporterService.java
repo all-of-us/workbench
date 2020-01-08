@@ -49,8 +49,7 @@ public class StackdriverStatsExporterService {
   public void createAndRegister() {
     if (!initialized) {
       try {
-        final StackdriverStatsConfiguration configuration =
-            makeStackdriverStatsConfiguration();
+        final StackdriverStatsConfiguration configuration = makeStackdriverStatsConfiguration();
         StackdriverStatsExporter.createAndRegister(configuration);
         logger.info(
             String.format(

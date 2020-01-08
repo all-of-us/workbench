@@ -48,23 +48,25 @@ public class StackdriverStatsExporterServiceTest {
   public void testMakeConfiguration() {
     doReturn(FOUND_NODE_ID).when(mockModulesService).getCurrentInstanceId();
 
-    StackdriverStatsConfiguration statsConfiguration = exporterService.makeStackdriverStatsConfiguration();
+    StackdriverStatsConfiguration statsConfiguration =
+        exporterService.makeStackdriverStatsConfiguration();
     assertThat(statsConfiguration.getProjectId()).isEqualTo(PROJECT_ID);
-    assertThat(statsConfiguration.getMetricNamePrefix()).isEqualTo("custom.googleapis.com/unit-test/");
+    assertThat(statsConfiguration.getMetricNamePrefix())
+        .isEqualTo("custom.googleapis.com/unit-test/");
 
     final MonitoredResource monitoredResource = statsConfiguration.getMonitoredResource();
     assertThat(monitoredResource.getType()).isEqualTo("generic_node");
 
-    final Map<String,String> labelToValue = monitoredResource.getLabelsMap();
+    final Map<String, String> labelToValue = monitoredResource.getLabelsMap();
     assertThat(statsConfiguration.getMonitoredResource().getLabelsMap()).isNotEmpty();
     assertThat(labelToValue.get("node_id")).isEqualTo(FOUND_NODE_ID);
   }
 
-
   @Test
   public void testMakeMonitoredResource_noInstanceIdAvailable() {
     doThrow(ModulesException.class).when(mockModulesService).getCurrentInstanceId();
-    final MonitoredResource monitoredResource = exporterService.makeStackdriverStatsConfiguration().getMonitoredResource();
+    final MonitoredResource monitoredResource =
+        exporterService.makeStackdriverStatsConfiguration().getMonitoredResource();
     assertThat(monitoredResource.getLabelsMap().get("node_id")).isNotEmpty();
   }
 }
