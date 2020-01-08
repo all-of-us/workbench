@@ -76,7 +76,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaBy() throws Exception {
+  public void getCriteriaBy() {
     DbCriteria icd9CriteriaParent =
         new DbCriteria()
             .domainId(DomainType.CONDITION.toString())
@@ -119,7 +119,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaByExceptions() throws Exception {
+  public void getCriteriaByExceptions() {
     try {
       controller.getCriteriaBy(1L, null, null, false, null);
       fail("Should have thrown a BadRequestException!");
@@ -149,7 +149,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaByDemo() throws Exception {
+  public void getCriteriaByDemo() {
     DbCriteria demoCriteria =
         new DbCriteria()
             .domainId(DomainType.PERSON.toString())
@@ -169,7 +169,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteMatchesSynonyms() throws Exception {
+  public void getCriteriaAutoCompleteMatchesSynonyms() {
     DbCriteria criteria =
         new DbCriteria()
             .domainId(DomainType.MEASUREMENT.toString())
@@ -196,7 +196,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteMatchesCode() throws Exception {
+  public void getCriteriaAutoCompleteMatchesCode() {
     DbCriteria criteria =
         new DbCriteria()
             .domainId(DomainType.MEASUREMENT.toString())
@@ -224,7 +224,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteSnomed() throws Exception {
+  public void getCriteriaAutoCompleteSnomed() {
     DbCriteria criteria =
         new DbCriteria()
             .domainId(DomainType.CONDITION.toString())
@@ -251,7 +251,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAutoCompleteExceptions() throws Exception {
+  public void getCriteriaAutoCompleteExceptions() {
     try {
       controller.getCriteriaAutoComplete(1L, null, "blah", null, null, null);
       fail("Should have thrown a BadRequestException!");
@@ -282,7 +282,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndSearchTermMatchesSourceCode() throws Exception {
+  public void findCriteriaByDomainAndSearchTermMatchesSourceCode() {
     DbCriteria criteria =
         new DbCriteria()
             .code("001")
@@ -309,7 +309,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndSearchTermLikeSourceCode() throws Exception {
+  public void findCriteriaByDomainAndSearchTermLikeSourceCode() {
     DbCriteria criteria =
         new DbCriteria()
             .code("00")
@@ -337,7 +337,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndSearchTermDrugMatchesStandardCodeBrand() throws Exception {
+  public void findCriteriaByDomainAndSearchTermDrugMatchesStandardCodeBrand() {
     DbCriteria criteria1 =
         new DbCriteria()
             .code("672535")
@@ -364,7 +364,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndSearchTermMatchesStandardCode() throws Exception {
+  public void findCriteriaByDomainAndSearchTermMatchesStandardCode() {
     DbCriteria criteria =
         new DbCriteria()
             .code("LP12")
@@ -391,7 +391,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndSearchTermMatchesSynonyms() throws Exception {
+  public void findCriteriaByDomainAndSearchTermMatchesSynonyms() {
     DbCriteria criteria =
         new DbCriteria()
             .code("001")
@@ -418,7 +418,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndSearchTermDrugMatchesSynonyms() throws Exception {
+  public void findCriteriaByDomainAndSearchTermDrugMatchesSynonyms() {
     jdbcTemplate.execute(
         "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
     DbCriteria criteria =
@@ -448,7 +448,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getStandardCriteriaByDomainAndConceptId() throws Exception {
+  public void getStandardCriteriaByDomainAndConceptId() {
     jdbcTemplate.execute(
         "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
     jdbcTemplate.execute(
@@ -473,7 +473,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getDrugBrandOrIngredientByName() throws Exception {
+  public void getDrugBrandOrIngredientByName() {
     DbCriteria drugATCCriteria =
         new DbCriteria()
             .domainId(DomainType.DRUG.toString())
@@ -513,7 +513,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void getCriteriaAttributeByConceptId() throws Exception {
+  public void getCriteriaAttributeByConceptId() {
     DbCriteriaAttribute criteriaAttributeMin =
         cbCriteriaAttributeDao.save(
             new DbCriteriaAttribute()
@@ -541,7 +541,7 @@ public class CohortBuilderControllerTest {
   }
 
   @Test
-  public void isApproximate() throws Exception {
+  public void isApproximate() {
     SearchParameter inSearchParameter = new SearchParameter();
     SearchParameter exSearchParameter = new SearchParameter();
     SearchGroupItem inSearchGroupItem =

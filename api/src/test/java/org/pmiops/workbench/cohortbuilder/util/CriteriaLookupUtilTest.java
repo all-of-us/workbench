@@ -40,7 +40,7 @@ public class CriteriaLookupUtilTest {
   private CriteriaLookupUtil lookupUtil;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     lookupUtil = new CriteriaLookupUtil(cbCriteriaDao);
   }
 
@@ -52,7 +52,7 @@ public class CriteriaLookupUtilTest {
   }
 
   @Test
-  public void buildCriteriaLookupMapNoSearchParametersException() throws Exception {
+  public void buildCriteriaLookupMapNoSearchParametersException() {
     SearchRequest searchRequest =
         new SearchRequest().addIncludesItem(new SearchGroup().addItemsItem(new SearchGroupItem()));
     try {
@@ -64,7 +64,7 @@ public class CriteriaLookupUtilTest {
   }
 
   @Test
-  public void buildCriteriaLookupMapDrugCriteria_ATC() throws Exception {
+  public void buildCriteriaLookupMapDrugCriteria_ATC() {
     DbCriteria drugNode1 =
         new DbCriteria()
             .parentId(99999)
@@ -122,7 +122,7 @@ public class CriteriaLookupUtilTest {
   }
 
   @Test
-  public void buildCriteriaLookupMapDrugCriteria_RXNORM() throws Exception {
+  public void buildCriteriaLookupMapDrugCriteria_RXNORM() {
     DbCriteria drugNode1 =
         new DbCriteria()
             .parentId(99999)
@@ -171,7 +171,7 @@ public class CriteriaLookupUtilTest {
   }
 
   @Test
-  public void buildCriteriaLookupMapPPICriteria() throws Exception {
+  public void buildCriteriaLookupMapPPICriteria() {
     DbCriteria surveyNode =
         new DbCriteria()
             .parentId(0)
@@ -267,7 +267,7 @@ public class CriteriaLookupUtilTest {
   }
 
   @Test
-  public void buildCriteriaLookupMapConditionSnomedCriteria() throws Exception {
+  public void buildCriteriaLookupMapConditionSnomedCriteria() {
     DbCriteria snomedParent1 =
         new DbCriteria()
             .parentId(0)
@@ -322,7 +322,7 @@ public class CriteriaLookupUtilTest {
   }
 
   @Test
-  public void buildCriteriaLookupMapConditionICD9Criteria() throws Exception {
+  public void buildCriteriaLookupMapConditionICD9Criteria() {
     DbCriteria icd9Parent =
         new DbCriteria()
             .parentId(0)

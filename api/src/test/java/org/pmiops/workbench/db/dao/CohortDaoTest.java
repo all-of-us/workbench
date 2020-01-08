@@ -22,7 +22,7 @@ public class CohortDaoTest {
   @Autowired JdbcTemplate jdbcTemplate;
 
   @Test
-  public void findCohortByCohortId() throws Exception {
+  public void findCohortByCohortId() {
     String cohortJson =
         "{\"includes\":[{\"items\":[{\"type\":\"DEMO\",\"searchParameters\":"
             + "[{\"value\":\"Age\",\"subtype\":\"AGE\",\"conceptId\":null,\"attribute\":"

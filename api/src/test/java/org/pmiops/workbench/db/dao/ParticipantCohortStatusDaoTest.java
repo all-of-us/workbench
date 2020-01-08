@@ -119,7 +119,7 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
-  public void findByParticipantKeyCohortReviewIdAndParticipantKeyParticipantId() throws Exception {
+  public void findByParticipantKeyCohortReviewIdAndParticipantKeyParticipantId() {
     DbParticipantCohortStatus participant1 =
         createExpectedPCS(
             new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
@@ -133,7 +133,7 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
-  public void findAllSaveParticipantCohortStatuses() throws Exception {
+  public void findAllSaveParticipantCohortStatuses() {
     DbParticipantCohortStatusKey key1 =
         new DbParticipantCohortStatusKey().cohortReviewId(2).participantId(3);
     DbParticipantCohortStatusKey key2 =
@@ -167,7 +167,7 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
-  public void findAllNoMatchingConcept() throws Exception {
+  public void findAllNoMatchingConcept() {
     PageRequest pageRequest =
         new PageRequest()
             .page(PAGE)
@@ -181,7 +181,7 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
-  public void findAllNoSearchCriteria() throws Exception {
+  public void findAllNoSearchCriteria() {
     PageRequest pageRequest =
         new PageRequest()
             .page(PAGE)
@@ -208,7 +208,7 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
-  public void findAllSearchCriteriaEqual() throws Exception {
+  public void findAllSearchCriteriaEqual() {
     PageRequest pageRequest =
         new PageRequest()
             .page(PAGE)
@@ -261,7 +261,7 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
-  public void findAllSearchCriteriaIn() throws Exception {
+  public void findAllSearchCriteriaIn() {
     PageRequest pageRequest =
         new PageRequest()
             .page(PAGE)
@@ -321,7 +321,7 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
-  public void findAllPaging() throws Exception {
+  public void findAllPaging() {
     PageRequest pageRequest =
         new PageRequest()
             .page(PAGE)
@@ -360,7 +360,7 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
-  public void findCount() throws Exception {
+  public void findCount() {
     PageRequest pageRequest =
         new PageRequest()
             .page(PAGE)
@@ -373,7 +373,7 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
-  public void findAllParticipantIdSorting() throws Exception {
+  public void findAllParticipantIdSorting() {
     PageRequest pageRequest =
         new PageRequest()
             .page(PAGE)
@@ -424,7 +424,7 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
-  public void findAllStatusSorting() throws Exception {
+  public void findAllStatusSorting() {
     PageRequest pageRequest =
         new PageRequest()
             .page(PAGE)
@@ -475,7 +475,7 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
-  public void findAllBadFilterTypes() throws Exception {
+  public void findAllBadFilterTypes() {
     PageRequest pageRequest =
         new PageRequest()
             .page(PAGE)
@@ -516,7 +516,7 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
-  public void findAllBadFilterValuesSize() throws Exception {
+  public void findAllBadFilterValuesSize() {
     PageRequest pageRequest =
         new PageRequest()
             .page(PAGE)
