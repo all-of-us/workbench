@@ -611,7 +611,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService
             .get(copyRequest.getToWorkspaceNamespace(), copyRequest.getToWorkspaceName())
             .getBillingStatus())) {
-      throw new ForbiddenException("Invalid billing account");
+      throw new ForbiddenException("Target workspace does not have a billing account");
     }
 
     FileDetail fileDetail;
