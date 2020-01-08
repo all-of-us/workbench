@@ -1,14 +1,20 @@
-# This file is for endpoints we do NOT intend to generate client libraries for
-# and advertise to notebook developers. Endpoints we DO want notebook developers to use should
-# go in client_api.yaml.
-
-# This file references parameters, paths, and definitions specified in
-# client_api.yaml; the two files get merged together into a merged.yaml file at build time.
-
-# If validation fails, gradle:generateApi fails claiming this file does not exist.
-# For separate validation (with some false positives), do:
-#     ./project.rb validate-swagger
 swagger: '2.0'
+x-aou-note: >
+  This file is for endpoints we do NOT intend to generate client libraries for
+  and advertise to notebook developers. Endpoints we DO want notebook developers to use should
+  go in client_api.yaml.
+
+  This file references parameters, paths, and definitions specified in
+  client_api.yaml; the two files get merged together into a merged.yaml file at build time.
+
+  If validation fails, gradle:generateApi fails claiming this file does not exist.
+  For separate validation (with some false positives), do:
+     ./project.rb validate-swagger
+
+  Throughout, we use integer/int64 in preference to string/date-time because Swagger's
+  date formatting is inconsistent between server and client. Time values are stored as
+  milliseconds since the UNIX epoch.
+
 info:
   version: "0.1.0"
   title: "AllOfUs Workbench API"
@@ -20,30 +26,36 @@ info:
     name: "BSD"
 host: "api.pmi-ops.org"
 securityDefinitions:
-  # Establish the fact that *some endpoints* are OAuth protected
-  # by defining an `aou_oauth` security mode, which we'll assing
-  # to any protected endpoints below.
+#  x-aou-note: |
+#    Establish the fact that *some endpoints* are OAuth protected
+#    by defining an `aou_oauth` security mode, which we'll assing
+#    to any protected endpoints below.
   aou_oauth:
-    # TODO: Vet/fix this token and/or authorization URL to work in practice.
-    # These are currently included simply to satisfy the Swagger specification,
-    # as this is not directly used to dictate oauth details (just used to
-    # annotate which methods require oauth).
-    authorizationUrl: ""
-    tokenUrl: ""
+    x-aou-note: |
+      TODO: Vet/fix this token and/or authorization URL to work in practice.
+      These are currently included simply to satisfy the Swagger specification,
+      as this is not directly used to dictate oauth details (just used to
+      annotate which methods require oauth).
+    authorizationUrl: "https://fake-authorization-url.pmi-ops.org"
+    tokenUrl: "https://fake-token-url.pmi-ops.org"
     type: oauth2
     flow: accessCode
 schemes:
   - "https"
 produces:
   - "application/json"
-# Establish the fact that all endpoints are protected: this annotation
-# ensures that client libraries know to send bearer tokens when calling
 security:
   - aou_oauth: []
-
-# Throughout, we use integer/int64 in preference to string/date-time because Swagger's
-# date formatting is inconsistent between server and client. Time values are stored as
-# milliseconds since the UNIX epoch.
+tags:
+  - name: cron
+    description: |
+      Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
+      true, which app engine itself only sets when invoking as a cronjob.
+      See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
+      and o.p.w.interceptors.CronInterceptor which implements the header check.
+    externalDocs:
+      url: https://github.com/all-of-us/workbench/blob/master/api/doc/cron-jobs.md
+    x-aou-note: this is an internal note, which can go under (global) tags...
 
 ##########################################################################################
 ## PATHS
@@ -114,6 +126,7 @@ paths:
             $ref: "#/definitions/FeaturedWorkspacesConfigResponse"
 
   /v1/status-alert:
+    x-aou-dev: "This is a comment anchored under a path"
     get:
       tags:
         - status-alert
