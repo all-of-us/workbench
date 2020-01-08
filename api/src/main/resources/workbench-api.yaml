@@ -6696,16 +6696,11 @@ definitions:
     type: object
     required:
     - items
-    - count
     properties:
       items:
         type: array
         items:
           "$ref": "#/definitions/ParticipantData"
-      count:
-        type: integer
-        format: int64
-        description: the total count of items.
   ParticipantDataCountResponse:
     type: object
     required:

@@ -274,13 +274,13 @@ export const DetailTabTable = withCurrentWorkspace()(
         lazyLoad: false,
         totalCount: null,
         requestPage: 0,
-        range: [0, 124]
+        range: [0, 999]
       };
       this.codeInputChange = fp.debounce(300, (e) => this.filterCodes(e));
     }
 
     componentDidMount() {
-      this.getParticipantData();
+      this.getParticipantData(true);
     }
 
     componentDidUpdate(prevProps: any) {
@@ -289,49 +289,42 @@ export const DetailTabTable = withCurrentWorkspace()(
         this.setState({
           data: null,
           filteredData: null,
+          lazyLoad: false,
           loading: true,
           error: false,
-        });
-        this.getParticipantData();
+          totalCount: null
+        }, () => this.getParticipantData(true));
       } else if (prevProps.updateState !== updateState) {
         this.filterData();
       }
     }
 
-    getParticipantData() {
+    getParticipantData(getCount: boolean) {
       try {
         const {columns, domain} = this.props;
-        let {lazyLoad, sortOrder} = this.state;
+        const {sortOrder} = this.state;
+        let {lazyLoad} = this.state;
         const pageFilterRequest = {
           page: 0,
-          pageSize: 125,
+          pageSize: lazyLoad ? 125 : 1000,
           sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
           sortColumn: columns[0].name,
           domain: domain,
           filters: {items: []}
         } as PageFilterRequest;
-
-        this.callApi(pageFilterRequest).then(response => {
-          lazyLoad = response.count > 1000;
-          response.items.forEach(item => {
-            if (domain === DomainType.VITAL || domain === DomainType.LAB) {
-              item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
-            }
-            item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
-          });
+        this.callApi(pageFilterRequest, getCount).then(response => {
+          const {count, data} = response;
+          lazyLoad = count > 1000;
           if (lazyLoad) {
-            this.setState({data: response.items, filteredData: response.items, loading: false, lazyLoad, totalCount: response.count});
+            this.setState({data, filteredData: data, loading: false, lazyLoad, totalCount: count, range: [0, 124]});
           } else {
-            this.setState({data: response.items, loading: false, lazyLoad});
+            this.setState({data, loading: false, lazyLoad, range: [0, count - 1]});
             this.filterData();
           }
         });
       } catch (error) {
-        console.log(error);
-        this.setState({
-          loading: false,
-          error: true
-        });
+        console.error(error);
+        this.setState({loading: false, error: true});
       }
     }
 
@@ -349,42 +342,54 @@ export const DetailTabTable = withCurrentWorkspace()(
         domain: domain,
         filters: {items: []}
       } as PageFilterRequest;
-      this.callApi(pageFilterRequest).then(response => {
-        response.items.forEach(item => {
-          if (domain === DomainType.VITAL || domain === DomainType.LAB) {
-            item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
-          }
-          item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
-        });
+      this.callApi(pageFilterRequest, false).then(response => {
+        const {data} = response;
+        console.log(data);
         if (previous) {
-          filteredData = [...response.items, ...filteredData];
+          filteredData = [...data, ...filteredData];
           if (filteredData.length > 425) {
             filteredData = filteredData.slice(0, filteredData.length - 125);
             range[1] -= 125;
           }
         } else {
-          filteredData = [...filteredData, ...response.items];
+          filteredData = [...filteredData, ...data];
           if (filteredData.length > 425) {
             filteredData = filteredData.slice(125);
             range[0] += 125;
           }
         }
-        this.setState({data: response.items, filteredData, range, loadingPrevious: false, updating: false});
+        this.setState({data, filteredData, range, loadingPrevious: false, updating: false});
       });
     }
 
-    callApi(request: PageFilterRequest) {
-      const {participantId, workspace: {id, namespace}} = this.props;
+    async callApi(request: PageFilterRequest, getCount: boolean) {
+      const {domain, participantId, workspace: {id, namespace}} = this.props;
       const {cohortReviewId} = cohortReviewStore.getValue();
-      return cohortReviewApi().getParticipantData(namespace, id, cohortReviewId, participantId, request);
+      const responses = {data: [], count: this.state.totalCount};
+      const promises = [cohortReviewApi().getParticipantData(namespace, id, cohortReviewId, participantId, request).then(response => {
+        responses.data = response.items.map(item => {
+          if (domain === DomainType.VITAL || domain === DomainType.LAB) {
+            item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
+          }
+          item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
+          return item;
+        });
+      })];
+      if (getCount) {
+        promises.push(cohortReviewApi().getParticipantCount(namespace, id, cohortReviewId, participantId, request).then(response => {
+          console.log(response);
+          responses.count = response.count;
+        }));
+      }
+      await Promise.all(promises);
+      return responses;
     }
 
     onSort = (event: any) => {
       this.setState({sortField: event.sortField, sortOrder: event.sortOrder});
       const {lazyLoad} = this.state;
       if (lazyLoad) {
-        this.setState({loading: true});
-        setTimeout(() => this.getParticipantData());
+        this.setState({loading: true}, () => this.getParticipantData(false));
       }
     }
 
@@ -397,8 +402,7 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
       const {lazyLoad} = this.state;
       if (lazyLoad) {
-        this.setState({loading: true});
-        setTimeout(() => this.getParticipantData());
+        this.setState({loading: true}, () => this.getParticipantData(false));
       }
     }
 
@@ -767,15 +771,17 @@ export const DetailTabTable = withCurrentWorkspace()(
       const filteredData = loading ? null : this.state.filteredData;
       let pageReportTemplate;
       let value = null;
+      let max;
       if (filteredData !== null) {
-        const max = lazyLoad ? totalCount : filteredData.length;
-        const lastRowOfPage = (start + rowsPerPage) > max
-          ? start + rowsPerPage - (start + rowsPerPage - max) : start + rowsPerPage;
+        max = lazyLoad ? totalCount : filteredData.length;
+        const lastRowOfPage = Math.min(start + rowsPerPage, max);
         pageReportTemplate = `${(start + 1).toLocaleString()} -
           ${lastRowOfPage.toLocaleString()} of
-          ${this.totalCount.toLocaleString()} records `;
+          ${max.toLocaleString()} records `;
         const pageStart = lazyLoad ? start - range[0] : start;
-        value = loadingPrevious && pageStart < 125 ? [] : filteredData.slice(pageStart, pageStart + rowsPerPage);
+        value = lazyLoad
+          ? (loadingPrevious && pageStart < 125 ? [] : filteredData.slice(pageStart, pageStart + rowsPerPage))
+          : filteredData;
       }
       let paginatorTemplate = 'CurrentPageReport';
       if (filteredData && filteredData.length > rowsPerPage) {
@@ -846,19 +852,19 @@ export const DetailTabTable = withCurrentWorkspace()(
           onSort={this.onSort}
           lazy={lazyLoad}
           paginator
-          alwaysShowPaginator={false}
           paginatorTemplate={!spinner && !!filteredData ? paginatorTemplate : ''}
           currentPageReportTemplate={!spinner && !!filteredData ? pageReportTemplate : ''}
           onPage={this.onPage}
           first={start}
           rows={rowsPerPage}
-          totalRecords={this.totalCount}
+          totalRecords={max}
           scrollable
           scrollHeight='calc(100vh - 350px)'
           autoLayout
           footer={this.errorMessage()}>
           {cols}
         </DataTable>
+        <div>{max} {lazyLoad.toString()}</div>
         {spinner && <SpinnerOverlay />}
       </div>;
     }

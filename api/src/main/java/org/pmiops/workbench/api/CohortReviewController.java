@@ -564,6 +564,10 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortReviewId,
       Long participantId,
       PageFilterRequest request) {
+    DbCohortReview review = cohortReviewService.findCohortReview(cohortReviewId);
+    DbCohort cohort = cohortReviewService.findCohort(review.getCohortId());
+    cohortReviewService.validateMatchingWorkspaceAndSetCdrVersion(
+        workspaceNamespace, workspaceId, cohort.getWorkspaceId(), WorkspaceAccessLevel.READER);
     // get the total records count for this participant per specified domain
     TableResult result =
         bigQueryService.executeQuery(
