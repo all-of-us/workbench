@@ -138,6 +138,7 @@ public class DbUser {
    * Returns the user's full G Suite email address, e.g. "joe@researchallofus.org". This is named
    * "username" in this entity class to distinguish it from getContactEmail, which is the user's
    * designated contact email address.
+   *
    * @return
    */
   @Column(name = "email")
@@ -151,6 +152,7 @@ public class DbUser {
 
   /**
    * Returns the user's designated contact email address, e.g. "joe@gmail.com".
+   *
    * @return
    */
   @Column(name = "contact_email")
