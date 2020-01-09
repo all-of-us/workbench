@@ -1,6 +1,6 @@
 package org.pmiops.workbench.tools;
 
-import com.google.auth.oauth2.GoogleCredentials;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import java.io.IOException;
 import java.util.Arrays;
 import org.pmiops.workbench.firecloud.ApiClient;
@@ -24,10 +24,10 @@ public class ServiceAccountAPIClientFactory {
   private ApiClient newApiClient(String apiUrl) throws IOException {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(apiUrl);
-    GoogleCredentials credentials =
-        GoogleCredentials.getApplicationDefault().createScoped(Arrays.asList(FC_SCOPES));
-    credentials.refresh();
-    apiClient.setAccessToken(credentials.getAccessToken().getTokenValue());
+    GoogleCredential credential =
+        GoogleCredential.getApplicationDefault().createScoped(Arrays.asList(FC_SCOPES));
+    credential.refreshToken();
+    apiClient.setAccessToken(credential.getAccessToken());
     return apiClient;
   }
 

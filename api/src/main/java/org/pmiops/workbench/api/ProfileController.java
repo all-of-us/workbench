@@ -22,6 +22,7 @@ import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAddress;
@@ -64,6 +65,7 @@ import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UserListResponse;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.moodle.ApiException;
+import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -174,7 +176,9 @@ public class ProfileController implements ProfileApiDelegate {
   private final FireCloudService fireCloudService;
   private final DirectoryService directoryService;
   private final CloudStorageService cloudStorageService;
+  private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final WorkbenchEnvironment workbenchEnvironment;
   private final Provider<MailService> mailServiceProvider;
   private final ProfileAuditor profileAuditor;
 
@@ -189,7 +193,9 @@ public class ProfileController implements ProfileApiDelegate {
       FireCloudService fireCloudService,
       DirectoryService directoryService,
       CloudStorageService cloudStorageService,
+      LeonardoNotebooksClient leonardoNotebooksClient,
       Provider<WorkbenchConfig> workbenchConfigProvider,
+      WorkbenchEnvironment workbenchEnvironment,
       Provider<MailService> mailServiceProvider,
       ProfileAuditor profileAuditor) {
     this.profileService = profileService;
@@ -201,7 +207,9 @@ public class ProfileController implements ProfileApiDelegate {
     this.fireCloudService = fireCloudService;
     this.directoryService = directoryService;
     this.cloudStorageService = cloudStorageService;
+    this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.workbenchEnvironment = workbenchEnvironment;
     this.mailServiceProvider = mailServiceProvider;
     this.profileAuditor = profileAuditor;
   }

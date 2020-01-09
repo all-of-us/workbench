@@ -1,6 +1,6 @@
 package org.pmiops.workbench.billing;
 
-import com.google.auth.oauth2.GoogleCredentials;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -35,7 +35,7 @@ public class BillingGarbageCollectionService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<CloudStorageService> cloudStorageServiceProvider;
   private final Clock clock;
-  private final LoadingCache<String, GoogleCredentials> credentialsLoadingCache;
+  private final LoadingCache<String, GoogleCredential> garbageCollectionSACredentials;
   private static final Logger log =
       Logger.getLogger(BillingGarbageCollectionService.class.getName());
 
@@ -54,16 +54,16 @@ public class BillingGarbageCollectionService {
     this.cloudStorageServiceProvider = cloudStorageServiceProvider;
     this.clock = clock;
 
-    this.credentialsLoadingCache = initializeCredentialsLoadingCache();
+    this.garbageCollectionSACredentials = initializeCredentialCache();
   }
 
-  private LoadingCache<String, GoogleCredentials> initializeCredentialsLoadingCache() {
+  private LoadingCache<String, GoogleCredential> initializeCredentialCache() {
     return CacheBuilder.newBuilder()
         .expireAfterWrite(24, TimeUnit.HOURS)
         .build(
-            new CacheLoader<String, GoogleCredentials>() {
+            new CacheLoader<String, GoogleCredential>() {
               @Override
-              public GoogleCredentials load(String saEmail) throws IOException {
+              public GoogleCredential load(String saEmail) throws IOException {
                 return cloudStorageServiceProvider
                     .get()
                     .getGarbageCollectionServiceAccountCredentials(saEmail)
@@ -137,12 +137,13 @@ public class BillingGarbageCollectionService {
     fireCloudService.addOwnerToBillingProject(garbageCollectionSA, projectName);
 
     try {
-      final GoogleCredentials garbageCollectionCredentials =
-          credentialsLoadingCache.get(garbageCollectionSA);
-      garbageCollectionCredentials.refresh();
+      final GoogleCredential gcsaCredential =
+          garbageCollectionSACredentials.get(garbageCollectionSA);
+
+      gcsaCredential.refreshToken();
 
       fireCloudService.removeOwnerFromBillingProject(
-          projectName, appEngineSA, garbageCollectionCredentials.getAccessToken().getTokenValue());
+          projectName, appEngineSA, gcsaCredential.getAccessToken());
     } catch (final ExecutionException e) {
       final String msg =
           String.format(

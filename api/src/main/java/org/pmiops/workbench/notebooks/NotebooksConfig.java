@@ -1,6 +1,5 @@
 package org.pmiops.workbench.notebooks;
 
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
@@ -8,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.notebooks.api.ClusterApi;
 import org.pmiops.workbench.notebooks.api.JupyterApi;
@@ -40,12 +40,14 @@ public class NotebooksConfig {
 
   @Bean(name = NOTEBOOKS_SERVICE_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient workbenchServiceAccountClient(WorkbenchConfig workbenchConfig) {
+  public ApiClient workbenchServiceAccountClient(
+      WorkbenchEnvironment workbenchEnvironment,
+      WorkbenchConfig workbenchConfig,
+      ServiceAccounts serviceAccounts) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
     try {
       apiClient.setAccessToken(
-          ServiceAccounts.getScopedAccessToken(
-              GoogleCredentials.getApplicationDefault(), NOTEBOOK_SCOPES));
+          serviceAccounts.workbenchAccessToken(workbenchEnvironment, NOTEBOOK_SCOPES));
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }

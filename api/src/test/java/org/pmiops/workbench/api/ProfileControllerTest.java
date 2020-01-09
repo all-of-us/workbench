@@ -34,6 +34,7 @@ import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
@@ -109,6 +110,7 @@ public class ProfileControllerTest {
   @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
 
   private ProfileController profileController;
+  private ProfileController cloudProfileController;
   private CreateAccountRequest createAccountRequest;
   private InvitationVerificationRequest invitationVerificationRequest;
   private com.google.api.services.directory.model.User googleUser;
@@ -121,6 +123,8 @@ public class ProfileControllerTest {
   public void setUp() throws MessagingException {
     WorkbenchConfig config = generateConfig();
 
+    WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
+    WorkbenchEnvironment cloudEnvironment = new WorkbenchEnvironment(false, "appId");
     createAccountRequest = new CreateAccountRequest();
     invitationVerificationRequest = new InvitationVerificationRequest();
     Profile profile = new Profile();
@@ -168,7 +172,25 @@ public class ProfileControllerTest {
             fireCloudService,
             directoryService,
             cloudStorageService,
+            leonardoNotebooksClient,
             Providers.of(config),
+            environment,
+            Providers.of(mailService),
+            mockProfileAuditor);
+    this.cloudProfileController =
+        new ProfileController(
+            profileService,
+            userProvider,
+            userAuthenticationProvider,
+            userDao,
+            clock,
+            userService,
+            fireCloudService,
+            directoryService,
+            cloudStorageService,
+            leonardoNotebooksClient,
+            Providers.of(config),
+            cloudEnvironment,
             Providers.of(mailService),
             mockProfileAuditor);
     when(directoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
@@ -556,6 +578,7 @@ public class ProfileControllerTest {
   public void testBypassAccessModule() throws Exception {
     Profile profile = createUser();
     userService = spy(userService);
+    WorkbenchEnvironment environment = new WorkbenchEnvironment(true, "appId");
     WorkbenchConfig config = generateConfig();
     ProfileService profileService = new ProfileService(userDao, freeTierBillingService);
     this.profileController =
@@ -569,7 +592,9 @@ public class ProfileControllerTest {
             fireCloudService,
             directoryService,
             cloudStorageService,
+            leonardoNotebooksClient,
             Providers.of(config),
+            environment,
             Providers.of(mailService),
             mockProfileAuditor);
     profileController.bypassAccessRequirement(

@@ -1,6 +1,6 @@
 package org.pmiops.workbench.google;
 
-import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
@@ -130,36 +130,36 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return readBlobAsString(getBlob(getCredentialsBucketName(), objectPath));
   }
 
-  private ServiceAccountCredentials getCredentials(final String objectPath) throws IOException {
+  private GoogleCredential getCredential(final String objectPath) throws IOException {
     final String json = readCredentialsBucketString(objectPath);
-    return ServiceAccountCredentials.fromStream(new ByteArrayInputStream(json.getBytes()));
+    return GoogleCredential.fromStream(new ByteArrayInputStream(json.getBytes()));
   }
 
   @Override
-  public ServiceAccountCredentials getGSuiteAdminCredentials() throws IOException {
-    return getCredentials("gsuite-admin-sa.json");
+  public GoogleCredential getGSuiteAdminCredentials() throws IOException {
+    return getCredential("gsuite-admin-sa.json");
   }
 
   @Override
-  public ServiceAccountCredentials getFireCloudAdminCredentials() throws IOException {
-    return getCredentials("firecloud-admin-sa.json");
+  public GoogleCredential getFireCloudAdminCredentials() throws IOException {
+    return getCredential("firecloud-admin-sa.json");
   }
 
   @Override
-  public ServiceAccountCredentials getCloudResourceManagerAdminCredentials() throws IOException {
-    return getCredentials("cloud-resource-manager-admin-sa.json");
+  public GoogleCredential getCloudResourceManagerAdminCredentials() throws IOException {
+    return getCredential("cloud-resource-manager-admin-sa.json");
   }
 
   @Override
-  public ServiceAccountCredentials getDefaultServiceAccountCredentials() throws IOException {
-    return getCredentials("app-engine-default-sa.json");
+  public GoogleCredential getDefaultServiceAccountCredentials() throws IOException {
+    return getCredential("app-engine-default-sa.json");
   }
 
   @Override
-  public ServiceAccountCredentials getGarbageCollectionServiceAccountCredentials(
+  public GoogleCredential getGarbageCollectionServiceAccountCredentials(
       String garbageCollectionEmail) throws IOException {
     final String objectPath = String.format("garbage-collection/%s.json", garbageCollectionEmail);
-    return getCredentials(objectPath);
+    return getCredential(objectPath);
   }
 
   @Override

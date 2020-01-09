@@ -2,23 +2,37 @@ package org.pmiops.workbench.google;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.apache.ApacheHttpTransport;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.time.Clock;
 import java.util.Map;
+import org.junit.Before;
 import org.junit.Test;
-import org.pmiops.workbench.BaseIntegrationTest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Import;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.test.Providers;
 import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
+import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
-public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
-  @Autowired private DirectoryService service;
+public class DirectoryServiceImplIntegrationTest {
+  private DirectoryServiceImpl service;
+  private final GoogleCredential googleCredential = getGoogleCredential();
+  private final WorkbenchConfig workbenchConfig = createConfig();
+  private final ApacheHttpTransport httpTransport = new ApacheHttpTransport();
 
-  @TestConfiguration
-  @Import(DirectoryServiceImpl.class)
-  static class Configuration {}
+  @Before
+  public void setUp() {
+    service =
+        new DirectoryServiceImpl(
+            Providers.of(googleCredential),
+            Providers.of(workbenchConfig),
+            httpTransport,
+            new GoogleRetryHandler(new NoBackOffPolicy()));
+  }
 
   @Test
   public void testDummyUsernameIsNotTaken() {
@@ -65,5 +79,21 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
     tmpl.setRetryPolicy(retry);
     tmpl.setThrowLastExceptionOnExhausted(true);
     return tmpl;
+  }
+
+  private static GoogleCredential getGoogleCredential() {
+    try {
+      String saKeyPath = "src/main/webapp/WEB-INF/gsuite-admin-sa.json";
+      return GoogleCredential.fromStream(new FileInputStream(new File(saKeyPath)));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static WorkbenchConfig createConfig() {
+    WorkbenchConfig config = new WorkbenchConfig();
+    config.googleDirectoryService = new WorkbenchConfig.GoogleDirectoryServiceConfig();
+    config.googleDirectoryService.gSuiteDomain = "fake-research-aou.org";
+    return config;
   }
 }
