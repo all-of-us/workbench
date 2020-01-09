@@ -532,7 +532,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     specificPopulationCheckboxSelected(populationEnum): boolean {
-      return !!fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
+      return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
     }
 
     onSaveClick() {
@@ -744,9 +744,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <FlexColumn style={{flex: '1 1 0'}}>
               {ResearchPurposeItems.slice(0, sliceByHalfLength(ResearchPurposeItems))
                 .map((rp, i) =>
-                  <WorkspaceCategory shortDescription={rp.shortDescription} key={i}
+                  <WorkspaceCategory
+                    shortDescription={rp.shortDescription}
+                    key={i}
                     longDescription={rp.longDescription}
-                     uniqueId={rp.uniqueId}
+                    uniqueId={rp.uniqueId}
                     value={this.state.workspace.researchPurpose[rp.shortName]}
                     onChange={v => this.updateResearchPurpose(rp.shortName, v)}
                     children={rp.shortName === 'diseaseFocusedResearch' ?
@@ -755,9 +757,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <FlexColumn style={{flex: '1 1 0'}}>
               {ResearchPurposeItems.slice(sliceByHalfLength(ResearchPurposeItems))
                 .map((rp, i) =>
-                  <WorkspaceCategory shortDescription={rp.shortDescription}
-                    longDescription={rp.longDescription} key={i}
-                                     uniqueId={rp.uniqueId}
+                  <WorkspaceCategory
+                    shortDescription={rp.shortDescription}
+                    longDescription={rp.longDescription}
+                    key={i}
+                    uniqueId={rp.uniqueId}
                     value={this.state.workspace.researchPurpose[rp.shortName]}
                     onChange={v => this.updateResearchPurpose(rp.shortName, v)}
                     children={rp.shortName === 'otherPurpose' ?

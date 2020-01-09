@@ -27,7 +27,7 @@ export class ConfirmPlaygroundModeModal extends React.Component<Props, State> {
     };
   }
 
-  toggleChecked(checked: boolean) {
+  handleCheckboxCHange(checked: boolean) {
     this.setState({checked: checked});
     Cookies.set(ConfirmPlaygroundModeModal.DO_NOT_SHOW_AGAIN, String(checked));
   }
@@ -44,7 +44,7 @@ export class ConfirmPlaygroundModeModal extends React.Component<Props, State> {
       <ModalFooter style={{alignItems: 'center'}}>
         <CheckBox id='show-again-checkbox'
                   checked={this.state.checked}
-                  onChange={(checked) => { this.toggleChecked(checked); }} />
+                  onChange={(checked) => { this.handleCheckboxCHange(checked); }} />
         <label htmlFor='show-again-checkbox'
                style={{marginLeft: '8px', marginRight: 'auto', color: colors.primary}}>
           Don't show again

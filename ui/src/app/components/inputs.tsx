@@ -164,17 +164,23 @@ interface CheckBoxState {
 }
 
 export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
+  static defaultProps: CheckBoxProps = {
+    checked: false,
+    manageOwnState: true
+  };
+
+  uniqueId?: string = null;
+
   constructor(props: CheckBoxProps) {
     super(props);
     this.state = {
       checked: props.checked
     };
-  }
 
-  static defaultProps: CheckBoxProps = {
-    checked: false,
-    manageOwnState: true
-  };
+    if (!props.id) {
+      this.uniqueId = fp.uniqueId('checkbox');
+    }
+  }
 
   handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (this.props.manageOwnState) {
@@ -191,12 +197,10 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
       checked, disabled, label, labelStyle, onChange, manageOwnState, style, wrapperStyle,
       ...otherProps
     } = this.props;
-    const uniqueId = fp.uniqueId('checkbox');
-
     const maybeDisabledOverrides = disabled ? styles.disabledStyle : {};
 
     const input = <input
-      id={uniqueId}
+      id={this.props.id ? this.props.id : this.uniqueId}
       type='checkbox'
       checked={manageOwnState ? this.state.checked : checked}
       disabled={disabled}
@@ -206,7 +210,7 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
     />;
     if (label) {
       return <span style={wrapperStyle}>{input}
-        <label htmlFor={uniqueId}
+        <label htmlFor={this.props.id ? this.props.id : this.uniqueId}
                style={{...styles.checkboxLabel,
                  ...labelStyle,
                  ...maybeDisabledOverrides}}>{label}</label>
