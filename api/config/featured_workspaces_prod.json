@@ -21,6 +21,11 @@
       "id": "featuredworkspaceworkingwithphysicalmeasurementdatav1",
       "category": "TUTORIAL_WORKSPACES"
     }, {
+      "name": "Versioning notebooks and intermediate results",
+      "namespace": "aou-rw-c73447b2",
+      "id": "featuredworkspaceversioningnotebooksandintermediateresults",
+      "category": "TUTORIAL_WORKSPACES"
+    }, {
       "name": "Type 2 Diabetes Phenotype",
       "namespace": "aou-rw-e6084db8",
       "id": "masterfeaturedworkspacetype2diabetesphenotype",
@@ -30,11 +35,6 @@
       "namespace": "aou-rw-edae682b",
       "id": "masterdepressionphenotype",
       "category": "PHENOTYPE_LIBRARY"
-    }, {
-      "name": "Versioning notebooks and intermediate results",
-      "namespace": "aou-rw-c73447b2",
-      "id": "featuredworkspaceversioningnotebooksandintermediateresults",
-      "category": "TUTORIAL_WORKSPACES"
     }
   ]
 }
