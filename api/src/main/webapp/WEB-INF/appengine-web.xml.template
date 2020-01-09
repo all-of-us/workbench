@@ -26,7 +26,7 @@
   </static-error-handlers>
 
   <static-files>
-    <include path="static/*">
+    <include path="static/**">
       <http-header name="Strict-Transport-Security"
                    value="max-age=31536000; includeSubDomains; preload" />
       <http-header name="X-XSS-Protection"
@@ -37,6 +37,7 @@
                    value="default-src 'none'; frame-ancestors 'none'; report-uri /content-security-report" />
     </include>
     <include path="server_unavailable.html" />
+    <exclude path="static/README.md"/>
   </static-files>
 
   <automatic-scaling>

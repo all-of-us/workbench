@@ -1503,7 +1503,6 @@ def deploy_gcs_artifacts(cmd_name, args)
 
   Dir.chdir("cluster-resources") do
     common.run_inline(%W{./build.rb build-snippets-menu})
-    common.run_inline(%W{./build.rb generate-static-files})
     run_inline_or_log(op.opts.dry_run, %W{
       gsutil cp
       initialize_notebook_cluster.sh
@@ -1576,7 +1575,9 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
     # TODO: generate new key here
     get_gsuite_admin_key(gcc.project)
   end
-
+  Dir.chdir("cluster-resources") do
+    common.run_inline(%W{./build.rb generate-static-files})
+  end
   common.run_inline %W{gradle :appengineStage}
   promote = "--no-promote"
   unless op.opts.promote.nil?

@@ -20,7 +20,7 @@ cron-emulator-err.log
 /api/src/main/webapp/WEB-INF/cron.yaml
 /api/src/main/webapp/WEB-INF/sa-key.json
 /api/src/main/webapp/WEB-INF/gsuite-admin-sa.json
-/api/src/main/webapp/static/generated/*
+/api/src/main/webapp/static/aou-snippets-menu.js
 /api/src/main/webapp/static/activity-checker-extension.js
 /api/src/main/webapp/static/aou-download-policy-extension.js
 /api/src/main/webapp/static/initialize_notebook_cluster.sh

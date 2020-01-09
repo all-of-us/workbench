@@ -42,8 +42,7 @@ def generate_static_files()
   FileUtils.cp("initialize_notebook_cluster.sh", static_files_directory)
   FileUtils.cp("start_notebook_cluster.sh", static_files_directory)
   build_snippets_menu()
-  FileUtils.mkdir_p static_files_directory + "/generated"
-  FileUtils.cp("generated/aou-snippets-menu.js", static_files_directory + "/generated")
+  FileUtils.cp("generated/aou-snippets-menu.js", static_files_directory)
 end
 
 Common.register_command({
