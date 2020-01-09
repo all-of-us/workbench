@@ -2044,12 +2044,13 @@ paths:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-    get:
+    post:
       parameters:
-        - in: query
+        - in: body
           name: resourceType
-          type: string
           required: true
+          schema:
+            $ref: "#/definitions/ResourceType"
         - in: query
           name: id
           type: integer
@@ -2992,7 +2993,17 @@ definitions:
         type: integer
         format: int64
       resourceType:
-        type: string
+        $ref: "#/definitions/ResourceType"
+
+  ResourceType:
+    type: string
+    enum:
+      - NOTEBOOK
+      - COHORT
+      - COHORT_REVIEW
+      - CONCEPT_SET
+      - DATASET
+      - WORKSPACE
 
   KernelTypeEnum:
     type: string

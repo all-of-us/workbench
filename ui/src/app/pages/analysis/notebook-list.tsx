@@ -12,13 +12,13 @@ import {NewNotebookModal} from 'app/pages/analysis/new-notebook-modal';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
-import {convertToResource, ResourceType} from 'app/utils/resourceActions';
+import {convertToResource} from 'app/utils/resourceActions';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {FileDetail, WorkspaceAccessLevel} from 'generated/fetch';
+import {FileDetail, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = {
   heading: {

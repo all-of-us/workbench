@@ -2,6 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {RenameModal} from './rename-modal';
+import {ResourceType} from 'generated/fetch';
 
 describe('RenameModal', () => {
   const existingNames = [];
@@ -9,7 +10,8 @@ describe('RenameModal', () => {
   it('should render', () => {
     const wrapper = mount(<RenameModal
         onRename={(newName) => {}}
-        type='Notebook' onCancel={() => {}}
+        resourceType={ResourceType.NOTEBOOK}
+        onCancel={() => {}}
         oldName=''
         existingNames={existingNames}
         nameFormat = {(name) => {}}
@@ -21,7 +23,8 @@ describe('RenameModal', () => {
   it('should display description only if props hideDescription is set to true', () => {
     const wrapper = mount(<RenameModal
         onRename={(newName) => {}}
-        type='Notebook' onCancel={() => {}}
+        resourceType={ResourceType.NOTEBOOK}
+        onCancel={() => {}}
         oldName=''
         existingNames={existingNames}
         nameFormat = {(name) => {}}/>

@@ -12,10 +12,9 @@ import {
   urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActions';
 
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
+import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
 @Component({
   styleUrls: ['../../../styles/buttons.css',
