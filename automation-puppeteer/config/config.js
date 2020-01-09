@@ -1,7 +1,7 @@
 require('dotenv').config(); // loads variables from .env
 const _ = require('lodash');
 
-const env = process.env.NODE_ENV || 'test'; // default env is test
+const env = process.env.WORKBENCH_ENV || 'test'; // default WORKBENCH_ENV value is test
 
 const userCredential = {
     userEmail: process.env.USER_NAME,
@@ -18,7 +18,7 @@ const urlPath = {
   };
 
 const puppeteer = {
-  puppeteerHeadless: process.env.PUPPETEER_HEADLESS || true,
+  puppeteerHeadless: process.env.headless || true,
   puppeteerSlowMotion: parseInt(process.env.PUPPETEER_SLOWMO) || 10, // milliseconds
   puppeteerDevTools: process.env.PUPPETEER_DEVTOOLS || false,
   puppeteerUserAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36'

@@ -38,7 +38,8 @@ describe.skip('Workspace creation tests:', () => {
     const home = new Home(page);
     const link = await home.getCreateNewWorkspaceLink();
     await link.click();
-    //TODO
+
+    // TODO
   });
 
 });

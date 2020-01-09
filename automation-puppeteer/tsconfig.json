@@ -2,18 +2,16 @@
   "extends": "../ui/tsconfig.json",
   "compilerOptions": {
     "module": "commonjs",
-    "lib": ["esnext", "dom"],
     "forceConsistentCasingInFileNames": true,
     "noUnusedParameters": true,
     "pretty": true,
     "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
     "outDir": "./tsc-out",
     "baseUrl": "./",
-    "noUnusedLocals": true,
     "typeRoots": [
       "./node_modules/@types"
     ]
   },
-  "include": [ "src" ],
-  "exclude": [ "tsc-out", "lib", "node_modules","bin/*.js", "*.spec.ts" ]
+  "exclude": [ "tsc-out", "node_modules" ]
 }

@@ -1,14 +1,13 @@
 import * as chromePaths from 'chrome-paths';
 import * as Puppeteer from 'puppeteer-core';
 import {Browser} from 'puppeteer-core';
-import * as configs from '../config/config.js';
 
 const defaultLaunchOpts = {
-  headless: configs.puppeteerHeadless,
-  slowMo: configs.puppeteerSlowMotion,
+  headless: true,
+  slowMo: 10,
   executablePath: chromePaths.chrome,
   defaultViewport: null,
-  devtools: configs.puppeteerDevTools,
+  devtools: false,
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',

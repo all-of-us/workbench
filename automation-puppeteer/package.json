@@ -6,16 +6,39 @@
   "private": true,
   "license": "BSD",
   "scripts": {
-    "test": "NODE_ENV=test jest /tests",
-    "test:debug": "PUPPETEER_HEADLESS=false PUPPETEER_DEVTOOLS=true yarn run test",
-    "test:headless": "PUPPETEER_HEADLESS=true yarn run test",
-    "test-dev": "NODE_ENV=dev jest /tests",
-    "test-dev:headless": "PUPPETEER_HEADLESS=true yarn run test-dev",
+    "test": "jest --runInBand /tests",
+    "test:debug": "yarn run test",
+    "test-dev": "WORKBENCH_ENV=dev jest /tests",
+    "test-dev:debug": "PUPPETEER_HEADLESS=true yarn run test-dev",
     "compile": "tsc",
     "lint": "tslint --project tsconfig.json",
     "lint:err": "yarn run lint --quiet",
     "lint:fix": "yarn run lint --fix",
-    "build": "rimraf lib && yarn run lint && yarn run compile"
+    "build": "rimraf tsc-out/ && yarn run lint && yarn run compile"
+  },
+  "jest": {
+    "verbose": true,
+    "roots": [
+      "<rootDir>/tests"
+    ],
+    "transform": {
+      "\\.(ts|tsx)$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.jest.json"
+      }
+    },
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "testRegex": "(tests/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "transformIgnorePatterns": [
+      "<rootDir>/node_modules/(?!tests)"
+    ],
+    "moduleFileExtensions": [
+      "ts", "spec.ts", "tsx", "js", "jsx", "json", "node"
+    ]
   },
   "keywords": [
     "test",

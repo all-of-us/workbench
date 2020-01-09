@@ -54,8 +54,8 @@ describe('Login tests:', () => {
     const button = await page.waitForXPath(selectors.passwordNextButton);
     await button.click();
 
-    const puppePage = new BasePage(page);
-    const err = await puppePage.waitForTextFound('Wrong password. Try again');
+    const passwordPage = new BasePage(page);
+    const err = await passwordPage.waitForTextFound('Wrong password. Try again');
     expect(err).toBeTruthy();
   });
 
