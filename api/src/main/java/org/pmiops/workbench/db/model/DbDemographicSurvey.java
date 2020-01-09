@@ -189,9 +189,7 @@ public class DbDemographicSurvey {
 
   public void setRaceEnum(List<Race> raceList) {
     this.race =
-        raceList.stream()
-            .map(DemographicSurveyEnum::raceToStorage)
-            .collect(Collectors.toList());
+        raceList.stream().map(DemographicSurveyEnum::raceToStorage).collect(Collectors.toList());
   }
 
   @ElementCollection(fetch = FetchType.LAZY)
