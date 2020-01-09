@@ -1503,6 +1503,7 @@ def deploy_gcs_artifacts(cmd_name, args)
 
   Dir.chdir("cluster-resources") do
     common.run_inline(%W{./build.rb build-snippets-menu})
+    common.run_inline(%W{./build.rb generate-static-files})
     run_inline_or_log(op.opts.dry_run, %W{
       gsutil cp
       initialize_notebook_cluster.sh

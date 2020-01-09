@@ -27,15 +27,29 @@ def build_snippets_menu()
 
   FileUtils.mkdir_p "generated"
   File.write("generated/aou-snippets-menu.js", tmpl)
-
-  FileUtils.mkdir_p "../src/main/webapp/static/generated"
-  File.write("../src/main/webapp/static/generated/aou-snippets-menu.js", tmpl)
 end
 
 Common.register_command({
   :invocation => "build-snippets-menu",
   :description => "Builds the templated snippets menu Jupyter extension",
   :fn => ->() { build_snippets_menu }
+})
+
+def generate_static_files()
+  static_files_directory = "../src/main/webapp/static"
+  FileUtils.cp("activity-checker-extension.js", static_files_directory)
+  FileUtils.cp("aou-download-policy-extension.js", static_files_directory)
+  FileUtils.cp("initialize_notebook_cluster.sh", static_files_directory)
+  FileUtils.cp("start_notebook_cluster.sh", static_files_directory)
+  build_snippets_menu()
+  FileUtils.mkdir_p static_files_directory + "/generated"
+  FileUtils.cp("generated/aou-snippets-menu.js", static_files_directory + "/generated")
+end
+
+Common.register_command({
+  :invocation => "generate-static-files",
+  :description => "Copies files from the cluster resources directory into our static files",
+  :fn => ->() { generate_static_files }
 })
 
 Workbench.handle_argv_or_die(__FILE__)
