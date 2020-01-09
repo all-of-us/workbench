@@ -20,16 +20,16 @@ public class ServiceAccounts {
   /**
    * Returns an appropriate set of backend service credentials with the given set of scopes.
    *
-   * This method uses AppIdentityService to return an instance of scoped AppEngineCredentials when
-   * running in an App Engine environment.
+   * <p>This method uses AppIdentityService to return an instance of scoped AppEngineCredentials
+   * when running in an App Engine environment.
    *
-   * Unfortunately, if we use GoogleCredentials.getApplicationDefault() from
-   * within an App Engine environment, the returned credentials will be an instance of
-   * ComputeEngineCredentials, which doesn't support scoped access tokens. Frustratingly, the call
-   * to .createScoped will silently proceed by doing nothing -- meaning we only learn about the
-   * error once an attempt to use these credentials fails in a downstream service due to bad scopes.
+   * <p>Unfortunately, if we use GoogleCredentials.getApplicationDefault() from within an App Engine
+   * environment, the returned credentials will be an instance of ComputeEngineCredentials, which
+   * doesn't support scoped access tokens. Frustratingly, the call to .createScoped will silently
+   * proceed by doing nothing -- meaning we only learn about the error once an attempt to use these
+   * credentials fails in a downstream service due to bad scopes.
    *
-   * See https://github.com/googleapis/google-auth-library-java/issues/272 and
+   * <p>See https://github.com/googleapis/google-auth-library-java/issues/272 and
    * https://github.com/googleapis/google-auth-library-java/issues/172 for reference; this seems to
    * be a common pain point for users of the com.google.auth.oauth2 library.
    *
@@ -48,11 +48,11 @@ public class ServiceAccounts {
       // out locally and it *seemed* to work, but it needs a bit more careful vetting.
       return GoogleCredentials.getApplicationDefault().createScoped(scopes);
     } else {
-    AppIdentityService appIdentityService = AppIdentityServiceFactory.getAppIdentityService();
-    return AppEngineCredentials.newBuilder()
-        .setScopes(scopes)
-        .setAppIdentityService(appIdentityService)
-        .build();
+      AppIdentityService appIdentityService = AppIdentityServiceFactory.getAppIdentityService();
+      return AppEngineCredentials.newBuilder()
+          .setScopes(scopes)
+          .setAppIdentityService(appIdentityService)
+          .build();
     }
   }
 
