@@ -1,30 +1,19 @@
 {
+  "extends": "../ui/tsconfig.json",
   "compilerOptions": {
-    "target": "es6",
     "module": "commonjs",
-    "moduleResolution": "node",
-    "lib": ["es2017", "dom"],
-    "strict": true,
-    "declaration": true,
-    "outDir": "./dist",
-    "rootDir": "src",
-    "sourceMap": true,
-    "removeComments": true,
-    "noUnusedLocals": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": false,
-    "noImplicitAny": false,
-    "noUnusedParameters": false,
+    "lib": ["esnext", "dom"],
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedParameters": true,
     "pretty": true,
     "noFallthroughCasesInSwitch": true,
-    "allowUnreachableCode": false,
-    "preserveConstEnums": true,
-    "strictNullChecks": false
+    "outDir": "./tsc-out",
+    "baseUrl": "./",
+    "noUnusedLocals": true,
+    "typeRoots": [
+      "./node_modules/@types"
+    ]
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": [ "src" ],
+  "exclude": [ "tsc-out", "lib", "node_modules","bin/*.js", "*.spec.ts" ]
 }

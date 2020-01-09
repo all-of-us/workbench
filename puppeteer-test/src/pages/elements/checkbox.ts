@@ -25,12 +25,18 @@ export default class Checkbox extends Widget {
     return !!(await elementHandler.getProperty(this.puppeteerPage, checkbox, 'checked'))
   }
 
+  /**
+   * Make checkbox element checked
+   */
   public async check() {
     if (!this.isChecked()) {
       await this.click();
     }
   }
 
+  /**
+   * Make checkbox element unchecked
+   */
   public async uncheck() {
     if (this.isChecked()) {
       await this.click();

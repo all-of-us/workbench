@@ -1,5 +1,5 @@
 import {ElementHandle, Page} from 'puppeteer-core';
-import {waitForNavigation} from "../services/page-wait";
+import {waitForNavigation} from '../services/page-wait';
 
 const configs = require('../config/config');
 

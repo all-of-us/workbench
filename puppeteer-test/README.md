@@ -1,39 +1,24 @@
 # All-of-Us Test Automation with Puppeteer
 Test using Jest as test runner and Puppeteer to perform automation tests in local installed Chrome browser.
 
-### We use `yarn` instead `npm`
-#### Install all libs
-- `yarn`
+### Try running tests in localhost
+#### clone github project
+- `git clone git@github.com:all-of-us/workbench.git`
 
-#### List all `yarn` tasks from `package.json`
+#### set up login credential
+- copy `.env.sample` file. Save new file as `.env` (do not commit `.env` file to version control)
+- edit `.env` to provide workbench login credential
+- 
+
+#### install libraries
+- change dir: `cd puppeteer-test`
+- run cmd `yarn`
+
+### Run UI tests in `tests` folder
+- in `puppeteer-test` dir, run cmd `yarn test`
+
+#### List all available `yarn` tasks from `package.json`
 - `yarn run`
-
-#### Run all UI tests found in `/tests` folder.
-- Run command: `cd automation/`
-- Copy `.env.sample` and name new file as `.env`. Add username and password in this file.
-- Run command: `yarn test`
-
-### External URLs
-#### [Puppeteer examples](https://github.com/GoogleChromeLabs/puppeteer-examples/tree/b28a59d3333db42e3c7d1c6a7d53c5320e6c279b)
-#### [Puppeteer debugging tips](https://github.com/GoogleChrome/puppeteer#debugging-tips)
-#### [Puppeteer API Documentation](https://pub.dev/documentation/puppeteer/latest/puppeteer/puppeteer-library.html)
-#### [Google developers Puppeteer tool](https://developers.google.com/web/tools/puppeteer)
-#### [Difference between Chrome and Chromium](https://www.howtogeek.com/202825/what%E2%80%99s-the-difference-between-chromium-and-chrome)
-#### [Chromium process models](https://www.chromium.org/developers/design-documents/process-models)
-#### [Browser testing in CircleCI with Selenium](https://circleci.com/docs/2.0/browser-testing/#selenium)
-
-### Reasons for Chrome switches usage
-Disable throttling which can cause flakiness in tests.
-https://blog.bigbinary.com/2018/08/15/debugging-failing-tests-in-background-tab-in-puppeteer.html
-* '--disable-background-timer-throttling'
-* '--disable-backgrounding-occluded-windows'
-* '--disable-renderer-backgrounding'
-
-Run headless with GPU enabled. https://github.com/GoogleChrome/puppeteer/issues/2901
-* '--headless' 
-
-https://github.com/GoogleChrome/puppeteer/issues/1664
-* '--enable-features=NetworkService'
 
 ### Stop execution in middle of test
 * Before starting test:
