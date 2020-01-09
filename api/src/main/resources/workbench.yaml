@@ -26,7 +26,7 @@ info:
     name: "BSD"
 host: "api.pmi-ops.org"
 securityDefinitions:
-#  x-aou-note: |
+# (Can't put an extension here unfortunately)
 #    Establish the fact that *some endpoints* are OAuth protected
 #    by defining an `aou_oauth` security mode, which we'll assing
 #    to any protected endpoints below.
@@ -3844,6 +3844,7 @@ definitions:
     enum: [ FREE_TIER, USER_PROVIDED ]
 
   BillingProjectBufferStatus:
+    x-aou-note: This is the status of a billing project in a buffer.
     type: object
     properties:
       bufferSize:
