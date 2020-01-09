@@ -3,6 +3,7 @@ package org.pmiops.workbench.api;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -166,16 +167,20 @@ public class ConceptsController implements ConceptsApiDelegate {
 
     ConceptListResponse response = new ConceptListResponse();
     if (request.getDomain().equals(Domain.SURVEY)) {
-      Slice<DbCriteria> questionList =
-          conceptService.searchSurveys(
-              request.getQuery(),
-              request.getSurveyName(),
-              maxResults,
-              (request.getPageNumber() == null) ? 0 : request.getPageNumber());
-      response.setQuestions(
-          questionList.getContent().stream()
-              .map(this::toClientSurveyQuestions)
-              .collect(Collectors.toList()));
+      if (StandardConceptFilter.ALL_CONCEPTS.equals(request.getStandardConceptFilter())) {
+        Slice<DbCriteria> questionList =
+            conceptService.searchSurveys(
+                request.getQuery(),
+                request.getSurveyName(),
+                maxResults,
+                (request.getPageNumber() == null) ? 0 : request.getPageNumber());
+        response.setQuestions(
+            questionList.getContent().stream()
+                .map(this::toClientSurveyQuestions)
+                .collect(Collectors.toList()));
+      } else {
+        response.setQuestions(Collections.EMPTY_LIST);
+      }
     } else {
       Slice<DbConcept> concepts =
           conceptService.searchConcepts(
