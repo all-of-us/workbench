@@ -43,6 +43,10 @@ definitions:
     description: levels of access to data in the curated data repository
     enum: &DATA_ACCESS_LEVEL [unregistered, registered, protected]
 
+  Degree:
+    type: string
+    enum: &Degree [PHD, MD, JD, EDD, MSN, MS, MA, MBA, ME, BA, BS, BSN, NONE]
+
   Domain:
     type: string
     description: a domain for concepts corresponding to a table in the OMOP schema
@@ -68,6 +72,14 @@ definitions:
   Gender:
     type: string
     enum: &Gender [MALE, FEMALE, NON_BINARY, TRANSGENDER, INTERSEX, NONE, PREFER_NO_ANSWER]
+
+  SexAtBirth:
+    type: string
+    enum: &SexAtBirth [MALE, FEMALE, INTERSEX, NONE_OF_THESE_DESCRIBE_ME, PREFER_NO_ANSWER]
+
+  SexualOrientation:
+    type: string
+    enum: &SexualOrientation [GAY, LESBIAN, STRAIGHT, BISEXUAL, NONE_OF_THESE_DESCRIBE_ME, PREFER_NO_ANSWER]
 
   Education:
     type: string

@@ -25,23 +25,22 @@ import {
   profileApi
 } from 'app/services/swagger-fetch-clients';
 
-import {
-  DataAccessLevel,
-  Profile,
-} from 'generated/fetch/api';
-
 import {FlexColumn, FlexRowWrap} from 'app/components/flex';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils/index';
 import {environment} from 'environments/environment';
 import {
+  DataAccessLevel,
+  Degree,
   EducationalRole,
   IndustryRole,
   InstitutionalAffiliation,
-  NonAcademicAffiliation
+  NonAcademicAffiliation,
+  Profile,
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
+import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
 import {AccountCreationOptions} from './account-creation-options';
@@ -87,7 +86,8 @@ const styles = {
     paddingBottom: '1.5rem'
   },
   section: {
-    width: '12rem'
+    width: '12rem',
+    height: '1.5rem'
   }
 };
 
@@ -135,7 +135,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             nonAcademicAffiliation: undefined,
             role: undefined
           }
-        ]
+        ],
+        degrees: [] as Degree[]
       },
       usernameCheckInProgress: false,
       usernameConflictError: false,
@@ -435,7 +436,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         </Section>
         <Section header='About you'>
           <FlexColumn>
-            <div style={{paddingBottom: '0.5rem'}}>
+            <div style={{paddingBottom: '1rem'}}>
               <TextInput id='givenName' name='givenName' autoFocus
                          placeholder='First Name'
                          value={givenName}
@@ -456,18 +457,25 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 Last Name must be {nameLength} character or less.
               </ErrorMessage>}
             </div>
-            <TextInput id='contactEmail' name='contactEmail'
-                       placeholder='Email Address'
-                       value={contactEmail}
-                       style={styles.section}
-                       onChange={v => this.updateProfileObject('contactEmail', v)}/>
-            {this.state.invalidEmail &&
-            <Error id='invalidEmailError'>
-              Contact Email Id is invalid
-            </Error>}
+            <div style={{display: 'flex', alignItems: 'center'}}>
+              <TextInput id='contactEmail' name='contactEmail'
+                         placeholder='Email Address'
+                         value={contactEmail}
+                         style={styles.section}
+                         onChange={v => this.updateProfileObject('contactEmail', v)}/>
+              {this.state.invalidEmail &&
+              <Error id='invalidEmailError'>
+                Contact Email Id is invalid
+              </Error>}
+              <MultiSelect placeholder='Degree' options={AccountCreationOptions.degree}
+                           style={{...styles.section, marginLeft: '2rem', overflowY: 'none'}}
+                           value={this.state.profile.degrees}
+                           onChange={(e) =>
+                             this.updateProfileObject('degrees', e.value)}/>
+            </div>
           </FlexColumn>
         </Section>
-        <Section header='Your address'>
+        <Section header='Your mailing address'>
           <FlexRowWrap style={{lineHeight: '1rem'}}>
             <TextInput data-test-id='streetAddress' name='streetAddress'
                        placeholder='Street Address' value={streetAddress1}
