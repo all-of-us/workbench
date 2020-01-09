@@ -30,6 +30,11 @@
       "namespace": "aou-rw-edae682b",
       "id": "masterdepressionphenotype",
       "category": "PHENOTYPE_LIBRARY"
+    }, {
+      "name": "Versioning notebooks and intermediate results",
+      "namespace": "aou-rw-c73447b2",
+      "id": "featuredworkspaceversioningnotebooksandintermediateresults",
+      "category": "TUTORIAL_WORKSPACES"
     }
   ]
 }
