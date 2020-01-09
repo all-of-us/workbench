@@ -20,14 +20,14 @@ export const TwoColPaddedTable = ({style = {}, header = false, headerLeft = '',
   headerRight = '', cellWidth = {left: '50%', right: '50%'}, contentLeft, contentRight}) => {
   return <FlexColumn style={{...style}}>
     {header &&
-      <FlexRow key='header' style={{height: '100%'}}>
-        <PaddedTableCell key='header_l' left={true} leftWidth={cellWidth.left}
+      <FlexRow style={{height: '100%'}}>
+        <PaddedTableCell left={true} leftWidth={cellWidth.left}
                          content={<strong>{headerLeft}</strong>}/>
-        <PaddedTableCell key='header_r' left={false} rightWidth={cellWidth.right}
+        <PaddedTableCell left={false} rightWidth={cellWidth.right}
                          content={<strong>{headerRight}</strong>}/>
       </FlexRow>}
     {contentLeft.map((c, i) =>
-      <FlexRow key={i}>
+      <FlexRow>
         <PaddedTableCell key={i + '_l'} left={true} content={c}
                          leftWidth={cellWidth.left}/>
         {contentRight.length >= i + 1 &&
