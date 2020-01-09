@@ -308,8 +308,10 @@ export const WorkspaceEditSection = (props) => {
 
 export const WorkspaceCategory = (props) => {
   return <div style={...fp.merge(styles.categoryRow, props.style)}>
-    <CheckBox style={styles.checkboxStyle} checked={!!props.value}
-      onChange={e => props.onChange(e)}/>
+    <CheckBox id={props.uniqueId}
+              style={styles.checkboxStyle}
+              checked={!!props.value}
+              onChange={e => props.onChange(e)}/>
     <FlexColumn style={{marginTop: '-0.2rem'}}>
       <label style={styles.shortDescription} htmlFor={props.uniqueId}>
         {props.shortDescription}

@@ -177,9 +177,7 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
       checked: props.checked
     };
 
-    if (!props.id) {
-      this.uniqueId = fp.uniqueId('checkbox');
-    }
+    this.uniqueId = props.id || fp.uniqueId('checkbox');
   }
 
   handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -200,7 +198,7 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
     const maybeDisabledOverrides = disabled ? styles.disabledStyle : {};
 
     const input = <input
-      id={this.props.id ? this.props.id : this.uniqueId}
+      id={this.uniqueId}
       type='checkbox'
       checked={manageOwnState ? this.state.checked : checked}
       disabled={disabled}
@@ -210,7 +208,7 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
     />;
     if (label) {
       return <span style={wrapperStyle}>{input}
-        <label htmlFor={this.props.id ? this.props.id : this.uniqueId}
+        <label htmlFor={this.uniqueId}
                style={{...styles.checkboxLabel,
                  ...labelStyle,
                  ...maybeDisabledOverrides}}>{label}</label>
