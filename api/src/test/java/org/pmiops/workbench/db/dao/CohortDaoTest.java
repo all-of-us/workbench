@@ -19,7 +19,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class CohortDaoTest {
 
-  public static final long WORKSPACE_ID = 9999;
   @Autowired CohortDao cohortDao;
   @Autowired WorkspaceDao workspaceDao;
   private DbCohort dbCohort;
@@ -55,7 +54,8 @@ public class CohortDaoTest {
 
   @Test
   public void findCohortByNameAndWorkspaceId() {
-    assertThat(cohortDao.findCohortByNameAndWorkspaceId("name", dbCohort.getWorkspaceId()))
+    assertThat(
+            cohortDao.findCohortByNameAndWorkspaceId(dbCohort.getName(), dbCohort.getWorkspaceId()))
         .isEqualTo(dbCohort);
   }
 
