@@ -1,5 +1,6 @@
 package org.pmiops.workbench.firecloud;
 
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
@@ -7,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
@@ -55,14 +55,12 @@ public class FireCloudConfig {
 
   @Bean(name = SERVICE_ACCOUNT_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient allOfUsApiClient(
-      WorkbenchEnvironment workbenchEnvironment,
-      WorkbenchConfig workbenchConfig,
-      ServiceAccounts serviceAccounts) {
+  public ApiClient allOfUsApiClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
     try {
       apiClient.setAccessToken(
-          serviceAccounts.workbenchAccessToken(workbenchEnvironment, BILLING_SCOPES));
+          ServiceAccounts.getScopedAccessToken(
+              GoogleCredentials.getApplicationDefault(), BILLING_SCOPES));
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
