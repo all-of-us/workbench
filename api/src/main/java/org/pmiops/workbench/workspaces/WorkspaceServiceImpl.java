@@ -46,6 +46,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -242,6 +243,14 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     }
     return workspace;
   }
+
+  @Override
+  public void requireActiveBilling(String workspaceNamespace, String workspaceId) throws ForbiddenException {
+    if (BillingStatus.INACTIVE.equals(get(workspaceNamespace, workspaceId).getBillingStatus())) {
+      throw new ForbiddenException("Invalid billing account");
+    }
+  }
+
 
   @Override
   public DbWorkspace saveWithLastModified(DbWorkspace workspace) {

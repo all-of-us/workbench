@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -39,6 +40,8 @@ public interface WorkspaceService {
   DbWorkspace getRequiredWithCohorts(String ns, String firecloudName);
 
   DbWorkspace saveWithLastModified(DbWorkspace workspace);
+
+  void requireActiveBilling(String workspaceNamespace, String workspaceId) throws ForbiddenException;
 
   List<DbWorkspace> findForReview();
 

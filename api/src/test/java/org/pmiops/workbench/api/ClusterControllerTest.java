@@ -39,6 +39,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterConfig;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
@@ -416,6 +417,16 @@ public class ClusterControllerTest {
             "workspaces_playground/wsid/.all_of_us_config.json",
             "workspaces/wsid/.all_of_us_config.json");
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
+  }
+
+  @Test
+  public void requireActiveBilling() {
+    testWorkspace.setBillingStatus(BillingStatus.ACTIVE);
+
+    clusterController
+        .listClusters(BILLING_PROJECT_ID, WORKSPACE_NAME)
+        .getBody()
+        .getDefaultCluster();
   }
 
   private void createUser(String email) {
