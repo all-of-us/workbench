@@ -20,14 +20,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig;
 import org.pmiops.workbench.monitoring.views.MonitoringViews;
 import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -45,17 +42,7 @@ public class MonitoringServiceTest {
   @TestConfiguration
   @Import({MonitoringServiceImpl.class})
   @MockBean({ViewManager.class, StatsRecorder.class, StackdriverStatsExporterService.class})
-  static class Configuration {
-    @Bean
-    public WorkbenchConfig workbenchConfig() {
-      final WorkbenchConfig workbenchConfig = new WorkbenchConfig();
-      // Nothing should show up in any Metrics backend for these tests.
-      workbenchConfig.server = new ServerConfig();
-      workbenchConfig.server.shortName = "unit-test";
-      workbenchConfig.server.projectId = "fake-project";
-      return workbenchConfig;
-    }
-  }
+  static class Configuration {}
 
   @Before
   public void setup() {
