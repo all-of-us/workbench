@@ -184,7 +184,7 @@ export const AttributesPage = withCurrentWorkspace() (
       const {node: {subtype}} = this.props;
       const{form, options} = this.state;
       if (!this.isMeasurement) {
-        options.unshift({label: 'Any value', value: AttrName[AttrName.ANY]});
+        options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
       }
       if (this.hasRange) {
         this.getAttributes();
@@ -354,7 +354,7 @@ export const AttributesPage = withCurrentWorkspace() (
       let paramName;
       const attrs = [];
       if (form.exists) {
-        paramName = name + ' (Any value)';
+        paramName = name + ` (${optionUtil.ANY.display})`;
       } else {
         form.num.filter(at => at.operator).forEach(({operator, operands, conceptId}) => {
           const attr = {name: AttrName.NUM, operator, operands};
@@ -392,7 +392,7 @@ export const AttributesPage = withCurrentWorkspace() (
       form.num.filter(at => at.operator).forEach((attr, i) => {
         if (attr.operator === 'ANY') {
           if (i === 0) {
-            name += 'Any value';
+            name += optionUtil.ANY.display;
           }
         } else {
           if (i > 0) {
