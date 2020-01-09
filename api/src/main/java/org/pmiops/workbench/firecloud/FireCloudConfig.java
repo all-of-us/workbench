@@ -1,6 +1,5 @@
 package org.pmiops.workbench.firecloud;
 
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
@@ -58,9 +57,7 @@ public class FireCloudConfig {
   public ApiClient allOfUsApiClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
     try {
-      apiClient.setAccessToken(
-          ServiceAccounts.getScopedAccessToken(
-              GoogleCredentials.getApplicationDefault(), BILLING_SCOPES));
+      apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(BILLING_SCOPES));
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
