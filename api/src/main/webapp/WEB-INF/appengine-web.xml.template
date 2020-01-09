@@ -26,11 +26,16 @@
   </static-error-handlers>
 
   <static-files>
-    <include path="static/activity-checker-extension.js" />
-    <include path="static/aou-download-policy-extension.js" />
-    <include path="static/initialize_notebook_cluster.sh" />
-    <include path="static/start_notebook_cluster.sh" />
-    <include path="static/generated/aou-snippets-menu.js" />
+    <include path="static/*">
+      <http-header name="Strict-Transport-Security"
+                   value="max-age=31536000; includeSubDomains; preload" />
+      <http-header name="X-XSS-Protection"
+                   value="1" />
+      <http-header name="X-Content-Type-Options"
+                   value="nosniff" />
+      <http-header name="Content-Security-Policy"
+                   value="default-src 'none'; frame-ancestors 'none'; report-uri /content-security-report" />
+    </include>
     <include path="server_unavailable.html" />
   </static-files>
 
