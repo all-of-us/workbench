@@ -8,6 +8,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.BiConsumer;
@@ -46,6 +47,7 @@ import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
+import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
@@ -585,8 +587,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     try {
       Integer moodleId = dbUser.getMoodleId();
+      String email = dbUser.getUsername();
       if (moodleId == null) {
-        moodleId = complianceService.getMoodleId(dbUser.getUsername());
+        moodleId = complianceService.getMoodleId(email);
         if (moodleId == null) {
           // User has not yet created/logged into MOODLE
           return dbUser;
@@ -594,33 +597,52 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         dbUser.setMoodleId(moodleId);
       }
 
-      List<BadgeDetails> badgeResponse = complianceService.getUserBadge(moodleId);
-      // The assumption here is that the User will always get 1 badge which will be AoU
-      if (badgeResponse != null && badgeResponse.size() > 0) {
-        BadgeDetails badge = badgeResponse.get(0);
-        Timestamp badgeExpiration =
-            badge.getDateexpire() == null
-                ? null
-                : new Timestamp(Long.parseLong(badge.getDateexpire()));
+      String expiryEpoch = null;
+      if(configProvider.get().featureFlags.enableMoodleV2Api) {
+        Map<String, BadgeDetails> userBadgesByName = complianceService.getUserBadgesByName(email);
+        if (userBadgesByName.containsKey(complianceService.getResearchEthicsTrainingField())) {
+          BadgeDetails badge = userBadgesByName.get(complianceService.getResearchEthicsTrainingField());
+          expiryEpoch = badge.getDateexpire();
+        } else {
+          // Moodle has not returned research ethics training information for the given user --
+          // we should clearn the user's training completion and expiration time.
+          dbUser.setComplianceTrainingCompletionTime(null);
+          dbUser.setComplianceTrainingExpirationTime(null);
+        }
+      }
+      else {
+        List<BadgeDetailsV1> badgeResponse = complianceService.getUserBadge(moodleId);
+        // The assumption here is that the User will always get 1 badge which will be AoU
+        if (badgeResponse != null && badgeResponse.size() > 0) {
+          BadgeDetailsV1 badge = badgeResponse.get(0);
+          expiryEpoch = badge.getDateexpire();
+        } else {
+          // Moodle has returned zero badges for the given user -- we should clear the user's
+          // training completion & expiration time.
+          dbUser.setComplianceTrainingCompletionTime(null);
+          dbUser.setComplianceTrainingExpirationTime(null);
+        }
+      }
 
+      System.err.println("expiryEpoch: " + expiryEpoch);
+      Timestamp badgeExpiration =
+          expiryEpoch == null
+              ? null
+              : new Timestamp(Long.parseLong(expiryEpoch));
+
+      if (badgeExpiration != null) {
         if (dbUser.getComplianceTrainingCompletionTime() == null) {
           // This is the user's first time with a Moodle badge response, so we reset the completion
           // time.
           dbUser.setComplianceTrainingCompletionTime(now);
-        } else if (badgeExpiration != null
-            && !badgeExpiration.equals(dbUser.getComplianceTrainingExpirationTime())) {
+        } else if (!badgeExpiration.equals(dbUser.getComplianceTrainingExpirationTime())) {
           // The badge has a new expiration date, suggesting some sort of course completion change.
           // Reset the completion time.
           dbUser.setComplianceTrainingCompletionTime(now);
         }
-
-        dbUser.setComplianceTrainingExpirationTime(badgeExpiration);
-      } else {
-        // Moodle has returned zero badges for the given user -- we should clear the user's
-        // training completion & expiration time.
-        dbUser.setComplianceTrainingCompletionTime(null);
-        dbUser.setComplianceTrainingExpirationTime(null);
       }
+
+      dbUser.setComplianceTrainingExpirationTime(badgeExpiration);
 
       return updateUserWithRetries(
           u -> {

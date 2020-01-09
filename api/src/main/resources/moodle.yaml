@@ -90,7 +90,7 @@ paths:
        200:
          description: Badge /error response
          schema:
-           $ref: '#/definitions/UserBadgeResponse'
+           $ref: '#/definitions/UserBadgeResponseV1'
        400:
          description: Bad request
        500:
@@ -112,9 +112,9 @@ paths:
           description: Format of the response which will be json for AoU
           type: string
           required: true
-        - name: userid
+        - name: email
           in: query
-          type: integer
+          type: string
         - name: wstoken
           in: query
           description: Secret Token associated with All of us
@@ -161,14 +161,14 @@ definitions:
         confirmed:
           type: boolean
 
-    UserBadgeResponse:
+    UserBadgeResponseV1:
       required:
         - badges
       properties:
         badges:
           type: array
           items:
-            $ref: '#/definitions/BadgeDetails'
+            $ref: '#/definitions/BadgeDetailsV1'
         exception:
           type: string
         errorcode:
@@ -176,7 +176,47 @@ definitions:
         message:
           type: string
 
+    UserBadgeResponse:
+      properties:
+        id:
+          type: integer
+          description: User id
+        username:
+          type: string
+          description: Moodle username
+        ret:
+          type: object
+          $ref: '#/definitions/BadgeDetails'
+        dua:
+          type: object
+          $ref: '#/definitions/BadgeDetails'
+        exception:
+          type: string
+        errorcode:
+          type: string
+        message:
+          type: string
+          description: A message describing the error
+
     BadgeDetails:
+      properties:
+        valid:
+          type: string
+          description: Whether the badge is valid #TODO wtf does this mean
+        lastissued:
+          type: string
+          description: Date of latest issued badge #TODO is this a freaking epoch
+        dateexpire:
+          type: string
+          description: Latest expiration of obtained badge #TODO is this a freaking epoch
+        message:
+          type: string
+          description: General API message
+        globalexpiration:
+          type: string
+          description: Global expiration, overrides badge expiration date #TODO is this a freaking epoch
+
+    BadgeDetailsV1:
       properties:
         name:
           type: string
