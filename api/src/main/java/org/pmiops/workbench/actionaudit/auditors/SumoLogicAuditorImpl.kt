@@ -1,5 +1,6 @@
 package org.pmiops.workbench.actionaudit.auditors
 
+import com.google.common.collect.ImmutableList
 import org.pmiops.workbench.actionaudit.ActionAuditEvent
 import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
@@ -75,22 +76,19 @@ constructor(
             logger.warning(String.format("Could not find a user for VM name %s in project %s", event.vmName, event.projectName))
         }
 
-        actionAuditService.send(ActionAuditEvent(
+        val actionId = actionIdProvider.get()
+        actionAuditService.sendWithComment(ImmutableList.of(ActionAuditEvent(
                 timestamp = clock.millis(),
-                actionId = actionIdProvider.get(),
+                actionId = actionId,
                 actionType = ActionType.HIGH_EGRESS,
                 agentType = AgentType.USER,
                 agentId = agentId,
                 agentEmailMaybe = agentEmail,
                 targetType = TargetType.WORKSPACE,
-                targetIdMaybe = dbWorkspace.workspaceId,
-                // TODO: Maybe what would fit best here would be a "comment" field on the AcionAuditEvent and
-                // an associated column in the target BigQuery schema.
-                targetPropertyMaybe = "comment",
-                newValueMaybe = String.format(
-                        "Detected %.2fMb egress across %d seconds in workspace %s, from VM %s",
-                        event.egressMib, event.timeWindowDuration, event.projectName, event.vmName)
-        ))
+                targetIdMaybe = dbWorkspace.workspaceId
+        )), String.format(
+                "Detected %.2fMb egress across %d seconds in workspace %s, from VM %s",
+                event.egressMib, event.timeWindowDuration, event.projectName, event.vmName))
     }
 
     override fun fireFailedToParseEgressEvent(request: EgressEventRequest) {
@@ -112,7 +110,7 @@ constructor(
     }
 
     private fun fireGenericEventWithComment(comment: String) {
-        actionAuditService.send(ActionAuditEvent(
+        actionAuditService.sendWithComment(ImmutableList.of(ActionAuditEvent(
                 timestamp = clock.millis(),
                 actionId = actionIdProvider.get(),
                 actionType = ActionType.HIGH_EGRESS,
@@ -120,10 +118,8 @@ constructor(
                 agentId = 0,
                 agentEmailMaybe = null,
                 targetType = TargetType.WORKSPACE,
-                targetIdMaybe = null,
-                targetPropertyMaybe = "comment",
-                newValueMaybe = comment
-        ))
+                targetIdMaybe = null
+        )), comment)
     }
 
     companion object {

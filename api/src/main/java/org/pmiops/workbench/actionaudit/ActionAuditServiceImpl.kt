@@ -17,10 +17,6 @@ import org.springframework.stereotype.Service
 class ActionAuditServiceImpl @Autowired
 constructor(private val configProvider: Provider<WorkbenchConfig>, private val cloudLogging: Logging) : ActionAuditService {
 
-    override fun send(event: ActionAuditEvent) {
-        send(setOf(event))
-    }
-
     override fun send(events: Collection<ActionAuditEvent>) {
         try {
             val logEntries: List<LogEntry> = events
@@ -32,6 +28,18 @@ constructor(private val configProvider: Provider<WorkbenchConfig>, private val c
             serviceLogger.log(
                     Level.SEVERE, e) { "Exception encountered writing log entries to Cloud Logging." }
         }
+    }
+
+    override fun sendWithComment(events: Collection<ActionAuditEvent>, comment: String) {
+        if (events.isEmpty()) {
+            serviceLogger.log(Level.SEVERE, "sendWithComment called with empty events collection.")
+        }
+
+        val commentEvent = events.stream().findFirst().get().copy(
+            actionType = ActionType.COMMENT,
+            newValueMaybe = comment
+        )
+        send(events.plus(commentEvent))
     }
 
     private fun auditEventToLogEntry(auditEvent: ActionAuditEvent): LogEntry {

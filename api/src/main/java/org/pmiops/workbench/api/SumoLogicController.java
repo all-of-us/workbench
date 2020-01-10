@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
+import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.SumoLogicAuditor;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -24,16 +26,25 @@ public class SumoLogicController implements SumoLogicApiDelegate {
   private static final Logger log = Logger.getLogger(SumoLogicController.class.getName());
   private final SumoLogicAuditor sumoLogicAuditor;
   private final CloudStorageService cloudStorageService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
-  SumoLogicController(SumoLogicAuditor sumoLogicAuditor, CloudStorageService cloudStorageService) {
+  SumoLogicController(
+      SumoLogicAuditor sumoLogicAuditor,
+      CloudStorageService cloudStorageService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.sumoLogicAuditor = sumoLogicAuditor;
     this.cloudStorageService = cloudStorageService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
   public ResponseEntity<EmptyResponse> logEgressEvent(
       String X_API_KEY, EgressEventRequest request) {
+    if (!workbenchConfigProvider.get().featureFlags.enableSumoLogicEventHandling) {
+      throw new BadRequestException("SumoLogic event handling is disabled in this environment.");
+    }
+
     authorizeRequest(X_API_KEY, request);
 
     try {

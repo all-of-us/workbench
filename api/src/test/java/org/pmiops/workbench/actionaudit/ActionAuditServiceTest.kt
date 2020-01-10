@@ -108,6 +108,24 @@ class ActionAuditServiceTest {
     }
 
     @Test
+    fun testSendsEventsWithComment() {
+        actionAuditService!!.sendWithComment(ImmutableList.of(EVENT_1, EVENT_2), "Hello, world")
+        argumentCaptor<List<LogEntry>>().apply {
+            verify(mockLogging).write(capture())
+            val entryList = firstValue
+            // Three rows are written: the original 2, plus a new "comment" row.
+            assertThat(entryList.size).isEqualTo(3)
+
+            val payloads = entryList
+                    .map { it.getPayload<JsonPayload>() }
+            val commentMap = payloads[2].dataAsMap
+            assertThat(commentMap[AuditColumn.ACTION_TYPE.name]).isEqualTo(ActionType.COMMENT.name)
+            assertThat(commentMap[AuditColumn.NEW_VALUE.name]).isEqualTo("Hello, world")
+            assertThat(commentMap[AuditColumn.ACTION_ID.name]).isEqualTo(EVENT_1.actionId)
+        }
+    }
+
+    @Test
     fun testSendWithEmptyCollectionDoesNotCallCloudLoggingApi() {
         actionAuditService!!.send(emptySet())
         argumentCaptor<List<LogEntry>>().apply {
