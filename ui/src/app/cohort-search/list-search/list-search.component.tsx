@@ -350,7 +350,7 @@ export const ListSearch = withCurrentWorkspace()(
           </div>}
         </div>
         {!loading && !!displayData && <div style={listStyle}>
-          {sourceMatch && <div style={{marginBottom: '0.75rem'}}>
+          {sourceMatch && !standardOnly && <div style={{marginBottom: '0.75rem'}}>
             There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}.
             {showStandardOption && <span> For more results, browse
               &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.showStandardResults()}>Standard Vocabulary</Clickable>.
