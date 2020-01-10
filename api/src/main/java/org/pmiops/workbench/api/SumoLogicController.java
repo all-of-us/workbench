@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class SumoLogicController implements SumoLogicApiDelegate {
 
+  public static final String SUMOLOGIC_KEY_FILENAME = "inbound-sumologic-keys.txt";
+
   private static final Logger log = Logger.getLogger(SumoLogicController.class.getName());
   private final SumoLogicAuditor sumoLogicAuditor;
   private final CloudStorageService cloudStorageService;
@@ -60,7 +62,7 @@ public class SumoLogicController implements SumoLogicApiDelegate {
    * @throws IOException
    */
   private List<String> getSumoLogicApiKeys() throws IOException {
-    String apiKeys = cloudStorageService.getCredentialsBucketString("inbound-sumologic-keys.txt");
+    String apiKeys = cloudStorageService.getCredentialsBucketString(SUMOLOGIC_KEY_FILENAME);
     return Arrays.asList(apiKeys.split("[\\r\\n]+"));
   }
 
