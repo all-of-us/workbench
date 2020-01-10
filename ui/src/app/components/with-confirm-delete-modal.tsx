@@ -1,5 +1,5 @@
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
-import {ResourceType} from 'app/utils/resourceActions';
+import {ResourceType} from 'generated/fetch';
 import * as React from 'react';
 
 interface State {

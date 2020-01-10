@@ -1,4 +1,144 @@
 {
+  "about": [
+    {
+      "title": "Cohorts",
+      "content": [
+        "A \"cohort\" is a group of participants that a group of researchers are interested in. The cohort builder allows you to create and review cohorts and annotate participants in a researcher’s study group."
+      ]
+    },
+    {
+      "title": "Concept Sets",
+      "content": [
+        "Concepts describe information in a patient’s medical record, such as a condition they have, a prescription they are taking or their physical measurements.",
+        "Subject areas such as conditions, drugs, measurements, etc. are called \"domains.\"",
+        "Concept sets are collections of concepts from a particular domain, that users can save and use to create a dataset for analysis."
+      ]
+    },
+    {
+      "title": "Datasets",
+      "content": [
+        "Datasets are analysis-ready tables that can be exported to analysis tools such as Notebooks.",
+        "Users can build and preview a dataset for one or more cohorts by selecting the desired concept sets and values for the cohorts."
+      ]
+    },
+    {
+      "title": "Recent Data",
+      "content": [
+        "This area displays recently opened data types like cohorts, concept sets, or datasets."
+      ]
+    },
+    {
+      "title": "Data Type",
+      "content": [
+        "This table displays details about cohorts, concept sets, and datasets within the workspace, including the name, owner and last changed date."
+      ]
+    }
+  ],
+  "edit": [
+    {
+      "title": "Cohorts",
+      "content": [
+        "A \"cohort\" is a group of participants that a group of researchers are interested in. The cohort builder allows you to create and review cohorts and annotate participants in a researcher’s study group."
+      ]
+    },
+    {
+      "title": "Concept Sets",
+      "content": [
+        "Concepts describe information in a patient’s medical record, such as a condition they have, a prescription they are taking or their physical measurements.",
+        "Subject areas such as conditions, drugs, measurements, etc. are called \"domains.\"",
+        "Concept sets are collections of concepts from a particular domain, that users can save and use to create a dataset for analysis."
+      ]
+    },
+    {
+      "title": "Datasets",
+      "content": [
+        "Datasets are analysis-ready tables that can be exported to analysis tools such as Notebooks.",
+        "Users can build and preview a dataset for one or more cohorts by selecting the desired concept sets and values for the cohorts."
+      ]
+    },
+    {
+      "title": "Recent Data",
+      "content": [
+        "This area displays recently opened data types like cohorts, concept sets, or datasets."
+      ]
+    },
+    {
+      "title": "Data Type",
+      "content": [
+        "This table displays details about cohorts, concept sets, and datasets within the workspace, including the name, owner and last changed date."
+      ]
+    }
+  ],
+  "duplicate": [
+    {
+      "title": "Cohorts",
+      "content": [
+        "A \"cohort\" is a group of participants that a group of researchers are interested in. The cohort builder allows you to create and review cohorts and annotate participants in a researcher’s study group."
+      ]
+    },
+    {
+      "title": "Concept Sets",
+      "content": [
+        "Concepts describe information in a patient’s medical record, such as a condition they have, a prescription they are taking or their physical measurements.",
+        "Subject areas such as conditions, drugs, measurements, etc. are called \"domains.\"",
+        "Concept sets are collections of concepts from a particular domain, that users can save and use to create a dataset for analysis."
+      ]
+    },
+    {
+      "title": "Datasets",
+      "content": [
+        "Datasets are analysis-ready tables that can be exported to analysis tools such as Notebooks.",
+        "Users can build and preview a dataset for one or more cohorts by selecting the desired concept sets and values for the cohorts."
+      ]
+    },
+    {
+      "title": "Recent Data",
+      "content": [
+        "This area displays recently opened data types like cohorts, concept sets, or datasets."
+      ]
+    },
+    {
+      "title": "Data Type",
+      "content": [
+        "This table displays details about cohorts, concept sets, and datasets within the workspace, including the name, owner and last changed date."
+      ]
+    }
+  ],
+  "notebooks": [
+    {
+      "title": "Cohorts",
+      "content": [
+        "A \"cohort\" is a group of participants that a group of researchers are interested in. The cohort builder allows you to create and review cohorts and annotate participants in a researcher’s study group."
+      ]
+    },
+    {
+      "title": "Concept Sets",
+      "content": [
+        "Concepts describe information in a patient’s medical record, such as a condition they have, a prescription they are taking or their physical measurements.",
+        "Subject areas such as conditions, drugs, measurements, etc. are called \"domains.\"",
+        "Concept sets are collections of concepts from a particular domain, that users can save and use to create a dataset for analysis."
+      ]
+    },
+    {
+      "title": "Datasets",
+      "content": [
+        "Datasets are analysis-ready tables that can be exported to analysis tools such as Notebooks.",
+        "Users can build and preview a dataset for one or more cohorts by selecting the desired concept sets and values for the cohorts."
+      ]
+    },
+    {
+      "title": "Recent Data",
+      "content": [
+        "This area displays recently opened data types like cohorts, concept sets, or datasets."
+      ]
+    },
+    {
+      "title": "Data Type",
+      "content": [
+        "This table displays details about cohorts, concept sets, and datasets within the workspace, including the name, owner and last changed date."
+      ]
+    }
+  ],
   "data": [
     {
       "title": "Cohorts",
@@ -212,6 +352,20 @@
       "title": "Dataset Builder",
       "content": [
         "Datasets are analysis-ready tables containing data about a Cohort can be exported to analysis tools such as Notebooks. Users can build and preview a dataset for one or more cohorts by selecting the desired concepts sets and values for the cohorts."
+      ]
+    }
+  ],
+  "cohortDescription": [
+    {
+      "title": "Participant Status",
+      "content": [
+        "Within the Review Set, you can review individual participant records and choose to include, exclude, or mark them for further review."
+      ]
+    },
+    {
+      "title": "Annotations",
+      "content": [
+        "Within the Review Set, you have the option of creating a review-set-wide annotation or set of annotations. Annotations allow you to add an explanation (free text), date, number (numeric field), selection from a specified list (dropdown list) or checkbox to each participant record."
       ]
     }
   ],

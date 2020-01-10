@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import {UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
+import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
 import {BugReportModal} from 'app/components/bug-report';
 import {Button, Clickable, Link, MenuItem} from 'app/components/buttons';
@@ -17,7 +17,6 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDate, reactStyles} from 'app/utils';
 import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 
 const EVENT_CATEGORY = 'Workspace list';

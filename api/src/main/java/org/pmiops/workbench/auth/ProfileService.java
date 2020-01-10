@@ -60,6 +60,8 @@ public class ProfileService {
               result.setEthnicity(demographicSurvey.getEthnicityEnum());
               result.setGender(demographicSurvey.getGenderEnum());
               result.setRace(demographicSurvey.getRaceEnum());
+              result.setSexAtBirth(demographicSurvey.getSexAtBirthEnum());
+              result.setSexualOrientation(demographicSurvey.getSexualOrientationEnum());
               result.setYearOfBirth(BigDecimal.valueOf(demographicSurvey.getYear_of_birth()));
 
               return result;
@@ -192,6 +194,9 @@ public class ProfileService {
     }
     if (user.getAddress() != null) {
       profile.setAddress(TO_CLIENT_ADDRESS_SURVEY.apply(user.getAddress()));
+    }
+    if (user.getDegreesEnum() != null) {
+      profile.setDegrees(user.getDegreesEnum());
     }
     profile.setInstitutionalAffiliations(
         user.getInstitutionalAffiliations().stream()

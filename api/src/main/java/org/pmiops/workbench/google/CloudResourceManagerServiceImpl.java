@@ -2,11 +2,13 @@ package org.pmiops.workbench.google;
 
 import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManagerScopes;
 import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -26,19 +28,16 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
   public static final List<String> SCOPES =
       Arrays.asList(CloudResourceManagerScopes.CLOUD_PLATFORM_READ_ONLY);
 
-  private final Provider<GoogleCredential> cloudResourceManagerAdminCredsProvider;
+  private final Provider<ServiceAccountCredentials> cloudResourceManagerAdminCredsProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
-  private final ServiceAccounts serviceAccounts;
 
   @Autowired
   public CloudResourceManagerServiceImpl(
       @Qualifier(Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
-          Provider<GoogleCredential> cloudResourceManagerAdminCredsProvider,
+          Provider<ServiceAccountCredentials> cloudResourceManagerAdminCredsProvider,
       HttpTransport httpTransport,
-      GoogleRetryHandler retryHandler,
-      ServiceAccounts serviceAccounts) {
-    this.serviceAccounts = serviceAccounts;
+      GoogleRetryHandler retryHandler) {
     this.cloudResourceManagerAdminCredsProvider = cloudResourceManagerAdminCredsProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
@@ -49,13 +48,12 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
     // Load credentials for the cloud-resource-manager Service Account. This account has been
     // granted
     // domain-wide delegation for the OAuth scopes required by cloud apis.
-    GoogleCredential googleCredential = cloudResourceManagerAdminCredsProvider.get();
-
-    googleCredential =
-        serviceAccounts.getImpersonatedCredential(googleCredential, user.getUsername(), SCOPES);
+    GoogleCredentials credentials =
+        ServiceAccounts.getImpersonatedCredentials(
+            cloudResourceManagerAdminCredsProvider.get(), user.getUsername(), SCOPES);
 
     return new CloudResourceManager.Builder(
-            httpTransport, getDefaultJsonFactory(), googleCredential)
+            httpTransport, getDefaultJsonFactory(), new HttpCredentialsAdapter(credentials))
         .setApplicationName(APPLICATION_NAME)
         .build();
   }

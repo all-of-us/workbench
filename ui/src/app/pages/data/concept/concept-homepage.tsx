@@ -28,7 +28,7 @@ import {
   DomainInfo,
   StandardConceptFilter,
   SurveyModule,
-  SurveyQuestionsResponse,
+  SurveyQuestions,
 } from 'generated/fetch';
 import {Key} from 'ts-key-enum';
 import {SurveyDetails} from './survey-details';
@@ -161,15 +161,6 @@ const conceptCacheStub = [
   }
 ];
 
-// Stub used to display placeholder tabs in concept search
-const domainCountStub = [
-  {
-    domain: Domain.SURVEY,
-    name: 'Surveys',
-    conceptCount: 0
-  }
-];
-
 interface Props {
   workspace: WorkspaceData;
 }
@@ -208,7 +199,7 @@ interface State { // Browse survey
   // Name of the survey selected
   selectedSurvey: string;
   // Array of survey questions selected to be added to concept set
-  selectedSurveyQuestions: Array<SurveyQuestionsResponse>;
+  selectedSurveyQuestions: Array<SurveyQuestions>;
   // Show if a search error occurred
   showSearchError: boolean;
   // Only search on standard concepts
@@ -275,7 +266,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         }));
         if (environment.enableNewConceptTabs) {
           conceptsCache = [...conceptsCache, ...conceptCacheStub];
-          conceptDomainCounts = [...conceptDomainCounts, ...domainCountStub];
+          conceptDomainCounts = [...conceptDomainCounts];
         } else {
           conceptsCache = conceptsCache.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
           conceptDomainCounts = conceptDomainCounts.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
@@ -360,7 +351,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         cacheItem.items = resp.items;
         this.setState({completedDomainSearches: completedDomainSearches});
         if (activeTabSearch) {
-          const conceptDomainCounts = environment.enableNewConceptTabs ? [...resp.domainCounts, ...domainCountStub]
+          const conceptDomainCounts = environment.enableNewConceptTabs ? [...resp.domainCounts]
             : resp.domainCounts.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
           this.setState({
             searchLoading: false,

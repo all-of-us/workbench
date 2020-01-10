@@ -54,7 +54,7 @@
     "shortName": "Prod",
     "oauthClientId": "684273740878-d7i68in5d9hqr6n9mfvrdh53snekp79f.apps.googleusercontent.com",
     "traceAllRequests": false,
-    "location": "us-central1"
+    "appEngineLocationId": "us-central"
   },
   "admin": {
     "adminIdVerification": "support@researchallofus.org",

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.List;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.rdr.api.RdrApi;
 import org.springframework.context.annotation.Bean;
@@ -18,8 +17,7 @@ public class RdrExportConfig {
   private static final List<String> SCOPES =
       ImmutableList.of(
           "https://www.googleapis.com/auth/userinfo.profile",
-          "https://www.googleapis.com/auth/userinfo.email",
-          "https://www.googleapis.com/auth/cloud-billing");
+          "https://www.googleapis.com/auth/userinfo.email");
 
   private static final String BASE_PATH = "/rdr/v1";
 
@@ -27,13 +25,12 @@ public class RdrExportConfig {
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public RdrApi rdrApi(
       ServiceAccounts serviceAccounts,
-      WorkbenchEnvironment workbenchEnvironment,
       WorkbenchConfig workbenchConfig) {
     RdrApi api = new RdrApi();
     org.pmiops.workbench.rdr.ApiClient apiClient = new org.pmiops.workbench.rdr.ApiClient();
     apiClient.setDebugging(true);
     try {
-      apiClient.setAccessToken(serviceAccounts.workbenchAccessToken(workbenchEnvironment, SCOPES));
+      apiClient.setAccessToken(serviceAccounts.getScopedServiceAccessToken(SCOPES));
       apiClient.setBasePath("https://" + workbenchConfig.rdrExport.host + BASE_PATH);
 
     } catch (IOException e) {

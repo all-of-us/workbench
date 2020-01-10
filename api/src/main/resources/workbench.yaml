@@ -1916,7 +1916,7 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/SurveyQuestionsResponse"
+              $ref: "#/definitions/SurveyQuestions"
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyAnswer:
     get:
@@ -2060,12 +2060,13 @@ paths:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-    get:
+    post:
       parameters:
-        - in: query
+        - in: body
           name: resourceType
-          type: string
           required: true
+          schema:
+            $ref: "#/definitions/ResourceType"
         - in: query
           name: id
           type: integer
@@ -3045,7 +3046,17 @@ definitions:
         type: integer
         format: int64
       resourceType:
-        type: string
+        $ref: "#/definitions/ResourceType"
+
+  ResourceType:
+    type: string
+    enum:
+      - NOTEBOOK
+      - COHORT
+      - COHORT_REVIEW
+      - CONCEPT_SET
+      - DATASET
+      - WORKSPACE
 
   KernelTypeEnum:
     type: string
@@ -3301,7 +3312,7 @@ definitions:
         items:
           $ref: "#/definitions/SurveyModule"
 
-  SurveyQuestionsResponse:
+  SurveyQuestions:
     type: object
     properties:
       question:
@@ -3421,6 +3432,10 @@ definitions:
       dataAccessLevel:
         description: what level of data access the user has
         $ref: "#/definitions/DataAccessLevel"
+      degrees:
+        type: array
+        items:
+          $ref: '#/definitions/Degree'
       givenName:
         description: the user's given name (e.g. Alice)
         type: string
@@ -3568,6 +3583,14 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Gender'
+      sexAtBirth:
+        type: array
+        items:
+          $ref: '#/definitions/SexAtBirth'
+      sexualOrientation:
+        type: array
+        items:
+          $ref: '#/definitions/SexualOrientation'
       yearOfBirth:
         type: number
       education:

@@ -145,7 +145,7 @@ public class WorkbenchConfig {
     // Controls whether all api requests are traced and sent to Stackdriver tracing, or
     // whether we only trace at the default frequency.
     public boolean traceAllRequests;
-    public String location;
+    public String appEngineLocationId;
   }
 
   public static class AdminConfig {

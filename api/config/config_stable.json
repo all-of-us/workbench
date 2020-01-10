@@ -54,7 +54,7 @@
     "shortName": "Stable",
     "oauthClientId": "56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com",
     "traceAllRequests": false,
-    "location": "us-central1"
+    "appEngineLocationId": "us-central"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-stable.appspot.com/login",

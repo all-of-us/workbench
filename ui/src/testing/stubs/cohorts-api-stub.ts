@@ -1,10 +1,11 @@
-import {convertToResources, ResourceType} from 'app/utils/resourceActions';
+import {convertToResources} from 'app/utils/resourceActions';
 import {
   Cohort,
   CohortAnnotationsResponse,
   CohortsApi,
   EmptyResponse,
   RecentResource,
+  ResourceType,
   Workspace,
   WorkspaceAccessLevel
 } from 'generated/fetch';

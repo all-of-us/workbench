@@ -30,7 +30,7 @@ public class CohortReviewDaoTest {
   private long cohortId;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     DbCohort cohort = new DbCohort();
     DbWorkspace workspace = new DbWorkspace();
     workspace.setWorkspaceNamespace("namespace");
@@ -42,12 +42,12 @@ public class CohortReviewDaoTest {
   }
 
   @Test
-  public void save() throws Exception {
+  public void save() {
     assertEquals(cohortReview, cohortReviewDao.findOne(cohortReview.getCohortReviewId()));
   }
 
   @Test
-  public void update() throws Exception {
+  public void update() {
     cohortReview = cohortReviewDao.findOne(cohortReview.getCohortReviewId());
     cohortReview.setReviewedCount(3);
     cohortReviewDao.saveAndFlush(cohortReview);
@@ -55,7 +55,7 @@ public class CohortReviewDaoTest {
   }
 
   @Test
-  public void findCohortReviewByCohortIdAndCdrVersionId() throws Exception {
+  public void findCohortReviewByCohortIdAndCdrVersionId() {
     assertEquals(
         cohortReview,
         cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
@@ -63,7 +63,7 @@ public class CohortReviewDaoTest {
   }
 
   @Test
-  public void findByFirecloudNameAndActiveStatus() throws Exception {
+  public void findByFirecloudNameAndActiveStatus() {
     assertEquals(
         cohortReview,
         cohortReviewDao

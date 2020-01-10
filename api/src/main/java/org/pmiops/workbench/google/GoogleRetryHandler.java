@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
-import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
 import org.pmiops.workbench.utils.RetryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.backoff.BackOffPolicy;
@@ -18,7 +18,7 @@ public class GoogleRetryHandler extends RetryHandler<IOException> {
 
   private static final Logger logger = Logger.getLogger(GoogleRetryHandler.class.getName());
 
-  private static class GoogleRetryPolicy extends RetryConfig.ResponseCodeRetryPolicy {
+  private static class GoogleRetryPolicy extends ResponseCodeRetryPolicy {
 
     public GoogleRetryPolicy() {
       super("Google API");

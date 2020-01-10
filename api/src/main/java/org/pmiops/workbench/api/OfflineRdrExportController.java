@@ -95,7 +95,7 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
     String queuePath =
         QueueName.of(
                 workbenchConfig.server.projectId,
-                workbenchConfig.server.location,
+                workbenchConfig.server.appEngineLocationId,
                 workbenchConfig.rdrExport.queueName)
             .toString();
     while (idIterator.hasNext()) {

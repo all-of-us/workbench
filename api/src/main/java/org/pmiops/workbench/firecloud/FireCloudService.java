@@ -1,5 +1,6 @@
 package org.pmiops.workbench.firecloud;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,10 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 public interface FireCloudService {
 
   String WORKSPACE_DELIMITER = "__";
+
+  /** Returns the base path for the FireCloud API. Exposed for integration testing purposes only. */
+  @VisibleForTesting
+  String getApiBasePath();
 
   /** @return true if firecloud is okay, false if firecloud is down. */
   boolean getFirecloudStatus();

@@ -8,8 +8,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.inject.Provider;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
@@ -117,7 +117,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return Arrays.asList("person", "death", "cb_search_person", "cb_search_all_events");
+    return ImmutableList.of("person", "death", "cb_search_person", "cb_search_all_events");
   }
 
   @Override
@@ -400,49 +400,49 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     return new Modifier()
         .name(ModifierType.AGE_AT_EVENT)
         .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-        .operands(Arrays.asList("25"));
+        .operands(ImmutableList.of("25"));
   }
 
   private static Modifier visitModifier() {
     return new Modifier()
         .name(ModifierType.ENCOUNTERS)
         .operator(Operator.IN)
-        .operands(Arrays.asList("1"));
+        .operands(ImmutableList.of("1"));
   }
 
   private static Modifier occurrencesModifier() {
     return new Modifier()
         .name(ModifierType.NUM_OF_OCCURRENCES)
         .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-        .operands(Arrays.asList("1"));
+        .operands(ImmutableList.of("1"));
   }
 
   private static Modifier eventDateModifier() {
     return new Modifier()
         .name(ModifierType.EVENT_DATE)
         .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-        .operands(Arrays.asList("2009-12-03"));
+        .operands(ImmutableList.of("2009-12-03"));
   }
 
   private static List<Attribute> wheelchairAttributes() {
-    return Arrays.asList(
+    return ImmutableList.of(
         new Attribute()
             .name(AttrName.CAT)
             .operator(Operator.IN)
-            .operands(Arrays.asList("4023190")));
+            .operands(ImmutableList.of("4023190")));
   }
 
   private static List<Attribute> bpAttributes() {
-    return Arrays.asList(
+    return ImmutableList.of(
         new Attribute()
             .name(AttrName.NUM)
             .operator(Operator.LESS_THAN_OR_EQUAL_TO)
-            .operands(Arrays.asList("90"))
+            .operands(ImmutableList.of("90"))
             .conceptId(903118L),
         new Attribute()
             .name(AttrName.NUM)
             .operator(Operator.BETWEEN)
-            .operands(Arrays.asList("60", "80"))
+            .operands(ImmutableList.of("60", "80"))
             .conceptId(903115L));
   }
 
@@ -499,7 +499,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void findCriteriaMenuOptions() throws Exception {
+  public void findCriteriaMenuOptions() {
     cbCriteriaDao.save(
         new DbCriteria()
             .domainId(DomainType.CONDITION.toString())
@@ -534,16 +534,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .addTypesItem(
                 new CriteriaMenuSubOption()
                     .type(CriteriaType.ICD10CM.toString())
-                    .standardFlags(Arrays.asList(new StandardFlag().standard(false))))
+                    .standardFlags(ImmutableList.of(new StandardFlag().standard(false))))
             .addTypesItem(
                 new CriteriaMenuSubOption()
                     .type(CriteriaType.ICD9CM.toString())
-                    .standardFlags(Arrays.asList(new StandardFlag().standard(false))))
+                    .standardFlags(ImmutableList.of(new StandardFlag().standard(false))))
             .addTypesItem(
                 new CriteriaMenuSubOption()
                     .type(CriteriaType.SNOMED.toString())
                     .standardFlags(
-                        Arrays.asList(
+                        ImmutableList.of(
                             new StandardFlag().standard(false),
                             new StandardFlag().standard(true))));
     CriteriaMenuOption option2 =
@@ -552,19 +552,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .addTypesItem(
                 new CriteriaMenuSubOption()
                     .type(CriteriaType.CPT4.toString())
-                    .standardFlags(Arrays.asList(new StandardFlag().standard(false))));
+                    .standardFlags(ImmutableList.of(new StandardFlag().standard(false))));
     assertTrue(options.contains(option1));
     assertTrue(options.contains(option2));
   }
 
   @Test
-  public void validateAttribute() throws Exception {
+  public void validateAttribute() {
     SearchParameter demo = age();
     Attribute attribute = new Attribute().name(AttrName.NUM);
-    demo.attributes(Arrays.asList(attribute));
+    demo.attributes(ImmutableList.of(attribute));
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(demo), new ArrayList<>());
+            DomainType.CONDITION.toString(), ImmutableList.of(demo), new ArrayList<>());
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
@@ -580,7 +580,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       assertEquals("Bad Request: attribute operands are empty.", bre.getMessage());
     }
 
-    attribute.operands(Arrays.asList("20"));
+    attribute.operands(ImmutableList.of("20"));
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
@@ -590,7 +590,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
           bre.getMessage());
     }
 
-    attribute.operands(Arrays.asList("s", "20"));
+    attribute.operands(ImmutableList.of("s", "20"));
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
@@ -598,7 +598,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       assertEquals("Bad Request: attribute NUM operands must be numeric.", bre.getMessage());
     }
 
-    attribute.operands(Arrays.asList("10", "20"));
+    attribute.operands(ImmutableList.of("10", "20"));
     attribute.operator(Operator.EQUAL);
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
@@ -611,11 +611,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void validateModifiers() throws Exception {
+  public void validateModifiers() {
     Modifier modifier = ageModifier().operator(null).operands(new ArrayList<>());
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(modifier));
+            DomainType.CONDITION.toString(), ImmutableList.of(icd9()), ImmutableList.of(modifier));
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
@@ -631,7 +631,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       assertEquals("Bad Request: modifier operands are empty.", bre.getMessage());
     }
 
-    modifier.operands(Arrays.asList("20"));
+    modifier.operands(ImmutableList.of("20"));
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
@@ -641,7 +641,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
           bre.getMessage());
     }
 
-    modifier.operands(Arrays.asList("s", "20"));
+    modifier.operands(ImmutableList.of("s", "20"));
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
@@ -650,7 +650,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
           "Bad Request: modifier AGE_AT_EVENT operands must be numeric.", bre.getMessage());
     }
 
-    modifier.operands(Arrays.asList("10", "20"));
+    modifier.operands(ImmutableList.of("10", "20"));
     modifier.operator(Operator.EQUAL);
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
@@ -662,7 +662,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     }
 
     modifier.name(ModifierType.EVENT_DATE);
-    modifier.operands(Arrays.asList("10"));
+    modifier.operands(ImmutableList.of("10"));
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
@@ -672,22 +672,22 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChild() throws Exception {
+  public void countSubjectsICD9ConditionOccurrenceChild() {
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9()), new ArrayList<>());
+            DomainType.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void temporalGroupExceptions() throws Exception {
+  public void temporalGroupExceptions() {
     SearchGroupItem icd9SGI =
         new SearchGroupItem().type(DomainType.CONDITION.toString()).addSearchParametersItem(icd9());
 
-    SearchGroup temporalGroup = new SearchGroup().items(Arrays.asList(icd9SGI)).temporal(true);
+    SearchGroup temporalGroup = new SearchGroup().items(ImmutableList.of(icd9SGI)).temporal(true);
 
-    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     try {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
@@ -708,8 +708,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void firstMentionOfICD9WithModifiersOrSnomed5DaysAfterICD10WithModifiers()
-      throws Exception {
+  public void firstMentionOfICD9WithModifiersOrSnomed5DaysAfterICD10WithModifiers() {
     SearchGroupItem icd9SGI =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
@@ -731,20 +730,20 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // First Mention Of (ICD9 w/modifiers or Snomed) 5 Days After ICD10 w/modifiers
     SearchGroup temporalGroup =
         new SearchGroup()
-            .items(Arrays.asList(icd9SGI, snomedSGI, icd10SGI))
+            .items(ImmutableList.of(icd9SGI, snomedSGI, icd10SGI))
             .temporal(true)
             .mention(TemporalMention.FIRST_MENTION)
             .time(TemporalTime.X_DAYS_AFTER)
             .timeValue(5L);
 
-    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     // matches icd9SGI in group 0 and icd10SGI in group 1
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void firstMentionOfDrug5DaysBeforeICD10WithModifiers() throws Exception {
+  public void firstMentionOfDrug5DaysBeforeICD10WithModifiers() {
     DbCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
     DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
@@ -765,13 +764,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // First Mention Of Drug 5 Days Before ICD10 w/modifiers
     SearchGroup temporalGroup =
         new SearchGroup()
-            .items(Arrays.asList(drugSGI, icd10SGI))
+            .items(ImmutableList.of(drugSGI, icd10SGI))
             .temporal(true)
             .mention(TemporalMention.FIRST_MENTION)
             .time(TemporalTime.X_DAYS_BEFORE)
             .timeValue(5L);
 
-    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     cbCriteriaDao.delete(drugNode1.getId());
@@ -781,7 +780,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void anyMentionOfCPTParent5DaysAfterICD10Child() throws Exception {
+  public void anyMentionOfCPTParent5DaysAfterICD10Child() {
     DbCriteria icd9Parent =
         new DbCriteria()
             .ancestorData(false)
@@ -821,13 +820,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // Any Mention Of ICD9 5 Days After ICD10
     SearchGroup temporalGroup =
         new SearchGroup()
-            .items(Arrays.asList(icd9SGI, icd10SGI))
+            .items(ImmutableList.of(icd9SGI, icd10SGI))
             .temporal(true)
             .mention(TemporalMention.ANY_MENTION)
             .time(TemporalTime.X_DAYS_AFTER)
             .timeValue(5L);
 
-    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     cbCriteriaDao.delete(icd9Parent.getId());
@@ -836,7 +835,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void anyMentionOfCPTWithIn5DaysOfVisit() throws Exception {
+  public void anyMentionOfCPTWithIn5DaysOfVisit() {
     SearchGroupItem cptSGI =
         new SearchGroupItem()
             .type(DomainType.PROCEDURE.toString())
@@ -851,19 +850,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // Any Mention Of ICD10 Parent within 5 Days of visit
     SearchGroup temporalGroup =
         new SearchGroup()
-            .items(Arrays.asList(visitSGI, cptSGI))
+            .items(ImmutableList.of(visitSGI, cptSGI))
             .temporal(true)
             .mention(TemporalMention.ANY_MENTION)
             .time(TemporalTime.WITHIN_X_DAYS_OF)
             .timeValue(5L);
 
-    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void firstMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
+  public void firstMentionOfDrugDuringSameEncounterAsMeasurement() {
     jdbcTemplate.execute(
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
 
@@ -881,12 +880,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // First Mention Of Drug during same encounter as measurement
     SearchGroup temporalGroup =
         new SearchGroup()
-            .items(Arrays.asList(drugSGI, measurementSGI))
+            .items(ImmutableList.of(drugSGI, measurementSGI))
             .temporal(true)
             .mention(TemporalMention.FIRST_MENTION)
             .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
-    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
@@ -894,7 +893,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void lastMentionOfDrugDuringSameEncounterAsMeasurement() throws Exception {
+  public void lastMentionOfDrugDuringSameEncounterAsMeasurement() {
     jdbcTemplate.execute(
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
 
@@ -912,12 +911,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // Last Mention Of Drug during same encounter as measurement
     SearchGroup temporalGroup =
         new SearchGroup()
-            .items(Arrays.asList(drugSGI, measurementSGI))
+            .items(ImmutableList.of(drugSGI, measurementSGI))
             .temporal(true)
             .mention(TemporalMention.LAST_MENTION)
             .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
-    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
@@ -925,7 +924,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void lastMentionOfDrugDuringSameEncounterAsMeasurementOrVisit() throws Exception {
+  public void lastMentionOfDrugDuringSameEncounterAsMeasurementOrVisit() {
     jdbcTemplate.execute(
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
 
@@ -948,12 +947,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // Last Mention Of Drug during same encounter as measurement
     SearchGroup temporalGroup =
         new SearchGroup()
-            .items(Arrays.asList(drugSGI, measurementSGI, visitSGI))
+            .items(ImmutableList.of(drugSGI, measurementSGI, visitSGI))
             .temporal(true)
             .mention(TemporalMention.LAST_MENTION)
             .time(TemporalTime.DURING_SAME_ENCOUNTER_AS);
 
-    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
@@ -961,7 +960,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void lastMentionOfMeasurementOrVisit5DaysAfterDrug() throws Exception {
+  public void lastMentionOfMeasurementOrVisit5DaysAfterDrug() {
     DbCriteria drugCriteria1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugCriteria1);
     DbCriteria drugCriteria2 = drugCriteriaChild(drugCriteria1.getId());
@@ -987,13 +986,13 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // Last Mention Of Measurement or Visit 5 days after Drug
     SearchGroup temporalGroup =
         new SearchGroup()
-            .items(Arrays.asList(drugSGI, measurementSGI, visitSGI))
+            .items(ImmutableList.of(drugSGI, measurementSGI, visitSGI))
             .temporal(true)
             .mention(TemporalMention.LAST_MENTION)
             .time(TemporalTime.X_DAYS_AFTER)
             .timeValue(5L);
 
-    SearchRequest searchRequest = new SearchRequest().includes(Arrays.asList(temporalGroup));
+    SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     cbCriteriaDao.delete(drugCriteria1.getId());
@@ -1003,92 +1002,95 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ConditionChildAgeAtEvent() throws Exception {
+  public void countSubjectsICD9ConditionChildAgeAtEvent() {
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(ageModifier()));
+            DomainType.CONDITION.toString(),
+            ImmutableList.of(icd9()),
+            ImmutableList.of(ageModifier()));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionChildEncounter() throws Exception {
+  public void countSubjectsICD9ConditionChildEncounter() {
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(visitModifier()));
+            DomainType.CONDITION.toString(),
+            ImmutableList.of(icd9()),
+            ImmutableList.of(visitModifier()));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionChildAgeAtEventBetween() throws Exception {
+  public void countSubjectsICD9ConditionChildAgeAtEventBetween() {
     Modifier modifier =
-        ageModifier().operator(Operator.BETWEEN).operands(Arrays.asList("37", "39"));
+        ageModifier().operator(Operator.BETWEEN).operands(ImmutableList.of("37", "39"));
 
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9()), Arrays.asList(modifier));
+            DomainType.CONDITION.toString(), ImmutableList.of(icd9()), ImmutableList.of(modifier));
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrences() throws Exception {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            DomainType.CONDITION.toString(),
-            Arrays.asList(icd9()),
-            Arrays.asList(ageModifier(), occurrencesModifier().operands(Arrays.asList("2"))));
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
-  }
-
-  @Test
-  public void countSubjectsICD9ConditioChildAgeAtEventAndOccurrencesAndEventDate()
-      throws Exception {
+  public void countSubjectsICD9ConditionOccurrenceChildAgeAtEventAndOccurrences() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
-            Arrays.asList(icd9(), icd9().conceptId(2L)),
-            Arrays.asList(ageModifier(), occurrencesModifier(), eventDateModifier()));
+            ImmutableList.of(icd9()),
+            ImmutableList.of(ageModifier(), occurrencesModifier().operands(ImmutableList.of("2"))));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionChildEventDate() throws Exception {
+  public void countSubjectsICD9ConditioChildAgeAtEventAndOccurrencesAndEventDate() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
-            Arrays.asList(icd9()),
-            Arrays.asList(eventDateModifier()));
+            ImmutableList.of(icd9(), icd9().conceptId(2L)),
+            ImmutableList.of(ageModifier(), occurrencesModifier(), eventDateModifier()));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionNumOfOccurrences() throws Exception {
+  public void countSubjectsICD9ConditionChildEventDate() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
-            Arrays.asList(icd9()),
-            Arrays.asList(occurrencesModifier()));
+            ImmutableList.of(icd9()),
+            ImmutableList.of(eventDateModifier()));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9Child() throws Exception {
+  public void countSubjectsICD9ConditionNumOfOccurrences() {
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(icd9()), new ArrayList<>());
+            DomainType.CONDITION.toString(),
+            ImmutableList.of(icd9()),
+            ImmutableList.of(occurrencesModifier()));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsICD9ConditionParent() throws Exception {
+  public void countSubjectsICD9Child() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.CONDITION.toString(), ImmutableList.of(icd9()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countSubjectsICD9ConditionParent() {
     DbCriteria criteriaParent = icd9CriteriaParent();
     saveCriteriaWithPath("0", criteriaParent);
     DbCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
@@ -1097,7 +1099,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
-            Arrays.asList(icd9().group(true).conceptId(2L)),
+            ImmutableList.of(icd9().group(true).conceptId(2L)),
             new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
@@ -1107,84 +1109,85 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDemoGender() throws Exception {
+  public void countSubjectsDemoGender() {
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PERSON.toString(), Arrays.asList(male()), new ArrayList<>());
+            DomainType.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsDemoRace() throws Exception {
+  public void countSubjectsDemoRace() {
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PERSON.toString(), Arrays.asList(race()), new ArrayList<>());
+            DomainType.PERSON.toString(), ImmutableList.of(race()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsDemoEthnicity() throws Exception {
+  public void countSubjectsDemoEthnicity() {
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PERSON.toString(), Arrays.asList(ethnicity()), new ArrayList<>());
+            DomainType.PERSON.toString(), ImmutableList.of(ethnicity()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsDemoDec() throws Exception {
+  public void countSubjectsDemoDec() {
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PERSON.toString(), Arrays.asList(deceased()), new ArrayList<>());
+            DomainType.PERSON.toString(), ImmutableList.of(deceased()), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsDemoAge() throws Exception {
+  public void countSubjectsDemoAge() {
     Integer lo = getTestPeriod().getYears() - 1;
     Integer hi = getTestPeriod().getYears() + 1;
     SearchParameter demo = age();
     demo.attributes(
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute()
                 .name(AttrName.AGE)
                 .operator(Operator.BETWEEN)
-                .operands(Arrays.asList(lo.toString(), hi.toString()))));
+                .operands(ImmutableList.of(lo.toString(), hi.toString()))));
     SearchRequest searchRequests =
-        createSearchRequests(DomainType.PERSON.toString(), Arrays.asList(demo), new ArrayList<>());
+        createSearchRequests(
+            DomainType.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequests), 1);
   }
 
   @Test
-  public void countSubjectsICD9AndDemo() throws Exception {
+  public void countSubjectsICD9AndDemo() {
     SearchParameter demoAgeSearchParam = age();
     Integer lo = getTestPeriod().getYears() - 1;
     Integer hi = getTestPeriod().getYears() + 1;
 
     demoAgeSearchParam.attributes(
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute()
                 .operator(Operator.BETWEEN)
-                .operands(Arrays.asList(lo.toString(), hi.toString()))));
+                .operands(ImmutableList.of(lo.toString(), hi.toString()))));
 
     SearchRequest searchRequests =
         createSearchRequests(
-            DomainType.PERSON.toString(), Arrays.asList(male()), new ArrayList<>());
+            DomainType.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
 
     SearchGroupItem anotherSearchGroupItem =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
-            .searchParameters(Arrays.asList(icd9().conceptId(3L)))
+            .searchParameters(ImmutableList.of(icd9().conceptId(3L)))
             .modifiers(new ArrayList<>());
 
     SearchGroupItem anotherNewSearchGroupItem =
         new SearchGroupItem()
             .type(DomainType.PERSON.toString())
-            .searchParameters(Arrays.asList(demoAgeSearchParam))
+            .searchParameters(ImmutableList.of(demoAgeSearchParam))
             .modifiers(new ArrayList<>());
 
     searchRequests.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
@@ -1195,16 +1198,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDemoExcluded() throws Exception {
+  public void countSubjectsDemoExcluded() {
     SearchGroupItem excludeSearchGroupItem =
         new SearchGroupItem()
             .type(DomainType.PERSON.toString())
-            .searchParameters(Arrays.asList(male()));
+            .searchParameters(ImmutableList.of(male()));
     SearchGroup excludeSearchGroup = new SearchGroup().addItemsItem(excludeSearchGroupItem);
 
     SearchRequest searchRequests =
         createSearchRequests(
-            DomainType.PERSON.toString(), Arrays.asList(male()), new ArrayList<>());
+            DomainType.PERSON.toString(), ImmutableList.of(male()), new ArrayList<>());
     searchRequests.getExcludes().add(excludeSearchGroup);
 
     assertParticipants(
@@ -1212,7 +1215,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsICD9ParentAndICD10ChildCondition() throws Exception {
+  public void countSubjectsICD9ParentAndICD10ChildCondition() {
     DbCriteria criteriaParent = icd9CriteriaParent();
     saveCriteriaWithPath("0", criteriaParent);
     DbCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
@@ -1221,7 +1224,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
-            Arrays.asList(icd9().group(true).conceptId(2L), icd10().conceptId(6L)),
+            ImmutableList.of(icd9().group(true).conceptId(2L), icd10().conceptId(6L)),
             new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
@@ -1231,29 +1234,29 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsCPTProcedure() throws Exception {
+  public void countSubjectsCPTProcedure() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.PROCEDURE.toString(),
-            Arrays.asList(procedure().conceptId(4L)),
+            ImmutableList.of(procedure().conceptId(4L)),
             new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsSnomedChildCondition() throws Exception {
+  public void countSubjectsSnomedChildCondition() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
-            Arrays.asList(snomed().standard(true).conceptId(6L)),
+            ImmutableList.of(snomed().standard(true).conceptId(6L)),
             new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsSnomedParentProcedure() throws Exception {
+  public void countSubjectsSnomedParentProcedure() {
     SearchParameter snomed = snomed().group(true).standard(true).conceptId(4302541L);
 
     DbCriteria criteriaParent =
@@ -1289,7 +1292,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.CONDITION.toString(), Arrays.asList(snomed), new ArrayList<>());
+            DomainType.CONDITION.toString(), ImmutableList.of(snomed), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     cbCriteriaDao.delete(criteriaParent.getId());
@@ -1298,31 +1301,34 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsVisit() throws Exception {
-    SearchRequest searchRequest =
-        createSearchRequests(
-            DomainType.VISIT.toString(), Arrays.asList(visit().conceptId(10L)), new ArrayList<>());
-    assertParticipants(
-        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
-  }
-
-  @Test
-  public void countSubjectsVisitModifiers() throws Exception {
+  public void countSubjectsVisit() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.VISIT.toString(),
-            Arrays.asList(visit().conceptId(10L)),
-            Arrays.asList(occurrencesModifier()));
+            ImmutableList.of(visit().conceptId(10L)),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
-  public void countSubjectsDrugChild() throws Exception {
+  public void countSubjectsVisitModifiers() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            DomainType.VISIT.toString(),
+            ImmutableList.of(visit().conceptId(10L)),
+            ImmutableList.of(occurrencesModifier()));
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+  }
+
+  @Test
+  public void countSubjectsDrugChild() {
     jdbcTemplate.execute(
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     SearchRequest searchRequest =
-        createSearchRequests(DomainType.DRUG.toString(), Arrays.asList(drug()), new ArrayList<>());
+        createSearchRequests(
+            DomainType.DRUG.toString(), ImmutableList.of(drug()), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
@@ -1330,7 +1336,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDrugParent() throws Exception {
+  public void countSubjectsDrugParent() {
     DbCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
     DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
@@ -1340,7 +1346,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.DRUG.toString(),
-            Arrays.asList(drug().group(true).conceptId(21600932L)),
+            ImmutableList.of(drug().group(true).conceptId(21600932L)),
             new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
@@ -1351,7 +1357,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDrugParentAndChild() throws Exception {
+  public void countSubjectsDrugParentAndChild() {
     DbCriteria drugNode1 = drugCriteriaParent();
     saveCriteriaWithPath("0", drugNode1);
     DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
@@ -1361,7 +1367,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.DRUG.toString(),
-            Arrays.asList(drug().group(true).conceptId(21600932L), drug()),
+            ImmutableList.of(drug().group(true).conceptId(21600932L), drug()),
             new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
@@ -1372,12 +1378,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDrugChildEncounter() throws Exception {
+  public void countSubjectsDrugChildEncounter() {
     jdbcTemplate.execute(
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.DRUG.toString(), Arrays.asList(drug()), Arrays.asList(visitModifier()));
+            DomainType.DRUG.toString(),
+            ImmutableList.of(drug()),
+            ImmutableList.of(visitModifier()));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
@@ -1385,12 +1393,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsDrugChildAgeAtEvent() throws Exception {
+  public void countSubjectsDrugChildAgeAtEvent() {
     jdbcTemplate.execute(
         "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.DRUG.toString(), Arrays.asList(drug()), Arrays.asList(ageModifier()));
+            DomainType.DRUG.toString(), ImmutableList.of(drug()), ImmutableList.of(ageModifier()));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
@@ -1398,132 +1406,142 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsLabEncounter() throws Exception {
+  public void countSubjectsLabEncounter() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.MEASUREMENT.toString(),
-            Arrays.asList(measurement()),
-            Arrays.asList(visitModifier()));
+            ImmutableList.of(measurement()),
+            ImmutableList.of(visitModifier()));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsLabNumericalBetween() throws Exception {
+  public void countSubjectsLabNumericalBetween() {
     SearchParameter lab = measurement();
     lab.attributes(
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute()
                 .name(AttrName.NUM)
                 .operator(Operator.BETWEEN)
-                .operands(Arrays.asList("0", "1"))));
+                .operands(ImmutableList.of("0", "1"))));
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.MEASUREMENT.toString(), Arrays.asList(lab), new ArrayList<>());
+            DomainType.MEASUREMENT.toString(), ImmutableList.of(lab), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsLabCategoricalIn() throws Exception {
+  public void countSubjectsLabCategoricalIn() {
     SearchParameter lab = measurement();
     lab.attributes(
-        Arrays.asList(
-            new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("1"))));
+        ImmutableList.of(
+            new Attribute()
+                .name(AttrName.CAT)
+                .operator(Operator.IN)
+                .operands(ImmutableList.of("1"))));
     SearchRequest searchRequest =
-        createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
+        createSearchRequests(lab.getType(), ImmutableList.of(lab), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsLabBothNumericalAndCategorical() throws Exception {
+  public void countSubjectsLabBothNumericalAndCategorical() {
     SearchParameter lab = measurement();
     Attribute numerical =
-        new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("0.1"));
+        new Attribute()
+            .name(AttrName.NUM)
+            .operator(Operator.EQUAL)
+            .operands(ImmutableList.of("0.1"));
     Attribute categorical =
-        new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("1", "2"));
-    lab.attributes(Arrays.asList(numerical, categorical));
+        new Attribute()
+            .name(AttrName.CAT)
+            .operator(Operator.IN)
+            .operands(ImmutableList.of("1", "2"));
+    lab.attributes(ImmutableList.of(numerical, categorical));
     SearchRequest searchRequest =
-        createSearchRequests(lab.getType(), Arrays.asList(lab), new ArrayList<>());
+        createSearchRequests(lab.getType(), ImmutableList.of(lab), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsLabCategoricalAgeAtEvent() throws Exception {
+  public void countSubjectsLabCategoricalAgeAtEvent() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.MEASUREMENT.toString(),
-            Arrays.asList(measurement()),
-            Arrays.asList(ageModifier()));
+            ImmutableList.of(measurement()),
+            ImmutableList.of(ageModifier()));
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsLabMoreThanOneSearchParameter() throws Exception {
+  public void countSubjectsLabMoreThanOneSearchParameter() {
     SearchParameter lab1 = measurement();
     SearchParameter lab2 = measurement().conceptId(9L);
     SearchParameter lab3 = measurement().conceptId(9L);
     Attribute labCategorical =
-        new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("77"));
-    lab3.attributes(Arrays.asList(labCategorical));
+        new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(ImmutableList.of("77"));
+    lab3.attributes(ImmutableList.of(labCategorical));
     SearchRequest searchRequest =
-        createSearchRequests(lab1.getDomain(), Arrays.asList(lab1, lab2, lab3), new ArrayList<>());
+        createSearchRequests(
+            lab1.getDomain(), ImmutableList.of(lab1, lab2, lab3), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
-  public void countSubjectsLabMoreThanOneSearchParameterSourceAndStandard() throws Exception {
+  public void countSubjectsLabMoreThanOneSearchParameterSourceAndStandard() {
     SearchParameter icd9 = icd9();
     SearchParameter snomed = snomed().standard(true);
     SearchRequest searchRequest =
-        createSearchRequests(icd9.getDomain(), Arrays.asList(icd9, snomed), new ArrayList<>());
+        createSearchRequests(icd9.getDomain(), ImmutableList.of(icd9, snomed), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsBloodPressure() throws Exception {
+  public void countSubjectsBloodPressure() {
     SearchParameter pm = bloodPressure().attributes(bpAttributes());
     SearchRequest searchRequest =
-        createSearchRequests(pm.getType(), Arrays.asList(pm), new ArrayList<>());
+        createSearchRequests(pm.getType(), ImmutableList.of(pm), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsBloodPressureAny() throws Exception {
+  public void countSubjectsBloodPressureAny() {
     List<Attribute> attributes =
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute().name(AttrName.ANY).operands(new ArrayList<>()).conceptId(903118L),
             new Attribute().name(AttrName.ANY).operands(new ArrayList<>()).conceptId(903115L));
     SearchParameter pm = bloodPressure().attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
+            DomainType.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsBloodPressureOrHeartRateDetail() throws Exception {
+  public void countSubjectsBloodPressureOrHeartRateDetail() {
     SearchParameter bpPm = bloodPressure().attributes(bpAttributes());
 
     List<Attribute> hrAttributes =
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute()
                 .name(AttrName.NUM)
                 .operator(Operator.EQUAL)
-                .operands(Arrays.asList("71")));
+                .operands(ImmutableList.of("71")));
     SearchParameter hrPm = hrDetail().attributes(hrAttributes);
 
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.PHYSICAL_MEASUREMENT.toString(),
-            Arrays.asList(bpPm, hrPm),
+            ImmutableList.of(bpPm, hrPm),
             new ArrayList<>());
 
     assertParticipants(
@@ -1531,38 +1549,38 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsBloodPressureOrHeartRateDetailOrHeartRateIrr() throws Exception {
+  public void countSubjectsBloodPressureOrHeartRateDetailOrHeartRateIrr() {
     SearchParameter bpPm = bloodPressure().attributes(bpAttributes());
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(bpPm), new ArrayList<>());
+            DomainType.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(bpPm), new ArrayList<>());
 
     List<Attribute> hrAttributes =
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute()
                 .name(AttrName.NUM)
                 .operator(Operator.EQUAL)
-                .operands(Arrays.asList("71")));
+                .operands(ImmutableList.of("71")));
     SearchParameter hrPm = hrDetail().attributes(hrAttributes);
     SearchGroupItem anotherSearchGroupItem =
         new SearchGroupItem()
             .type(DomainType.PHYSICAL_MEASUREMENT.toString())
-            .searchParameters(Arrays.asList(hrPm))
+            .searchParameters(ImmutableList.of(hrPm))
             .modifiers(new ArrayList<>());
 
     searchRequest.getIncludes().get(0).addItemsItem(anotherSearchGroupItem);
 
     List<Attribute> irrAttributes =
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute()
                 .name(AttrName.CAT)
                 .operator(Operator.IN)
-                .operands(Arrays.asList("4262985")));
+                .operands(ImmutableList.of("4262985")));
     SearchParameter hrIrrPm = hr().attributes(irrAttributes);
     SearchGroupItem heartRateIrrSearchGroupItem =
         new SearchGroupItem()
             .type(DomainType.PHYSICAL_MEASUREMENT.toString())
-            .searchParameters(Arrays.asList(hrIrrPm))
+            .searchParameters(ImmutableList.of(hrIrrPm))
             .modifiers(new ArrayList<>());
 
     searchRequest.getIncludes().get(0).addItemsItem(heartRateIrrSearchGroupItem);
@@ -1572,138 +1590,140 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsHeartRateAny() throws Exception {
+  public void countSubjectsHeartRateAny() {
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.PHYSICAL_MEASUREMENT.toString(),
-            Arrays.asList(hrDetail().conceptId(1586218L)),
+            ImmutableList.of(hrDetail().conceptId(1586218L)),
             new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
-  public void countSubjectsHeartRate() throws Exception {
+  public void countSubjectsHeartRate() {
     List<Attribute> attributes =
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute()
                 .name(AttrName.NUM)
                 .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
-                .operands(Arrays.asList("45")));
+                .operands(ImmutableList.of("45")));
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.PHYSICAL_MEASUREMENT.toString(),
-            Arrays.asList(hrDetail().conceptId(1586218L).attributes(attributes)),
+            ImmutableList.of(hrDetail().conceptId(1586218L).attributes(attributes)),
             new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
-  public void countSubjectsHeight() throws Exception {
+  public void countSubjectsHeight() {
     List<Attribute> attributes =
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute()
                 .name(AttrName.NUM)
                 .operator(Operator.LESS_THAN_OR_EQUAL_TO)
-                .operands(Arrays.asList("168")));
+                .operands(ImmutableList.of("168")));
     SearchParameter pm = height().attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
+            DomainType.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsWeight() throws Exception {
+  public void countSubjectsWeight() {
     List<Attribute> attributes =
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute()
                 .name(AttrName.NUM)
                 .operator(Operator.LESS_THAN_OR_EQUAL_TO)
-                .operands(Arrays.asList("201")));
+                .operands(ImmutableList.of("201")));
     SearchParameter pm = weight().attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
+            DomainType.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectsBMI() throws Exception {
+  public void countSubjectsBMI() {
     List<Attribute> attributes =
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute()
                 .name(AttrName.NUM)
                 .operator(Operator.LESS_THAN_OR_EQUAL_TO)
-                .operands(Arrays.asList("263")));
+                .operands(ImmutableList.of("263")));
     SearchParameter pm = bmi().attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
+            DomainType.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectWaistCircumferenceAndHipCircumference() throws Exception {
+  public void countSubjectWaistCircumferenceAndHipCircumference() {
     List<Attribute> attributes =
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute()
                 .name(AttrName.NUM)
                 .operator(Operator.EQUAL)
-                .operands(Arrays.asList("31")));
+                .operands(ImmutableList.of("31")));
     SearchParameter pm = waistCircumference().attributes(attributes);
     SearchParameter pm1 = hipCircumference().attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm, pm1), new ArrayList<>());
+            DomainType.PHYSICAL_MEASUREMENT.toString(),
+            ImmutableList.of(pm, pm1),
+            new ArrayList<>());
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectPregnant() throws Exception {
+  public void countSubjectPregnant() {
     List<Attribute> attributes =
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute()
                 .name(AttrName.CAT)
                 .operator(Operator.IN)
-                .operands(Arrays.asList("45877994")));
+                .operands(ImmutableList.of("45877994")));
     SearchParameter pm = pregnancy().attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
+            DomainType.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
-  public void countSubjectWheelChairUser() throws Exception {
+  public void countSubjectWheelChairUser() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
+            DomainType.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
   }
 
   @Test
-  public void countSubjectsPPI() throws Exception {
+  public void countSubjectsPPI() {
     List<DbCriteria> surveys = insertSurveyCriteria();
 
     // Survey
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.SURVEY.toString(), Arrays.asList(survey()), new ArrayList<>());
+            DomainType.SURVEY.toString(), ImmutableList.of(survey()), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     deleteSurveyCriteria(surveys);
@@ -1714,7 +1734,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchParameter ppiQuestion =
         survey().subtype(CriteriaSubType.QUESTION.toString()).conceptId(1585899L);
     searchRequest =
-        createSearchRequests(ppiQuestion.getType(), Arrays.asList(ppiQuestion), new ArrayList<>());
+        createSearchRequests(
+            ppiQuestion.getType(), ImmutableList.of(ppiQuestion), new ArrayList<>());
     response = controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     deleteSurveyCriteria(surveys);
     assertParticipants(response, 1);
@@ -1722,13 +1743,18 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // value source concept id
     surveys = insertSurveyCriteria();
     List<Attribute> attributes =
-        Arrays.asList(
-            new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList("7")));
+        ImmutableList.of(
+            new Attribute()
+                .name(AttrName.CAT)
+                .operator(Operator.IN)
+                .operands(ImmutableList.of("7")));
     SearchParameter ppiValueAsConceptId =
         survey().subtype(CriteriaSubType.ANSWER.toString()).conceptId(5L).attributes(attributes);
     searchRequest =
         createSearchRequests(
-            ppiValueAsConceptId.getType(), Arrays.asList(ppiValueAsConceptId), new ArrayList<>());
+            ppiValueAsConceptId.getType(),
+            ImmutableList.of(ppiValueAsConceptId),
+            new ArrayList<>());
     response = controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     deleteSurveyCriteria(surveys);
     assertParticipants(response, 1);
@@ -1736,27 +1762,27 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     // value as number
     surveys = insertSurveyCriteria();
     attributes =
-        Arrays.asList(
+        ImmutableList.of(
             new Attribute()
                 .name(AttrName.NUM)
                 .operator(Operator.EQUAL)
-                .operands(Arrays.asList("7")));
+                .operands(ImmutableList.of("7")));
     SearchParameter ppiValueAsNumer =
         survey().subtype(CriteriaSubType.ANSWER.toString()).conceptId(5L).attributes(attributes);
     searchRequest =
         createSearchRequests(
-            ppiValueAsNumer.getType(), Arrays.asList(ppiValueAsNumer), new ArrayList<>());
+            ppiValueAsNumer.getType(), ImmutableList.of(ppiValueAsNumer), new ArrayList<>());
     response = controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     deleteSurveyCriteria(surveys);
     assertParticipants(response, 1);
   }
 
   @Test
-  public void getDemoChartInfo() throws Exception {
+  public void getDemoChartInfo() {
     SearchParameter pm = wheelchair().attributes(wheelchairAttributes());
     SearchRequest searchRequest =
         createSearchRequests(
-            DomainType.PHYSICAL_MEASUREMENT.toString(), Arrays.asList(pm), new ArrayList<>());
+            DomainType.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
 
     DemoChartInfoListResponse response =
         controller.getDemoChartInfo(cdrVersion.getCdrVersionId(), searchRequest).getBody();
@@ -1770,7 +1796,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void filterBigQueryConfig_WithoutTableName() throws Exception {
+  public void filterBigQueryConfig_WithoutTableName() {
     final String statement = "my statement ${projectId}.${dataSetId}.myTableName";
     QueryJobConfiguration queryJobConfiguration =
         QueryJobConfiguration.newBuilder(statement).setUseLegacySql(false).build();
@@ -1857,7 +1883,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .name("USA")
             .conceptId("5");
     saveCriteriaWithPath(questionNode.getPath(), answerNode);
-    return Arrays.asList(surveyNode, questionNode, answerNode);
+    return ImmutableList.of(surveyNode, questionNode, answerNode);
   }
 
   private void deleteSurveyCriteria(List<DbCriteria> surveys) {

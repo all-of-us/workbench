@@ -2,29 +2,21 @@ package org.pmiops.workbench.google;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.test.Providers;
+import org.pmiops.workbench.BaseIntegrationTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Import;
 
-public class CloudStorageServiceImplIntegrationTest {
-  private CloudStorageServiceImpl service;
-  private final WorkbenchConfig workbenchConfig = createConfig();
+public class CloudStorageServiceImplIntegrationTest extends BaseIntegrationTest {
+  @Autowired private CloudStorageService service;
 
-  @Before
-  public void setUp() {
-    service = new CloudStorageServiceImpl(Providers.of(workbenchConfig));
-  }
+  @TestConfiguration
+  @Import(CloudStorageServiceImpl.class)
+  static class Configuration {}
 
   @Test
   public void testCanReadFile() {
     assertThat(service.readInvitationKey().length() > 4).isTrue();
-  }
-
-  private static WorkbenchConfig createConfig() {
-    WorkbenchConfig config = new WorkbenchConfig();
-    config.googleCloudStorageService = new WorkbenchConfig.GoogleCloudStorageServiceConfig();
-    config.googleCloudStorageService.credentialsBucketName = "all-of-us-workbench-test-credentials";
-    return config;
   }
 }
