@@ -7,7 +7,6 @@ import com.google.cloud.tasks.v2.QueueName;
 import com.google.cloud.tasks.v2.Task;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -16,13 +15,14 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchLocationConfigService;
 import org.pmiops.workbench.rdr.RdrExportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * This offline process is responsible to daily sync up with RDR by sending all the created/modified
- * User and workspace information.
+ * This offline process is responsible to daily sync up with RDR by creating/pushing multiple task
+ * with eligible user Ids and workspace Ids to cloud task queue
  *
  * @author nsaxena
  */
@@ -32,15 +32,18 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
   private static final Logger log = Logger.getLogger(OfflineRdrExportController.class.getName());
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private RdrExportService rdrExportService;
+  private WorkbenchLocationConfigService locationConfigService;
 
-  private final String BASE_PATH = "/v1/offline";
+  private final String BASE_PATH = "/v1/queueTask";
   private final String EXPORT_RESEARCHER_PATH = BASE_PATH + "/exportResearcherData";
   private final String EXPORT_USER_PATH = BASE_PATH + "/exportWorkspaceData";
-
   private final String IDS_STRING_SPLIT = ", ";
 
   OfflineRdrExportController(
-      RdrExportService rdrExportService, Provider<WorkbenchConfig> configProvider) {
+      WorkbenchLocationConfigService locationConfigService,
+      RdrExportService rdrExportService,
+      Provider<WorkbenchConfig> configProvider) {
+    this.locationConfigService = locationConfigService;
     this.rdrExportService = rdrExportService;
     this.workbenchConfigProvider = configProvider;
   }
@@ -95,7 +98,7 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
     String queuePath =
         QueueName.of(
                 workbenchConfig.server.projectId,
-                workbenchConfig.server.appEngineLocationId,
+                locationConfigService.getCloudTaskLocationId(),
                 workbenchConfig.rdrExport.queueName)
             .toString();
     while (idIterator.hasNext()) {
@@ -124,48 +127,5 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
               "Error while creating task to push to queue for IDS %s and path %s",
               idsAsString, taskUri));
     }
-  }
-
-  /**
-   * This endpoint will be called by the task in queue. The task will contain user ID whose
-   * information needs to be send to RdrExportService
-   *
-   * @param request: Type: ByteString will contain comma separated User ids
-   * @return
-   */
-  @Override
-  public ResponseEntity<Void> exportResearcherData(Object request) {
-    if (request == null || ((ByteString) request).isEmpty()) {
-      log.severe(" call to export Researcher Data had no Ids");
-      return ResponseEntity.noContent().build();
-    }
-    List<Long> requestUserIdList =
-        Arrays.asList(((ByteString) request).toStringUtf8().split(IDS_STRING_SPLIT)).stream()
-            .map(strUserId -> Long.parseLong(strUserId))
-            .collect(Collectors.toList());
-    rdrExportService.exportUsers(requestUserIdList);
-
-    return ResponseEntity.noContent().build();
-  }
-
-  /**
-   * Send all the IDS passed in request body to RDRService
-   *
-   * @param researchIds: Type: ByteString will contain comma separated Workspace ids
-   * @return
-   */
-  @Override
-  public ResponseEntity<Void> exportWorkspaceData(Object researchIds) {
-    if (researchIds == null || ((ByteString) researchIds).isEmpty()) {
-      log.severe(" call to export Workspace Data had no Ids");
-      return ResponseEntity.noContent().build();
-    }
-    List<Long> requestUserIdList =
-        Arrays.asList(((ByteString) researchIds).toStringUtf8().split(IDS_STRING_SPLIT)).stream()
-            .map(strUserId -> Long.parseLong(strUserId))
-            .collect(Collectors.toList());
-    rdrExportService.exportWorkspaces(requestUserIdList);
-
-    return ResponseEntity.noContent().build();
   }
 }

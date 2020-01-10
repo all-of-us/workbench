@@ -23,9 +23,7 @@ public class RdrExportConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public RdrApi rdrApi(
-      ServiceAccounts serviceAccounts,
-      WorkbenchConfig workbenchConfig) {
+  public RdrApi rdrApi(ServiceAccounts serviceAccounts, WorkbenchConfig workbenchConfig) {
     RdrApi api = new RdrApi();
     org.pmiops.workbench.rdr.ApiClient apiClient = new org.pmiops.workbench.rdr.ApiClient();
     apiClient.setDebugging(true);

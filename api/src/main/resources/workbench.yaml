@@ -2173,44 +2173,6 @@ paths:
           schema:
             $ref: "#/definitions/DataSetPreviewResponse"
 
-  /v1/offline/exportResearcherData:
-    post:
-      tags:
-        - offlineRdrExport
-      description: >
-        Send Researcher data
-      operationId: "exportResearcherData"
-      parameters:
-        - in: body
-          name: researchIds
-          required: true
-          description: The IDs of concepts to be added to the concept set.
-          schema:
-            type: object
-      responses:
-        200:
-          description: >
-            A SQL query for each domain in the Data Set
-
-  /v1/offline/exportWorkspaceData:
-    post:
-      tags:
-        - offlineRdrExport
-      description: >
-        Send Researcher data
-      operationId: "exportWorkspaceData"
-      parameters:
-        - in: body
-          name: researchIds
-          required: true
-          description: The IDs of concepts to be added to the concept set.
-          schema:
-            type: object
-      responses:
-        200:
-          description: >
-            A SQL query for each domain in the Data Set
-
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/domainValues/{domain}:
     get:
       tags:
@@ -2230,6 +2192,49 @@ paths:
           description: the values/column names in the domain.
           schema:
             $ref: "#/definitions/DomainValuesResponse"
+
+
+##########################################################################################
+## Endpoints for task in cloud task queue
+#########################################################################################
+  /v1/queueTask/exportResearcherData:
+    post:
+      tags:
+        - cloudTaskRdrExport
+      description: >
+        Send Researcher data
+      operationId: "exportResearcherData"
+      parameters:
+        - in: body
+          name: researcherIds
+          required: true
+          description: The IDs of concepts to be added to the concept set.
+          schema:
+            type: object
+      responses:
+        200:
+          description: >
+            A SQL query for each domain in the Data Set
+
+  /v1/queueTask/exportWorkspaceData:
+    post:
+      tags:
+        - cloudTaskRdrExport
+      description: >
+        Send Researcher data
+      operationId: "exportWorkspaceData"
+      parameters:
+        - in: body
+          name: researchIds
+          required: true
+          description: The IDs of concepts to be added to the concept set.
+          schema:
+            type: object
+      responses:
+        200:
+          description: >
+            A SQL query for each domain in the Data Set
+
 
 ##########################################################################################
 ## DEFINITIONS

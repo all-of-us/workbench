@@ -12,7 +12,7 @@ info:
 host: "pmi-drc-api-test.appspot.com"
 schemes:
   - "https"
-basePath: /rdr/v1
+basePath: /rdr
 
 securityDefinitions:
   googleoauth:
@@ -39,7 +39,7 @@ produces:
 ##########################################################################################
 
 paths:
-  /workbench/directory/workspaces:
+  /v1/workbench/directory/workspaces:
     post:
       description: Submits one or more workspace snapshots for storage in the RDR.
       tags:
@@ -59,7 +59,7 @@ paths:
         200:
           description: successful operation
 
-  /workbench/directory/researchers:
+  /v1/workbench/directory/researchers:
     post:
       description: Submits one or more researcher snapshots for storage in the RDR.
       tags:
@@ -111,8 +111,6 @@ definitions:
         type: boolean
       diseaseFocusedResearchName:
         type: string
-      otherPurposeDetails:
-        type: string
       methodsDevelopment:
         type: boolean
       controlSet:
@@ -131,6 +129,15 @@ definitions:
         type: boolean
       otherPurpose:
         type: boolean
+      otherPurposeDetails:
+        type: string
+      reasonForInvestigation:
+        type: string
+      intendToStudy:
+        type: string
+      findingsFromStudy:
+        type: string
+
 
   RdrWorkspaceUser:
     type: object
@@ -178,13 +185,25 @@ definitions:
       country:
         type: string
       ethnicity:
-        type: string
-#      Need to talk to Yu about this to be a list
+        type: array
+        items:
+          $ref: '#/definitions/Ethnicity'
       gender:
-#      Need to talk to yu about this to be a list
-        type: string
+        type: array
+        items:
+          $ref: '#/definitions/Gender'
       race:
-        type: string
+        type: array
+        items:
+          $ref: '#/definitions/Race'
+      sexAtBirth:
+        $ref: '#/definitions/SexAtBirth'
+      sexualOrientation:
+        $ref: '#/definitions/SexualOrientation'
+      education:
+        $ref: '#/definitions/Education'
+      disability:
+        $ref: '#/definitions/Disability'
       affiliations:
         type: array
         items:
@@ -200,3 +219,68 @@ definitions:
 #        Need to talk to Yu about this to be an ENUM
       nonAcademicAffiliation:
         type: boolean
+
+  Ethnicity:
+    type: string
+    enum:
+      - HISPANIC
+      - NOT_HISPANIC
+      - PREFER_NOT_TO_ANSWER
+
+  Gender:
+    type: string
+    enum:
+      - MALE
+      - FEMALE
+      - NON_BINARY
+      - TRANSGENDER
+      - INTERSEX
+      - NONE
+      - PREFER_NOT_TO_ANSWER
+
+  Race:
+    type: string
+    enum:
+      - AIAN
+      - ASIAN
+      - AA
+      - NHOPI
+      - WHITE
+      - NONE
+      - PREFER_NOT_TO_ANSWER
+
+  SexAtBirth:
+    type: string
+    enum:
+      - FEMALE
+      - INTERSEX
+      - MALE
+      - NONE_OF_THESE_DESCRIBE_ME
+      - PREFER_NOT_TO_ANSWER
+
+  SexualOrientation:
+    type: string
+    enum:
+      - BISEXUAL
+      - GAY
+      - LESBIAN
+      - STRAIGHT
+      - NONE_OF_THESE_DESCRIBE_ME
+      - PREFER_NOT_TO_ANSWER
+
+  Education:
+    type: string
+    enum:
+      - NO_EDUCATION
+      - GRADES_1_12
+      - COLLEGE_GRADUATE
+      - UNDERGRADUATE
+      - MASTER
+      - DOCTORATE
+      -
+  Disability:
+    type: string
+    enum:
+      - YES
+      - NO
+      - PREFER_NOT_TO_ANSWER
