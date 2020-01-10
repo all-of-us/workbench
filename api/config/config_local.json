@@ -95,6 +95,6 @@
     "enableBillingLockout": true
   },
   "actionAudit": {
-    "logName": "workbench-action-audit-local"
+    "logName":"workbench-action-audit-local"
   }
 }
