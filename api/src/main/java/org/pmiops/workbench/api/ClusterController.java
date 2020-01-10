@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.json.JSONObject;
+import org.pmiops.workbench.actionaudit.auditors.ClusterAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -87,6 +88,7 @@ public class ClusterController implements ClusterApiDelegate {
             return allOfUsCluster;
           };
 
+  private final ClusterAuditor clusterAuditor;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final Provider<DbUser> userProvider;
   private final WorkspaceService workspaceService;
@@ -99,6 +101,7 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Autowired
   ClusterController(
+      ClusterAuditor clusterAuditor,
       LeonardoNotebooksClient leonardoNotebooksClient,
       Provider<DbUser> userProvider,
       WorkspaceService workspaceService,
@@ -108,6 +111,7 @@ public class ClusterController implements ClusterApiDelegate {
       UserRecentResourceService userRecentResourceService,
       UserDao userDao,
       Clock clock) {
+    this.clusterAuditor = clusterAuditor;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
@@ -125,6 +129,7 @@ public class ClusterController implements ClusterApiDelegate {
     if (billingProjectId == null) {
       throw new BadRequestException("Must specify billing project");
     }
+    clusterAuditor.fireDeleteClustersInProject(billingProjectId);
 
     leonardoNotebooksClient
         .listClustersByProjectAsAdmin(billingProjectId)

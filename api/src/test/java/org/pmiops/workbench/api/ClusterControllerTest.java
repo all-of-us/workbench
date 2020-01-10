@@ -29,6 +29,7 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.pmiops.workbench.actionaudit.auditors.ClusterAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -49,7 +50,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterConfig;
-import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
@@ -101,6 +101,7 @@ public class ClusterControllerTest {
   @TestConfiguration
   @Import({ClusterController.class, UserServiceImpl.class})
   @MockBean({
+    ClusterAuditor.class,
     FireCloudService.class,
     LeonardoNotebooksClient.class,
     WorkspaceService.class,
@@ -137,6 +138,7 @@ public class ClusterControllerTest {
 
   @Captor private ArgumentCaptor<Map<String, String>> mapCaptor;
 
+  @Autowired ClusterAuditor clusterAuditor;
   @Autowired LeonardoNotebooksClient notebookService;
   @Autowired FireCloudService fireCloudService;
   @Autowired UserDao userDao;
@@ -150,7 +152,6 @@ public class ClusterControllerTest {
   private org.pmiops.workbench.notebooks.model.ListClusterResponse testFcClusterListResponse;
 
   private Cluster testCluster;
-  private ListClusterResponse testClusterListResponse;
   private DbWorkspace testWorkspace;
 
   @Before
@@ -197,12 +198,6 @@ public class ClusterControllerTest {
             .clusterName(getClusterName())
             .clusterNamespace(BILLING_PROJECT_ID)
             .status(ClusterStatus.DELETING)
-            .createdDate(createdDate);
-    testClusterListResponse =
-        new ListClusterResponse()
-            .clusterName(getClusterName())
-            .googleProject(BILLING_PROJECT_ID)
-            .status(ClusterStatus.RUNNING)
             .createdDate(createdDate);
 
     testWorkspace = new DbWorkspace();
