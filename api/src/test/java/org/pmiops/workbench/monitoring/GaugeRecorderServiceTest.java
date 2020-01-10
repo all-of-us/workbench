@@ -23,7 +23,7 @@ import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.monitoring.views.OpenCensusView;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class GaugeRecorderServiceTest {
 
-  private static final Map<OpenCensusView, Number> BILLING_BUFFER_INDIVIDUAL_GAUGE_MAP =
+  private static final Map<Metric, Number> BILLING_BUFFER_INDIVIDUAL_GAUGE_MAP =
       ImmutableMap.of(
           GaugeMetric.BILLING_BUFFER_ASSIGNING_PROJECT_COUNT,
           2L,
@@ -50,11 +50,11 @@ public class GaugeRecorderServiceTest {
       ImmutableList.of(
           MeasurementBundle.builder().addAll(BILLING_BUFFER_INDIVIDUAL_GAUGE_MAP).build(),
           MeasurementBundle.builder()
-              .addValue(GaugeMetric.BILLING_BUFFER_COUNT_BY_STATUS, 22L)
+              .addValue(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 22L)
               .attach(AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
               .build(),
           MeasurementBundle.builder()
-              .addValue(GaugeMetric.BILLING_BUFFER_COUNT_BY_STATUS, 3L)
+              .addValue(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 3L)
               .attach(AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.CREATING.toString())
               .build());
 

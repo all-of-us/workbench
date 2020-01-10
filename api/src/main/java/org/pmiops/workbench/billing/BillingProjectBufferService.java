@@ -95,7 +95,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
       long count = entryStatusToCount.getOrDefault(status, 0L);
       resultBuilder.add(
           MeasurementBundle.builder()
-              .addValue(GaugeMetric.BILLING_BUFFER_COUNT_BY_STATUS, count)
+              .addValue(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, count)
               .attach(AttachmentKey.BUFFER_ENTRY_STATUS, status.toString())
               .build());
     }

@@ -12,7 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.monitoring.views.OpenCensusView;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,48 +44,13 @@ public class MonitoringServiceImpl implements MonitoringService {
 
   private void registerSignals() {
     Arrays.stream(GaugeMetric.values())
-        .map(OpenCensusView::toView)
+        .map(Metric::toView)
         .forEach(viewManager::registerView);
   }
 
   @Override
-  public void recordValue(OpenCensusView viewInfo, Number value) {
-    try {
-      initStatsConfigurationIdempotent();
-      if (value == null) {
-        logger.log(
-            Level.WARNING,
-            String.format(
-                "Attempting to log a null numeric value for signal %s", viewInfo.getName()));
-        return;
-      }
-      if (viewInfo.getMeasureClass().equals(MeasureLong.class)) {
-        recordLongValue(viewInfo.getMeasureLong(), value.longValue());
-      } else if (viewInfo.getMeasureClass().equals(MeasureDouble.class)) {
-        recordDoubleValue(viewInfo.getMeasureDouble(), value.doubleValue());
-      } else {
-        logger.log(
-            Level.WARNING,
-            String.format("Unrecognized measure class %s", viewInfo.getMeasureClass().getName()));
-      }
-    } catch (RuntimeException e) {
-      logAndSwallow(e);
-    }
-  }
-
-  /**
-   * Record multiple values at once. An attachment map allows associating these measurements with
-   * metadata (shared across all samples). We use a single MeasureMap for all the entries in both
-   * maps.
-   *
-   * @param viewInfoToValue key/value pairs for time series. These need not be related, but any
-   *     attachments should apply to all entries in this map.
-   * @param attachmentKeyToValue Map of String/AttachmentValue pairs to be associated with these
-   *     data.
-   */
-  @Override
   public void recordValues(
-      Map<OpenCensusView, Number> viewInfoToValue,
+      Map<Metric, Number> viewInfoToValue,
       Map<String, AttachmentValue> attachmentKeyToValue) {
     try {
       initStatsConfigurationIdempotent();
@@ -115,7 +80,7 @@ public class MonitoringServiceImpl implements MonitoringService {
    */
   private void addToMeasureMap(
       @NotNull MeasureMap measureMap,
-      @NotNull OpenCensusView viewProperties,
+      @NotNull Metric viewProperties,
       @NotNull Number value) {
     if (viewProperties.getMeasureClass().equals(MeasureLong.class)) {
       measureMap.put(viewProperties.getMeasureLong(), value.longValue());

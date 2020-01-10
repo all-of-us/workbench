@@ -24,7 +24,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.monitoring.views.OpenCensusView;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -96,7 +96,7 @@ public class MonitoringServiceTest {
 
   @Test
   public void testRecordMap() {
-    ImmutableMap.Builder<OpenCensusView, Number> signalToValueBuilder = ImmutableMap.builder();
+    ImmutableMap.Builder<Metric, Number> signalToValueBuilder = ImmutableMap.builder();
     signalToValueBuilder.put(GaugeMetric.BILLING_BUFFER_SIZE, 99L);
     signalToValueBuilder.put(GaugeMetric.BILLING_BUFFER_CREATING_PROJECT_COUNT, 2L);
     signalToValueBuilder.put(GaugeMetric.DEBUG_RANDOM_DOUBLE, 3.14);

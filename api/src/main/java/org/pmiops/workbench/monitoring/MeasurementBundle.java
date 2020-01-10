@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
-import org.pmiops.workbench.monitoring.views.OpenCensusView;
+import org.pmiops.workbench.monitoring.views.Metric;
 
 /**
  * Simple bundle class to avoid dealing with lists of pairs of maps. This situation can occur in
@@ -17,17 +17,17 @@ import org.pmiops.workbench.monitoring.views.OpenCensusView;
  * to avoid excessive proliferation of (confusing) argument list types, we try to consolidate here.
  */
 public class MeasurementBundle {
-  private final Map<OpenCensusView, Number> monitoringViews;
+  private final Map<Metric, Number> monitoringViews;
   private final Map<AttachmentKey, String> attachmentKeyToString;
 
   private MeasurementBundle(
-      Map<OpenCensusView, Number> monitoringViews,
+      Map<Metric, Number> monitoringViews,
       Map<AttachmentKey, String> attachmentKeyToString) {
     this.monitoringViews = monitoringViews;
     this.attachmentKeyToString = attachmentKeyToString;
   }
 
-  public Map<OpenCensusView, Number> getMeasurements() {
+  public Map<Metric, Number> getMeasurements() {
     return monitoringViews;
   }
 
@@ -53,7 +53,7 @@ public class MeasurementBundle {
     return new Builder();
   }
 
-  public static MeasurementBundle ofDelta(OpenCensusView view) {
+  public static MeasurementBundle ofDelta(Metric view) {
     return builder().addDelta(view).build();
   }
 
@@ -88,7 +88,7 @@ public class MeasurementBundle {
   }
 
   public static class Builder {
-    private ImmutableMap.Builder<OpenCensusView, Number> measurementsBuilder;
+    private ImmutableMap.Builder<Metric, Number> measurementsBuilder;
     private ImmutableMap.Builder<AttachmentKey, String> attachmentsBuilder;
 
     private Builder() {
@@ -96,17 +96,17 @@ public class MeasurementBundle {
       attachmentsBuilder = ImmutableMap.builder();
     }
 
-    public Builder addDelta(OpenCensusView viewInfo) {
+    public Builder addDelta(Metric viewInfo) {
       measurementsBuilder.put(viewInfo, MonitoringService.DELTA_VALUE);
       return this;
     }
 
-    public Builder addValue(OpenCensusView viewInfo, Number value) {
+    public Builder addValue(Metric viewInfo, Number value) {
       measurementsBuilder.put(viewInfo, value);
       return this;
     }
 
-    public Builder addAll(Map<OpenCensusView, Number> map) {
+    public Builder addAll(Map<Metric, Number> map) {
       measurementsBuilder.putAll(ImmutableMap.copyOf(map));
       return this;
     }

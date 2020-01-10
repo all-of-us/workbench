@@ -38,14 +38,6 @@ public class StackdriverStatsExporterService {
             StackdriverStatsConfiguration.builder()
                 .setMetricNamePrefix(buildMetricNamePrefix())
                 .setProjectId(workbenchConfigProvider.get().server.projectId)
-                .setMonitoredResource(
-                    MonitoredResource.newBuilder()
-                        .setType("generic_node")
-                        .putLabels("project_id", workbenchConfigProvider.get().server.projectId)
-                        .putLabels("location", "global")
-                        .putLabels("namespace", "aou-test1")
-                        .putLabels("node_id", "1")
-                        .build())
                 .build();
         StackdriverStatsExporter.createAndRegister(configuration);
         initialized = true;

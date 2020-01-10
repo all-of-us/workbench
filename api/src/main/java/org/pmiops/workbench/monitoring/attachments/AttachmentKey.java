@@ -5,8 +5,10 @@ public enum AttachmentKey implements AttachmentKeyBase {
   DEBUG_COLOR("debug_color"),
   NOTEBOOK_NAME("notebook_name"),
   NOTEBOOK_WORKSPACE_NAMESPACE("notebook_workspace_namespace"),
+  USER_BYPASSED_BETA("user_bypassed_beta"),
   USER_DISABLED("user_disabled"),
   DATASET_INVALID("dataset_invalid"),
+  USER_DATA_ACCESS_LEVEL("user_data_access_level"),
   WORKSPACE_ACTIVE_STATUS("workspace_active_status"),
   WORKSPACE_DATA_ACCESS_LEVEL("workspace_data_access_level");
 

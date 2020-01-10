@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 /** Metric enum values for events to be counted. */
-public enum EventMetric implements OpenCensusView {
+public enum EventMetric implements Metric {
   NOTEBOOK_CLONE("notebook_clone", "Clone (duplicate) a notebook"),
   NOTEBOOK_DELETE("notebook_delete", "Delete a notebook"),
   NOTEBOOK_SAVE("notebook_save", "Save (or create) a notebook");
@@ -38,7 +38,7 @@ public enum EventMetric implements OpenCensusView {
 
   @Override
   public String getUnit() {
-    return OpenCensusView.UNITLESS_UNIT;
+    return Metric.UNITLESS_UNIT;
   }
 
   @Override

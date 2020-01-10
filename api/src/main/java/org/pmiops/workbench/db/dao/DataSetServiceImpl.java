@@ -67,13 +67,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   public Collection<MeasurementBundle> getGaugeData() {
     Map<Boolean, Long> invalidToCount = dataSetDao.getInvalidToCountMap();
     return ImmutableSet.of(
-        MeasurementBundle.builder().addValue(GaugeMetric.DATASET_COUNT, dataSetDao.count()).build(),
         MeasurementBundle.builder()
-            .addValue(GaugeMetric.DATASET_COUNT_BY_INVALID, invalidToCount.getOrDefault(false, 0L))
+            .addValue(GaugeMetric.DATASET_COUNT, invalidToCount.getOrDefault(false, 0L))
             .attach(AttachmentKey.DATASET_INVALID, Boolean.valueOf(false).toString())
             .build(),
         MeasurementBundle.builder()
-            .addValue(GaugeMetric.DATASET_COUNT_BY_INVALID, invalidToCount.getOrDefault(true, 0L))
+            .addValue(GaugeMetric.DATASET_COUNT, invalidToCount.getOrDefault(true, 0L))
             .attach(AttachmentKey.DATASET_INVALID, Boolean.valueOf(true).toString())
             .build());
   }

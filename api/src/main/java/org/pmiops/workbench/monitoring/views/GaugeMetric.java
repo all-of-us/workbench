@@ -7,20 +7,12 @@ import io.opencensus.tags.TagKey;
 import java.util.Collections;
 import java.util.List;
 
-public enum GaugeMetric implements OpenCensusView {
+public enum GaugeMetric implements Metric {
+  BILLING_BUFFER_PROJECT_COUNT(
+      "billing_buffer_project_count", "Number of projects in the billing buffer for each status"),
   BILLING_BUFFER_SIZE(
       "billing_project_buffer_entries", "The number of billing project buffer entries."),
-  BILLING_BUFFER_COUNT_BY_STATUS(
-      "billing_buffer_count_by_status", "Number of projects inthe billing buffer for each status"),
-  BILLING_BUFFER_AVAILABLE_PROJECT_COUNT(
-      "billing_project_buffer_available_project_count",
-      "Current number of billing projects with available status."),
-  BILLING_BUFFER_ASSIGNING_PROJECT_COUNT(
-      "billing_project_buffer_assigning_project_count",
-      "Current number of billing projects with assigning status."),
-  BILLING_BUFFER_CREATING_PROJECT_COUNT(
-      "billing_project_buffer_creating_project_count",
-      "Current number of billing projects with creating status."),
+  DATASET_COUNT("dataset_count", "Count of all datasets in existence"),
   DEBUG_CONSTANT_VALUE("debug_constant_value", "Always 101"),
   DEBUG_MILLISECONDS_SINCE_EPOCH("debug_epoch_millis", "Number of milliseconds since epoch"),
   DEBUG_RANDOM_DOUBLE(
@@ -34,12 +26,9 @@ public enum GaugeMetric implements OpenCensusView {
       "workspace_count_by_active_status", "Count of workspaces by active status"),
   WORKSPACE_COUNT_BY_DATA_ACCESS_LEVEL(
       "workspace_count_by_data_access_level", "Count of workspaces for each data access level"),
-  DATASET_COUNT("dataset_count", "Count of all datasets in existence"),
-  DATASET_COUNT_BY_INVALID("dataset_count_by_invalid", "Count of all datasets by invalid status"),
   COHORT_COUNT("cohort_count", "Count of all cohorts in existence"),
   COHORT_REVIEW_COUNT("cohort_review_count", "Total number of cohort reviews in existence"),
-  USER_COUNT_BY_DISABLED_STATUS(
-      "user_count_by_disabled_status", "Count of users, labeled by disabled status");
+  USER_COUNT("user_count", "total number of users");
 
   private final String name;
   private final String description;
@@ -49,7 +38,7 @@ public enum GaugeMetric implements OpenCensusView {
   private final Class measureClass;
 
   GaugeMetric(String name, String description) {
-    this(name, description, OpenCensusView.UNITLESS_UNIT, MeasureLong.class);
+    this(name, description, Metric.UNITLESS_UNIT, MeasureLong.class);
   }
 
   GaugeMetric(String name, String description, String unit, Class measureClass) {
