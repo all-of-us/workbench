@@ -37,23 +37,23 @@ public class GaugeRecorderServiceTest {
   private static final List<MeasurementBundle> BILLING_BUFFER_GAUGE_BUNDLES =
       ImmutableList.of(
           MeasurementBundle.builder()
-              .addValue(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 22L)
-              .attach(Attachment.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
+              .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 22L)
+              .addAttachment(Attachment.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
               .build(),
           MeasurementBundle.builder()
-              .addValue(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 3L)
-              .attach(Attachment.BUFFER_ENTRY_STATUS, BufferEntryStatus.CREATING.toString())
+              .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 3L)
+              .addAttachment(Attachment.BUFFER_ENTRY_STATUS, BufferEntryStatus.CREATING.toString())
               .build());
 
   private static final long WORKSPACES_COUNT = 101L;
   private static final MeasurementBundle WORKSPACE_MEASUREMENT_BUNDLE =
       MeasurementBundle.builder()
-          .addValue(GaugeMetric.WORKSPACE_TOTAL_COUNT, WORKSPACES_COUNT)
+          .addMeasurement(GaugeMetric.WORKSPACE_TOTAL_COUNT, WORKSPACES_COUNT)
           .build();
   private static final String TEST_GAUGE_DATA_COLLECTOR = "test gauge data collector";
 
   @Captor private ArgumentCaptor<MeasurementBundle> measurementBundleCaptor;
-  @Captor private ArgumentCaptor<Collection<MeasurementBundle>> gaugeDataCaptor;
+  @Captor private ArgumentCaptor<Collection<MeasurementBundle>> measurementBundlesListCaptor;
 
   // In order to access the GaugeDataCollector method, we need to mock the
   // Implementation classes for the ones that implement it. We could get
@@ -95,8 +95,7 @@ public class GaugeRecorderServiceTest {
       return () ->
           Collections.singleton(
               MeasurementBundle.builder()
-                  .addValue(GaugeMetric.DATASET_COUNT, 999L)
-                  .addValue(GaugeMetric.DEBUG_CONSTANT_VALUE, 100L)
+                  .addMeasurement(GaugeMetric.DATASET_COUNT, 999L)
                   .build());
     }
   }
@@ -120,19 +119,24 @@ public class GaugeRecorderServiceTest {
   public void testRecord() {
     gaugeRecorderService.record();
 
-    verify(mockMonitoringService, atLeast(1)).recordBundle(measurementBundleCaptor.capture());
+    verify(mockMonitoringService, atLeast(1)).recordBundles(measurementBundlesListCaptor.capture());
     verify(mockWorkspaceServiceImpl).getGaugeData();
     verify(mockBillingProjectBufferService).getGaugeData();
 
-    final List<MeasurementBundle> allRecordedBundles = measurementBundleCaptor.getAllValues();
+    final List<Collection<MeasurementBundle>> allRecordedBundles = measurementBundlesListCaptor.getAllValues();
     final int expectedSize =
         mockWorkspaceServiceImpl.getGaugeData().size()
             + mockBillingProjectBufferService.getGaugeData().size()
             + standAloneGaugeDataCollector.getGaugeData().size();
-    assertThat(allRecordedBundles).hasSize(expectedSize);
+    final int flatSize = allRecordedBundles.stream()
+        .map(Collection::size)
+        .mapToInt(Integer::valueOf)
+        .sum();
+    assertThat(flatSize).isEqualTo(expectedSize);
 
     final Optional<MeasurementBundle> workspacesBundle =
         allRecordedBundles.stream()
+            .flatMap(Collection::stream)
             .filter(b -> b.getMeasurements().containsKey(GaugeMetric.WORKSPACE_TOTAL_COUNT))
             .findFirst();
 

@@ -85,12 +85,10 @@ public class MonitoringServiceTest {
     ImmutableMap.Builder<Metric, Number> signalToValueBuilder = ImmutableMap.builder();
     signalToValueBuilder.put(GaugeMetric.BILLING_BUFFER_SIZE, 99L);
     signalToValueBuilder.put(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 2L);
-    signalToValueBuilder.put(GaugeMetric.DEBUG_RANDOM_DOUBLE, 3.14);
 
     monitoringService.recordValues(signalToValueBuilder.build());
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap, times(2)).put(any(MeasureLong.class), anyLong());
-    verify(mockMeasureMap, times(1)).put(GaugeMetric.DEBUG_RANDOM_DOUBLE.getMeasureDouble(), 3.14);
     verify(mockMeasureMap).record();
   }
 

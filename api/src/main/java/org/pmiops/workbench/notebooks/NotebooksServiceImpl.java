@@ -168,12 +168,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             workspaceNamespace,
             workspaceName,
             newName);
-    monitoringService.recordBundle(
-        MeasurementBundle.builder()
-            .addValue(EventMetric.NOTEBOOK_CLONE, 1L)
-            .attach(Attachment.NOTEBOOK_NAME, copiedNotebookFileDetail.getName())
-            .attach(Attachment.NOTEBOOK_WORKSPACE_NAMESPACE, workspaceName)
-            .build());
+    monitoringService.recordEvent(EventMetric.NOTEBOOK_CLONE);
     return copiedNotebookFileDetail;
   }
 

@@ -623,7 +623,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
     resultBuilder.add(
         MeasurementBundle.builder()
-            .addValue(GaugeMetric.WORKSPACE_TOTAL_COUNT, workspaceDao.count())
+            .addMeasurement(GaugeMetric.WORKSPACE_TOTAL_COUNT, workspaceDao.count())
             .build());
     final Map<WorkspaceActiveStatus, Long> activeStatusToCount =
         workspaceDao.getActiveStatusToCountMap();
@@ -631,8 +631,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       final long count = activeStatusToCount.getOrDefault(status, 0L);
       resultBuilder.add(
           MeasurementBundle.builder()
-              .addValue(GaugeMetric.WORKSPACE_COUNT_BY_ACTIVE_STATUS, count)
-              .attach(Attachment.WORKSPACE_ACTIVE_STATUS, status.toString())
+              .addMeasurement(GaugeMetric.WORKSPACE_COUNT_BY_ACTIVE_STATUS, count)
+              .addAttachment(Attachment.WORKSPACE_ACTIVE_STATUS, status.toString())
               .build());
     }
 
@@ -642,8 +642,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       final long count = dataAccessLevelToCount.getOrDefault(status, 0L);
       resultBuilder.add(
           MeasurementBundle.builder()
-              .addValue(GaugeMetric.WORKSPACE_COUNT_BY_DATA_ACCESS_LEVEL, count)
-              .attach(Attachment.WORKSPACE_DATA_ACCESS_LEVEL, status.toString())
+              .addMeasurement(GaugeMetric.WORKSPACE_COUNT_BY_DATA_ACCESS_LEVEL, count)
+              .addAttachment(Attachment.WORKSPACE_DATA_ACCESS_LEVEL, status.toString())
               .build());
     }
 

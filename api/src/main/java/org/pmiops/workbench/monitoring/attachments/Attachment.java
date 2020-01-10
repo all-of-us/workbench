@@ -14,6 +14,7 @@ public enum Attachment implements AttachmentBase {
   BUFFER_ENTRY_STATUS("buffer_entry_status",
       ImmutableSet.of(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT),
       Enums.getValueStrings(BufferEntryStatus.class)),
+  DEBUG_CONTINUOUS_VALUE("debug_continuous_value"),
   DATASET_INVALID("dataset_invalid",
       ImmutableSet.of(GaugeMetric.DATASET_COUNT),
       Booleans.getValueStrings()),

@@ -85,7 +85,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
     resultBuilder.add(
         MeasurementBundle.builder()
-            .addValue(GaugeMetric.BILLING_BUFFER_SIZE, getCurrentBufferSize())
+            .addMeasurement(GaugeMetric.BILLING_BUFFER_SIZE, getCurrentBufferSize())
             .build());
 
     final ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
@@ -95,8 +95,8 @@ public class BillingProjectBufferService implements GaugeDataCollector {
       long count = entryStatusToCount.getOrDefault(status, 0L);
       resultBuilder.add(
           MeasurementBundle.builder()
-              .addValue(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, count)
-              .attach(Attachment.BUFFER_ENTRY_STATUS, status.toString())
+              .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, count)
+              .addAttachment(Attachment.BUFFER_ENTRY_STATUS, status.toString())
               .build());
     }
 

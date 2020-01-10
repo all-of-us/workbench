@@ -781,10 +781,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         .map(
             e ->
                 MeasurementBundle.builder()
-                    .addValue(GaugeMetric.USER_COUNT, e.getValue())
-                    .attach(Attachment.USER_DATA_ACCESS_LEVEL, e.getKey().getKey(0))
-                    .attach(Attachment.USER_DISABLED, e.getKey().getKey(1))
-                    .attach(Attachment.USER_BYPASSED_BETA, e.getKey().getKey(2))
+                    .addMeasurement(GaugeMetric.USER_COUNT, e.getValue())
+                    .addAttachment(Attachment.USER_DATA_ACCESS_LEVEL, e.getKey().getKey(0))
+                    .addAttachment(Attachment.USER_DISABLED, e.getKey().getKey(1))
+                    .addAttachment(Attachment.USER_BYPASSED_BETA, e.getKey().getKey(2))
                     .build())
         .collect(ImmutableSet.toImmutableSet());
   }

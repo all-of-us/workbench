@@ -53,7 +53,7 @@ public class MeasurementBundle {
   }
 
   public static MeasurementBundle ofDelta(Metric view) {
-    return builder().addDelta(view).build();
+    return builder().addEvent(view).build();
   }
 
   @Override
@@ -95,36 +95,63 @@ public class MeasurementBundle {
       attachmentsBuilder = ImmutableMap.builder();
     }
 
-    public Builder addDelta(Metric viewInfo) {
+    public Builder addEvent(Metric viewInfo) {
       measurementsBuilder.put(viewInfo, MonitoringService.DELTA_VALUE);
       return this;
     }
 
-    public Builder addValue(Metric viewInfo, Number value) {
-      measurementsBuilder.put(viewInfo, value);
+    public Builder addMeasurement(Metric metric, Number value) {
+      measurementsBuilder.put(metric, value);
       return this;
     }
 
-    public Builder addAll(Map<Metric, Number> map) {
+    public Builder addAllMeasurements(Map<Metric, Number> map) {
       measurementsBuilder.putAll(ImmutableMap.copyOf(map));
       return this;
     }
 
-    public Builder attach(Attachment attachmentKey, String value) {
+    public Builder addAttachment(Attachment attachmentKey, String value) {
       attachmentsBuilder.put(attachmentKey, value);
       return this;
     }
 
-    public Builder attachAll(Map<Attachment, String> attachmentKeyToString) {
+    public Builder addAllAttachments(Map<Attachment, String> attachmentKeyToString) {
       attachmentsBuilder.putAll(ImmutableMap.copyOf(attachmentKeyToString));
       return this;
     }
 
     public MeasurementBundle build() {
-      if (measurementsBuilder.build().isEmpty()) {
+      validate();
+      return new MeasurementBundle(measurementsBuilder.build(), attachmentsBuilder.build());
+    }
+
+    /**
+     * Validate the MeasurementBundle Builder inputs here, throwing IllegalStateException if not valid.
+     * Rules are:
+     *   1. Bundle must have at least one measurement
+     *   2. Any attachment provided must support all metrics provided in the masurements map, as determined by Attachment#supportsMetric()
+     *   3. Additionally, all attachment values must be supported by their attachments, according to Attachment#supportsDiscreteValue()
+     */
+    private void validate() {
+      ImmutableMap<Metric, Number> measurements = measurementsBuilder.build();
+      ImmutableMap<Attachment, String> attachments = attachmentsBuilder.build();
+      if (measurements.isEmpty()) {
         throw new IllegalStateException("MeasurementBundle must have at least one measurement.");
       }
-      return new MeasurementBundle(measurementsBuilder.build(), attachmentsBuilder.build());
+      // Validate each attachment supports all metrics
+      for (Map.Entry<Attachment, String> entry : attachments.entrySet()) {
+        final Attachment attachment = entry.getKey();
+        final String attachmentValue = entry.getValue();
+
+        for (Metric metric : measurements.keySet()) {
+          if (!attachment.supportsMetric(metric)) {
+            throw new IllegalStateException((String.format("Attachment %s does not support metric %s", attachment.getKeyName(), metric.getName())));
+          }
+        }
+        if (!entry.getKey().supportsDiscreteValue(attachmentValue)) {
+          throw new IllegalStateException(String.format("Attachment %s does not support provided value %s", attachment.getKeyName(), attachmentValue));
+        }
+      }
     }
   }
 }
