@@ -1,6 +1,5 @@
 package org.pmiops.workbench.notebooks;
 
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
@@ -43,9 +42,7 @@ public class NotebooksConfig {
   public ApiClient workbenchServiceAccountClient(WorkbenchConfig workbenchConfig) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
     try {
-      apiClient.setAccessToken(
-          ServiceAccounts.getScopedAccessToken(
-              GoogleCredentials.getApplicationDefault(), NOTEBOOK_SCOPES));
+      apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(NOTEBOOK_SCOPES));
     } catch (IOException e) {
       throw new ServerErrorException(e);
     }
