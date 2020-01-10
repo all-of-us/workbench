@@ -16,7 +16,7 @@ public class RdrExportEnums {
           .put(Race.PREFER_NO_ANSWER, org.pmiops.workbench.rdr.model.Race.PREFER_NOT_TO_ANSWER)
           .put(Race.NONE, org.pmiops.workbench.rdr.model.Race.NONE)
           .build();
-  
+
   private static final BiMap<Ethnicity, org.pmiops.workbench.rdr.model.Ethnicity>
       CLIENT_TO_RDR_ETHNICITY =
           ImmutableBiMap.<Ethnicity, org.pmiops.workbench.rdr.model.Ethnicity>builder()
