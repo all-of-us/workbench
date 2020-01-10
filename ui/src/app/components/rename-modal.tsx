@@ -12,7 +12,8 @@ import {
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors} from 'app/utils';
-import {ResourceType} from 'app/utils/resourceActions';
+import {toDisplay} from 'app/utils/resourceActions';
+import {ResourceType} from 'generated/fetch';
 import * as React from 'react';
 import {validate} from 'validate.js';
 
@@ -34,8 +35,8 @@ const styles = reactStyles({
  *
  * Other AoU resource types do not have the same name restriction and only block slashes.
  */
-export const nameValidationFormat = (existingNames, type) =>
-  type === ResourceType.NOTEBOOK ?
+export const nameValidationFormat = (existingNames, resourceType: ResourceType) =>
+  resourceType === ResourceType.NOTEBOOK ?
     ({
       presence: {allowEmpty: false},
       format: {
@@ -69,7 +70,7 @@ interface Props {
   onCancel: Function;
   onRename: Function;
   nameFormat?: Function;
-  type: string;
+  resourceType: ResourceType;
 }
 
 interface States {
@@ -95,14 +96,14 @@ export class RenameModal extends React.Component<Props, States> {
   }
 
   render() {
-    const {hideDescription, existingNames, oldName, type} = this.props;
+    const {hideDescription, existingNames, oldName, resourceType} = this.props;
     let {newName, nameTouched, resourceDescription, saving} = this.state;
     if (this.props.nameFormat) {
       newName = this.props.nameFormat(newName);
     }
     const errors = validate(
       {newName: newName},
-      {newName: nameValidationFormat(existingNames, type)}
+      {newName: nameValidationFormat(existingNames, resourceType)}
       );
     return <Modal loading={saving}>
       <ModalTitle>Enter new name for {oldName}</ModalTitle>
@@ -126,7 +127,7 @@ export class RenameModal extends React.Component<Props, States> {
                   disabled={!!errors || saving}
                   style={{marginLeft: '0.5rem'}}
                   onClick={() => this.onRename()}>
-            Rename {type}
+            Rename {toDisplay(resourceType)}
           </Button>
         </TooltipTrigger>
       </ModalFooter>

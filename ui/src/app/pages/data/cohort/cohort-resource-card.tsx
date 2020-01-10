@@ -7,8 +7,8 @@ import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {formatRecentResourceDisplayDate} from 'app/utils';
 import {navigateByUrl} from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActions';
-import {RecentResource} from 'generated/fetch';
+import {toDisplay} from 'app/utils/resourceActions';
+import {RecentResource, ResourceType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -160,7 +160,7 @@ export const CohortResourceCard = fp.flow(
     return <React.Fragment>
       {this.state.showRenameModal &&
       <RenameModal onRename={(name, description) => this.rename(name, description)}
-                   type={fp.startCase(this.resourceType)}
+                   resourceType={this.resourceType}
                    onCancel={() => this.setState({showRenameModal: false})}
                    oldDescription={this.props.resource.cohort.description}
                    oldName={this.displayName}
@@ -174,7 +174,7 @@ export const CohortResourceCard = fp.flow(
         displayName={this.displayName}
         description={this.props.resource.cohort.description}
         displayDate={formatRecentResourceDisplayDate(this.props.resource.modifiedTime)}
-        footerText={fp.startCase(this.resourceType)}
+        footerText={toDisplay(this.resourceType)}
         footerColor={colors.resourceCardHighlights.cohort}
       />
     </React.Fragment>;

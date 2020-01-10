@@ -236,4 +236,21 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
           "select distinct domain_id as domain, type, is_standard as standard from cb_criteria order by domain, type, is_standard",
       nativeQuery = true)
   List<DbMenuOption> findMenuOptions();
+
+  @Query(
+      value =
+          "select count(c) "
+              + "from DbCriteria c "
+              + "where domainId = 'SURVEY' and type = 'PPI' and subtype = 'QUESTION' "
+              + "and match(synonyms, :term) > 0")
+  long findSurveyCountByTerm(@Param("term") String term);
+
+  @Query(
+      value =
+          "select count(*) "
+              + "from cb_criteria "
+              + "where domain_id = 'SURVEY' and type = 'PPI' and subtype = 'QUESTION' "
+              + "and parent_id in (select id from cb_criteria where domain_id = 'SURVEY' and type = 'PPI' and name = :surveyName)",
+      nativeQuery = true)
+  long findSurveyCountBySurveyName(@Param("surveyName") String surveyName);
 }

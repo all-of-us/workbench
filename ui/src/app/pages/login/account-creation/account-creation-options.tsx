@@ -1,15 +1,35 @@
 import {
   AcademicRole,
+  Degree,
   Education,
   EducationalRole,
   Ethnicity,
   Gender,
   IndustryRole,
   NonAcademicAffiliation,
-  Race
+  Race,
+  SexAtBirth,
+  SexualOrientation
 } from 'generated/fetch';
 
 export const AccountCreationOptions = {
+  degree: [
+    {label: 'Ph.D.', value: Degree.PHD},
+    {label: 'M.D.', value: Degree.MD},
+    {label: 'J.D.', value: Degree.JD},
+    {label: 'Ed.D.', value: Degree.EDD},
+    {label: 'M.S.N.', value: Degree.MSN},
+    {label: 'M.S.', value: Degree.MS},
+    {label: 'M.A.', value: Degree.MA},
+    {label: 'M.B.A.', value: Degree.MBA},
+    {label: 'M.E.', value: Degree.ME},
+    {label: 'B.A.', value: Degree.BA},
+    {label: 'B.S.', value: Degree.BS},
+    {label: 'B.S.N.', value: Degree.BSN},
+    // This label can have a space in it when the following issue is resolved:
+    // https://github.com/primefaces/primereact/issues/1137
+    {label: 'None(blank)', value: Degree.NONE},
+  ],
   roles: [
     {label: `Undergraduate (Bachelor level) student`, value: AcademicRole.UNDERGRADUATE},
     {label: `Graduate trainee (Current student in a Masters, PhD, or Medical school training
@@ -43,7 +63,7 @@ export const AccountCreationOptions = {
     {label: 'Administrator', value: EducationalRole.ADMIN},
     {label: 'Other (free text)', value: EducationalRole.FREETEXT}
   ],
-  Race: [
+  race: [
     {label: `American Indian or Alaska Native (AIAN)`, value: Race.AIAN},
     {label: `Black or African American`, value: Race.AA},
     {label: `Asian`, value: Race.ASIAN},
@@ -52,12 +72,12 @@ export const AccountCreationOptions = {
     {label: `Prefer not to answer`, value: Race.PREFERNOANSWER},
     {label: `None of these describe me`, value: Race.NONE}
   ],
-  Ethnicity: [
+  ethnicity: [
     {label: `Hispanic or Latino`, value: Ethnicity.HISPANIC},
     {label: `Not Hispanic or Latino`, value: Ethnicity.NOTHISPANIC},
     {label: ` Prefer not to answer`, value: Ethnicity.PREFERNOANSWER}
   ],
-  Gender: [
+  gender: [
     {label: 'Male', value: Gender.MALE},
     {label: 'Female', value: Gender.FEMALE},
     {label: 'Non-binary', value: Gender.NONBINARY},
@@ -66,7 +86,22 @@ export const AccountCreationOptions = {
     {label: `Prefer not to answer`, value: Gender.PREFERNOANSWER},
     {label: `None of these describe me`, value: Gender.NONE}
   ],
-  LevelOfEducation: [
+  sexAtBirth: [
+    {label: 'Female', value: SexAtBirth.FEMALE},
+    {label: 'Intersex', value: SexAtBirth.INTERSEX},
+    {label: 'Male', value: SexAtBirth.MALE},
+    {label: 'None of these describe me', value: SexAtBirth.NONEOFTHESEDESCRIBEME},
+    {label: 'Prefer not to answer', value: SexAtBirth.PREFERNOANSWER}
+  ],
+  sexualOrientation: [
+    {label: 'Lesbian', value: SexualOrientation.LESBIAN},
+    {label: 'Gay', value: SexualOrientation.GAY},
+    {label: 'Straight', value: SexualOrientation.STRAIGHT},
+    {label: 'Bisexual', value: SexualOrientation.BISEXUAL},
+    {label: 'None of these describe me', value: SexualOrientation.NONEOFTHESEDESCRIBEME},
+    {label: 'Prefer not to answer', value: SexualOrientation.PREFERNOANSWER}
+  ],
+  levelOfEducation: [
     {label: 'Never attended school/no formal education', value: Education.NOEDUCATION},
     {label: 'Primary/Middle School/High School (Grades 1 through 12/GED)', value: Education.GRADES112},
     {label: 'Some college, Associate Degree or ' +

@@ -97,7 +97,7 @@ const routes: Routes = [
                 data: {
                   title: 'View Workspace Details',
                   breadcrumb: BreadcrumbType.Workspace,
-                  helpContent: 'data'
+                  helpContent: 'about'
                 }
               }, {
                 path: 'edit',
@@ -106,7 +106,7 @@ const routes: Routes = [
                   title: 'Edit Workspace',
                   mode: WorkspaceEditMode.Edit,
                   breadcrumb: BreadcrumbType.WorkspaceEdit,
-                  helpContent: 'data'
+                  helpContent: 'edit'
                 }
               }, {
                 path: 'duplicate',
@@ -115,7 +115,7 @@ const routes: Routes = [
                   title: 'Duplicate Workspace',
                   mode: WorkspaceEditMode.Duplicate,
                   breadcrumb: BreadcrumbType.WorkspaceDuplicate,
-                  helpContent: 'data'
+                  helpContent: 'duplicate'
                 }
               },
               {
@@ -127,7 +127,7 @@ const routes: Routes = [
                     data: {
                       title: 'View Notebooks',
                       breadcrumb: BreadcrumbType.Workspace,
-                      helpContent: 'data'
+                      helpContent: 'notebooks'
                     }
                   }, {
                     path: ':nbName',
@@ -219,7 +219,7 @@ const routes: Routes = [
                             data: {
                               title: 'Review Cohort Description',
                               breadcrumb: BreadcrumbType.Cohort,
-                              helpContent: 'reviewParticipants'
+                              helpContent: 'cohortDescription'
                             }
                           }, {
                             path: 'participants/:pid',

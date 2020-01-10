@@ -5,7 +5,6 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.collect.ImmutableList;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -597,7 +596,7 @@ public class ElasticFiltersTest {
   @Test
   public void testHeightEqualQuery() {
     Attribute attr =
-        new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(Arrays.asList("1"));
+        new Attribute().name(AttrName.NUM).operator(Operator.EQUAL).operands(ImmutableList.of("1"));
     Object left = Float.parseFloat(attr.getOperands().get(0));
     Object right = Float.parseFloat(attr.getOperands().get(0));
     String conceptId = "903133";
@@ -630,7 +629,7 @@ public class ElasticFiltersTest {
         new Attribute()
             .name(AttrName.NUM)
             .operator(Operator.BETWEEN)
-            .operands(Arrays.asList("1", "2"));
+            .operands(ImmutableList.of("1", "2"));
     Object left = Float.parseFloat(attr.getOperands().get(0));
     Object right = Float.parseFloat(attr.getOperands().get(1));
     String conceptId = "903121";
@@ -805,7 +804,10 @@ public class ElasticFiltersTest {
     String conceptId = "903120";
     String operand = "12345";
     Attribute attr =
-        new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(Arrays.asList(operand));
+        new Attribute()
+            .name(AttrName.CAT)
+            .operator(Operator.IN)
+            .operands(ImmutableList.of(operand));
     SearchParameter pregParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
@@ -814,7 +816,7 @@ public class ElasticFiltersTest {
             .group(false)
             .ancestorData(false)
             .standard(false)
-            .attributes(Arrays.asList(attr));
+            .attributes(ImmutableList.of(attr));
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
             cbCriteriaDao,
@@ -838,7 +840,7 @@ public class ElasticFiltersTest {
         new Attribute()
             .name(AttrName.CAT)
             .operator(Operator.IN)
-            .operands(Arrays.asList(operand1, operand2));
+            .operands(ImmutableList.of(operand1, operand2));
     SearchParameter measParam =
         new SearchParameter()
             .conceptId(Long.parseLong(conceptId))
@@ -847,7 +849,7 @@ public class ElasticFiltersTest {
             .group(false)
             .ancestorData(false)
             .standard(true)
-            .attributes(Arrays.asList(attr));
+            .attributes(ImmutableList.of(attr));
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
             cbCriteriaDao,
@@ -903,7 +905,7 @@ public class ElasticFiltersTest {
                 new Attribute()
                     .name(AttrName.AGE)
                     .operator(Operator.BETWEEN)
-                    .operands(Arrays.asList("20", "34")));
+                    .operands(ImmutableList.of("20", "34")));
     QueryBuilder resp =
         ElasticFilters.fromCohortSearch(
             cbCriteriaDao,
@@ -938,7 +940,7 @@ public class ElasticFiltersTest {
                 new Attribute()
                     .name(AttrName.AGE)
                     .operator(Operator.BETWEEN)
-                    .operands(Arrays.asList("20", "34")));
+                    .operands(ImmutableList.of("20", "34")));
     String conceptId = "38003563";
     SearchParameter ethParam =
         new SearchParameter()
@@ -957,7 +959,7 @@ public class ElasticFiltersTest {
                     new SearchGroup()
                         .addItemsItem(
                             new SearchGroupItem()
-                                .searchParameters(Arrays.asList(ageParam, ethParam)))));
+                                .searchParameters(ImmutableList.of(ageParam, ethParam)))));
 
     BoolQueryBuilder ageBuilder =
         QueryBuilders.boolQuery()

@@ -120,6 +120,7 @@
     <include file="changelog/db.changelog-110-free-credits-days-override.xml"/>
     <include file="changelog/db.changelog-111-status-alert.xml"/>
     <include file="changelog/db.changelog-112-free-credits-time-management.xml"/>
+    <include file="changelog/db.changelog-113-user-demographics-updates.xml"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`

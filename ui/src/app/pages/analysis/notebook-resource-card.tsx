@@ -10,8 +10,8 @@ import colors from 'app/styles/colors';
 import {formatRecentResourceDisplayDate} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {encodeURIComponentStrict} from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActions';
-import {CopyRequest, RecentResource} from 'generated/fetch';
+import {toDisplay} from 'app/utils/resourceActions';
+import {CopyRequest, RecentResource, ResourceType} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
 
@@ -184,7 +184,7 @@ export const NotebookResourceCard = fp.flow(
       }
 
       {this.state.showRenameModal &&
-      <RenameModal type={this.resourceType}
+      <RenameModal resourceType={this.resourceType}
                    onRename={(newName) => {
                      AnalyticsTracker.Notebooks.Rename();
                      this.renameNotebook(newName);
@@ -204,7 +204,7 @@ export const NotebookResourceCard = fp.flow(
         displayName={this.displayName}
         description={''}
         displayDate={formatRecentResourceDisplayDate(this.props.resource.modifiedTime)}
-        footerText={this.resourceType}
+        footerText={toDisplay(this.resourceType)}
         footerColor={colors.resourceCardHighlights.notebook}
       />
     </React.Fragment>;

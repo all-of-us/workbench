@@ -4,13 +4,13 @@ import Select from 'react-select';
 
 import {TextInput} from 'app/components/inputs';
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {ResourceType} from 'app/utils/resourceActions';
 import {WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {CopyModal, CopyModalProps, CopyModalState} from './copy-modal';
+import {ResourceType} from 'generated/fetch';
 
 describe('CopyModal', () => {
   let props: CopyModalProps;

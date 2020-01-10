@@ -25,10 +25,11 @@ import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.MonitoringViews;
+import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -46,17 +47,7 @@ public class MonitoringServiceTest {
   @TestConfiguration
   @Import({MonitoringServiceImpl.class})
   @MockBean({ViewManager.class, StatsRecorder.class, StackdriverStatsExporterService.class})
-  static class Configuration {
-    @Bean
-    public WorkbenchConfig workbenchConfig() {
-      final WorkbenchConfig workbenchConfig = new WorkbenchConfig();
-      // Nothing should show up in any Metrics backend for these tests.
-      workbenchConfig.server = new ServerConfig();
-      workbenchConfig.server.shortName = "unit-test";
-      workbenchConfig.server.projectId = "fake-project";
-      return workbenchConfig;
-    }
-  }
+  static class Configuration {}
 
   @Before
   public void setup() {
@@ -85,12 +76,12 @@ public class MonitoringServiceTest {
   @Test
   public void testRecordValue() {
     long value = 16L;
-    monitoringService.recordValue(GaugeMetric.BILLING_BUFFER_CREATING_PROJECT_COUNT, value);
+    monitoringService.recordValue(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, value);
 
     verify(mockInitService).createAndRegister();
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap)
-        .put(GaugeMetric.BILLING_BUFFER_CREATING_PROJECT_COUNT.getMeasureLong(), value);
+        .put(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT.getMeasureLong(), value);
     verify(mockMeasureMap).record();
   }
 
@@ -98,7 +89,7 @@ public class MonitoringServiceTest {
   public void testRecordMap() {
     ImmutableMap.Builder<Metric, Number> signalToValueBuilder = ImmutableMap.builder();
     signalToValueBuilder.put(GaugeMetric.BILLING_BUFFER_SIZE, 99L);
-    signalToValueBuilder.put(GaugeMetric.BILLING_BUFFER_CREATING_PROJECT_COUNT, 2L);
+    signalToValueBuilder.put(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 2L);
     signalToValueBuilder.put(GaugeMetric.DEBUG_RANDOM_DOUBLE, 3.14);
 
     monitoringService.recordValues(signalToValueBuilder.build());

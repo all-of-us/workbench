@@ -54,7 +54,8 @@
     "projectId": "all-of-us-workbench-test",
     "shortName": "Local",
     "oauthClientId": "602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com",
-    "traceAllRequests": true
+    "traceAllRequests": true,
+    "appEngineLocationId": "us-central"
   },
   "admin": {
     "loginUrl": "http:\/\/localhost:4200/login",

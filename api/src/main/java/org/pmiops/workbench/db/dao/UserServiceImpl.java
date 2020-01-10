@@ -40,6 +40,7 @@ import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
@@ -299,6 +300,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         areaOfResearch,
         null,
         null,
+        null,
         null);
   }
 
@@ -311,6 +313,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       String currentPosition,
       String organization,
       String areaOfResearch,
+      List<Degree> degrees,
       DbAddress address,
       DbDemographicSurvey demographicSurvey,
       List<DbInstitutionalAffiliation> institutionalAffiliations) {
@@ -328,6 +331,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setAboutYou(null);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     dbUser.setAddress(address);
+    if (degrees != null) {
+      dbUser.setDegreesEnum(degrees);
+    }
     dbUser.setDemographicSurvey(demographicSurvey);
     // For existing user that do not have address
     if (address != null) {

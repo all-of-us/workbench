@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="srubenst" id="changelog-113-user-demographics-updates">
+    <createTable tableName="demographic_survey_sexual_orientation">
+      <column name="demographic_survey_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="sexual_orientation" type="tinyint">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="demographic_survey_sex_at_birth">
+      <column name="demographic_survey_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="sex_at_birth" type="tinyint">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="user_degree">
+      <column name="user_id" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="degree" type="tinyint">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+
+    <addForeignKeyConstraint baseColumnNames="demographic_survey_id"
+                             baseTableName="demographic_survey_sexual_orientation"
+                             constraintName="fk_demographic_survey_sexual_orientation_id"
+                             onDelete="CASCADE"
+                             referencedColumnNames="demographic_survey_id"
+                             referencedTableName="demographic_survey"/>
+    <addForeignKeyConstraint baseColumnNames="demographic_survey_id"
+                             baseTableName="demographic_survey_sex_at_birth"
+                             constraintName="fk_demographic_survey_sex_at_birth_id"
+                             onDelete="CASCADE"
+                             referencedColumnNames="demographic_survey_id"
+                             referencedTableName="demographic_survey"/>
+    <addForeignKeyConstraint baseColumnNames="user_id"
+                             baseTableName="user_degree"
+                             constraintName="fk_user_degree_id"
+                             onDelete="CASCADE"
+                             referencedColumnNames="user_id"
+                             referencedTableName="user"/>
+  </changeSet>
+</databaseChangeLog>

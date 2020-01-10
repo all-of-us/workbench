@@ -3,7 +3,7 @@ package org.pmiops.workbench.cdr.dao;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +47,7 @@ public class ConceptDaoTest {
                 .prevalence(0.0F)
                 .sourceCountValue(3094L)
                 .synonyms(
-                    Arrays.asList(
+                    ImmutableList.of(
                         "35225339",
                         "Personal history of malignant neoplasm of breast|Personal history of malignant neoplasm of breast")));
     concept2 =
@@ -64,7 +64,7 @@ public class ConceptDaoTest {
                 .prevalence(0.0F)
                 .sourceCountValue(3094L)
                 .synonyms(
-                    Arrays.asList(
+                    ImmutableList.of(
                         "35225339",
                         "Personal history of malignant neoplasm of breast|Personal history of malignant neoplasm of breast")));
   }
@@ -83,8 +83,8 @@ public class ConceptDaoTest {
     Slice<DbConcept> concepts =
         conceptDao.findConcepts(
             "history",
-            Arrays.asList("S", "C"),
-            Arrays.asList(DomainType.CONDITION.toString()),
+            ImmutableList.of("S", "C"),
+            ImmutableList.of(DomainType.CONDITION.toString()),
             page);
     assertEquals(1, concepts.getContent().size());
     assertTrue(concepts.getContent().contains(concept2));
@@ -96,8 +96,8 @@ public class ConceptDaoTest {
     Slice<DbConcept> concepts =
         conceptDao.findConcepts(
             "history",
-            Arrays.asList("S", "C", ""),
-            Arrays.asList(DomainType.CONDITION.toString()),
+            ImmutableList.of("S", "C", ""),
+            ImmutableList.of(DomainType.CONDITION.toString()),
             page);
     assertEquals(2, concepts.getContent().size());
     assertTrue(concepts.getContent().contains(concept1));

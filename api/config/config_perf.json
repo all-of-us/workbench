@@ -56,7 +56,8 @@
     "projectId": "all-of-us-rw-perf",
     "shortName": "Perf",
     "oauthClientId": "63939010390-aj0r8hro7r8lkt7a45gissu3m73ietl2.apps.googleusercontent.com",
-    "traceAllRequests": true
+    "traceAllRequests": true,
+    "appEngineLocationId": "us-central"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-perf.appspot.com/login",

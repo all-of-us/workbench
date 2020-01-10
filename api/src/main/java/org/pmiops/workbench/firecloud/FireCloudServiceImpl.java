@@ -1,7 +1,9 @@
 package org.pmiops.workbench.firecloud;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpStatusCodes;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
@@ -58,8 +60,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<StatusApi> statusApiProvider;
   private final Provider<StaticNotebooksApi> staticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
-  private final Provider<GoogleCredential> fcAdminCredsProvider;
-  private final ServiceAccounts serviceAccounts;
+  private final Provider<ServiceAccountCredentials> fcAdminCredsProvider;
 
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
@@ -105,8 +106,8 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<StatusApi> statusApiProvider,
       Provider<StaticNotebooksApi> staticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
-      ServiceAccounts serviceAccounts,
-      @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS) Provider<GoogleCredential> fcAdminCredsProvider) {
+      @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
+          Provider<ServiceAccountCredentials> fcAdminCredsProvider) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
@@ -116,7 +117,6 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.workspaceAclsApiProvider = workspaceAclsApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.retryHandler = retryHandler;
-    this.serviceAccounts = serviceAccounts;
     this.fcAdminCredsProvider = fcAdminCredsProvider;
     this.staticNotebooksApiProvider = staticNotebooksApiProvider;
   }
@@ -134,14 +134,12 @@ public class FireCloudServiceImpl implements FireCloudService {
   public ApiClient getApiClientWithImpersonation(String userEmail) throws IOException {
     // Load credentials for the firecloud-admin Service Account. This account has been granted
     // domain-wide delegation for the OAuth scopes required by FireCloud.
-    GoogleCredential googleCredential = fcAdminCredsProvider.get();
-
-    GoogleCredential impersonatedUserCredential =
-        serviceAccounts.getImpersonatedCredential(
-            googleCredential, userEmail, FIRECLOUD_API_OAUTH_SCOPES);
+    GoogleCredentials impersonatedUserCredentials =
+        ServiceAccounts.getImpersonatedCredentials(
+            fcAdminCredsProvider.get(), userEmail, FIRECLOUD_API_OAUTH_SCOPES);
 
     ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
-    apiClient.setAccessToken(impersonatedUserCredential.getAccessToken());
+    apiClient.setAccessToken(impersonatedUserCredentials.getAccessToken().getTokenValue());
     return apiClient;
   }
 
@@ -150,6 +148,12 @@ public class FireCloudServiceImpl implements FireCloudService {
     FirecloudManagedGroupRef registeredDomain = new FirecloudManagedGroupRef();
     registeredDomain.setMembersGroupName(configProvider.get().firecloud.registeredDomainName);
     workspaceIngest.setAuthorizationDomain(ImmutableList.of(registeredDomain));
+  }
+
+  @Override
+  @VisibleForTesting
+  public String getApiBasePath() {
+    return statusApiProvider.get().getApiClient().getBasePath();
   }
 
   @Override
