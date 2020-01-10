@@ -67,8 +67,8 @@ public class SumoLogicAuditorTest {
   public void setUp() {
     dbUser = new DbUser();
     dbUser.setUserId(USER_ID);
-    dbUser.setEmail(USER_EMAIL);
-    when(mockUserDao.findUserByEmail(USER_EMAIL)).thenReturn(dbUser);
+    dbUser.setUsername(USER_EMAIL);
+    when(mockUserDao.findUserByUsername(USER_EMAIL)).thenReturn(dbUser);
 
     dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceId(WORKSPACE_ID);

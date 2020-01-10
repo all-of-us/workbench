@@ -22,7 +22,7 @@ public class ActionAuditTestConfig {
   public static DbUser getUser() {
     final DbUser administrator = new DbUser();
     administrator.setUserId(ADMINISTRATOR_USER_ID);
-    administrator.setEmail(ADMINISTRATOR_EMAIL);
+    administrator.setUsername(ADMINISTRATOR_EMAIL);
     return administrator;
   }
 

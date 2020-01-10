@@ -46,14 +46,14 @@ constructor(
         val userRoles = workspaceService.getFirecloudUserRoles(dbWorkspace.workspaceNamespace,
                 dbWorkspace.firecloudName)
         val vmOwner = userRoles
-                .map { userDao.findUserByEmail(it.email) }
+                .map { userDao.findUserByUsername(it.email) }
                 .filter { userIdToVmName(it.userId).equals(event.vmName) }
                 .firstOrNull()
 
         var agentEmail = ""
         var agentId = 0L
         if (vmOwner != null) {
-            agentEmail = vmOwner.email
+            agentEmail = vmOwner.username
             agentId = vmOwner.userId
         } else {
             // If the VM name doesn't match a user on the workspace, we'll still log an

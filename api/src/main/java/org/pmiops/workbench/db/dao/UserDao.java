@@ -12,6 +12,13 @@ import org.springframework.data.repository.query.Param;
 
 public interface UserDao extends CrudRepository<DbUser, Long> {
 
+  /**
+   * Looks up a user by their "username", which is the full G Suite email address of the user (e.g.
+   * "john.doe@researchallofus.org").
+   *
+   * @param username
+   * @return
+   */
   DbUser findUserByUsername(String username);
 
   DbUser findUserByUserId(long userId);

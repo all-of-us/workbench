@@ -4038,6 +4038,7 @@ definitions:
       link:
         description: >
           A URL linking to an incident report where users can read more
+        type: string
 
   EgressEventRequest:
     type: object
