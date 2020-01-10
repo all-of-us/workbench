@@ -28,6 +28,8 @@ public interface CloudStorageService {
 
   void copyBlob(BlobId from, BlobId to);
 
+  String getCredentialsBucketString(String objectPath);
+
   JSONObject getJiraCredentials();
 
   JSONObject getElasticCredentials();
@@ -42,8 +44,6 @@ public interface CloudStorageService {
 
   ServiceAccountCredentials getGarbageCollectionServiceAccountCredentials(
       String garbageCollectionEmail) throws IOException;
-
-  List<String> getSumoLogicApiKeys() throws IOException;
 
   Map<String, String> getMetadata(String bucketName, String objectPath);
 

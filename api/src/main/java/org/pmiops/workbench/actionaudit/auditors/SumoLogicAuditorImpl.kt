@@ -5,7 +5,9 @@ import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
 import org.pmiops.workbench.actionaudit.AgentType
 import org.pmiops.workbench.actionaudit.TargetType
+import org.pmiops.workbench.api.ClusterController
 import org.pmiops.workbench.db.dao.UserDao
+import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.model.EgressEvent
 import org.pmiops.workbench.model.EgressEventRequest
 import org.pmiops.workbench.workspaces.WorkspaceService
@@ -26,12 +28,24 @@ constructor(
     @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : SumoLogicAuditor {
 
-    private fun userIdToClusterName(userId: Long): String {
-        return "all-of-us-" + userId
+    /**
+     * Converts a DB-internal user ID to the corresponding VM name. Note: for now, we use the same
+     * logic used by ClusterController, but if that logic changes, we may want to adapt this code
+     * to support searching for VMs with both the older and newer naming scheme.
+     */
+    private fun dbUserToClusterName(dbUser: DbUser): String {
+        return ClusterController.clusterNameForUser(dbUser)
     }
 
-    private fun userIdToVmName(userId: Long): String {
-        return userIdToClusterName(userId) + "-m"
+    /**
+     * Converts the AoU-chosen cluster name into the actual VM name as reported by Google Cloud's
+     * flow logs. Empirically, an "-m" suffix is added to the VM name.
+     *
+     * Note: this pattern may change if the Leo team switches to using raw VMs instead of Dataproc
+     * clusters!
+     */
+    private fun dbUserToVmName(dbUser: DbUser): String {
+        return dbUserToClusterName(dbUser) + "-m"
     }
 
     override fun fireEgressEvent(event: EgressEvent) {
@@ -47,7 +61,7 @@ constructor(
                 dbWorkspace.firecloudName)
         val vmOwner = userRoles
                 .map { userDao.findUserByUsername(it.email) }
-                .filter { userIdToVmName(it.userId).equals(event.vmName) }
+                .filter { dbUserToVmName(it).equals(event.vmName) }
                 .firstOrNull()
 
         var agentEmail = ""

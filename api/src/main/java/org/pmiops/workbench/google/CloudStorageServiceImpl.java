@@ -12,7 +12,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,7 +36,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public String readInvitationKey() {
-    return readCredentialsBucketString("invitation-key.txt");
+    return getCredentialsBucketString("invitation-key.txt");
   }
 
   @Override
@@ -48,7 +47,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public String getMoodleApiKey() {
-    return readCredentialsBucketString("moodle-key.txt");
+    return getCredentialsBucketString("moodle-key.txt");
   }
 
   @Override
@@ -109,8 +108,13 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     storage.create(blobInfo, bytes);
   }
 
+  @Override
+  public String getCredentialsBucketString(String objectPath) {
+    return readBlobAsString(getBlob(getCredentialsBucketName(), objectPath));
+  }
+
   private JSONObject getCredentialsBucketJSON(final String objectPath) {
-    return new JSONObject(readCredentialsBucketString(objectPath));
+    return new JSONObject(getCredentialsBucketString(objectPath));
   }
 
   @Override
@@ -127,12 +131,8 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     return new String(blob.getContent()).trim();
   }
 
-  private String readCredentialsBucketString(String objectPath) {
-    return readBlobAsString(getBlob(getCredentialsBucketName(), objectPath));
-  }
-
   private ServiceAccountCredentials getCredentials(final String objectPath) throws IOException {
-    final String json = readCredentialsBucketString(objectPath);
+    final String json = getCredentialsBucketString(objectPath);
     return ServiceAccountCredentials.fromStream(new ByteArrayInputStream(json.getBytes()));
   }
 
@@ -161,13 +161,6 @@ public class CloudStorageServiceImpl implements CloudStorageService {
       String garbageCollectionEmail) throws IOException {
     final String objectPath = String.format("garbage-collection/%s.json", garbageCollectionEmail);
     return getCredentials(objectPath);
-  }
-
-  @Override
-  public List<String> getSumoLogicApiKeys() throws IOException {
-    String apiKeys =
-        readBlobAsString(getBlob(getCredentialsBucketName(), "inbound-sumologic-keys.txt"));
-    return Arrays.asList(apiKeys.split("[\\r\\n]+"));
   }
 
   @Override

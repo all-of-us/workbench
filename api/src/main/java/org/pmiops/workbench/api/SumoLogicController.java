@@ -52,9 +52,28 @@ public class SumoLogicController implements SumoLogicApiDelegate {
     }
   }
 
+  /**
+   * Reads the SumoLogic keys file to get the list of valid API key strings for inbound SumoLogic
+   * requests.
+   *
+   * @return
+   * @throws IOException
+   */
+  private List<String> getSumoLogicApiKeys() throws IOException {
+    String apiKeys = cloudStorageService.getCredentialsBucketString("inbound-sumologic-keys.txt");
+    return Arrays.asList(apiKeys.split("[\\r\\n]+"));
+  }
+
+  /**
+   * Authorizes an inbound EgressEventRequest with a given API key. If the API key is invalid, a
+   * generic audit event is logged.
+   *
+   * @param apiKey
+   * @param request
+   */
   private void authorizeRequest(String apiKey, EgressEventRequest request) {
     try {
-      List<String> validApiKeys = this.cloudStorageService.getSumoLogicApiKeys();
+      List<String> validApiKeys = getSumoLogicApiKeys();
       if (!validApiKeys.contains(apiKey)) {
         log.severe(
             String.format(
