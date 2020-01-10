@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.appengine.repackaged.com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -7,6 +8,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -30,11 +32,12 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Cluster;
-import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
+import org.pmiops.workbench.model.DefaultClusterResponse;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.ListClusterResponse;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
@@ -117,7 +120,50 @@ public class ClusterController implements ClusterApiDelegate {
   }
 
   @Override
-  public ResponseEntity<ClusterListResponse> listClusters(
+  @AuthorityRequired(Authority.SECURITY_ADMIN)
+  public ResponseEntity<List<ListClusterResponse>> deleteClustersInProject(String billingProjectId) {
+    if (billingProjectId == null) {
+      throw new BadRequestException("Must specify billing project");
+    }
+
+    leonardoNotebooksClient
+        .listClustersByProjectAsAdmin(billingProjectId)
+        .forEach(
+            cluster ->
+                leonardoNotebooksClient.deleteClusterAsAdmin(
+                    cluster.getGoogleProject(), cluster.getClusterName()));
+    List<ListClusterResponse> clustersInProject =
+        leonardoNotebooksClient.listClustersByProjectAsAdmin(billingProjectId).stream()
+            .map(
+                leoCluster ->
+                    new ListClusterResponse()
+                        .clusterName(leoCluster.getClusterName())
+                        .createdDate(leoCluster.getCreatedDate())
+                        .dateAccessed(leoCluster.getDateAccessed())
+                        .googleProject(leoCluster.getGoogleProject())
+                        .status(ClusterStatus.fromValue(leoCluster.getStatus().toString()))
+                        .labels(leoCluster.getLabels()))
+            .collect(Collectors.toList());
+    List<ClusterStatus> acceptableStates =
+        ImmutableList.of(
+            ClusterStatus.DELETED,
+            ClusterStatus.DELETING,
+            ClusterStatus.ERROR);
+    clustersInProject.stream()
+        .filter(cluster -> !acceptableStates.contains(cluster.getStatus()))
+        .forEach(
+            clusterInBadState ->
+                log.log(
+                    Level.SEVERE,
+                    String.format(
+                        "Cluster %s/%s is not in a deleting or deleted state",
+                        clusterInBadState.getGoogleProject(), clusterInBadState.getClusterName())));
+
+    return ResponseEntity.ok(clustersInProject);
+  }
+
+  @Override
+  public ResponseEntity<DefaultClusterResponse> listClusters(
       String billingProjectId, String workspaceFirecloudName) {
     if (billingProjectId == null) {
       throw new BadRequestException("Must specify billing project");
@@ -158,7 +204,7 @@ public class ClusterController implements ClusterApiDelegate {
         && retries != 0) {
       this.userService.setClusterRetryCount(0);
     }
-    ClusterListResponse resp = new ClusterListResponse();
+    DefaultClusterResponse resp = new DefaultClusterResponse();
     resp.setDefaultCluster(TO_ALL_OF_US_CLUSTER.apply(fcCluster));
     return ResponseEntity.ok(resp);
   }

@@ -2,6 +2,7 @@ package org.pmiops.workbench.notebooks;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -19,6 +20,7 @@ import org.pmiops.workbench.notebooks.api.NotebooksApi;
 import org.pmiops.workbench.notebooks.api.StatusApi;
 import org.pmiops.workbench.notebooks.model.Cluster;
 import org.pmiops.workbench.notebooks.model.ClusterRequest;
+import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
 import org.pmiops.workbench.notebooks.model.MachineConfig;
@@ -39,6 +41,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
   private final Provider<ClusterApi> clusterApiProvider;
+  private final Provider<ClusterApi> serviceClusterApiProvider;
   private final Provider<NotebooksApi> notebooksApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Provider<DbUser> userProvider;
@@ -48,12 +51,14 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   @Autowired
   public LeonardoNotebooksClientImpl(
       @Qualifier(NotebooksConfig.USER_CLUSTER_API) Provider<ClusterApi> clusterApiProvider,
+      @Qualifier(NotebooksConfig.SERVICE_CLUSTER_API) Provider<ClusterApi> serviceClusterApiProvider,
       Provider<NotebooksApi> notebooksApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,
       NotebooksRetryHandler retryHandler,
       WorkspaceService workspaceService) {
     this.clusterApiProvider = clusterApiProvider;
+    this.serviceClusterApiProvider = serviceClusterApiProvider;
     this.notebooksApiProvider = notebooksApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userProvider = userProvider;
@@ -136,6 +141,20 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
+  public List<ListClusterResponse> listClustersByProject(String googleProject) {
+    ClusterApi clusterApi = clusterApiProvider.get();
+    return retryHandler.run(
+        (context) -> clusterApi.listClustersByProject(googleProject, null, false));
+  }
+
+  @Override
+  public List<ListClusterResponse> listClustersByProjectAsAdmin(String googleProject) {
+    ClusterApi clusterApi = serviceClusterApiProvider.get();
+    return retryHandler.run(
+        (context) -> clusterApi.listClustersByProject(googleProject, null, false));
+  }
+
+  @Override
   public void deleteCluster(String googleProject, String clusterName) {
     ClusterApi clusterApi = clusterApiProvider.get();
     retryHandler.run(
@@ -149,6 +168,16 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   public Cluster getCluster(String googleProject, String clusterName) {
     ClusterApi clusterApi = clusterApiProvider.get();
     return retryHandler.run((context) -> clusterApi.getCluster(googleProject, clusterName));
+  }
+
+  @Override
+  public void deleteClusterAsAdmin(String googleProject, String clusterName) {
+    ClusterApi clusterApi = serviceClusterApiProvider.get();
+    retryHandler.run(
+        (context) -> {
+          clusterApi.deleteCluster(googleProject, clusterName);
+          return null;
+        });
   }
 
   @Override

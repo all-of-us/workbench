@@ -26,6 +26,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -46,10 +49,12 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterConfig;
+import org.pmiops.workbench.model.ClusterListResponse;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.ListClusterResponse;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
@@ -142,7 +147,10 @@ public class ClusterControllerTest {
 
   private DbCdrVersion cdrVersion;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
+  private org.pmiops.workbench.notebooks.model.ListClusterResponse testFcClusterListResponse;
+
   private Cluster testCluster;
+  private ListClusterResponse testClusterListResponse;
   private DbWorkspace testWorkspace;
 
   @Before
@@ -178,11 +186,23 @@ public class ClusterControllerTest {
             .googleProject(BILLING_PROJECT_ID)
             .status(org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING)
             .createdDate(createdDate);
+    testFcClusterListResponse =
+        new org.pmiops.workbench.notebooks.model.ListClusterResponse()
+            .clusterName(getClusterName())
+            .googleProject(BILLING_PROJECT_ID)
+            .status(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING)
+            .createdDate(createdDate);
     testCluster =
         new Cluster()
             .clusterName(getClusterName())
             .clusterNamespace(BILLING_PROJECT_ID)
             .status(ClusterStatus.DELETING)
+            .createdDate(createdDate);
+    testClusterListResponse =
+        new ListClusterResponse()
+            .clusterName(getClusterName())
+            .googleProject(BILLING_PROJECT_ID)
+            .status(ClusterStatus.RUNNING)
             .createdDate(createdDate);
 
     testWorkspace = new DbWorkspace();
@@ -239,6 +259,27 @@ public class ClusterControllerTest {
                 .getBody()
                 .getDefaultCluster())
         .isEqualTo(testCluster);
+  }
+
+  @Test
+  public void testDeleteClustersInProject() throws Exception {
+    when(notebookService.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
+        .thenReturn(ImmutableList.of(testFcClusterListResponse));
+    Mockito.doAnswer(new Answer<Void>() {
+      public Void answer(InvocationOnMock invocation) {
+        testFcClusterListResponse.setStatus(org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING);
+        return null;
+      }
+    }).when(notebookService).deleteClusterAsAdmin(BILLING_PROJECT_ID, getClusterName());
+
+    assertThat(
+        clusterController
+            .deleteClustersInProject(BILLING_PROJECT_ID)
+            .getBody())
+        .isEqualTo(ImmutableList.of(new ListClusterResponse()
+            .clusterName(testCluster.getClusterName())
+            .createdDate(testCluster.getCreatedDate())
+            .status(ClusterStatus.DELETING).googleProject(testCluster.getClusterNamespace())));
   }
 
   @Test

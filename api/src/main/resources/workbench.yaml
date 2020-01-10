@@ -538,6 +538,32 @@ paths:
 
   # Notebook clusters ####################################################################
 
+  /v1/admin/security/clusters/{billingProjectId}/delete-clusters:
+    post:
+      summary: Pause all clusters in a project
+      description: >
+        An admin gated endpoint that deletes all clusters in a given billing project.
+      operationId: deleteClustersInProject
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: billingProjectId
+          description: The unique identifier of the Google Billing Project containing the clusters
+          required: true
+          type: string
+      responses:
+        200:
+          description: Clusters paused
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ListClusterResponse'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   /v1/clusters/{billingProjectId}/{workspaceFirecloudName}:
     get:
       summary: List available notebook clusters
@@ -565,7 +591,7 @@ paths:
         200:
           description: Available clusters
           schema:
-            $ref: '#/definitions/ClusterListResponse'
+            $ref: '#/definitions/DefaultClusterResponse'
         500:
           description: Internal Error
           schema:
@@ -2332,7 +2358,8 @@ definitions:
       DEVELOPER,
       ACCESS_CONTROL_ADMIN,
       FEATURED_WORKSPACE_ADMIN,
-      COMMUNICATIONS_ADMIN
+      COMMUNICATIONS_ADMIN,
+      SECURITY_ADMIN
     ]
 
   PageVisit:
@@ -3634,13 +3661,43 @@ definitions:
         format: int64
         description: Milliseconds since the UNIX epoch.
 
-  ClusterListResponse:
+  DefaultClusterResponse:
     type: object
     required:
       - defaultCluster
     properties:
       defaultCluster:
         $ref: "#/definitions/Cluster"
+
+  ListClusterResponse:
+    description: Limited set of responses for a cluster. This is a subset of options in a full cluster, copied from the Leonardo swagger
+    required:
+      - clusterName
+      - googleProject
+      - status
+      - createdDate
+      - labels
+      - dateAccessed
+    properties:
+      clusterName:
+        type: string
+        description: The user-supplied name for the cluster
+      googleProject:
+        type: string
+        description: The Google Project used to create the cluster
+      status:
+        $ref: "#/definitions/ClusterStatus"
+      createdDate:
+        type: string
+        description: The date and time the cluster was created, in ISO-8601 format
+      labels:
+        type: object
+        description: The labels to be placed on the cluster. Of type Map[String,String]
+      dateAccessed:
+        type: string
+        description: |
+          The date and time the cluster was last accessed, in ISO-8601 format.
+          Date accessed is defined as the last time the cluster was created, modified, or accessed via the proxy.
 
   ClusterLocalizeRequest:
     type: object
