@@ -87,7 +87,8 @@
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": false
+    "enableNewAccountCreation": false,
+    "enableBillingLockout": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf"

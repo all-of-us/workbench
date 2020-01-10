@@ -25,8 +25,14 @@
     "defaultFreeCreditsLimit": 100.0,
     "defaultFreeCreditsDollarLimit": 100.0,
     "defaultFreeCreditsDaysLimit": 180,
-    "freeTierCostAlertThresholds": [0.5, 0.75],
-    "freeTierTimeAlertThresholds": [0.5, 0.75],
+    "freeTierCostAlertThresholds": [
+      0.5,
+      0.75
+    ],
+    "freeTierTimeAlertThresholds": [
+      0.5,
+      0.75
+    ],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-test-1@all-of-us-workbench-test.iam.gserviceaccount.com"
@@ -85,9 +91,10 @@
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": true
+    "enableNewAccountCreation": true,
+    "enableBillingLockout": true
   },
   "actionAudit": {
-    "logName":"workbench-action-audit-local"
+    "logName": "workbench-action-audit-local"
   }
 }

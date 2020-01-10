@@ -23,6 +23,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
@@ -81,6 +82,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private UserDao userDao;
   private Provider<DbUser> userProvider;
   private UserRecentWorkspaceDao userRecentWorkspaceDao;
+  private Provider<WorkbenchConfig> workbenchConfigProvider;
   private WorkspaceDao workspaceDao;
 
   private FireCloudService fireCloudService;
@@ -96,6 +98,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserDao userDao,
       Provider<DbUser> userProvider,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao) {
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
@@ -105,6 +108,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
   }
 
@@ -247,6 +251,10 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public void requireActiveBilling(String workspaceNamespace, String workspaceId)
       throws ForbiddenException {
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
+      return;
+    }
+
     if (BillingStatus.INACTIVE.equals(
         getRequired(workspaceNamespace, workspaceId).getBillingStatus())) {
       throw new ForbiddenException("Workspace is in an inactive billing state");
