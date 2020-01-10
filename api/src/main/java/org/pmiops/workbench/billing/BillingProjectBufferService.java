@@ -83,10 +83,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
     final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
-    resultBuilder.add(
-        MeasurementBundle.builder()
-            .addMeasurement(GaugeMetric.BILLING_BUFFER_SIZE, getCurrentBufferSize())
-            .build());
 
     final ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
         ImmutableMap.copyOf(billingProjectBufferEntryDao.getCountByStatusMap());

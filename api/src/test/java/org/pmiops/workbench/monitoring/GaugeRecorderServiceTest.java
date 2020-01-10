@@ -48,7 +48,7 @@ public class GaugeRecorderServiceTest {
   private static final long WORKSPACES_COUNT = 101L;
   private static final MeasurementBundle WORKSPACE_MEASUREMENT_BUNDLE =
       MeasurementBundle.builder()
-          .addMeasurement(GaugeMetric.WORKSPACE_TOTAL_COUNT, WORKSPACES_COUNT)
+          .addMeasurement(GaugeMetric.WORKSPACE_COUNT, WORKSPACES_COUNT)
           .build();
   private static final String TEST_GAUGE_DATA_COLLECTOR = "test gauge data collector";
 
@@ -94,9 +94,7 @@ public class GaugeRecorderServiceTest {
     public GaugeDataCollector getGaugeDataCollector() {
       return () ->
           Collections.singleton(
-              MeasurementBundle.builder()
-                  .addMeasurement(GaugeMetric.DATASET_COUNT, 999L)
-                  .build());
+              MeasurementBundle.builder().addMeasurement(GaugeMetric.DATASET_COUNT, 999L).build());
     }
   }
 
@@ -123,26 +121,29 @@ public class GaugeRecorderServiceTest {
     verify(mockWorkspaceServiceImpl).getGaugeData();
     verify(mockBillingProjectBufferService).getGaugeData();
 
-    final List<Collection<MeasurementBundle>> allRecordedBundles = measurementBundlesListCaptor.getAllValues();
+    final List<Collection<MeasurementBundle>> allRecordedBundles =
+        measurementBundlesListCaptor.getAllValues();
     final int expectedSize =
         mockWorkspaceServiceImpl.getGaugeData().size()
             + mockBillingProjectBufferService.getGaugeData().size()
             + standAloneGaugeDataCollector.getGaugeData().size();
-    final int flatSize = allRecordedBundles.stream()
-        .map(Collection::size)
-        .mapToInt(Integer::valueOf)
-        .sum();
+    final int flatSize =
+        allRecordedBundles.stream().map(Collection::size).mapToInt(Integer::valueOf).sum();
     assertThat(flatSize).isEqualTo(expectedSize);
 
     final Optional<MeasurementBundle> workspacesBundle =
         allRecordedBundles.stream()
             .flatMap(Collection::stream)
-            .filter(b -> b.getMeasurements().containsKey(GaugeMetric.WORKSPACE_TOTAL_COUNT))
+            .filter(b -> b.getMeasurements().containsKey(GaugeMetric.WORKSPACE_COUNT))
             .findFirst();
 
     assertThat(
             workspacesBundle.map(MeasurementBundle::getMeasurements).orElse(Collections.emptyMap()))
         .hasSize(1);
-    assertThat(workspacesBundle.get().getMeasurements().get(GaugeMetric.WORKSPACE_TOTAL_COUNT));
+    assertThat(
+            workspacesBundle
+                .map(wb -> wb.getMeasurements().get(GaugeMetric.WORKSPACE_COUNT))
+                .orElse(0))
+        .isEqualTo(WORKSPACES_COUNT);
   }
 }

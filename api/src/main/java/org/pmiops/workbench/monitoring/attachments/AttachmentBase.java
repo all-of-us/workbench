@@ -12,15 +12,17 @@ public interface AttachmentBase {
   String getKeyName();
 
   /**
-   * In some cases, we may want key names to apply to only certain Metrics.
-   * If this set is empty, we support all of them, otherwise, just the listed ones.
-   * This is enforced in the MeasurementBundle validator.
+   * In some cases, we may want key names to apply to only certain Metrics. If this set is empty, we
+   * support all of them, otherwise, just the listed ones. This is enforced in the MeasurementBundle
+   * validator.
+   *
    * @return
    */
   Set<Metric> getAllowedMetrics();
 
   /**
    * Return true if this AttachmentKeyBase supports the given Metric.
+   *
    * @param metric
    * @return
    */
@@ -29,11 +31,11 @@ public interface AttachmentBase {
   }
 
   /**
-   * For attachments whose values are in a discrete range (such as booleans, enums, or
-   * cloud regions), we can validate the values here before sending to the monitoring
-   * backend.
+   * For attachments whose values are in a discrete range (such as booleans, enums, or cloud
+   * regions), we can validate the values here before sending to the monitoring backend.
    *
-   * Leave this set empty to allow all valuesl
+   * <p>Leave this set empty to allow all valuesl
+   *
    * @return
    */
   Set<String> getAllowedDiscreteValues();

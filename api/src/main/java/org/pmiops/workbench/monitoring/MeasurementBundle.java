@@ -17,21 +17,20 @@ import org.pmiops.workbench.monitoring.views.Metric;
  * to avoid excessive proliferation of (confusing) argument list types, we try to consolidate here.
  */
 public class MeasurementBundle {
-  private final Map<Metric, Number> monitoringViews;
-  private final Map<Attachment, String> attachmentKeyToString;
+  private final Map<Metric, Number> measurements;
+  private final Map<Attachment, String> attachments;
 
-  private MeasurementBundle(
-      Map<Metric, Number> monitoringViews, Map<Attachment, String> attachmentKeyToString) {
-    this.monitoringViews = monitoringViews;
-    this.attachmentKeyToString = attachmentKeyToString;
+  private MeasurementBundle(Map<Metric, Number> measurements, Map<Attachment, String> attachments) {
+    this.measurements = measurements;
+    this.attachments = attachments;
   }
 
   public Map<Metric, Number> getMeasurements() {
-    return monitoringViews;
+    return measurements;
   }
 
   public Map<String, AttachmentValue> getAttachments() {
-    return fromAttachmentKeyToString(attachmentKeyToString);
+    return fromAttachmentKeyToString(attachments);
   }
 
   // In our system, it's more convenient to work with the AttachmentKey
@@ -65,13 +64,12 @@ public class MeasurementBundle {
       return false;
     }
     MeasurementBundle that = (MeasurementBundle) o;
-    return monitoringViews.equals(that.monitoringViews)
-        && attachmentKeyToString.equals(that.attachmentKeyToString);
+    return measurements.equals(that.measurements) && attachments.equals(that.attachments);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(monitoringViews, attachmentKeyToString);
+    return Objects.hash(measurements, attachments);
   }
 
   @Override
@@ -126,11 +124,11 @@ public class MeasurementBundle {
     }
 
     /**
-     * Validate the MeasurementBundle Builder inputs here, throwing IllegalStateException if not valid.
-     * Rules are:
-     *   1. Bundle must have at least one measurement
-     *   2. Any attachment provided must support all metrics provided in the masurements map, as determined by Attachment#supportsMetric()
-     *   3. Additionally, all attachment values must be supported by their attachments, according to Attachment#supportsDiscreteValue()
+     * Validate the MeasurementBundle Builder inputs here, throwing IllegalStateException if not
+     * valid. Rules are: 1. Bundle must have at least one measurement 2. Any attachment provided
+     * must support all metrics provided in the masurements map, as determined by
+     * Attachment#supportsMetric() 3. Additionally, all attachment values must be supported by their
+     * attachments, according to Attachment#supportsDiscreteValue()
      */
     private void validate() {
       ImmutableMap<Metric, Number> measurements = measurementsBuilder.build();
@@ -145,11 +143,17 @@ public class MeasurementBundle {
 
         for (Metric metric : measurements.keySet()) {
           if (!attachment.supportsMetric(metric)) {
-            throw new IllegalStateException((String.format("Attachment %s does not support metric %s", attachment.getKeyName(), metric.getName())));
+            throw new IllegalStateException(
+                (String.format(
+                    "Attachment %s does not support metric %s",
+                    attachment.getKeyName(), metric.getName())));
           }
         }
         if (!entry.getKey().supportsDiscreteValue(attachmentValue)) {
-          throw new IllegalStateException(String.format("Attachment %s does not support provided value %s", attachment.getKeyName(), attachmentValue));
+          throw new IllegalStateException(
+              String.format(
+                  "Attachment %s does not support provided value %s",
+                  attachment.getKeyName(), attachmentValue));
         }
       }
     }

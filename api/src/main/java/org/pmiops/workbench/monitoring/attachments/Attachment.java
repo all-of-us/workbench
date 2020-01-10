@@ -11,24 +11,22 @@ import org.pmiops.workbench.utils.Booleans;
 import org.pmiops.workbench.utils.Enums;
 
 public enum Attachment implements AttachmentBase {
-  BUFFER_ENTRY_STATUS("buffer_entry_status",
+  BUFFER_ENTRY_STATUS(
+      "buffer_entry_status",
       ImmutableSet.of(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT),
       Enums.getValueStrings(BufferEntryStatus.class)),
   DEBUG_CONTINUOUS_VALUE("debug_continuous_value"),
-  DATASET_INVALID("dataset_invalid",
-      ImmutableSet.of(GaugeMetric.DATASET_COUNT),
-      Booleans.getValueStrings()),
-  USER_BYPASSED_BETA("user_bypassed_beta",
-      ImmutableSet.of(GaugeMetric.USER_COUNT),
-      Booleans.getValueStrings()),
-  USER_DISABLED("user_disabled",
-      Collections.singleton(GaugeMetric.USER_COUNT),
-      Booleans.getValueStrings()),
-  USER_DATA_ACCESS_LEVEL("user_data_access_level",
-      Collections.singleton(GaugeMetric.USER_COUNT),
+  DATASET_INVALID(
+      "dataset_invalid", ImmutableSet.of(GaugeMetric.DATASET_COUNT), Booleans.getValueStrings()),
+  USER_BYPASSED_BETA(
+      "user_bypassed_beta", ImmutableSet.of(GaugeMetric.USER_COUNT), Booleans.getValueStrings()),
+  USER_DISABLED(
+      "user_disabled", Collections.singleton(GaugeMetric.USER_COUNT), Booleans.getValueStrings()),
+  DATA_ACCESS_LEVEL(
+      "user_data_access_level",
+      ImmutableSet.of(GaugeMetric.USER_COUNT, GaugeMetric.WORKSPACE_COUNT),
       Enums.getValueStrings(DataAccessLevel.class)),
-  WORKSPACE_ACTIVE_STATUS("workspace_active_status"),
-  WORKSPACE_DATA_ACCESS_LEVEL("workspace_data_access_level");
+  WORKSPACE_ACTIVE_STATUS("workspace_active_status");
 
   private String keyName;
   private Set<Metric> allowedMetrics;
@@ -62,5 +60,4 @@ public enum Attachment implements AttachmentBase {
   public Set<String> getAllowedDiscreteValues() {
     return allowedDiscreteValues;
   }
-
 }

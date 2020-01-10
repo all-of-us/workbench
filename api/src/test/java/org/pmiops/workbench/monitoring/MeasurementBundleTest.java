@@ -15,9 +15,8 @@ public class MeasurementBundleTest {
 
   @Test
   public void testBuild_singleMeasurementBundle() {
-    final MeasurementBundle bundle = MeasurementBundle.builder()
-        .addMeasurement(GaugeMetric.USER_COUNT, USER_COUNT)
-        .build();
+    final MeasurementBundle bundle =
+        MeasurementBundle.builder().addMeasurement(GaugeMetric.USER_COUNT, USER_COUNT).build();
 
     assertThat(bundle.getMeasurements()).hasSize(1);
     assertThat(bundle.getMeasurements().get(GaugeMetric.USER_COUNT)).isEqualTo(USER_COUNT);
@@ -26,13 +25,13 @@ public class MeasurementBundleTest {
 
   @Test
   public void testBuild_multipleMeasurementsNoAttachments() {
-    final ImmutableMap<Metric, Number> measurementMap = ImmutableMap.of(
-        GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 202L,
-        GaugeMetric.COHORT_COUNT, 300L,
-        GaugeMetric.USER_COUNT, USER_COUNT);
-    final MeasurementBundle bundle = MeasurementBundle.builder()
-        .addAllMeasurements(measurementMap)
-        .build();
+    final ImmutableMap<Metric, Number> measurementMap =
+        ImmutableMap.of(
+            GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 202L,
+            GaugeMetric.COHORT_COUNT, 300L,
+            GaugeMetric.USER_COUNT, USER_COUNT);
+    final MeasurementBundle bundle =
+        MeasurementBundle.builder().addAllMeasurements(measurementMap).build();
     assertThat(bundle.getAttachments()).hasSize(measurementMap.size());
     assertThat(bundle.getMeasurements().get(GaugeMetric.USER_COUNT)).isEqualTo(USER_COUNT);
   }
@@ -50,7 +49,7 @@ public class MeasurementBundleTest {
         .addMeasurement(GaugeMetric.COHORT_COUNT, 101L)
         .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 202L)
         .addAttachment(Attachment.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
-    .build();
+        .build();
   }
 
   @Test(expected = IllegalStateException.class)

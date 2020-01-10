@@ -7,6 +7,7 @@ public class Booleans {
 
   /**
    * Get a set of strings for all (both) of the values Boolean can have.
+   *
    * @return
    */
   public static Set<String> getValueStrings() {
