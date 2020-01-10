@@ -634,10 +634,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<FileDetail> cloneNotebook(
       String workspace, String workspaceName, String notebookName) {
-    if (BillingStatus.INACTIVE.equals(
-        workspaceService.get(workspace, workspaceName).getBillingStatus())) {
-      throw new ForbiddenException("Invalid billing account");
-    }
+    workspaceService.requireActiveBilling(workspace, workspaceName);
 
     FileDetail fileDetail;
     try {

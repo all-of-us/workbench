@@ -4,9 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.google.cloud.Date;
 import com.google.common.collect.ImmutableList;
@@ -26,14 +24,12 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
-import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
-import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
+import org.pmiops.workbench.db.dao.*;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
@@ -184,7 +180,9 @@ public class ClusterControllerTest {
     testWorkspace = new DbWorkspace();
     testWorkspace.setWorkspaceNamespace(WORKSPACE_NS);
     testWorkspace.setName(WORKSPACE_NAME);
+    testWorkspace.setFirecloudName(WORKSPACE_ID);
     testWorkspace.setCdrVersion(cdrVersion);
+    doReturn(testWorkspace).when(workspaceService).get(WORKSPACE_NS, WORKSPACE_ID);
   }
 
   private FirecloudWorkspace createFcWorkspace(String ns, String name, String creator) {
@@ -419,14 +417,29 @@ public class ClusterControllerTest {
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
   }
 
-  @Test
-  public void requireActiveBilling() {
-    testWorkspace.setBillingStatus(BillingStatus.ACTIVE);
+  @Test(expected = ForbiddenException.class)
+  public void listCluster_requireActiveBilling() {
+    testWorkspace.setBillingStatus(BillingStatus.INACTIVE);
 
-    clusterController
-        .listClusters(BILLING_PROJECT_ID, WORKSPACE_NAME)
-        .getBody()
-        .getDefaultCluster();
+    doThrow(ForbiddenException.class)
+        .when(workspaceService)
+        .requireActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+
+    clusterController.listClusters(WORKSPACE_NS, WORKSPACE_ID);
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void localize_requireActiveBilling() {
+    testWorkspace.setBillingStatus(BillingStatus.INACTIVE);
+
+    doThrow(ForbiddenException.class)
+        .when(workspaceService)
+        .requireActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+
+    ClusterLocalizeRequest req =
+        new ClusterLocalizeRequest().workspaceNamespace(WORKSPACE_NS).workspaceId(WORKSPACE_ID);
+
+    clusterController.localize("y", "z", req);
   }
 
   private void createUser(String email) {

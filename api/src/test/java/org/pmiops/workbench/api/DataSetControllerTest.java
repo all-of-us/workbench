@@ -60,22 +60,10 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetMapper;
-import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.CohortDao;
-import org.pmiops.workbench.db.dao.CohortReviewDao;
-import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
-import org.pmiops.workbench.db.dao.DataSetDao;
-import org.pmiops.workbench.db.dao.DataSetService;
-import org.pmiops.workbench.db.dao.DataSetServiceImpl;
-import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.UserServiceImpl;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.dao.*;
+import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
@@ -83,25 +71,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.Concept;
-import org.pmiops.workbench.model.ConceptSet;
-import org.pmiops.workbench.model.CreateConceptSetRequest;
-import org.pmiops.workbench.model.DataAccessLevel;
-import org.pmiops.workbench.model.DataSetCodeResponse;
-import org.pmiops.workbench.model.DataSetExportRequest;
-import org.pmiops.workbench.model.DataSetPreviewValueList;
-import org.pmiops.workbench.model.DataSetRequest;
-import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.model.DomainValue;
-import org.pmiops.workbench.model.DomainValuePair;
-import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.KernelTypeEnum;
-import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
-import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.Workspace;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -213,6 +183,8 @@ public class DataSetControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
 
   @Autowired UserService userService;
+
+  @Autowired WorkspaceDao workspaceDao;
 
   @Autowired WorkspaceService workspaceService;
 
@@ -958,6 +930,20 @@ public class DataSetControllerTest {
     // java equivalence didn't handle it well.
     verify(notebooksService, times(1))
         .saveNotebook(eq(WORKSPACE_BUCKET_NAME), eq(notebookName), any(JSONObject.class));
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void exportToNotebook_requiresActiveBilling() {
+    DbWorkspace dbWorkspace =
+        workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+            workspace.getNamespace(),
+            WORKSPACE_NAME,
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
+    workspaceDao.save(dbWorkspace);
+
+    DataSetExportRequest request = new DataSetExportRequest();
+    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
   }
 
   @Test

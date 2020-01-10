@@ -245,12 +245,12 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public void requireActiveBilling(String workspaceNamespace, String workspaceId) throws ForbiddenException {
+  public void requireActiveBilling(String workspaceNamespace, String workspaceId)
+      throws ForbiddenException {
     if (BillingStatus.INACTIVE.equals(get(workspaceNamespace, workspaceId).getBillingStatus())) {
       throw new ForbiddenException("Invalid billing account");
     }
   }
-
 
   @Override
   public DbWorkspace saveWithLastModified(DbWorkspace workspace) {
