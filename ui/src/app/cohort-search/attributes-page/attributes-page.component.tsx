@@ -134,7 +134,7 @@ const styles = reactStyles({
 });
 
 const optionUtil = {
-  ANY: {display: 'Any', code: 'Any'},
+  ANY: {display: 'Any value', code: 'Any'},
   EQUAL: {display: '= ', code: '01'},
   GREATER_THAN_OR_EQUAL_TO: {display: '>= ', code: '02'},
   LESS_THAN_OR_EQUAL_TO: {display: '<= ', code: '03'},
@@ -184,7 +184,7 @@ export const AttributesPage = withCurrentWorkspace() (
       const {node: {subtype}} = this.props;
       const{form, options} = this.state;
       if (!this.isMeasurement) {
-        options.unshift({label: 'Any', value: AttrName[AttrName.ANY]});
+        options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
       }
       if (this.hasRange) {
         this.getAttributes();
@@ -354,7 +354,7 @@ export const AttributesPage = withCurrentWorkspace() (
       let paramName;
       const attrs = [];
       if (form.exists) {
-        paramName = name + ' (Any)';
+        paramName = name + ` (${optionUtil.ANY.display})`;
       } else {
         form.num.filter(at => at.operator).forEach(({operator, operands, conceptId}) => {
           const attr = {name: AttrName.NUM, operator, operands};
@@ -392,7 +392,7 @@ export const AttributesPage = withCurrentWorkspace() (
       form.num.filter(at => at.operator).forEach((attr, i) => {
         if (attr.operator === 'ANY') {
           if (i === 0) {
-            name += 'Any';
+            name += optionUtil.ANY.display;
           }
         } else {
           if (i > 0) {

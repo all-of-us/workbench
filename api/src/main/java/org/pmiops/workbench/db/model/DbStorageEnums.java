@@ -9,6 +9,7 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -233,6 +234,31 @@ public final class DbStorageEnums {
 
   public static Short billingAccountTypeToStorage(BillingAccountType s) {
     return CLIENT_TO_STORAGE_BILLING_ACCOUNT_TYPE.get(s);
+  }
+
+  private static final BiMap<Degree, Short> CLIENT_TO_STORAGE_DEGREE =
+      ImmutableBiMap.<Degree, Short>builder()
+          .put(Degree.BA, (short) 0)
+          .put(Degree.BS, (short) 1)
+          .put(Degree.BSN, (short) 2)
+          .put(Degree.EDD, (short) 3)
+          .put(Degree.JD, (short) 4)
+          .put(Degree.MA, (short) 5)
+          .put(Degree.MBA, (short) 6)
+          .put(Degree.MD, (short) 7)
+          .put(Degree.ME, (short) 8)
+          .put(Degree.MS, (short) 9)
+          .put(Degree.MSN, (short) 10)
+          .put(Degree.PHD, (short) 11)
+          .put(Degree.NONE, (short) 12)
+          .build();
+
+  public static Degree degreeFromStorage(Short degree) {
+    return CLIENT_TO_STORAGE_DEGREE.inverse().get(degree);
+  }
+
+  public static Short degreeToStorage(Degree degree) {
+    return CLIENT_TO_STORAGE_DEGREE.get(degree);
   }
 
   /** Utility class. */

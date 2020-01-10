@@ -11,7 +11,9 @@ import {
   DataAccessLevel,
   Gender,
   Profile,
-  Race
+  Race,
+  SexAtBirth,
+  SexualOrientation
 } from 'generated/fetch';
 import {Section} from './account-creation';
 
@@ -23,12 +25,15 @@ import {AccountCreationOptions} from './account-creation-options';
 
 
 const styles = {
-  questionLabel: {
-    width: 76,
+  checkbox: {marginTop: '0.3rem'},
+  checkboxWrapper: {display: 'flex', width: '9rem', marginBottom: '0.5rem'},
+  checkboxLabel: {
     color: colors.primary,
     fontFamily: 'Montserrat',
     fontSize: '14px',
     fontWeight: 400,
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem'
   }
 };
 
@@ -38,16 +43,6 @@ export const DropDownSection = (props) => {
               value={props.value}
               onChange={(e) => props.onChange(e.value)}/>
   </Section>;
-};
-
-export const CheckBoxWithLabel = (props) => {
-  return <div style={{display: 'flex', width: '9rem', marginBottom: '0.5rem'}}>
-    <CheckBox style={{marginTop: '0.3rem'}}
-              checked={props.checked} onChange={(value) => props.onChange(value)}/>
-    <div style={{paddingLeft: '0.5rem', paddingRight: '0.5rem'}}>
-      <label style={{...styles.questionLabel, ...props.style}}>{props.label}</label>
-    </div>
-  </div>;
 };
 
 export interface AccountCreationSurveyProps {
@@ -70,12 +65,14 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
         username: '',
         dataAccessLevel: DataAccessLevel.Protected,
         demographicSurvey: {
-          race: [] as Race[],
+          disability: false,
+          education: undefined,
           ethnicity: undefined,
           gender: [] as Gender[],
-          yearOfBirth: 0,
-          education: undefined,
-          disability: false
+          race: [] as Race[],
+          sexAtBirth: [] as SexAtBirth[],
+          sexualOrientation: [] as SexualOrientation[],
+          yearOfBirth: 0
         }
       }
     };
@@ -120,6 +117,14 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     this.setState(fp.set(['profile', 'demographicSurvey', attribute], value));
   }
 
+  createOptionCheckbox(checkboxLabel: string, optionKey: string, optionValue: any) {
+    return <CheckBox label={checkboxLabel}
+                     style={styles.checkbox}
+                     wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
+                     onChange={(value) => this.updateList(optionKey, optionValue)}
+    />;
+  }
+
   render() {
     const {profile: {demographicSurvey}} = this.state;
     return <div style={{marginTop: '1rem', paddingLeft: '3rem'}}>
@@ -134,46 +139,58 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       {/*Race section*/}
       <Section header='1. Race'>
         <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
-          {AccountCreationOptions.Race.map((race) => {
-            return <CheckBoxWithLabel attribute='race' label={race.label}
-                                      onChange={(value) => this.updateList('race', race.value)}
-                                      value={race.value}/>; })
-          }
+          {AccountCreationOptions.race.map((race) => {
+            return this.createOptionCheckbox(race.label, 'race', race.value);
+          })}
         </div>
       </Section>
 
       {/*Ethnicity section*/}
-      <DropDownSection header='2. Ethnicity' options={AccountCreationOptions.Ethnicity}
+      <DropDownSection header='2. Ethnicity' options={AccountCreationOptions.ethnicity}
                        value={demographicSurvey.ethnicity}
                        onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
 
       {/*Gender section*/}
       <Section header='3. Gender'>
         <FlexRow style={{flexWrap: 'wrap'}}>
-          {AccountCreationOptions.Gender.map((gender) => {
-            return <CheckBoxWithLabel attribute='gender'
-                                      onChange={(value) => this.updateList('gender', gender.value)}
-                                      label={gender.label} value={gender.value}/>;
+          {AccountCreationOptions.gender.map((gender) => {
+            return this.createOptionCheckbox(gender.label, 'gender', gender.value);
+          })}
+        </FlexRow>
+      </Section>
+      {/*Sex at birth section*/}
+      <Section header='4. Sex at birth'>
+        <FlexRow style={{flexWrap: 'wrap'}}>
+          {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
+            return this.createOptionCheckbox(sexAtBirth.label, 'sexAtBirth', sexAtBirth.value);
+          })}
+        </FlexRow>
+      </Section>
+      {/*Sexual orientation section*/}
+      <Section header='5. Sexual Orientation'>
+        <FlexRow style={{flexWrap: 'wrap'}}>
+          {AccountCreationOptions.sexualOrientation.map((sexualOrientation) => {
+            return this.createOptionCheckbox(sexualOrientation.label, 'sexualOrientation', sexualOrientation.value);
           })
           }
         </FlexRow>
       </Section>
 
       {/*Year of birth section*/}
-      <DropDownSection header='4. Year of Birth' options={AccountCreationOptions.Years}
+      <DropDownSection header='6. Year of Birth' options={AccountCreationOptions.Years}
                        value={demographicSurvey.yearOfBirth}
                        onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
       />
 
       {/*Education section*/}
-      <DropDownSection header='5. Highest Level of Education Completed'
-                       options={AccountCreationOptions.LevelOfEducation}
+      <DropDownSection header='7. Highest Level of Education Completed'
+                       options={AccountCreationOptions.levelOfEducation}
                        value={demographicSurvey.education}
                        onChange={
                          (e) => this.updateDemographicAttribute('education', e)}/>
 
       {/*Disability section*/}
-      <Section header='6. Do you have a Physical or Cognitive disability?'>
+      <Section header='8. Do you have a Physical or Cognitive disability?'>
         <div style={{paddingTop: '0.5rem'}}>
           <RadioButton onChange={
             (e) => this.toggleDisability(true)}

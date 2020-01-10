@@ -6,13 +6,13 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -145,7 +145,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return Arrays.asList(
+    return ImmutableList.of(
         "cb_review_all_events", "person", "cb_search_person", "cb_search_all_events", "death");
   }
 
@@ -155,7 +155,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     DbUser dbUser = new DbUser();
     dbUser.setUsername("bob@gmail.com");
     dbUser.setUserId(123L);
@@ -320,7 +320,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getCohortReviewsInWorkspace() throws Exception {
+  public void getCohortReviewsInWorkspace() {
     CohortReview expectedReview =
         new CohortReview()
             .cohortReviewId(review.getCohortReviewId())
@@ -341,7 +341,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void createCohortReview() throws Exception {
+  public void createCohortReview() {
     DbCohort cohortWithoutReview = new DbCohort();
     cohortWithoutReview.setWorkspaceId(workspace.getWorkspaceId());
     String criteria =
@@ -371,7 +371,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getParticipantConditionsSorting() throws Exception {
+  public void getParticipantConditionsSorting() {
     PageFilterRequest testFilter = new PageFilterRequest().domain(DomainType.CONDITION);
 
     // no sort order or column
@@ -381,7 +381,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedCondition1(), expectedCondition2()), 2);
+    assertResponse(response, ImmutableList.of(expectedCondition1(), expectedCondition2()), 2);
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -391,11 +391,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedCondition2(), expectedCondition1()), 2);
+    assertResponse(response, ImmutableList.of(expectedCondition2(), expectedCondition1()), 2);
   }
 
   @Test
-  public void getParticipantConditionsPagination() throws Exception {
+  public void getParticipantConditionsPagination() {
     stubMockFirecloudGetWorkspace();
 
     PageFilterRequest testFilter =
@@ -408,7 +408,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedCondition1()), 2);
+    assertResponse(response, ImmutableList.of(expectedCondition1()), 2);
 
     // page 2 should have 1 item
     testFilter.page(1);
@@ -417,11 +417,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .getParticipantData(
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID, testFilter)
             .getBody();
-    assertResponse(response, Arrays.asList(expectedCondition2()), 2);
+    assertResponse(response, ImmutableList.of(expectedCondition2()), 2);
   }
 
   @Test
-  public void getParticipantAllEventsPagination() throws Exception {
+  public void getParticipantAllEventsPagination() {
     PageFilterRequest testFilter =
         new PageFilterRequest().domain(DomainType.ALL_EVENTS).page(0).pageSize(1);
 
@@ -432,7 +432,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedAllEvents1()), 2);
+    assertResponse(response, ImmutableList.of(expectedAllEvents1()), 2);
 
     // page 2 should have 1 item
     testFilter.page(1);
@@ -442,11 +442,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedAllEvents2()), 2);
+    assertResponse(response, ImmutableList.of(expectedAllEvents2()), 2);
   }
 
   @Test
-  public void getParticipantAllEventsSorting() throws Exception {
+  public void getParticipantAllEventsSorting() {
     PageFilterRequest testFilter = new PageFilterRequest().domain(DomainType.ALL_EVENTS);
 
     // no sort order or column
@@ -456,7 +456,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedAllEvents1(), expectedAllEvents2()), 2);
+    assertResponse(response, ImmutableList.of(expectedAllEvents1(), expectedAllEvents2()), 2);
 
     // added sort order
     testFilter.sortOrder(SortOrder.DESC);
@@ -466,11 +466,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 NAMESPACE, NAME, review.getCohortReviewId(), PARTICIPANT_ID2, testFilter)
             .getBody();
 
-    assertResponse(response, Arrays.asList(expectedAllEvents2(), expectedAllEvents1()), 2);
+    assertResponse(response, ImmutableList.of(expectedAllEvents2(), expectedAllEvents1()), 2);
   }
 
   @Test
-  public void getParticipantChartData() throws Exception {
+  public void getParticipantChartData() {
     ParticipantChartDataListResponse response =
         controller
             .getParticipantChartData(
@@ -502,7 +502,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getParticipantChartDataBadLimit() throws Exception {
+  public void getParticipantChartDataBadLimit() {
     try {
       controller.getParticipantChartData(
           NAMESPACE,
@@ -520,7 +520,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getParticipantChartDataBadLimitOverHundred() throws Exception {
+  public void getParticipantChartDataBadLimitOverHundred() {
     try {
       controller.getParticipantChartData(
           NAMESPACE,
@@ -538,7 +538,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getCohortChartDataBadLimit() throws Exception {
+  public void getCohortChartDataBadLimit() {
     try {
       controller.getCohortChartData(
           NAMESPACE, NAME, review.getCohortReviewId(), DomainType.CONDITION.name(), -1);
@@ -551,7 +551,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getCohortChartDataBadLimitOverHundred() throws Exception {
+  public void getCohortChartDataBadLimitOverHundred() {
     try {
       controller.getCohortChartData(
           NAMESPACE, NAME, review.getCohortReviewId(), DomainType.CONDITION.name(), 101);
@@ -564,7 +564,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getCohortChartDataLab() throws Exception {
+  public void getCohortChartDataLab() {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
@@ -580,7 +580,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getCohortChartDataDrug() throws Exception {
+  public void getCohortChartDataDrug() {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
@@ -592,7 +592,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getCohortChartDataCondition() throws Exception {
+  public void getCohortChartDataCondition() {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
@@ -606,7 +606,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getCohortChartDataProcedure() throws Exception {
+  public void getCohortChartDataProcedure() {
     CohortChartDataListResponse response =
         controller
             .getCohortChartData(
@@ -622,7 +622,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void getVocabularies() throws Exception {
+  public void getVocabularies() {
     VocabularyListResponse response =
         controller.getVocabularies(NAMESPACE, NAME, review.getCohortReviewId()).getBody();
     assertEquals(20, response.getItems().size());
@@ -656,7 +656,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
     when(mockFireCloudService.getWorkspace(NAMESPACE, NAME)).thenReturn(workspaceResponse);
   }
 
-  private void stubMockFirecloudGetWorkspaceAcl() throws ApiException {
+  private void stubMockFirecloudGetWorkspaceAcl() {
     FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
     FirecloudWorkspaceAccessEntry accessLevelEntry =
         new FirecloudWorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.WRITER.toString());

@@ -1,7 +1,9 @@
 package org.pmiops.workbench.db.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +27,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 
 @Entity
@@ -50,7 +53,7 @@ public class DbUser {
   // A nonce which can be used during the account creation flow to verify
   // unauthenticated API calls after account creation, but before initial login.
   private Long creationNonce;
-  // The Google email address that the user signs in with.
+  // The full G Suite email address that the user signs in with, e.g. "joe@researchallofus.org".
   private String username;
   // The email address that can be used to contact the user.
   private String contactEmail;
@@ -62,9 +65,12 @@ public class DbUser {
   private String organization;
   private Double freeTierCreditsLimitDollarsOverride = null;
   private Short freeTierCreditsLimitDaysOverride = null;
+  private Timestamp lastFreeTierCreditsTimeCheck;
   private Timestamp firstSignInTime;
+  private Timestamp firstRegistrationCompletionTime;
   private Set<Short> authorities = new HashSet<>();
   private Boolean idVerificationIsValid;
+  private List<Short> degrees;
   private Timestamp demographicSurveyCompletionTime;
   private boolean disabled;
   private Short emailVerificationStatus;
@@ -130,6 +136,13 @@ public class DbUser {
     this.creationNonce = creationNonce;
   }
 
+  /**
+   * Returns the user's full G Suite email address, e.g. "joe@researchallofus.org". This is named
+   * "username" in this entity class to distinguish it from getContactEmail, which is the user's
+   * designated contact email address.
+   *
+   * @return
+   */
   @Column(name = "email")
   public String getUsername() {
     return username;
@@ -139,6 +152,11 @@ public class DbUser {
     this.username = userName;
   }
 
+  /**
+   * Returns the user's designated contact email address, e.g. "joe@gmail.com".
+   *
+   * @return
+   */
   @Column(name = "contact_email")
   public String getContactEmail() {
     return contactEmail;
@@ -230,6 +248,15 @@ public class DbUser {
     this.freeTierCreditsLimitDaysOverride = freeTierCreditsLimitDaysOverride;
   }
 
+  @Column(name = "last_free_tier_credits_time_check")
+  public Timestamp getLastFreeTierCreditsTimeCheck() {
+    return lastFreeTierCreditsTimeCheck;
+  }
+
+  public void setLastFreeTierCreditsTimeCheck(Timestamp lastFreeTierCreditsTimeCheck) {
+    this.lastFreeTierCreditsTimeCheck = lastFreeTierCreditsTimeCheck;
+  }
+
   @Column(name = "first_sign_in_time")
   public Timestamp getFirstSignInTime() {
     return firstSignInTime;
@@ -237,6 +264,20 @@ public class DbUser {
 
   public void setFirstSignInTime(Timestamp firstSignInTime) {
     this.firstSignInTime = firstSignInTime;
+  }
+
+  @Column(name = "first_registration_completion_time")
+  public Timestamp getFirstRegistrationCompletionTime() {
+    return firstRegistrationCompletionTime;
+  }
+
+  public void setFirstRegistrationCompletionTime() {
+    setFirstRegistrationCompletionTime(Timestamp.from(Instant.now()));
+  }
+
+  @VisibleForTesting
+  public void setFirstRegistrationCompletionTime(Timestamp registrationCompletionTime) {
+    this.firstRegistrationCompletionTime = registrationCompletionTime;
   }
 
   // Authorities (special permissions) are granted using api/project.rb set-authority.
@@ -265,6 +306,38 @@ public class DbUser {
         newAuthorities.stream()
             .map(DbStorageEnums::authorityToStorage)
             .collect(Collectors.toSet()));
+  }
+
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(name = "user_degree", joinColumns = @JoinColumn(name = "user_id"))
+  @Column(name = "degree")
+  public List<Short> getDegrees() {
+    return degrees;
+  }
+
+  public void setDegrees(List<Short> degree) {
+    this.degrees = degree;
+  }
+
+  @Transient
+  public List<Degree> getDegreesEnum() {
+    if (degrees == null) return null;
+    return this.degrees.stream()
+        .map(
+            (degreeObject) -> {
+              return DbStorageEnums.degreeFromStorage(degreeObject);
+            })
+        .collect(Collectors.toList());
+  }
+
+  public void setDegreesEnum(List<Degree> degreeList) {
+    this.degrees =
+        degreeList.stream()
+            .map(
+                (degree) -> {
+                  return DbStorageEnums.degreeToStorage(degree);
+                })
+            .collect(Collectors.toList());
   }
 
   @OneToMany(

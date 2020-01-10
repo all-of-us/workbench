@@ -24,6 +24,8 @@
     "defaultFreeCreditsLimit": 100.0,
     "defaultFreeCreditsDollarLimit": 100.0,
     "defaultFreeCreditsDaysLimit": 180,
+    "freeTierCostAlertThresholds": [0.5, 0.75],
+    "freeTierTimeAlertThresholds": [0.5, 0.75],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-perf-1@all-of-us-rw-perf.iam.gserviceaccount.com",
@@ -54,7 +56,8 @@
     "projectId": "all-of-us-rw-perf",
     "shortName": "Perf",
     "oauthClientId": "63939010390-aj0r8hro7r8lkt7a45gissu3m73ietl2.apps.googleusercontent.com",
-    "traceAllRequests": true
+    "traceAllRequests": true,
+    "appEngineLocationId": "us-central"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-perf.appspot.com/login",

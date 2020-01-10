@@ -7,10 +7,9 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
-import {Button, Link} from 'app/components/buttons';
+import {Button} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {ResetClusterButton} from 'app/pages/analysis/reset-cluster-button';
@@ -30,7 +29,6 @@ interface WorkspaceState {
   cdrVersion: CdrVersion;
   workspace: WorkspaceData;
   workspaceUserRoles: UserRole[];
-  googleBucketModalOpen: boolean;
   publishing: boolean;
 }
 
@@ -98,7 +96,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
       cdrVersion: undefined,
       workspace: undefined,
       workspaceUserRoles: [],
-      googleBucketModalOpen: false,
       publishing: false,
     };
   }
@@ -153,13 +150,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     }
   }
 
-  openGoogleBucket() {
-    const googleBucketUrl = 'https://console.cloud.google.com/storage/browser/' +
-      this.state.workspace.googleBucketName + '?authuser=' +
-      this.props.profileState.profile.username;
-    window.open(googleBucketUrl, '_blank');
-  }
-
   workspaceClusterBillingProjectId(): string {
     const {workspace} = this.state;
     if (workspace === undefined) {
@@ -196,8 +186,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
 
   render() {
     const {profileState: {profile}} = this.props;
-    const {cdrVersion, workspace, workspaceUserRoles, googleBucketModalOpen,
-      sharing, publishing} = this.state;
+    const {cdrVersion, workspace, workspaceUserRoles, sharing, publishing} = this.state;
     return <div style={styles.mainPage}>
       <FlexColumn style={{margin: '1rem', width: '98%'}}>
         <ResearchPurpose data-test-id='researchPurpose'/>
@@ -251,30 +240,11 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
             <div style={{fontSize: '0.5rem'}}>{workspace ?
               fp.capitalize(workspace.dataAccessLevel.toString()) : 'Loading...'}</div>
           </div>
-          <Link disabled={!workspace}
-                onClick={() => this.setState({googleBucketModalOpen: true})}>Google Bucket</Link>
           {!!this.workspaceClusterBillingProjectId() &&
             <ResetClusterButton billingProjectId={this.workspaceClusterBillingProjectId()}
                                 workspaceFirecloudName={this.state.workspace.id}/>}
         </div>
       </div>
-      {googleBucketModalOpen && <Modal>
-        <ModalTitle>Policy Reminder</ModalTitle>
-        <ModalBody style={{color: colors.primary}}>
-            It is <i>All of Us</i> data use policy that researchers should not make copies of or
-            download individual-level data (including taking screenshots or other means of viewing
-            individual-level data) outside of the <i>All of Us</i> research environment without
-            approval from <i>All of Us</i> Resource Access Board (RAB).<br/><br/>
-            Notebooks should rarely be downloaded directly from Google Cloud Console, as output
-            cells in Notebooks may contain sensitive individual level data.
-        </ModalBody>
-        <ModalFooter>
-          <Button type='secondary'
-                  onClick={() => this.setState({googleBucketModalOpen: false})}>Cancel</Button>
-          <Button onClick={() => this.openGoogleBucket()}
-                  style={{marginLeft: '0.5rem'}}>Continue</Button>
-        </ModalFooter>
-      </Modal>}
       {sharing && <WorkspaceShare workspace={workspace}
                                   accessLevel={workspace.accessLevel}
                                   userEmail={profile.username}

@@ -25,6 +25,8 @@
     "defaultFreeCreditsLimit": 100.0,
     "defaultFreeCreditsDollarLimit": 100.0,
     "defaultFreeCreditsDaysLimit": 180,
+    "freeTierCostAlertThresholds": [0.5, 0.75],
+    "freeTierTimeAlertThresholds": [0.5, 0.75],
     "garbageCollectionUserCapacity": 1000,
     "garbageCollectionUsers": [
       "aou-rw-gc-test-1@all-of-us-workbench-test.iam.gserviceaccount.com"
@@ -52,7 +54,8 @@
     "projectId": "all-of-us-workbench-test",
     "shortName": "Test",
     "oauthClientId": "602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com",
-    "traceAllRequests": true
+    "traceAllRequests": true,
+    "appEngineLocationId": "us-central"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-workbench-test.appspot.com/login",

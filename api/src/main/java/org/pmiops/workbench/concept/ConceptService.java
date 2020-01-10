@@ -4,11 +4,14 @@ import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.apache.commons.lang3.StringUtils;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
+import org.pmiops.workbench.cdr.dao.DomainInfoDao;
+import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdr.model.DbDomainInfo;
+import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,12 +22,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ConceptService {
-
-  public enum SearchType {
-    CONCEPT_SEARCH,
-    SURVEY_COUNTS,
-    DOMAIN_COUNTS;
-  }
 
   public static class ConceptIds {
 
@@ -45,10 +42,10 @@ public class ConceptService {
     }
   }
 
-  @PersistenceContext(unitName = "cdr")
-  private EntityManager entityManager;
-
   @Autowired private ConceptDao conceptDao;
+  @Autowired private DomainInfoDao domainInfoDao;
+  @Autowired private SurveyModuleDao surveyModuleDao;
+  @Autowired private CBCriteriaDao cbCriteriaDao;
   public static final String STANDARD_CONCEPTS = "STANDARD_CONCEPTS";
   public static final String STANDARD_CONCEPT_CODE = "S";
   public static final String CLASSIFICATION_CONCEPT_CODE = "C";
@@ -61,12 +58,18 @@ public class ConceptService {
   public ConceptService() {}
 
   // Used for tests
-  public ConceptService(EntityManager entityManager, ConceptDao conceptDao) {
-    this.entityManager = entityManager;
+  public ConceptService(
+      ConceptDao conceptDao,
+      DomainInfoDao domainInfoDao,
+      SurveyModuleDao surveyModuleDao,
+      CBCriteriaDao cbCriteriaDao) {
     this.conceptDao = conceptDao;
+    this.domainInfoDao = domainInfoDao;
+    this.surveyModuleDao = surveyModuleDao;
+    this.cbCriteriaDao = cbCriteriaDao;
   }
 
-  public static String modifyMultipleMatchKeyword(String query, SearchType searchType) {
+  public static String modifyMultipleMatchKeyword(String query) {
     // This function modifies the keyword to match all the words if multiple words are present(by
     // adding + before each word to indicate match that matching each word is essential)
     if (query == null || query.trim().isEmpty()) {
@@ -93,23 +96,7 @@ public class ConceptService {
           if (key.length() < 3) {
             temp.add(key);
           } else {
-            // Only in the case of calling this method from getDomainSearchResults to fetch survey
-            // counts add wildcard* search.
-            // The survey view angular code fetches all the results of each survey module and then
-            // checks if the search text is present in the concept name / stratum4 of achilles
-            // results using regex test.
-            // Without this the number of results for search smoke would be 6 while also the actual
-            // results would be 12 as smoking, smoked (smoke*) are considered.
-            // Changing this would address the search count discrepancy for survey results. If *
-            // wildcard is added to all search types, source vocabulary code match on 507 fetches
-            // all the results matching 507*. (which is not desired to show the source / standard
-            // code mapping)
-            // So added different search type for each purpose
-            if (searchType == SearchType.SURVEY_COUNTS) {
-              temp.add(new String("+" + key + "*"));
-            } else {
-              temp.add(toAdd);
-            }
+            temp.add(toAdd);
           }
         }
       }
@@ -123,9 +110,41 @@ public class ConceptService {
     return query2.toString();
   }
 
+  public List<DbDomainInfo> getDomainInfo() {
+    return domainInfoDao.findByOrderByDomainId();
+  }
+
+  public List<DbDomainInfo> getAllDomainsOrderByDomainId() {
+    return domainInfoDao.findByOrderByDomainId();
+  }
+
+  public List<DbDomainInfo> getAllConceptCounts(String matchExp) {
+    return domainInfoDao.findAllMatchConceptCounts(matchExp);
+  }
+
+  public DbDomainInfo findPhysicalMeasurementConceptCounts(String matchExp) {
+    return domainInfoDao.findPhysicalMeasurementConceptCounts(matchExp);
+  }
+
+  public List<DbDomainInfo> getStandardConceptCounts(String matchExp) {
+    return domainInfoDao.findStandardConceptCounts(matchExp);
+  }
+
+  public List<DbSurveyModule> getSurveyInfo() {
+    return surveyModuleDao.findByParticipantCountNotOrderByOrderNumberAsc(0L);
+  }
+
+  public long findSurveyCountByTerm(String matchExp) {
+    return cbCriteriaDao.findSurveyCountByTerm(matchExp);
+  }
+
+  public long findSurveyCountBySurveyName(String surveyName) {
+    return cbCriteriaDao.findSurveyCountBySurveyName(surveyName);
+  }
+
   public Slice<DbConcept> searchConcepts(
       String query, String standardConceptFilter, List<String> domainIds, int limit, int page) {
-    final String keyword = modifyMultipleMatchKeyword(query, SearchType.CONCEPT_SEARCH);
+    final String keyword = modifyMultipleMatchKeyword(query);
     Pageable pageable = new PageRequest(page, limit, new Sort(Direction.DESC, "countValue"));
     List<String> conceptTypes =
         STANDARD_CONCEPTS.equals(standardConceptFilter)

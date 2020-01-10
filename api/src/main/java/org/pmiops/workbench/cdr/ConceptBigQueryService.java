@@ -15,7 +15,7 @@ import org.pmiops.workbench.concept.ConceptService.ConceptIds;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
 import org.pmiops.workbench.model.SurveyAnswerResponse;
-import org.pmiops.workbench.model.SurveyQuestionsResponse;
+import org.pmiops.workbench.model.SurveyQuestions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -126,8 +126,8 @@ public class ConceptBigQueryService {
     return QueryJobConfiguration.newBuilder(finalSql).setUseLegacySql(false).build();
   }
 
-  public List<SurveyQuestionsResponse> getSurveyQuestions(String surveyName) {
-    List<SurveyQuestionsResponse> responseList = new ArrayList<>();
+  public List<SurveyQuestions> getSurveyQuestions(String surveyName) {
+    List<SurveyQuestions> responseList = new ArrayList<>();
 
     TableResult result =
         bigQueryService.executeQuery(
@@ -138,8 +138,7 @@ public class ConceptBigQueryService {
             surveyValue -> {
               String question = surveyValue.get(0).getValue().toString();
               Long concept_id = Long.parseLong(surveyValue.get(1).getValue().toString());
-              responseList.add(
-                  new SurveyQuestionsResponse().question(question).conceptId(concept_id));
+              responseList.add(new SurveyQuestions().question(question).conceptId(concept_id));
             });
     return responseList;
   }

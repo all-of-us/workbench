@@ -5,13 +5,13 @@ import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {SurveyAnswerResponse, SurveyQuestionsResponse} from 'generated/fetch';
+import {SurveyAnswerResponse, SurveyQuestions} from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 
 interface SurveyDetails {
-  question: SurveyQuestionsResponse;
+  question: SurveyQuestions;
   answer: Array<SurveyAnswerResponse>;
 }
 
@@ -58,7 +58,7 @@ interface State {
   expandedRows: Array<any>;
   loading: boolean;
   seeMyAnswers: Array<boolean>;
-  selectedQuestions: Array<SurveyQuestionsResponse>;
+  selectedQuestions: Array<SurveyQuestions>;
   surveyList: Array<SurveyDetails>;
 }
 
@@ -108,6 +108,7 @@ export const SurveyDetails = withCurrentWorkspace()(
     }
 
     getQuestion(row, col) {
+      const showAnswers = false; // Hides answers since they are currently not selectable
       return <FlexColumn>
       <div style={{display: 'flex'}}>
         <CheckBox style={{marginTop: '0.3rem'}}
@@ -117,10 +118,15 @@ export const SurveyDetails = withCurrentWorkspace()(
          <div style={style.columnLabel}>{row.question}</div>
        </div>
       </div>
-        <a href='#' onClick={(e) => {e.preventDefault(); this.updateSeeMyAnswer(col.rowIndex); }}>
-          See my Answers
-        </a>
-        {this.state.seeMyAnswers[col.rowIndex] && this.renderAnswerTable(col.rowIndex)}
+        {showAnswers && <React.Fragment>
+          <a href='#' onClick={(e) => {
+            e.preventDefault();
+            this.updateSeeMyAnswer(col.rowIndex);
+          }}>
+            See my Answers
+          </a>
+          {this.state.seeMyAnswers[col.rowIndex] && this.renderAnswerTable(col.rowIndex)}
+        </React.Fragment>}
       </FlexColumn>;
     }
 

@@ -11,13 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
@@ -80,7 +79,7 @@ public class ConceptsControllerTest {
           .domainId("Condition")
           .countValue(123L)
           .prevalence(0.2F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_2 =
       new Concept()
@@ -93,7 +92,7 @@ public class ConceptsControllerTest {
           .domainId("Measurement")
           .countValue(456L)
           .prevalence(0.3F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_3 =
       new Concept()
@@ -106,7 +105,7 @@ public class ConceptsControllerTest {
           .domainId("Condition")
           .countValue(789L)
           .prevalence(0.4F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_4 =
       new Concept()
@@ -119,7 +118,7 @@ public class ConceptsControllerTest {
           .domainId("Observation")
           .countValue(1250L)
           .prevalence(0.5F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_5 =
       new Concept()
@@ -132,7 +131,7 @@ public class ConceptsControllerTest {
           .domainId("Condition")
           .countValue(7890L)
           .prevalence(0.9F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final Concept CLIENT_CONCEPT_6 =
       new Concept()
@@ -145,7 +144,7 @@ public class ConceptsControllerTest {
           .domainId("Condition")
           .countValue(7891L)
           .prevalence(0.1F)
-          .conceptSynonyms(new ArrayList<String>());
+          .conceptSynonyms(new ArrayList<>());
 
   private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
   private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
@@ -198,6 +197,17 @@ public class ConceptsControllerTest {
           .standardConceptCount(3)
           .allConceptCount(4);
 
+  private static final DbDomainInfo SURVEY_DOMAIN =
+      new DbDomainInfo()
+          .domainEnum(Domain.SURVEY)
+          .domainId("Survey")
+          .name("Surveys")
+          .description("SURVEY")
+          .conceptId(CONCEPT_4.getConceptId())
+          .participantCount(0)
+          .standardConceptCount(0)
+          .allConceptCount(0);
+
   private static final String WORKSPACE_NAMESPACE = "ns";
   private static final String WORKSPACE_NAME = "name";
   private static final String USER_EMAIL = "bob@gmail.com";
@@ -228,12 +238,11 @@ public class ConceptsControllerTest {
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private DomainInfoDao domainInfoDao;
+  @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired FireCloudService fireCloudService;
   @Autowired UserDao userDao;
   @Mock Provider<DbUser> userProvider;
   @Autowired SurveyModuleDao surveyModuleDao;
-
-  @PersistenceContext private EntityManager entityManager;
 
   private ConceptsController conceptsController;
 
@@ -242,14 +251,10 @@ public class ConceptsControllerTest {
     // Injecting ConceptsController and ConceptService doesn't work well without using
     // SpringBootTest, which causes problems with CdrDbConfig. Just construct the service and
     // controller directly.
-    ConceptService conceptService = new ConceptService(entityManager, conceptDao);
+    ConceptService conceptService =
+        new ConceptService(conceptDao, domainInfoDao, surveyModuleDao, cbCriteriaDao);
     conceptsController =
-        new ConceptsController(
-            conceptService,
-            conceptBigQueryService,
-            workspaceService,
-            domainInfoDao,
-            surveyModuleDao);
+        new ConceptsController(conceptService, conceptBigQueryService, workspaceService);
 
     DbUser user = new DbUser();
     user.setUsername(USER_EMAIL);
@@ -277,12 +282,18 @@ public class ConceptsControllerTest {
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
     when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)).thenReturn(fcResponse);
-    stubGetWorkspaceAcl(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, USER_EMAIL, WorkspaceAccessLevel.WRITER);
+    FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
+    FirecloudWorkspaceAccessEntry accessLevelEntry =
+        new FirecloudWorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.WRITER.toString());
+    Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
+        ImmutableMap.of(USER_EMAIL, accessLevelEntry);
+    workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
+    when(fireCloudService.getWorkspaceAcl(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+        .thenReturn(workspaceAccessLevelResponse);
   }
 
   @Test
-  public void testSearchConceptsBlankQuery() throws Exception {
+  public void testSearchConceptsBlankQuery() {
     assertResults(
         conceptsController.searchConcepts(
             "ns",
@@ -295,7 +306,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsBlankQueryWithResults() throws Exception {
+  public void testSearchConceptsBlankQueryWithResults() {
     saveConcepts();
     saveDomains();
     assertResults(
@@ -314,7 +325,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsBlankQueryWithDomainAllCounts() throws Exception {
+  public void testSearchConceptsBlankQueryWithDomainAllCounts() {
     saveConcepts();
     saveDomains();
     // When no query is provided, domain concept counts come from domain info directly.
@@ -328,16 +339,17 @@ public class ConceptsControllerTest {
                 .standardConceptFilter(StandardConceptFilter.ALL_CONCEPTS));
     assertResultsWithCounts(
         response,
-        ImmutableList.<DomainCount>of(
+        ImmutableList.of(
             toDomainCount(CONDITION_DOMAIN, false),
             toDomainCount(DRUG_DOMAIN, false),
             toDomainCount(MEASUREMENT_DOMAIN, false),
-            toDomainCount(PROCEDURE_DOMAIN, false)),
+            toDomainCount(PROCEDURE_DOMAIN, false),
+            toDomainCount(SURVEY_DOMAIN, false)),
         ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_3, CLIENT_CONCEPT_1));
   }
 
   @Test
-  public void testSearchConceptsBlankQueryWithDomainStandardCounts() throws Exception {
+  public void testSearchConceptsBlankQueryWithDomainStandardCounts() {
     saveConcepts();
     saveDomains();
     // When no query is provided, domain concept counts come from domain info directly.
@@ -351,16 +363,17 @@ public class ConceptsControllerTest {
                 .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
     assertResultsWithCounts(
         response,
-        ImmutableList.<DomainCount>of(
+        ImmutableList.of(
             toDomainCount(CONDITION_DOMAIN, true),
             toDomainCount(DRUG_DOMAIN, true),
             toDomainCount(MEASUREMENT_DOMAIN, true),
-            toDomainCount(PROCEDURE_DOMAIN, true)),
+            toDomainCount(PROCEDURE_DOMAIN, true),
+            toDomainCount(SURVEY_DOMAIN, true)),
         ImmutableList.of(CLIENT_CONCEPT_5, CLIENT_CONCEPT_1));
   }
 
   @Test
-  public void testSearchConceptsBlankQueryWithDomainAndVocabStandardCounts() throws Exception {
+  public void testSearchConceptsBlankQueryWithDomainAndVocabStandardCounts() {
     saveConcepts();
     saveDomains();
     // When no query is provided, domain concept counts come from domain info directly.
@@ -374,16 +387,17 @@ public class ConceptsControllerTest {
                 .standardConceptFilter(StandardConceptFilter.STANDARD_CONCEPTS));
     assertResultsWithCounts(
         response,
-        ImmutableList.<DomainCount>of(
+        ImmutableList.of(
             toDomainCount(CONDITION_DOMAIN, true),
             toDomainCount(DRUG_DOMAIN, true),
             toDomainCount(MEASUREMENT_DOMAIN, true),
-            toDomainCount(PROCEDURE_DOMAIN, true)),
+            toDomainCount(PROCEDURE_DOMAIN, true),
+            toDomainCount(SURVEY_DOMAIN, true)),
         ImmutableList.of(CLIENT_CONCEPT_5, CLIENT_CONCEPT_1));
   }
 
   @Test
-  public void testSearchConceptsBlankQueryInDomain() throws Exception {
+  public void testSearchConceptsBlankQueryInDomain() {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts(
@@ -401,7 +415,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsBlankQueryInDomainWithVocabularyIds() throws Exception {
+  public void testSearchConceptsBlankQueryInDomainWithVocabularyIds() {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts(
@@ -419,7 +433,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchNoConcepts() throws Exception {
+  public void testSearchNoConcepts() {
     assertResults(
         conceptsController.searchConcepts(
             "ns",
@@ -432,7 +446,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsNameNoMatches() throws Exception {
+  public void testSearchConceptsNameNoMatches() {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts(
@@ -446,7 +460,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsCodeMatch() throws Exception {
+  public void testSearchConceptsCodeMatch() {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts(
@@ -461,7 +475,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsConceptIdMatch() throws Exception {
+  public void testSearchConceptsConceptIdMatch() {
     saveConcepts();
     // ID matching currently includes substrings.
     assertResults(
@@ -477,7 +491,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsVocabIdMatch() throws Exception {
+  public void testSearchConceptsVocabIdMatch() {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts(
@@ -492,7 +506,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsMatchOrder() throws Exception {
+  public void testSearchConceptsMatchOrder() {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts(
@@ -508,7 +522,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsWithDomainAllCounts() throws Exception {
+  public void testSearchConceptsWithDomainAllCounts() {
     saveConcepts();
     saveDomains();
     assertResultsWithCounts(
@@ -524,12 +538,13 @@ public class ConceptsControllerTest {
             toDomainCount(CONDITION_DOMAIN, 2),
             toDomainCount(DRUG_DOMAIN, 0),
             toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(PROCEDURE_DOMAIN, 0)),
+            toDomainCount(PROCEDURE_DOMAIN, 0),
+            toDomainCount(SURVEY_DOMAIN, 0)),
         ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5));
   }
 
   @Test
-  public void testSearchConceptsWithDomainStandardCounts() throws Exception {
+  public void testSearchConceptsWithDomainStandardCounts() {
     saveConcepts();
     saveDomains();
     assertResultsWithCounts(
@@ -545,12 +560,13 @@ public class ConceptsControllerTest {
             toDomainCount(CONDITION_DOMAIN, 1),
             toDomainCount(DRUG_DOMAIN, 0),
             toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(PROCEDURE_DOMAIN, 0)),
+            toDomainCount(PROCEDURE_DOMAIN, 0),
+            toDomainCount(SURVEY_DOMAIN, 0)),
         ImmutableList.of(CLIENT_CONCEPT_4));
   }
 
   @Test
-  public void testSearchConceptsWithoutDomainCounts() throws Exception {
+  public void testSearchConceptsWithoutDomainCounts() {
     saveConcepts();
     saveDomains();
     assertResultsWithCounts(
@@ -567,7 +583,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsWithVocabularyStandardCounts() throws Exception {
+  public void testSearchConceptsWithVocabularyStandardCounts() {
     saveConcepts();
     saveDomains();
     assertResultsWithCounts(
@@ -584,7 +600,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsWithDomainAndVocabularyStandardCounts() throws Exception {
+  public void testSearchConceptsWithDomainAndVocabularyStandardCounts() {
     saveConcepts();
     saveDomains();
     assertResultsWithCounts(
@@ -600,12 +616,13 @@ public class ConceptsControllerTest {
             toDomainCount(CONDITION_DOMAIN, 1),
             toDomainCount(DRUG_DOMAIN, 0),
             toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(PROCEDURE_DOMAIN, 0)),
+            toDomainCount(PROCEDURE_DOMAIN, 0),
+            toDomainCount(SURVEY_DOMAIN, 0)),
         ImmutableList.of(CLIENT_CONCEPT_5));
   }
 
   @Test
-  public void testSearchConceptsWithDomainAndVocabularyAllCounts() throws Exception {
+  public void testSearchConceptsWithDomainAndVocabularyAllCounts() {
     saveConcepts();
     saveDomains();
     assertResultsWithCounts(
@@ -621,13 +638,13 @@ public class ConceptsControllerTest {
             toDomainCount(CONDITION_DOMAIN, 2),
             toDomainCount(DRUG_DOMAIN, 0),
             toDomainCount(MEASUREMENT_DOMAIN, 0),
-            toDomainCount(PROCEDURE_DOMAIN, 0)),
+            toDomainCount(PROCEDURE_DOMAIN, 0),
+            toDomainCount(SURVEY_DOMAIN, 0)),
         ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5));
   }
 
   @Test
-  public void testSearchConceptsWithDomainAndVocabularyAllCountsMatchAllConditions()
-      throws Exception {
+  public void testSearchConceptsWithDomainAndVocabularyAllCountsMatchAllConditions() {
     saveConcepts();
     saveDomains();
     assertResultsWithCounts(
@@ -645,12 +662,13 @@ public class ConceptsControllerTest {
             // Although it doesn't match the domain filter, we still include the measurement concept
             // in domain counts
             toDomainCount(MEASUREMENT_DOMAIN, 1),
-            toDomainCount(PROCEDURE_DOMAIN, 0)),
+            toDomainCount(PROCEDURE_DOMAIN, 0),
+            toDomainCount(SURVEY_DOMAIN, 0)),
         ImmutableList.of(CLIENT_CONCEPT_6, CLIENT_CONCEPT_5, CLIENT_CONCEPT_3, CLIENT_CONCEPT_1));
   }
 
   @Test
-  public void testSearchConceptsNonStandard() throws Exception {
+  public void testSearchConceptsNonStandard() {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts(
@@ -665,7 +683,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsStandardConcept() throws Exception {
+  public void testSearchConceptsStandardConcept() {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts(
@@ -680,7 +698,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsDomainIdNoMatch() throws Exception {
+  public void testSearchConceptsDomainIdNoMatch() {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts(
@@ -694,7 +712,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsDomainIdMatch() throws Exception {
+  public void testSearchConceptsDomainIdMatch() {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts(
@@ -709,7 +727,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsMultipleMatch() throws Exception {
+  public void testSearchConceptsMultipleMatch() {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts(
@@ -725,7 +743,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsOneResult() throws Exception {
+  public void testSearchConceptsOneResult() {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts(
@@ -741,7 +759,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testSearchConceptsSubstring() throws Exception {
+  public void testSearchConceptsSubstring() {
     saveConcepts();
     assertResults(
         conceptsController.searchConcepts(
@@ -758,7 +776,7 @@ public class ConceptsControllerTest {
   }
 
   @Test
-  public void testGetDomainInfo() throws Exception {
+  public void testGetDomainInfo() {
     saveConcepts();
     saveDomains();
     List<DomainInfo> domainInfos =
@@ -856,16 +874,5 @@ public class ConceptsControllerTest {
       ResponseEntity<ConceptListResponse> response, Concept... expectedConcepts) {
     assertThat(response.getBody().getItems()).isEqualTo(ImmutableList.copyOf(expectedConcepts));
     assertThat(response.getBody().getDomainCounts()).isNull();
-  }
-
-  private void stubGetWorkspaceAcl(
-      String ns, String name, String creator, WorkspaceAccessLevel access) {
-    FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
-    FirecloudWorkspaceAccessEntry accessLevelEntry =
-        new FirecloudWorkspaceAccessEntry().accessLevel(access.toString());
-    Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
-        ImmutableMap.of(creator, accessLevelEntry);
-    workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAcl(ns, name)).thenReturn(workspaceAccessLevelResponse);
   }
 }

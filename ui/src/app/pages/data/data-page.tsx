@@ -14,13 +14,10 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
-import {
-  convertToResources,
-  ResourceType
-} from 'app/utils/resourceActions';
+import {convertToResources} from 'app/utils/resourceActions';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Domain, RecentResource, WorkspaceAccessLevel} from 'generated/fetch';
+import {Domain, RecentResource, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = {
   cardButtonArea: {
@@ -134,11 +131,11 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       list = list.concat(convertToResources(cohorts.items, namespace,
         id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.COHORT));
       list = list.concat(convertToResources(cohortReviews.items, namespace,
-        id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.COHORT_REVIEW));
+        id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.COHORTREVIEW));
       list = list.concat(convertToResources(conceptSets.items, namespace,
-        id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.CONCEPT_SET));
+        id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.CONCEPTSET));
       list = list.concat(convertToResources(dataSets.items, namespace,
-        id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.DATA_SET));
+        id, accessLevel as unknown as WorkspaceAccessLevel, ResourceType.DATASET));
       this.setState({
         resourceList: list
       });

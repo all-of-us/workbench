@@ -22,6 +22,7 @@ public class DomainInfoDaoTest {
   @Autowired private ConceptDao conceptDao;
   private DbDomainInfo domainInfoObservation;
   private DbDomainInfo domainInfoCondition;
+  private DbDomainInfo domainInfoPM;
 
   @Before
   public void setUp() {
@@ -40,6 +41,14 @@ public class DomainInfoDaoTest {
             .count(100L)
             .sourceCountValue(122L)
             .standardConcept("S")
+            .conceptName("name"));
+    conceptDao.save(
+        new DbConcept()
+            .conceptId(3L)
+            .domainId("Measurement")
+            .count(200L)
+            .sourceCountValue(127L)
+            .vocabularyId("PPI")
             .conceptName("name"));
     domainInfoObservation =
         domainInfoDao.save(
@@ -63,14 +72,26 @@ public class DomainInfoDaoTest {
                 .allConceptCount(0)
                 .standardConceptCount(0)
                 .participantCount(0));
+    domainInfoPM =
+        domainInfoDao.save(
+            new DbDomainInfo()
+                .conceptId(0L)
+                .domain((short) 10)
+                .domainId("Physical Measurements")
+                .name("Physical Measurements")
+                .description("descr")
+                .allConceptCount(33)
+                .standardConceptCount(0)
+                .participantCount(453542));
   }
 
   @Test
   public void findByOrderByDomainId() {
     List<DbDomainInfo> infos = domainInfoDao.findByOrderByDomainId();
-    assertEquals(2, infos.size());
+    assertEquals(3, infos.size());
     assertEquals(domainInfoCondition, infos.get(0));
     assertEquals(domainInfoObservation, infos.get(1));
+    assertEquals(domainInfoPM, infos.get(2));
   }
 
   @Test
@@ -87,5 +108,11 @@ public class DomainInfoDaoTest {
     assertEquals(2, infos.size());
     assertEquals(domainInfoCondition.allConceptCount(1), infos.get(0));
     assertEquals(domainInfoObservation.allConceptCount(1), infos.get(1));
+  }
+
+  @Test
+  public void findPhysicalMeasurementConceptCounts() {
+    DbDomainInfo info = domainInfoDao.findPhysicalMeasurementConceptCounts("name");
+    assertEquals(domainInfoPM.allConceptCount(1), info);
   }
 }

@@ -33,7 +33,7 @@ public class CBCriteriaAttributeDaoTest {
   }
 
   @Test
-  public void findCriteriaAttributeByConceptId() throws Exception {
+  public void findCriteriaAttributeByConceptId() {
     List<DbCriteriaAttribute> attributes =
         cbCriteriaAttributeDao.findCriteriaAttributeByConceptId(1L);
     assertEquals(1, attributes.size());

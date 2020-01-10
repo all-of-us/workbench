@@ -36,6 +36,7 @@ import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -165,6 +166,12 @@ public class UserServiceImpl implements UserService {
     if (shouldUserBeRegistered(dbUser)) {
       addToRegisteredTierGroupIdempotent(dbUser);
       newDataAccessLevel = DataAccessLevel.REGISTERED;
+
+      // if this is the first time the user has completed registration, record it
+      // this starts the Free Tier Credits countdown clock
+      if (dbUser.getFirstRegistrationCompletionTime() == null) {
+        dbUser.setFirstRegistrationCompletionTime();
+      }
     } else {
       removeFromRegisteredTierGroupIdempotent(dbUser);
       newDataAccessLevel = DataAccessLevel.UNREGISTERED;
@@ -285,6 +292,7 @@ public class UserServiceImpl implements UserService {
         areaOfResearch,
         null,
         null,
+        null,
         null);
   }
 
@@ -297,6 +305,7 @@ public class UserServiceImpl implements UserService {
       String currentPosition,
       String organization,
       String areaOfResearch,
+      List<Degree> degrees,
       DbAddress address,
       DbDemographicSurvey demographicSurvey,
       List<DbInstitutionalAffiliation> institutionalAffiliations) {
@@ -314,6 +323,9 @@ public class UserServiceImpl implements UserService {
     dbUser.setAboutYou(null);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     dbUser.setAddress(address);
+    if (degrees != null) {
+      dbUser.setDegreesEnum(degrees);
+    }
     dbUser.setDemographicSurvey(demographicSurvey);
     // For existing user that do not have address
     if (address != null) {

@@ -35,4 +35,20 @@ Common.register_command({
   :fn => ->() { build_snippets_menu }
 })
 
+def generate_static_files()
+  static_files_directory = "../src/main/webapp/static"
+  FileUtils.cp("activity-checker-extension.js", static_files_directory)
+  FileUtils.cp("aou-download-policy-extension.js", static_files_directory)
+  FileUtils.cp("initialize_notebook_cluster.sh", static_files_directory)
+  FileUtils.cp("start_notebook_cluster.sh", static_files_directory)
+  build_snippets_menu()
+  FileUtils.cp("generated/aou-snippets-menu.js", static_files_directory)
+end
+
+Common.register_command({
+  :invocation => "generate-static-files",
+  :description => "Copies files from the cluster resources directory into our static files",
+  :fn => ->() { generate_static_files }
+})
+
 Workbench.handle_argv_or_die(__FILE__)

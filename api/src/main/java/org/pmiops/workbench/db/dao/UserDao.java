@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.List;
+import java.util.Set;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -35,4 +36,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
           + "OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%')) )")
   List<DbUser> findUsersByDataAccessLevelsAndSearchString(
       @Param("dals") List<Short> dataAccessLevels, @Param("term") String term, Sort sort);
+
+  Set<DbUser> findByFirstRegistrationCompletionTimeNotNull();
 }
