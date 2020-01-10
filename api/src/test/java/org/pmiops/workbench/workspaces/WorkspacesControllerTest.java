@@ -2632,4 +2632,21 @@ public class WorkspacesControllerTest {
 
     workspacesController.cloneNotebook(workspace.getNamespace(), workspace.getId(), "notebook");
   }
+
+  @Test(expected = ForbiddenException.class)
+  public void copyNotebook_requireActiveBilling() {
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
+    workspaceDao.save(dbWorkspace);
+
+    CopyRequest copyNotebookRequest =
+        new CopyRequest()
+            .toWorkspaceName(workspace.getName())
+            .toWorkspaceNamespace(workspace.getNamespace());
+
+    workspacesController.copyNotebook("x", "y", "z", copyNotebookRequest);
+  }
 }
