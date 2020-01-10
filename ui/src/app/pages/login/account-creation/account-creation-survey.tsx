@@ -25,15 +25,16 @@ import {AccountCreationOptions} from './account-creation-options';
 
 
 const styles = {
-  questionLabel: {
-    width: 76,
+  checkbox: {marginTop: '0.3rem'},
+  checkboxWrapper: {display: 'flex', width: '9rem', marginBottom: '0.5rem'},
+  checkboxLabel: {
     color: colors.primary,
     fontFamily: 'Montserrat',
     fontSize: '14px',
     fontWeight: 400,
-  },
-  checkboxWrapper: {display: 'flex', width: '9rem', marginBottom: '0.5rem', marginTop: '0.3rem'},
-  checkboxLabel: {paddingLeft: '0.5rem', paddingRight: '0.5rem'}
+    paddingLeft: '0.5rem',
+    paddingRight: '0.5rem'
+  }
 };
 
 export const DropDownSection = (props) => {
@@ -116,6 +117,14 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     this.setState(fp.set(['profile', 'demographicSurvey', attribute], value));
   }
 
+  createOptionCheckbox(checkboxLabel: string, optionKey: string, optionValue: any) {
+    return <CheckBox label={checkboxLabel}
+                     style={styles.checkbox}
+                     wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
+                     onChange={(value) => this.updateList(optionKey, optionValue)}
+    />;
+  }
+
   render() {
     const {profile: {demographicSurvey}} = this.state;
     return <div style={{marginTop: '1rem', paddingLeft: '3rem'}}>
@@ -131,11 +140,8 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       <Section header='1. Race'>
         <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
           {AccountCreationOptions.race.map((race) => {
-            return <CheckBox label={race.label}
-                             wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
-                             onChange={(value) => this.updateList('race', race.value)}
-                             />; })
-          }
+            return this.createOptionCheckbox(race.label, 'race', race.value);
+          })}
         </div>
       </Section>
 
@@ -148,34 +154,23 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       <Section header='3. Gender'>
         <FlexRow style={{flexWrap: 'wrap'}}>
           {AccountCreationOptions.gender.map((gender) => {
-            return <CheckBox label={gender.label}
-                        onChange={(value) => this.updateList('gender', gender.value)}
-                        wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
-                        />;
-          })
-          }
+            return this.createOptionCheckbox(gender.label, 'gender', gender.value);
+          })}
         </FlexRow>
       </Section>
       {/*Sex at birth section*/}
       <Section header='4. Sex at birth'>
         <FlexRow style={{flexWrap: 'wrap'}}>
           {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
-            return <CheckBox label={sexAtBirth.label}
-                             onChange={(value) => this.updateList('sexAtBirth', sexAtBirth.value)}
-                             wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
-            />;
-          })
-          }
+            return this.createOptionCheckbox(sexAtBirth.label, 'sexAtBirth', sexAtBirth.value);
+          })}
         </FlexRow>
       </Section>
       {/*Sexual orientation section*/}
       <Section header='5. Sexual Orientation'>
         <FlexRow style={{flexWrap: 'wrap'}}>
           {AccountCreationOptions.sexualOrientation.map((sexualOrientation) => {
-            return <CheckBox label={sexualOrientation.label}
-                             onChange={(value) => this.updateList('sexualOrientation', sexualOrientation.value)}
-                             wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
-            />;
+            return this.createOptionCheckbox(sexualOrientation.label, 'sexualOrientation', sexualOrientation.value);
           })
           }
         </FlexRow>
