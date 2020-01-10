@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -143,7 +142,9 @@ public class ConceptsController implements ConceptsApiDelegate {
       if (allConcepts) {
         conceptCount =
             matchExp == null
-                ? conceptService.countSurveyByName(request.getSurveyName())
+                ? request.getSurveyName() == null
+                    ? conceptService.countSurveys()
+                    : conceptService.countSurveyByName(request.getSurveyName())
                 : conceptService.countSurveyBySearchTerm(matchExp);
       }
       response.addDomainCountsItem(
@@ -178,8 +179,6 @@ public class ConceptsController implements ConceptsApiDelegate {
             questionList.getContent().stream()
                 .map(this::toClientSurveyQuestions)
                 .collect(Collectors.toList()));
-      } else {
-        response.setQuestions(Collections.EMPTY_LIST);
       }
     } else {
       Slice<DbConcept> concepts =

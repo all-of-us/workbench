@@ -269,4 +269,18 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION' "
               + "and c.parentId in (select dc.id from DbCriteria dc where dc.domainId = 'SURVEY' and dc.type = 'PPI' and dc.name = :surveyName)")
   Page<DbCriteria> findSurveysByName(@Param("surveyName") String surveyName, Pageable page);
+
+  @Query(
+      value =
+          "select c "
+              + "from DbCriteria c "
+              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION'")
+  Page<DbCriteria> findSurveys(Pageable page);
+
+  @Query(
+      value =
+          "select count(c) "
+              + "from DbCriteria c "
+              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION'")
+  long countSurveys();
 }

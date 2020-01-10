@@ -147,6 +147,10 @@ public class ConceptService {
     return cbCriteriaDao.countSurveyByName(surveyName);
   }
 
+  public long countSurveys() {
+    return cbCriteriaDao.countSurveys();
+  }
+
   public Slice<DbConcept> searchConcepts(
       String query, String standardConceptFilter, List<String> domainIds, int limit, int page) {
     final String keyword = modifyMultipleMatchKeyword(query);
@@ -156,10 +160,12 @@ public class ConceptService {
             ? STANDARD_CONCEPT_CODES
             : ALL_CONCEPT_CODES;
     if (domainIds.contains(CommonStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT))) {
+      ImmutableList domains =
+          ImmutableList.of(CommonStorageEnums.domainToDomainId(Domain.MEASUREMENT));
       return StringUtils.isBlank(keyword)
-          ? conceptDao.findConcepts(conceptTypes, domainIds, VOCAB_ID, CONCEPT_CLASS_ID, pageable)
+          ? conceptDao.findConcepts(conceptTypes, domains, VOCAB_ID, CONCEPT_CLASS_ID, pageable)
           : conceptDao.findConcepts(
-              keyword, conceptTypes, domainIds, VOCAB_ID, CONCEPT_CLASS_ID, pageable);
+              keyword, conceptTypes, domains, VOCAB_ID, CONCEPT_CLASS_ID, pageable);
     } else {
       return StringUtils.isBlank(keyword)
           ? conceptDao.findConcepts(conceptTypes, domainIds, pageable)
@@ -170,9 +176,12 @@ public class ConceptService {
   public Slice<DbCriteria> searchSurveys(String query, String surveyName, int limit, int page) {
     final String keyword = modifyMultipleMatchKeyword(query);
     Pageable pageable = new PageRequest(page, limit, new Sort(Direction.ASC, "id"));
-    return StringUtils.isBlank(keyword)
-        ? cbCriteriaDao.findSurveysByName(surveyName, pageable)
-        : cbCriteriaDao.findSurveys(keyword, pageable);
+    if (StringUtils.isBlank(keyword)) {
+      return StringUtils.isBlank(surveyName)
+          ? cbCriteriaDao.findSurveys(pageable)
+          : cbCriteriaDao.findSurveysByName(surveyName, pageable);
+    }
+    return cbCriteriaDao.findSurveys(keyword, pageable);
   }
 
   public ConceptIds classifyConceptIds(Set<Long> conceptIds) {
