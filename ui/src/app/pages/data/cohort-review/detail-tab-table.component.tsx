@@ -302,14 +302,14 @@ export const DetailTabTable = withCurrentWorkspace()(
     async getParticipantData(getCount: boolean) {
       try {
         const {columns, domain, participantId, workspace: {id, namespace}} = this.props;
-        const {sortOrder} = this.state;
+        const {sortField, sortOrder} = this.state;
         let {lazyLoad, totalCount} = this.state;
         const {cohortReviewId} = cohortReviewStore.getValue();
         const pageFilterRequest = {
           page: 0,
           pageSize: 125,
           sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
-          sortColumn: columns[0].name,
+          sortColumn: columns.find(col => col.name === sortField).filter,
           domain: domain,
           filters: {items: []}
         } as PageFilterRequest;
@@ -337,14 +337,14 @@ export const DetailTabTable = withCurrentWorkspace()(
     updatePageData(previous: boolean) {
       this.setState({loadingPrevious: previous, updating: true});
       const {columns, domain} = this.props;
-      const {range, sortOrder} = this.state;
+      const {range, sortField, sortOrder} = this.state;
       let {filteredData} = this.state;
       const requestPage = previous ? range[0] / 125 : (filteredData.length + range[0]) / 125;
       const pageFilterRequest = {
         page: requestPage,
         pageSize: 125,
         sortOrder: sortOrder === 1 ? SortOrder.Asc :  SortOrder.Desc,
-        sortColumn: columns[0].name,
+        sortColumn: columns.find(col => col.name === sortField).filter,
         domain: domain,
         filters: {items: []}
       } as PageFilterRequest;
@@ -823,7 +823,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           field={col.name}
           header={header}
           headerStyle={isExpanderNeeded ? styles.graphStyle : {}}
-          sortable
+          sortable={!!col.filter}
           body={overlayTemplate}/>;
       });
       return <div style={styles.container}>

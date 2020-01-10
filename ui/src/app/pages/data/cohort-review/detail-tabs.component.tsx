@@ -11,7 +11,7 @@ import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType} from 'generated/fetch';
+import {DomainType, FilterColumns} from 'generated/fetch';
 import {TabPanel, TabView} from 'primereact/tabview';
 import {Observable} from 'rxjs/Observable';
 import {from} from 'rxjs/observable/from';
@@ -87,6 +87,7 @@ const itemDate = {
   name: 'itemDate',
   classNames: ['date-col'],
   displayName: 'Date',
+  filter: FilterColumns.STARTDATE
 };
 const itemTime = {
   name: 'itemTime',
@@ -96,68 +97,84 @@ const itemTime = {
 const domain = {
   name: 'domain',
   displayName: 'Domain',
+  filter: FilterColumns.DOMAIN
 };
 const standardVocabulary = {
   name: 'standardVocabulary',
   classNames: ['vocab-col'],
   displayName: 'Standard Vocabulary',
+  filter: FilterColumns.STANDARDVOCAB
 };
 const standardName = {
   name: 'standardName',
   displayName: 'Standard Name',
+  filter: FilterColumns.STANDARDNAME
 };
 const standardCode = {
   name: 'standardCode',
   displayName: 'Standard Code',
+  filter: FilterColumns.STANDARDCODE
 };
 const sourceVocabulary = {
   name: 'sourceVocabulary',
   classNames: ['vocab-col'],
   displayName: 'Source Vocabulary',
+  filter: FilterColumns.SOURCEVOCAB
 };
 const sourceName = {
   name: 'sourceName',
   displayName: 'Source Name',
+  filter: FilterColumns.SOURCENAME
 };
 const sourceCode = {
   name: 'sourceCode',
   displayName: 'Source Code',
+  filter: FilterColumns.SOURCECODE
 };
 const value = {
   name: 'value',
   displayName: 'Value',
+  filter: FilterColumns.VALASNUMBER
 };
 const ageAtEvent = {
   name: 'ageAtEvent',
   displayName: 'Age At Event',
+  filter: FilterColumns.AGEATEVENT
 };
 const visitType = {
   name: 'visitType',
   displayName: 'Visit Type',
+  filter: FilterColumns.VISITTYPE
 };
 const numMentions = {
   name: 'numMentions',
   displayName: 'Number Of Mentions',
+  filter: FilterColumns.NUMOFMENTIONS
 };
 const firstMention = {
   name: 'firstMention',
   displayName: 'Date First Mention',
+  filter: FilterColumns.FIRSTMENTION
 };
 const lastMention = {
   name: 'lastMention',
   displayName: 'Date Last Mention',
+  filter: FilterColumns.LASTMENTION
 };
 const survey = {
   name: 'survey',
   displayName: 'Survey Name',
+  filter: FilterColumns.SURVEYNAME
 };
 const question = {
   name: 'question',
   displayName: 'Question',
+  filter: FilterColumns.QUESTION
 };
 const answer = {
   name: 'answer',
   displayName: 'Answer',
+  filter: FilterColumns.ANSWER
 };
 const graph = {
   name: 'graph',
