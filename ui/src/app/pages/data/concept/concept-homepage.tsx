@@ -337,7 +337,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
       // TODO switch to empty array when we start actually searching surveys and PM
       const completedDomainSearches = [Domain.SURVEY];
       // TODO remove filter below when we start actually searching surveys and PM
-      conceptsCache.filter(item => ![Domain.SURVEY].includes(item.domain)).forEach(async(cacheItem) => {
+      conceptsCache.forEach(async(cacheItem) => {
         selectedConceptDomainMap[cacheItem.domain] = [];
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
         const resp = await conceptsApi().searchConcepts(namespace, id, {
