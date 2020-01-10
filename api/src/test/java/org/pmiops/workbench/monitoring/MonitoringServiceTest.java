@@ -22,7 +22,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.monitoring.views.Metric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -82,11 +81,10 @@ public class MonitoringServiceTest {
 
   @Test
   public void testRecordMap() {
-    ImmutableMap.Builder<Metric, Number> signalToValueBuilder = ImmutableMap.builder();
-    signalToValueBuilder.put(GaugeMetric.BILLING_BUFFER_SIZE, 99L);
-    signalToValueBuilder.put(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 2L);
-
-    monitoringService.recordValues(signalToValueBuilder.build());
+    monitoringService.recordValues(
+        ImmutableMap.of(
+            GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 2L,
+            GaugeMetric.USER_COUNT, 33L));
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap, times(2)).put(any(MeasureLong.class), anyLong());
     verify(mockMeasureMap).record();

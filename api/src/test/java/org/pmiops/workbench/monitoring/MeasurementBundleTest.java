@@ -32,8 +32,9 @@ public class MeasurementBundleTest {
             GaugeMetric.USER_COUNT, USER_COUNT);
     final MeasurementBundle bundle =
         MeasurementBundle.builder().addAllMeasurements(measurementMap).build();
-    assertThat(bundle.getAttachments()).hasSize(measurementMap.size());
+    assertThat(bundle.getMeasurements()).hasSize(measurementMap.size());
     assertThat(bundle.getMeasurements().get(GaugeMetric.USER_COUNT)).isEqualTo(USER_COUNT);
+    assertThat(bundle.getAttachments()).isEmpty();
   }
 
   @Test(expected = IllegalStateException.class)
