@@ -77,7 +77,8 @@ public class StackdriverStatsExporterService {
         .putLabels(PROJECT_ID_LABEL, getProjectId())
         .putLabels(LOCATION_LABEL, getLocation())
         .putLabels(NAMESPACE_LABEL, getEnvironmentShortName())
-        .putLabels(NODE_ID_LABEL, getNodeId()).build();
+        .putLabels(NODE_ID_LABEL, getNodeId())
+        .build();
   }
 
   private String getProjectId() {

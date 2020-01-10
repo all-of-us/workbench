@@ -8,7 +8,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.BiConsumer;
@@ -44,7 +43,7 @@ import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
+import org.pmiops.workbench.monitoring.attachments.Attachment;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -766,23 +765,27 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       // get keys
       final String dataAccessLevel = user.getDataAccessLevelEnum().toString();
       final String isDisabled = Boolean.valueOf(user.getDisabled()).toString();
-      final String isBetaBypassed = Boolean.valueOf(user.getBetaAccessBypassTime() != null).toString();
+      final String isBetaBypassed =
+          Boolean.valueOf(user.getBetaAccessBypassTime() != null).toString();
 
       // find count
-      final long count = Optional.ofNullable(keysToCount.get(dataAccessLevel,
-          isDisabled, isBetaBypassed)).orElse(0L);
+      final long count =
+          Optional.ofNullable(keysToCount.get(dataAccessLevel, isDisabled, isBetaBypassed))
+              .orElse(0L);
       // increment count
       keysToCount.put(dataAccessLevel, isDisabled, isBetaBypassed, count + 1);
     }
 
     // build bundles for each entry in the map
     return keysToCount.entrySet().stream()
-        .map(e -> MeasurementBundle.builder()
-            .addValue(GaugeMetric.USER_COUNT, e.getValue())
-            .attach(AttachmentKey.USER_DATA_ACCESS_LEVEL, e.getKey().getKey(0))
-            .attach(AttachmentKey.USER_DISABLED, e.getKey().getKey(1))
-            .attach(AttachmentKey.USER_BYPASSED_BETA, e.getKey().getKey(2))
-            .build())
+        .map(
+            e ->
+                MeasurementBundle.builder()
+                    .addValue(GaugeMetric.USER_COUNT, e.getValue())
+                    .attach(Attachment.USER_DATA_ACCESS_LEVEL, e.getKey().getKey(0))
+                    .attach(Attachment.USER_DISABLED, e.getKey().getKey(1))
+                    .attach(Attachment.USER_BYPASSED_BETA, e.getKey().getKey(2))
+                    .build())
         .collect(ImmutableSet.toImmutableSet());
   }
 }

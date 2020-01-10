@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
+import org.pmiops.workbench.monitoring.attachments.Attachment;
 import org.pmiops.workbench.monitoring.views.Metric;
 
 /**
@@ -18,11 +18,10 @@ import org.pmiops.workbench.monitoring.views.Metric;
  */
 public class MeasurementBundle {
   private final Map<Metric, Number> monitoringViews;
-  private final Map<AttachmentKey, String> attachmentKeyToString;
+  private final Map<Attachment, String> attachmentKeyToString;
 
   private MeasurementBundle(
-      Map<Metric, Number> monitoringViews,
-      Map<AttachmentKey, String> attachmentKeyToString) {
+      Map<Metric, Number> monitoringViews, Map<Attachment, String> attachmentKeyToString) {
     this.monitoringViews = monitoringViews;
     this.attachmentKeyToString = attachmentKeyToString;
   }
@@ -40,7 +39,7 @@ public class MeasurementBundle {
   // in AttachmentValueStrings now (though naked Strings are still supported but
   // deprecated).
   private static Map<String, AttachmentValue> fromAttachmentKeyToString(
-      Map<AttachmentKey, String> attachmentKeyStringMap) {
+      Map<Attachment, String> attachmentKeyStringMap) {
     return attachmentKeyStringMap.entrySet().stream()
         .map(
             e ->
@@ -89,7 +88,7 @@ public class MeasurementBundle {
 
   public static class Builder {
     private ImmutableMap.Builder<Metric, Number> measurementsBuilder;
-    private ImmutableMap.Builder<AttachmentKey, String> attachmentsBuilder;
+    private ImmutableMap.Builder<Attachment, String> attachmentsBuilder;
 
     private Builder() {
       measurementsBuilder = ImmutableMap.builder();
@@ -111,12 +110,12 @@ public class MeasurementBundle {
       return this;
     }
 
-    public Builder attach(AttachmentKey attachmentKey, String value) {
+    public Builder attach(Attachment attachmentKey, String value) {
       attachmentsBuilder.put(attachmentKey, value);
       return this;
     }
 
-    public Builder attachAll(Map<AttachmentKey, String> attachmentKeyToString) {
+    public Builder attachAll(Map<Attachment, String> attachmentKeyToString) {
       attachmentsBuilder.putAll(ImmutableMap.copyOf(attachmentKeyToString));
       return this;
     }

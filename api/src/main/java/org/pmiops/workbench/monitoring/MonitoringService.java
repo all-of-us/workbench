@@ -46,8 +46,7 @@ public interface MonitoringService {
    *     data.
    */
   void recordValues(
-      Map<Metric, Number> viewInfoToValue,
-      Map<String, AttachmentValue> attachmentKeyToValue);
+      Map<Metric, Number> viewInfoToValue, Map<String, AttachmentValue> attachmentKeyToValue);
 
   default void recordBundle(MeasurementBundle viewBundle) {
     recordValues(viewBundle.getMeasurements(), viewBundle.getAttachments());

@@ -672,8 +672,7 @@ public class BillingProjectBufferServiceTest {
     assertThat(bundles.size()).isGreaterThan(0);
     Optional<MeasurementBundle> entryStatusBundle =
         bundles.stream()
-            .filter(
-                b -> b.getMeasurements().containsKey(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT))
+            .filter(b -> b.getMeasurements().containsKey(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT))
             .findFirst();
     assertThat(entryStatusBundle.isPresent()).isTrue();
     assertThat(entryStatusBundle.get().getAttachments()).isNotEmpty();

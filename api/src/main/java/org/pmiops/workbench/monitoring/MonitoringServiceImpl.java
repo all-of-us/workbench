@@ -43,15 +43,12 @@ public class MonitoringServiceImpl implements MonitoringService {
   }
 
   private void registerSignals() {
-    Arrays.stream(GaugeMetric.values())
-        .map(Metric::toView)
-        .forEach(viewManager::registerView);
+    Arrays.stream(GaugeMetric.values()).map(Metric::toView).forEach(viewManager::registerView);
   }
 
   @Override
   public void recordValues(
-      Map<Metric, Number> viewInfoToValue,
-      Map<String, AttachmentValue> attachmentKeyToValue) {
+      Map<Metric, Number> viewInfoToValue, Map<String, AttachmentValue> attachmentKeyToValue) {
     try {
       initStatsConfigurationIdempotent();
       if (viewInfoToValue.isEmpty()) {
@@ -79,9 +76,7 @@ public class MonitoringServiceImpl implements MonitoringService {
    * @param value
    */
   private void addToMeasureMap(
-      @NotNull MeasureMap measureMap,
-      @NotNull Metric viewProperties,
-      @NotNull Number value) {
+      @NotNull MeasureMap measureMap, @NotNull Metric viewProperties, @NotNull Number value) {
     if (viewProperties.getMeasureClass().equals(MeasureLong.class)) {
       measureMap.put(viewProperties.getMeasureLong(), value.longValue());
     } else if (viewProperties.getMeasureClass().equals(MeasureDouble.class)) {

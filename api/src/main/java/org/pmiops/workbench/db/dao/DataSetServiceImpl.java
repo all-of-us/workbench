@@ -45,7 +45,7 @@ import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
+import org.pmiops.workbench.monitoring.attachments.Attachment;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,11 +69,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return ImmutableSet.of(
         MeasurementBundle.builder()
             .addValue(GaugeMetric.DATASET_COUNT, invalidToCount.getOrDefault(false, 0L))
-            .attach(AttachmentKey.DATASET_INVALID, Boolean.valueOf(false).toString())
+            .attach(Attachment.DATASET_INVALID, Boolean.valueOf(false).toString())
             .build(),
         MeasurementBundle.builder()
             .addValue(GaugeMetric.DATASET_COUNT, invalidToCount.getOrDefault(true, 0L))
-            .attach(AttachmentKey.DATASET_INVALID, Boolean.valueOf(true).toString())
+            .attach(Attachment.DATASET_INVALID, Boolean.valueOf(true).toString())
             .build());
   }
 

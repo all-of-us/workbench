@@ -20,13 +20,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.ServerConfig;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -80,8 +76,7 @@ public class MonitoringServiceTest {
 
     verify(mockInitService).createAndRegister();
     verify(mockStatsRecorder).newMeasureMap();
-    verify(mockMeasureMap)
-        .put(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT.getMeasureLong(), value);
+    verify(mockMeasureMap).put(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT.getMeasureLong(), value);
     verify(mockMeasureMap).record();
   }
 

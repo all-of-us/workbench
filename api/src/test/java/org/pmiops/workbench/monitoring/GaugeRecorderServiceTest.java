@@ -6,12 +6,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import java.time.Clock;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,9 +19,8 @@ import org.mockito.Captor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
-import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
+import org.pmiops.workbench.monitoring.attachments.Attachment;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.monitoring.views.Metric;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,25 +34,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class GaugeRecorderServiceTest {
 
-  private static final Map<Metric, Number> BILLING_BUFFER_INDIVIDUAL_GAUGE_MAP =
-      ImmutableMap.of(
-          GaugeMetric.BILLING_BUFFER_ASSIGNING_PROJECT_COUNT,
-          2L,
-          GaugeMetric.BILLING_BUFFER_AVAILABLE_PROJECT_COUNT,
-          1L,
-          GaugeMetric.BILLING_BUFFER_CREATING_PROJECT_COUNT,
-          0L);
-
   private static final List<MeasurementBundle> BILLING_BUFFER_GAUGE_BUNDLES =
       ImmutableList.of(
-          MeasurementBundle.builder().addAll(BILLING_BUFFER_INDIVIDUAL_GAUGE_MAP).build(),
           MeasurementBundle.builder()
               .addValue(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 22L)
-              .attach(AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
+              .attach(Attachment.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
               .build(),
           MeasurementBundle.builder()
               .addValue(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 3L)
-              .attach(AttachmentKey.BUFFER_ENTRY_STATUS, BufferEntryStatus.CREATING.toString())
+              .attach(Attachment.BUFFER_ENTRY_STATUS, BufferEntryStatus.CREATING.toString())
               .build());
 
   private static final long WORKSPACES_COUNT = 101L;

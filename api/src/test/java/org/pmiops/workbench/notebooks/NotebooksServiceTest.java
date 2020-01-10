@@ -29,7 +29,7 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
+import org.pmiops.workbench.monitoring.attachments.Attachment;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -197,7 +197,7 @@ public class NotebooksServiceTest {
 
     final MeasurementBundle bundle = measurementBundleCaptor.getValue();
     assertThat(bundle).isNotNull();
-    assertThat(bundle.getAttachments().get(AttachmentKey.NOTEBOOK_NAME.getKeyName()).getValue())
+    assertThat(bundle.getAttachments().get(Attachment.NOTEBOOK_NAME.getKeyName()).getValue())
         .isEqualTo(clonedFileDetail.getName());
     assertThat(bundle.getMeasurements().get(EventMetric.NOTEBOOK_CLONE)).isEqualTo(1L);
   }

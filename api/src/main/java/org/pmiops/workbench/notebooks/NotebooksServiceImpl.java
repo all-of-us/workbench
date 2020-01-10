@@ -24,7 +24,7 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.attachments.AttachmentKey;
+import org.pmiops.workbench.monitoring.attachments.Attachment;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,8 +171,8 @@ public class NotebooksServiceImpl implements NotebooksService {
     monitoringService.recordBundle(
         MeasurementBundle.builder()
             .addValue(EventMetric.NOTEBOOK_CLONE, 1L)
-            .attach(AttachmentKey.NOTEBOOK_NAME, copiedNotebookFileDetail.getName())
-            .attach(AttachmentKey.NOTEBOOK_WORKSPACE_NAMESPACE, workspaceName)
+            .attach(Attachment.NOTEBOOK_NAME, copiedNotebookFileDetail.getName())
+            .attach(Attachment.NOTEBOOK_WORKSPACE_NAMESPACE, workspaceName)
             .build());
     return copiedNotebookFileDetail;
   }

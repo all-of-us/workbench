@@ -60,14 +60,13 @@ public interface Metric {
   }
 
   /**
-   * Distinguish between Long and Double measures via MeasureLong and MeasureDouble
-   * return values
+   * Distinguish between Long and Double measures via MeasureLong and MeasureDouble return values
+   *
    * @return Measure.MeasureLong, Measure.MeasureDouble, or another (future) class
    */
   Class getMeasureClass();
 
   Aggregation getAggregation();
-
 
   List<TagKey> getColumns();
 

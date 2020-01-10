@@ -12,22 +12,14 @@ public enum GaugeMetric implements Metric {
       "billing_buffer_project_count", "Number of projects in the billing buffer for each status"),
   BILLING_BUFFER_SIZE(
       "billing_project_buffer_entries", "The number of billing project buffer entries."),
+  COHORT_COUNT("cohort_count", "Count of all cohorts in existence"),
+  COHORT_REVIEW_COUNT("cohort_review_count", "Total number of cohort reviews in existence"),
   DATASET_COUNT("dataset_count", "Count of all datasets in existence"),
-  DEBUG_CONSTANT_VALUE("debug_constant_value", "Always 101"),
-  DEBUG_MILLISECONDS_SINCE_EPOCH("debug_epoch_millis", "Number of milliseconds since epoch"),
-  DEBUG_RANDOM_DOUBLE(
-      "debug_random_double",
-      "Double value for debugging",
-      "MHz",
-      MeasureDouble.class,
-      Aggregation.Sum.create()),
   WORKSPACE_TOTAL_COUNT("workspace_total_count", "Count of all workspaces (including inactive)"),
   WORKSPACE_COUNT_BY_ACTIVE_STATUS(
       "workspace_count_by_active_status", "Count of workspaces by active status"),
   WORKSPACE_COUNT_BY_DATA_ACCESS_LEVEL(
       "workspace_count_by_data_access_level", "Count of workspaces for each data access level"),
-  COHORT_COUNT("cohort_count", "Count of all cohorts in existence"),
-  COHORT_REVIEW_COUNT("cohort_review_count", "Total number of cohort reviews in existence"),
   USER_COUNT("user_count", "total number of users");
 
   private final String name;
