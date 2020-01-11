@@ -26,7 +26,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
@@ -190,13 +189,8 @@ public class NotebooksServiceTest {
     doReturn(WORKSPACE_RESPONSE).when(mockFirecloudService).getWorkspace(anyString(), anyString());
     doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
 
-    final FileDetail clonedFileDetail =
-        notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
-    verify(mockMonitoringService).recordBundle(measurementBundleCaptor.capture());
-
-    final MeasurementBundle bundle = measurementBundleCaptor.getValue();
-    assertThat(bundle).isNotNull();
-    assertThat(bundle.getMeasurements().get(EventMetric.NOTEBOOK_CLONE)).isEqualTo(1L);
+    notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
+    verify(mockMonitoringService).recordEvent(EventMetric.NOTEBOOK_CLONE);
   }
 
   private void stubNotebookToJson() {
