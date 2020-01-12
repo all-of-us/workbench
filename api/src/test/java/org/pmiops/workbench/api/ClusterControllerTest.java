@@ -44,7 +44,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cluster;
 import org.pmiops.workbench.model.ClusterConfig;
 import org.pmiops.workbench.model.ClusterLocalizeRequest;
@@ -438,7 +437,6 @@ public class ClusterControllerTest {
 
   @Test
   public void listCluster_validateActiveBilling_checkAccessFirst() {
-    testWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     doThrow(ForbiddenException.class)
         .when(workspaceService)
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
@@ -454,8 +452,6 @@ public class ClusterControllerTest {
 
   @Test
   public void localize_validateActiveBilling() {
-    testWorkspace.setBillingStatus(BillingStatus.INACTIVE);
-
     doThrow(ForbiddenException.class)
         .when(workspaceService)
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
@@ -468,7 +464,6 @@ public class ClusterControllerTest {
 
   @Test
   public void localize_validateActiveBilling_checkAccessFirst() {
-    testWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     doThrow(ForbiddenException.class)
         .when(workspaceService)
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
