@@ -82,6 +82,15 @@ ENVIRONMENTS = {
     :featured_workspaces_json => "featured_workspaces_stable.json",
     :gae_vars => TEST_GAE_VARS
   },
+  "all-of-us-rw-preprod" => {
+    :env_name => "preprod",
+    :api_endpoint_host => "api-dot-all-of-us-rw-preprod.appspot.com",
+    :cdr_sql_instance => "all-of-us-rw-preprod:us-central1:workbenchmaindb",
+    :config_json => "config_preprod.json",
+    :cdr_versions_json => "cdr_versions_stable.json",
+    :featured_workspaces_json => "featured_workspaces_preprod.json",
+    :gae_vars => TEST_GAE_VARS
+  },
   "all-of-us-rw-prod" => {
     :env_name => "prod",
     :api_endpoint_host => "api.workbench.researchallofus.org",
