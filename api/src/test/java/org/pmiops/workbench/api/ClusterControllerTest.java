@@ -1,11 +1,13 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -424,7 +426,7 @@ public class ClusterControllerTest {
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void listCluster_requireActiveBilling() {
     testWorkspace.setBillingStatus(BillingStatus.INACTIVE);
 
@@ -432,10 +434,25 @@ public class ClusterControllerTest {
         .when(workspaceService)
         .requireActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
-    clusterController.listClusters(WORKSPACE_NS, WORKSPACE_ID);
+    assertThrows(ForbiddenException.class, () -> clusterController.listClusters(WORKSPACE_NS, WORKSPACE_ID));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
+  public void listCluster_requireActiveBilling_checkAccessFirst() {
+    testWorkspace.setBillingStatus(BillingStatus.INACTIVE);
+    doThrow(ForbiddenException.class)
+        .when(workspaceService)
+        .requireActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+
+    doThrow(ForbiddenException.class)
+        .when(workspaceService)
+        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.READER);
+
+    assertThrows(ForbiddenException.class, () -> clusterController.listClusters(WORKSPACE_NS, WORKSPACE_ID));
+    verify(workspaceService, never()).requireActiveBilling(anyString(), anyString());
+  }
+
+  @Test
   public void localize_requireActiveBilling() {
     testWorkspace.setBillingStatus(BillingStatus.INACTIVE);
 
@@ -446,7 +463,25 @@ public class ClusterControllerTest {
     ClusterLocalizeRequest req =
         new ClusterLocalizeRequest().workspaceNamespace(WORKSPACE_NS).workspaceId(WORKSPACE_ID);
 
-    clusterController.localize("y", "z", req);
+    assertThrows(ForbiddenException.class, () -> clusterController.localize("y", "z", req));
+  }
+
+  @Test
+  public void localize_requireActiveBilling_checkAccessFirst() {
+    testWorkspace.setBillingStatus(BillingStatus.INACTIVE);
+    doThrow(ForbiddenException.class)
+        .when(workspaceService)
+        .requireActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+
+    doThrow(ForbiddenException.class)
+        .when(workspaceService)
+        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.READER);
+
+    ClusterLocalizeRequest req =
+        new ClusterLocalizeRequest().workspaceNamespace(WORKSPACE_NS).workspaceId(WORKSPACE_ID);
+
+    assertThrows(ForbiddenException.class, () -> clusterController.localize("y", "z", req));
+    verify(workspaceService, never()).requireActiveBilling(anyString(), anyString());
   }
 
   private void createUser(String email) {

@@ -605,9 +605,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String fromWorkspaceId,
       String fromNotebookName,
       CopyRequest copyRequest) {
-    workspaceService.requireActiveBilling(
-        copyRequest.getToWorkspaceNamespace(), copyRequest.getToWorkspaceName());
-
     FileDetail fileDetail;
     try {
       fileDetail =
@@ -628,8 +625,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<FileDetail> cloneNotebook(
       String workspace, String workspaceName, String notebookName) {
-    workspaceService.requireActiveBilling(workspace, workspaceName);
-
     FileDetail fileDetail;
     try {
       fileDetail = notebooksService.cloneNotebook(workspace, workspaceName, notebookName);

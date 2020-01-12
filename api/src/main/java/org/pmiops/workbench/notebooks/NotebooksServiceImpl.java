@@ -124,16 +124,18 @@ public class NotebooksServiceImpl implements NotebooksService {
       String toWorkspaceNamespace,
       String toWorkspaceName,
       String newNotebookName) {
+    workspaceService.enforceWorkspaceAccessLevel(
+        fromWorkspaceNamespace, fromWorkspaceName, WorkspaceAccessLevel.READER);
+    workspaceService.enforceWorkspaceAccessLevel(
+        toWorkspaceNamespace, toWorkspaceName, WorkspaceAccessLevel.WRITER);
+    workspaceService.requireActiveBilling(toWorkspaceNamespace, toWorkspaceName);
     newNotebookName = NotebooksService.withNotebookExtension(newNotebookName);
+
     GoogleCloudLocators fromNotebookLocators =
         getNotebookLocators(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
     GoogleCloudLocators newNotebookLocators =
         getNotebookLocators(toWorkspaceNamespace, toWorkspaceName, newNotebookName);
 
-    workspaceService.enforceWorkspaceAccessLevel(
-        fromWorkspaceNamespace, fromWorkspaceName, WorkspaceAccessLevel.READER);
-    workspaceService.enforceWorkspaceAccessLevel(
-        toWorkspaceNamespace, toWorkspaceName, WorkspaceAccessLevel.WRITER);
     if (!cloudStorageService
         .getExistingBlobIdsIn(Collections.singletonList(newNotebookLocators.blobId))
         .isEmpty()) {
