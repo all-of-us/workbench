@@ -257,7 +257,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
     if (BillingStatus.INACTIVE.equals(
         getRequired(workspaceNamespace, workspaceId).getBillingStatus())) {
-      throw new ForbiddenException("Workspace (" + workspaceNamespace + ") is in an inactive billing state");
+      throw new ForbiddenException(
+          "Workspace (" + workspaceNamespace + ") is in an inactive billing state");
     }
   }
 
