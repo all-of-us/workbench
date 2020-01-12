@@ -1,0 +1,288 @@
+Reading gcloud configuration...
+Using 'default' gcloud configuration
+  account: eric.song@pmi-ops.org
+Enabling Cloud Service APIs...
++ gcloud services enable servicemanagement.googleapis.com --project all-of-us-rw-preprod
+
+Spawn
+gcloud services enable servicemanagement.googleapis.com --project all-of-us-rw-preprod
+Spawn
+
+
+Updates are available for some Cloud SDK components.  To install them,
+please run:
+  $ gcloud components update
+
++ gcloud services enable storage-component.googleapis.com --project all-of-us-rw-preprod
+
+Spawn
+gcloud services enable storage-component.googleapis.com --project all-of-us-rw-preprod
+Spawn
++ gcloud services enable iam.googleapis.com --project all-of-us-rw-preprod
+
+Spawn
+gcloud services enable iam.googleapis.com --project all-of-us-rw-preprod
+Spawn
+Operation "operations/acf.d34bb56e-b280-435c-b0a8-c486661dd3be" finished successfully.
++ gcloud services enable compute.googleapis.com --project all-of-us-rw-preprod
+
+Spawn
+gcloud services enable compute.googleapis.com --project all-of-us-rw-preprod
+Spawn
++ gcloud services enable admin.googleapis.com --project all-of-us-rw-preprod
+
+Spawn
+gcloud services enable admin.googleapis.com --project all-of-us-rw-preprod
+Spawn
+Operation "operations/acf.02af4309-fe75-4557-8d05-063f230c5969" finished successfully.
++ gcloud services enable appengine.googleapis.com --project all-of-us-rw-preprod
+
+Spawn
+gcloud services enable appengine.googleapis.com --project all-of-us-rw-preprod
+Spawn
+Operation "operations/acf.286765b4-dc02-4ce9-b34a-8ea0ef022915" finished successfully.
++ gcloud services enable cloudbilling.googleapis.com --project all-of-us-rw-preprod
+
+Spawn
+gcloud services enable cloudbilling.googleapis.com --project all-of-us-rw-preprod
+Spawn
+Operation "operations/acf.ad936579-1254-4752-8322-2391192e6e37" finished successfully.
++ gcloud services enable sqladmin.googleapis.com --project all-of-us-rw-preprod
+
+Spawn
+gcloud services enable sqladmin.googleapis.com --project all-of-us-rw-preprod
+Spawn
+Operation "operations/acf.6bd588fd-40ae-43e1-9423-e6a0b5d63ae8" finished successfully.
++ gcloud services enable sql-component.googleapis.com --project all-of-us-rw-preprod
+
+Spawn
+gcloud services enable sql-component.googleapis.com --project all-of-us-rw-preprod
+Spawn
++ gcloud services enable clouderrorreporting.googleapis.com --project all-of-us-rw-preprod
+
+Spawn
+gcloud services enable clouderrorreporting.googleapis.com --project all-of-us-rw-preprod
+Spawn
+Operation "operations/acf.1cbd6c90-0225-4416-a4e1-f670f54942d8" finished successfully.
++ gcloud services enable bigquery-json.googleapis.com --project all-of-us-rw-preprod
+
+Spawn
+gcloud services enable bigquery-json.googleapis.com --project all-of-us-rw-preprod
+Spawn
+Creating GCS bucket to store credentials...
++ gsutil mb -p all-of-us-rw-preprod -c regional -l us-central1 gs://all-of-us-rw-preprod-credentials/
+
+Spawn
+gsutilmb-pall-of-us-rw-preprod-cregional-lus-central1gs://all-of-us-rw-preprod-credentials/
+Spawn
+Creating gs://all-of-us-rw-preprod-credentials/...
+Creating GCS bucket to store scripts...
++ gsutil mb -p all-of-us-rw-preprod -c regional -l us-central1 gs://all-of-us-rw-preprod-cluster-resources/
+
+Spawn
+gsutilmb-pall-of-us-rw-preprod-cregional-lus-central1gs://all-of-us-rw-preprod-cluster-resources/
+Spawn
+Creating gs://all-of-us-rw-preprod-cluster-resources/...
+Creating Cloud SQL instances...
++ gcloud sql instances create workbenchmaindb --tier=db-n1-standard-2 --activation-policy=ALWAYS --backup-start-time 00:00 --require-ssl --failover-replica-name workbenchbackupdb --enable-bin-log --database-version MYSQL_5_7 --project all-of-us-rw-preprod --storage-auto-increase --async --maintenance-release-channel preview --maintenance-window-day SAT --maintenance-window-hour 5
+
+Spawn
+gcloudsqlinstancescreateworkbenchmaindb--tier=db-n1-standard-2--activation-policy=ALWAYS--backup-start-time00:00--require-ssl--failover-replica-nameworkbenchbackupdb--enable-bin-log--database-versionMYSQL_5_7--projectall-of-us-rw-preprod--storage-auto-increase--async--maintenance-release-channelpreview--maintenance-window-daySAT--maintenance-window-hour5
+Spawn
+WARNING: Starting with release 233.0.0, you will need to specify either a region or a zone to create an instance.
+insertTime: '2020-01-12T07:23:26.144000+00:00'
+kind: sql#operation
+name: 48d7cbd4-b82f-4409-8ccb-25933bfba8c4
+operationType: CREATE
+selfLink: https://www.googleapis.com/sql/v1beta4/projects/all-of-us-rw-preprod/operations/48d7cbd4-b82f-4409-8ccb-25933bfba8c4
+startTime: '2020-01-12T07:23:26.379000+00:00'
+status: RUNNING
+targetId: workbenchmaindb
+targetLink: https://www.googleapis.com/sql/v1beta4/projects/all-of-us-rw-preprod/instances/workbenchmaindb
+targetProject: all-of-us-rw-preprod
+user: eric.song@pmi-ops.org
+Waiting for database instance to become ready...
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: PENDING_CREATE
+
+DB status: state: RUNNABLE
+
+Creating AppEngine app...
++ gcloud app create --region us-central --project all-of-us-rw-preprod
+
+Spawn
+gcloudappcreate--regionus-central--projectall-of-us-rw-preprod
+Spawn
+You are creating an app for project [all-of-us-rw-preprod].
+WARNING: Creating an App Engine application for a project is irreversible and the region
+cannot be changed. More information about regions is at
+<https://cloud.google.com/appengine/docs/locations>.
+
+Creating App Engine application in project [all-of-us-rw-preprod] and region [us-central]....done.                             
+Success! The app is now created. Please use `gcloud app deploy` to deploy your first app.
+Writing DB credentials file...
++ gsutil cp /tmp/all-of-us-rw-preprod-vars.env20200112-1-1mbu9u2 gs://all-of-us-rw-preprod-credentials/vars.env
+
+Spawn
+gsutilcp/tmp/all-of-us-rw-preprod-vars.env20200112-1-1mbu9u2gs://all-of-us-rw-preprod-credentials/vars.env
+Spawn
+Copying file:///tmp/all-of-us-rw-preprod-vars.env20200112-1-1mbu9u2 [Content-Type=application/octet-stream]...
+/ [1 files][  477.0 B/  477.0 B]                                                
+Operation completed over 1 objects/477.0 B.                                      
+Setting root password...
++ gcloud sql users set-password root % --project all-of-us-rw-preprod --instance workbenchmaindb --password ********************
+ERROR: (gcloud.sql.users.set-password) Positional argument deprecated_host has been removed. Use --host instead.
+Usage: gcloud sql users set-password USERNAME --instance=INSTANCE, -i INSTANCE [optional flags]
+  optional flags may be  --async | --help | --host | --password |
+                         --prompt-for-password
+
+For detailed information on this command and its flags, run:
+  gcloud sql users set-password --help
+Traceback (most recent call last):
+	6: from /w/api/project.rb:6:in `<main>'
+	5: from /w/aou-utils/workbench.rb:61:in `handle_argv_or_die'
+	4: from /w/aou-utils/utils/common.rb:86:in `handle_or_die'
+	3: from /w/api/libproject/devstart.rb:1937:in `block in <top (required)>'
+	2: from /w/api/libproject/devstart.rb:1930:in `setup_cloud_project'
+	1: from /w/api/libproject/devstart.rb:1879:in `setup_project_data'
+/w/api/libproject/devstart.rb:580:in `run_with_redirects': Error running: gcloud sql users set-password root % --project all-of-us-rw-preprod --instance workbenchmaindb --password ******************** (RuntimeError)
+
