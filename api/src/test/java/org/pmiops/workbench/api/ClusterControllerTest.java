@@ -427,38 +427,38 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void listCluster_requireActiveBilling() {
-    testWorkspace.setBillingStatus(BillingStatus.INACTIVE);
-
+  public void listCluster_validateActiveBilling() {
     doThrow(ForbiddenException.class)
         .when(workspaceService)
-        .requireActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
-    assertThrows(ForbiddenException.class, () -> clusterController.listClusters(WORKSPACE_NS, WORKSPACE_ID));
+    assertThrows(
+        ForbiddenException.class, () -> clusterController.listClusters(WORKSPACE_NS, WORKSPACE_ID));
   }
 
   @Test
-  public void listCluster_requireActiveBilling_checkAccessFirst() {
+  public void listCluster_validateActiveBilling_checkAccessFirst() {
     testWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     doThrow(ForbiddenException.class)
         .when(workspaceService)
-        .requireActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
     doThrow(ForbiddenException.class)
         .when(workspaceService)
         .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.READER);
 
-    assertThrows(ForbiddenException.class, () -> clusterController.listClusters(WORKSPACE_NS, WORKSPACE_ID));
-    verify(workspaceService, never()).requireActiveBilling(anyString(), anyString());
+    assertThrows(
+        ForbiddenException.class, () -> clusterController.listClusters(WORKSPACE_NS, WORKSPACE_ID));
+    verify(workspaceService, never()).validateActiveBilling(anyString(), anyString());
   }
 
   @Test
-  public void localize_requireActiveBilling() {
+  public void localize_validateActiveBilling() {
     testWorkspace.setBillingStatus(BillingStatus.INACTIVE);
 
     doThrow(ForbiddenException.class)
         .when(workspaceService)
-        .requireActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
     ClusterLocalizeRequest req =
         new ClusterLocalizeRequest().workspaceNamespace(WORKSPACE_NS).workspaceId(WORKSPACE_ID);
@@ -467,11 +467,11 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void localize_requireActiveBilling_checkAccessFirst() {
+  public void localize_validateActiveBilling_checkAccessFirst() {
     testWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     doThrow(ForbiddenException.class)
         .when(workspaceService)
-        .requireActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
     doThrow(ForbiddenException.class)
         .when(workspaceService)
@@ -481,7 +481,7 @@ public class ClusterControllerTest {
         new ClusterLocalizeRequest().workspaceNamespace(WORKSPACE_NS).workspaceId(WORKSPACE_ID);
 
     assertThrows(ForbiddenException.class, () -> clusterController.localize("y", "z", req));
-    verify(workspaceService, never()).requireActiveBilling(anyString(), anyString());
+    verify(workspaceService, never()).validateActiveBilling(anyString(), anyString());
   }
 
   private void createUser(String email) {

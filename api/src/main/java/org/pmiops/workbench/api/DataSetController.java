@@ -440,7 +440,7 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    workspaceService.requireActiveBilling(workspaceNamespace, workspaceId);
+    workspaceService.validateActiveBilling(workspaceNamespace, workspaceId);
     // This suppresses 'may not be initialized errors. We will always init to something else before
     // used.
     JSONObject notebookFile = new JSONObject();

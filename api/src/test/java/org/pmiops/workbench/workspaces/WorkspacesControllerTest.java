@@ -2657,7 +2657,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void cloneNotebook_requireActiveBilling() {
+  public void cloneNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
     DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
@@ -2672,7 +2672,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void renameNotebook_requireActiveBilling() {
+  public void renameNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
     DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
@@ -2689,7 +2689,7 @@ public class WorkspacesControllerTest {
   }
 
   @Test
-  public void copyNotebook_requireActiveBilling() {
+  public void copyNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
     DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());

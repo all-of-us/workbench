@@ -41,7 +41,7 @@ public interface WorkspaceService {
 
   DbWorkspace saveWithLastModified(DbWorkspace workspace);
 
-  void requireActiveBilling(String workspaceNamespace, String workspaceId)
+  void validateActiveBilling(String workspaceNamespace, String workspaceId)
       throws ForbiddenException;
 
   List<DbWorkspace> findForReview();

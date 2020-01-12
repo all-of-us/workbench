@@ -198,6 +198,7 @@ public class WorkbenchConfig {
     public boolean enableNewAccountCreation;
     // Setting this to true will prevent users from making compute increasing operations on
     // inactive billing workspaces
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-3209
     public boolean enableBillingLockout;
   }
 

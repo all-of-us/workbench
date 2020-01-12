@@ -128,7 +128,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         fromWorkspaceNamespace, fromWorkspaceName, WorkspaceAccessLevel.READER);
     workspaceService.enforceWorkspaceAccessLevel(
         toWorkspaceNamespace, toWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceService.requireActiveBilling(toWorkspaceNamespace, toWorkspaceName);
+    workspaceService.validateActiveBilling(toWorkspaceNamespace, toWorkspaceName);
     newNotebookName = NotebooksService.withNotebookExtension(newNotebookName);
 
     GoogleCloudLocators fromNotebookLocators =

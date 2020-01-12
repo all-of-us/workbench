@@ -249,7 +249,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public void requireActiveBilling(String workspaceNamespace, String workspaceId)
+  public void validateActiveBilling(String workspaceNamespace, String workspaceId)
       throws ForbiddenException {
     if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
       return;
@@ -257,7 +257,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
     if (BillingStatus.INACTIVE.equals(
         getRequired(workspaceNamespace, workspaceId).getBillingStatus())) {
-      throw new ForbiddenException("Workspace is in an inactive billing state");
+      throw new ForbiddenException("Workspace (" + workspaceNamespace + ") is in an inactive billing state");
     }
   }
 
