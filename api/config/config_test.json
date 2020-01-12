@@ -86,7 +86,7 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": true,
-    "enableBillingLockout": false
+    "enableBillingLockout": true
   },
   "actionAudit": {
     "logName":"workbench-action-audit-test"
