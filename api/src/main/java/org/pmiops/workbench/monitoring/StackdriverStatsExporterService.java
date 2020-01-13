@@ -102,9 +102,10 @@ public class StackdriverStatsExporterService {
   }
 
   /**
-   * Stackdriver instances have very long, random ID strings. When running locally, however,
-   * the ModulesService throws an exception, so we need to assign non-conflicting and non-repeating
-   * ID strings.
+   * Stackdriver instances have very long, random ID strings. When running locally, however, the
+   * ModulesService throws an exception, so we need to assign non-conflicting and non-repeating ID
+   * strings.
+   *
    * @return
    */
   private String makeRandomNodeId() {
