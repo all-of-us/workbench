@@ -260,21 +260,25 @@ public class ClusterControllerTest {
   public void testDeleteClustersInProject() throws Exception {
     when(notebookService.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
         .thenReturn(ImmutableList.of(testFcClusterListResponse));
-    Mockito.doAnswer(new Answer<Void>() {
-      public Void answer(InvocationOnMock invocation) {
-        testFcClusterListResponse.setStatus(org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING);
-        return null;
-      }
-    }).when(notebookService).deleteClusterAsAdmin(BILLING_PROJECT_ID, getClusterName());
+    Mockito.doAnswer(
+            new Answer<Void>() {
+              public Void answer(InvocationOnMock invocation) {
+                testFcClusterListResponse.setStatus(
+                    org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING);
+                return null;
+              }
+            })
+        .when(notebookService)
+        .deleteClusterAsAdmin(BILLING_PROJECT_ID, getClusterName());
 
-    assertThat(
-        clusterController
-            .deleteClustersInProject(BILLING_PROJECT_ID)
-            .getBody())
-        .isEqualTo(ImmutableList.of(new ListClusterResponse()
-            .clusterName(testCluster.getClusterName())
-            .createdDate(testCluster.getCreatedDate())
-            .status(ClusterStatus.DELETING).googleProject(testCluster.getClusterNamespace())));
+    assertThat(clusterController.deleteClustersInProject(BILLING_PROJECT_ID).getBody())
+        .isEqualTo(
+            ImmutableList.of(
+                new ListClusterResponse()
+                    .clusterName(testCluster.getClusterName())
+                    .createdDate(testCluster.getCreatedDate())
+                    .status(ClusterStatus.DELETING)
+                    .googleProject(testCluster.getClusterNamespace())));
   }
 
   @Test

@@ -51,7 +51,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   @Autowired
   public LeonardoNotebooksClientImpl(
       @Qualifier(NotebooksConfig.USER_CLUSTER_API) Provider<ClusterApi> clusterApiProvider,
-      @Qualifier(NotebooksConfig.SERVICE_CLUSTER_API) Provider<ClusterApi> serviceClusterApiProvider,
+      @Qualifier(NotebooksConfig.SERVICE_CLUSTER_API)
+          Provider<ClusterApi> serviceClusterApiProvider,
       Provider<NotebooksApi> notebooksApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Provider<DbUser> userProvider,

@@ -37,7 +37,6 @@ public interface LeonardoNotebooksClient {
   /** Gets information about a notebook cluster */
   Cluster getCluster(String googleProject, String clusterName) throws WorkbenchException;
 
-
   /** Send files over to notebook Cluster */
   void localize(String googleProject, String clusterName, Map<String, String> fileList)
       throws WorkbenchException;

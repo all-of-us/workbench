@@ -125,18 +125,22 @@ public class ClusterController implements ClusterApiDelegate {
 
   @Override
   @AuthorityRequired(Authority.SECURITY_ADMIN)
-  public ResponseEntity<List<ListClusterResponse>> deleteClustersInProject(String billingProjectId) {
+  public ResponseEntity<List<ListClusterResponse>> deleteClustersInProject(
+      String billingProjectId) {
     if (billingProjectId == null) {
       throw new BadRequestException("Must specify billing project");
     }
-    clusterAuditor.fireDeleteClustersInProject(billingProjectId);
-
-    leonardoNotebooksClient
-        .listClustersByProjectAsAdmin(billingProjectId)
-        .forEach(
-            cluster ->
-                leonardoNotebooksClient.deleteClusterAsAdmin(
-                    cluster.getGoogleProject(), cluster.getClusterName()));
+    List<org.pmiops.workbench.notebooks.model.ListClusterResponse> clustersToDelete =
+        leonardoNotebooksClient.listClustersByProjectAsAdmin(billingProjectId);
+    clusterAuditor.fireDeleteClustersInProject(
+        billingProjectId,
+        clustersToDelete.stream()
+            .map(org.pmiops.workbench.notebooks.model.ListClusterResponse::getClusterName)
+            .collect(Collectors.toList()));
+    clustersToDelete.forEach(
+        cluster ->
+            leonardoNotebooksClient.deleteClusterAsAdmin(
+                cluster.getGoogleProject(), cluster.getClusterName()));
     List<ListClusterResponse> clustersInProject =
         leonardoNotebooksClient.listClustersByProjectAsAdmin(billingProjectId).stream()
             .map(
@@ -150,10 +154,7 @@ public class ClusterController implements ClusterApiDelegate {
                         .labels(leoCluster.getLabels()))
             .collect(Collectors.toList());
     List<ClusterStatus> acceptableStates =
-        ImmutableList.of(
-            ClusterStatus.DELETED,
-            ClusterStatus.DELETING,
-            ClusterStatus.ERROR);
+        ImmutableList.of(ClusterStatus.DELETED, ClusterStatus.DELETING, ClusterStatus.ERROR);
     clustersInProject.stream()
         .filter(cluster -> !acceptableStates.contains(cluster.getStatus()))
         .forEach(
