@@ -5,14 +5,15 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {Concept} from 'generated/fetch/api';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 
 function formatCounts(concept: any) {
-  concept.countValue = concept.countValue.toLocaleString();
+  if (concept.countValue) {
+    concept.countValue = concept.countValue.toLocaleString();
+  }
   return concept;
 }
 
@@ -52,6 +53,55 @@ const styles = reactStyles({
     display: 'inline-block'
   }
 });
+const domainColumns = [
+  {
+    bodyStyle: styles.colStyle,
+    className: null,
+    field: 'conceptName',
+    header: 'Name',
+    headerStyle: styles.headerStyle,
+    selectionMode: null,
+    testId: 'conceptName'
+  },
+  {
+    bodyStyle: styles.colStyle,
+    className: 'divider',
+    field: 'conceptCode',
+    header: 'Code',
+    headerStyle: styles.headerStyle,
+    selectionMode: null,
+    testId: 'conceptCode'
+  },
+  {
+    bodyStyle: styles.colStyle,
+    className: 'divider',
+    field: 'vocabularyId',
+    header: 'Vocabulary',
+    headerStyle: styles.headerStyle,
+    selectionMode: null,
+    testId: null
+  },
+  {
+    bodyStyle: styles.colStyle,
+    className: 'divider',
+    field: 'countValue',
+    header: 'Count',
+    headerStyle: styles.headerStyle,
+    selectionMode: null,
+    testId: null
+  }
+];
+const surveyColumns = [
+  {
+    bodyStyle: styles.colStyle,
+    className: null,
+    field: 'question',
+    header: 'Question',
+    headerStyle: styles.headerStyle,
+    selectionMode: null,
+    testId: 'question'
+  }
+];
 
 interface SynonymsObjectState {
   seeMore: boolean;
@@ -107,23 +157,23 @@ export class SynonymsObject extends React.Component<{}, SynonymsObjectState> {
 }
 
 interface Props {
-  concepts: Concept[];
+  concepts: any[];
   loading: boolean;
   onSelectConcepts: Function;
   placeholderValue: string;
   reactKey: string;
   searchTerm?: string;
-  selectedConcepts: Concept[];
+  selectedConcepts: any[];
 }
 
 interface State {
   first: number;
   pageLoading: boolean;
-  selectedConcepts: Concept[];
+  selectedConcepts: any[];
   showBanner: boolean;
   selectAll: boolean;
   totalRecords: number;
-  pageConcepts: Concept[];
+  pageConcepts: any[];
   tableRef: any;
 }
 
@@ -239,13 +289,41 @@ export class ConceptTable extends React.Component<Props, State> {
     this.setState({showBanner: false});
   }
 
+  renderColumns() {
+    const {concepts} = this.props;
+    const isSurvey = !!concepts && !!concepts.length && !!concepts[0].question;
+    const columns = [
+      {
+        bodyStyle: {...styles.colStyle, textAlign: 'center'},
+        className: null,
+        field: null,
+        header: null,
+        headerStyle: {...styles.headerStyle, textAlign: 'center', width: '2rem'},
+        selectionMode: 'multiple',
+        testId: 'conceptCheckBox'
+      },
+      ...(isSurvey ? surveyColumns : domainColumns)
+    ];
+    return columns.map((col, c) => <Column
+      bodyStyle={col.bodyStyle}
+      className={col.className}
+      field={col.field}
+      header={col.header}
+      headerStyle={col.headerStyle}
+      key={c}
+      selectionMode={col.selectionMode}
+      data-test-id={col.testId}
+    />);
+  }
+
   render() {
     const {selectedConcepts, tableRef} = this.state;
-    const {placeholderValue, loading, reactKey} = this.props;
+    const {concepts, placeholderValue, loading, reactKey} = this.props;
     return <div data-test-id='conceptTable' key={reactKey} style={{position: 'relative', minHeight: '10rem'}}>
       <style>
         {`
           body .p-datatable .p-datatable-tbody > tr:nth-child(even),
+          body .p-datatable .p-datatable-tbody > tr:nth-child(even).p-highlight,
           body .p-datatable .p-datatable-tbody > .p-datatable-row.p-highlight {
             background: ${colors.white};
           }
@@ -258,29 +336,25 @@ export class ConceptTable extends React.Component<Props, State> {
             color: ${colors.primary};
           }
         `}
-        </style>
-        {loading ? <SpinnerOverlay /> : <DataTable ref={tableRef} emptyMessage={loading ? '' : placeholderValue}
-                                                   style={styles.datatable}
-                                                   header={this.selectAllHeader()}
-                                                   value={this.props.concepts.map(formatCounts)} scrollable={true}
-                                                   selection={selectedConcepts}
-                                                   totalRecords={this.state.totalRecords}
-                                                   expandedRows={this.props.concepts
-                                                     .filter(concept => concept.conceptSynonyms.length > 0)}
-                                                   rowExpansionTemplate={(data) => this.rowExpansionTemplate(data)}
-                                                   alwaysShowPaginator={false}
-                                                   paginator={true} rows={ROWS_TO_DISPLAY}
-                                                   data-test-id='conceptRow'
-                                                   onValueChange={(value) => this.onPageChange()}
-                                                   onSelectionChange={e => this.updateSelectedConceptList(e.value, 'table')} >
-            <Column bodyStyle={{...styles.colStyle, textAlign: 'center'}} headerStyle={{...styles.headerStyle, textAlign: 'center', width: '2rem'}}
-                    data-test-id='conceptCheckBox' selectionMode='multiple' />
-            <Column bodyStyle={styles.colStyle} headerStyle={styles.headerStyle} field='conceptName' header='Name'
-                    data-test-id='conceptName'/>
-            <Column bodyStyle={styles.colStyle} headerStyle={styles.headerStyle} field='conceptCode' header='Code' className='divider'/>
-            <Column headerStyle={styles.headerStyle} field='vocabularyId' header='Vocabulary' bodyStyle={styles.colStyle}  className='divider'/>
-            <Column style={styles.colStyle} headerStyle={styles.headerStyle} field='countValue' header='Count' className='divider'/>
-          </DataTable>}
+      </style>
+      {loading ? <SpinnerOverlay /> : <DataTable ref={tableRef} emptyMessage={loading ? '' : placeholderValue}
+                                                 style={styles.datatable}
+                                                 header={this.selectAllHeader()}
+                                                 value={concepts.map(formatCounts)}
+                                                 scrollable={true}
+                                                 selection={selectedConcepts}
+                                                 totalRecords={this.state.totalRecords}
+                                                 expandedRows={
+                                                   concepts.filter(concept => concept.conceptSynonyms && concept.conceptSynonyms.length > 0)
+                                                 }
+                                                 rowExpansionTemplate={(data) => this.rowExpansionTemplate(data)}
+                                                 alwaysShowPaginator={false}
+                                                 paginator={true} rows={ROWS_TO_DISPLAY}
+                                                 data-test-id='conceptRow'
+                                                 onValueChange={(value) => this.onPageChange()}
+                                                 onSelectionChange={e => this.updateSelectedConceptList(e.value, 'table')}>
+        {this.renderColumns()}
+      </DataTable>}
     </div>;
   }
 }
