@@ -523,7 +523,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     switch (kernelTypeEnum) {
       case R:
         prerequisites =
-            // RW-4241 workaround: update when the Jupyter image with the reticulate fix is fully rolled out
+            // RW-4241 workaround: update when the Jupyter image with the reticulate fix is fully
+            // rolled out
             "require(devtools)\n"
                 + "devtools::install_github(\"rstudio/reticulate\", ref=\"00172079\")\n"
                 + "library(reticulate)\n"
