@@ -36,6 +36,7 @@ import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.model.ClusterError;
 import org.pmiops.workbench.notebooks.model.StorageLink;
@@ -121,6 +122,9 @@ public class ClusterController implements ClusterApiDelegate {
     if (billingProjectId == null) {
       throw new BadRequestException("Must specify billing project");
     }
+    workspaceService.enforceWorkspaceAccessLevel(
+        billingProjectId, workspaceFirecloudName, WorkspaceAccessLevel.READER);
+    workspaceService.validateActiveBilling(billingProjectId, workspaceFirecloudName);
 
     DbUser user = this.userProvider.get();
 
@@ -169,6 +173,10 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   public ResponseEntity<ClusterLocalizeResponse> localize(
       String projectName, String clusterName, ClusterLocalizeRequest body) {
+    workspaceService.enforceWorkspaceAccessLevel(
+        body.getWorkspaceNamespace(), body.getWorkspaceId(), WorkspaceAccessLevel.READER);
+    workspaceService.validateActiveBilling(body.getWorkspaceNamespace(), body.getWorkspaceId());
+
     FirecloudWorkspace fcWorkspace;
     try {
       fcWorkspace =

@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.fail;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -109,6 +110,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortAnnotationDefinition;
@@ -309,6 +311,7 @@ public class WorkspacesControllerTest {
   public void setUp() {
     workbenchConfig = new WorkbenchConfig();
     workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+    workbenchConfig.featureFlags.enableBillingLockout = true;
 
     testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
@@ -2651,5 +2654,58 @@ public class WorkspacesControllerTest {
     assertThat(recentWorkspace.getWorkspace().getNamespace())
         .isEqualTo(dbWorkspace.getWorkspaceNamespace());
     assertThat(recentWorkspace.getWorkspace().getName()).isEqualTo(dbWorkspace.getName());
+  }
+
+  @Test
+  public void cloneNotebook_validateActiveBilling() {
+    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+
+    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
+    workspaceDao.save(dbWorkspace);
+
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            workspacesController.cloneNotebook(
+                workspace.getNamespace(), workspace.getId(), "notebook"));
+  }
+
+  @Test
+  public void renameNotebook_validateActiveBilling() {
+    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+
+    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
+    workspaceDao.save(dbWorkspace);
+
+    NotebookRename request = new NotebookRename().name("a").newName("b");
+
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            workspacesController.renameNotebook(
+                workspace.getNamespace(), workspace.getId(), request));
+  }
+
+  @Test
+  public void copyNotebook_validateActiveBilling() {
+    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+
+    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
+    workspaceDao.save(dbWorkspace);
+
+    CopyRequest copyNotebookRequest =
+        new CopyRequest()
+            .toWorkspaceName(workspace.getName())
+            .toWorkspaceNamespace(workspace.getNamespace())
+            .newName("x");
+
+    assertThrows(
+        ForbiddenException.class,
+        () ->
+            workspacesController.copyNotebook(
+                workspace.getNamespace(), workspace.getId(), "z", copyNotebookRequest));
   }
 }

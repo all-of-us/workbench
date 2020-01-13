@@ -196,6 +196,10 @@ public class WorkbenchConfig {
     // Flag to indicate whether to enable the new Create Account flow
     // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
     public boolean enableNewAccountCreation;
+    // Setting this to true will prevent users from making compute increasing operations on
+    // inactive billing workspaces
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-3209
+    public boolean enableBillingLockout;
   }
 
   public static class ActionAuditConfig {
