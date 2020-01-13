@@ -38,6 +38,7 @@ import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.DefaultClusterResponse;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.ListClusterDeleteRequest;
 import org.pmiops.workbench.model.ListClusterResponse;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -126,22 +127,23 @@ public class ClusterController implements ClusterApiDelegate {
   @Override
   @AuthorityRequired(Authority.SECURITY_ADMIN)
   public ResponseEntity<List<ListClusterResponse>> deleteClustersInProject(
-      String billingProjectId) {
+      String billingProjectId, ListClusterDeleteRequest clusterNamesToDelete) {
     if (billingProjectId == null) {
       throw new BadRequestException("Must specify billing project");
     }
     List<org.pmiops.workbench.notebooks.model.ListClusterResponse> clustersToDelete =
-        leonardoNotebooksClient.listClustersByProjectAsAdmin(billingProjectId);
-    clusterAuditor.fireDeleteClustersInProject(
-        billingProjectId,
-        clustersToDelete.stream()
-            .map(org.pmiops.workbench.notebooks.model.ListClusterResponse::getClusterName)
-            .collect(Collectors.toList()));
+        leonardoNotebooksClient.listClustersByProjectAsAdmin(billingProjectId).stream()
+            .filter(
+                cluster ->
+                    clusterNamesToDelete.getClustersToDelete() == null
+                        || clusterNamesToDelete.getClustersToDelete().contains(cluster.getClusterName()))
+            .collect(Collectors.toList());
+
     clustersToDelete.forEach(
         cluster ->
             leonardoNotebooksClient.deleteClusterAsAdmin(
                 cluster.getGoogleProject(), cluster.getClusterName()));
-    List<ListClusterResponse> clustersInProject =
+    List<ListClusterResponse> clustersInProjectAffected =
         leonardoNotebooksClient.listClustersByProjectAsAdmin(billingProjectId).stream()
             .map(
                 leoCluster ->
@@ -152,10 +154,14 @@ public class ClusterController implements ClusterApiDelegate {
                         .googleProject(leoCluster.getGoogleProject())
                         .status(ClusterStatus.fromValue(leoCluster.getStatus().toString()))
                         .labels(leoCluster.getLabels()))
+            .filter(
+                cluster ->
+                    clusterNamesToDelete.getClustersToDelete() == null
+                        || clusterNamesToDelete.getClustersToDelete().contains(cluster.getClusterName()))
             .collect(Collectors.toList());
     List<ClusterStatus> acceptableStates =
         ImmutableList.of(ClusterStatus.DELETED, ClusterStatus.DELETING, ClusterStatus.ERROR);
-    clustersInProject.stream()
+    clustersInProjectAffected.stream()
         .filter(cluster -> !acceptableStates.contains(cluster.getStatus()))
         .forEach(
             clusterInBadState ->
@@ -164,8 +170,12 @@ public class ClusterController implements ClusterApiDelegate {
                     String.format(
                         "Cluster %s/%s is not in a deleting or deleted state",
                         clusterInBadState.getGoogleProject(), clusterInBadState.getClusterName())));
-
-    return ResponseEntity.ok(clustersInProject);
+    clusterAuditor.fireDeleteClustersInProject(
+        billingProjectId,
+        clustersToDelete.stream()
+            .map(org.pmiops.workbench.notebooks.model.ListClusterResponse::getClusterName)
+            .collect(Collectors.toList()));
+    return ResponseEntity.ok(clustersInProjectAffected);
   }
 
   @Override

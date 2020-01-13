@@ -540,7 +540,7 @@ paths:
 
   /v1/admin/security/clusters/{billingProjectId}/delete-clusters:
     post:
-      summary: Pause all clusters in a project
+      summary: Delete all clusters in a project
       description: >
         An admin gated endpoint that deletes all clusters in a given billing project.
       operationId: deleteClustersInProject
@@ -552,9 +552,15 @@ paths:
           description: The unique identifier of the Google Billing Project containing the clusters
           required: true
           type: string
+        - in: body
+          name: clustersToDelete
+          description: A list of names of clusters to delete. To delete all clusters, use an empty object (e.g., {})
+          required: true
+          schema:
+            $ref: '#/definitions/ListClusterDeleteRequest'
       responses:
         200:
-          description: Clusters paused
+          description: Clusters deleted
           schema:
             type: array
             items:
@@ -3698,6 +3704,14 @@ definitions:
         description: |
           The date and time the cluster was last accessed, in ISO-8601 format.
           Date accessed is defined as the last time the cluster was created, modified, or accessed via the proxy.
+
+  ListClusterDeleteRequest:
+    type: object
+    properties:
+      clustersToDelete:
+        type: array
+        items:
+          type: string
 
   ClusterLocalizeRequest:
     type: object
