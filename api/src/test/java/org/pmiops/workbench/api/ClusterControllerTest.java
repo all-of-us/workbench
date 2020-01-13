@@ -1,9 +1,13 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +38,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
@@ -183,7 +188,9 @@ public class ClusterControllerTest {
     testWorkspace = new DbWorkspace();
     testWorkspace.setWorkspaceNamespace(WORKSPACE_NS);
     testWorkspace.setName(WORKSPACE_NAME);
+    testWorkspace.setFirecloudName(WORKSPACE_ID);
     testWorkspace.setCdrVersion(cdrVersion);
+    doReturn(testWorkspace).when(workspaceService).get(WORKSPACE_NS, WORKSPACE_ID);
   }
 
   private FirecloudWorkspace createFcWorkspace(String ns, String name, String creator) {
@@ -416,6 +423,60 @@ public class ClusterControllerTest {
             "workspaces_playground/wsid/.all_of_us_config.json",
             "workspaces/wsid/.all_of_us_config.json");
     assertThat(resp.getClusterLocalDirectory()).isEqualTo("workspaces/wsid");
+  }
+
+  @Test
+  public void listCluster_validateActiveBilling() {
+    doThrow(ForbiddenException.class)
+        .when(workspaceService)
+        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+
+    assertThrows(
+        ForbiddenException.class, () -> clusterController.listClusters(WORKSPACE_NS, WORKSPACE_ID));
+  }
+
+  @Test
+  public void listCluster_validateActiveBilling_checkAccessFirst() {
+    doThrow(ForbiddenException.class)
+        .when(workspaceService)
+        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+
+    doThrow(ForbiddenException.class)
+        .when(workspaceService)
+        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.READER);
+
+    assertThrows(
+        ForbiddenException.class, () -> clusterController.listClusters(WORKSPACE_NS, WORKSPACE_ID));
+    verify(workspaceService, never()).validateActiveBilling(anyString(), anyString());
+  }
+
+  @Test
+  public void localize_validateActiveBilling() {
+    doThrow(ForbiddenException.class)
+        .when(workspaceService)
+        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+
+    ClusterLocalizeRequest req =
+        new ClusterLocalizeRequest().workspaceNamespace(WORKSPACE_NS).workspaceId(WORKSPACE_ID);
+
+    assertThrows(ForbiddenException.class, () -> clusterController.localize("y", "z", req));
+  }
+
+  @Test
+  public void localize_validateActiveBilling_checkAccessFirst() {
+    doThrow(ForbiddenException.class)
+        .when(workspaceService)
+        .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
+
+    doThrow(ForbiddenException.class)
+        .when(workspaceService)
+        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.READER);
+
+    ClusterLocalizeRequest req =
+        new ClusterLocalizeRequest().workspaceNamespace(WORKSPACE_NS).workspaceId(WORKSPACE_ID);
+
+    assertThrows(ForbiddenException.class, () -> clusterController.localize("y", "z", req));
+    verify(workspaceService, never()).validateActiveBilling(anyString(), anyString());
   }
 
   private void createUser(String email) {
