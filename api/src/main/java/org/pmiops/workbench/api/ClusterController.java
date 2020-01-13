@@ -136,7 +136,9 @@ public class ClusterController implements ClusterApiDelegate {
             .filter(
                 cluster ->
                     clusterNamesToDelete.getClustersToDelete() == null
-                        || clusterNamesToDelete.getClustersToDelete().contains(cluster.getClusterName()))
+                        || clusterNamesToDelete
+                            .getClustersToDelete()
+                            .contains(cluster.getClusterName()))
             .collect(Collectors.toList());
 
     clustersToDelete.forEach(
@@ -157,7 +159,9 @@ public class ClusterController implements ClusterApiDelegate {
             .filter(
                 cluster ->
                     clusterNamesToDelete.getClustersToDelete() == null
-                        || clusterNamesToDelete.getClustersToDelete().contains(cluster.getClusterName()))
+                        || clusterNamesToDelete
+                            .getClustersToDelete()
+                            .contains(cluster.getClusterName()))
             .collect(Collectors.toList());
     List<ClusterStatus> acceptableStates =
         ImmutableList.of(ClusterStatus.DELETED, ClusterStatus.DELETING, ClusterStatus.ERROR);

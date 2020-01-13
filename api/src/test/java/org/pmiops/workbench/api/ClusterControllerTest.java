@@ -272,7 +272,13 @@ public class ClusterControllerTest {
         .when(notebookService)
         .deleteClusterAsAdmin(BILLING_PROJECT_ID, getClusterName());
 
-    assertThat(clusterController.deleteClustersInProject(BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(ImmutableList.of(testFcCluster.getClusterName()))).getBody())
+    assertThat(
+            clusterController
+                .deleteClustersInProject(
+                    BILLING_PROJECT_ID,
+                    new ListClusterDeleteRequest()
+                        .clustersToDelete(ImmutableList.of(testFcCluster.getClusterName())))
+                .getBody())
         .isEqualTo(
             ImmutableList.of(
                 new ListClusterResponse()
