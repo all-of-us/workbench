@@ -54,6 +54,7 @@ import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.ListClusterDeleteRequest;
 import org.pmiops.workbench.model.ListClusterResponse;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -271,7 +272,7 @@ public class ClusterControllerTest {
         .when(notebookService)
         .deleteClusterAsAdmin(BILLING_PROJECT_ID, getClusterName());
 
-    assertThat(clusterController.deleteClustersInProject(BILLING_PROJECT_ID).getBody())
+    assertThat(clusterController.deleteClustersInProject(BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(ImmutableList.of(testFcCluster.getClusterName()))).getBody())
         .isEqualTo(
             ImmutableList.of(
                 new ListClusterResponse()
