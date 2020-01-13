@@ -23,6 +23,7 @@ import {environment} from 'environments/environment';
 import {
   Concept,
   ConceptSet,
+  CriteriaType,
   Domain,
   DomainCount,
   DomainInfo,
@@ -95,7 +96,7 @@ const styles = reactStyles({
 
 interface ConceptCacheItem {
   domain: Domain;
-  items: Array<Concept>;
+  items: Array<Concept | SurveyQuestions>;
 }
 
 const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
@@ -170,7 +171,7 @@ interface State { // Browse survey
   // Array of domains that have finished being searched for concepts with search string
   completedDomainSearches: Array<Domain>;
   // Array of concepts found in the search
-  concepts: Array<Concept>;
+  concepts: Array<any>;
   // If modal to add concepts to set is open
   conceptAddModalOpen: boolean;
   // Cache for storing selected concepts, their domain, and vocabulary
@@ -193,7 +194,7 @@ interface State { // Browse survey
   // If we are in 'search mode' and should show the table
   searching: boolean;
   // Map of domain to selected concepts in domain
-  selectedConceptDomainMap: Map<String, Concept[]>;
+  selectedConceptDomainMap: Map<String, any[]>;
   // Domain being viewed. Will be the domain that the add button uses.
   selectedDomain: DomainCount;
   // Name of the survey selected
@@ -316,13 +317,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     selectDomain(domainCount: DomainCount) {
-      this.setState({selectedDomain: domainCount},
-        this.setConceptsAndVocabularies);
+      this.setState({selectedDomain: domainCount}, this.setConceptsAndVocabularies);
     }
 
     setConceptsAndVocabularies() {
-      const cacheItem = this.state.conceptsCache
-        .find(c => c.domain === this.state.selectedDomain.domain);
+      const cacheItem = this.state.conceptsCache.find(c => c.domain === this.state.selectedDomain.domain);
       this.setState({concepts: cacheItem.items});
     }
 
@@ -331,12 +330,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
         selectedConceptDomainMap} = this.state;
       const {namespace, id} = this.props.workspace;
       this.setState({concepts: [], searchLoading: true, searching: true, completedDomainSearches: []});
-      const standardConceptFilter = standardConceptsOnly ?
-        StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
-      selectedConceptDomainMap[Domain.SURVEY] = [];
-      // TODO switch to empty array when we start actually searching surveys and PM
-      const completedDomainSearches = [Domain.SURVEY];
-      // TODO remove filter below when we start actually searching surveys and PM
+      const standardConceptFilter = standardConceptsOnly ? StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
+      const completedDomainSearches = [];
       conceptsCache.forEach(async(cacheItem) => {
         selectedConceptDomainMap[cacheItem.domain] = [];
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
@@ -348,7 +343,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
           maxResults: this.MAX_CONCEPT_FETCH
         });
         completedDomainSearches.push(cacheItem.domain);
-        cacheItem.items = resp.items;
+        cacheItem.items = cacheItem.domain === Domain.SURVEY ? resp.questions : resp.items;
         this.setState({completedDomainSearches: completedDomainSearches});
         if (activeTabSearch) {
           const conceptDomainCounts = environment.enableNewConceptTabs ? [...resp.domainCounts]
@@ -364,11 +359,18 @@ export const ConceptHomepage = withCurrentWorkspace()(
       this.setState({selectedConceptDomainMap: selectedConceptDomainMap});
     }
 
-    selectConcepts(concepts: Concept[]) {
-      const {selectedDomain, selectedConceptDomainMap} = this.state;
-      selectedConceptDomainMap[selectedDomain.domain] = concepts.filter(concept => {
-        return concept.domainId.toLowerCase() === selectedDomain.domain.toString().toLowerCase();
-      });
+    selectConcepts(concepts: any[]) {
+      const {selectedDomain: {domain}, selectedConceptDomainMap} = this.state;
+      if (domain === Domain.PHYSICALMEASUREMENT) {
+        selectedConceptDomainMap[domain] = concepts.filter(concept =>
+          concept.domainId.toLowerCase() === Domain[Domain.MEASUREMENT].toLowerCase()
+            && concept.vocabularyId === CriteriaType[CriteriaType.PPI]
+        );
+      } else if (domain === Domain.SURVEY) {
+        selectedConceptDomainMap[domain] = concepts.filter(concept => !!concept.question);
+      } else {
+        selectedConceptDomainMap[domain] = concepts.filter(concept => concept.domainId.toLowerCase() === Domain[domain].toLowerCase());
+      }
       this.setState({selectedConceptDomainMap: selectedConceptDomainMap});
     }
 
