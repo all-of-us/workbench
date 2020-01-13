@@ -77,9 +77,9 @@ public interface Metric {
         getStatsName(), getDescription(), getMeasure(), getAggregation(), getColumns());
   }
 
-  Set<Attachment> getAllowedAttachments();
+  Set<Attachment> getSupportedAttachments();
 
-  default boolean isAllowed(Attachment attachment) {
-    return getAllowedAttachments().contains(attachment);
+  default boolean supportsAttachment(Attachment attachment) {
+    return getSupportedAttachments().contains(attachment);
   }
 }

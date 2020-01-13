@@ -120,7 +120,7 @@ public enum GaugeMetric implements Metric {
   }
 
   @Override
-  public Set<Attachment> getAllowedAttachments() {
+  public Set<Attachment> getSupportedAttachments() {
     return allowedAttachments;
   }
 
