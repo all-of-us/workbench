@@ -142,7 +142,7 @@ public class MeasurementBundle {
         final String attachmentValue = entry.getValue();
 
         for (Metric metric : measurements.keySet()) {
-          if (!attachment.supportsMetric(metric)) {
+          if (!metric.isAllowed(attachment)) {
             throw new IllegalStateException(
                 (String.format(
                     "Attachment %s does not support metric %s",

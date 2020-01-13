@@ -10,7 +10,9 @@ import io.opencensus.stats.View.Name;
 import io.opencensus.tags.TagKey;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+import org.pmiops.workbench.monitoring.attachments.Attachment;
 
 /**
  * This is essentially a carbon copy of io.opencensus.stats.View, but written as an interface
@@ -73,5 +75,11 @@ public interface Metric {
   default View toView() {
     return View.create(
         getStatsName(), getDescription(), getMeasure(), getAggregation(), getColumns());
+  }
+
+  Set<Attachment> getAllowedAttachments();
+
+  default boolean isAllowed(Attachment attachment) {
+    return getAllowedAttachments().contains(attachment);
   }
 }
