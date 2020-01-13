@@ -720,7 +720,8 @@ public class DataSetControllerTest {
     String prefix = "dataset_00000000_condition_";
     assertThat(response.getCode())
         .isEqualTo(
-            "if(! \"reticulate\" %in% installed.packages()) { install.packages(\"reticulate\") }\n"
+            "require(devtools)\n"
+                + "devtools::install_github(\"rstudio/reticulate\", ref=\"00172079\")\n"
                 + "library(reticulate)\n"
                 + "pd <- reticulate::import(\"pandas\")\n\n"
                 + "# The ‘max_number_of_rows’ parameter limits the number of rows in the query so that the result set can fit in memory.\n"
