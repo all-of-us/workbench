@@ -1,0 +1,464 @@
+Reading gcloud configuration...
+Using 'default' gcloud configuration
+  account: eric.song@pmi-ops.org
+Writing DB credentials file...
++ gsutil cp /tmp/all-of-us-rw-preprod-vars.env20200113-1-1x1ubh4 gs://all-of-us-rw-preprod-credentials/vars.env
+
+Spawn
+gsutilcp/tmp/all-of-us-rw-preprod-vars.env20200113-1-1x1ubh4gs://all-of-us-rw-preprod-credentials/vars.env
+Spawn
+Copying file:///tmp/all-of-us-rw-preprod-vars.env20200113-1-1x1ubh4 [Content-Type=application/octet-stream]...
+/ [1 files][  477.0 B/  477.0 B]
+Operation completed over 1 objects/477.0 B.
+Setting root password...
++ gcloud sql users set-password root --host % --project all-of-us-rw-preprod --instance workbenchmaindb --password ********************
+Updating Cloud SQL user...done.
++ gcloud iam service-accounts keys create /w/api/sa-key.json --iam-account=all-of-us-rw-preprod@appspot.gserviceaccount.com --project=all-of-us-rw-preprod
+
+Spawn
+gcloudiamservice-accountskeyscreate/w/api/sa-key.json--iam-account=all-of-us-rw-preprod@appspot.gserviceaccount.com--project=all-of-us-rw-preprod
+Spawn
+created key [4b9e2dd4e3727cb11d1230eef14a0820d62adf62] of type [json] as [/w/api/sa-key.json] for [all-of-us-rw-preprod@appspot.gserviceaccount.com]
+2020/01/13 15:55:16 current FDs rlimit set to 1048576, wanted limit is 8500. Nothing to do here.
+2020/01/13 15:55:16 using credential file for authentication; email=all-of-us-rw-preprod@appspot.gserviceaccount.com
+2020/01/13 15:55:16 Listening on 0.0.0.0:3307 for all-of-us-rw-preprod:us-central1:workbenchmaindb
+2020/01/13 15:55:16 Ready for new connections
+Copying GSuite service account key to GCS...
++ gcloud iam service-accounts keys create /tmp/gsuite-admin-sa.json20200113-1-hzht2r --iam-account=gsuite-admin@all-of-us-rw-preprod.iam.gserviceaccount.com --project=all-of-us-rw-preprod
+
+Spawn
+gcloudiamservice-accountskeyscreate/tmp/gsuite-admin-sa.json20200113-1-hzht2r--iam-account=gsuite-admin@all-of-us-rw-preprod.iam.gserviceaccount.com--project=all-of-us-rw-preprod
+Spawn
+created key [cdfca9563286945c4a5f2afd513051edd75e9fe0] of type [json] as [/tmp/gsuite-admin-sa.json20200113-1-hzht2r] for [gsuite-admin@all-of-us-rw-preprod.iam.gserviceaccount.com]
++ gsutil cp /tmp/gsuite-admin-sa.json20200113-1-hzht2r gs://all-of-us-rw-preprod-credentials/gsuite-admin-sa.json
+
+Spawn
+gsutilcp/tmp/gsuite-admin-sa.json20200113-1-hzht2rgs://all-of-us-rw-preprod-credentials/gsuite-admin-sa.json
+Spawn
+Copying file:///tmp/gsuite-admin-sa.json20200113-1-hzht2r [Content-Type=application/octet-stream]...
+/ [1 files][  2.3 KiB/  2.3 KiB]
+Operation completed over 1 objects/2.3 KiB.
+Copying FireCloud service account key to GCS...
++ gcloud iam service-accounts keys create /tmp/firecloud-admin-sa.json20200113-1-1a02u6o --iam-account=firecloud-admin@all-of-us-rw-preprod.iam.gserviceaccount.com --project=all-of-us-rw-preprod
+
+Spawn
+gcloudiamservice-accountskeyscreate/tmp/firecloud-admin-sa.json20200113-1-1a02u6o--iam-account=firecloud-admin@all-of-us-rw-preprod.iam.gserviceaccount.com--project=all-of-us-rw-preprod
+Spawn
+created key [e4c4ac6b5d2f05b622eb1f9455251cce5d1ec932] of type [json] as [/tmp/firecloud-admin-sa.json20200113-1-1a02u6o] for [firecloud-admin@all-of-us-rw-preprod.iam.gserviceaccount.com]
++ gsutil cp /tmp/firecloud-admin-sa.json20200113-1-1a02u6o gs://all-of-us-rw-preprod-credentials/firecloud-admin-sa.json
+
+Spawn
+gsutilcp/tmp/firecloud-admin-sa.json20200113-1-1a02u6ogs://all-of-us-rw-preprod-credentials/firecloud-admin-sa.json
+Spawn
+Copying file:///tmp/firecloud-admin-sa.json20200113-1-1a02u6o [Content-Type=application/octet-stream]...
+/ [1 files][  2.3 KiB/  2.3 KiB]
+Operation completed over 1 objects/2.3 KiB.
+Setting up databases and users...
++ cat db/create_db.sql | envsubst | mysql -u "root" -p"********************" --host 127.0.0.1 --port 3307
+mysql: [Warning] Using a password on the command line interface can be insecure.
+2020/01/13 15:55:21 New connection for "all-of-us-rw-preprod:us-central1:workbenchmaindb"
+2020/01/13 15:55:22 Client closed local connection on 127.0.0.1:3307
+Running schema migrations...
+Migrating main database...
++ gradle update -PrunList=main
+
+Spawn
+gradleupdate-PrunList=main
+Spawn
+<-------------> 0% EXECUTING [10s]
+
+> Task :update
+liquibase-plugin: Running the 'main' activity...s-rw-preprod:us-central1:workbenchmaindb"
+INFO 1/13/20 3:55 PM: liquibase: Successfully acquired change log lock
+INFO 1/13/20 3:55 PM: liquibase: Creating database history table with name: workbench.DATABASECHANGELOG
+INFO 1/13/20 3:55 PM: liquibase: Reading from workbench.DATABASECHANGELOG
+WARNING 1/13/20 3:55 PM: liquibase: liquibase.statement.core.CreateSequenceStatement is not supported on mysql, but createSequence will still execute
+WARNING 1/13/20 3:55 PM: liquibase: modifyDataType will lose primary key/autoincrement/not null settings for mysql.  Use <sql> and re-specify all configuration if this is the case
+WARNING 1/13/20 3:55 PM: liquibase: modifyDataType will lose primary key/autoincrement/not null settings for mysql.  Use <sql> and re-specify all configuration if this is the case
+WARNING 1/13/20 3:55 PM: liquibase: modifyDataType will lose primary key/autoincrement/not null settings for mysql.  Use <sql> and re-specify all configuration if this is the case
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-1.xml::changelog-1::danrodney: Table user created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-1.xml::changelog-1::danrodney: Index idx_user_email created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-1.xml::changelog-1::danrodney: Table cdr_version created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-1.xml::changelog-1::danrodney: Table workspace created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-1.xml::changelog-1::danrodney: Index idx_workspace_workspace_namespace created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-1.xml::changelog-1::danrodney: Index idx_workspace_firecloud_name created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-1.xml::changelog-1::danrodney: Foreign key constraint added to workspace (creator_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-1.xml::changelog-1::danrodney: Foreign key constraint added to workspace (cdr_version_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-1.xml::changelog-1::danrodney: Table cohort created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-1.xml::changelog-1::danrodney: Foreign key constraint added to cohort (creator_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-1.xml::changelog-1::danrodney: Foreign key constraint added to cohort (workspace_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-1.xml::changelog-1::danrodney: ChangeSet changelog/db.changelog-1.xml::changelog-1::danrodney ran successfully in 1474ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-2.xml::changelog-2::danrodney: Columns contact_email(varchar(255)),full_name(varchar(255)),given_name(varchar(80)),family_name(varchar(80)),phone_number(varchar(30)),free_tier_billing_project_name(varchar(255)) added to user
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-2.xml::changelog-2::danrodney: ChangeSet changelog/db.changelog-2.xml::changelog-2::danrodney ran successfully in 228ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-3.xml::changelog-3::danrodney: Table config created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-3.xml::changelog-3::danrodney: ChangeSet changelog/db.changelog-3.xml::changelog-3::danrodney ran successfully in 207ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-4.xml::changelog-4::blrubenstein: Columns rp_disease_focused_research(boolean),rp_disease_of_focus(varchar(80)),rp_methods_development(boolean),rp_control_set(boolean),rp_aggregate_analysis(boolean),rp_ancestry(boolean),rp_commercial_purpose(boolean),rp_population(boolean),rp_population_of_focus(varchar(30)),rp_additional_notes(varchar(1024)) added to workspace
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-4.xml::changelog-4::blrubenstein: ChangeSet changelog/db.changelog-4.xml::changelog-4::blrubenstein ran successfully in 242ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-5-authority.xml::changelog-5-authority::mwf: Table authority created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-5-authority.xml::changelog-5-authority::mwf: Foreign key constraint added to authority (user_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-5-authority.xml::changelog-5-authority::mwf: ChangeSet changelog/db.changelog-5-authority.xml::changelog-5-authority::mwf ran successfully in 364ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-6.xml::changelog-6::blrubenstein: Columns rp_review_requested(boolean),rp_approved(boolean),rp_time_requested(datetime),rp_time_reviewed(datetime) added to workspace
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-6.xml::changelog-6::blrubenstein: ChangeSet changelog/db.changelog-6.xml::changelog-6::blrubenstein ran successfully in 228ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-7.xml::changelog-7::danrodney: Columns first_sign_in_time(datetime) added to user
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-7.xml::changelog-7::danrodney: Column user.full_name dropped
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-7.xml::changelog-7::danrodney: ChangeSet changelog/db.changelog-7.xml::changelog-7::danrodney ran successfully in 344ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-8-ws-index.xml::changelog-8-ws-index::markfickett: Index idx_workspace_rp created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-8-ws-index.xml::changelog-8-ws-index::markfickett: ChangeSet changelog/db.changelog-8-ws-index.xml::changelog-8-ws-index::markfickett ran successfully in 211ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-9-ws-index-fix.xml::changelog-9-ws-index-fix::markfickett: Index idx_workspace_rp dropped from table workspace
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-9-ws-index-fix.xml::changelog-9-ws-index-fix::markfickett: Index idx_workspace_rp_notunique created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-9-ws-index-fix.xml::changelog-9-ws-index-fix::markfickett: ChangeSet changelog/db.changelog-9-ws-index-fix.xml::changelog-9-ws-index-fix::markfickett ran successfully in 300ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-10-userworkspace.xml::changelog-10-userworkspace::brubenst: Table user_workspace created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-10-userworkspace.xml::changelog-10-userworkspace::brubenst: Unique constraint added to user_workspace(user_id, workspace_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-10-userworkspace.xml::changelog-10-userworkspace::brubenst: ChangeSet changelog/db.changelog-10-userworkspace.xml::changelog-10-userworkspace::brubenst ran successfully in 439ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-11-version.xml::changelog-11-version::calbach: Columns version(smallint) added to workspace
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-11-version.xml::changelog-11-version::calbach: Columns version(smallint) added to cohort
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-11-version.xml::changelog-11-version::calbach: Columns version(smallint) added to user
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-11-version.xml::changelog-11-version::calbach: ChangeSet changelog/db.changelog-11-version.xml::changelog-11-version::calbach ran successfully in 573ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-12.xml::changelog-12::brianfreeman: Table cohort_review created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-12.xml::changelog-12::brianfreeman: Foreign key constraint added to cohort_review (cohort_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-12.xml::changelog-12::brianfreeman: Foreign key constraint added to cohort_review (cdr_version_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-12.xml::changelog-12::brianfreeman: Table participant_cohort_status created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-12.xml::changelog-12::brianfreeman: Primary key added to participant_cohort_status (cohort_review_id, participant_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-12.xml::changelog-12::brianfreeman: Foreign key constraint added to participant_cohort_status (cohort_review_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-12.xml::changelog-12::brianfreeman: Index idx_participant_cohort_status created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-12.xml::changelog-12::brianfreeman: ChangeSet changelog/db.changelog-12.xml::changelog-12::brianfreeman ran successfully in 896ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-13.xml::changelog-13::danrodney: Null constraint dropped from cohort.description
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-13.xml::changelog-13::danrodney: Index idx_cohort_workspace_id_name created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-13.xml::changelog-13::danrodney: ChangeSet changelog/db.changelog-13.xml::changelog-13::danrodney ran successfully in 338ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-14.xml::changelog-14::brianfreeman: Table cohort_annotation_definition created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-14.xml::changelog-14::brianfreeman: Foreign key constraint added to cohort_annotation_definition (cohort_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-14.xml::changelog-14::brianfreeman: Table participant_cohort_annotations created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-14.xml::changelog-14::brianfreeman: Foreign key constraint added to participant_cohort_annotations (cohort_annotation_definition_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-14.xml::changelog-14::brianfreeman: Foreign key constraint added to participant_cohort_annotations (cohort_review_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-14.xml::changelog-14::brianfreeman: ChangeSet changelog/db.changelog-14.xml::changelog-14::brianfreeman ran successfully in 713ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-15-blockscore.xml::changelog-15-blockscore::dmohs: Columns blockscore_id(varchar(30)),blockscore_verification_is_valid(boolean) added to user
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-15-blockscore.xml::changelog-15-blockscore::dmohs: ChangeSet changelog/db.changelog-15-blockscore.xml::changelog-15-blockscore::dmohs ran successfully in 221ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-16.xml::changelog-16::brianfreeman: Unique constraint added to cohort_annotation_definition(cohort_id, column_name)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-16.xml::changelog-16::brianfreeman: ChangeSet changelog/db.changelog-16.xml::changelog-16::brianfreeman ran successfully in 241ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-17.xml::changelog-17::danrodney: Columns terms_of_service_completion_time(datetime),ethics_training_completion_time(datetime),demographic_survey_completion_time(datetime) added to user
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-17.xml::changelog-17::danrodney: ChangeSet changelog/db.changelog-17.xml::changelog-17::danrodney ran successfully in 239ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-18.xml::changelog-18::brianfreeman: Columns gender_concept_id(bigint),birth_date(date),race_concept_id(bigint),ethnicity_concept_id(bigint) added to participant_cohort_status
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-18.xml::changelog-18::brianfreeman: ChangeSet changelog/db.changelog-18.xml::changelog-18::brianfreeman ran successfully in 246ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-19.xml::changelog-19::brianfreeman: Index idx_participant_cohort_status dropped from table participant_cohort_status
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-19.xml::changelog-19::brianfreeman: ChangeSet changelog/db.changelog-19.xml::changelog-19::brianfreeman ran successfully in 261ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-20-disable-users.xml::changelog-20::blrubenstein: Columns disabled(boolean),disabled_time(datetime),disabling_admin_id(bigint) added to user
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-20-disable-users.xml::changelog-20::blrubenstein: Foreign key constraint added to user (disabling_admin_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-20-disable-users.xml::changelog-20::blrubenstein: ChangeSet changelog/db.changelog-20-disable-users.xml::changelog-20::blrubenstein ran successfully in 376ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-21.xml::changelog-20::danrodney: Columns cdr_db_name(varchar(20)),public_db_name(varchar(20)) added to cdr_version
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-21.xml::changelog-20::danrodney: Sequence hibernate_sequence created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-21.xml::changelog-20::danrodney: ChangeSet changelog/db.changelog-21.xml::changelog-20::danrodney ran successfully in 231ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-22-email-verification-status.xml::changelog-22-email-verification-status::blrubenstein: Columns email_verification_status(tinyint) added to user
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-22-email-verification-status.xml::changelog-22-email-verification-status::blrubenstein: ChangeSet changelog/db.changelog-22-email-verification-status.xml::changelog-22-email-verification-status::blrubenstein ran successfully in 223ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-23.xml::changelog-23::brianfreeman: Table cohort_annotation_enum_value created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-23.xml::changelog-23::brianfreeman: Foreign key constraint added to cohort_annotation_enum_value (cohort_annotation_definition_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-23.xml::changelog-23::brianfreeman: Column participant_cohort_annotations.annotation_value_timestamp dropped
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-23.xml::changelog-23::brianfreeman: Columns annotation_value_date(date) added to participant_cohort_annotations
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-23.xml::changelog-23::brianfreeman: Columns cohort_annotation_enum_value_id(bigint) added to participant_cohort_annotations
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-23.xml::changelog-23::brianfreeman: Columns annotation_value_boolean(tinyint) added to participant_cohort_annotations
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-23.xml::changelog-23::brianfreeman: Foreign key constraint added to participant_cohort_annotations (cohort_annotation_enum_value_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-23.xml::changelog-23::brianfreeman: ChangeSet changelog/db.changelog-23.xml::changelog-23::brianfreeman ran successfully in 982ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-24-email-verification-status-default.xml::changelog-23-email-verification-status-default::rsasch: Default value added to user.email_verification_status
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-24-email-verification-status-default.xml::changelog-23-email-verification-status-default::rsasch: ChangeSet changelog/db.changelog-24-email-verification-status-default.xml::changelog-23-email-verification-status-default::rsasch ran successfully in 193ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-25.xml::changelog-25::brianfreeman: Index idx_participant_cohort_annotations created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-25.xml::changelog-25::brianfreeman: ChangeSet changelog/db.changelog-25.xml::changelog-25::brianfreeman ran successfully in 210ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-26-billing-status.xml::changelog-26-billing-status::calbach: Columns free_tier_billing_project_status(tinyint) added to user
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-26-billing-status.xml::changelog-26-billing-status::calbach: ChangeSet changelog/db.changelog-26-billing-status.xml::changelog-26-billing-status::calbach ran successfully in 306ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-27-underserved-populations.xml::changelog-27-underserved-populations::blrubenstein: Columns rp_contains_underserved_population(boolean) added to workspace
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-27-underserved-populations.xml::changelog-27-underserved-populations::blrubenstein: Table underserved_populations created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-27-underserved-populations.xml::changelog-27-underserved-populations::blrubenstein: Foreign key constraint added to underserved_populations (workspace_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-27-underserved-populations.xml::changelog-27-underserved-populations::blrubenstein: ChangeSet changelog/db.changelog-27-underserved-populations.xml::changelog-27-underserved-populations::blrubenstein ran successfully in 478ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-28-default-rp-values.xml::changelog-28-default-rp-values::blrubenstein: Default value added to workspace.rp_contains_underserved_population
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-28-default-rp-values.xml::changelog-28-default-rp-values::blrubenstein: Default value added to workspace.rp_disease_focused_research
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-28-default-rp-values.xml::changelog-28-default-rp-values::blrubenstein: Default value added to workspace.rp_methods_development
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-28-default-rp-values.xml::changelog-28-default-rp-values::blrubenstein: Default value added to workspace.rp_control_set
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-28-default-rp-values.xml::changelog-28-default-rp-values::blrubenstein: Default value added to workspace.rp_aggregate_analysis
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-28-default-rp-values.xml::changelog-28-default-rp-values::blrubenstein: Default value added to workspace.rp_ancestry
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-28-default-rp-values.xml::changelog-28-default-rp-values::blrubenstein: Default value added to workspace.rp_commercial_purpose
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-28-default-rp-values.xml::changelog-28-default-rp-values::blrubenstein: Default value added to workspace.rp_population
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-28-default-rp-values.xml::changelog-28-default-rp-values::blrubenstein: ChangeSet changelog/db.changelog-28-default-rp-values.xml::changelog-28-default-rp-values::blrubenstein ran successfully in 766ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-29-admin-logging.xml::changelog-29::rsasch: Table admin_action_history created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-29-admin-logging.xml::changelog-29::rsasch: Foreign key constraint added to admin_action_history (admin_user_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-29-admin-logging.xml::changelog-29::rsasch: Foreign key constraint added to admin_action_history (target_user_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-29-admin-logging.xml::changelog-29::rsasch: Foreign key constraint added to admin_action_history (target_workspace_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-29-admin-logging.xml::changelog-29::rsasch: Foreign key disabling_admin dropped
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-29-admin-logging.xml::changelog-29::rsasch: Column user.disabled_time dropped
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-29-admin-logging.xml::changelog-29::rsasch: Column user.disabling_admin_id dropped
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-29-admin-logging.xml::changelog-29::rsasch: Column workspace.rp_time_reviewed dropped
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-29-admin-logging.xml::changelog-29::rsasch: ChangeSet changelog/db.changelog-29-admin-logging.xml::changelog-29::rsasch ran successfully in 1032ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-30-profile-text-fields-extension.xml::changelog-30-profile-text-fields-extension::blrubenstein: Columns area_of_research(varchar(255)),about_you(CLOB) added to user
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-30-profile-text-fields-extension.xml::changelog-30-profile-text-fields-extension::blrubenstein: Table institutional_affiliation created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-30-profile-text-fields-extension.xml::changelog-30-profile-text-fields-extension::blrubenstein: Foreign key constraint added to institutional_affiliation (user_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-30-profile-text-fields-extension.xml::changelog-30-profile-text-fields-extension::blrubenstein: ChangeSet changelog/db.changelog-30-profile-text-fields-extension.xml::changelog-30-profile-text-fields-extension::blrubenstein ran successfully in 526ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-31-requested-id-verification.xml::changelog-31-requested-id-verification::blrubenstein: Columns requested_id_verification(boolean) added to user
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-31-requested-id-verification.xml::changelog-31-requested-id-verification::blrubenstein: ChangeSet changelog/db.changelog-31-requested-id-verification.xml::changelog-31-requested-id-verification::blrubenstein ran successfully in 244ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-32-firecloud-uuid.xml::firecloud_uuid::ustutsman: Columns firecloud_uuid(varchar(40)) added to workspace
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-32-firecloud-uuid.xml::firecloud_uuid::ustutsman: Index idx_firecloud_uuid created
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-32-firecloud-uuid.xml::firecloud_uuid::ustutsman: ChangeSet changelog/db.changelog-32-firecloud-uuid.xml::firecloud_uuid::ustutsman ran successfully in 334ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-33-uniq-fc-uuid.xml::uniq_firecloud_uuid::ustutsman: Unique constraint added to workspace(firecloud_uuid)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-33-uniq-fc-uuid.xml::uniq_firecloud_uuid::ustutsman: ChangeSet changelog/db.changelog-33-uniq-fc-uuid.xml::uniq_firecloud_uuid::ustutsman ran successfully in 189ms
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman: Foreign key fk_annotation_cohort_id dropped
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman: Foreign key constraint added to cohort_annotation_definition (cohort_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman: Foreign key fk_cohort_id dropped
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman: Foreign key constraint added to cohort_review (cohort_id)
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman: Foreign key fk_annotation_cohort_review_id dropped
+INFO 1/13/20 3:55 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman: Foreign key constraint added to participant_cohort_annotations (cohort_review_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman: Foreign key fk_enum_cohort_annotation_definition_id dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman: Foreign key constraint added to cohort_annotation_enum_value (cohort_annotation_definition_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman: Foreign key fk_cohort_annotation_definition_id dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman: Foreign key constraint added to participant_cohort_annotations (cohort_annotation_definition_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman: Foreign key fk_enum_cohort_annotation_enum_value_id dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman: Foreign key constraint added to participant_cohort_annotations (cohort_annotation_enum_value_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman: ChangeSet changelog/db.changelog-34-update-fk-rules.xml::changelog-33::ursastutsman ran successfully in 1530ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-35-another-fk-update.xml::changelog-35::ursastutsman: Foreign key fk_underserved_population_workspace_id dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-35-another-fk-update.xml::changelog-35::ursastutsman: Foreign key constraint added to underserved_populations (workspace_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-35-another-fk-update.xml::changelog-35::ursastutsman: ChangeSet changelog/db.changelog-35-another-fk-update.xml::changelog-35::ursastutsman ran successfully in 306ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-36.xml::changelog-36::brianfreeman: Table concept created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-36.xml::changelog-36::brianfreeman: Data loaded from csv/concept.csv into concept
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-36.xml::changelog-36::brianfreeman: ChangeSet changelog/db.changelog-36.xml::changelog-36::brianfreeman ran successfully in 417ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-37-add-two-factor-column.xml::changelog-37-add-two-factor-column::brubenst: Columns two_factor_enabled(boolean) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-37-add-two-factor-column.xml::changelog-37-add-two-factor-column::brubenst: ChangeSet changelog/db.changelog-37-add-two-factor-column.xml::changelog-37-add-two-factor-column::brubenst ran successfully in 222ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-38.xml::changelog-38::brianfreeman: Table concept dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-38.xml::changelog-38::brianfreeman: ChangeSet changelog/db.changelog-38.xml::changelog-38::brianfreeman ran successfully in 202ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-39-add-cluster-retry-number.xml::changelog-39-add-cluster-retry-number::brubenst: Columns cluster_create_retries(INTEGER) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-39-add-cluster-retry-number.xml::changelog-39-add-cluster-retry-number::brubenst: ChangeSet changelog/db.changelog-39-add-cluster-retry-number.xml::changelog-39-add-cluster-retry-number::brubenst ran successfully in 230ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-40-remove-blockscore.xml::changelog-40-remove-blockscore::brubenst: Column user.blockscore_id dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-40-remove-blockscore.xml::changelog-40-remove-blockscore::brubenst: Column user.blockscore_verification_is_valid renamed to id_verification_is_valid
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-40-remove-blockscore.xml::changelog-40-remove-blockscore::brubenst: ChangeSet changelog/db.changelog-40-remove-blockscore.xml::changelog-40-remove-blockscore::brubenst ran successfully in 312ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-41-billing-project-retry.xml::changelog-41-billing-project-retry::brubenst: Columns billing_project_retry(INTEGER) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-41-billing-project-retry.xml::changelog-41-billing-project-retry::brubenst: ChangeSet changelog/db.changelog-41-billing-project-retry.xml::changelog-41-billing-project-retry::brubenst ran successfully in 231ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-42-rename-billing-project-retries.xml::changelog-42-rename-billing-project-retries::brubenst: Column user.billing_project_retry renamed to billing_project_retries
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-42-rename-billing-project-retries.xml::changelog-42-rename-billing-project-retries::brubenst: ChangeSet changelog/db.changelog-42-rename-billing-project-retries.xml::changelog-42-rename-billing-project-retries::brubenst ran successfully in 197ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-43-add-page-visit.xml::changelog-43-add-user-visited-page::ursas: Table page_visit created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-43-add-page-visit.xml::changelog-43-add-user-visited-page::ursas: Foreign key constraint added to page_visit (user_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-43-add-page-visit.xml::changelog-43-add-user-visited-page::ursas: ChangeSet changelog/db.changelog-43-add-page-visit.xml::changelog-43-add-user-visited-page::ursas ran successfully in 326ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-44-user-recent-resource.xml::db.changelog-44-cacheTable::nehasaxena: Table user_recent_resource created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-44-user-recent-resource.xml::db.changelog-44-cacheTable::nehasaxena: Foreign key constraint added to user_recent_resource (user_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-44-user-recent-resource.xml::db.changelog-44-cacheTable::nehasaxena: Foreign key constraint added to user_recent_resource (workspace_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-44-user-recent-resource.xml::db.changelog-44-cacheTable::nehasaxena: Foreign key constraint added to user_recent_resource (cohort_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-44-user-recent-resource.xml::db.changelog-44-cacheTable::nehasaxena: ChangeSet changelog/db.changelog-44-user-recent-resource.xml::db.changelog-44-cacheTable::nehasaxena ran successfully in 637ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-45-concept-set.xml::changelog-45::danrodney: Table concept_set created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-45-concept-set.xml::changelog-45::danrodney: Foreign key constraint added to concept_set (creator_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-45-concept-set.xml::changelog-45::danrodney: Foreign key constraint added to concept_set (workspace_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-45-concept-set.xml::changelog-45::danrodney: Index idx_concept_set_workspace_id_name created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-45-concept-set.xml::changelog-45::danrodney: Table concept_set_concept_id created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-45-concept-set.xml::changelog-45::danrodney: Foreign key constraint added to concept_set_concept_id (concept_set_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-45-concept-set.xml::changelog-45::danrodney: ChangeSet changelog/db.changelog-45-concept-set.xml::changelog-45::danrodney ran successfully in 797ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-46-add-concept-set-count.xml::changelog-46::danrodney: Columns participant_count(INTEGER) added to concept_set
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-46-add-concept-set-count.xml::changelog-46::danrodney: ChangeSet changelog/db.changelog-46-add-concept-set-count.xml::changelog-46::danrodney ran successfully in 222ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-47-request-id-verification-time.xml::changelog-47-request-id-verification-time::blrubenstein: Columns id_verification_request_time(datetime) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-47-request-id-verification-time.xml::changelog-47-request-id-verification-time::blrubenstein: ChangeSet changelog/db.changelog-47-request-id-verification-time.xml::changelog-47-request-id-verification-time::blrubenstein ran successfully in 218ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-48-default-cdr.xml::changelog-48-default-cdr::calbach: Columns is_default(boolean) added to cdr_version
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-48-default-cdr.xml::changelog-48-default-cdr::calbach: ChangeSet changelog/db.changelog-48-default-cdr.xml::changelog-48-default-cdr::calbach ran successfully in 379ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-49-add-concept-set-to-user-recent-resource.xml::changelog-49-add-concept-set-to-user-recent-resource::ursas: Columns concept_set_id(bigint) added to user_recent_resource
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-49-add-concept-set-to-user-recent-resource.xml::changelog-49-add-concept-set-to-user-recent-resource::ursas: Foreign key constraint added to user_recent_resource (concept_set_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-49-add-concept-set-to-user-recent-resource.xml::changelog-49-add-concept-set-to-user-recent-resource::ursas: ChangeSet changelog/db.changelog-49-add-concept-set-to-user-recent-resource.xml::changelog-49-add-concept-set-to-user-recent-resource::ursas ran successfully in 375ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-50.xml::changelog-50::brianfreeman: cohort.criteria datatype was changed to mediumblob
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-50.xml::changelog-50::brianfreeman: ChangeSet changelog/db.changelog-50.xml::changelog-50::brianfreeman ran successfully in 255ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-51-user-profile-updates.xml::changelog-51::grushton: Columns current_position(varchar(255)),organization(varchar(255)) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-51-user-profile-updates.xml::changelog-51::grushton: user.area_of_research datatype was changed to CLOB
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-51-user-profile-updates.xml::changelog-51::grushton: ChangeSet changelog/db.changelog-51-user-profile-updates.xml::changelog-51::grushton ran successfully in 339ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-52-user-nonce.xml::changelog-52::calbach: Columns creation_nonce(bigint) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-52-user-nonce.xml::changelog-52::calbach: ChangeSet changelog/db.changelog-52-user-nonce.xml::changelog-52::calbach ran successfully in 215ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-53-research-purpose-type.xml::changelog-53::jroberti: workspace.description datatype was changed to CLOB
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-53-research-purpose-type.xml::changelog-53::jroberti: ChangeSet changelog/db.changelog-53-research-purpose-type.xml::changelog-53::jroberti ran successfully in 237ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-54-update-data-access-level.xml::changelog-54::grushton: Custom SQL executed
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-54-update-data-access-level.xml::changelog-54::grushton: ChangeSet changelog/db.changelog-54-update-data-access-level.xml::changelog-54::grushton ran successfully in 182ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-55-moodle-training.xml::db.changelog-55-moodle-training::nehasaxena: Column user.ethics_training_completion_time dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-55-moodle-training.xml::db.changelog-55-moodle-training::nehasaxena: Columns moodle_id(bigint),training_expiration_time(datetime),training_completion_time(datetime) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-55-moodle-training.xml::db.changelog-55-moodle-training::nehasaxena: ChangeSet changelog/db.changelog-55-moodle-training.xml::db.changelog-55-moodle-training::nehasaxena ran successfully in 363ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-56-update-email-lowercase.xml::changelog-56-update-email-lowercase::blrubenst: Custom SQL executed
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-56-update-email-lowercase.xml::changelog-56-update-email-lowercase::blrubenst: ChangeSet changelog/db.changelog-56-update-email-lowercase.xml::changelog-56-update-email-lowercase::blrubenst ran successfully in 181ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-57-add-era-commons-entries.xml::db.changelog-57-add-era-commons-entries::blrubenst: Columns era_commons_linked_nih_username(varchar(255)),era_commons_link_expire_time(datetime),era_commons_completion_time(datetime) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-57-add-era-commons-entries.xml::db.changelog-57-add-era-commons-entries::blrubenst: ChangeSet changelog/db.changelog-57-add-era-commons-entries.xml::db.changelog-57-add-era-commons-entries::blrubenst ran successfully in 225ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-58-update-access-modules.xml::db.changelog-58-update-access-modules::ustutsman: Columns data_use_agreement_completion_time(datetime),data_use_agreement_bypass_time(datetime),compliance_training_completion_time(datetime),compliance_training_bypass_time(datetime),beta_access_completion_time(datetime),beta_access_bypass_time(datetime),email_verification_completion_time(datetime),email_verification_bypass_time(datetime),era_commons_bypass_time(datetime),id_verification_completion_time(datetime),id_verification_bypass_time(datetime),two_factor_auth_completion_time(datetime),two_factor_auth_bypass_time(datetime) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-58-update-access-modules.xml::db.changelog-58-update-access-modules::ustutsman: ChangeSet changelog/db.changelog-58-update-access-modules.xml::db.changelog-58-update-access-modules::ustutsman ran successfully in 237ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-59-cluster-config-default.xml::changelog-59-cluster-config-default::calbach: Columns cluster_config_default(clob) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-59-cluster-config-default.xml::changelog-59-cluster-config-default::calbach: ChangeSet changelog/db.changelog-59-cluster-config-default.xml::changelog-59-cluster-config-default::calbach ran successfully in 230ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-60-backfill-bypass.xml::changelog-60-backfill-bypass::blrubenstein: Custom SQL executed
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-60-backfill-bypass.xml::changelog-60-backfill-bypass::blrubenstein: ChangeSet changelog/db.changelog-60-backfill-bypass.xml::changelog-60-backfill-bypass::blrubenstein ran successfully in 188ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-61-backfill-beta-bypass.xml::changelog-61-backfill-beta-bypass::gjordan: Custom SQL executed
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-61-backfill-beta-bypass.xml::changelog-61-backfill-beta-bypass::gjordan: ChangeSet changelog/db.changelog-61-backfill-beta-bypass.xml::changelog-61-backfill-beta-bypass::gjordan ran successfully in 183ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-62.xml::changelog-61::willdolbeer: Columns deceased(BOOL) added to participant_cohort_status
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-62.xml::changelog-61::willdolbeer: ChangeSet changelog/db.changelog-62.xml::changelog-61::willdolbeer ran successfully in 226ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-63.xml::changelog-62::brianfreeman: Columns cohort_definition(mediumblob),cohort_name(varchar(80)) added to cohort_review
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-63.xml::changelog-62::brianfreeman: ChangeSet changelog/db.changelog-63.xml::changelog-62::brianfreeman ran successfully in 267ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-64.xml::changelog-64::willdolbeer: Custom SQL executed
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-64.xml::changelog-64::willdolbeer: ChangeSet changelog/db.changelog-64.xml::changelog-64::willdolbeer ran successfully in 186ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-65.xml::changelog-65::brianfreeman: Custom SQL executed
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-65.xml::changelog-65::brianfreeman: ChangeSet changelog/db.changelog-65.xml::changelog-65::brianfreeman ran successfully in 180ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-66.xml::changelog-66::calbach: Columns elastic_index_base_name(varchar(20)) added to cdr_version
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-66.xml::changelog-66::calbach: ChangeSet changelog/db.changelog-66.xml::changelog-66::calbach ran successfully in 285ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-67-compliance-training-expiration.xml::db.changelog-67-compliance-training-expiration::gjuggler: Columns compliance_training_expiration_time(datetime) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-67-compliance-training-expiration.xml::db.changelog-67-compliance-training-expiration::gjuggler: Custom SQL executed
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-67-compliance-training-expiration.xml::db.changelog-67-compliance-training-expiration::gjuggler: Column user.training_expiration_time dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-67-compliance-training-expiration.xml::db.changelog-67-compliance-training-expiration::gjuggler: ChangeSet changelog/db.changelog-67-compliance-training-expiration.xml::db.changelog-67-compliance-training-expiration::gjuggler ran successfully in 402ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-68-drop-training-completion-time-col.xml::db.changelog-68-drop-training-completion-time-col::jroberti: Column user.training_completion_time dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-68-drop-training-completion-time-col.xml::db.changelog-68-drop-training-completion-time-col::jroberti: ChangeSet changelog/db.changelog-68-drop-training-completion-time-col.xml::db.changelog-68-drop-training-completion-time-col::jroberti ran successfully in 222ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-69-replace-idv-with-beta-access.xml::db.changelog-69-replace-idv-with-beta-access::jroberti: Column user.beta_access_completion_time dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-69-replace-idv-with-beta-access.xml::db.changelog-69-replace-idv-with-beta-access::jroberti: Column user.requested_id_verification dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-69-replace-idv-with-beta-access.xml::db.changelog-69-replace-idv-with-beta-access::jroberti: Column user.id_verification_request_time renamed to beta_access_request_time
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-69-replace-idv-with-beta-access.xml::db.changelog-69-replace-idv-with-beta-access::jroberti: ChangeSet changelog/db.changelog-69-replace-idv-with-beta-access.xml::db.changelog-69-replace-idv-with-beta-access::jroberti ran successfully in 405ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-70-data-set.xml::changelog-67-data-set::nsaxena: Table data_set created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-70-data-set.xml::changelog-67-data-set::nsaxena: Foreign key constraint added to data_set (creator_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-70-data-set.xml::changelog-67-data-set::nsaxena: Foreign key constraint added to data_set (workspace_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-70-data-set.xml::changelog-67-data-set::nsaxena: Table data_set_concept_set created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-70-data-set.xml::changelog-67-data-set::nsaxena: Table data_set_cohort created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-70-data-set.xml::changelog-67-data-set::nsaxena: Table data_set_values created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-70-data-set.xml::changelog-67-data-set::nsaxena: Foreign key constraint added to data_set_concept_set (concept_set_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-70-data-set.xml::changelog-67-data-set::nsaxena: Foreign key constraint added to data_set_concept_set (data_set_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-70-data-set.xml::changelog-67-data-set::nsaxena: Foreign key constraint added to data_set_cohort (cohort_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-70-data-set.xml::changelog-67-data-set::nsaxena: Foreign key constraint added to data_set_cohort (data_set_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-70-data-set.xml::changelog-67-data-set::nsaxena: Foreign key constraint added to data_set_values (data_set_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-70-data-set.xml::changelog-67-data-set::nsaxena: ChangeSet changelog/db.changelog-70-data-set.xml::changelog-67-data-set::nsaxena ran successfully in 1381ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-71-remove-2fa-enabled.xml::db.changelog-71-remove-2fa-enabled::jroberti: Column user.two_factor_enabled dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-71-remove-2fa-enabled.xml::db.changelog-71-remove-2fa-enabled::jroberti: ChangeSet changelog/db.changelog-71-remove-2fa-enabled.xml::db.changelog-71-remove-2fa-enabled::jroberti ran successfully in 229ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-72-all-participants-data-set.xml::changelog-72-all-participants-data-set::srubenst: Columns includes_all_participants(boolean) added to data_set
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-72-all-participants-data-set.xml::changelog-72-all-participants-data-set::srubenst: ChangeSet changelog/db.changelog-72-all-participants-data-set.xml::changelog-72-all-participants-data-set::srubenst ran successfully in 218ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-73-add-billing_project_buffer_entry.xml::db.changelog-73-add-billing_project_buffer_entry::ericsong: Table billing_project_buffer_entry created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-73-add-billing_project_buffer_entry.xml::db.changelog-73-add-billing_project_buffer_entry::ericsong: ChangeSet changelog/db.changelog-73-add-billing_project_buffer_entry.xml::db.changelog-73-add-billing_project_buffer_entry::ericsong ran successfully in 209ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-74-add-last_sync_request_time-billing-buffer.xml::db.changelog-74-add-last_synced_time-billing-buffer::ericsong: Columns last_sync_request_time(datetime) added to billing_project_buffer_entry
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-74-add-last_sync_request_time-billing-buffer.xml::db.changelog-74-add-last_synced_time-billing-buffer::ericsong: ChangeSet changelog/db.changelog-74-add-last_sync_request_time-billing-buffer.xml::db.changelog-74-add-last_synced_time-billing-buffer::ericsong ran successfully in 232ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-75-workspace-deletion.xml::db.changelog-75-workspace-deletion::jroberti: Columns last_accessed_time(datetime),active_status(tinyint) added to workspace
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-75-workspace-deletion.xml::db.changelog-75-workspace-deletion::jroberti: ChangeSet changelog/db.changelog-75-workspace-deletion.xml::db.changelog-75-workspace-deletion::jroberti ran successfully in 303ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-76-add-assigned_user-billing-buffer.xml::db.changelog-76-add-assigned_user-billing-buffer::ericsong: Columns assigned_user_id(bigint) added to billing_project_buffer_entry
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-76-add-assigned_user-billing-buffer.xml::db.changelog-76-add-assigned_user-billing-buffer::ericsong: ChangeSet changelog/db.changelog-76-add-assigned_user-billing-buffer.xml::db.changelog-76-add-assigned_user-billing-buffer::ericsong ran successfully in 358ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-77-data-set-last-modified.xml::db.changelog-76-data-set-last-modified::srubenst: Columns last_modified_time(datetime) added to data_set
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-77-data-set-last-modified.xml::db.changelog-76-data-set-last-modified::srubenst: ChangeSet changelog/db.changelog-77-data-set-last-modified.xml::db.changelog-76-data-set-last-modified::srubenst ran successfully in 229ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-78-data-set-etag.xml::db.changelog-76-data-set-last-modified::srubenst: Columns version(smallint) added to data_set
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-78-data-set-etag.xml::db.changelog-76-data-set-last-modified::srubenst: ChangeSet changelog/db.changelog-78-data-set-etag.xml::db.changelog-76-data-set-last-modified::srubenst ran successfully in 224ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-79-drop-fc-index.xml::db.changelog-79-drop-fc-index::calbach: Index idx_workspace_firecloud_name dropped from table workspace
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-79-drop-fc-index.xml::db.changelog-79-drop-fc-index::calbach: ChangeSet changelog/db.changelog-79-drop-fc-index.xml::db.changelog-79-drop-fc-index::calbach ran successfully in 196ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-80-research-purpose-refactor.xml::db.changelog-80-research-purpose-refactor::jroberti: Columns rp_social_behavioral(boolean),rp_population_health(boolean),rp_educational(boolean),rp_other_purpose(boolean),rp_drug_development(boolean),rp_other_purpose_details(varchar(500)),rp_reason_for_all_of_us(varchar(500)),rp_anticipated_findings(varchar(2000)) added to workspace
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-80-research-purpose-refactor.xml::db.changelog-80-research-purpose-refactor::jroberti: Column workspace.description renamed to rp_intended_study
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-80-research-purpose-refactor.xml::db.changelog-80-research-purpose-refactor::jroberti: Column workspace.rp_aggregate_analysis dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-80-research-purpose-refactor.xml::db.changelog-80-research-purpose-refactor::jroberti: Column workspace.rp_contains_underserved_population dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-80-research-purpose-refactor.xml::db.changelog-80-research-purpose-refactor::jroberti: Column workspace.rp_population_of_focus dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-80-research-purpose-refactor.xml::db.changelog-80-research-purpose-refactor::jroberti: Table specific_populations created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-80-research-purpose-refactor.xml::db.changelog-80-research-purpose-refactor::jroberti: Foreign key constraint added to specific_populations (workspace_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-80-research-purpose-refactor.xml::db.changelog-80-research-purpose-refactor::jroberti: Table underserved_populations dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-80-research-purpose-refactor.xml::db.changelog-80-research-purpose-refactor::jroberti: ChangeSet changelog/db.changelog-80-research-purpose-refactor.xml::db.changelog-80-research-purpose-refactor::jroberti ran successfully in 1007ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-81-add-billing_migration_status-workspace.xml::db.changelog-81-add-billing_migration_status-workspace::ericsong: Columns billing_migration_status(tinyint) added to workspace
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-81-add-billing_migration_status-workspace.xml::db.changelog-81-add-billing_migration_status-workspace::ericsong: ChangeSet changelog/db.changelog-81-add-billing_migration_status-workspace.xml::db.changelog-81-add-billing_migration_status-workspace::ericsong ran successfully in 220ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-82-add-cascade-delete-admin-actions-after-user-delete.xml::changelog-82-add-cascade-delete-admin-actions-after-user-delete::srubenst: Foreign key fk_history_target_user_id dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-82-add-cascade-delete-admin-actions-after-user-delete.xml::changelog-82-add-cascade-delete-admin-actions-after-user-delete::srubenst: Foreign key constraint added to admin_action_history (target_user_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-82-add-cascade-delete-admin-actions-after-user-delete.xml::changelog-82-add-cascade-delete-admin-actions-after-user-delete::srubenst: Foreign key fk_history_admin_id dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-82-add-cascade-delete-admin-actions-after-user-delete.xml::changelog-82-add-cascade-delete-admin-actions-after-user-delete::srubenst: Foreign key constraint added to admin_action_history (admin_user_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-82-add-cascade-delete-admin-actions-after-user-delete.xml::changelog-82-add-cascade-delete-admin-actions-after-user-delete::srubenst: ChangeSet changelog/db.changelog-82-add-cascade-delete-admin-actions-after-user-delete.xml::changelog-82-add-cascade-delete-admin-actions-after-user-delete::srubenst ran successfully in 541ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-83-other-population.xml::db.changelog-83-other-population::jroberti: Columns rp_other_population_details(varchar(100)) added to workspace
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-83-other-population.xml::db.changelog-83-other-population::jroberti: ChangeSet changelog/db.changelog-83-other-population.xml::db.changelog-83-other-population::jroberti ran successfully in 221ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-84-add-last_status_changed_time.xml::db.changelog-84-add-last_status_changed_time.xml::ericsong: Columns last_status_changed_time(datetime) added to billing_project_buffer_entry
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-84-add-last_status_changed_time.xml::db.changelog-84-add-last_status_changed_time.xml::ericsong: ChangeSet changelog/db.changelog-84-add-last_status_changed_time.xml::db.changelog-84-add-last_status_changed_time.xml::ericsong ran successfully in 219ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-85-drop-user_workspace.xml::db.changelog-85-drop-user_workspace::jroberti: Table user_workspace dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-85-drop-user_workspace.xml::db.changelog-85-drop-user_workspace::jroberti: ChangeSet changelog/db.changelog-85-drop-user_workspace.xml::db.changelog-85-drop-user_workspace::jroberti ran successfully in 196ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-86-drop-tos.xml::db.changelog-86-drop-tos::calbach: Column user.terms_of_service_completion_time dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-86-drop-tos.xml::db.changelog-86-drop-tos::calbach: ChangeSet changelog/db.changelog-86-drop-tos.xml::db.changelog-86-drop-tos::calbach ran successfully in 223ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-87-add-survey-concept-set.xml::changelog-87-add-survey-concept-set::nsaxena: Columns survey(tinyint) added to concept_set
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-87-add-survey-concept-set.xml::changelog-87-add-survey-concept-set::nsaxena: ChangeSet changelog/db.changelog-87-add-survey-concept-set.xml::changelog-87-add-survey-concept-set::nsaxena ran successfully in 223ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-88-published-workspaces.xml::db.changelog-88-published-workspaces::jroberti: Columns published(boolean) added to workspace
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-88-published-workspaces.xml::db.changelog-88-published-workspaces::jroberti: ChangeSet changelog/db.changelog-88-published-workspaces.xml::db.changelog-88-published-workspaces::jroberti ran successfully in 225ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-89-add-data-use-agreement-signed-version.xml::db.changelog-89-add-data-use-agreement-signed-version::andrewjang: Columns data_use_agreement_signed_version(INTEGER) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-89-add-data-use-agreement-signed-version.xml::db.changelog-89-add-data-use-agreement-signed-version::andrewjang: ChangeSet changelog/db.changelog-89-add-data-use-agreement-signed-version.xml::db.changelog-89-add-data-use-agreement-signed-version::andrewjang ran successfully in 219ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-90-review-version.xml::changelog-90-review-version::freemabd: Columns version(smallint) added to cohort_review
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-90-review-version.xml::changelog-90-review-version::freemabd: Columns description(clob) added to cohort_review
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-90-review-version.xml::changelog-90-review-version::freemabd: Columns creator_id(bigint) added to cohort_review
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-90-review-version.xml::changelog-90-review-version::freemabd: Foreign key constraint added to cohort_review (creator_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-90-review-version.xml::changelog-90-review-version::freemabd: Custom SQL executed
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-90-review-version.xml::changelog-90-review-version::freemabd: ChangeSet changelog/db.changelog-90-review-version.xml::changelog-90-review-version::freemabd ran successfully in 634ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-91-review-last-modified.xml::changelog-91-review-last-modified::freemabd: Custom SQL executed
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-91-review-last-modified.xml::changelog-91-review-last-modified::freemabd: ChangeSet changelog/db.changelog-91-review-last-modified.xml::changelog-91-review-last-modified::freemabd ran successfully in 176ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-92-dataset-add-prepackaged-conceptsets.xml::db.changelog-92-dataset-add-prepackaged-conceptsets::nsaxena: Columns prePackagedConceptSet(tinyint) added to data_set
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-92-dataset-add-prepackaged-conceptsets.xml::db.changelog-92-dataset-add-prepackaged-conceptsets::nsaxena: ChangeSet changelog/db.changelog-92-dataset-add-prepackaged-conceptsets.xml::db.changelog-92-dataset-add-prepackaged-conceptsets::nsaxena ran successfully in 217ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-93-annotation-version.xml::changelog-93-annotation-version::freemabd: Columns version(smallint) added to cohort_annotation_definition
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-93-annotation-version.xml::changelog-93-annotation-version::freemabd: ChangeSet changelog/db.changelog-93-annotation-version.xml::changelog-93-annotation-version::freemabd ran successfully in 208ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-94-dataset-add-prepackaged-conceptsets-addDefaultValue.xml::db.changelog-94-dataset-add-prepackaged-conceptsets-addDefaultValue::nsaxena: Custom SQL executed
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-94-dataset-add-prepackaged-conceptsets-addDefaultValue.xml::db.changelog-94-dataset-add-prepackaged-conceptsets-addDefaultValue::nsaxena: ChangeSet changelog/db.changelog-94-dataset-add-prepackaged-conceptsets-addDefaultValue.xml::db.changelog-94-dataset-add-prepackaged-conceptsets-addDefaultValue::nsaxena ran successfully in 176ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-95-free-credits.xml::changelog-95-free-credits::ericsong: Columns free_tier_credits_limit_override(double) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-95-free-credits.xml::changelog-95-free-credits::ericsong: ChangeSet changelog/db.changelog-95-free-credits.xml::changelog-95-free-credits::ericsong ran successfully in 207ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-96-drop-free-tier-billing.xml::db.changelog-86-drop-free-tier-billing::srubenst: Column user.free_tier_billing_project_name dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-96-drop-free-tier-billing.xml::db.changelog-86-drop-free-tier-billing::srubenst: Column user.free_tier_billing_project_status dropped
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-96-drop-free-tier-billing.xml::db.changelog-86-drop-free-tier-billing::srubenst: ChangeSet changelog/db.changelog-96-drop-free-tier-billing.xml::db.changelog-86-drop-free-tier-billing::srubenst ran successfully in 312ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-97-cdr-archival-status.xml::db.changelog-97-cdr-archival-status::calbach: Columns archival_status(tinyint) added to cdr_version
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-97-cdr-archival-status.xml::db.changelog-97-cdr-archival-status::calbach: ChangeSet changelog/db.changelog-97-cdr-archival-status.xml::db.changelog-97-cdr-archival-status::calbach ran successfully in 222ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-98-add-demographic-survey.xml::changelog-98-add-demographic-survey::nsaxena: Table demographic_survey created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-98-add-demographic-survey.xml::changelog-98-add-demographic-survey::nsaxena: Table demographic_survey_gender created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-98-add-demographic-survey.xml::changelog-98-add-demographic-survey::nsaxena: Table demographic_survey_race created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-98-add-demographic-survey.xml::changelog-98-add-demographic-survey::nsaxena: Foreign key constraint added to demographic_survey_gender (demographic_survey_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-98-add-demographic-survey.xml::changelog-98-add-demographic-survey::nsaxena: Foreign key constraint added to demographic_survey (user_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-98-add-demographic-survey.xml::changelog-98-add-demographic-survey::nsaxena: Foreign key constraint added to demographic_survey_race (demographic_survey_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-98-add-demographic-survey.xml::changelog-98-add-demographic-survey::nsaxena: ChangeSet changelog/db.changelog-98-add-demographic-survey.xml::changelog-98-add-demographic-survey::nsaxena ran successfully in 800ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-99-add-address.xml::changelog-99-add-address::nsaxena: Table address created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-99-add-address.xml::changelog-99-add-address::nsaxena: Foreign key constraint added to address (user_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-99-add-address.xml::changelog-99-add-address::nsaxena: ChangeSet changelog/db.changelog-99-add-address.xml::changelog-99-add-address::nsaxena ran successfully in 337ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-100-update-institution-affiliations.xml::changelog-100-update-institution-affiliations::nsaxena: Columns non_academic_affiliation(tinyint),other(varchar(255)) added to institutional_affiliation
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-100-update-institution-affiliations.xml::changelog-100-update-institution-affiliations::nsaxena: Default value added to institutional_affiliation.non_academic_affiliation
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-100-update-institution-affiliations.xml::changelog-100-update-institution-affiliations::nsaxena: Default value added to institutional_affiliation.role
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-100-update-institution-affiliations.xml::changelog-100-update-institution-affiliations::nsaxena: ChangeSet changelog/db.changelog-100-update-institution-affiliations.xml::changelog-100-update-institution-affiliations::nsaxena ran successfully in 386ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-101-billing-project-garbage-collection.xml::changelog-101-billing-project-garbage-collection::thibault: Table billing_project_garbage_collection created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-101-billing-project-garbage-collection.xml::changelog-101-billing-project-garbage-collection::thibault: ChangeSet changelog/db.changelog-101-billing-project-garbage-collection.xml::changelog-101-billing-project-garbage-collection::thibault ran successfully in 201ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-102-user-recent-workspace.xml::db.changelog-102-user-recent-workspace::als364: Table user_recent_workspace created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-102-user-recent-workspace.xml::db.changelog-102-user-recent-workspace::als364: Foreign key constraint added to user_recent_workspace (user_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-102-user-recent-workspace.xml::db.changelog-102-user-recent-workspace::als364: Foreign key constraint added to user_recent_workspace (workspace_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-102-user-recent-workspace.xml::db.changelog-102-user-recent-workspace::als364: ChangeSet changelog/db.changelog-102-user-recent-workspace.xml::db.changelog-102-user-recent-workspace::als364 ran successfully in 444ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-103-data-dictionary.xml::changelog-103-data-dictionary::ericsong: Table data_dictionary_entry created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-103-data-dictionary.xml::changelog-103-data-dictionary::ericsong: Unique constraint added to data_dictionary_entry(relevant_omop_table, field_name, cdr_version_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-103-data-dictionary.xml::changelog-103-data-dictionary::ericsong: ChangeSet changelog/db.changelog-103-data-dictionary.xml::changelog-103-data-dictionary::ericsong ran successfully in 302ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-104-dataset-name-unique-in-workspace.xml::db.changelog-104-dataset-name-unique-in-workspace::srubenst: Unique constraint name dropped from data_set
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-104-dataset-name-unique-in-workspace.xml::db.changelog-104-dataset-name-unique-in-workspace::srubenst: Unique constraint added to data_set(name, workspace_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-104-dataset-name-unique-in-workspace.xml::db.changelog-104-dataset-name-unique-in-workspace::srubenst: ChangeSet changelog/db.changelog-104-dataset-name-unique-in-workspace.xml::db.changelog-104-dataset-name-unique-in-workspace::srubenst ran successfully in 299ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-105-workspace-free-tier-usage.xml::changelog-105-workspace-free-tier-usage::thibault: Table workspace_free_tier_usage created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-105-workspace-free-tier-usage.xml::changelog-105-workspace-free-tier-usage::thibault: ChangeSet changelog/db.changelog-105-workspace-free-tier-usage.xml::changelog-105-workspace-free-tier-usage::thibault ran successfully in 212ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-106-workspace-billing-account-fields.xml::changelog-106-billing-account-fields::thibault: Columns billing_status(tinyint),billing_account_type(tinyint) added to workspace
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-106-workspace-billing-account-fields.xml::changelog-106-billing-account-fields::thibault: ChangeSet changelog/db.changelog-106-workspace-billing-account-fields.xml::changelog-106-billing-account-fields::thibault ran successfully in 236ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-107-workspace-free-tier-usage-user-index.xml::changelog-107-workspace-free-tier-usage-user-index::thibault: Index workspace_free_tier_usage_user_idx created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-107-workspace-free-tier-usage-user-index.xml::changelog-107-workspace-free-tier-usage-user-index::thibault: ChangeSet changelog/db.changelog-107-workspace-free-tier-usage-user-index.xml::changelog-107-workspace-free-tier-usage-user-index::thibault ran successfully in 203ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-108-user-data-use-agreement.xml::changelog-108-user-data-use-agreement::aschwart: Table user_data_use_agreement created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-108-user-data-use-agreement.xml::changelog-108-user-data-use-agreement::aschwart: ChangeSet changelog/db.changelog-108-user-data-use-agreement.xml::changelog-108-user-data-use-agreement::aschwart ran successfully in 209ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-109-dataset-prepackaged-conceptsets-nullConstraint.xml::db.changelog-109-dataset-prepackaged-conceptsets-nullConstraint::nsaxena: Null constraint has been added to data_set.prePackagedConceptSet
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-109-dataset-prepackaged-conceptsets-nullConstraint.xml::db.changelog-109-dataset-prepackaged-conceptsets-nullConstraint::nsaxena: Column data_set.prePackagedConceptSet renamed to pre_packaged_concept_set
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-109-dataset-prepackaged-conceptsets-nullConstraint.xml::db.changelog-109-dataset-prepackaged-conceptsets-nullConstraint::nsaxena: ChangeSet changelog/db.changelog-109-dataset-prepackaged-conceptsets-nullConstraint.xml::db.changelog-109-dataset-prepackaged-conceptsets-nullConstraint::nsaxena ran successfully in 469ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-110-free-credits-days-override.xml::db.changelog-110-free-credits-days-override::thibault: Column user.free_tier_credits_limit_override renamed to free_tier_credits_limit_dollars_override
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-110-free-credits-days-override.xml::db.changelog-110-free-credits-days-override::thibault: Columns free_tier_credits_limit_days_override(tinyint) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-110-free-credits-days-override.xml::db.changelog-110-free-credits-days-override::thibault: ChangeSet changelog/db.changelog-110-free-credits-days-override.xml::db.changelog-110-free-credits-days-override::thibault ran successfully in 317ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-111-status-alert.xml::changelog-111-status-alert::aschwart: Table status_alert created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-111-status-alert.xml::changelog-111-status-alert::aschwart: ChangeSet changelog/db.changelog-111-status-alert.xml::changelog-111-status-alert::aschwart ran successfully in 205ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-112-free-credits-time-management.xml::db.changelog-112-free-credits-time-management::thibault: Columns last_free_tier_credits_time_check(datetime) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-112-free-credits-time-management.xml::db.changelog-112-free-credits-time-management::thibault: Columns first_registration_completion_time(datetime) added to user
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-112-free-credits-time-management.xml::db.changelog-112-free-credits-time-management::thibault: ChangeSet changelog/db.changelog-112-free-credits-time-management.xml::db.changelog-112-free-credits-time-management::thibault ran successfully in 340ms
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-113-user-demographics-updates.xml::changelog-113-user-demographics-updates::srubenst: Table demographic_survey_sexual_orientation created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-113-user-demographics-updates.xml::changelog-113-user-demographics-updates::srubenst: Table demographic_survey_sex_at_birth created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-113-user-demographics-updates.xml::changelog-113-user-demographics-updates::srubenst: Table user_degree created
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-113-user-demographics-updates.xml::changelog-113-user-demographics-updates::srubenst: Foreign key constraint added to demographic_survey_sexual_orientation (demographic_survey_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-113-user-demographics-updates.xml::changelog-113-user-demographics-updates::srubenst: Foreign key constraint added to demographic_survey_sex_at_birth (demographic_survey_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-113-user-demographics-updates.xml::changelog-113-user-demographics-updates::srubenst: Foreign key constraint added to user_degree (user_id)
+INFO 1/13/20 3:56 PM: liquibase: changelog/db.changelog-master.xml: changelog/db.changelog-113-user-demographics-updates.xml::changelog-113-user-demographics-updates::srubenst: ChangeSet changelog/db.changelog-113-user-demographics-updates.xml::changelog-113-user-demographics-updates::srubenst ran successfully in 828ms
+<-------------> 0% EXECUTING [1m 13s]
+INFO 1/13/20 3:56 PM: liquibase: Successfully released change log lock
+Liquibase Update Successful
+
+
+BUILD SUCCESSFUL in 1m 16s
+1 actionable task: 1 executed
++ gcloud iam service-accounts keys delete 4b9e2dd4e3727cb11d1230eef14a0820d62adf62 -q --iam-account=all-of-us-rw-preprod@appspot.gserviceaccount.com --project=all-of-us-rw-preprod
+
+Spawn
+gcloudiamservice-accountskeysdelete4b9e2dd4e3727cb11d1230eef14a0820d62adf62-q--iam-account=all-of-us-rw-preprod@appspot.gserviceaccount.com--project=all-of-us-rw-preprod
+Spawn
+deleted key [4b9e2dd4e3727cb11d1230eef14a0820d62adf62] for service account [all-of-us-rw-preprod@appspot.gserviceaccount.com]
++ rm /w/api/sa-key.json
+
+Spawn
+rm/w/api/sa-key.json
+Spawn
+Reading gcloud configuration...
+Using 'default' gcloud configuration
+  account: eric.song@pmi-ops.org
+Traceback (most recent call last):
+	8: from /w/api/project.rb:6:in `<main>'
+	7: from /w/aou-utils/workbench.rb:61:in `handle_argv_or_die'
+	6: from /w/aou-utils/utils/common.rb:86:in `handle_or_die'
+	5: from /w/api/libproject/devstart.rb:1937:in `block in <top (required)>'
+	4: from /w/api/libproject/devstart.rb:1931:in `setup_cloud_project'
+	3: from /w/api/libproject/devstart.rb:1511:in `deploy_gcs_artifacts'
+	2: from /w/api/libproject/devstart.rb:1650:in `get_auth_domain_group'
+	1: from /w/api/libproject/devstart.rb:1638:in `get_fc_config'
+/w/api/libproject/devstart.rb:1638:in `read': No such file or directory @ rb_sysopen - config/config_preprod.json (Errno::ENOENT)

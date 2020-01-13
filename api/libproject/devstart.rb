@@ -87,7 +87,7 @@ ENVIRONMENTS = {
     :api_endpoint_host => "api-dot-all-of-us-rw-preprod.appspot.com",
     :cdr_sql_instance => "all-of-us-rw-preprod:us-central1:workbenchmaindb",
     :config_json => "config_preprod.json",
-    :cdr_versions_json => "cdr_versions_stable.json",
+    :cdr_versions_json => "cdr_versions_preprod.json",
     :featured_workspaces_json => "featured_workspaces_preprod.json",
     :gae_vars => TEST_GAE_VARS
   },
@@ -1876,7 +1876,7 @@ def setup_project_data(gcc, cdr_db_name)
   common.status "Writing DB credentials file..."
   write_db_creds_file(gcc.project, cdr_db_name, root_password, workbench_password)
   common.status "Setting root password..."
-  run_with_redirects("gcloud sql users set-password root % --project #{gcc.project} " +
+  run_with_redirects("gcloud sql users set-password root --host % --project #{gcc.project} " +
                      "--instance #{INSTANCE_NAME} --password #{root_password}",
                      root_password)
   # Don't delete the credentials created here; they will be stored in GCS and reused during
@@ -1926,8 +1926,8 @@ def setup_cloud_project(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
-  create_project_resources(gcc)
-  setup_project_data(gcc, op.opts.cdr_db_name)
+  # create_project_resources(gcc)
+  # setup_project_data(gcc, op.opts.cdr_db_name)
   deploy_gcs_artifacts(cmd_name, %W{--project #{gcc.project}})
 end
 
