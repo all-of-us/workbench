@@ -103,8 +103,8 @@ describe('ConceptHomepage', () => {
       );
     });
 
-    // Test that it makes a call for each domain
-    expect(spy).toHaveBeenCalledTimes(DomainStubVariables.STUB_DOMAINS.length);
+    // Test that it makes a call for each domain. Adding 1 to the length since currently we manually add surveys to conceptsCache on init
+    expect(spy).toHaveBeenCalledTimes(DomainStubVariables.STUB_DOMAINS.length + 1);
 
     // Test that it switches to the table view
     expect(wrapper.find('[data-test-id="conceptTable"]').length).toBeGreaterThan(0);
