@@ -73,15 +73,13 @@ public class StackdriverStatsExporterService {
   }
 
   private MonitoredResource makeMonitoredResource() {
-    final MonitoredResource.Builder resultBuilder =
-        MonitoredResource.newBuilder()
-            .setType(MONITORED_RESOURCE_TYPE)
-            .putLabels(PROJECT_ID_LABEL, getProjectId())
-            .putLabels(LOCATION_LABEL, getLocation())
-            .putLabels(NAMESPACE_LABEL, getEnvironmentShortName())
-            .putLabels(NODE_ID_LABEL, getNodeId());
-
-    return resultBuilder.build();
+    return MonitoredResource.newBuilder()
+        .setType(MONITORED_RESOURCE_TYPE)
+        .putLabels(PROJECT_ID_LABEL, getProjectId())
+        .putLabels(LOCATION_LABEL, getLocation())
+        .putLabels(NAMESPACE_LABEL, getEnvironmentShortName())
+        .putLabels(NODE_ID_LABEL, getNodeId())
+        .build();
   }
 
   private String getProjectId() {

@@ -1,10 +1,12 @@
 package org.pmiops.workbench.db.dao;
 
 import com.google.api.client.http.HttpStatusCodes;
+import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -15,6 +17,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
+import org.apache.commons.collections4.map.MultiKeyMap;
 import org.hibernate.exception.GenericJDBCException;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
@@ -38,6 +41,10 @@ import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.monitoring.GaugeDataCollector;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.attachments.Attachment;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -58,7 +65,7 @@ import org.springframework.transaction.annotation.Transactional;
  * ensuring we call a single updateDataAccessLevel method whenever a User entry is saved.
  */
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private final int MAX_RETRIES = 3;
   private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
@@ -743,5 +750,42 @@ public class UserServiceImpl implements UserService {
           return user;
         },
         targetUser);
+  }
+
+  @Override
+  public Collection<MeasurementBundle> getGaugeData() {
+    // TODO(jaycarlton): replace this findAll/MultiKeyMap implementation
+    //   wtih JdbcTemplate method. I'm told we can't currently do things like this
+    //   with our JPA/Spring/MySQL versions.
+
+    List<DbUser> allUsers = userDao.findUsers();
+    MultiKeyMap<String, Long> keysToCount = new MultiKeyMap<>();
+    // keys will be { accessLevel, disabled }
+    for (DbUser user : allUsers) {
+      // get keys
+      final String dataAccessLevel = user.getDataAccessLevelEnum().toString();
+      final String isDisabled = Boolean.valueOf(user.getDisabled()).toString();
+      final String isBetaBypassed =
+          Boolean.valueOf(user.getBetaAccessBypassTime() != null).toString();
+
+      // find count
+      final long count =
+          Optional.ofNullable(keysToCount.get(dataAccessLevel, isDisabled, isBetaBypassed))
+              .orElse(0L);
+      // increment count
+      keysToCount.put(dataAccessLevel, isDisabled, isBetaBypassed, count + 1);
+    }
+
+    // build bundles for each entry in the map
+    return keysToCount.entrySet().stream()
+        .map(
+            e ->
+                MeasurementBundle.builder()
+                    .addMeasurement(GaugeMetric.USER_COUNT, e.getValue())
+                    .addAttachment(Attachment.DATA_ACCESS_LEVEL, e.getKey().getKey(0))
+                    .addAttachment(Attachment.USER_DISABLED, e.getKey().getKey(1))
+                    .addAttachment(Attachment.USER_BYPASSED_BETA, e.getKey().getKey(2))
+                    .build())
+        .collect(ImmutableSet.toImmutableSet());
   }
 }

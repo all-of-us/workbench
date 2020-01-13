@@ -2,11 +2,13 @@ package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.utils.DaoUtils;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -33,6 +35,10 @@ public interface BillingProjectBufferEntryDao
   DbBillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
 
   Long countByStatus(short status);
+
+  default Map<BufferEntryStatus, Long> getCountByStatusMap() {
+    return DaoUtils.getAttributeToCountMap(findAll(), DbBillingProjectBufferEntry::getStatusEnum);
+  }
 
   @Query(value = "SELECT GET_LOCK('" + ASSIGNING_LOCK + "', 1)", nativeQuery = true)
   int acquireAssigningLock();

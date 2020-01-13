@@ -2,12 +2,16 @@ package org.pmiops.workbench.db.dao;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
+import org.pmiops.workbench.utils.DaoUtils;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -62,4 +66,12 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
   @Query("SELECT w.creator FROM DbWorkspace w WHERE w.billingStatus = (:status)")
   Set<DbUser> findAllCreatorsByBillingStatus(@Param("status") BillingStatus status);
+
+  default Map<WorkspaceActiveStatus, Long> getActiveStatusToCountMap() {
+    return DaoUtils.getAttributeToCountMap(findAll(), DbWorkspace::getWorkspaceActiveStatusEnum);
+  }
+
+  default Map<DataAccessLevel, Long> getDataAccessLevelToCountMap() {
+    return DaoUtils.getAttributeToCountMap(findAll(), DbWorkspace::getDataAccessLevelEnum);
+  }
 }

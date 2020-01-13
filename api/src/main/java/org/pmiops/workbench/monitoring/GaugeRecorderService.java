@@ -1,11 +1,11 @@
 package org.pmiops.workbench.monitoring;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,29 +15,30 @@ public class GaugeRecorderService {
   private final List<GaugeDataCollector> gaugeDataCollectors;
   private final MonitoringService monitoringService;
 
+  // For local debugging, change this to Level.INFO or higher
+  private final Level logLevel = Level.INFO;
+
   public GaugeRecorderService(
       List<GaugeDataCollector> gaugeDataCollectors, MonitoringService monitoringService) {
     this.gaugeDataCollectors = gaugeDataCollectors;
     this.monitoringService = monitoringService;
   }
 
-  public Map<OpenCensusStatsViewInfo, Number> record() {
-    ImmutableMap<OpenCensusStatsViewInfo, Number> result =
-        gaugeDataCollectors.stream()
-            .map(GaugeDataCollector::getGaugeData)
-            .flatMap(m -> m.entrySet().stream())
-            .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
-    monitoringService.recordValues(result);
-    logValues(result); // temporary until dashboards are up and robust
-    return result;
+  public void record() {
+    ImmutableList.Builder<MeasurementBundle> bundlesToLogBuilder = ImmutableList.builder();
+    for (GaugeDataCollector collector : gaugeDataCollectors) {
+      Collection<MeasurementBundle> bundles = collector.getGaugeData();
+      monitoringService.recordBundles(bundles);
+      bundlesToLogBuilder.addAll(bundles);
+    }
+    logValues(bundlesToLogBuilder.build());
   }
 
-  private void logValues(Map<OpenCensusStatsViewInfo, Number> viewToValue) {
-    logger.info(
-        viewToValue.entrySet().stream()
-            .map(
-                entry ->
-                    String.format("%s = %s", entry.getKey().getName(), entry.getValue().toString()))
+  private void logValues(Collection<MeasurementBundle> bundles) {
+    logger.log(
+        logLevel,
+        bundles.stream()
+            .map(MeasurementBundle::toString)
             .sorted()
             .collect(Collectors.joining("\n")));
   }
