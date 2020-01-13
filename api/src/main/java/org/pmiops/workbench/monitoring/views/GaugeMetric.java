@@ -11,14 +11,24 @@ import org.pmiops.workbench.monitoring.attachments.Attachment;
 
 public enum GaugeMetric implements Metric {
   BILLING_BUFFER_PROJECT_COUNT(
-      "billing_buffer_project_count", "Number of projects in the billing buffer for each status",
+      "billing_buffer_project_count",
+      "Number of projects in the billing buffer for each status",
       ImmutableSet.of(Attachment.BUFFER_ENTRY_STATUS)),
   COHORT_COUNT("cohort_count", "Count of all cohorts in existence"),
   COHORT_REVIEW_COUNT("cohort_review_count", "Total number of cohort reviews in existence"),
-  DATASET_COUNT("dataset_count", "Count of all datasets in existence",
+  DATASET_COUNT(
+      "dataset_count",
+      "Count of all datasets in existence",
       Collections.singleton(Attachment.DATASET_INVALID)),
-  USER_COUNT("user_count", "total number of users", ImmutableSet.of()),
-  WORKSPACE_COUNT("workspace_count", "Count of all workspaces");
+  USER_COUNT(
+      "user_count",
+      "total number of users",
+      ImmutableSet.of(
+          Attachment.USER_BYPASSED_BETA, Attachment.USER_DISABLED, Attachment.DATA_ACCESS_LEVEL)),
+  WORKSPACE_COUNT(
+      "workspace_count",
+      "Count of all workspaces",
+      ImmutableSet.of(Attachment.WORKSPACE_ACTIVE_STATUS, Attachment.DATA_ACCESS_LEVEL));
 
   private final String name;
   private final String description;

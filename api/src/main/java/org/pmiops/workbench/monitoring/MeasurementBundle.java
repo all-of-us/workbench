@@ -145,8 +145,8 @@ public class MeasurementBundle {
           if (!metric.isAllowed(attachment)) {
             throw new IllegalStateException(
                 (String.format(
-                    "Attachment %s does not support metric %s",
-                    attachment.getKeyName(), metric.getName())));
+                    "Metric %s does not support Attachment %s",
+                    metric.getName(), attachment.getKeyName())));
           }
         }
         if (!entry.getKey().supportsDiscreteValue(attachmentValue)) {

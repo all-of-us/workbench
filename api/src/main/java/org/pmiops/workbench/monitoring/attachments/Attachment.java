@@ -13,7 +13,7 @@ public enum Attachment implements AttachmentBase {
   DATASET_INVALID("dataset_invalid", Booleans.VALUE_STRINGS),
   USER_BYPASSED_BETA("user_bypassed_beta", Booleans.VALUE_STRINGS),
   USER_DISABLED("user_disabled", Booleans.VALUE_STRINGS),
-  DATA_ACCESS_LEVEL("user_data_access_level", Enums.getValueStrings(DataAccessLevel.class)),
+  DATA_ACCESS_LEVEL("data_access_level", Enums.getValueStrings(DataAccessLevel.class)),
   WORKSPACE_ACTIVE_STATUS("workspace_active_status");
 
   private String keyName;
