@@ -368,4 +368,15 @@ public class CBCriteriaDaoTest {
     assertEquals(
         questionCriteria, cbCriteriaDao.findSurveysByName("The Basics", page).getContent().get(0));
   }
+
+  @Test
+  public void findSurveysNoSurveyName() {
+    PageRequest page = new PageRequest(0, 10);
+    assertEquals(questionCriteria, cbCriteriaDao.findSurveys(page).getContent().get(0));
+  }
+
+  @Test
+  public void countSurveys() {
+    assertEquals(1, cbCriteriaDao.countSurveys());
+  }
 }
