@@ -33,7 +33,6 @@ public enum GaugeMetric implements Metric {
   private final String name;
   private final String description;
   private final String unit;
-  private final Aggregation aggregation;
   private List<TagKey> columns;
   private final Class measureClass;
   private final Set<Attachment> allowedAttachments;
@@ -52,7 +51,7 @@ public enum GaugeMetric implements Metric {
       Set<Attachment> allowedAttachments,
       String unit,
       Class measureClass) {
-    this(name, description, allowedAttachments, unit, measureClass, Aggregation.LastValue.create());
+    this(name, description, allowedAttachments, unit, measureClass, Collections.emptyList());
   }
 
   GaugeMetric(
@@ -61,31 +60,12 @@ public enum GaugeMetric implements Metric {
       Set<Attachment> allowedAttachments,
       String unit,
       Class measureClass,
-      Aggregation aggregation) {
-    this(
-        name,
-        description,
-        allowedAttachments,
-        unit,
-        measureClass,
-        aggregation,
-        Collections.emptyList());
-  }
-
-  GaugeMetric(
-      String name,
-      String description,
-      Set<Attachment> allowedAttachments,
-      String unit,
-      Class measureClass,
-      Aggregation aggregation,
       List<TagKey> columns) {
     this.name = name;
     this.description = description;
     this.allowedAttachments = allowedAttachments;
     this.unit = unit;
     this.measureClass = measureClass;
-    this.aggregation = aggregation;
     this.columns = columns;
   }
 
@@ -109,9 +89,14 @@ public enum GaugeMetric implements Metric {
     return measureClass;
   }
 
+  /**
+   * In Stackdriver, using LastValue is the only way to signify that a metric is a gauge. It turns
+   * out it's what we want anyway for gauges, since effectively we only need one value per interval,
+   * taken at the sampling time.
+   */
   @Override
   public Aggregation getAggregation() {
-    return aggregation;
+    return Aggregation.LastValue.create();
   }
 
   @Override
@@ -126,7 +111,7 @@ public enum GaugeMetric implements Metric {
 
   @Override
   public String toString() {
-    return "Metric{"
+    return "GaugeMetric{"
         + "name='"
         + name
         + '\''
@@ -137,7 +122,7 @@ public enum GaugeMetric implements Metric {
         + unit
         + '\''
         + ", aggregation="
-        + aggregation
+        + getAggregation()
         + ", columns="
         + columns
         + ", measureClass="
