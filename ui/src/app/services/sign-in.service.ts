@@ -52,19 +52,6 @@ export class SignInService {
             ' https://www.googleapis.com/auth/cloud-billing'
         }).then(() => {
           this.subscribeToAuth2User();
-
-          console.log('starting');
-          gapi.load("client", () => {
-            console.log('client loaded');
-            gapi.client.load('cloudbilling', 'v1', () => {
-              console.log('cloudbilling loaded');
-              console.log(gapi.client);
-              console.log(gapi.client.cloudbilling);
-              console.log(gapi.client.cloudbilling.billingAccounts);
-              gapi.client.cloudbilling.billingAccounts.list()
-                .then(response => console.log(response.body));
-            });
-          });
         });
         resolve(gapi.auth2);
       });

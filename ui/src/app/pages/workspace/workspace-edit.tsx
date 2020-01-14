@@ -20,6 +20,7 @@ import {ArchivalStatus, CdrVersion, CdrVersionListResponse, DataAccessLevel, Spe
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
+import {Dropdown} from "primereact/dropdown";
 
 export const ResearchPurposeDescription =
   <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
@@ -201,6 +202,10 @@ export const specificPopulations = [
   }
 ];
 
+const billingDescription = 'The All of Us Program provides $200 in free credits per user. ' +
+  'When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account. ' +
+  'At any time, you can update your Workspace billing account.';
+
 // Poll parameters to check Workspace ACLs after creation of a new workspace. See
 // SATURN-104 for details, eventually the root cause should be resolved by fixes
 // to Sam (as part of Postgres migration).
@@ -300,7 +305,7 @@ export const WorkspaceEditSection = (props) => {
     <div style={styles.text}>
       {props.description}
     </div>
-    <div>
+    <div style={{marginTop: '0.5rem'}}>
       {props.children}
     </div>
   </div>;
@@ -450,6 +455,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         // workspace which references a non-default, non-archived CDR version.
         this.setState(fp.set(['workspace', 'cdrVersionId'], cdrResp.defaultCdrVersionId));
       }
+
+      gapi.load("client", () => {
+        console.log('client loaded');
+        gapi.client.load('cloudbilling', 'v1', () => {
+          console.log('cloudbilling loaded');
+          console.log(gapi.client);
+          console.log(gapi.client.cloudbilling);
+          console.log(gapi.client.cloudbilling.billingAccounts);
+          gapi.client.cloudbilling.billingAccounts.list()
+            .then(response => console.log(response.body));
+        });
+      });
     }
 
     makeDiseaseInput() {
@@ -715,7 +732,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </div>
             </TooltipTrigger>
             <TooltipTrigger content={toolTipText.cdrSelect}>
-              <InfoIcon style={{...styles.infoIcon, marginTop: '0.5rem'}}/>
+              <InfoIcon style={{...styles.infoIcon}}/>
             </TooltipTrigger>
           </FlexRow>
         </WorkspaceEditSection>
@@ -729,8 +746,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             onChange={v => this.setState({cloneUserRole: v})}/>
         </WorkspaceEditSection>
         }
-        <WorkspaceEditSection header='Billing Account' subHeader='National Institutes of Health'
-            tooltip={toolTipText.billingAccount}/>
+        <WorkspaceEditSection header='All of Us Billing Account'
+                              description={billingDescription}
+                              tooltip={toolTipText.billingAccount}>
+          <Dropdown options={[{label: 'a', value: 'a'}, {label: 'b', value: 'b'}]}/>
+        </WorkspaceEditSection>
         <WorkspaceEditSection header='Research Use Statement Questions'
             description={<div> {ResearchPurposeDescription} Therefore, please provide
               sufficiently detailed responses at a 5th grade reading level.  Your responses
@@ -779,25 +799,22 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           header={researchPurposeQuestions[1].header}
           description={researchPurposeQuestions[1].description} required>
           <TextArea value={this.state.workspace.researchPurpose.reasonForAllOfUs}
-                    onChange={v => this.updateResearchPurpose('reasonForAllOfUs', v)}
-                    style={{marginTop: '0.5rem'}}/>
+                    onChange={v => this.updateResearchPurpose('reasonForAllOfUs', v)}/>
         </WorkspaceEditSection>
         <WorkspaceEditSection
           header={researchPurposeQuestions[2].header}
           description={researchPurposeQuestions[2].description} required>
           <TextArea value={this.state.workspace.researchPurpose.intendedStudy}
-                    onChange={v => this.updateResearchPurpose('intendedStudy', v)}
-                    style={{marginTop: '0.5rem'}}/>
+                    onChange={v => this.updateResearchPurpose('intendedStudy', v)}/>
         </WorkspaceEditSection>
         <WorkspaceEditSection header={researchPurposeQuestions[3].header}
                               description={researchPurposeQuestions[3].description} required>
           <TextArea value={this.state.workspace.researchPurpose.anticipatedFindings}
-                    onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
-                    style={{marginTop: '0.5rem'}}/>
+                    onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}/>
         </WorkspaceEditSection>
         <WorkspaceEditSection required header={researchPurposeQuestions[4].header}>
           <Link onClick={() => this.setState({showUnderservedPopulationDetails:
-              !this.state.showUnderservedPopulationDetails})} style={{marginTop: '0.5rem'}}>
+              !this.state.showUnderservedPopulationDetails})}>
             More info on underserved populations
             {this.state.showUnderservedPopulationDetails ? <ClrIcon shape='caret' dir='up'/> :
               <ClrIcon shape='caret' dir='down'/>}
@@ -878,7 +895,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <WorkspaceEditSection header='Request a review of your research purpose for potential
                                       stigmatization of research participants'>
           <Link onClick={() => this.setState({showStigmatizationDetails:
-              !this.state.showStigmatizationDetails})} style={{marginTop: '0.5rem'}}>
+              !this.state.showStigmatizationDetails})}>
             More info on stigmatization
             {this.state.showStigmatizationDetails ? <ClrIcon shape='caret' dir='up'/> :
               <ClrIcon shape='caret' dir='down'/>}
