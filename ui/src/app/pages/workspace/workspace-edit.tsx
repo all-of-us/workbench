@@ -352,6 +352,13 @@ export interface WorkspaceEditProps {
   cancel: Function;
 }
 
+interface BillingAccount {
+  name: string;
+  displayName: string;
+  masterBillingAccount?: string;
+  open: boolean;
+}
+
 export interface WorkspaceEditState {
   cdrVersionItems: Array<CdrVersion>;
   workspace: Workspace;
@@ -364,6 +371,7 @@ export interface WorkspaceEditState {
   loading: boolean;
   showUnderservedPopulationDetails: boolean;
   showStigmatizationDetails: boolean;
+  billingAccounts: Array<BillingAccount>;
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
@@ -407,6 +415,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         loading: false,
         showUnderservedPopulationDetails: false,
         showStigmatizationDetails: false,
+        billingAccounts: []
       };
     }
 
@@ -457,14 +466,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       }
 
       gapi.load("client", () => {
-        console.log('client loaded');
         gapi.client.load('cloudbilling', 'v1', () => {
-          console.log('cloudbilling loaded');
-          console.log(gapi.client);
-          console.log(gapi.client.cloudbilling);
-          console.log(gapi.client.cloudbilling.billingAccounts);
           gapi.client.cloudbilling.billingAccounts.list()
-            .then(response => console.log(response.body));
+            .then(response => {
+              this.setState({billingAccounts: JSON.parse(response.body).billingAccounts});
+            });
         });
       });
     }
@@ -749,7 +755,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <WorkspaceEditSection header='All of Us Billing Account'
                               description={billingDescription}
                               tooltip={toolTipText.billingAccount}>
-          <Dropdown options={[{label: 'a', value: 'a'}, {label: 'b', value: 'b'}]}/>
+          <Dropdown options={this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}))}/>
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Research Use Statement Questions'
             description={<div> {ResearchPurposeDescription} Therefore, please provide
