@@ -1,6 +1,5 @@
 package org.pmiops.workbench.monitoring.views;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure;
@@ -76,9 +75,7 @@ public interface Metric {
   Set<MetricLabel> getLabels();
 
   default List<TagKey> getColumns() {
-    return getLabels().stream()
-        .map(MetricLabelBase::getTagKey)
-        .collect(Collectors.toList());
+    return getLabels().stream().map(MetricLabelBase::getTagKey).collect(Collectors.toList());
   }
 
   default View toView() {

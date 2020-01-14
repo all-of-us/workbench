@@ -1,12 +1,9 @@
 package org.pmiops.workbench.monitoring.views;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure.MeasureLong;
-import io.opencensus.tags.TagKey;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 
@@ -29,7 +26,7 @@ public enum GaugeMetric implements Metric {
           MetricLabel.USER_DISABLED,
           MetricLabel.DATA_ACCESS_LEVEL)),
   WORKSPACE_COUNT(
-      "workspace_count_2",
+      "workspace_count",
       "Count of all workspaces",
       ImmutableSet.of(MetricLabel.WORKSPACE_ACTIVE_STATUS, MetricLabel.DATA_ACCESS_LEVEL),
       Metric.UNITLESS_UNIT,
@@ -52,15 +49,9 @@ public enum GaugeMetric implements Metric {
   }
 
   GaugeMetric(
-      String name,
-      String description,
-      Set<MetricLabel> labels,
-      String unit,
-      Class measureClass) {
+      String name, String description, Set<MetricLabel> labels, String unit, Class measureClass) {
     this(name, description, labels, unit, measureClass, Aggregation.LastValue.create());
   }
-
-
 
   GaugeMetric(
       String name,

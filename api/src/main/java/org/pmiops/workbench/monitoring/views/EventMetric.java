@@ -2,9 +2,7 @@ package org.pmiops.workbench.monitoring.views;
 
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure.MeasureLong;
-import io.opencensus.tags.TagKey;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 
@@ -18,8 +16,7 @@ public enum EventMetric implements Metric {
   private final String description;
   private final Set<MetricLabel> labels;
 
-  EventMetric(
-      String name, String description, Set<MetricLabel> labels) {
+  EventMetric(String name, String description, Set<MetricLabel> labels) {
     this.name = name;
     this.description = description;
     this.labels = labels;

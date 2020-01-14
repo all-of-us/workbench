@@ -52,9 +52,12 @@ public class MonitoringServiceImpl implements MonitoringService {
   }
 
   private void registerMetricViews() {
-    StreamSupport.stream(Iterables.concat(
-        Arrays.<Metric>asList(GaugeMetric.values()),
-        Arrays.<Metric>asList(EventMetric.values())).spliterator(), false)
+    StreamSupport.stream(
+            Iterables.concat(
+                    Arrays.<Metric>asList(GaugeMetric.values()),
+                    Arrays.<Metric>asList(EventMetric.values()))
+                .spliterator(),
+            false)
         .map(Metric::toView)
         .forEach(viewManager::registerView);
   }
