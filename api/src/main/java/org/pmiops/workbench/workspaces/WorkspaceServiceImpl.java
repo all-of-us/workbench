@@ -640,6 +640,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public Collection<MeasurementBundle> getGaugeData() {
     final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
 
+    // TODO(jaycarlton): fetch both active status and data access level crossed counts
     final Map<WorkspaceActiveStatus, Long> activeStatusToCount =
         workspaceDao.getActiveStatusToCountMap();
     for (WorkspaceActiveStatus status : WorkspaceActiveStatus.values()) {

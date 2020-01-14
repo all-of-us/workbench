@@ -6,6 +6,7 @@ import io.opencensus.tags.TagValue;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 import org.pmiops.workbench.monitoring.views.Metric;
 
@@ -56,7 +57,14 @@ public class MeasurementBundle {
 
   @Override
   public String toString() {
-    return "MeasurementBundle{" + "measurements=" + measurements + ", tags=" + tags + '}';
+    return String.format(
+        "{measurements: [%s] tags: [%s]}",
+        getMeasurements().entrySet().stream()
+            .map(e -> String.format("%s: %s", e.getKey().getName(), e.getValue()))
+            .collect(Collectors.joining(", ")),
+        getTags().entrySet().stream()
+            .map(e -> String.format("%s: %s", e.getKey().getName(), e.getValue().asString()))
+            .collect(Collectors.joining(", ")));
   }
 
   public static class Builder {

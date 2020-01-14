@@ -26,7 +26,7 @@ public enum GaugeMetric implements Metric {
           MetricLabel.USER_DISABLED,
           MetricLabel.DATA_ACCESS_LEVEL)),
   WORKSPACE_COUNT(
-      "workspace_count",
+      "workspace_count_3",
       "Count of all workspaces",
       ImmutableSet.of(MetricLabel.WORKSPACE_ACTIVE_STATUS, MetricLabel.DATA_ACCESS_LEVEL),
       Metric.UNITLESS_UNIT,
