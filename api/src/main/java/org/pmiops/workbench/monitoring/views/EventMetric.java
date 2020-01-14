@@ -16,19 +16,13 @@ public enum EventMetric implements Metric {
 
   private final String name;
   private final String description;
-  private final Set<MetricLabel> allowedAttachments;
-  private List<TagKey> columns;
+  private final Set<MetricLabel> labels;
 
   EventMetric(
-      String name, String description, Set<MetricLabel> allowedAttachments, List<TagKey> columns) {
+      String name, String description, Set<MetricLabel> labels) {
     this.name = name;
     this.description = description;
-    this.allowedAttachments = allowedAttachments;
-    this.columns = columns;
-  }
-
-  EventMetric(String name, String description, Set<MetricLabel> allowedAttachments) {
-    this(name, description, allowedAttachments, Collections.emptyList());
+    this.labels = labels;
   }
 
   @Override
@@ -57,12 +51,7 @@ public enum EventMetric implements Metric {
   }
 
   @Override
-  public List<TagKey> getColumns() {
-    return columns;
-  }
-
-  @Override
-  public Set<MetricLabel> getSupportedAttachments() {
-    return allowedAttachments;
+  public Set<MetricLabel> getLabels() {
+    return labels;
   }
 }

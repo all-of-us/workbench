@@ -8,12 +8,12 @@ import org.pmiops.workbench.utils.Booleans;
 import org.pmiops.workbench.utils.Enums;
 
 public enum MetricLabel implements MetricLabelBase {
-  BUFFER_ENTRY_STATUS("Buffer Entry Status", Enums.getValueStrings(BufferEntryStatus.class)),
+  BUFFER_ENTRY_STATUS("BufferEntryStatus", Enums.getValueStrings(BufferEntryStatus.class)),
   DATASET_INVALID("Invalid", Booleans.VALUE_STRINGS),
-  USER_BYPASSED_BETA("Bypassed Beta", Booleans.VALUE_STRINGS),
+  USER_BYPASSED_BETA("BypassedBeta", Booleans.VALUE_STRINGS),
   USER_DISABLED("Disabled", Booleans.VALUE_STRINGS),
-  DATA_ACCESS_LEVEL("Data Access Level", Enums.getValueStrings(DataAccessLevel.class)),
-  WORKSPACE_ACTIVE_STATUS("Active Status");
+  DATA_ACCESS_LEVEL("DataAccessLevel", Enums.getValueStrings(DataAccessLevel.class)),
+  WORKSPACE_ACTIVE_STATUS("ActiveStatus");
 
   private String keyName;
   private Set<String> allowedDiscreteValues;

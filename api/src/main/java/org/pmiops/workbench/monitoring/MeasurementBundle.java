@@ -120,7 +120,7 @@ public class MeasurementBundle {
         final TagValue attachmentValue = entry.getValue();
 
         for (Metric metric : measurements.keySet()) {
-          if (!metric.supportsAttachment(attachment)) {
+          if (!metric.supportsLabel(attachment)) {
             throw new IllegalStateException(
                 (String.format(
                     "Metric %s does not support Attachment %s",

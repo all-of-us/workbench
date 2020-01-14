@@ -55,28 +55,25 @@ public class MonitoringServiceImpl implements MonitoringService {
     StreamSupport.stream(Iterables.concat(
         Arrays.<Metric>asList(GaugeMetric.values()),
         Arrays.<Metric>asList(EventMetric.values())).spliterator(), false)
-        .map(Metric::toView).forEach(viewManager::registerView);
+        .map(Metric::toView)
+        .forEach(viewManager::registerView);
   }
 
   @Override
   public void recordValues(Map<Metric, Number> metricToValue, Map<TagKey, TagValue> tags) {
-    try {
-      initStatsConfigurationIdempotent();
-      if (metricToValue.isEmpty()) {
-        logger.warning("recordValue() called with empty map.");
-        return;
-      }
-      final MeasureMap measureMap = statsRecorder.newMeasureMap();
-      metricToValue.forEach((metric, value) -> addToMeasureMap(measureMap, metric, value));
-
-      final TagContextBuilder tagContextBuilder = tagger.currentBuilder();
-      tags.forEach(tagContextBuilder::putLocal);
-
-      // Finally, send the data to the backend (Stackdriver/Cloud Monitoring for now).
-      measureMap.record(tagContextBuilder.build());
-    } catch (RuntimeException e) {
-      logAndSwallow(e);
+    initStatsConfigurationIdempotent();
+    if (metricToValue.isEmpty()) {
+      logger.warning("recordValue() called with empty map.");
+      return;
     }
+    final MeasureMap measureMap = statsRecorder.newMeasureMap();
+    metricToValue.forEach((metric, value) -> addToMeasureMap(measureMap, metric, value));
+
+    final TagContextBuilder tagContextBuilder = tagger.currentBuilder();
+    tags.forEach(tagContextBuilder::putLocal);
+
+    // Finally, send the data to the backend (Stackdriver/Cloud Monitoring for now).
+    measureMap.record(tagContextBuilder.build());
   }
 
   /**

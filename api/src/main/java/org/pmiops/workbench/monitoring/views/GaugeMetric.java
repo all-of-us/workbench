@@ -34,14 +34,12 @@ public enum GaugeMetric implements Metric {
       ImmutableSet.of(MetricLabel.WORKSPACE_ACTIVE_STATUS, MetricLabel.DATA_ACCESS_LEVEL),
       Metric.UNITLESS_UNIT,
       MeasureLong.class,
-      Aggregation.LastValue.create(),
-      ImmutableList.of(TagKey.create("color")));
+      Aggregation.LastValue.create());
 
   private final String name;
   private final String description;
   private final String unit;
   private final Aggregation aggregation;
-  private List<TagKey> columns;
   private final Class measureClass;
   private final Set<MetricLabel> allowedAttachments;
 
@@ -62,22 +60,7 @@ public enum GaugeMetric implements Metric {
     this(name, description, labels, unit, measureClass, Aggregation.LastValue.create());
   }
 
-  GaugeMetric(
-      String name,
-      String description,
-      Set<MetricLabel> labels,
-      String unit,
-      Class measureClass,
-      Aggregation aggregation) {
-    this(
-        name,
-        description,
-        labels,
-        unit,
-        measureClass,
-        aggregation,
-        Collections.emptyList());
-  }
+
 
   GaugeMetric(
       String name,
@@ -85,15 +68,13 @@ public enum GaugeMetric implements Metric {
       Set<MetricLabel> labels,
       String unit,
       Class measureClass,
-      Aggregation aggregation,
-      List<TagKey> columns) {
+      Aggregation aggregation) {
     this.name = name;
     this.description = description;
     this.allowedAttachments = labels;
     this.unit = unit;
     this.measureClass = measureClass;
     this.aggregation = aggregation;
-    this.columns = columns;
   }
 
   @Override
@@ -122,12 +103,7 @@ public enum GaugeMetric implements Metric {
   }
 
   @Override
-  public List<TagKey> getColumns() {
-    return columns;
-  }
-
-  @Override
-  public Set<MetricLabel> getSupportedAttachments() {
+  public Set<MetricLabel> getLabels() {
     return allowedAttachments;
   }
 
@@ -146,7 +122,7 @@ public enum GaugeMetric implements Metric {
         + ", aggregation="
         + aggregation
         + ", columns="
-        + columns
+        + getColumns()
         + ", measureClass="
         + measureClass
         + '}';

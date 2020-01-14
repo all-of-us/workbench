@@ -1,5 +1,6 @@
 package org.pmiops.workbench.monitoring.views;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure;
@@ -12,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.attachments.MetricLabelBase;
 
 /**
  * This is essentially a carbon copy of io.opencensus.stats.View, but written as an interface
@@ -70,16 +73,20 @@ public interface Metric {
 
   Aggregation getAggregation();
 
-  List<TagKey> getColumns();
+  Set<MetricLabel> getLabels();
+
+  default List<TagKey> getColumns() {
+    return getLabels().stream()
+        .map(MetricLabelBase::getTagKey)
+        .collect(Collectors.toList());
+  }
 
   default View toView() {
     return View.create(
         getStatsName(), getDescription(), getMeasure(), getAggregation(), getColumns());
   }
 
-  Set<MetricLabel> getSupportedAttachments();
-
-  default boolean supportsAttachment(MetricLabel attachment) {
-    return getSupportedAttachments().contains(attachment);
+  default boolean supportsLabel(MetricLabel label) {
+    return getLabels().contains(label);
   }
 }
