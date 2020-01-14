@@ -343,7 +343,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
           maxResults: this.MAX_CONCEPT_FETCH
         });
         completedDomainSearches.push(cacheItem.domain);
-        cacheItem.items = cacheItem.domain === Domain.SURVEY ? resp.questions : resp.items;
+        cacheItem.items = cacheItem.domain === Domain.SURVEY ? resp.questions || [] : resp.items;
         this.setState({completedDomainSearches: completedDomainSearches});
         if (activeTabSearch) {
           const conceptDomainCounts = environment.enableNewConceptTabs ? [...resp.domainCounts]
@@ -351,8 +351,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
           this.setState({
             searchLoading: false,
             conceptDomainCounts: conceptDomainCounts,
-            selectedDomain: resp.domainCounts
-              .find(domainCount => domainCount.domain === cacheItem.domain)});
+            selectedDomain: resp.domainCounts.find(domainCount => domainCount.domain === cacheItem.domain)
+          });
           this.setConceptsAndVocabularies();
         }
       });
@@ -473,6 +473,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
             Showing top {concepts.length} {selectedDomain.name}
           </div>}
           <ConceptTable concepts={concepts}
+                        domain={selectedDomain.domain}
                         loading={searchLoading}
                         onSelectConcepts={this.selectConcepts.bind(this)}
                         placeholderValue={this.noConceptsConstant}
