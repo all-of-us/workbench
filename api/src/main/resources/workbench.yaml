@@ -554,7 +554,8 @@ paths:
           type: string
         - in: body
           name: clustersToDelete
-          description: A list of names of clusters to delete. To delete all clusters, use an empty object (e.g., {})
+          description: A list of names of clusters to delete. To delete all clusters, use an empty object, without
+            providing a list property at all (e.g., {}) An empty list will delete no clusters.
           required: true
           schema:
             $ref: '#/definitions/ListClusterDeleteRequest'
