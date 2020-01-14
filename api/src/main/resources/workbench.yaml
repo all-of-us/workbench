@@ -595,7 +595,7 @@ paths:
           type: string
       responses:
         200:
-          description: Available clusters
+          description: The users cluster
           schema:
             $ref: '#/definitions/DefaultClusterResponse'
         500:

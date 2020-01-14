@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import com.google.appengine.repackaged.com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,6 +15,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.actionaudit.auditors.ClusterAuditor;
@@ -124,6 +125,14 @@ public class ClusterController implements ClusterApiDelegate {
     this.clock = clock;
   }
 
+  private Stream<org.pmiops.workbench.notebooks.model.ListClusterResponse> filterByClustersInList(
+      Stream<org.pmiops.workbench.notebooks.model.ListClusterResponse> clustersToFilter,
+      List<String> clusterNames) {
+    // Null means keep all clusters.
+    return clustersToFilter.filter(
+        cluster -> clusterNames == null || clusterNames.contains(cluster.getClusterName()));
+  }
+
   @Override
   @AuthorityRequired(Authority.SECURITY_ADMIN)
   public ResponseEntity<List<ListClusterResponse>> deleteClustersInProject(
@@ -132,13 +141,9 @@ public class ClusterController implements ClusterApiDelegate {
       throw new BadRequestException("Must specify billing project");
     }
     List<org.pmiops.workbench.notebooks.model.ListClusterResponse> clustersToDelete =
-        leonardoNotebooksClient.listClustersByProjectAsAdmin(billingProjectId).stream()
-            .filter(
-                cluster ->
-                    clusterNamesToDelete.getClustersToDelete() == null
-                        || clusterNamesToDelete
-                            .getClustersToDelete()
-                            .contains(cluster.getClusterName()))
+        filterByClustersInList(
+                leonardoNotebooksClient.listClustersByProjectAsAdmin(billingProjectId).stream(),
+                clusterNamesToDelete.getClustersToDelete())
             .collect(Collectors.toList());
 
     clustersToDelete.forEach(
@@ -146,7 +151,9 @@ public class ClusterController implements ClusterApiDelegate {
             leonardoNotebooksClient.deleteClusterAsAdmin(
                 cluster.getGoogleProject(), cluster.getClusterName()));
     List<ListClusterResponse> clustersInProjectAffected =
-        leonardoNotebooksClient.listClustersByProjectAsAdmin(billingProjectId).stream()
+        filterByClustersInList(
+                leonardoNotebooksClient.listClustersByProjectAsAdmin(billingProjectId).stream(),
+                clusterNamesToDelete.getClustersToDelete())
             .map(
                 leoCluster ->
                     new ListClusterResponse()
@@ -156,15 +163,12 @@ public class ClusterController implements ClusterApiDelegate {
                         .googleProject(leoCluster.getGoogleProject())
                         .status(ClusterStatus.fromValue(leoCluster.getStatus().toString()))
                         .labels(leoCluster.getLabels()))
-            .filter(
-                cluster ->
-                    clusterNamesToDelete.getClustersToDelete() == null
-                        || clusterNamesToDelete
-                            .getClustersToDelete()
-                            .contains(cluster.getClusterName()))
             .collect(Collectors.toList());
+    // DELETED is an acceptable status from an implementation standpoint, but we will never
+    // receive clusters with that status from Leo. We don't want to because we reuse cluster
+    // names and thus could have >1 deleted clusters with the same name in the project.
     List<ClusterStatus> acceptableStates =
-        ImmutableList.of(ClusterStatus.DELETED, ClusterStatus.DELETING, ClusterStatus.ERROR);
+        ImmutableList.of(ClusterStatus.DELETING, ClusterStatus.ERROR);
     clustersInProjectAffected.stream()
         .filter(cluster -> !acceptableStates.contains(cluster.getStatus()))
         .forEach(
@@ -172,7 +176,7 @@ public class ClusterController implements ClusterApiDelegate {
                 log.log(
                     Level.SEVERE,
                     String.format(
-                        "Cluster %s/%s is not in a deleting or deleted state",
+                        "Cluster %s/%s is not in a deleting state",
                         clusterInBadState.getGoogleProject(), clusterInBadState.getClusterName())));
     clusterAuditor.fireDeleteClustersInProject(
         billingProjectId,

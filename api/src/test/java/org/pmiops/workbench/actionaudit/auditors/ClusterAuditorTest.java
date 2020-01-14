@@ -70,7 +70,7 @@ public class ClusterAuditorTest {
     clusterAuditor.fireDeleteClustersInProject(BILLING_PROJECT_ID, CLUSTER_NAMES);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
     Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
-    assertThat(eventsSent).hasSize(3);
+    assertThat(eventsSent).hasSize(CLUSTER_NAMES.size());
     Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
     assertThat(firstEvent.isPresent()).isTrue();
     assertThat(firstEvent.map(ActionAuditEvent::getActionType).orElse(null))
