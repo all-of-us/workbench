@@ -18,17 +18,16 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.pmiops.workbench.actionaudit.auditors.ClusterAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -55,10 +54,10 @@ import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListClusterDeleteRequest;
-import org.pmiops.workbench.model.ListClusterResponse;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
+import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -259,33 +258,22 @@ public class ClusterControllerTest {
 
   @Test
   public void testDeleteClustersInProject() throws Exception {
+    List<ListClusterResponse> listClusterResponseList = ImmutableList.of(testFcClusterListResponse);
     when(notebookService.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
-        .thenReturn(ImmutableList.of(testFcClusterListResponse));
-    Mockito.doAnswer(
-            new Answer<Void>() {
-              public Void answer(InvocationOnMock invocation) {
-                testFcClusterListResponse.setStatus(
-                    org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING);
-                return null;
-              }
-            })
-        .when(notebookService)
-        .deleteClusterAsAdmin(BILLING_PROJECT_ID, getClusterName());
+        .thenReturn(listClusterResponseList);
 
-    assertThat(
-            clusterController
-                .deleteClustersInProject(
-                    BILLING_PROJECT_ID,
-                    new ListClusterDeleteRequest()
-                        .clustersToDelete(ImmutableList.of(testFcCluster.getClusterName())))
-                .getBody())
-        .isEqualTo(
-            ImmutableList.of(
-                new ListClusterResponse()
-                    .clusterName(testCluster.getClusterName())
-                    .createdDate(testCluster.getCreatedDate())
-                    .status(ClusterStatus.DELETING)
-                    .googleProject(testCluster.getClusterNamespace())));
+    clusterController.deleteClustersInProject(
+        BILLING_PROJECT_ID,
+        new ListClusterDeleteRequest()
+            .clustersToDelete(ImmutableList.of(testFcCluster.getClusterName())));
+    verify(notebookService)
+        .deleteClusterAsAdmin(BILLING_PROJECT_ID, testFcCluster.getClusterName());
+    verify(clusterAuditor)
+        .fireDeleteClustersInProject(
+            BILLING_PROJECT_ID,
+            listClusterResponseList.stream()
+                .map(ListClusterResponse::getClusterName)
+                .collect(Collectors.toList()));
   }
 
   @Test
