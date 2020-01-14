@@ -16,7 +16,7 @@ public class GaugeRecorderService {
   private final MonitoringService monitoringService;
 
   // For local debugging, change this to Level.INFO or higher
-  private final Level logLevel = Level.INFO;
+  private final Level logLevel = Level.FINE;
 
   public GaugeRecorderService(
       List<GaugeDataCollector> gaugeDataCollectors, MonitoringService monitoringService) {
