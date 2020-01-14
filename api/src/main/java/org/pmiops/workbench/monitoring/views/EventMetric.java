@@ -6,28 +6,28 @@ import io.opencensus.tags.TagKey;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import org.pmiops.workbench.monitoring.attachments.Attachment;
+import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 
 /** Metric enum values for events to be counted. */
 public enum EventMetric implements Metric {
-  NOTEBOOK_CLONE("notebook_clone", "Clone (duplicate) a notebook", Collections.emptySet()),
-  NOTEBOOK_DELETE("notebook_delete", "Delete a notebook", Collections.emptySet()),
-  NOTEBOOK_SAVE("notebook_save", "Save (or create) a notebook", Collections.emptySet());
+  NOTEBOOK_CLONE("notebook_clone_2", "Clone (duplicate) a notebook", Collections.emptySet()),
+  NOTEBOOK_DELETE("notebook_delete_2", "Delete a notebook", Collections.emptySet()),
+  NOTEBOOK_SAVE("notebook_save_2", "Save (or create) a notebook", Collections.emptySet());
 
   private final String name;
   private final String description;
-  private final Set<Attachment> allowedAttachments;
+  private final Set<MetricLabel> allowedAttachments;
   private List<TagKey> columns;
 
   EventMetric(
-      String name, String description, Set<Attachment> allowedAttachments, List<TagKey> columns) {
+      String name, String description, Set<MetricLabel> allowedAttachments, List<TagKey> columns) {
     this.name = name;
     this.description = description;
     this.allowedAttachments = allowedAttachments;
     this.columns = columns;
   }
 
-  EventMetric(String name, String description, Set<Attachment> allowedAttachments) {
+  EventMetric(String name, String description, Set<MetricLabel> allowedAttachments) {
     this(name, description, allowedAttachments, Collections.emptyList());
   }
 
@@ -62,7 +62,7 @@ public enum EventMetric implements Metric {
   }
 
   @Override
-  public Set<Attachment> getSupportedAttachments() {
+  public Set<MetricLabel> getSupportedAttachments() {
     return allowedAttachments;
   }
 }

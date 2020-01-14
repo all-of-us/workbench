@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import org.pmiops.workbench.monitoring.attachments.Attachment;
+import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 
 /**
  * This is essentially a carbon copy of io.opencensus.stats.View, but written as an interface
@@ -77,9 +77,9 @@ public interface Metric {
         getStatsName(), getDescription(), getMeasure(), getAggregation(), getColumns());
   }
 
-  Set<Attachment> getSupportedAttachments();
+  Set<MetricLabel> getSupportedAttachments();
 
-  default boolean supportsAttachment(Attachment attachment) {
+  default boolean supportsAttachment(MetricLabel attachment) {
     return getSupportedAttachments().contains(attachment);
   }
 }

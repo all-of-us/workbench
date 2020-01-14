@@ -1,5 +1,6 @@
 package org.pmiops.workbench.monitoring.views;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure.MeasureLong;
@@ -7,28 +8,34 @@ import io.opencensus.tags.TagKey;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import org.pmiops.workbench.monitoring.attachments.Attachment;
+import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 
 public enum GaugeMetric implements Metric {
   BILLING_BUFFER_PROJECT_COUNT(
       "billing_buffer_project_count",
       "Number of projects in the billing buffer for each status",
-      ImmutableSet.of(Attachment.BUFFER_ENTRY_STATUS)),
-  COHORT_COUNT("cohort_count", "Count of all cohorts in existence"),
-  COHORT_REVIEW_COUNT("cohort_review_count", "Total number of cohort reviews in existence"),
+      ImmutableSet.of(MetricLabel.BUFFER_ENTRY_STATUS)),
+  COHORT_COUNT("cohort_count_2", "Count of all cohorts in existence"),
+  COHORT_REVIEW_COUNT("cohort_review_count_2", "Total number of cohort reviews in existence"),
   DATASET_COUNT(
-      "dataset_count",
+      "dataset_count_2",
       "Count of all datasets in existence",
-      Collections.singleton(Attachment.DATASET_INVALID)),
+      Collections.singleton(MetricLabel.DATASET_INVALID)),
   USER_COUNT(
-      "user_count",
+      "user_count_2",
       "total number of users",
       ImmutableSet.of(
-          Attachment.USER_BYPASSED_BETA, Attachment.USER_DISABLED, Attachment.DATA_ACCESS_LEVEL)),
+          MetricLabel.USER_BYPASSED_BETA,
+          MetricLabel.USER_DISABLED,
+          MetricLabel.DATA_ACCESS_LEVEL)),
   WORKSPACE_COUNT(
-      "workspace_count",
+      "workspace_count_2",
       "Count of all workspaces",
-      ImmutableSet.of(Attachment.WORKSPACE_ACTIVE_STATUS, Attachment.DATA_ACCESS_LEVEL));
+      ImmutableSet.of(MetricLabel.WORKSPACE_ACTIVE_STATUS, MetricLabel.DATA_ACCESS_LEVEL),
+      Metric.UNITLESS_UNIT,
+      MeasureLong.class,
+      Aggregation.LastValue.create(),
+      ImmutableList.of(TagKey.create("color")));
 
   private final String name;
   private final String description;
@@ -36,36 +43,36 @@ public enum GaugeMetric implements Metric {
   private final Aggregation aggregation;
   private List<TagKey> columns;
   private final Class measureClass;
-  private final Set<Attachment> allowedAttachments;
+  private final Set<MetricLabel> allowedAttachments;
 
   GaugeMetric(String name, String description) {
     this(name, description, Collections.emptySet(), Metric.UNITLESS_UNIT, MeasureLong.class);
   }
 
-  GaugeMetric(String name, String description, Set<Attachment> allowedAttachments) {
-    this(name, description, allowedAttachments, Metric.UNITLESS_UNIT, MeasureLong.class);
+  GaugeMetric(String name, String description, Set<MetricLabel> labels) {
+    this(name, description, labels, Metric.UNITLESS_UNIT, MeasureLong.class);
   }
 
   GaugeMetric(
       String name,
       String description,
-      Set<Attachment> allowedAttachments,
+      Set<MetricLabel> labels,
       String unit,
       Class measureClass) {
-    this(name, description, allowedAttachments, unit, measureClass, Aggregation.LastValue.create());
+    this(name, description, labels, unit, measureClass, Aggregation.LastValue.create());
   }
 
   GaugeMetric(
       String name,
       String description,
-      Set<Attachment> allowedAttachments,
+      Set<MetricLabel> labels,
       String unit,
       Class measureClass,
       Aggregation aggregation) {
     this(
         name,
         description,
-        allowedAttachments,
+        labels,
         unit,
         measureClass,
         aggregation,
@@ -75,14 +82,14 @@ public enum GaugeMetric implements Metric {
   GaugeMetric(
       String name,
       String description,
-      Set<Attachment> allowedAttachments,
+      Set<MetricLabel> labels,
       String unit,
       Class measureClass,
       Aggregation aggregation,
       List<TagKey> columns) {
     this.name = name;
     this.description = description;
-    this.allowedAttachments = allowedAttachments;
+    this.allowedAttachments = labels;
     this.unit = unit;
     this.measureClass = measureClass;
     this.aggregation = aggregation;
@@ -120,7 +127,7 @@ public enum GaugeMetric implements Metric {
   }
 
   @Override
-  public Set<Attachment> getSupportedAttachments() {
+  public Set<MetricLabel> getSupportedAttachments() {
     return allowedAttachments;
   }
 

@@ -54,7 +54,7 @@ import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.attachments.Attachment;
+import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -647,7 +647,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       resultBuilder.add(
           MeasurementBundle.builder()
               .addMeasurement(GaugeMetric.WORKSPACE_COUNT, count)
-              .addAttachment(Attachment.WORKSPACE_ACTIVE_STATUS, status.toString())
+              .addTag(MetricLabel.WORKSPACE_ACTIVE_STATUS, status.toString())
               .build());
     }
     return resultBuilder.build();

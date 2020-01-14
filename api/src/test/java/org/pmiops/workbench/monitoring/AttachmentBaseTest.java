@@ -6,16 +6,16 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.Set;
 import org.junit.Test;
-import org.pmiops.workbench.monitoring.attachments.AttachmentBase;
+import org.pmiops.workbench.monitoring.attachments.MetricLabelBase;
 
 public class AttachmentBaseTest {
 
   // use anonymous inner class implementing AttachmentBase objects so we don't depend on
   // enums directly. That is, we're just checking the interface here.
-  private static final AttachmentBase DISCRETE_VALUE_ATTACHMENT =
-      new AttachmentBase() {
+  private static final MetricLabelBase DISCRETE_VALUE_ATTACHMENT =
+      new MetricLabelBase() {
         @Override
-        public String getKeyName() {
+        public String getName() {
           return "dummy_discrete_value_attachment";
         }
 
@@ -25,10 +25,10 @@ public class AttachmentBaseTest {
         }
       };
 
-  private static final AttachmentBase CONTINUOUS_VALUE_ATTACHMENT =
-      new AttachmentBase() {
+  private static final MetricLabelBase CONTINUOUS_VALUE_ATTACHMENT =
+      new MetricLabelBase() {
         @Override
-        public String getKeyName() {
+        public String getName() {
           return "dummy_continuous_value_attachment";
         }
 
