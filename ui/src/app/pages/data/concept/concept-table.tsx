@@ -5,6 +5,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import {Domain} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
@@ -158,6 +159,7 @@ export class SynonymsObject extends React.Component<{}, SynonymsObjectState> {
 
 interface Props {
   concepts: any[];
+  domain: Domain;
   loading: boolean;
   onSelectConcepts: Function;
   placeholderValue: string;
@@ -225,6 +227,7 @@ export class ConceptTable extends React.Component<Props, State> {
 
   componentWillReceiveProps(nextProps) {
     if ((nextProps.concepts !==  this.props.concepts)) {
+      console.log(nextProps);
       if (nextProps.concepts !== this.props.concepts && nextProps.concepts.length > 0 ) {
         this.setState({totalRecords: nextProps.concepts.length});
       }
@@ -290,8 +293,7 @@ export class ConceptTable extends React.Component<Props, State> {
   }
 
   renderColumns() {
-    const {concepts} = this.props;
-    const isSurvey = !!concepts && !!concepts.length && !!concepts[0].question;
+    const {domain} = this.props;
     const columns = [
       {
         bodyStyle: {...styles.colStyle, textAlign: 'center'},
@@ -302,7 +304,7 @@ export class ConceptTable extends React.Component<Props, State> {
         selectionMode: 'multiple',
         testId: 'conceptCheckBox'
       },
-      ...(isSurvey ? surveyColumns : domainColumns)
+      ...(domain === Domain.SURVEY ? surveyColumns : domainColumns)
     ];
     return columns.map((col, c) => <Column
       bodyStyle={col.bodyStyle}
