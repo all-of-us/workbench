@@ -382,12 +382,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
       });
     }
 
-    browseDomain(domain: DomainInfo) {
+    browseDomain(domain?: DomainInfo) {
       const {conceptDomainCounts} = this.state;
-      this.setState({browsingSurvey: false, currentSearchString: '',
-        selectedDomain: conceptDomainCounts
-          .find(domainCount => domainCount.domain === domain.domain)},
-        this.searchConcepts);
+      const selectedDomain = !domain ? {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0}
+        : conceptDomainCounts.find(domainCount => domainCount.domain === domain.domain)
+      this.setState({browsingSurvey: false, currentSearchString: '', selectedDomain: selectedDomain}, this.searchConcepts);
     }
 
     browseSurvey(surveyName) {
@@ -563,11 +562,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                   </div>
                   <div style={styles.cardList}>
                     {conceptSurveysList.map((surveys) => {
-                      return <SurveyCard survey={surveys} key={surveys.orderNumber}
-                                         browseSurvey={() => {this.setState({
-                                           browsingSurvey: true,
-                                           selectedSurvey: surveys.name
-                                         }); }}/>;
+                      return <SurveyCard survey={surveys} key={surveys.orderNumber} browseSurvey={() => this.browseDomain()} />;
                     })}
                    </div>
                   {environment.enableNewConceptTabs && <React.Fragment>
