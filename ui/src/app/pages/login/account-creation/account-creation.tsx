@@ -25,8 +25,9 @@ import {
   profileApi
 } from 'app/services/swagger-fetch-clients';
 
-import {FlexColumn, FlexRowWrap} from 'app/components/flex';
-import colors from 'app/styles/colors';
+import {FlexColumn, FlexRow, FlexRowWrap} from 'app/components/flex';
+import {pageImages} from 'app/pages/login/account-creation-images';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils/index';
 import {environment} from 'environments/environment';
 import {
@@ -43,7 +44,9 @@ import {Dropdown} from 'primereact/dropdown';
 import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
+
 import {AccountCreationOptions} from './account-creation-options';
+import {AoUTitle} from "../../profile/data-use-agreement-styles";
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
@@ -76,18 +79,46 @@ export interface AccountCreationState {
 }
 
 const styles = {
-  sectionLabel: {
-    height: '22px',
-    color: colors.primary,
-    fontFamily: 'Montserrat',
-    fontSize: '16px',
-    fontWeight: 600,
-    lineHeight: '22px',
-    paddingBottom: '1.5rem'
+  asideContainer: {
+    backgroundColor: colorWithWhiteness(colors.primary, 0.85),
+    borderRadius: 8,
+    height: '17rem',
+    width: '18rem',
+    padding: '0.5rem'
   },
-  section: {
+  asideHeader: {
+    color: colors.primary,
+    fontWeight: 600,
+    fontSize: 16,
+  },
+  asideText: {
+    fontSize: 14,
+    fontWeight: 400,
+    color: colors.primary,
+  },
+  multiInputSpacing: {
+    marginLeft: '2rem'
+  },
+  publiclyDisplayedText: {
+    fontSize: 12,
+    fontWeight: 400
+  },
+  sectionHeader: {
+    width: '26rem',
+    borderBottom: `1px solid ${colors.primary}`,
+    color: colors.primary,
+    fontWeight: 600,
+    fontSize: 18,
+    marginBottom: '1rem',
+  },
+  sectionInput: {
     width: '12rem',
     height: '1.5rem'
+  },
+  text: {
+    fontSize: 14,
+    color: colors.primary,
+    lineHeight: '22px',
   }
 };
 
@@ -95,12 +126,39 @@ const nameLength = 80;
 
 export const Section = (props) => {
   return <FormSection
-      style={{display: 'flex', flexDirection: 'column', paddingTop: '1rem', ...props.style}}>
-    <label style={styles.sectionLabel}>
+      style={{display: 'flex', flexDirection: 'column', ...props.style}}>
+    <label style={styles.sectionHeader}>
       {props.header}
     </label>
     {props.children}
   </FormSection>;
+};
+
+export const TextInputWithLabel = (props) => {
+  return <FlexColumn style={{width: '12rem', ...props.containerStyle}}>
+    <label style={{...styles.text, fontWeight: 600}}>{props.labelText}</label>
+    <FlexRow style={{alignItems: 'center', marginTop: '0.1rem'}}>
+      <TextInput id={props.inputId} name={props.inputName} placeholder={props.placeholder}
+                 value={props.value}
+                 onChange={props.onChange}
+                 invalid={props.invalid ? props.invalid.toString() : undefined}
+                 style={{...styles.sectionInput}}/>
+      {props.children}
+    </FlexRow>
+  </FlexColumn>;
+};
+
+export const MultiSelectWithLabel = (props) => {
+  return <FlexColumn style={{width: '12rem', ...props.containerStyle}}>
+    <label style={{...styles.text, fontWeight: 600}}>{props.labelText}</label>
+    <FlexRow style={{alignItems: 'center', marginTop: '0.1rem'}}>
+      <MultiSelect placeholder={props.placeholder}
+                   value={props.value} onChange={props.onChange}
+                   options={props.options} data-test-id={props.dataTestId}
+                   style={{...styles.sectionInput, overflowY: 'none'}}/>
+      {props.children}
+    </FlexRow>
+  </FlexColumn>;
 };
 
 export class AccountCreation extends React.Component<AccountCreationProps, AccountCreationState> {
@@ -195,7 +253,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     profileApi().createAccount({profile, invitationKey})
       .then((savedProfile) => {
         this.setState({profile: savedProfile, creatingAccount: false});
-        setProfile(savedProfile, 'accountCreationSuccess'); })
+        setProfile(savedProfile, {stepName: 'accountCreationSuccess', backgroundImages: pageImages.login}); })
       .catch(error => {
         console.log(error);
         this.setState({creatingAccount: false});
@@ -376,7 +434,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       institution, nonAcademicAffiliation, role}, validationCheck);
     this.setState({errors: errors}, () => {
       if (!this.state.errors) {
-        this.props.setProfile(this.state.profile, 'accountCreationSurvey');
+        this.props.setProfile(this.state.profile, {stepName: 'accountCreationSurvey'});
       }
     });
   }
@@ -396,173 +454,189 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     return <div id='account-creation'
                 style={{paddingTop: environment.enableAccountPages ? '1.5rem' :
                       '3rem', paddingRight: '3rem', paddingLeft: '3rem'}}>
-      <Header>Create your account</Header>
-      {environment.enableAccountPages && <div style={{marginTop: '0.5rem'}}>
-        <label style={{color: colors.primary, fontSize: 16}}>
-          Please complete Step 1 of 2
-        </label>
-        {this.state.errors && <div className='error-messages'>
-          <ValidationError>
-            {summarizeErrors(this.state.errors)}
-          </ValidationError>
-        </div>}
-        <Section header='Create an All of Us username'>
-          <div>
-            <TextInput id='username' name='username' placeholder='New Username'
-                       value={username}
-                       onChange={v => this.usernameChanged(v)}
-                       invalid={this.state.usernameConflictError || this.usernameInvalidError()}
-                       style={{...styles.section, marginRight: '0.5rem'}}/>
-            <div style={inputStyles.iconArea}>
-              <ValidationIcon validSuccess={this.usernameValid}/>
-            </div>
-            <TooltipTrigger content={<div>Usernames can contain only letters (a-z),
-              numbers (0-9), dashes (-), underscores (_), apostrophes ('), and periods (.)
-              (minimum of 3 characters and maximum of 64 characters).<br/>Usernames cannot
-              begin or end with a period (.) and may not contain more than one period (.) in a row.
-            </div>}>
-              <InfoIcon style={{'height': '22px', 'paddingLeft': '2px'}}/>
-            </TooltipTrigger>
-            {this.state.usernameConflictError &&
-            <div style={{height: '1.5rem'}}>
-              <Error id='usernameConflictError'>
-                Username is already taken.
+      <div style={{fontSize: 28, fontWeight: 400, color: colors.primary}}>Create your account</div>
+      {environment.enableAccountPages && <FlexRow>
+        <FlexColumn style={{marginTop: '0.5rem'}}>
+          <div style={{...styles.text, fontSize: 16, marginTop: '1rem'}}>
+            Please complete Step 1 of 2
+          </div>
+          <div style={{...styles.text, fontSize: 12, marginTop: '0.7rem'}}>All fields required unless indicated as optional</div>
+          <Section header={<div>Create an <i>All of Us</i> username</div>}>
+            <div>
+              <TextInputWithLabel value={username} inputId='username' inputName='username' placeholder='New Username'
+                                  invalid={this.state.usernameConflictError || this.usernameInvalidError()}
+                                  containerStyle={{width: '13rem'}} labelText='New Username'
+                                  onChange={v => this.usernameChanged(v)}>
+                <div style={{...inputStyles.iconArea}}>
+                  <ValidationIcon validSuccess={this.usernameValid}/>
+                </div>
+                <TooltipTrigger content={<div>Usernames can contain only letters (a-z),
+                  numbers (0-9), dashes (-), underscores (_), apostrophes ('), and periods (.)
+                  (minimum of 3 characters and maximum of 64 characters).<br/>Usernames cannot
+                  begin or end with a period (.) and may not contain more than one period (.) in a row.
+                </div>} style={{marginLeft: '0.5rem'}}>
+                  <InfoIcon style={{'height': '22px', 'paddingLeft': '2px'}}/>
+                </TooltipTrigger>
+              </TextInputWithLabel>
+              {this.state.usernameConflictError &&
+              <div style={{height: '1.5rem'}}>
+                <Error id='usernameConflictError'>
+                  Username is already taken.
+                </Error></div>}
+              {this.usernameInvalidError() &&
+              <div style={{height: '1.5rem'}}><Error id='usernameError'>
+                Username is not a valid username.
               </Error></div>}
-            {this.usernameInvalidError() &&
-            <div style={{height: '1.5rem'}}><Error id='usernameError'>
-              Username is not a valid username.
-            </Error></div>}
-          </div>
-        </Section>
-        <Section header='About you'>
-          <FlexColumn>
-            <div style={{paddingBottom: '1rem'}}>
-              <TextInput id='givenName' name='givenName' autoFocus
-                         placeholder='First Name'
-                         value={givenName}
-                         invalid={givenName.length > nameLength}
-                         style={{...styles.section, marginRight: '2rem'}}
-                         onChange={value => this.updateProfileObject('givenName', value)}/>
-              {givenName.length > nameLength &&
-              <ErrorMessage id='givenNameError'>
-                First Name must be {nameLength} characters or less.
-              </ErrorMessage>}
-              <TextInput id='familyName' name='familyName' placeholder='Last Name'
-                         value={familyName}
-                         invalid={familyName.length > nameLength}
-                         style={styles.section}
-                         onChange={v => this.updateProfileObject('familyName', v)}/>
-              {familyName.length > nameLength &&
-              <ErrorMessage id='familyNameError'>
-                Last Name must be {nameLength} character or less.
-              </ErrorMessage>}
             </div>
-            <div style={{display: 'flex', alignItems: 'center'}}>
-              <TextInput id='contactEmail' name='contactEmail'
-                         placeholder='Email Address'
-                         value={contactEmail}
-                         style={styles.section}
-                         onChange={v => this.updateProfileObject('contactEmail', v)}/>
-              {this.state.invalidEmail &&
-              <Error id='invalidEmailError'>
-                Contact Email Id is invalid
-              </Error>}
-              <MultiSelect placeholder='Degree' options={AccountCreationOptions.degree}
-                           style={{...styles.section, marginLeft: '2rem', overflowY: 'none'}}
-                           value={this.state.profile.degrees}
-                           onChange={(e) =>
-                             this.updateProfileObject('degrees', e.value)}/>
-            </div>
-          </FlexColumn>
-        </Section>
-        <Section header='Your mailing address'>
-          <FlexRowWrap style={{lineHeight: '1rem'}}>
-            <TextInput data-test-id='streetAddress' name='streetAddress'
-                       placeholder='Street Address' value={streetAddress1}
-                       onChange={value => this.updateAddress('streetAddress1', value)}
-                       style={{...styles.section, marginRight: '2rem', marginBottom: '0.5rem'}}/>
-            <TextInput data-test-id='state' name='state' placeholder='State' value={state}
-                       onChange={value => this.updateAddress('state', value)}
-                       style={{...styles.section, marginBottom: '0.5rem'}}/>
-            <TextInput data-test-id='streetAddress2' name='streetAddress2' placeholder='Street Address 2'
-                       value={streetAddress2}
-                       style={{...styles.section, marginRight: '2rem', marginBottom: '0.5rem'}}
-                       onChange={value => this.updateAddress('streetAddress2', value)}/>
-            <TextInput data-test-id='zip' name='zip' placeholder='Zip Code' value={zipCode}
-                       onChange={value => this.updateAddress('zipCode', value)}
-                       style={{...styles.section, marginBottom: '0.5rem'}}/>
-            <TextInput data-test-id='city' name='city' placeholder='City' value={city}
-                       onChange={value => this.updateAddress('city', value)}
-                       style={{...styles.section, marginRight: '2rem'}}/>
-            <TextInput data-test-id='country' placeholder='Country' value={country} style={styles.section}
-                       onChange={value => this.updateAddress('country', value)}/>
-          </FlexRowWrap>
-        </Section>
-        <Section header='Institutional Affiliation'>
-          <label style={{color: colors.primary, fontSize: 16}}>
-            Are you affiliated with an Academic Research Institution?
-          </label>
-          <div style={{paddingTop: '0.5rem'}}>
-            <RadioButton data-test-id='show-institution-yes'
-                         onChange={() => {this.clearInstitutionAffiliation();
-                           this.setState({showInstitution: true}); }}
-                         checked={this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
-            <label style={{paddingRight: '3rem', color: colors.primary}}>
-              Yes
+          </Section>
+          <Section header={<div>About you <i style={styles.publiclyDisplayedText}>Publicly displayed</i></div>}>
+            <FlexColumn>
+              <FlexRow style={{paddingBottom: '1rem'}}>
+                <TextInputWithLabel value={givenName} inputId='givenName' inputName='givenName' placeholder='First Name'
+                                    invalid={givenName.length > nameLength} labelText='First Name'
+                                    onChange={value => this.updateProfileObject('givenName', value)} />
+
+                {givenName.length > nameLength &&
+                <ErrorMessage id='givenNameError'>
+                  First Name must be {nameLength} characters or less.
+                </ErrorMessage>}
+                <TextInputWithLabel value={familyName} inputId='familyName' inputName='familyName' placeholder='Last Name'
+                                    invalid={familyName.length > nameLength} containerStyle={styles.multiInputSpacing}
+                                    onChange={v => this.updateProfileObject('familyName', v)}
+                                    labelText='Last Name'/>
+                {familyName.length > nameLength &&
+                <ErrorMessage id='familyNameError'>
+                  Last Name must be {nameLength} character or less.
+                </ErrorMessage>}
+              </FlexRow>
+              <FlexRow style={{alignItems: 'center'}}>
+                <TextInputWithLabel value={contactEmail} inputId='contactEmail' inputName='contactEmail'
+                                    placeholder='Email Address'
+                                    invalid={this.state.invalidEmail} labelText='Email Address'
+                                    onChange={v => this.updateProfileObject('contactEmail', v)}/>
+                {this.state.invalidEmail &&
+                <Error id='invalidEmailError'>
+                  Contact Email Id is invalid
+                </Error>}
+                <MultiSelectWithLabel placeholder={'You can select more than one'} options={AccountCreationOptions.degree}
+                                      containerStyle={styles.multiInputSpacing} value={this.state.profile.degrees}
+                                      labelText='Your degree'
+                                      onChange={(e) => this.updateProfileObject('degrees', e.value)}/>
+              </FlexRow>
+            </FlexColumn>
+          </Section>
+          <Section header={<React.Fragment>
+            <div>Your institutional mailing address</div>
+            <div style={styles.asideText}>We use your address if we need to send correspondence about the program;
+              your information will not be shared or displayed publicly</div>
+          </React.Fragment>}>
+            <FlexColumn style={{lineHeight: '1rem'}}>
+              <FlexRow>
+                <TextInputWithLabel dataTestId='streetAddress' inputName='streetAddress'
+                                    placeholder='Street Address' value={streetAddress1} labelText='Street Address 1'
+                                    onChange={value => this.updateAddress('streetAddress1', value)}/>
+                <TextInputWithLabel dataTestId='streetAddress2' inputName='streetAddress2' placeholder='Street Address 2'
+                                    value={streetAddress2} labelText='Street Address 2'
+                                    containerStyle={styles.multiInputSpacing}
+                                    onChange={value => this.updateAddress('streetAddress2', value)}/>
+              </FlexRow>
+              <FlexRow style={{marginTop: '0.75rem'}}>
+              <TextInputWithLabel dataTestId='city' inputName='city' placeholder='City' value={city} labelText='City'
+                                  onChange={value => this.updateAddress('city', value)}/>
+              <TextInputWithLabel dataTestId='state' inputName='state' placeholder='State' value={state} labelText='State'
+                                  containerStyle={styles.multiInputSpacing}
+                                  onChange={value => this.updateAddress('state', value)}/>
+              </FlexRow>
+              <FlexRow style={{marginTop: '0.75rem'}}>
+                <TextInputWithLabel dataTestId='zip' inputName='zip' placeholder='Zip Code'
+                                    value={zipCode} labelText='Zip Code'
+                                    onChange={value => this.updateAddress('zipCode', value)}/>
+                <TextInputWithLabel dataTestId='country' inputName='country' placeholder='Country' value={country}
+                                    labelText='Country' containerStyle={styles.multiInputSpacing}
+                                    onChange={value => this.updateAddress('country', value)}/>
+              </FlexRow>
+            </FlexColumn>
+          </Section>
+          <Section header='Institutional Affiliation'>
+            <label style={{color: colors.primary, fontSize: 16}}>
+              Are you affiliated with an Academic Research Institution?
             </label>
-            <RadioButton data-test-id='show-institution-no'
-                         onChange={() => {this.clearInstitutionAffiliation();
-                           this.setState({showInstitution: false}); }}
-                         checked={!this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
-            <label style={{color: colors.primary}}>No</label>
-          </div>
-        </Section>
-        {this.state.showInstitution &&
-        <FlexColumn style={{justifyContent: 'space-between'}}>
-          <TextInput data-test-id='institutionname' style={{width: '16rem', marginBottom: '0.5rem',
-            marginTop: '0.5rem'}}
-            value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
-                institutionalAffiliations[0].institution : ''}
-            placeholder='Institution Name'
-            onChange={value => this.updateInstitutionAffiliation('institution', value)}
-                     ></TextInput>
-          <Dropdown data-test-id='institutionRole' value={institutionalAffiliations &&
-          institutionalAffiliations.length > 0 ?
-              institutionalAffiliations[0].role : ''}
-                    onChange={e => this.updateInstitutionAffiliation('role', e.value)}
-                    placeholder='Which of the following describes your role'
-                    style={{width: '16rem'}} options={AccountCreationOptions.roles}/>
-        </FlexColumn>}
-        {!this.state.showInstitution &&
-        <FlexColumn style={{justifyContent: 'space-between'}}>
-          <Dropdown data-test-id='affiliation'
-                    style={{width: '18rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
-                    value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
-                        institutionalAffiliations[0].nonAcademicAffiliation : ''}
-                    options={AccountCreationOptions.nonAcademicAffiliations}
-                    onChange={e => this.updateNonAcademicAffiliationRoles(e.value)}
-                    placeholder='Which of the following better describes your affiliation?'/>
-          {this.state.showNonAcademicAffiliationRole &&
-          <Dropdown data-test-id='affiliationrole' placeholder='Which of the following describes your role'
-                    options={this.state.rolesOptions} value={institutionalAffiliations
-          && institutionalAffiliations.length > 0 ?
-              institutionalAffiliations[0].role : ''}
-                    onChange={e => this.selectNonAcademicAffiliationRoles(e.value)}
-                    style={{width: '18rem'}}/>}
-          {this.state.showNonAcademicAffiliationOther &&
-          <TextInput value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
-              institutionalAffiliations[0].other : ''}
-                     onChange={value => this.updateInstitutionAffiliation('other', value)}
-                     style={{marginTop: '1rem', width: '18rem'}}/>}
-        </FlexColumn>}
-        <FormSection style={{paddingBottom: '1rem'}}>
-          <Button disabled={this.state.usernameCheckInProgress || this.isUsernameValidationError}
-                  style={{'height': '2rem', 'width': '10rem'}}
-                  onClick={() => this.validateAccountCreation()}>
-            Next
-          </Button>
-        </FormSection>
-      </div>}
+            <div style={{paddingTop: '0.5rem'}}>
+              <RadioButton data-test-id='show-institution-yes'
+                           onChange={() => {this.clearInstitutionAffiliation();
+                             this.setState({showInstitution: true}); }}
+                           checked={this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
+              <label style={{paddingRight: '3rem', color: colors.primary}}>
+                Yes
+              </label>
+              <RadioButton data-test-id='show-institution-no'
+                           onChange={() => {this.clearInstitutionAffiliation();
+                             this.setState({showInstitution: false}); }}
+                           checked={!this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
+              <label style={{color: colors.primary}}>No</label>
+            </div>
+          </Section>
+          {this.state.showInstitution &&
+          <FlexColumn style={{justifyContent: 'space-between'}}>
+            <TextInput data-test-id='institutionname' style={{width: '16rem', marginBottom: '0.5rem',
+              marginTop: '0.5rem'}}
+              value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
+                  institutionalAffiliations[0].institution : ''}
+              placeholder='Institution Name'
+              onChange={value => this.updateInstitutionAffiliation('institution', value)}
+                       ></TextInput>
+            <Dropdown data-test-id='institutionRole' value={institutionalAffiliations &&
+            institutionalAffiliations.length > 0 ?
+                institutionalAffiliations[0].role : ''}
+                      onChange={e => this.updateInstitutionAffiliation('role', e.value)}
+                      placeholder='Which of the following describes your role'
+                      style={{width: '16rem'}} options={AccountCreationOptions.roles}/>
+          </FlexColumn>}
+          {!this.state.showInstitution &&
+          <FlexColumn style={{justifyContent: 'space-between'}}>
+            <Dropdown data-test-id='affiliation'
+                      style={{width: '18rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
+                      value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
+                          institutionalAffiliations[0].nonAcademicAffiliation : ''}
+                      options={AccountCreationOptions.nonAcademicAffiliations}
+                      onChange={e => this.updateNonAcademicAffiliationRoles(e.value)}
+                      placeholder='Which of the following better describes your affiliation?'/>
+            {this.state.showNonAcademicAffiliationRole &&
+            <Dropdown data-test-id='affiliationrole' placeholder='Which of the following describes your role'
+                      options={this.state.rolesOptions} value={institutionalAffiliations
+            && institutionalAffiliations.length > 0 ?
+                institutionalAffiliations[0].role : ''}
+                      onChange={e => this.selectNonAcademicAffiliationRoles(e.value)}
+                      style={{width: '18rem'}}/>}
+            {this.state.showNonAcademicAffiliationOther &&
+            <TextInput value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
+                institutionalAffiliations[0].other : ''}
+                       onChange={value => this.updateInstitutionAffiliation('other', value)}
+                       style={{marginTop: '1rem', width: '18rem'}}/>}
+          </FlexColumn>}
+          <FormSection style={{paddingBottom: '1rem'}}>
+            <Button disabled={this.state.usernameCheckInProgress || this.isUsernameValidationError}
+                    style={{'height': '2rem', 'width': '10rem'}}
+                    onClick={() => this.validateAccountCreation()}>
+              Next
+            </Button>
+          </FormSection>
+        </FlexColumn>
+        <FlexColumn>
+          <FlexColumn style={styles.asideContainer}>
+            <div style={styles.asideHeader}>About your new username</div>
+            <div style={styles.asideText}>We create a 'username'@researchallofus.org Google account which you will use
+                to login to the Workbench.</div>
+            <div style={{...styles.asideHeader, marginTop: '1rem'}}>Why will some information be public?</div>
+            <div style={styles.asideText}>The <AoUTitle/> is committed to transparency with the Research
+                participants on who can access their data, and the purpose of such access. Therefore, your name,
+                institution and role, as well as your research background/interests and link to your professional
+                profile will be displayed publicly on the Research Projects Directory on the <AoUTitle/> website to
+                inform the All of Us Research participants, and to comply with the 21st Century Cures Act. Some of the
+                fields noted above may not be visible currently, but will be added in the future.</div>
+          </FlexColumn>
+        </FlexColumn>
+      </FlexRow>}
       {/*The following will be deleted once enableAccountPages is set to true in prod*/}
       {!environment.enableAccountPages && <div>
         <FormSection>

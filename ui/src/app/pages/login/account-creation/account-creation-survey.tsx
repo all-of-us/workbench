@@ -17,6 +17,7 @@ import {
 } from 'generated/fetch';
 import {Section} from './account-creation';
 
+import {pageImages} from 'app/pages/login/account-creation-images';
 import {
   profileApi
 } from 'app/services/swagger-fetch-clients';
@@ -96,7 +97,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     profileApi().createAccount({profile: this.profileObj, invitationKey: invitationKey})
       .then((savedProfile) => {
         this.setState({profile: savedProfile, creatingAccount: false});
-        setProfile(savedProfile, 'accountCreationSuccess');
+        setProfile(savedProfile, {stepName: 'accountCreationSuccess', backgroundImages: pageImages.login});
       }).catch(error => {
         console.log(error);
         this.setState({creatingAccount: false});
@@ -127,7 +128,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
 
   render() {
     const {profile: {demographicSurvey}} = this.state;
-    return <div style={{marginTop: '1rem', paddingLeft: '3rem'}}>
+    return <div style={{marginTop: '1rem', paddingLeft: '3rem', width: '26rem'}}>
       <label style={{color: colors.primary, fontSize: 16}}>
         Please complete Step 2 of 2
       </label>
@@ -208,7 +209,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
 
       <div style={{display: 'flex', paddingTop: '2rem'}}>
         <Button type='secondary' style={{marginRight: '1rem'}} disabled={this.state.creatingAccount}
-                onClick={() => this.props.setProfile(this.profileObj, 'accountCreation')}>
+                onClick={() => this.props.setProfile(this.profileObj, {stepName: 'accountCreation'})}>
           Previous
         </Button>
         <Button type='primary' disabled={this.state.creatingAccount || this.state.creatingAccount}

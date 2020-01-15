@@ -12,8 +12,16 @@ import {AccountCreation} from './account-creation/account-creation';
 import {Profile} from 'generated/fetch';
 
 import {FlexColumn} from 'app/components/flex';
+import {PageImages, pageImages} from 'app/pages/login/account-creation-images';
 import * as React from 'react';
 import {AccountCreationSurvey} from './account-creation/account-creation-survey';
+
+
+
+interface Step {
+  stepName: string;
+  backgroundImages?: PageImages;
+}
 
 export interface SignInProps {
   onInit: () => void;
@@ -22,13 +30,13 @@ export interface SignInProps {
 }
 
 interface SignInState {
-  currentStep: string;
+  currentStep: Step;
   invitationKey: string;
   profile: Profile;
 }
 
 const styles = {
-  template: (windowSize, images) => {
+  template: (windowSize, images: PageImages) => {
     // Lower bounds to prevent the small and large images from covering the
     // creation controls, respectively.
     const bgWidthMinPx = 900;
@@ -45,6 +53,9 @@ const styles = {
     };
 
     function calculateImage() {
+      if (images === undefined) {
+        return null;
+      }
       let imageUrl = 'url(\'' + images.backgroundImgSrc + '\')';
       if (windowSize.width > bgWidthMinPx && windowSize.width <= bgWidthSmallLimitPx) {
         imageUrl = 'url(\'' + images.smallerBackgroundImgSrc + '\')';
@@ -73,28 +84,7 @@ const styles = {
 };
 
 
-export const pageImages = {
-  'login': {
-    backgroundImgSrc: '/assets/images/login-group.png',
-    smallerBackgroundImgSrc: '/assets/images/login-standing.png'
-  },
-  'invitationKey': {
-    backgroundImgSrc: '/assets/images/invitation-female.png',
-    smallerBackgroundImgSrc: '/assets/images/invitation-female-standing.png'
-  },
-  'accountCreation': {
-    backgroundImgSrc: '/assets/images/create-account-male.png',
-    smallerBackgroundImgSrc: '/assets/images/create-account-male-standing.png'
-  },
-  'accountCreationSurvey': {
-    backgroundImgSrc: '/assets/images/create-account-male.png',
-    smallerBackgroundImgSrc: '/assets/images/create-account-male-standing.png'
-  },
-  'accountCreationSuccess': {
-    backgroundImgSrc: '/assets/images/congrats-female.png',
-    smallerBackgroundImgSrc: 'assets/images/congrats-female-standing.png'
-  }
-};
+
 
 const headerImg = '/assets/images/logo-registration-non-signed-in.svg';
 
@@ -104,7 +94,7 @@ export const SignInReact = withWindowSize()(
     constructor(props: SignInProps) {
       super(props);
       this.state = {
-        currentStep: 'login',
+        currentStep: {stepName: 'login', backgroundImages: pageImages.login},
         invitationKey: '',
         profile: {} as Profile
       };
@@ -120,15 +110,15 @@ export const SignInReact = withWindowSize()(
       switch (index) {
         case 'login':
           return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() =>
-            this.setCurrentStep('invitationKey')}/>;
+            this.setCurrentStep({stepName: 'invitationKey'})}/>;
         case 'invitationKey':
           return <InvitationKey onInvitationKeyVerify={(key) => this.onKeyVerified(key)}/>;
         case 'accountCreation':
           return <AccountCreation invitationKey={this.state.invitationKey} profile={this.state.profile}
-                                  setProfile={this.setProfile}/>;
+                                  setProfile={(profile, nextStep) => this.setProfile(profile, nextStep)}/>;
         case 'accountCreationSurvey':
           return <AccountCreationSurvey profile={this.state.profile}
-            invitationKey={this.state.invitationKey} setProfile={this.setProfile}/>;
+            invitationKey={this.state.invitationKey} setProfile={(profile, nextStep) => this.setProfile(profile, nextStep)}/>;
         case 'accountCreationSuccess':
           return <AccountCreationSuccess profile={this.state.profile}/>;
         default:
@@ -136,7 +126,7 @@ export const SignInReact = withWindowSize()(
       }
     }
 
-    setCurrentStep(nextStep: string) {
+    setCurrentStep(nextStep: Step) {
       this.setState({
         currentStep: nextStep
       });
@@ -145,11 +135,12 @@ export const SignInReact = withWindowSize()(
     onKeyVerified(invitationKey: string) {
       this.setState({
         invitationKey: invitationKey,
-        currentStep: 'accountCreation'
+        currentStep: {stepName: 'accountCreation'}
       });
     }
 
     setProfile(profile, currentStep) {
+      console.log(currentStep);
       this.setState({
         profile: profile,
         currentStep: currentStep
@@ -159,14 +150,17 @@ export const SignInReact = withWindowSize()(
 
 
     render() {
+      const {stepName, backgroundImages} = this.state.currentStep;
+      const maxWidth = backgroundImages === undefined ? '100%' : '41.66667%';
       return <div style={styles.signedInContainer}>
         <FlexColumn style={{width: '100%'}}>
           <div data-test-id='template'
-               style={styles.template(this.props.windowSize, pageImages[this.state.currentStep])}>
+               style={styles.template(this.props.windowSize, backgroundImages)}>
             <img style={{height: '1.75rem', marginLeft: '1rem', marginTop: '1rem'}}
                  src={headerImg}/>
-            <div style={{flex: '0 0 41.66667%', maxWidth: '41.66667%', minWidth: '25rem'}}>
-              {this.nextDirective(this.state.currentStep)}
+            <div style={{flex: `0 0 ${maxWidth}`,
+              maxWidth: maxWidth, minWidth: '25rem'}}>
+              {this.nextDirective(stepName)}
             </div>
           </div>
         </FlexColumn>
