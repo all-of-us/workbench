@@ -32,7 +32,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.Creati
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.attachments.Attachment;
+import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +92,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
       resultBuilder.add(
           MeasurementBundle.builder()
               .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, count)
-              .addAttachment(Attachment.BUFFER_ENTRY_STATUS, status.toString())
+              .addTag(MetricLabel.BUFFER_ENTRY_STATUS, status.toString())
               .build());
     }
 

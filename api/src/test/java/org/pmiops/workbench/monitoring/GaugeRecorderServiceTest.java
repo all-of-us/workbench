@@ -19,7 +19,7 @@ import org.mockito.Captor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
-import org.pmiops.workbench.monitoring.attachments.Attachment;
+import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
@@ -38,11 +38,11 @@ public class GaugeRecorderServiceTest {
       ImmutableList.of(
           MeasurementBundle.builder()
               .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 22L)
-              .addAttachment(Attachment.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
+              .addTag(MetricLabel.BUFFER_ENTRY_STATUS, BufferEntryStatus.AVAILABLE.toString())
               .build(),
           MeasurementBundle.builder()
               .addMeasurement(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 3L)
-              .addAttachment(Attachment.BUFFER_ENTRY_STATUS, BufferEntryStatus.CREATING.toString())
+              .addTag(MetricLabel.BUFFER_ENTRY_STATUS, BufferEntryStatus.CREATING.toString())
               .build());
 
   private static final long WORKSPACES_COUNT = 101L;

@@ -675,7 +675,7 @@ public class BillingProjectBufferServiceTest {
             .filter(b -> b.getMeasurements().containsKey(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT))
             .findFirst();
     assertThat(entryStatusBundle.isPresent()).isTrue();
-    assertThat(entryStatusBundle.get().getAttachments()).isNotEmpty();
+    assertThat(entryStatusBundle.get().getTags()).isNotEmpty();
   }
 
   private Timestamp getCurrentTimestamp() {

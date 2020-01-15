@@ -6,16 +6,16 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.Set;
 import org.junit.Test;
-import org.pmiops.workbench.monitoring.attachments.AttachmentBase;
+import org.pmiops.workbench.monitoring.attachments.MetricLabelBase;
 
-public class AttachmentBaseTest {
+public class MetricLabelTest {
 
   // use anonymous inner class implementing AttachmentBase objects so we don't depend on
   // enums directly. That is, we're just checking the interface here.
-  private static final AttachmentBase DISCRETE_VALUE_ATTACHMENT =
-      new AttachmentBase() {
+  private static final MetricLabelBase DISCRETE_VALUE_LABEL =
+      new MetricLabelBase() {
         @Override
-        public String getKeyName() {
+        public String getName() {
           return "dummy_discrete_value_attachment";
         }
 
@@ -25,10 +25,10 @@ public class AttachmentBaseTest {
         }
       };
 
-  private static final AttachmentBase CONTINUOUS_VALUE_ATTACHMENT =
-      new AttachmentBase() {
+  private static final MetricLabelBase CONTINUOUS_VALUE_LABEL =
+      new MetricLabelBase() {
         @Override
-        public String getKeyName() {
+        public String getName() {
           return "dummy_continuous_value_attachment";
         }
 
@@ -40,13 +40,13 @@ public class AttachmentBaseTest {
 
   @Test
   public void testBufferEntryStatus() {
-    assertThat(DISCRETE_VALUE_ATTACHMENT.supportsDiscreteValue("a")).isTrue();
-    assertThat(DISCRETE_VALUE_ATTACHMENT.supportsDiscreteValue("coolio")).isFalse();
+    assertThat(DISCRETE_VALUE_LABEL.supportsDiscreteValue("a")).isTrue();
+    assertThat(DISCRETE_VALUE_LABEL.supportsDiscreteValue("coolio")).isFalse();
   }
 
   @Test
   public void testUnrestricted() {
-    assertThat(CONTINUOUS_VALUE_ATTACHMENT.supportsDiscreteValue("101")).isTrue();
-    assertThat(CONTINUOUS_VALUE_ATTACHMENT.supportsDiscreteValue("102"));
+    assertThat(CONTINUOUS_VALUE_LABEL.supportsDiscreteValue("101")).isTrue();
+    assertThat(CONTINUOUS_VALUE_LABEL.supportsDiscreteValue("102"));
   }
 }

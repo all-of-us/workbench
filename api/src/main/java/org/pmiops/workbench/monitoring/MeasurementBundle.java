@@ -1,14 +1,13 @@
 package org.pmiops.workbench.monitoring;
 
 import com.google.common.collect.ImmutableMap;
-import io.opencensus.metrics.data.AttachmentValue;
-import io.opencensus.metrics.data.AttachmentValue.AttachmentValueString;
-import java.util.AbstractMap.SimpleImmutableEntry;
+import io.opencensus.tags.TagKey;
+import io.opencensus.tags.TagValue;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.monitoring.attachments.Attachment;
+import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 import org.pmiops.workbench.monitoring.views.Metric;
 
 /**
@@ -18,41 +17,25 @@ import org.pmiops.workbench.monitoring.views.Metric;
  */
 public class MeasurementBundle {
   private final Map<Metric, Number> measurements;
-  private final Map<Attachment, String> attachments;
+  private final Map<MetricLabel, TagValue> tags;
 
-  private MeasurementBundle(Map<Metric, Number> measurements, Map<Attachment, String> attachments) {
+  private MeasurementBundle(Map<Metric, Number> measurements, Map<MetricLabel, TagValue> tags) {
     this.measurements = measurements;
-    this.attachments = attachments;
+    this.tags = tags;
   }
 
   public Map<Metric, Number> getMeasurements() {
     return measurements;
   }
 
-  public Map<String, AttachmentValue> getAttachments() {
-    return fromAttachmentKeyToString(attachments);
-  }
-
-  // In our system, it's more convenient to work with the AttachmentKey
-  // enum directly and String values. For some reason we have to wrap strings
-  // in AttachmentValueStrings now (though naked Strings are still supported but
-  // deprecated).
-  private static Map<String, AttachmentValue> fromAttachmentKeyToString(
-      Map<Attachment, String> attachmentKeyStringMap) {
-    return attachmentKeyStringMap.entrySet().stream()
-        .map(
-            e ->
-                new SimpleImmutableEntry<String, AttachmentValue>(
-                    e.getKey().getKeyName(), AttachmentValueString.create(e.getValue())))
-        .collect(ImmutableMap.toImmutableMap(Entry::getKey, SimpleImmutableEntry::getValue));
+  public Map<TagKey, TagValue> getTags() {
+    return tags.entrySet().stream()
+        .collect(
+            ImmutableMap.toImmutableMap(e -> TagKey.create(e.getKey().getName()), Entry::getValue));
   }
 
   public static Builder builder() {
     return new Builder();
-  }
-
-  public static MeasurementBundle ofDelta(Metric view) {
-    return builder().addEvent(view).build();
   }
 
   @Override
@@ -63,38 +46,38 @@ public class MeasurementBundle {
     if (!(o instanceof MeasurementBundle)) {
       return false;
     }
-    MeasurementBundle that = (MeasurementBundle) o;
-    return measurements.equals(that.measurements) && attachments.equals(that.attachments);
+    MeasurementBundle bundle = (MeasurementBundle) o;
+    return Objects.equals(measurements, bundle.measurements) && Objects.equals(tags, bundle.tags);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(measurements, attachments);
+    return Objects.hash(measurements, tags);
   }
 
   @Override
   public String toString() {
     return String.format(
-        "measurements: [%s] attachments: [%s]",
+        "{measurements: [%s] tags: [%s]}",
         getMeasurements().entrySet().stream()
             .map(e -> String.format("%s: %s", e.getKey().getName(), e.getValue()))
             .collect(Collectors.joining(", ")),
-        getAttachments().entrySet().stream()
-            .map(e -> String.format("%s: %s", e.getKey(), e.getValue().getValue()))
+        getTags().entrySet().stream()
+            .map(e -> String.format("%s: %s", e.getKey().getName(), e.getValue().asString()))
             .collect(Collectors.joining(", ")));
   }
 
   public static class Builder {
     private ImmutableMap.Builder<Metric, Number> measurementsBuilder;
-    private ImmutableMap.Builder<Attachment, String> attachmentsBuilder;
+    private ImmutableMap.Builder<MetricLabel, TagValue> tagsBuilder;
 
     private Builder() {
       measurementsBuilder = ImmutableMap.builder();
-      attachmentsBuilder = ImmutableMap.builder();
+      tagsBuilder = ImmutableMap.builder();
     }
 
-    public Builder addEvent(Metric viewInfo) {
-      measurementsBuilder.put(viewInfo, MonitoringService.DELTA_VALUE);
+    public Builder addEvent(Metric metric) {
+      measurementsBuilder.put(metric, MonitoringService.DELTA_VALUE);
       return this;
     }
 
@@ -108,19 +91,22 @@ public class MeasurementBundle {
       return this;
     }
 
-    public Builder addAttachment(Attachment attachmentKey, String value) {
-      attachmentsBuilder.put(attachmentKey, value);
+    public Builder addTag(MetricLabel metricLabel, String value) {
+      tagsBuilder.put(metricLabel, TagValue.create(value));
       return this;
     }
 
-    public Builder addAllAttachments(Map<Attachment, String> attachmentKeyToString) {
-      attachmentsBuilder.putAll(ImmutableMap.copyOf(attachmentKeyToString));
+    public Builder addAllTags(Map<MetricLabel, String> attachmentKeyToString) {
+      tagsBuilder.putAll(
+          attachmentKeyToString.entrySet().stream()
+              .collect(
+                  ImmutableMap.toImmutableMap(Entry::getKey, e -> TagValue.create(e.getValue()))));
       return this;
     }
 
     public MeasurementBundle build() {
       validate();
-      return new MeasurementBundle(measurementsBuilder.build(), attachmentsBuilder.build());
+      return new MeasurementBundle(measurementsBuilder.build(), tagsBuilder.build());
     }
 
     /**
@@ -132,28 +118,28 @@ public class MeasurementBundle {
      */
     private void validate() {
       ImmutableMap<Metric, Number> measurements = measurementsBuilder.build();
-      ImmutableMap<Attachment, String> attachments = attachmentsBuilder.build();
+      ImmutableMap<MetricLabel, TagValue> tags = tagsBuilder.build();
       if (measurements.isEmpty()) {
         throw new IllegalStateException("MeasurementBundle must have at least one measurement.");
       }
       // Validate each attachment supports all metrics
-      for (Map.Entry<Attachment, String> entry : attachments.entrySet()) {
-        final Attachment attachment = entry.getKey();
-        final String attachmentValue = entry.getValue();
+      for (Map.Entry<MetricLabel, TagValue> entry : tags.entrySet()) {
+        final MetricLabel attachment = entry.getKey();
+        final TagValue attachmentValue = entry.getValue();
 
         for (Metric metric : measurements.keySet()) {
-          if (!metric.supportsAttachment(attachment)) {
+          if (!metric.supportsLabel(attachment)) {
             throw new IllegalStateException(
                 (String.format(
                     "Metric %s does not support Attachment %s",
-                    metric.getName(), attachment.getKeyName())));
+                    metric.getName(), attachment.getName())));
           }
         }
-        if (!entry.getKey().supportsDiscreteValue(attachmentValue)) {
+        if (!entry.getKey().supportsDiscreteValue(attachmentValue.asString())) {
           throw new IllegalStateException(
               String.format(
                   "Attachment %s does not support provided value %s",
-                  attachment.getKeyName(), attachmentValue));
+                  attachment.getName(), attachmentValue));
         }
       }
     }

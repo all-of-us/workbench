@@ -1,7 +1,8 @@
 package org.pmiops.workbench.monitoring;
 
 import com.google.common.collect.ImmutableMap;
-import io.opencensus.metrics.data.AttachmentValue;
+import io.opencensus.tags.TagKey;
+import io.opencensus.tags.TagValue;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -11,7 +12,7 @@ import org.pmiops.workbench.monitoring.views.Metric;
 public interface MonitoringService {
 
   int DELTA_VALUE = 1;
-  Map<String, AttachmentValue> DEFAULT_ATTACHMENTS = Collections.emptyMap();
+  Map<TagKey, TagValue> DEFAULT_TAGS = Collections.emptyMap();
 
   /**
    * Record an occurrence of a counted (a.k.a. delta or cumulative) time series. These are events
@@ -23,16 +24,16 @@ public interface MonitoringService {
     recordValue(eventMetric, DELTA_VALUE);
   }
 
-  default void recordEvent(EventMetric eventMetric, Map<String, AttachmentValue> attachments) {
-    recordValues(ImmutableMap.of(eventMetric, DELTA_VALUE), attachments);
+  default void recordEvent(EventMetric eventMetric, Map<TagKey, TagValue> tags) {
+    recordValues(ImmutableMap.of(eventMetric, DELTA_VALUE), tags);
   }
 
-  default void recordValue(Metric viewInfo, Number value) {
-    recordValues(ImmutableMap.of(viewInfo, value));
+  default void recordValue(Metric metric, Number value) {
+    recordValues(ImmutableMap.of(metric, value));
   }
 
-  default void recordValues(Map<Metric, Number> viewInfoToValue) {
-    recordValues(viewInfoToValue, DEFAULT_ATTACHMENTS);
+  default void recordValues(Map<Metric, Number> metricToValue) {
+    recordValues(metricToValue, DEFAULT_TAGS);
   }
 
   /**
@@ -40,16 +41,14 @@ public interface MonitoringService {
    * metadata (shared across all samples). We use a single MeasureMap for all the entries in both
    * maps.
    *
-   * @param viewInfoToValue key/value pairs for time series. These need not be related, but any
+   * @param metricToValue key/value pairs for time series. These need not be related, but any
    *     attachments should apply to all entries in this map.
-   * @param attachmentKeyToValue Map of String/AttachmentValue pairs to be associated with these
-   *     data.
+   * @param tags Map of String/AttachmentValue pairs to be associated with these data.
    */
-  void recordValues(
-      Map<Metric, Number> viewInfoToValue, Map<String, AttachmentValue> attachmentKeyToValue);
+  void recordValues(Map<Metric, Number> metricToValue, Map<TagKey, TagValue> tags);
 
-  default void recordBundle(MeasurementBundle viewBundle) {
-    recordValues(viewBundle.getMeasurements(), viewBundle.getAttachments());
+  default void recordBundle(MeasurementBundle measurementBundle) {
+    recordValues(measurementBundle.getMeasurements(), measurementBundle.getTags());
   }
 
   // Record each ViewBundle object separately, so that we don't

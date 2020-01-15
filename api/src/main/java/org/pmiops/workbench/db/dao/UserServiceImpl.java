@@ -43,7 +43,7 @@ import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
-import org.pmiops.workbench.monitoring.attachments.Attachment;
+import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -787,9 +787,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             e ->
                 MeasurementBundle.builder()
                     .addMeasurement(GaugeMetric.USER_COUNT, e.getValue())
-                    .addAttachment(Attachment.DATA_ACCESS_LEVEL, e.getKey().getKey(0))
-                    .addAttachment(Attachment.USER_DISABLED, e.getKey().getKey(1))
-                    .addAttachment(Attachment.USER_BYPASSED_BETA, e.getKey().getKey(2))
+                    .addTag(MetricLabel.DATA_ACCESS_LEVEL, e.getKey().getKey(0))
+                    .addTag(MetricLabel.USER_DISABLED, e.getKey().getKey(1))
+                    .addTag(MetricLabel.USER_BYPASSED_BETA, e.getKey().getKey(2))
                     .build())
         .collect(ImmutableSet.toImmutableSet());
   }
