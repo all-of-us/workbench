@@ -2,10 +2,10 @@ import {Observable} from 'rxjs/Observable';
 
 import {
   Cluster,
-  ClusterListResponse,
   ClusterLocalizeRequest,
   ClusterLocalizeResponse,
-  ClusterStatus
+  ClusterStatus,
+  DefaultClusterResponse,
 } from 'generated';
 
 export class ClusterServiceStub {
@@ -21,8 +21,8 @@ export class ClusterServiceStub {
     };
   }
 
-  listClusters(extraHttpRequestParams?: any): Observable<ClusterListResponse> {
-    return new Observable<ClusterListResponse>(observer => {
+  listClusters(extraHttpRequestParams?: any): Observable<DefaultClusterResponse> {
+    return new Observable<DefaultClusterResponse>(observer => {
       setTimeout(() => {
         observer.next({defaultCluster: this.cluster});
         observer.complete();

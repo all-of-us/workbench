@@ -1,8 +1,10 @@
 package org.pmiops.workbench.notebooks;
 
+import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.notebooks.model.Cluster;
+import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 
 /**
@@ -10,6 +12,11 @@ import org.pmiops.workbench.notebooks.model.StorageLink;
  * for internal use.
  */
 public interface LeonardoNotebooksClient {
+  List<ListClusterResponse> listClustersByProject(String googleProject);
+
+  /** lists all notebook clusters as the appengine SA, to be used only for admin operations */
+  List<ListClusterResponse> listClustersByProjectAsAdmin(String googleProject);
+
   /**
    * Creates a notebooks cluster owned by the current authenticated user.
    *
@@ -23,6 +30,9 @@ public interface LeonardoNotebooksClient {
 
   /** Deletes a notebook cluster */
   void deleteCluster(String googleProject, String clusterName) throws WorkbenchException;
+
+  /** Deletes a notebook cluster as the appengine SA, to be used only for admin operations */
+  void deleteClusterAsAdmin(String googleProject, String clusterName) throws WorkbenchException;
 
   /** Gets information about a notebook cluster */
   Cluster getCluster(String googleProject, String clusterName) throws WorkbenchException;
