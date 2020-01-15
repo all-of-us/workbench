@@ -18,14 +18,17 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.actionaudit.auditors.ClusterAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -50,9 +53,11 @@ import org.pmiops.workbench.model.ClusterLocalizeRequest;
 import org.pmiops.workbench.model.ClusterLocalizeResponse;
 import org.pmiops.workbench.model.ClusterStatus;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.ListClusterDeleteRequest;
 import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
+import org.pmiops.workbench.notebooks.model.ListClusterResponse;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -77,6 +82,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClusterControllerTest {
 
   private static final String BILLING_PROJECT_ID = "proj";
+  private static final String BILLING_PROJECT_ID_2 = "proj2";
   // a workspace's namespace is always its billing project ID
   private static final String WORKSPACE_NS = BILLING_PROJECT_ID;
   private static final String WORKSPACE_ID = "wsid";
@@ -89,6 +95,8 @@ public class ClusterControllerTest {
   private static final String API_HOST = "api.stable.fake-research-aou.org";
   private static final String API_BASE_URL = "https://" + API_HOST;
   private static final String BIGQUERY_DATASET = "dataset-name";
+  private static final String EXTRA_CLUSTER_NAME = "all-of-us-extra";
+  private static final String EXTRA_CLUSTER_NAME_DIFFERENT_PROJECT = "all-of-us-different-project";
 
   private static WorkbenchConfig config = new WorkbenchConfig();
   private static DbUser user = new DbUser();
@@ -96,6 +104,7 @@ public class ClusterControllerTest {
   @TestConfiguration
   @Import({ClusterController.class, UserServiceImpl.class})
   @MockBean({
+    ClusterAuditor.class,
     FireCloudService.class,
     LeonardoNotebooksClient.class,
     WorkspaceService.class,
@@ -132,6 +141,7 @@ public class ClusterControllerTest {
 
   @Captor private ArgumentCaptor<Map<String, String>> mapCaptor;
 
+  @Autowired ClusterAuditor clusterAuditor;
   @Autowired LeonardoNotebooksClient notebookService;
   @Autowired FireCloudService fireCloudService;
   @Autowired UserDao userDao;
@@ -142,6 +152,13 @@ public class ClusterControllerTest {
 
   private DbCdrVersion cdrVersion;
   private org.pmiops.workbench.notebooks.model.Cluster testFcCluster;
+  private org.pmiops.workbench.notebooks.model.Cluster testFcCluster2;
+  private org.pmiops.workbench.notebooks.model.Cluster testFcClusterDifferentProject;
+  private org.pmiops.workbench.notebooks.model.ListClusterResponse testFcClusterListResponse;
+  private org.pmiops.workbench.notebooks.model.ListClusterResponse testFcClusterListResponse2;
+  private org.pmiops.workbench.notebooks.model.ListClusterResponse
+      testFcClusterListResponseDifferentProject;
+
   private Cluster testCluster;
   private DbWorkspace testWorkspace;
 
@@ -172,17 +189,52 @@ public class ClusterControllerTest {
     cdrVersion.setBigqueryDataset(BIGQUERY_DATASET);
 
     String createdDate = Date.fromYearMonthDay(1988, 12, 26).toString();
+
     testFcCluster =
         new org.pmiops.workbench.notebooks.model.Cluster()
             .clusterName(getClusterName())
             .googleProject(BILLING_PROJECT_ID)
             .status(org.pmiops.workbench.notebooks.model.ClusterStatus.DELETING)
             .createdDate(createdDate);
+    testFcClusterListResponse =
+        new org.pmiops.workbench.notebooks.model.ListClusterResponse()
+            .clusterName(getClusterName())
+            .googleProject(BILLING_PROJECT_ID)
+            .status(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING)
+            .createdDate(createdDate);
     testCluster =
         new Cluster()
             .clusterName(getClusterName())
             .clusterNamespace(BILLING_PROJECT_ID)
             .status(ClusterStatus.DELETING)
+            .createdDate(createdDate);
+
+    testFcCluster2 =
+        new org.pmiops.workbench.notebooks.model.Cluster()
+            .clusterName(EXTRA_CLUSTER_NAME)
+            .googleProject(BILLING_PROJECT_ID)
+            .status(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING)
+            .createdDate(createdDate);
+
+    testFcClusterListResponse2 =
+        new org.pmiops.workbench.notebooks.model.ListClusterResponse()
+            .clusterName(EXTRA_CLUSTER_NAME)
+            .googleProject(BILLING_PROJECT_ID)
+            .status(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING)
+            .createdDate(createdDate);
+
+    testFcClusterDifferentProject =
+        new org.pmiops.workbench.notebooks.model.Cluster()
+            .clusterName(EXTRA_CLUSTER_NAME_DIFFERENT_PROJECT)
+            .googleProject(BILLING_PROJECT_ID_2)
+            .status(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING)
+            .createdDate(createdDate);
+
+    testFcClusterListResponseDifferentProject =
+        new org.pmiops.workbench.notebooks.model.ListClusterResponse()
+            .clusterName(EXTRA_CLUSTER_NAME_DIFFERENT_PROJECT)
+            .googleProject(BILLING_PROJECT_ID_2)
+            .status(org.pmiops.workbench.notebooks.model.ClusterStatus.RUNNING)
             .createdDate(createdDate);
 
     testWorkspace = new DbWorkspace();
@@ -201,7 +253,7 @@ public class ClusterControllerTest {
         .bucketName(BUCKET_NAME);
   }
 
-  private void stubGetWorkspace(String ns, String name, String creator) throws Exception {
+  private void stubGetWorkspace(String ns, String name, String creator) {
     DbWorkspace w = new DbWorkspace();
     w.setWorkspaceNamespace(ns);
     w.setFirecloudName(name);
@@ -210,7 +262,7 @@ public class ClusterControllerTest {
     stubGetFcWorkspace(createFcWorkspace(ns, name, creator));
   }
 
-  private void stubGetFcWorkspace(FirecloudWorkspace fcWorkspace) throws Exception {
+  private void stubGetFcWorkspace(FirecloudWorkspace fcWorkspace) {
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setWorkspace(fcWorkspace);
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
@@ -229,7 +281,7 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testListClusters() throws Exception {
+  public void testListClusters() {
     when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
         .thenReturn(testFcCluster);
 
@@ -242,7 +294,96 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testListClustersUnknownStatus() throws Exception {
+  public void testDeleteClustersInProject() {
+    List<ListClusterResponse> listClusterResponseList = ImmutableList.of(testFcClusterListResponse);
+    when(notebookService.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
+        .thenReturn(listClusterResponseList);
+
+    clusterController.deleteClustersInProject(
+        BILLING_PROJECT_ID,
+        new ListClusterDeleteRequest()
+            .clustersToDelete(ImmutableList.of(testFcCluster.getClusterName())));
+    verify(notebookService)
+        .deleteClusterAsAdmin(BILLING_PROJECT_ID, testFcCluster.getClusterName());
+    verify(clusterAuditor)
+        .fireDeleteClustersInProject(
+            BILLING_PROJECT_ID,
+            listClusterResponseList.stream()
+                .map(ListClusterResponse::getClusterName)
+                .collect(Collectors.toList()));
+  }
+
+  @Test
+  public void testDeleteClustersInProjectDeleteSome() {
+    List<ListClusterResponse> listClusterResponseList =
+        ImmutableList.of(testFcClusterListResponse, testFcClusterListResponse2);
+    List<String> clustersToDelete = ImmutableList.of(testFcCluster.getClusterName());
+    when(notebookService.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
+        .thenReturn(listClusterResponseList);
+
+    clusterController.deleteClustersInProject(
+        BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(clustersToDelete));
+    verify(notebookService, times(clustersToDelete.size()))
+        .deleteClusterAsAdmin(BILLING_PROJECT_ID, testFcCluster.getClusterName());
+    verify(clusterAuditor, times(1))
+        .fireDeleteClustersInProject(BILLING_PROJECT_ID, clustersToDelete);
+  }
+
+  @Test
+  public void testDeleteClustersInProjectDeleteDoesNotAffectOtherProjects() {
+    List<ListClusterResponse> listClusterResponseList =
+        ImmutableList.of(testFcClusterListResponse, testFcClusterListResponse2);
+    List<String> clustersToDelete =
+        ImmutableList.of(testFcClusterDifferentProject.getClusterName());
+    when(notebookService.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
+        .thenReturn(listClusterResponseList);
+
+    clusterController.deleteClustersInProject(
+        BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(clustersToDelete));
+    verify(notebookService, times(0))
+        .deleteClusterAsAdmin(BILLING_PROJECT_ID, testFcCluster.getClusterName());
+    verify(clusterAuditor, times(0))
+        .fireDeleteClustersInProject(BILLING_PROJECT_ID, clustersToDelete);
+  }
+
+  @Test
+  public void testDeleteClustersInProjectNoClusters() {
+    List<ListClusterResponse> listClusterResponseList = ImmutableList.of(testFcClusterListResponse);
+    when(notebookService.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
+        .thenReturn(listClusterResponseList);
+
+    clusterController.deleteClustersInProject(
+        BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(ImmutableList.of()));
+    verify(notebookService, never())
+        .deleteClusterAsAdmin(BILLING_PROJECT_ID, testFcCluster.getClusterName());
+    verify(clusterAuditor, never())
+        .fireDeleteClustersInProject(
+            BILLING_PROJECT_ID,
+            listClusterResponseList.stream()
+                .map(ListClusterResponse::getClusterName)
+                .collect(Collectors.toList()));
+  }
+
+  @Test
+  public void testDeleteClustersInProjectNullClustersList() {
+    List<ListClusterResponse> listClusterResponseList = ImmutableList.of(testFcClusterListResponse);
+    when(notebookService.listClustersByProjectAsAdmin(BILLING_PROJECT_ID))
+        .thenReturn(listClusterResponseList);
+
+    clusterController.deleteClustersInProject(
+        BILLING_PROJECT_ID, new ListClusterDeleteRequest().clustersToDelete(null));
+    verify(notebookService)
+        .deleteClusterAsAdmin(BILLING_PROJECT_ID, testFcCluster.getClusterName());
+    verify(clusterAuditor)
+        .fireDeleteClustersInProject(
+            BILLING_PROJECT_ID,
+            listClusterResponseList.stream()
+                .map(ListClusterResponse::getClusterName)
+                .collect(Collectors.toList()));
+  }
+
+  @Test
+  public void testListClustersUnknownStatus() {
     when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
         .thenReturn(testFcCluster.status(null));
 
@@ -256,12 +397,12 @@ public class ClusterControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testListClustersNullBillingProject() throws Exception {
+  public void testListClustersNullBillingProject() {
     clusterController.listClusters(null, WORKSPACE_NAME);
   }
 
   @Test
-  public void testListClustersLazyCreate() throws Exception {
+  public void testListClustersLazyCreate() {
     when(notebookService.getCluster(BILLING_PROJECT_ID, getClusterName()))
         .thenThrow(new NotFoundException());
     when(notebookService.createCluster(
@@ -278,7 +419,7 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testDeleteCluster() throws Exception {
+  public void testDeleteCluster() {
     clusterController.deleteCluster(BILLING_PROJECT_ID, "cluster");
     verify(notebookService).deleteCluster(BILLING_PROJECT_ID, "cluster");
   }
@@ -324,7 +465,7 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testLocalize() throws Exception {
+  public void testLocalize() {
     ClusterLocalizeRequest req =
         new ClusterLocalizeRequest()
             .workspaceNamespace(WORKSPACE_NS)
@@ -354,7 +495,7 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testLocalize_playgroundMode() throws Exception {
+  public void testLocalize_playgroundMode() {
     ClusterLocalizeRequest req =
         new ClusterLocalizeRequest()
             .workspaceNamespace(WORKSPACE_NS)
@@ -378,7 +519,7 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testLocalize_differentNamespace() throws Exception {
+  public void testLocalize_differentNamespace() {
     ClusterLocalizeRequest req =
         new ClusterLocalizeRequest()
             .workspaceNamespace(WORKSPACE_NS)
@@ -406,7 +547,7 @@ public class ClusterControllerTest {
   }
 
   @Test
-  public void testLocalize_noNotebooks() throws Exception {
+  public void testLocalize_noNotebooks() {
     ClusterLocalizeRequest req = new ClusterLocalizeRequest();
     req.setWorkspaceNamespace(WORKSPACE_NS);
     req.setWorkspaceId(WORKSPACE_ID);

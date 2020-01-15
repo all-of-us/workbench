@@ -51,8 +51,7 @@ public class StackdriverStatsExporterServiceTest {
     StackdriverStatsConfiguration statsConfiguration =
         exporterService.makeStackdriverStatsConfiguration();
     assertThat(statsConfiguration.getProjectId()).isEqualTo(PROJECT_ID);
-    assertThat(statsConfiguration.getMetricNamePrefix())
-        .isEqualTo("custom.googleapis.com/unit-test/");
+    assertThat(statsConfiguration.getMetricNamePrefix()).isEqualTo("custom.googleapis.com/");
 
     final MonitoredResource monitoredResource = statsConfiguration.getMonitoredResource();
     assertThat(monitoredResource.getType()).isEqualTo("generic_node");

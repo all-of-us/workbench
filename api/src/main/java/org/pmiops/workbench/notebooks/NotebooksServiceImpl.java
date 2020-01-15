@@ -23,7 +23,7 @@ import org.pmiops.workbench.google.GoogleCloudLocators;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
+import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -160,7 +160,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   public FileDetail cloneNotebook(
       String workspaceNamespace, String workspaceName, String fromNotebookName) {
     String newName = "Duplicate of " + fromNotebookName;
-    final FileDetail result =
+    final FileDetail copiedNotebookFileDetail =
         copyNotebook(
             workspaceNamespace,
             workspaceName,
@@ -168,8 +168,8 @@ public class NotebooksServiceImpl implements NotebooksService {
             workspaceNamespace,
             workspaceName,
             newName);
-    monitoringService.recordIncrement(MonitoringViews.NOTEBOOK_CLONE);
-    return result;
+    monitoringService.recordEvent(EventMetric.NOTEBOOK_CLONE);
+    return copiedNotebookFileDetail;
   }
 
   @Override
@@ -181,7 +181,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         workspaceService.getRequired(workspaceNamespace, workspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
         notebookLocators.fullPath);
-    monitoringService.recordIncrement(MonitoringViews.NOTEBOOK_DELETE);
+    monitoringService.recordEvent(EventMetric.NOTEBOOK_DELETE);
   }
 
   @Override
@@ -224,7 +224,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         bucketName,
         "notebooks/" + NotebooksService.withNotebookExtension(notebookName),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
-    monitoringService.recordIncrement(MonitoringViews.NOTEBOOK_SAVE);
+    monitoringService.recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
 
   @Override

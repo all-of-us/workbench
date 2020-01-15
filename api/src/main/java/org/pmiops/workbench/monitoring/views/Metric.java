@@ -10,7 +10,9 @@ import io.opencensus.stats.View.Name;
 import io.opencensus.tags.TagKey;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+import org.pmiops.workbench.monitoring.attachments.Attachment;
 
 /**
  * This is essentially a carbon copy of io.opencensus.stats.View, but written as an interface
@@ -22,12 +24,12 @@ import java.util.function.Function;
  * we may wish to support other metrics backends, and don't want to depend on Stackdriver concepts
  * or implementation details.
  */
-public interface OpenCensusStatsViewInfo {
+public interface Metric {
 
-  Map<Class, Function<OpenCensusStatsViewInfo, Measure>> MEASURE_CLASS_TO_MEASURE_FUNCTION =
+  Map<Class, Function<Metric, Measure>> MEASURE_CLASS_TO_MEASURE_FUNCTION =
       ImmutableMap.of(
-          MeasureLong.class, OpenCensusStatsViewInfo::getMeasureLong,
-          MeasureDouble.class, OpenCensusStatsViewInfo::getMeasureDouble);
+          MeasureLong.class, Metric::getMeasureLong,
+          MeasureDouble.class, Metric::getMeasureDouble);
 
   String UNITLESS_UNIT = "1";
 
@@ -59,14 +61,25 @@ public interface OpenCensusStatsViewInfo {
     return MeasureDouble.create(getName(), getDescription(), getUnit());
   }
 
+  /**
+   * Distinguish between Long and Double measures via MeasureLong and MeasureDouble return values
+   *
+   * @return Measure.MeasureLong, Measure.MeasureDouble, or another (future) class
+   */
   Class getMeasureClass();
 
   Aggregation getAggregation();
 
   List<TagKey> getColumns();
 
-  default View toOpenCensusView() {
+  default View toView() {
     return View.create(
         getStatsName(), getDescription(), getMeasure(), getAggregation(), getColumns());
+  }
+
+  Set<Attachment> getSupportedAttachments();
+
+  default boolean supportsAttachment(Attachment attachment) {
+    return getSupportedAttachments().contains(attachment);
   }
 }

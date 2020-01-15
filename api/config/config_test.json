@@ -86,9 +86,15 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": true,
+    "enableRdrExport": true,
     "enableBillingLockout": true
   },
   "actionAudit": {
     "logName":"workbench-action-audit-test"
+  },
+  "rdrExport": {
+    "host": "pmi-drc-api-test.appspot.com",
+    "queueName": "rdrQueueTest",
+    "exportObjectsPerTask" : 10
   }
 }

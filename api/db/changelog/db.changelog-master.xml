@@ -121,6 +121,8 @@
     <include file="changelog/db.changelog-111-status-alert.xml"/>
     <include file="changelog/db.changelog-112-free-credits-time-management.xml"/>
     <include file="changelog/db.changelog-113-user-demographics-updates.xml"/>
+    <include file="changelog/db.changelog-114-workspace-last-export-date.xml"/>
+    <include file="changelog/db.changelog-115-addColumn-user-create-modified.xml"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`
