@@ -4,13 +4,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import com.google.common.collect.ImmutableMap;
-import io.opencensus.implcore.tags.TaggerImpl;
 import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
 import io.opencensus.stats.MeasureMap;
@@ -52,10 +50,11 @@ public class MonitoringServiceTest {
   @TestConfiguration
   @Import({MonitoringServiceImpl.class})
   @MockBean({
-      ViewManager.class,
-      StatsRecorder.class,
-      StackdriverStatsExporterService.class,
-      Tagger.class})
+    ViewManager.class,
+    StatsRecorder.class,
+    StackdriverStatsExporterService.class,
+    Tagger.class
+  })
   static class Configuration {}
 
   @Before
