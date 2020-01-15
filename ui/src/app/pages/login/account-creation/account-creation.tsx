@@ -47,6 +47,7 @@ import * as validate from 'validate.js';
 
 import {AccountCreationOptions} from './account-creation-options';
 import {AoUTitle} from "../../profile/data-use-agreement-styles";
+import {serverConfigStore} from "../../../utils/navigation";
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
@@ -463,21 +464,29 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <div style={{...styles.text, fontSize: 12, marginTop: '0.7rem'}}>All fields required unless indicated as optional</div>
           <Section header={<div>Create an <i>All of Us</i> username</div>}>
             <div>
-              <TextInputWithLabel value={username} inputId='username' inputName='username' placeholder='New Username'
-                                  invalid={this.state.usernameConflictError || this.usernameInvalidError()}
-                                  containerStyle={{width: '13rem'}} labelText='New Username'
-                                  onChange={v => this.usernameChanged(v)}>
-                <div style={{...inputStyles.iconArea}}>
-                  <ValidationIcon validSuccess={this.usernameValid}/>
-                </div>
-                <TooltipTrigger content={<div>Usernames can contain only letters (a-z),
-                  numbers (0-9), dashes (-), underscores (_), apostrophes ('), and periods (.)
-                  (minimum of 3 characters and maximum of 64 characters).<br/>Usernames cannot
-                  begin or end with a period (.) and may not contain more than one period (.) in a row.
-                </div>} style={{marginLeft: '0.5rem'}}>
-                  <InfoIcon style={{'height': '22px', 'paddingLeft': '2px'}}/>
-                </TooltipTrigger>
-              </TextInputWithLabel>
+              <FlexRow>
+                  <TextInputWithLabel value={username} inputId='username' inputName='username'
+                                      placeholder='New Username' invalid={
+                                        this.state.usernameConflictError || this.usernameInvalidError()}
+                                      containerStyle={{width: '26rem'}} labelText={
+                                        <div>New Username
+                                          <TooltipTrigger side='top' content={<div>Usernames can contain only letters
+                                            (a-z), numbers (0-9), dashes (-), underscores (_), apostrophes ('), and
+                                            periods (.) (minimum of 3 characters and maximum of 64
+                                            characters).<br/>Usernames cannot begin or end with a period (.) and may not
+                                            contain more than one period (.) in a row.</div>}
+                                                          style={{marginLeft: '0.5rem'}}>
+                                            <InfoIcon style={{'height': '16px', 'paddingLeft': '2px'}}/>
+                                          </TooltipTrigger>
+                                        </div>}
+                                    onChange={v => this.usernameChanged(v)}>
+                  <div style={{...inputStyles.iconArea}}>
+                    <ValidationIcon validSuccess={this.usernameValid}/>
+                  </div>
+                  <i style={{...styles.asideText, marginLeft: 4}}>@{serverConfigStore.getValue().gsuiteDomain}</i>
+                </TextInputWithLabel>
+
+              </FlexRow>
               {this.state.usernameConflictError &&
               <div style={{height: '1.5rem'}}>
                 <Error id='usernameConflictError'>
