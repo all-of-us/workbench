@@ -198,17 +198,17 @@ public class RdrExportServiceImpl implements RdrExportService {
 
     if (null != dbDemographicSurvey && dbDemographicSurvey.getRaceEnum() != null) {
       researcher.setRace(
-              dbDemographicSurvey.getRaceEnum().stream()
-                      .map(dbUserRace -> RdrExportEnums.raceToRdrRace(dbUserRace))
-                      .collect(Collectors.toList()));
+          dbDemographicSurvey.getRaceEnum().stream()
+              .map(dbUserRace -> RdrExportEnums.raceToRdrRace(dbUserRace))
+              .collect(Collectors.toList()));
     } else {
       researcher.setRace(new ArrayList<>());
     }
     if (null != dbDemographicSurvey && dbDemographicSurvey.getGenderEnum() != null) {
       researcher.setGender(
-              dbDemographicSurvey.getGenderEnum().stream()
-                      .map(dbUserGender -> RdrExportEnums.genderToRdrGender(dbUserGender))
-                      .collect(Collectors.toList()));
+          dbDemographicSurvey.getGenderEnum().stream()
+              .map(dbUserGender -> RdrExportEnums.genderToRdrGender(dbUserGender))
+              .collect(Collectors.toList()));
     } else {
       researcher.setGender(new ArrayList<>());
     }
