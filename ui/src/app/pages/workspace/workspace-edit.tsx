@@ -22,6 +22,8 @@ import * as React from 'react';
 import * as validate from 'validate.js';
 import {Dropdown} from "primereact/dropdown";
 
+declare const gapi: any;
+
 export const ResearchPurposeDescription =
   <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
    of <i>All of Us</i> data to provide a meaningful description of the intended purpose of data use
