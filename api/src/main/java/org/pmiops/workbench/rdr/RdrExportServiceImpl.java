@@ -157,7 +157,6 @@ public class RdrExportServiceImpl implements RdrExportService {
   private RdrResearcher toRdrResearcher(DbUser dbUser) {
     RdrResearcher researcher = new RdrResearcher();
     researcher.setUserId((int) dbUser.getUserId());
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     if (null != researcher.getCreationTime()) {
       researcher.setCreationTime(dbUser.getCreationTime().toLocalDateTime().atOffset(offset));
     } else {
