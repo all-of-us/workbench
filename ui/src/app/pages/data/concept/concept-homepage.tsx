@@ -351,8 +351,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
         cacheItem.items = resp.items;
         this.setState({completedDomainSearches: completedDomainSearches});
         if (activeTabSearch) {
-          const conceptDomainCounts = environment.enableNewConceptTabs ? [...resp.domainCounts]
-            : resp.domainCounts.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
+          const conceptDomainCounts = environment.enableNewConceptTabs ? resp.domainCounts
+            : resp.domainCounts.filter(item => ![Domain.PHYSICALMEASUREMENT, Domain.SURVEY].includes(item.domain));
           this.setState({
             searchLoading: false,
             conceptDomainCounts: conceptDomainCounts,
