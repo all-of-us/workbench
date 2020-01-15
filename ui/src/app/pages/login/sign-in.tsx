@@ -12,7 +12,7 @@ import {AccountCreation} from './account-creation/account-creation';
 import {Profile} from 'generated/fetch';
 
 import {FlexColumn} from 'app/components/flex';
-import {PageImages, pageImages} from 'app/pages/login/account-creation-images';
+import {SignedOutImages, signedOutImages} from 'app/pages/login/signed-out-images';
 import * as React from 'react';
 import {AccountCreationSurvey} from './account-creation/account-creation-survey';
 
@@ -20,7 +20,7 @@ import {AccountCreationSurvey} from './account-creation/account-creation-survey'
 
 interface Step {
   stepName: string;
-  backgroundImages?: PageImages;
+  backgroundImages?: SignedOutImages;
 }
 
 export interface SignInProps {
@@ -36,7 +36,7 @@ interface SignInState {
 }
 
 const styles = {
-  template: (windowSize, images: PageImages) => {
+  template: (windowSize, images: SignedOutImages) => {
     // Lower bounds to prevent the small and large images from covering the
     // creation controls, respectively.
     const bgWidthMinPx = 900;
@@ -94,7 +94,7 @@ export const SignInReact = withWindowSize()(
     constructor(props: SignInProps) {
       super(props);
       this.state = {
-        currentStep: {stepName: 'login', backgroundImages: pageImages.login},
+        currentStep: {stepName: 'login', backgroundImages: signedOutImages.login},
         invitationKey: '',
         profile: {} as Profile
       };

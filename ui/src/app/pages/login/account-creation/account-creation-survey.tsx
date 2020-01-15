@@ -17,7 +17,7 @@ import {
 } from 'generated/fetch';
 import {Section} from './account-creation';
 
-import {pageImages} from 'app/pages/login/account-creation-images';
+import {signedOutImages} from 'app/pages/login/signed-out-images';
 import {
   profileApi
 } from 'app/services/swagger-fetch-clients';
@@ -97,7 +97,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     profileApi().createAccount({profile: this.profileObj, invitationKey: invitationKey})
       .then((savedProfile) => {
         this.setState({profile: savedProfile, creatingAccount: false});
-        setProfile(savedProfile, {stepName: 'accountCreationSuccess', backgroundImages: pageImages.login});
+        setProfile(savedProfile, {stepName: 'accountCreationSuccess', backgroundImages: signedOutImages.login});
       }).catch(error => {
         console.log(error);
         this.setState({creatingAccount: false});

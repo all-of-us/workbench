@@ -1,9 +1,9 @@
-export interface PageImages {
+export interface SignedOutImages {
   backgroundImgSrc: string;
   smallerBackgroundImgSrc: string;
 }
 
-export const pageImages = {
+export const signedOutImages = {
   login: {
     backgroundImgSrc: '/assets/images/login-group.png',
     smallerBackgroundImgSrc: '/assets/images/login-standing.png'

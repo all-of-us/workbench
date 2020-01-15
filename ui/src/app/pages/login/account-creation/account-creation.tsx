@@ -23,8 +23,8 @@ import {
   profileApi
 } from 'app/services/swagger-fetch-clients';
 
-import {FlexColumn, FlexRow} from 'app/components/flex';
-import {pageImages} from 'app/pages/login/account-creation-images';
+import {FlexColumn, FlexRow, flexStyle} from 'app/components/flex';
+import {signedOutImages} from 'app/pages/login/signed-out-images';
 import {AoUTitle} from 'app/pages/profile/data-use-agreement-styles';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {environment} from 'environments/environment';
@@ -124,7 +124,7 @@ const nameLength = 80;
 
 export const Section = (props) => {
   return <FormSection
-      style={{display: 'flex', flexDirection: 'column', ...props.style}}>
+      style={{...flexStyle.column, ...props.style}}>
     <label style={styles.sectionHeader}>
       {props.header}
     </label>
@@ -251,7 +251,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     profileApi().createAccount({profile, invitationKey})
       .then((savedProfile) => {
         this.setState({profile: savedProfile, creatingAccount: false});
-        setProfile(savedProfile, {stepName: 'accountCreationSuccess', backgroundImages: pageImages.login}); })
+        setProfile(savedProfile, {stepName: 'accountCreationSuccess', backgroundImages: signedOutImages.login}); })
       .catch(error => {
         console.log(error);
         this.setState({creatingAccount: false});
