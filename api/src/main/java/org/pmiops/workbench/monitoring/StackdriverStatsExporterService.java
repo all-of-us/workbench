@@ -24,12 +24,13 @@ public class StackdriverStatsExporterService {
 
   private static final Logger logger =
       Logger.getLogger(StackdriverStatsExporterService.class.getName());
-  private static final String STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME = "custom.googleapis.com";
+  private static final String STACKDRIVER_CUSTOM_METRICS_PREFIX = "custom.googleapis.com/";
   private static final String MONITORED_RESOURCE_TYPE = "generic_node";
   private static final String PROJECT_ID_LABEL = "project_id";
   private static final String LOCATION_LABEL = "location";
   private static final String NAMESPACE_LABEL = "namespace";
   private static final String NODE_ID_LABEL = "node_id";
+  public static final String UNKNOWN_INSTANCE_PREFIX = "unknown-";
 
   private boolean initialized;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -65,22 +66,20 @@ public class StackdriverStatsExporterService {
   @VisibleForTesting
   public StackdriverStatsConfiguration makeStackdriverStatsConfiguration() {
     return StackdriverStatsConfiguration.builder()
-        .setMetricNamePrefix(buildMetricNamePrefix())
+        .setMetricNamePrefix(STACKDRIVER_CUSTOM_METRICS_PREFIX)
         .setProjectId(getProjectId())
         .setMonitoredResource(makeMonitoredResource())
         .build();
   }
 
   private MonitoredResource makeMonitoredResource() {
-    final MonitoredResource.Builder resultBuilder =
-        MonitoredResource.newBuilder()
-            .setType(MONITORED_RESOURCE_TYPE)
-            .putLabels(PROJECT_ID_LABEL, getProjectId())
-            .putLabels(LOCATION_LABEL, getLocation())
-            .putLabels(NAMESPACE_LABEL, getEnvironmentShortName())
-            .putLabels(NODE_ID_LABEL, getNodeId());
-
-    return resultBuilder.build();
+    return MonitoredResource.newBuilder()
+        .setType(MONITORED_RESOURCE_TYPE)
+        .putLabels(PROJECT_ID_LABEL, getProjectId())
+        .putLabels(LOCATION_LABEL, getLocation())
+        .putLabels(NAMESPACE_LABEL, getEnvironmentShortName())
+        .putLabels(NODE_ID_LABEL, getNodeId())
+        .build();
   }
 
   private String getProjectId() {
@@ -100,13 +99,15 @@ public class StackdriverStatsExporterService {
     }
   }
 
+  /**
+   * Stackdriver instances have very long, random ID strings. When running locally, however, the
+   * ModulesService throws an exception, so we need to assign non-conflicting and non-repeating ID
+   * strings.
+   *
+   * @return
+   */
   private String makeRandomNodeId() {
-    return UUID.randomUUID().toString();
-  }
-
-  private String buildMetricNamePrefix() {
-    return String.format(
-        "%s/%s/", STACKDRIVER_CUSTOM_METRICS_DOMAIN_NAME, getEnvironmentShortName());
+    return UNKNOWN_INSTANCE_PREFIX + UUID.randomUUID().toString();
   }
 
   @NotNull

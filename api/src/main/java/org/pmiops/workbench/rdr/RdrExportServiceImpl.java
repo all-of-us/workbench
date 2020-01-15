@@ -170,40 +170,48 @@ public class RdrExportServiceImpl implements RdrExportService {
       researcher.setZipCode(dbUser.getAddress().getZipCode());
     }
     DbDemographicSurvey dbDemographicSurvey = dbUser.getDemographicSurvey();
-    researcher.setDisability(
-        RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
-    researcher.setEducation(
-        RdrExportEnums.educationToRdrEducation(dbDemographicSurvey.getEducationEnum()));
-    if (dbDemographicSurvey.getEthnicityEnum() != null) {
-      researcher.setEthnicity(
-          new ArrayList<Ethnicity>(
-              Arrays.asList(
-                  RdrExportEnums.ethnicityToRdrEthnicity(dbDemographicSurvey.getEthnicityEnum()))));
+    if (null != dbDemographicSurvey) {
+      researcher.setDisability(
+          RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
+      researcher.setEducation(
+          RdrExportEnums.educationToRdrEducation(dbDemographicSurvey.getEducationEnum()));
+      if (dbDemographicSurvey.getEthnicityEnum() != null) {
+        researcher.setEthnicity(
+            new ArrayList<Ethnicity>(
+                Arrays.asList(
+                    RdrExportEnums.ethnicityToRdrEthnicity(
+                        dbDemographicSurvey.getEthnicityEnum()))));
+      }
+      if (dbDemographicSurvey.getSexAtBirthEnum() != null) {
+        researcher.setSexAtBirth(
+            RdrExportEnums.sexAtBirthToRdrSexAtBirth(
+                dbDemographicSurvey.getSexAtBirthEnum().get(0)));
+      }
+      if (dbDemographicSurvey.getSexualOrientationEnum() != null) {
+        researcher.setSexualOrientation(
+            RdrExportEnums.sexualOrientationToRdrSexualOrientation(
+                dbDemographicSurvey.getSexualOrientationEnum().get(0)));
+      }
+      researcher.setDisability(
+          RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
     }
-    if (dbDemographicSurvey.getRaceEnum() != null) {
-      researcher.setRace(
-          dbDemographicSurvey.getRaceEnum().stream()
-              .map(dbUserRace -> RdrExportEnums.raceToRdrRace(dbUserRace))
-              .collect(Collectors.toList()));
-    }
-    if (dbDemographicSurvey.getGenderEnum() != null) {
-      researcher.setGender(
-          dbDemographicSurvey.getGenderEnum().stream()
-              .map(dbUserGender -> RdrExportEnums.genderToRdrGender(dbUserGender))
-              .collect(Collectors.toList()));
-    }
-    if (dbDemographicSurvey.getSexAtBirthEnum() != null) {
-      researcher.setSexAtBirth(
-          RdrExportEnums.sexAtBirthToRdrSexAtBirth(dbDemographicSurvey.getSexAtBirthEnum().get(0)));
-    }
-    if (dbDemographicSurvey.getSexualOrientationEnum() != null) {
-      researcher.setSexualOrientation(
-          RdrExportEnums.sexualOrientationToRdrSexualOrientation(
-              dbDemographicSurvey.getSexualOrientationEnum().get(0)));
-    }
-    researcher.setDisability(
-        RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
 
+    if (null != dbDemographicSurvey && dbDemographicSurvey.getRaceEnum() != null) {
+      researcher.setRace(
+              dbDemographicSurvey.getRaceEnum().stream()
+                      .map(dbUserRace -> RdrExportEnums.raceToRdrRace(dbUserRace))
+                      .collect(Collectors.toList()));
+    } else {
+      researcher.setRace(new ArrayList<>());
+    }
+    if (null != dbDemographicSurvey && dbDemographicSurvey.getGenderEnum() != null) {
+      researcher.setGender(
+              dbDemographicSurvey.getGenderEnum().stream()
+                      .map(dbUserGender -> RdrExportEnums.genderToRdrGender(dbUserGender))
+                      .collect(Collectors.toList()));
+    } else {
+      researcher.setGender(new ArrayList<>());
+    }
     researcher.setAffiliations(
         dbUser.getInstitutionalAffiliations().stream()
             .map(
@@ -240,6 +248,9 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setDrugDevelopment(dbWorkspace.getDrugDevelopment());
     rdrWorkspace.setCommercialPurpose(dbWorkspace.getCommercialPurpose());
     rdrWorkspace.setEducational(dbWorkspace.getEducational());
+    rdrWorkspace.setReasonForInvestigation(dbWorkspace.getReasonForAllOfUs());
+    rdrWorkspace.setIntendToStudy(dbWorkspace.getIntendedStudy());
+    rdrWorkspace.setFindingsFromStudy(dbWorkspace.getAnticipatedFindings());
 
     // Call Firecloud to get a list of Collaborators
     FirecloudWorkspaceACL firecloudResponse =

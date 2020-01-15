@@ -511,14 +511,13 @@ export const ConceptHomepage = withCurrentWorkspace()(
                   <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>
               </Clickable>}
               <CheckBox checked={standardConceptsOnly}
+                        label='Standard concepts only'
+                        labelStyle={{marginLeft: '0.2rem'}}
                         data-test-id='standardConceptsCheckBox'
                         style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
-                        onChange={() => this.setState({
-                          standardConceptsOnly: !standardConceptsOnly
+                        onChange={(checked) => this.setState({
+                          standardConceptsOnly: checked
                         })}/>
-              <label style={{marginLeft: '0.2rem'}}>
-                Standard concepts only
-              </label>
             </div>
             {showSearchError &&
             <AlertDanger style={{width: '64.3%', marginLeft: '1%',

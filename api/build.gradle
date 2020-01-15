@@ -376,6 +376,7 @@ dependencies {
   compile project(":common-api")
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
   compile 'com.google.http-client:google-http-client-apache:1.29.2'
+  compile 'org.apache.commons:commons-collections4:4.4'
   compile 'com.google.apis:google-api-services-cloudresourcemanager:v1-rev549-1.25.0'
   compile 'mysql:mysql-connector-java:8.0.16'
   compile 'com.google.cloud.sql:mysql-socket-factory:1.0.10'
@@ -455,7 +456,7 @@ dependencies {
   toolsCompile 'commons-cli:commons-cli:1.4'
   toolsCompile 'com.opencsv:opencsv:4.6'
 
-  testCompile 'junit:junit:4.12'
+  testCompile 'junit:junit:4.13'
   testCompile 'org.mockito:mockito-core:2.18.3'
   testCompile "com.google.appengine:appengine-api-stubs:${GAE_VERSION}"
   testCompile "com.google.appengine:appengine-tools-sdk:${GAE_VERSION}"

@@ -18,6 +18,20 @@ export const styles = {
     borderColor: colors.success
   },
 
+  checkbox: {
+    cursor: 'pointer',
+    verticalAlign: 'middle'
+  },
+
+  checkboxLabel: {
+    cursor: 'pointer',
+    verticalAlign: 'middle'
+  },
+
+  disabledStyle: {
+    cursor: 'default'
+  },
+
   error: {
     padding: '0 0.5rem',
     fontWeight: 600,
@@ -119,13 +133,91 @@ export const RadioButton = ({ onChange, ...props }) => {
   />;
 };
 
-export const CheckBox = ({onChange, ...props}) => {
-  return <input
-    type='checkbox'
-    onChange={onChange ? (e => onChange(e.target.checked)) : undefined}
-    {...props}
-  />;
-};
+interface CheckBoxProps {
+  // Whether the checkbox should be checked. If manageOwnState is false, the
+  // checkbox will always be rendered with the value of this prop. If
+  // manageOwnState is true, this prop controls only the initial value.
+  checked?: boolean;
+  // Whether the checkbox is rendered in a disabled state.
+  disabled?: boolean;
+  id?: string;
+  // An optional label to show alongside the input. Can be a plain string or
+  // any React node.
+  label?: React.ReactNode;
+  // Styles to apply to the label element. Only relevant when label is non-null.
+  labelStyle?: React.CSSProperties;
+  // Indicates whether the CheckBox should be responsible for managing its own
+  // state. When false, the HTML input will always be rendered with the value of
+  // the passed 'checked' prop.
+  manageOwnState: boolean;
+  // Callback called when the user clicks the checkbox or label, containing the
+  // new checked value.
+  onChange?: (boolean) => void;
+  // Styles for the <input> checkbox component.
+  style?: React.CSSProperties;
+  // If the label is non-empty, styles to be applied to the <span> wrapper.
+  wrapperStyle?: React.CSSProperties;
+}
+
+interface CheckBoxState {
+  checked: boolean;
+}
+
+export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
+  static defaultProps: CheckBoxProps = {
+    checked: false,
+    manageOwnState: true
+  };
+
+  uniqueId?: string = null;
+
+  constructor(props: CheckBoxProps) {
+    super(props);
+    this.state = {
+      checked: props.checked
+    };
+
+    this.uniqueId = props.id || fp.uniqueId('checkbox');
+  }
+
+  handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (this.props.manageOwnState) {
+      // We only track state internally if props aren't being used to render
+      // the checkbox value.
+      this.setState({checked: !this.state.checked});
+    }
+    if (this.props.onChange) {
+      this.props.onChange(e.target.checked);
+    }
+  }
+  render() {
+    const {
+      checked, disabled, label, labelStyle, onChange, manageOwnState, style, wrapperStyle,
+      ...otherProps
+    } = this.props;
+    const maybeDisabledOverrides = disabled ? styles.disabledStyle : {};
+
+    const input = <input
+      id={this.uniqueId}
+      type='checkbox'
+      checked={manageOwnState ? this.state.checked : checked}
+      disabled={disabled}
+      onChange={e => this.handleChange(e)}
+      style={{...styles.checkbox, ...style, ...maybeDisabledOverrides}}
+      {...otherProps}
+    />;
+    if (label) {
+      return <span style={wrapperStyle}>{input}
+        <label htmlFor={this.uniqueId}
+               style={{...styles.checkboxLabel,
+                 ...labelStyle,
+                 ...maybeDisabledOverrides}}>{label}</label>
+      </span>;
+    } else {
+      return input;
+    }
+  }
+}
 
 export const Select = ({value, options, onChange, ...props}) => {
   return <RSelect

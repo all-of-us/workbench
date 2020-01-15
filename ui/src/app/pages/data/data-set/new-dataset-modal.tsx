@@ -180,8 +180,8 @@ class NewDataSetModal extends React.Component<Props, State> {
     }
   }
 
-  changeExportToNotebook() {
-    this.setState({exportToNotebook: !this.state.exportToNotebook});
+  changeExportToNotebook(checked: boolean) {
+    this.setState({exportToNotebook: checked});
   }
 
   onSaveClick() {
@@ -282,8 +282,8 @@ class NewDataSetModal extends React.Component<Props, State> {
         <div style={{display: 'flex', alignItems: 'center', marginTop: '1rem'}}>
           <CheckBox style={{height: 17, width: 17}}
                     data-test-id='export-to-notebook'
-                    onChange={() => this.changeExportToNotebook()}
-                    checked={this.state.exportToNotebook} />
+                    onChange={(checked) => this.changeExportToNotebook(checked)}
+                    checked={false} />
           <div style={{marginLeft: '.5rem',
             color: colors.primary}}>Export to notebook</div>
         </div>

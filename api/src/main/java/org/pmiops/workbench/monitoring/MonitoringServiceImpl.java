@@ -1,5 +1,6 @@
 package org.pmiops.workbench.monitoring;
 
+import io.opencensus.metrics.data.AttachmentValue;
 import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
 import io.opencensus.stats.MeasureMap;
@@ -10,8 +11,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
+import org.pmiops.workbench.monitoring.views.Metric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,53 +43,24 @@ public class MonitoringServiceImpl implements MonitoringService {
   }
 
   private void registerSignals() {
-    Arrays.stream(MonitoringViews.values())
-        .map(MonitoringViews::toOpenCensusView)
-        .forEach(viewManager::registerView);
+    Arrays.stream(GaugeMetric.values()).map(Metric::toView).forEach(viewManager::registerView);
   }
 
   @Override
-  public void recordValue(OpenCensusStatsViewInfo viewInfo, Number value) {
+  public void recordValues(
+      Map<Metric, Number> viewInfoToValue, Map<String, AttachmentValue> attachmentKeyToValue) {
     try {
       initStatsConfigurationIdempotent();
-      if (value == null) {
-        logger.log(
-            Level.WARNING,
-            String.format(
-                "Attempting to log a null numeric value for signal %s", viewInfo.getName()));
-        return;
-      }
-      if (viewInfo.getMeasureClass().equals(MeasureLong.class)) {
-        recordLongValue(viewInfo.getMeasureLong(), value.longValue());
-      } else if (viewInfo.getMeasureClass().equals(MeasureDouble.class)) {
-        recordDoubleValue(viewInfo.getMeasureDouble(), value.doubleValue());
-      } else {
-        logger.log(
-            Level.WARNING,
-            String.format("Unrecognized measure class %s", viewInfo.getMeasureClass().getName()));
-      }
-    } catch (RuntimeException e) {
-      logAndSwallow(e);
-    }
-  }
-
-  /**
-   * Record multiple values at once, indexed by keys in the StatsViewProperties enum. This should
-   * save calls to Stackdriver.
-   *
-   * @param enumToValue
-   */
-  @Override
-  public void recordValues(Map<OpenCensusStatsViewInfo, Number> enumToValue) {
-    try {
-      initStatsConfigurationIdempotent();
-      if (enumToValue.isEmpty()) {
+      if (viewInfoToValue.isEmpty()) {
         logger.warning("recordValue() called with empty map.");
         return;
       }
       final MeasureMap measureMap = statsRecorder.newMeasureMap();
-      enumToValue.forEach(
+      viewInfoToValue.forEach(
           (viewProperties, value) -> addToMeasureMap(measureMap, viewProperties, value));
+      attachmentKeyToValue.forEach(measureMap::putAttachment);
+
+      // Finally, send the data to the backend (Stackdriver/Cloud Monitoring for now).
       measureMap.record();
     } catch (RuntimeException e) {
       logAndSwallow(e);
@@ -104,9 +76,7 @@ public class MonitoringServiceImpl implements MonitoringService {
    * @param value
    */
   private void addToMeasureMap(
-      @NotNull MeasureMap measureMap,
-      @NotNull OpenCensusStatsViewInfo viewProperties,
-      @NotNull Number value) {
+      @NotNull MeasureMap measureMap, @NotNull Metric viewProperties, @NotNull Number value) {
     if (viewProperties.getMeasureClass().equals(MeasureLong.class)) {
       measureMap.put(viewProperties.getMeasureLong(), value.longValue());
     } else if (viewProperties.getMeasureClass().equals(MeasureDouble.class)) {

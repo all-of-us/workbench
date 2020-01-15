@@ -86,7 +86,8 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": true,
-    "enableRdrExport": true
+    "enableRdrExport": true,
+    "enableBillingLockout": true
   },
   "actionAudit": {
     "logName":"workbench-action-audit-test"

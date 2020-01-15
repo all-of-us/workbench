@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +44,9 @@ import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.attachments.Attachment;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,8 +64,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final int DATA_SET_VERSION = 1;
 
   @Override
-  public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
-    return ImmutableMap.of(MonitoringViews.DATASET_COUNT, dataSetDao.count());
+  public Collection<MeasurementBundle> getGaugeData() {
+    Map<Boolean, Long> invalidToCount = dataSetDao.getInvalidToCountMap();
+    return ImmutableSet.of(
+        MeasurementBundle.builder()
+            .addMeasurement(GaugeMetric.DATASET_COUNT, invalidToCount.getOrDefault(false, 0L))
+            .addAttachment(Attachment.DATASET_INVALID, Boolean.valueOf(false).toString())
+            .build(),
+        MeasurementBundle.builder()
+            .addMeasurement(GaugeMetric.DATASET_COUNT, invalidToCount.getOrDefault(true, 0L))
+            .addAttachment(Attachment.DATASET_INVALID, Boolean.valueOf(true).toString())
+            .build());
   }
 
   /*
@@ -523,7 +534,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     switch (kernelTypeEnum) {
       case R:
         prerequisites =
-            "if(! \"reticulate\" %in% installed.packages()) { install.packages(\"reticulate\") }\n"
+            // RW-4241 workaround: update when the Jupyter image with the reticulate fix is fully
+            // rolled out
+            "require(devtools)\n"
+                + "devtools::install_github(\"rstudio/reticulate\", ref=\"00172079\")\n"
                 + "library(reticulate)\n"
                 + "pd <- reticulate::import(\"pandas\")";
         break;

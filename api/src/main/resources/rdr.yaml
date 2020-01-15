@@ -12,7 +12,7 @@ info:
 host: "pmi-drc-api-test.appspot.com"
 schemes:
   - "https"
-basePath: /rdr
+basePath: /
 
 securityDefinitions:
   googleoauth:
@@ -39,7 +39,7 @@ produces:
 ##########################################################################################
 
 paths:
-  /v1/workbench/directory/workspaces:
+  /rdr/v1/workbench/directory/workspaces:
     post:
       description: Submits one or more workspace snapshots for storage in the RDR.
       tags:
@@ -59,7 +59,7 @@ paths:
         200:
           description: successful operation
 
-  /v1/workbench/directory/researchers:
+  /rdr/v1/workbench/directory/researchers:
     post:
       description: Submits one or more researcher snapshots for storage in the RDR.
       tags:

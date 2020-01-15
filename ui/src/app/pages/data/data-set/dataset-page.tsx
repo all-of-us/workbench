@@ -913,6 +913,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                     <BoxHeader step='3' header='Select Values' subHeader='Columns'>
                     <div style={styles.selectAllContainer}>
                       <CheckBox style={{height: 17, width: 17}}
+                                manageOwnState={false}
                                 disabled={fp.isEmpty(valueSets)}
                                 data-test-id='select-all'
                                 onChange={() => this.selectAllValues()}

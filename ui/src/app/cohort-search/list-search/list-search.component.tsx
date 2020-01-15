@@ -149,9 +149,10 @@ interface Props {
 
 interface State {
   data: any;
+  standardData: any;
   error: boolean;
   loading: boolean;
-  results: string;
+  standardOnly: boolean;
   sourceMatch: any;
   ingredients: any;
   hoverId: string;
@@ -163,9 +164,10 @@ export const ListSearch = withCurrentWorkspace()(
       super(props);
       this.state = {
         data: null,
+        standardData: null,
         error: false,
         loading: false,
-        results: 'all',
+        standardOnly: false,
         sourceMatch: undefined,
         ingredients: {},
         hoverId: undefined
@@ -184,12 +186,16 @@ export const ListSearch = withCurrentWorkspace()(
     getResults = async(value: string) => {
       let sourceMatch;
       try {
-        this.setState({data: null, error: false, loading: true, results: 'all'});
+        this.setState({data: null, error: false, loading: true, standardOnly: false});
         const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
         const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim());
         const data = resp.items;
         if (data.length && this.checkSource) {
           sourceMatch = data.find(item => item.code.toLowerCase() === value.trim().toLowerCase() && !item.isStandard);
+          if (sourceMatch) {
+            const stdResp = await cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(+cdrVersionId, domain, sourceMatch.conceptId);
+            this.setState({standardData: stdResp.items});
+          }
         }
         this.setState({data});
       } catch (err) {
@@ -199,19 +205,9 @@ export const ListSearch = withCurrentWorkspace()(
       }
     }
 
-    getStandardResults = async() => {
-      try {
-        const {wizard: {domain}, workspace: {cdrVersionId}} = this.props;
-        const {sourceMatch} = this.state;
-        this.trackEvent('Standard Vocab Hyperlink');
-        this.setState({data: null, error: false, loading: true, results: 'standard'});
-        const resp = await cohortBuilderApi().getStandardCriteriaByDomainAndConceptId(+cdrVersionId, domain, sourceMatch.conceptId);
-        this.setState({data: resp.items});
-      } catch (err) {
-        this.setState({error: true});
-      } finally {
-        this.setState({loading: false});
-      }
+    showStandardResults() {
+      this.trackEvent('Standard Vocab Hyperlink');
+      this.setState({standardOnly: true});
     }
 
     get checkSource() {
@@ -337,8 +333,10 @@ export const ListSearch = withCurrentWorkspace()(
 
     render() {
       const {wizard: {domain}} = this.props;
-      const {data, error, ingredients, loading, results, sourceMatch} = this.state;
+      const {data, error, ingredients, loading, standardOnly, sourceMatch, standardData} = this.state;
       const listStyle = domain === DomainType.DRUG ? {...styles.listContainer, marginTop: '4.25rem'} : styles.listContainer;
+      const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
+      const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
         <div style={styles.searchContainer}>
           <div style={styles.searchBar}>
@@ -351,25 +349,27 @@ export const ListSearch = withCurrentWorkspace()(
             Your search may bring back brand names, generics and ingredients. Only ingredients may be added to your search criteria.
           </div>}
         </div>
-        {!loading && data && <div style={listStyle}>
-          {results === 'all' && sourceMatch && <div style={{marginBottom: '0.75rem'}}>
-            There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}. For more results, browse
-            &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.getStandardResults()}>Standard Vocabulary</Clickable>.
-          </div>}
-          {results === 'standard' && <div style={{marginBottom: '0.75rem'}}>
-            {!!data.length && <span>
-              There are {data[0].count.toLocaleString()} participants for the standard version of the code you searched.
+        {!loading && !!displayData && <div style={listStyle}>
+          {sourceMatch && !standardOnly && <div style={{marginBottom: '0.75rem'}}>
+            There are {sourceMatch.count.toLocaleString()} participants with source code {sourceMatch.code}.
+            {showStandardOption && <span> For more results, browse
+              &nbsp;<Clickable style={styles.vocabLink} onClick={() => this.showStandardResults()}>Standard Vocabulary</Clickable>.
             </span>}
-            {!data.length && <span>
+          </div>}
+          {standardOnly && <div style={{marginBottom: '0.75rem'}}>
+            {!!displayData.length && <span>
+              There are {displayData[0].count.toLocaleString()} participants for the standard version of the code you searched.
+            </span>}
+            {!displayData.length && <span>
               There are no standard matches for source code {sourceMatch.code}.
             </span>}
             &nbsp;<Clickable style={styles.vocabLink}
               onMouseDown={() => this.trackEvent('Source Vocab Hyperlink')}
-              onClick={() => this.getResults(sourceMatch.code)}>
+              onClick={() => this.setState({standardOnly: false})}>
               Return to source code
             </Clickable>.
           </div>}
-          {!!data.length && <table className='p-datatable' style={styles.table}>
+          {!!displayData.length && <table className='p-datatable' style={styles.table}>
             <thead className='p-datatable-thead'>
               <tr style={{height: '2rem'}}>
                 <th style={{...styles.columnHeader, borderLeft: 0}}>Name</th>
@@ -380,7 +380,7 @@ export const ListSearch = withCurrentWorkspace()(
               </tr>
             </thead>
             <tbody className='p-datatable-tbody'>
-              {data.map((row, r) => {
+              {displayData.map((row, r) => {
                 const open = ingredients[row.id] && ingredients[row.id].open;
                 const err = ingredients[row.id] && ingredients[row.id].error;
                 return <React.Fragment key={r}>
@@ -400,13 +400,13 @@ export const ListSearch = withCurrentWorkspace()(
               })}
             </tbody>
           </table>}
-          {results === 'all' && !data.length && <div>No results found</div>}
+          {!standardOnly && !displayData.length && <div>No results found</div>}
         </div>}
         {loading && <SpinnerOverlay/>}
         {error && <div style={{...styles.error, ...(domain === DomainType.DRUG ? {marginTop: '3.75rem'} : {})}}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
-          {results === 'standard' && <Clickable style={styles.vocabLink} onClick={() => this.getResults(sourceMatch.code)}>
+          {standardOnly && <Clickable style={styles.vocabLink} onClick={() => this.getResults(sourceMatch.code)}>
             &nbsp;Return to source code.
           </Clickable>}
         </div>}
