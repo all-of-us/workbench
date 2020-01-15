@@ -386,6 +386,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
     dbUser.setDataUseAgreementCompletionTime(timestamp);
     dbUser.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+    dbUser.setLastModifiedTime(timestamp);
     return userDao.save(dbUser);
   }
 

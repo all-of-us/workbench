@@ -157,8 +157,17 @@ public class RdrExportServiceImpl implements RdrExportService {
   private RdrResearcher toRdrResearcher(DbUser dbUser) {
     RdrResearcher researcher = new RdrResearcher();
     researcher.setUserId((int) dbUser.getUserId());
-    researcher.setCreationTime(dbUser.getCreationTime().toLocalDateTime().atOffset(offset));
-    researcher.setModifiedTime(dbUser.getLastModifiedTime().toLocalDateTime().atOffset(offset));
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    if (null != researcher.getCreationTime()) {
+      researcher.setCreationTime(dbUser.getCreationTime().toLocalDateTime().atOffset(offset));
+    } else {
+      researcher.setCreationTime(OffsetDateTime.now());
+    }
+    if (null != researcher.getModifiedTime()) {
+      researcher.setModifiedTime(dbUser.getLastModifiedTime().toLocalDateTime().atOffset(offset));
+    } else {
+      researcher.setModifiedTime(OffsetDateTime.now());
+    }
     researcher.setGivenName(dbUser.getGivenName());
     researcher.setFamilyName(dbUser.getFamilyName());
     if (dbUser.getAddress() != null) {
@@ -259,10 +268,11 @@ public class RdrExportServiceImpl implements RdrExportService {
     Map<String, FirecloudWorkspaceAccessEntry> aclMap = firecloudResponse.getAcl();
     aclMap.forEach(
         (email, access) -> {
-          RdrWorkspaceUser workspaceUderMap = new RdrWorkspaceUser();
-          workspaceUderMap.setUserId((int) userDao.findUserByUsername(email).getUserId());
-          workspaceUderMap.setRole(RdrWorkspaceUser.RoleEnum.fromValue(access.getAccessLevel()));
-          rdrWorkspace.addWorkspaceUsersItem(workspaceUderMap);
+          RdrWorkspaceUser workspaceUserMap = new RdrWorkspaceUser();
+          workspaceUserMap.setUserId((int) userDao.findUserByUsername(email).getUserId());
+          workspaceUserMap.setRole(RdrWorkspaceUser.RoleEnum.fromValue(access.getAccessLevel()));
+          workspaceUserMap.setStatus(RdrWorkspaceUser.StatusEnum.fromValue("ACTIVE"));
+          rdrWorkspace.addWorkspaceUsersItem(workspaceUserMap);
         });
 
     return rdrWorkspace;
