@@ -9,9 +9,12 @@
       <column name="creation_time" type="datetime">
         <constraints nullable="true" />
       </column>
-      <column name="last_modified_time" type="datetime">
+      <column name="last_modified_time" type="datetime" defaultValueDate="CURRENT_TIMESTAMP">
         <constraints nullable="true"/>
       </column>
     </addColumn>
+  </changeSet>
+  <changeSet id="update modified time" author="nsaxena">
+    <sql>update user set last_modified_time = first_sign_in_time where first_sign_in_time is not null</sql>
   </changeSet>
 </databaseChangeLog>

@@ -12,7 +12,7 @@ public interface RdrExportDao extends CrudRepository<DbRdrExport, Long> {
       nativeQuery = true,
       value =
           "select u.user_id from user u LEFT JOIN rdr_export rdr on"
-              + " u.user_id = rdr.export_id and rdr.entity_type = 1 where u.last_modified_time is null or "
+              + " u.user_id = rdr.export_id and rdr.entity_type = 1 where "
               + "u.last_modified_time > rdr.last_Export_date or rdr.export_id is null")
   List<BigInteger> findDbUserIdsToExport();
 
