@@ -52,6 +52,8 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
   List<DbWorkspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
 
+  DbWorkspace findDbWorkspaceByWorkspaceId(long workspaceId);
+
   Set<DbWorkspace> findAllByCreator(DbUser user);
 
   default List<DbWorkspace> findAllByBillingMigrationStatus(BillingMigrationStatus status) {

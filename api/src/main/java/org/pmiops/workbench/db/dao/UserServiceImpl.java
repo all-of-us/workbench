@@ -334,6 +334,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       dbUser.setDegreesEnum(degrees);
     }
     dbUser.setDemographicSurvey(demographicSurvey);
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+    dbUser.setCreationTime(now);
+    dbUser.setLastModifiedTime(now);
+
+    DbUser user = new DbUser();
     // For existing user that do not have address
     if (address != null) {
       address.setUser(dbUser);

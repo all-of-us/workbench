@@ -85,9 +85,15 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": false,
+    "enableRdrExport": false,
     "enableBillingLockout": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-stable"
+  },
+  "rdrExport": {
+    "host": "all-of-us-rdr-stable.appspot.com",
+    "queueName": "rdrQueue",
+    "exportObjectsPerTask" : 10
   }
 }

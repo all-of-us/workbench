@@ -102,6 +102,8 @@ public class DbUser {
   private Timestamp idVerificationCompletionTime;
   private Timestamp idVerificationBypassTime;
   private Timestamp twoFactorAuthCompletionTime;
+  private Timestamp creationTime;
+  private Timestamp lastModifiedTime;
   private Timestamp twoFactorAuthBypassTime;
   private DbDemographicSurvey demographicSurvey;
   private DbAddress address;
@@ -666,6 +668,24 @@ public class DbUser {
 
   public void setDemographicSurvey(DbDemographicSurvey demographicSurvey) {
     this.demographicSurvey = demographicSurvey;
+  }
+
+  @Column(name = "last_modified_time")
+  public Timestamp getLastModifiedTime() {
+    return lastModifiedTime;
+  }
+
+  public void setLastModifiedTime(Timestamp lastModifiedTime) {
+    this.lastModifiedTime = lastModifiedTime;
+  }
+
+  @Column(name = "creation_time")
+  public Timestamp getCreationTime() {
+    return creationTime;
+  }
+
+  public void setCreationTime(Timestamp creationTime) {
+    this.creationTime = creationTime;
   }
 
   @OneToOne(
