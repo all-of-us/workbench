@@ -170,49 +170,51 @@ public class RdrExportServiceImpl implements RdrExportService {
       researcher.setZipCode(dbUser.getAddress().getZipCode());
     }
     DbDemographicSurvey dbDemographicSurvey = dbUser.getDemographicSurvey();
-    researcher.setDisability(
-        RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
-    researcher.setEducation(
-        RdrExportEnums.educationToRdrEducation(dbDemographicSurvey.getEducationEnum()));
-    if (dbDemographicSurvey.getEthnicityEnum() != null) {
-      researcher.setEthnicity(
-          new ArrayList<Ethnicity>(
-              Arrays.asList(
-                  RdrExportEnums.ethnicityToRdrEthnicity(dbDemographicSurvey.getEthnicityEnum()))));
+    if (dbDemographicSurvey != null) {
+      researcher.setDisability(
+              RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
+      researcher.setEducation(
+              RdrExportEnums.educationToRdrEducation(dbDemographicSurvey.getEducationEnum()));
+      if (dbDemographicSurvey.getEthnicityEnum() != null) {
+        researcher.setEthnicity(
+                new ArrayList<Ethnicity>(
+                        Arrays.asList(
+                                RdrExportEnums.ethnicityToRdrEthnicity(dbDemographicSurvey.getEthnicityEnum()))));
+      }
+      if (dbDemographicSurvey.getRaceEnum() != null) {
+        researcher.setRace(
+                dbDemographicSurvey.getRaceEnum().stream()
+                        .map(dbUserRace -> RdrExportEnums.raceToRdrRace(dbUserRace))
+                        .collect(Collectors.toList()));
+      }
+      if (dbDemographicSurvey.getGenderEnum() != null) {
+        researcher.setGender(
+                dbDemographicSurvey.getGenderEnum().stream()
+                        .map(dbUserGender -> RdrExportEnums.genderToRdrGender(dbUserGender))
+                        .collect(Collectors.toList()));
+      }
+      if (dbDemographicSurvey.getSexAtBirthEnum() != null) {
+        researcher.setSexAtBirth(
+                RdrExportEnums.sexAtBirthToRdrSexAtBirth(dbDemographicSurvey.getSexAtBirthEnum().get(0)));
+      }
+      if (dbDemographicSurvey.getSexualOrientationEnum() != null) {
+        researcher.setSexualOrientation(
+                RdrExportEnums.sexualOrientationToRdrSexualOrientation(
+                        dbDemographicSurvey.getSexualOrientationEnum().get(0)));
+      }
+      researcher.setDisability(
+              RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
     }
-    if (dbDemographicSurvey.getRaceEnum() != null) {
-      researcher.setRace(
-          dbDemographicSurvey.getRaceEnum().stream()
-              .map(dbUserRace -> RdrExportEnums.raceToRdrRace(dbUserRace))
-              .collect(Collectors.toList()));
-    }
-    if (dbDemographicSurvey.getGenderEnum() != null) {
-      researcher.setGender(
-          dbDemographicSurvey.getGenderEnum().stream()
-              .map(dbUserGender -> RdrExportEnums.genderToRdrGender(dbUserGender))
-              .collect(Collectors.toList()));
-    }
-    if (dbDemographicSurvey.getSexAtBirthEnum() != null) {
-      researcher.setSexAtBirth(
-          RdrExportEnums.sexAtBirthToRdrSexAtBirth(dbDemographicSurvey.getSexAtBirthEnum().get(0)));
-    }
-    if (dbDemographicSurvey.getSexualOrientationEnum() != null) {
-      researcher.setSexualOrientation(
-          RdrExportEnums.sexualOrientationToRdrSexualOrientation(
-              dbDemographicSurvey.getSexualOrientationEnum().get(0)));
-    }
-    researcher.setDisability(
-        RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
+      researcher.setAffiliations(
+              dbUser.getInstitutionalAffiliations().stream()
+                      .map(
+                              inst -> {
+                                return new ResearcherAffiliation()
+                                        .institution(inst.getInstitution())
+                                        .role(inst.getRole());
+                              })
+                      .collect(Collectors.toList()));
 
-    researcher.setAffiliations(
-        dbUser.getInstitutionalAffiliations().stream()
-            .map(
-                inst -> {
-                  return new ResearcherAffiliation()
-                      .institution(inst.getInstitution())
-                      .role(inst.getRole());
-                })
-            .collect(Collectors.toList()));
     return researcher;
   }
 
