@@ -1,6 +1,5 @@
 import {Button} from 'app/components/buttons';
 import {FormSection} from 'app/components/forms';
-import {Header} from 'app/components/headers';
 
 import {
   InfoIcon,
@@ -13,8 +12,7 @@ import {
   RadioButton,
   styles as inputStyles,
   TextArea,
-  TextInput,
-  ValidationError
+  TextInput
 } from 'app/components/inputs';
 
 import {
@@ -25,10 +23,10 @@ import {
   profileApi
 } from 'app/services/swagger-fetch-clients';
 
-import {FlexColumn, FlexRow, FlexRowWrap} from 'app/components/flex';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {pageImages} from 'app/pages/login/account-creation-images';
+import {AoUTitle} from 'app/pages/profile/data-use-agreement-styles';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {summarizeErrors} from 'app/utils/index';
 import {environment} from 'environments/environment';
 import {
   DataAccessLevel,
@@ -45,9 +43,8 @@ import {MultiSelect} from 'primereact/multiselect';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
+import {serverConfigStore} from 'app/utils/navigation';
 import {AccountCreationOptions} from './account-creation-options';
-import {AoUTitle} from "../../profile/data-use-agreement-styles";
-import {serverConfigStore} from "../../../utils/navigation";
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
