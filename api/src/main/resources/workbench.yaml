@@ -2492,6 +2492,8 @@ definitions:
         type: string
       creator:
         type: string
+      billingAccount:
+        type: string
       googleBucketName:
         type: string
       dataAccessLevel:
