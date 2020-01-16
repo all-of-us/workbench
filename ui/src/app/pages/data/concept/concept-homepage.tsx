@@ -186,6 +186,8 @@ interface State { // Browse survey
   // Array of surveys
   conceptSurveysList: Array<SurveyModule>;
   // Current string in search box
+  currentInputString: string;
+  // Last string that was searched
   currentSearchString: string;
   // If concept metadata is still being gathered for any domain
   loadingDomains: boolean;
@@ -228,6 +230,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         conceptsCache: [],
         conceptsSavedText: '',
         conceptSurveysList: [],
+        currentInputString: '',
         currentSearchString: '',
         loadingDomains: true,
         searchLoading: false,
@@ -299,21 +302,26 @@ export const ConceptHomepage = withCurrentWorkspace()(
       }
     }
 
-    handleSearchStringChange(e) {
-      this.setState({currentSearchString: e});
-    }
-
     handleSearchKeyPress(e) {
+      const {currentInputString} = this.state;
       // search on enter key
       if (e.key === Key.Enter) {
-        const searchTermLength = this.state.currentSearchString.trim().length;
-        if (searchTermLength < 3) {
+        if (currentInputString.trim().length < 3) {
           this.setState({showSearchError: true});
         } else {
-          this.setState({showSearchError: false});
-          this.searchConcepts().then(/* ignore promise returned */);
+          this.setState({currentSearchString: currentInputString, showSearchError: false}, () => this.searchConcepts());
         }
       }
+    }
+
+    handleCheckboxChange() {
+      const {currentInputString, currentSearchString, searching, standardConceptsOnly} = this.state;
+      this.setState({standardConceptsOnly: !standardConceptsOnly}, () => {
+        // Check that we're in search mode and that the input hasn't changed since the last search before searching again
+        if (searching && currentInputString === currentSearchString) {
+          this.searchConcepts().then();
+        }
+      });
     }
 
     selectDomain(domainCount: DomainCount) {
@@ -376,6 +384,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     clearSearch() {
       this.setState({
+        currentInputString: '',
         currentSearchString: '',
         showSearchError: false,
         searching: false // reset the search result table to show browse/domain cards instead
@@ -386,7 +395,10 @@ export const ConceptHomepage = withCurrentWorkspace()(
       const {conceptDomainCounts} = this.state;
       const selectedDomain = !domain ? {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0}
         : conceptDomainCounts.find(domainCount => domainCount.domain === domain.domain)
-      this.setState({browsingSurvey: false, currentSearchString: '', selectedDomain: selectedDomain}, this.searchConcepts);
+      this.setState(
+        {browsingSurvey: false, currentInputString: '', currentSearchString: '', selectedDomain: selectedDomain},
+        () => this.searchConcepts()
+      );
     }
 
     browseSurvey(surveyName) {
@@ -493,7 +505,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     render() {
       const {loadingDomains, browsingSurvey, conceptDomainList, conceptPhysicalMeasurementsList, conceptSurveysList,
         standardConceptsOnly, showSearchError, searching, selectedDomain, conceptAddModalOpen,
-        currentSearchString, conceptsSavedText, selectedSurvey, surveyAddModalOpen,
+        currentInputString, currentSearchString, conceptsSavedText, selectedSurvey, surveyAddModalOpen,
         selectedSurveyQuestions, selectedConceptDomainMap} =
           this.state;
       return <React.Fragment>
@@ -505,8 +517,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
                 fill: colors.accent, left: 'calc(1rem + 3.5%)'}}/>
               <TextInput style={styles.searchBar} data-test-id='concept-search-input'
                          placeholder='Search concepts in domain'
-                         value={this.state.currentSearchString}
-                         onChange={(e) => this.handleSearchStringChange(e)}
+                         value={currentInputString}
+                         onChange={(e) => this.setState({currentInputString: e})}
                          onKeyPress={(e) => this.handleSearchKeyPress(e)}/>
               {currentSearchString !== '' && <Clickable onClick={() => this.clearSearch()}
                                                         data-test-id='clear-search'>
@@ -517,9 +529,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                         labelStyle={{marginLeft: '0.2rem'}}
                         data-test-id='standardConceptsCheckBox'
                         style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
-                        onChange={(checked) => this.setState({
-                          standardConceptsOnly: checked
-                        })}/>
+                        onChange={() => this.handleCheckboxChange()}/>
             </div>
             {showSearchError &&
             <AlertDanger style={{width: '64.3%', marginLeft: '1%',
