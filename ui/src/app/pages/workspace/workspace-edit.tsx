@@ -10,19 +10,26 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {TwoColPaddedTable} from 'app/components/tables';
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCdrVersions, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
-import {ArchivalStatus, CdrVersion, CdrVersionListResponse, DataAccessLevel, SpecificPopulationEnum, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
+import {
+  ArchivalStatus,
+  BillingAccount,
+  CdrVersion,
+  CdrVersionListResponse,
+  DataAccessLevel,
+  SpecificPopulationEnum,
+  Workspace,
+  WorkspaceAccessLevel
+} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
 import {Dropdown} from "primereact/dropdown";
-
-declare const gapi: any;
 
 export const ResearchPurposeDescription =
   <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
@@ -354,13 +361,6 @@ export interface WorkspaceEditProps {
   cancel: Function;
 }
 
-interface BillingAccount {
-  name: string;
-  displayName: string;
-  masterBillingAccount?: string;
-  open: boolean;
-}
-
 export interface WorkspaceEditState {
   cdrVersionItems: Array<CdrVersion>;
   workspace: Workspace;
@@ -467,14 +467,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         this.setState(fp.set(['workspace', 'cdrVersionId'], cdrResp.defaultCdrVersionId));
       }
 
-      gapi.load("client", () => {
-        gapi.client.load('cloudbilling', 'v1', () => {
-          gapi.client.cloudbilling.billingAccounts.list()
-            .then(response => {
-              this.setState({billingAccounts: JSON.parse(response.body).billingAccounts});
-            });
-        });
-      });
+      userApi().listBillingAccounts().then(response =>
+        this.setState({billingAccounts: response.billingAccounts})
+      );
+
     }
 
     makeDiseaseInput() {

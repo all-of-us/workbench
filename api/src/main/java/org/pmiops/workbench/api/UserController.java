@@ -1,25 +1,42 @@
 package org.pmiops.workbench.api;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Provider;
+import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.BillingAccount;
+import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UserResponse;
+import org.pmiops.workbench.model.WorkbenchListBillingAccountsResponse;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
 
 @RestController
 public class UserController implements UserApiDelegate {
@@ -42,16 +59,20 @@ public class UserController implements UserApiDelegate {
   private final UserService userService;
   private final FireCloudService fireCloudService;
 
+  private final Provider<Cloudbilling> cloudBillingProvider;
+
   @Autowired
   public UserController(
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> configProvider,
       FireCloudService fireCloudService,
-      UserService userService) {
+      UserService userService,
+      Provider<Cloudbilling> cloudBillingProvider) {
     this.userProvider = userProvider;
     this.configProvider = configProvider;
     this.userService = userService;
     this.fireCloudService = fireCloudService;
+    this.cloudBillingProvider = cloudBillingProvider;
   }
 
   @Override
@@ -119,6 +140,41 @@ public class UserController implements UserApiDelegate {
       return ResponseEntity.badRequest().body(response);
     }
     return ResponseEntity.ok(response);
+  }
+
+  private BillingAccount freeTierBillingAccount() {
+    return new BillingAccount()
+        .isFreeTier(true)
+        .displayName("Use All of Us FREE credits")
+        .name(configProvider.get().billing.accountId)
+        .isOpen(true);
+  }
+
+  @Override
+  public ResponseEntity<WorkbenchListBillingAccountsResponse> listBillingAccounts() {
+    ListBillingAccountsResponse response = null;
+    try {
+      Cloudbilling.BillingAccounts.List request = cloudBillingProvider.get().billingAccounts().list();
+      response = request.execute();
+    } catch (IOException e) {
+      log.info(e.getMessage());
+    }
+
+    List<BillingAccount> billingAccounts = Stream.concat(
+        Stream.of(freeTierBillingAccount()),
+        response.getBillingAccounts()
+            .stream()
+            .map(googleBillingAccount ->
+                new BillingAccount()
+                    .isFreeTier(false)
+                    .displayName(googleBillingAccount.getDisplayName())
+                    .name(googleBillingAccount.getName())
+                    .isOpen(googleBillingAccount.getOpen())
+      )).collect(Collectors.toList());
+
+    return ResponseEntity.ok(
+        new WorkbenchListBillingAccountsResponse().billingAccounts(billingAccounts)
+    );
   }
 
   private PaginationToken getPaginationTokenFromPageToken(String pageToken) {

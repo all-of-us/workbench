@@ -375,6 +375,7 @@ dependencies {
 
   compile project(":common-api")
   compile 'com.google.api-client:google-api-client-appengine:1.23.0'
+  compile 'com.google.apis:google-api-services-cloudbilling:v1-rev48-1.25.0'
   compile 'com.google.http-client:google-http-client-apache:1.29.2'
   compile 'org.apache.commons:commons-collections4:4.4'
   compile 'com.google.apis:google-api-services-cloudresourcemanager:v1-rev549-1.25.0'

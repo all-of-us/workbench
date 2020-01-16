@@ -536,6 +536,18 @@ paths:
           type: string
           required: false
 
+  /v1/user/billingAccounts:
+    get:
+      tags:
+        - user
+      description: Placeholder
+      operationId: listBillingAccounts
+      responses:
+        200:
+          description: Placeholder
+          schema:
+            $ref: "#/definitions/WorkbenchListBillingAccountsResponse"
+
   # Notebook clusters ####################################################################
 
   /v1/admin/security/clusters/{billingProjectId}/delete-clusters:
@@ -2774,6 +2786,33 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/CohortReview"
+
+  WorkbenchListBillingAccountsResponse:
+    type: object
+    required:
+      - billingAccounts
+    properties:
+      billingAccounts:
+        type: "array"
+        items:
+          $ref: "#/definitions/BillingAccount"
+
+  BillingAccount:
+    type: object
+    required:
+      - isFreeTier
+      - name
+      - displayName
+      - isOpen
+    properties:
+      isFreeTier:
+        type: boolean
+      name:
+        type: string
+      displayName:
+        type: string
+      isOpen:
+        type: boolean
 
   CohortListResponse:
     type: object
