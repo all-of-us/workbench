@@ -55,9 +55,9 @@ public class ConceptService {
   public static final String STANDARD_CONCEPT_CODE = "S";
   public static final String CLASSIFICATION_CONCEPT_CODE = "C";
   public static final String EMPTY_CONCEPT_CODE = "";
-  public static final List<String> STANDARD_CONCEPT_CODES =
+  public static final ImmutableList<String> STANDARD_CONCEPT_CODES =
       ImmutableList.of(STANDARD_CONCEPT_CODE, CLASSIFICATION_CONCEPT_CODE);
-  public static final List<String> ALL_CONCEPT_CODES =
+  public static final ImmutableList<String> ALL_CONCEPT_CODES =
       ImmutableList.of(STANDARD_CONCEPT_CODE, CLASSIFICATION_CONCEPT_CODE, EMPTY_CONCEPT_CODE);
 
   public ConceptService() {}
@@ -133,7 +133,7 @@ public class ConceptService {
         matchExp, getConceptTypes(standardConceptFilter));
   }
 
-  private List<String> getConceptTypes(String standardConceptFilter) {
+  private ImmutableList<String> getConceptTypes(String standardConceptFilter) {
     return STANDARD_CONCEPTS.equals(standardConceptFilter)
         ? STANDARD_CONCEPT_CODES
         : ALL_CONCEPT_CODES;
@@ -159,7 +159,7 @@ public class ConceptService {
       String query, String standardConceptFilter, List<String> domainIds, int limit, int page) {
     final String keyword = modifyMultipleMatchKeyword(query);
     Pageable pageable = new PageRequest(page, limit, new Sort(Direction.DESC, "countValue"));
-    List<String> conceptTypes = getConceptTypes(standardConceptFilter);
+    ImmutableList<String> conceptTypes = getConceptTypes(standardConceptFilter);
     if (domainIds.contains(CommonStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT))) {
       ImmutableList domains =
           ImmutableList.of(CommonStorageEnums.domainToDomainId(Domain.MEASUREMENT));
