@@ -13,7 +13,7 @@ import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -176,7 +176,7 @@ public class MailServiceImpl implements MailService {
             .put("BULLET_1", cloudStorageService.getImageUrl("bullet_1.png"))
             .put("BULLET_2", cloudStorageService.getImageUrl("bullet_2.png"))
             .build();
-    return new StrSubstitutor(replaceMap).replace(string);
+    return new StringSubstitutor(replaceMap).replace(string);
   }
 
   private MandrillMessage buildBetaAccessCompleteMessage(String contactEmail, String username)
@@ -221,7 +221,7 @@ public class MailServiceImpl implements MailService {
             .put("HEADER_IMG", cloudStorageService.getImageUrl("all_of_us_logo.png"))
             .put("USERNAME", username)
             .build();
-    return new StrSubstitutor(replaceMap).replace(string);
+    return new StringSubstitutor(replaceMap).replace(string);
   }
 
   private ImmutablePair<Status, String> trySend(MandrillApiKeyAndMessage keyAndMessage) {
