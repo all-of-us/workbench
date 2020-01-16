@@ -227,7 +227,6 @@ export class ConceptTable extends React.Component<Props, State> {
 
   componentWillReceiveProps(nextProps) {
     if ((nextProps.concepts !==  this.props.concepts)) {
-      console.log(nextProps);
       if (nextProps.concepts !== this.props.concepts && nextProps.concepts.length > 0 ) {
         this.setState({totalRecords: nextProps.concepts.length});
       }

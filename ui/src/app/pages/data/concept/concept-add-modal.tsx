@@ -75,7 +75,6 @@ export const ConceptAddModal = withCurrentWorkspace()
   }
 
   componentDidMount() {
-    console.log(this.props);
     this.getExistingConceptSets();
   }
 
