@@ -449,6 +449,18 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         institutionalAffiliations
       },
     } = this.state;
+    const usernameLabelText =
+      <div>New Username
+        <TooltipTrigger side='top' content={<div>Usernames can contain only letters
+          (a-z), numbers (0-9), dashes (-), underscores (_), apostrophes ('), and
+          periods (.) (minimum of 3 characters and maximum of 64
+          characters).<br/>Usernames cannot begin or end with a period (.) and may not
+          contain more than one period (.) in a row.</div>}
+                        style={{marginLeft: '0.5rem'}}>
+          <InfoIcon style={{'height': '16px', 'paddingLeft': '2px'}}/>
+        </TooltipTrigger>
+      </div>;
+
     return <div id='account-creation'
                 style={{paddingTop: environment.enableAccountPages ? '1.5rem' :
                       '3rem', paddingRight: '3rem', paddingLeft: '3rem'}}>
@@ -465,17 +477,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                   <TextInputWithLabel value={username} inputId='username' inputName='username'
                                       placeholder='New Username' invalid={
                                         this.state.usernameConflictError || this.usernameInvalidError()}
-                                      containerStyle={{width: '26rem'}} labelText={
-                                        <div>New Username
-                                          <TooltipTrigger side='top' content={<div>Usernames can contain only letters
-                                            (a-z), numbers (0-9), dashes (-), underscores (_), apostrophes ('), and
-                                            periods (.) (minimum of 3 characters and maximum of 64
-                                            characters).<br/>Usernames cannot begin or end with a period (.) and may not
-                                            contain more than one period (.) in a row.</div>}
-                                                          style={{marginLeft: '0.5rem'}}>
-                                            <InfoIcon style={{'height': '16px', 'paddingLeft': '2px'}}/>
-                                          </TooltipTrigger>
-                                        </div>}
+                                      containerStyle={{width: '26rem'}} labelText={usernameLabelText}
                                     onChange={v => this.usernameChanged(v)}>
                   <div style={{...inputStyles.iconArea}}>
                     <ValidationIcon validSuccess={this.usernameValid}/>
@@ -501,7 +503,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 <TextInputWithLabel value={givenName} inputId='givenName' inputName='givenName' placeholder='First Name'
                                     invalid={givenName.length > nameLength} labelText='First Name'
                                     onChange={value => this.updateProfileObject('givenName', value)} />
-
                 {givenName.length > nameLength &&
                 <ErrorMessage id='givenNameError'>
                   First Name must be {nameLength} characters or less.
@@ -547,11 +548,11 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                                     onChange={value => this.updateAddress('streetAddress2', value)}/>
               </FlexRow>
               <FlexRow style={{marginTop: '0.75rem'}}>
-              <TextInputWithLabel dataTestId='city' inputName='city' placeholder='City' value={city} labelText='City'
-                                  onChange={value => this.updateAddress('city', value)}/>
-              <TextInputWithLabel dataTestId='state' inputName='state' placeholder='State' value={state} labelText='State'
-                                  containerStyle={styles.multiInputSpacing}
-                                  onChange={value => this.updateAddress('state', value)}/>
+                <TextInputWithLabel dataTestId='city' inputName='city' placeholder='City' value={city} labelText='City'
+                                    onChange={value => this.updateAddress('city', value)}/>
+                <TextInputWithLabel dataTestId='state' inputName='state' placeholder='State' value={state} labelText='State'
+                                    containerStyle={styles.multiInputSpacing}
+                                    onChange={value => this.updateAddress('state', value)}/>
               </FlexRow>
               <FlexRow style={{marginTop: '0.75rem'}}>
                 <TextInputWithLabel dataTestId='zip' inputName='zip' placeholder='Zip Code'
@@ -590,7 +591,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                   institutionalAffiliations[0].institution : ''}
               placeholder='Institution Name'
               onChange={value => this.updateInstitutionAffiliation('institution', value)}
-                       ></TextInput>
+                       />
             <Dropdown data-test-id='institutionRole' value={institutionalAffiliations &&
             institutionalAffiliations.length > 0 ?
                 institutionalAffiliations[0].role : ''}

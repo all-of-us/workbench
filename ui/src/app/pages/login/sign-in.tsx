@@ -140,7 +140,6 @@ export const SignInReact = withWindowSize()(
     }
 
     setProfile(profile, currentStep) {
-      console.log(currentStep);
       this.setState({
         profile: profile,
         currentStep: currentStep
