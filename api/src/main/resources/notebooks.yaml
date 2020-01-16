@@ -1375,14 +1375,6 @@ definitions:
       userJupyterExtensionConfig:
         $ref: "#/definitions/UserJupyterExtensionConfig"
         description: Jupyter extensions to be installed in the notebook
-      jupyterExtensionUri:
-        type: string
-        description: |
-          Optional bucket URI or URL to an archive containing Jupyter notebook extension files, or
-          a .js file.
-          The archive must be in tar.gz format, must not include a parent directory, and
-          must have an entry point named 'main'. For more information on notebook extensions,
-          see http://jupyter-notebook.readthedocs.io/en/latest/extending/frontend_extensions.html.
       jupyterUserScriptUri:
         type: string
         description: |
@@ -1426,9 +1418,14 @@ definitions:
       defaultClientId:
         type: string
         description: The default Google Client ID.
-      jupyterDockerImage:
+      toolDockerImage:
         type: string
-        description: The Jupyter docker image to install. May be Dockerhub or GCR. If not set, then a default Jupyter image will be installed.
+        description: The tool docker image to install. May be Dockerhub or GCR. If not set, a default Jupyter image will be installed.
+      welderDockerImage:
+        type: string
+        description: |
+          The Welder docker image to install. Only takes effect if the tool being installed supports welder.
+          May be Dockerhub or GCR. If not set, then a default Welder image will be installed.
       scopes:
         type: array
         items:
@@ -1445,7 +1442,6 @@ definitions:
         description: A collection of key/value pairs of environment variable names and their desired value to be set in the cluster.
         additionalProperties:
           type: string
-
 
   ClusterError:
     description: 'Errors encountered on cluster create'

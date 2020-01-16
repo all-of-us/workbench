@@ -1191,6 +1191,22 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
+  /v1/cron/exportToRdr:
+    get:
+      security: []
+      tags:
+        - offlineRdrExport
+        - cron
+      description: Send workbench data to RDR
+      operationId: exportData
+      responses:
+        204:
+          description: All modified/created workspaces and users were exported
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   # Billing ##############################################################################
 
   /v1/cron/bufferBillingProjects:
@@ -2210,11 +2226,53 @@ paths:
           schema:
             $ref: "#/definitions/DomainValuesResponse"
 
+
+##########################################################################################
+## Endpoints for task in cloud task queue
+#########################################################################################
+  /v1/queueTask/exportResearcherData:
+    post:
+      tags:
+        - cloudTaskRdrExport
+      description: >
+        Send Researcher data
+      operationId: "exportResearcherData"
+      parameters:
+        - in: body
+          name: researcherIds
+          required: true
+          description: The IDs of concepts to be added to the concept set.
+          schema:
+            type: object
+      responses:
+        200:
+          description: >
+            A SQL query for each domain in the Data Set
+
+  /v1/queueTask/exportWorkspaceData:
+    post:
+      tags:
+        - cloudTaskRdrExport
+      description: >
+        Send Researcher data
+      operationId: "exportWorkspaceData"
+      parameters:
+        - in: body
+          name: researchIds
+          required: true
+          description: The IDs of concepts to be added to the concept set.
+          schema:
+            type: object
+      responses:
+        200:
+          description: >
+            A SQL query for each domain in the Data Set
+
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
 definitions:
-
   StatusResponse:
     type: object
     required:

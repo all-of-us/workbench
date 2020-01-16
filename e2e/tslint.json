@@ -1,0 +1,25 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint:recommended",
+        "tslint-eslint-rules",
+        "tslint-config-prettier"
+    ],
+    "jsRules": {},
+    "rules": {
+        "no-require-imports": false,
+        "no-var-requires": false,
+        "interface-name": false,
+        "jsx-no-lambda": false,
+        "object-literal-sort-keys": false,
+        "quotemark": [true, "single", "jsx-double"],
+        "ter-indent": [true, 2],
+        "max-line-length": [true,
+            {
+                "limit": 120,
+                "ignore-pattern": "^import [^,]+ from |^export | implements"
+            }
+        ]
+    }
+
+}

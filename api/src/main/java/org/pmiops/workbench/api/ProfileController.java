@@ -552,6 +552,7 @@ public class ProfileController implements ProfileApiDelegate {
       userService.setDataUseAgreementNameOutOfDate(
           updatedProfile.getGivenName(), updatedProfile.getFamilyName());
     }
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
@@ -559,7 +560,7 @@ public class ProfileController implements ProfileApiDelegate {
     user.setCurrentPosition(updatedProfile.getCurrentPosition());
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
-
+    user.setLastModifiedTime(now);
     if (updatedProfile.getContactEmail() != null
         && !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
       // See RW-1488.
