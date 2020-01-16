@@ -498,7 +498,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 </Error></div>}
               {this.usernameInvalidError() &&
               <div style={{height: '1.5rem'}}><Error id='usernameError'>
-                Username is not a valid username.
+                {username} is not a valid username.
               </Error></div>}
             </div>
           </Section>
@@ -528,7 +528,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                                     onChange={v => this.updateProfileObject('contactEmail', v)}/>
                 {this.state.invalidEmail &&
                 <Error id='invalidEmailError'>
-                  Contact Email Id is invalid
+                  Contact Email is invalid
                 </Error>}
                 <MultiSelectWithLabel placeholder={'You can select more than one'} options={AccountCreationOptions.degree}
                                       containerStyle={styles.multiInputSpacing} value={this.state.profile.degrees}
@@ -632,8 +632,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         <FlexColumn>
           <FlexColumn style={styles.asideContainer}>
             <div style={styles.asideHeader}>About your new username</div>
-            <div style={styles.asideText}>We create a 'username'@researchallofus.org Google account which you will use
-                to login to the Workbench.</div>
+            <div style={styles.asideText}>We create a 'username'{serverConfigStore.getValue().gsuiteDomain} Google
+                account which you will use to login to the Workbench.</div>
             <div style={{...styles.asideHeader, marginTop: '1rem'}}>Why will some information be public?</div>
             <div style={styles.asideText}>The <AoUTitle/> is committed to transparency with the Research
                 participants on who can access their data, and the purpose of such access. Therefore, your name,
