@@ -4,14 +4,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="nsaxena" id="db.changelog-115-addColumn-user-create-modified">
-    <addColumn tableName="user">
-      <column name="creation_time" type="datetime">
-        <constraints nullable="false" />
-      </column>
-      <column name="last_modified_time" type="datetime">
-        <constraints nullable="false"/>
-      </column>
-    </addColumn>
+  <changeSet author="nsaxena" id="db.changelog-116-drop-not-null-constraint-user-creation-date">
+  	<dropNotNullConstraint columnDataType="datetime" columnName="creation_time" tableName="user"/>
+    <sql>update user set last_modified_time = first_sign_in_time where first_sign_in_time is not null</sql>
   </changeSet>
 </databaseChangeLog>
