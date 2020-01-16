@@ -379,9 +379,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
     DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
     dataUseAgreement.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
-    dataUseAgreement.setUserId(user.getUserId());
-    dataUseAgreement.setUserFamilyName(user.getFamilyName());
-    dataUseAgreement.setUserGivenName(user.getGivenName());
+    dataUseAgreement.setUserId(dbUser.getUserId());
+    dataUseAgreement.setUserFamilyName(dbUser.getFamilyName());
+    dataUseAgreement.setUserGivenName(dbUser.getGivenName());
     dataUseAgreement.setUserInitials(initials);
     dataUseAgreement.setCompletionTime(timestamp);
     userDataUseAgreementDao.save(dataUseAgreement);
