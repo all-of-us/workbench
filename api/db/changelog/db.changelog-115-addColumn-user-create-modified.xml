@@ -10,7 +10,7 @@
         <constraints nullable="true" />
       </column>
       <column name="last_modified_time" type="datetime" defaultValueDate="CURRENT_TIMESTAMP">
-        <constraints nullable="true"/>
+        <constraints nullable="false"/>
       </column>
     </addColumn>
   </changeSet>
