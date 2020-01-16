@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
+import com.google.common.collect.ImmutableList;
 import java.util.HashSet;
 import java.util.List;
 import org.junit.Before;
@@ -142,7 +142,7 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaLeavesByDomainAndTypeAndSubtype() throws Exception {
+  public void findCriteriaLeavesByDomainAndTypeAndSubtype() {
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findCriteriaLeavesByDomainAndTypeAndSubtype(
             DomainType.SURVEY.toString(),
@@ -153,7 +153,7 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findExactMatchByCode() throws Exception {
+  public void findExactMatchByCode() {
     // test that we match both source and standard codes
     List<DbCriteria> exactMatchByCode =
         cbCriteriaDao.findExactMatchByCode(DomainType.CONDITION.toString(), "120");
@@ -163,7 +163,7 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndTypeAndCode() throws Exception {
+  public void findCriteriaByDomainAndTypeAndCode() {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndCode(
@@ -177,7 +177,7 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndCode() throws Exception {
+  public void findCriteriaByDomainAndCode() {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findCriteriaByDomainAndCode(
@@ -187,7 +187,7 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndSynonyms() throws Exception {
+  public void findCriteriaByDomainAndSynonyms() {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> measurements =
         cbCriteriaDao.findCriteriaByDomainAndSynonyms(
@@ -197,7 +197,7 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc() throws Exception {
+  public void findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc() {
     DbCriteria actualIcd9 =
         cbCriteriaDao
             .findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
@@ -214,7 +214,7 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndTypeOrderByIdAsc() throws Exception {
+  public void findCriteriaByDomainAndTypeOrderByIdAsc() {
     final List<DbCriteria> demoList =
         cbCriteriaDao.findCriteriaByDomainAndTypeOrderByIdAsc(
             DomainType.PERSON.toString(), CriteriaType.RACE.toString());
@@ -225,7 +225,7 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndTypeAndStandardAndCode() throws Exception {
+  public void findCriteriaByDomainAndTypeAndStandardAndCode() {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> labs =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
@@ -235,7 +235,7 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaByDomainAndTypeAndStandardAndSynonyms() throws Exception {
+  public void findCriteriaByDomainAndTypeAndStandardAndSynonyms() {
     PageRequest page = new PageRequest(0, 10);
     List<DbCriteria> conditions =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(
@@ -245,7 +245,7 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findConceptId2ByConceptId1() throws Exception {
+  public void findConceptId2ByConceptId1() {
     jdbcTemplate.execute(
         "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
     jdbcTemplate.execute(
@@ -255,17 +255,17 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findStandardCriteriaByDomainAndConceptId() throws Exception {
+  public void findStandardCriteriaByDomainAndConceptId() {
     assertEquals(
         icd10Criteria,
         cbCriteriaDao
             .findStandardCriteriaByDomainAndConceptId(
-                DomainType.CONDITION.toString(), false, Arrays.asList("1"))
+                DomainType.CONDITION.toString(), false, ImmutableList.of("1"))
             .get(0));
   }
 
   @Test
-  public void findCriteriaParentsByDomainAndTypeAndParentConceptIds() throws Exception {
+  public void findCriteriaParentsByDomainAndTypeAndParentConceptIds() {
     HashSet<String> parentConceptIds = new HashSet<>();
     parentConceptIds.add("1");
     List<DbCriteria> results =
@@ -278,12 +278,12 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findCriteriaLeavesAndParentsByPath() throws Exception {
+  public void findCriteriaLeavesAndParentsByPath() {
     assertEquals(icd9Criteria, cbCriteriaDao.findCriteriaLeavesAndParentsByPath("5").get(0));
   }
 
   @Test
-  public void findGenderRaceEthnicity() throws Exception {
+  public void findGenderRaceEthnicity() {
     List<DbCriteria> criteriaList = cbCriteriaDao.findGenderRaceEthnicity();
     assertEquals(2, criteriaList.size());
     assertTrue(criteriaList.contains(raceAsian));
@@ -291,7 +291,7 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findByDomainIdAndTypeAndParentIdNotIn() throws Exception {
+  public void findByDomainIdAndTypeAndParentIdNotIn() {
     Sort sort = new Sort(Direction.ASC, "name");
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findByDomainIdAndTypeAndParentIdNotIn(
@@ -311,7 +311,7 @@ public class CBCriteriaDaoTest {
   }
 
   @Test
-  public void findMenuOptions() throws Exception {
+  public void findMenuOptions() {
     List<DbMenuOption> options = cbCriteriaDao.findMenuOptions();
     assertEquals(6, options.size());
 

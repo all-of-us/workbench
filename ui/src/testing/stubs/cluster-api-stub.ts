@@ -1,10 +1,10 @@
 import {
   Cluster,
   ClusterApi,
-  ClusterListResponse,
   ClusterLocalizeRequest,
   ClusterLocalizeResponse,
   ClusterStatus,
+  DefaultClusterResponse,
 } from 'generated/fetch';
 
 export class ClusterApiStub extends ClusterApi {
@@ -20,8 +20,8 @@ export class ClusterApiStub extends ClusterApi {
     };
   }
 
-  listClusters(extraHttpRequestParams?: any): Promise<ClusterListResponse> {
-    return new Promise<ClusterListResponse>(resolve => {
+  listClusters(extraHttpRequestParams?: any): Promise<DefaultClusterResponse> {
+    return new Promise<DefaultClusterResponse>(resolve => {
       console.log(this.cluster);
       resolve({defaultCluster: this.cluster});
     });

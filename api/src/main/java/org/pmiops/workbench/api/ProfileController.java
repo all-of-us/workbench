@@ -22,7 +22,6 @@ import org.pmiops.workbench.auth.ProfileService;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.auth.UserAuthentication.UserType;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchEnvironment;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAddress;
@@ -65,7 +64,6 @@ import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UserListResponse;
 import org.pmiops.workbench.model.UsernameTakenResponse;
 import org.pmiops.workbench.moodle.ApiException;
-import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -157,6 +155,10 @@ public class ProfileController implements ProfileApiDelegate {
               if (demographicSurvey.getDisability() != null)
                 result.setDisabilityEnum(
                     demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
+              if (demographicSurvey.getSexAtBirth() != null)
+                result.setSexAtBirthEnum(demographicSurvey.getSexAtBirth());
+              if (demographicSurvey.getSexualOrientation() != null)
+                result.setSexualOrientationEnum(demographicSurvey.getSexualOrientation());
               if (demographicSurvey.getYearOfBirth() != null)
                 result.setYear_of_birth(demographicSurvey.getYearOfBirth().intValue());
               return result;
@@ -176,9 +178,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final FireCloudService fireCloudService;
   private final DirectoryService directoryService;
   private final CloudStorageService cloudStorageService;
-  private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final WorkbenchEnvironment workbenchEnvironment;
   private final Provider<MailService> mailServiceProvider;
   private final ProfileAuditor profileAuditor;
 
@@ -193,9 +193,7 @@ public class ProfileController implements ProfileApiDelegate {
       FireCloudService fireCloudService,
       DirectoryService directoryService,
       CloudStorageService cloudStorageService,
-      LeonardoNotebooksClient leonardoNotebooksClient,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkbenchEnvironment workbenchEnvironment,
       Provider<MailService> mailServiceProvider,
       ProfileAuditor profileAuditor) {
     this.profileService = profileService;
@@ -207,9 +205,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.fireCloudService = fireCloudService;
     this.directoryService = directoryService;
     this.cloudStorageService = cloudStorageService;
-    this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.workbenchEnvironment = workbenchEnvironment;
     this.mailServiceProvider = mailServiceProvider;
     this.profileAuditor = profileAuditor;
   }
@@ -359,6 +355,7 @@ public class ProfileController implements ProfileApiDelegate {
             request.getProfile().getCurrentPosition(),
             request.getProfile().getOrganization(),
             request.getProfile().getAreaOfResearch(),
+            request.getProfile().getDegrees(),
             FROM_CLIENT_ADDRESS.apply(request.getProfile().getAddress()),
             FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(request.getProfile().getDemographicSurvey()),
             request.getProfile().getInstitutionalAffiliations().stream()
@@ -555,6 +552,7 @@ public class ProfileController implements ProfileApiDelegate {
       userService.setDataUseAgreementNameOutOfDate(
           updatedProfile.getGivenName(), updatedProfile.getFamilyName());
     }
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
 
     user.setGivenName(updatedProfile.getGivenName());
     user.setFamilyName(updatedProfile.getFamilyName());
@@ -562,7 +560,7 @@ public class ProfileController implements ProfileApiDelegate {
     user.setCurrentPosition(updatedProfile.getCurrentPosition());
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
-
+    user.setLastModifiedTime(now);
     if (updatedProfile.getContactEmail() != null
         && !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
       // See RW-1488.

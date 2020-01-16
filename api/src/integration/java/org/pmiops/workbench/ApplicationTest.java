@@ -18,7 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * Services, Controllers, Components and Configurations.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestWebMvcConfig.class})
+@SpringBootTest
 public class ApplicationTest {
 
   @Autowired private ApplicationContext context;
@@ -31,18 +31,15 @@ public class ApplicationTest {
    * of spring.datasource.platform. This allows you to switch to database-specific scripts if
    * necessary. For example, you might choose to set it to the vendor name of the database (hsqldb,
    * h2, oracle, mysql, postgresql, and so on).
-   *
-   * @throws Exception
    */
   @Test
-  public void contextLoads() throws Exception {
+  public void contextLoads() {
     List<Object> beans = new ArrayList<>();
     // This loads all dao's that implement JPA repositories
     beans.addAll(context.getBeansWithAnnotation(NoRepositoryBean.class).values());
     // This loads all @Service, @Controller, @Component and @Configuration annotations
     beans.addAll(context.getBeansWithAnnotation(Component.class).values());
     for (Object object : beans) {
-      System.out.println(object);
       assertThat(object).isNotNull();
     }
   }

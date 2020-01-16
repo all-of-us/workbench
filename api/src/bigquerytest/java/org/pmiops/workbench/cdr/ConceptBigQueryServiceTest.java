@@ -2,8 +2,8 @@ package org.pmiops.workbench.cdr;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import java.util.Arrays;
 import java.util.List;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
@@ -100,7 +100,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return Arrays.asList("condition_occurrence");
+    return ImmutableList.of("condition_occurrence");
   }
 
   @Override

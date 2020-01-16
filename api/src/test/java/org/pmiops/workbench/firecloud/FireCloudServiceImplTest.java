@@ -3,12 +3,10 @@ package org.pmiops.workbench.firecloud;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import java.io.IOException;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
@@ -17,7 +15,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -31,7 +28,6 @@ import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
-import org.pmiops.workbench.firecloud.auth.OAuth;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -55,9 +51,7 @@ public class FireCloudServiceImplTest {
   @Mock private NihApi nihApi;
   @Mock private StatusApi statusApi;
   @Mock private StaticNotebooksApi staticNotebooksApi;
-  @Mock private GoogleCredential fireCloudCredential;
-  @Mock private ServiceAccounts serviceAccounts;
-  @Mock private GoogleCredential impersonatedCredential;
+  @Mock private ServiceAccountCredentials fireCloudCredentials;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
@@ -81,8 +75,7 @@ public class FireCloudServiceImplTest {
             Providers.of(statusApi),
             Providers.of(staticNotebooksApi),
             new FirecloudRetryHandler(new NoBackOffPolicy()),
-            serviceAccounts,
-            Providers.of(fireCloudCredential));
+            Providers.of(fireCloudCredentials));
   }
 
   @Test
@@ -195,21 +188,6 @@ public class FireCloudServiceImplTest {
   public void testNihCallbackServerError() throws Exception {
     when(nihApi.nihCallback(any())).thenThrow(new ApiException(500, "Internal Server Error"));
     service.postNihCallback(any());
-  }
-
-  @Test
-  public void testGetApiClientWithImpersonation() throws IOException {
-    when(serviceAccounts.getImpersonatedCredential(any(), eq("asdf@fake-research-aou.org"), any()))
-        .thenReturn(impersonatedCredential);
-
-    // Pretend we retrieved the given access token.
-    when(impersonatedCredential.getAccessToken()).thenReturn("impersonated-access-token");
-
-    ApiClient apiClient = service.getApiClientWithImpersonation("asdf@fake-research-aou.org");
-
-    // The impersonated access token should be assigned to the generated API client.
-    OAuth oauth = (OAuth) apiClient.getAuthentication("googleoauth");
-    assertThat(oauth.getAccessToken()).isEqualTo("impersonated-access-token");
   }
 
   @Test

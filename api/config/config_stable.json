@@ -12,7 +12,8 @@
     "xAppIdValue": "stable-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_stable",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-gatk:0.0.6"
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-gatk:0.0.8",
+    "welderDockerImage": "broadinstitute/welder-server:60e28bc"
   },
   "billing": {
     "accountId": "014D91-FCB792-33D2C0",
@@ -53,7 +54,8 @@
     "projectId": "all-of-us-rw-stable",
     "shortName": "Stable",
     "oauthClientId": "56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com",
-    "traceAllRequests": false
+    "traceAllRequests": false,
+    "appEngineLocationId": "us-central"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-stable.appspot.com/login",
@@ -83,9 +85,16 @@
     "unsafeAllowDeleteUser": false,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": false
+    "enableNewAccountCreation": false,
+    "enableRdrExport": false,
+    "enableBillingLockout": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-stable"
+  },
+  "rdrExport": {
+    "host": "all-of-us-rdr-stable.appspot.com",
+    "queueName": "rdrQueue",
+    "exportObjectsPerTask" : 10
   }
 }

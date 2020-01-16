@@ -538,6 +538,39 @@ paths:
 
   # Notebook clusters ####################################################################
 
+  /v1/admin/security/clusters/{billingProjectId}/delete-clusters:
+    post:
+      summary: Delete specified (or all if no specified list) clusters in a project
+      description: >
+        An admin gated endpoint that deletes given clusters in a given billing project.
+      operationId: deleteClustersInProject
+      tags:
+        - cluster
+      parameters:
+        - in: path
+          name: billingProjectId
+          description: The unique identifier of the Google Billing Project containing the clusters
+          required: true
+          type: string
+        - in: body
+          name: clustersToDelete
+          description: A list of names of clusters to delete. To delete all clusters, use an empty object, without
+            providing a list property at all (e.g., {}) An empty list will delete no clusters.
+          required: true
+          schema:
+            $ref: '#/definitions/ListClusterDeleteRequest'
+      responses:
+        200:
+          description: Clusters deleted
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ListClusterResponse'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
   /v1/clusters/{billingProjectId}/{workspaceFirecloudName}:
     get:
       summary: List available notebook clusters
@@ -563,9 +596,9 @@ paths:
           type: string
       responses:
         200:
-          description: Available clusters
+          description: The users cluster
           schema:
-            $ref: '#/definitions/ClusterListResponse'
+            $ref: '#/definitions/DefaultClusterResponse'
         500:
           description: Internal Error
           schema:
@@ -1153,6 +1186,22 @@ paths:
       responses:
         204:
           description: All users' project access were audited.
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /v1/cron/exportToRdr:
+    get:
+      security: []
+      tags:
+        - offlineRdrExport
+        - cron
+      description: Send workbench data to RDR
+      operationId: exportData
+      responses:
+        204:
+          description: All modified/created workspaces and users were exported
         500:
           description: Internal Error
           schema:
@@ -2044,12 +2093,13 @@ paths:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
       - $ref: '#/parameters/workspaceId'
-    get:
+    post:
       parameters:
-        - in: query
+        - in: body
           name: resourceType
-          type: string
           required: true
+          schema:
+            $ref: "#/definitions/ResourceType"
         - in: query
           name: id
           type: integer
@@ -2176,11 +2226,53 @@ paths:
           schema:
             $ref: "#/definitions/DomainValuesResponse"
 
+
+##########################################################################################
+## Endpoints for task in cloud task queue
+#########################################################################################
+  /v1/queueTask/exportResearcherData:
+    post:
+      tags:
+        - cloudTaskRdrExport
+      description: >
+        Send Researcher data
+      operationId: "exportResearcherData"
+      parameters:
+        - in: body
+          name: researcherIds
+          required: true
+          description: The IDs of concepts to be added to the concept set.
+          schema:
+            type: object
+      responses:
+        200:
+          description: >
+            A SQL query for each domain in the Data Set
+
+  /v1/queueTask/exportWorkspaceData:
+    post:
+      tags:
+        - cloudTaskRdrExport
+      description: >
+        Send Researcher data
+      operationId: "exportWorkspaceData"
+      parameters:
+        - in: body
+          name: researchIds
+          required: true
+          description: The IDs of concepts to be added to the concept set.
+          schema:
+            type: object
+      responses:
+        200:
+          description: >
+            A SQL query for each domain in the Data Set
+
+
 ##########################################################################################
 ## DEFINITIONS
 ##########################################################################################
 definitions:
-
   StatusResponse:
     type: object
     required:
@@ -2331,7 +2423,8 @@ definitions:
       DEVELOPER,
       ACCESS_CONTROL_ADMIN,
       FEATURED_WORKSPACE_ADMIN,
-      COMMUNICATIONS_ADMIN
+      COMMUNICATIONS_ADMIN,
+      SECURITY_ADMIN
     ]
 
   PageVisit:
@@ -2992,7 +3085,17 @@ definitions:
         type: integer
         format: int64
       resourceType:
-        type: string
+        $ref: "#/definitions/ResourceType"
+
+  ResourceType:
+    type: string
+    enum:
+      - NOTEBOOK
+      - COHORT
+      - COHORT_REVIEW
+      - CONCEPT_SET
+      - DATASET
+      - WORKSPACE
 
   KernelTypeEnum:
     type: string
@@ -3368,6 +3471,10 @@ definitions:
       dataAccessLevel:
         description: what level of data access the user has
         $ref: "#/definitions/DataAccessLevel"
+      degrees:
+        type: array
+        items:
+          $ref: '#/definitions/Degree'
       givenName:
         description: the user's given name (e.g. Alice)
         type: string
@@ -3515,6 +3622,14 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Gender'
+      sexAtBirth:
+        type: array
+        items:
+          $ref: '#/definitions/SexAtBirth'
+      sexualOrientation:
+        type: array
+        items:
+          $ref: '#/definitions/SexualOrientation'
       yearOfBirth:
         type: number
       education:
@@ -3611,13 +3726,51 @@ definitions:
         format: int64
         description: Milliseconds since the UNIX epoch.
 
-  ClusterListResponse:
+  DefaultClusterResponse:
     type: object
     required:
       - defaultCluster
     properties:
       defaultCluster:
         $ref: "#/definitions/Cluster"
+
+  ListClusterResponse:
+    description: Limited set of responses for a cluster. This is a subset of options in a full cluster, copied from the Leonardo swagger
+    required:
+      - clusterName
+      - googleProject
+      - status
+      - createdDate
+      - labels
+      - dateAccessed
+    properties:
+      clusterName:
+        type: string
+        description: The user-supplied name for the cluster
+      googleProject:
+        type: string
+        description: The Google Project used to create the cluster
+      status:
+        $ref: "#/definitions/ClusterStatus"
+      createdDate:
+        type: string
+        description: The date and time the cluster was created, in ISO-8601 format
+      labels:
+        type: object
+        description: The labels to be placed on the cluster. Of type Map[String,String]
+      dateAccessed:
+        type: string
+        description: |
+          The date and time the cluster was last accessed, in ISO-8601 format.
+          Date accessed is defined as the last time the cluster was created, modified, or accessed via the proxy.
+
+  ListClusterDeleteRequest:
+    type: object
+    properties:
+      clustersToDelete:
+        type: array
+        items:
+          type: string
 
   ClusterLocalizeRequest:
     type: object

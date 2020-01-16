@@ -29,7 +29,6 @@ import {
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActions';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -48,6 +47,7 @@ import {
   ErrorResponse,
   PrePackagedConceptSetEnum,
   Profile,
+  ResourceType,
   Surveys,
   ValueSet,
 } from 'generated/fetch';
@@ -545,7 +545,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     select(resource: ConceptSet | Cohort, rtype: ResourceType): void {
       this.setState({dataSetTouched: true});
-      if (rtype === ResourceType.CONCEPT_SET) {
+      if (rtype === ResourceType.CONCEPTSET) {
         const {valueSets, selectedDomainValuePairs} = this.state;
         const origSelected = this.state.selectedConceptSetIds;
         const newSelectedConceptSets =
@@ -902,7 +902,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                           data-test-id='concept-set-list-item'
                                           checked={selectedConceptSetIds.includes(conceptSet.id)}
                                           onChange={
-                                            () => this.select(conceptSet, ResourceType.CONCEPT_SET)
+                                            () => this.select(conceptSet, ResourceType.CONCEPTSET)
                                           }/>)
                     }
                     {loadingResources && <Spinner style={{position: 'relative', top: '2rem',
@@ -913,6 +913,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                     <BoxHeader step='3' header='Select Values' subHeader='Columns'>
                     <div style={styles.selectAllContainer}>
                       <CheckBox style={{height: 17, width: 17}}
+                                manageOwnState={false}
                                 disabled={fp.isEmpty(valueSets)}
                                 data-test-id='select-all'
                                 onChange={() => this.selectAllValues()}
@@ -1062,8 +1063,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
   });
 
 export {
-  DataSetPage,
-  Props as DataSetPageProps
+  DataSetPage
 };
 
 @Component({

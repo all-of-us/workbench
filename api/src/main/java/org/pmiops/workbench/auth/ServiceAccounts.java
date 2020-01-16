@@ -1,52 +1,69 @@
 package org.pmiops.workbench.auth;
 
-import static com.google.api.client.googleapis.util.Utils.getDefaultJsonFactory;
-
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.HttpTransport;
 import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
+import com.google.appengine.api.utils.SystemProperty;
+import com.google.auth.appengine.AppEngineCredentials;
+import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.List;
-import org.pmiops.workbench.config.WorkbenchEnvironment;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Handles functionality related to loading service account credentials and generating derived /
  * impersonated credentials.
  */
-@Component
 public class ServiceAccounts {
 
-  private final HttpTransport httpTransport;
+  private static final String SIGN_JWT_URL_FORMAT =
+      "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/%s:signJwt";
 
-  @Autowired
-  public ServiceAccounts(HttpTransport httpTransport) {
-    this.httpTransport = httpTransport;
-  }
+  /**
+   * Returns an appropriate set of backend service credentials with the given set of scopes.
+   *
+   * <p>This method uses AppIdentityService to return an instance of scoped AppEngineCredentials
+   * when running in an App Engine environment.
+   *
+   * <p>Unfortunately, if we use GoogleCredentials.getApplicationDefault() from within an App Engine
+   * environment, the returned credentials will be an instance of ComputeEngineCredentials, which
+   * doesn't support scoped access tokens. Frustratingly, the call to .createScoped will silently
+   * proceed by doing nothing -- meaning we only learn about the error once an attempt to use these
+   * credentials fails in a downstream service due to bad scopes.
+   *
+   * <p>See https://github.com/googleapis/google-auth-library-java/issues/272 and
+   * https://github.com/googleapis/google-auth-library-java/issues/172 for reference; this seems to
+   * be a common pain point for users of the com.google.auth.oauth2 library.
+   *
+   * @param scopes
+   * @return
+   * @throws IOException
+   */
+  private static GoogleCredentials getScopedServiceCredentials(List<String> scopes)
+      throws IOException {
 
-  public GoogleCredential.Builder getCredentialBuilder() {
-    return new GoogleCredential.Builder();
+    if (SystemProperty.environment.value().equals(SystemProperty.Environment.Value.Development)) {
+      // When running in a local dev environment, we simply get the application default credentials.
+      //
+      // TODO(gjuggler): it may be possible to remove this branch point altogether, and use the
+      // AppIdentityService approach even when running a local app engine server. I tested this
+      // out locally and it *seemed* to work, but it needs a bit more careful vetting.
+      return GoogleCredentials.getApplicationDefault().createScoped(scopes);
+    } else {
+      AppIdentityService appIdentityService = AppIdentityServiceFactory.getAppIdentityService();
+      return AppEngineCredentials.newBuilder()
+          .setScopes(scopes)
+          .setAppIdentityService(appIdentityService)
+          .build();
+    }
   }
 
   /**
-   * Retrieves an access token for the Workbench server service account. This should be used
-   * carefully, as this account is generally more privileged than an end user researcher account.
+   * Retrieves an access token with the specified set of scopes derived from Workbench service
+   * credentials.
    */
-  public String workbenchAccessToken(WorkbenchEnvironment workbenchEnvironment, List<String> scopes)
-      throws IOException {
-    // When running locally, we get application default credentials in a different way than
-    // when running in Cloud.
-    if (workbenchEnvironment.isDevelopment()) {
-      GoogleCredential credential = GoogleCredential.getApplicationDefault().createScoped(scopes);
-      credential.refreshToken();
-      return credential.getAccessToken();
-    }
-    AppIdentityService appIdentity = AppIdentityServiceFactory.getAppIdentityService();
-    final AppIdentityService.GetAccessTokenResult accessTokenResult =
-        appIdentity.getAccessToken(scopes);
-    return accessTokenResult.getAccessToken();
+  public static String getScopedServiceAccessToken(List<String> scopes) throws IOException {
+    GoogleCredentials scopedCreds = getScopedServiceCredentials(scopes);
+    scopedCreds.refreshIfExpired();
+    return scopedCreds.getAccessToken().getTokenValue();
   }
 
   /**
@@ -56,30 +73,18 @@ public class ServiceAccounts {
    *
    * <p>See docs/domain-delegation.md for more details.
    *
-   * @param serviceAccountCredential
+   * @param originalCredentials
    * @param userEmail Email address of the user to impersonate.
    * @param scopes The list of Google / OAuth API scopes to be authorized for.
    * @return
    * @throws IOException
    */
-  public GoogleCredential getImpersonatedCredential(
-      GoogleCredential serviceAccountCredential, String userEmail, List<String> scopes)
+  public static GoogleCredentials getImpersonatedCredentials(
+      GoogleCredentials originalCredentials, String userEmail, List<String> scopes)
       throws IOException {
-    // Build derived credentials for impersonating the target user.
-    GoogleCredential impersonatedUserCredential =
-        getCredentialBuilder()
-            .setJsonFactory(getDefaultJsonFactory())
-            .setTransport(httpTransport)
-            .setServiceAccountUser(userEmail)
-            .setServiceAccountId(serviceAccountCredential.getServiceAccountId())
-            .setServiceAccountScopes(scopes)
-            .setServiceAccountPrivateKey(serviceAccountCredential.getServiceAccountPrivateKey())
-            .setServiceAccountPrivateKeyId(serviceAccountCredential.getServiceAccountPrivateKeyId())
-            .setTokenServerEncodedUrl(serviceAccountCredential.getTokenServerEncodedUrl())
-            .build();
-
-    // Initiate the OAuth flow to populate the access token.
-    impersonatedUserCredential.refreshToken();
-    return impersonatedUserCredential;
+    GoogleCredentials impersonatedCreds =
+        originalCredentials.createScoped(scopes).createDelegated(userEmail);
+    impersonatedCreds.refresh();
+    return impersonatedCreds;
   }
 }

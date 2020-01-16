@@ -126,8 +126,8 @@ describe('ConceptHomepage', () => {
     const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
 
-    wrapper.find('[data-test-id="standardConceptsCheckBox"]').first()
-      .simulate('change', { target: { checked: true } });
+    wrapper.find('[data-test-id="standardConceptsCheckBox"] input').first()
+      .simulate('change', { target: { checked: false } });
     await waitOneTickAndUpdate(wrapper);
     searchTable(defaultSearchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);

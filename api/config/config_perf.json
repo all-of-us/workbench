@@ -12,7 +12,8 @@
     "xAppIdValue": "perf-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_perf_aou_perf",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "us.gcr.io/broad-dsp-gcr-public/terra-jupyter-gatk:0.0.6"
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-gatk:0.0.8",
+    "welderDockerImage": "broadinstitute/welder-server:60e28bc"
   },
   "billing": {
     "accountId": "00293C-5DEA2D-6887E7",
@@ -56,7 +57,8 @@
     "projectId": "all-of-us-rw-perf",
     "shortName": "Perf",
     "oauthClientId": "63939010390-aj0r8hro7r8lkt7a45gissu3m73ietl2.apps.googleusercontent.com",
-    "traceAllRequests": true
+    "traceAllRequests": true,
+    "appEngineLocationId": "us-central"
   },
   "admin": {
     "loginUrl": "https:\/\/all-of-us-rw-perf.appspot.com/login",
@@ -86,9 +88,16 @@
     "unsafeAllowDeleteUser": true,
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
-    "enableNewAccountCreation": false
+    "enableNewAccountCreation": false,
+    "enableRdrExport": false,
+    "enableBillingLockout": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf"
+  },
+  "rdrExport": {
+    "host": "pmi-drc-api-test.appspot.com",
+    "queueName": "rdrQueue",
+    "exportObjectsPerTask" : 10
   }
 }

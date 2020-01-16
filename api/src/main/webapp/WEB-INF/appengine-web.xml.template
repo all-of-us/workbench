@@ -4,7 +4,6 @@
   <threadsafe>true</threadsafe>
   <!-- Deploy complains about this tag, bug BigQuery needs it. -->
   <application>all-of-us-workbench-test</application>
-
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
 
@@ -25,6 +24,21 @@
   <static-error-handlers>
     <handler file="server_unavailable.html" />
   </static-error-handlers>
+
+  <static-files>
+    <include path="static/**">
+      <http-header name="Strict-Transport-Security"
+                   value="max-age=31536000; includeSubDomains; preload" />
+      <http-header name="X-XSS-Protection"
+                   value="1" />
+      <http-header name="X-Content-Type-Options"
+                   value="nosniff" />
+      <http-header name="Content-Security-Policy"
+                   value="default-src 'none'; frame-ancestors 'none'; report-uri /content-security-report" />
+    </include>
+    <include path="server_unavailable.html" />
+    <exclude path="static/README.md"/>
+  </static-files>
 
   <automatic-scaling>
     <min-idle-instances>${GAE_MIN_IDLE_INSTANCES}</min-idle-instances>

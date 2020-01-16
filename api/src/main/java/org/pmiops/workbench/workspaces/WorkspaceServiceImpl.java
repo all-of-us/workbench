@@ -1,7 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -9,6 +8,7 @@ import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +23,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
@@ -46,13 +47,15 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
-import org.pmiops.workbench.monitoring.views.MonitoringViews;
-import org.pmiops.workbench.monitoring.views.OpenCensusStatsViewInfo;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -80,6 +83,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private UserDao userDao;
   private Provider<DbUser> userProvider;
   private UserRecentWorkspaceDao userRecentWorkspaceDao;
+  private Provider<WorkbenchConfig> workbenchConfigProvider;
   private WorkspaceDao workspaceDao;
 
   private FireCloudService fireCloudService;
@@ -95,6 +99,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserDao userDao,
       Provider<DbUser> userProvider,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao) {
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
@@ -104,6 +109,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.userDao = userDao;
     this.userProvider = userProvider;
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
   }
 
@@ -241,6 +247,20 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
     }
     return workspace;
+  }
+
+  @Override
+  public void validateActiveBilling(String workspaceNamespace, String workspaceId)
+      throws ForbiddenException {
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
+      return;
+    }
+
+    if (BillingStatus.INACTIVE.equals(
+        getRequired(workspaceNamespace, workspaceId).getBillingStatus())) {
+      throw new ForbiddenException(
+          "Workspace (" + workspaceNamespace + ") is in an inactive billing state");
+    }
   }
 
   @Override
@@ -617,8 +637,20 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public Map<OpenCensusStatsViewInfo, Number> getGaugeData() {
-    long totalWorkspaceCount = workspaceDao.count();
-    return ImmutableMap.of(MonitoringViews.WORKSPACE_TOTAL_COUNT, totalWorkspaceCount);
+  public Collection<MeasurementBundle> getGaugeData() {
+    final ImmutableList.Builder<MeasurementBundle> resultBuilder = ImmutableList.builder();
+
+    // TODO(jaycarlton): fetch both active status and data access level crossed counts
+    final Map<WorkspaceActiveStatus, Long> activeStatusToCount =
+        workspaceDao.getActiveStatusToCountMap();
+    for (WorkspaceActiveStatus status : WorkspaceActiveStatus.values()) {
+      final long count = activeStatusToCount.getOrDefault(status, 0L);
+      resultBuilder.add(
+          MeasurementBundle.builder()
+              .addMeasurement(GaugeMetric.WORKSPACE_COUNT, count)
+              .addTag(MetricLabel.WORKSPACE_ACTIVE_STATUS, status.toString())
+              .build());
+    }
+    return resultBuilder.build();
   }
 }

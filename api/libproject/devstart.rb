@@ -1575,7 +1575,9 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin)
     # TODO: generate new key here
     get_gsuite_admin_key(gcc.project)
   end
-
+  Dir.chdir("cluster-resources") do
+    common.run_inline(%W{./build.rb generate-static-files})
+  end
   common.run_inline %W{gradle :appengineStage}
   promote = "--no-promote"
   unless op.opts.promote.nil?

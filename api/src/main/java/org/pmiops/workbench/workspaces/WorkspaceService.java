@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -39,6 +40,18 @@ public interface WorkspaceService {
   DbWorkspace getRequiredWithCohorts(String ns, String firecloudName);
 
   DbWorkspace saveWithLastModified(DbWorkspace workspace);
+
+  /*
+   * This function will check the workspace's billing status and throw a ForbiddenException
+   * if it is inactive.
+   *
+   * There is no hard and fast rule on what operations should require active billing but
+   * the general idea is that we should prevent operations that can either incur a non trivial
+   * amount of Google Cloud computation costs (starting a notebook cluster) or increase the
+   * monthly cost of the workspace (ex. creating GCS objects).
+   */
+  void validateActiveBilling(String workspaceNamespace, String workspaceId)
+      throws ForbiddenException;
 
   List<DbWorkspace> findForReview();
 

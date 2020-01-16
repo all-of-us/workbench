@@ -1,8 +1,10 @@
 package org.pmiops.workbench.db.dao;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.utils.DaoUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -38,4 +40,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       @Param("dals") List<Short> dataAccessLevels, @Param("term") String term, Sort sort);
 
   Set<DbUser> findByFirstRegistrationCompletionTimeNotNull();
+
+  default Map<Boolean, Long> getDisabledToCountMap() {
+    return DaoUtils.getAttributeToCountMap(findAll(), DbUser::getDisabled);
+  }
 }

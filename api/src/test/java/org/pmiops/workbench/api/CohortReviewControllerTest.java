@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -781,7 +782,7 @@ public class CohortReviewControllerTest {
     CohortReview expectedReview1 =
         createCohortReview(
             cohortReview,
-            Arrays.asList(participantCohortStatus1, participantCohortStatus2),
+            ImmutableList.of(participantCohortStatus1, participantCohortStatus2),
             page,
             pageSize,
             SortOrder.DESC,
@@ -789,7 +790,7 @@ public class CohortReviewControllerTest {
     CohortReview expectedReview2 =
         createCohortReview(
             cohortReview,
-            Arrays.asList(participantCohortStatus2, participantCohortStatus1),
+            ImmutableList.of(participantCohortStatus2, participantCohortStatus1),
             page,
             pageSize,
             SortOrder.DESC,
@@ -797,7 +798,7 @@ public class CohortReviewControllerTest {
     CohortReview expectedReview3 =
         createCohortReview(
             cohortReview,
-            Arrays.asList(participantCohortStatus1, participantCohortStatus2),
+            ImmutableList.of(participantCohortStatus1, participantCohortStatus2),
             page,
             pageSize,
             SortOrder.ASC,
@@ -805,7 +806,7 @@ public class CohortReviewControllerTest {
     CohortReview expectedReview4 =
         createCohortReview(
             cohortReview,
-            Arrays.asList(participantCohortStatus1, participantCohortStatus2),
+            ImmutableList.of(participantCohortStatus1, participantCohortStatus2),
             page,
             pageSize,
             SortOrder.ASC,
@@ -900,13 +901,7 @@ public class CohortReviewControllerTest {
     assertThat(participantCohortStatus.getStatus()).isEqualTo(CohortStatus.INCLUDED);
   }
 
-  /**
-   * Helper method to consolidate assertions for all the {@link AnnotationType}s.
-   *
-   * @param participantId
-   * @param annotationDefinitionId
-   * @param request
-   */
+  /** Helper method to consolidate assertions for all the {@link AnnotationType}s. */
   private void assertCreateParticipantCohortAnnotation(
       Long participantId, Long annotationDefinitionId, ParticipantCohortAnnotation request) {
     when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
@@ -936,10 +931,6 @@ public class CohortReviewControllerTest {
   /**
    * Helper method to consolidate assertions for {@link BadRequestException}s for all {@link
    * AnnotationType}s.
-   *
-   * @param participantId
-   * @param cohortAnnotationDefId
-   * @param type
    */
   private void assertBadRequestExceptionForAnnotationType(
       Long participantId, Long cohortAnnotationDefId, String type) {
@@ -975,12 +966,6 @@ public class CohortReviewControllerTest {
    * Helper method to assert results for {@link
    * CohortReviewController#getParticipantCohortStatuses(String, String, Long, Long,
    * PageFilterRequest)}.
-   *
-   * @param expectedReview
-   * @param page
-   * @param pageSize
-   * @param sortOrder
-   * @param sortColumn
    */
   private void assertParticipantCohortStatuses(
       CohortReview expectedReview,

@@ -4,12 +4,12 @@ import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
 import { Select, TextInput, ValidationError } from 'app/components/inputs';
 import { Modal, ModalBody, ModalFooter, ModalTitle } from 'app/components/modals';
-import {ConceptSet, FileDetail, Workspace} from 'generated/fetch';
+import {ConceptSet, FileDetail, ResourceType, Workspace} from 'generated/fetch';
 
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import { navigate } from 'app/utils/navigation';
-import {ResourceType} from 'app/utils/resourceActions';
+import {toDisplay} from 'app/utils/resourceActions';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
 
 enum RequestState { UNSENT, ERROR, SUCCESS }
@@ -17,8 +17,8 @@ enum RequestState { UNSENT, ERROR, SUCCESS }
 const ResourceTypeHomeTabs = new Map()
   .set(ResourceType.NOTEBOOK, 'notebooks')
   .set(ResourceType.COHORT, 'data')
-  .set(ResourceType.CONCEPT_SET, 'data')
-  .set(ResourceType.DATA_SET, 'data');
+  .set(ResourceType.CONCEPTSET, 'data')
+  .set(ResourceType.DATASET, 'data');
 
 export interface Props {
   fromWorkspaceNamespace: string;
@@ -82,10 +82,10 @@ class CopyModal extends React.Component<Props, State> {
       this.props.onCopy(response);
     }).catch((response) => {
       const errorMsg = response.status === 409 ?
-        `${resourceType} with the same ` +
+        `${toDisplay(resourceType)} with the same ` +
         `name already exists in the targeted workspace.` :
         response.status === 404 ?
-          `${resourceType} not found in the ` +
+          `${toDisplay(resourceType)} not found in the ` +
             `original workspace.` :
           'An error occurred while copying. Please try again.';
 
@@ -140,7 +140,7 @@ class CopyModal extends React.Component<Props, State> {
   }
 
   renderActionButton() {
-    const {resourceType} = this.props;
+    const resourceType = toDisplay(this.props.resourceType);
     if (this.state.requestState === RequestState.UNSENT ||
       this.state.requestState === RequestState.ERROR) {
       return (
@@ -190,7 +190,7 @@ class CopyModal extends React.Component<Props, State> {
       <div> Successfully copied
         <b style={boldStyle}> {fromResourceName} </b> to
         <b style={boldStyle}> {this.state.destination.name} </b>.
-        Do you want to view the copied {resourceType}?</div>
+        Do you want to view the copied {toDisplay(resourceType)}?</div>
     );
   }
 }

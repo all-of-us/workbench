@@ -84,7 +84,7 @@ public class ExportWorkspaceData {
   // Importing the real one requires importing a large subtree of dependencies
   @Bean
   public WorkspaceService workspaceService() {
-    return new WorkspaceServiceImpl(null, null, null, null, null, null, null, null, null);
+    return new WorkspaceServiceImpl(null, null, null, null, null, null, null, null, null, null);
   }
 
   @Bean
