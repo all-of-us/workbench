@@ -19,7 +19,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
-import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -125,7 +124,6 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setApproved(true);
     sourceDbWorkspace.setTimeRequested(DB_CREATION_TIMESTAMP);
     sourceDbWorkspace.setBillingStatus(BillingStatus.ACTIVE);
-    sourceDbWorkspace.setBillingAccountType(BillingAccountType.FREE_TIER);
   }
 
   @Test
