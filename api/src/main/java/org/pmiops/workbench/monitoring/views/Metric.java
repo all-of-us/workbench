@@ -10,9 +10,10 @@ import io.opencensus.stats.View.Name;
 import io.opencensus.tags.TagKey;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
-import org.pmiops.workbench.monitoring.attachments.Attachment;
+import java.util.stream.Collectors;
+import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.attachments.MetricLabelBase;
 
 /**
  * This is essentially a carbon copy of io.opencensus.stats.View, but written as an interface
@@ -70,16 +71,18 @@ public interface Metric {
 
   Aggregation getAggregation();
 
-  List<TagKey> getColumns();
+  List<MetricLabel> getLabels();
+
+  default List<TagKey> getColumns() {
+    return getLabels().stream().map(MetricLabelBase::getTagKey).collect(Collectors.toList());
+  }
 
   default View toView() {
     return View.create(
         getStatsName(), getDescription(), getMeasure(), getAggregation(), getColumns());
   }
 
-  Set<Attachment> getSupportedAttachments();
-
-  default boolean supportsAttachment(Attachment attachment) {
-    return getSupportedAttachments().contains(attachment);
+  default boolean supportsLabel(MetricLabel label) {
+    return getLabels().contains(label);
   }
 }

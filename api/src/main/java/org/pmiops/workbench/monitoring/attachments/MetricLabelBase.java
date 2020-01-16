@@ -1,5 +1,6 @@
 package org.pmiops.workbench.monitoring.attachments;
 
+import io.opencensus.tags.TagKey;
 import java.util.Set;
 
 /**
@@ -7,8 +8,12 @@ import java.util.Set;
  * attachment key name. Future capabilities might include listing metrics for which the keys are
  * applicable, or defining a discrete range of values that can be attached with a given key.
  */
-public interface AttachmentBase {
-  String getKeyName();
+public interface MetricLabelBase {
+  String getName();
+
+  default TagKey getTagKey() {
+    return TagKey.create(getName());
+  }
 
   /**
    * For attachments whose values are in a discrete range (such as booleans, enums, or cloud
