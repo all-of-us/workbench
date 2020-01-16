@@ -374,26 +374,26 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       DbUser dbUser, Integer dataUseAgreementSignedVersion, String initials) {
 
     return updateUserWithRetries(
-            (user) -> {
-              // FIXME: this should not be hardcoded
-              if (dataUseAgreementSignedVersion != CURRENT_DATA_USE_AGREEMENT_VERSION) {
-                throw new BadRequestException("Data Use Agreement Version is not up to date");
-              }
-              final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
-              DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
-              dataUseAgreement.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
-              dataUseAgreement.setUserId(user.getUserId());
-              dataUseAgreement.setUserFamilyName(user.getFamilyName());
-              dataUseAgreement.setUserGivenName(user.getGivenName());
-              dataUseAgreement.setUserInitials(initials);
-              dataUseAgreement.setCompletionTime(timestamp);
-              userDataUseAgreementDao.save(dataUseAgreement);
-              // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
-              user.setDataUseAgreementCompletionTime(timestamp);
-              user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
-              return user;
-            },
-            dbUser);
+        (user) -> {
+          // FIXME: this should not be hardcoded
+          if (dataUseAgreementSignedVersion != CURRENT_DATA_USE_AGREEMENT_VERSION) {
+            throw new BadRequestException("Data Use Agreement Version is not up to date");
+          }
+          final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+          DbUserDataUseAgreement dataUseAgreement = new DbUserDataUseAgreement();
+          dataUseAgreement.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+          dataUseAgreement.setUserId(user.getUserId());
+          dataUseAgreement.setUserFamilyName(user.getFamilyName());
+          dataUseAgreement.setUserGivenName(user.getGivenName());
+          dataUseAgreement.setUserInitials(initials);
+          dataUseAgreement.setCompletionTime(timestamp);
+          userDataUseAgreementDao.save(dataUseAgreement);
+          // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
+          user.setDataUseAgreementCompletionTime(timestamp);
+          user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+          return user;
+        },
+        dbUser);
   }
 
   @Override

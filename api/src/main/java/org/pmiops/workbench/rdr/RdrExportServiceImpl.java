@@ -157,10 +157,10 @@ public class RdrExportServiceImpl implements RdrExportService {
   private RdrResearcher toRdrResearcher(DbUser dbUser) {
     RdrResearcher researcher = new RdrResearcher();
     researcher.setUserId((int) dbUser.getUserId());
+    // RDR will start accepting null creation Time and later once workbench works on story
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-3741 RDR will create API to backfill data
     if (null != researcher.getCreationTime()) {
       researcher.setCreationTime(dbUser.getCreationTime().toLocalDateTime().atOffset(offset));
-    } else {
-      researcher.setCreationTime(OffsetDateTime.now());
     }
     researcher.setModifiedTime(dbUser.getLastModifiedTime().toLocalDateTime().atOffset(offset));
 
