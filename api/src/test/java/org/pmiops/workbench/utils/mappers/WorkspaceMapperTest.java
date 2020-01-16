@@ -43,6 +43,7 @@ public class WorkspaceMapperTest {
   private static final int WORKSPACE_VERSION = 2;
   private static final String WORKSPACE_AOU_NAME = "studyallthethings";
   private static final String WORKSPACE_FIRECLOUD_NAME = "aaaa-bbbb-cccc-dddd";
+  private static final String BILLING_ACCOUNT_NAME = "abc";
 
   private static final DataAccessLevel DATA_ACCESS_LEVEL = DataAccessLevel.REGISTERED;
   private static final Timestamp DB_CREATION_TIMESTAMP =
@@ -124,6 +125,7 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setApproved(true);
     sourceDbWorkspace.setTimeRequested(DB_CREATION_TIMESTAMP);
     sourceDbWorkspace.setBillingStatus(BillingStatus.ACTIVE);
+    sourceDbWorkspace.setBillingAccountName(BILLING_ACCOUNT_NAME);
   }
 
   @Test
@@ -139,6 +141,7 @@ public class WorkspaceMapperTest {
     assertThat(ws.getCreator()).isEqualTo(CREATOR_EMAIL);
     assertThat(ws.getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
     assertThat(ws.getDataAccessLevel()).isEqualTo(DATA_ACCESS_LEVEL);
+    assertThat(ws.getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
 
     final ResearchPurpose rp = ws.getResearchPurpose();
     assertResearchPurposeMatches(rp);

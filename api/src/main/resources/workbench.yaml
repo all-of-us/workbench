@@ -2492,7 +2492,7 @@ definitions:
         type: string
       creator:
         type: string
-      billingAccount:
+      billingAccountName:
         type: string
       googleBucketName:
         type: string

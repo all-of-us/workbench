@@ -433,6 +433,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             diseaseOfFocus: !this.props.workspace.researchPurpose.diseaseOfFocus ?
               '' : this.props.workspace.researchPurpose.diseaseOfFocus}
         }});
+
+        console.log(this.props.workspace);
+        console.log(this.state.workspace);
+
         if (this.isMode(WorkspaceEditMode.Duplicate)) {
           // This is the only field which is not automatically handled/differentiated
           // on the API level.
@@ -753,7 +757,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <WorkspaceEditSection header='All of Us Billing Account'
                               description={billingDescription}
                               tooltip={toolTipText.billingAccount}>
-          <Dropdown options={this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}))}/>
+          <Dropdown value={this.state.workspace.billingAccountName}
+                    options={this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}))}/>
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Research Use Statement Questions'
             description={<div> {ResearchPurposeDescription} Therefore, please provide
