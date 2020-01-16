@@ -162,11 +162,8 @@ public class RdrExportServiceImpl implements RdrExportService {
     } else {
       researcher.setCreationTime(OffsetDateTime.now());
     }
-    if (null != researcher.getModifiedTime()) {
-      researcher.setModifiedTime(dbUser.getLastModifiedTime().toLocalDateTime().atOffset(offset));
-    } else {
-      researcher.setModifiedTime(OffsetDateTime.now());
-    }
+    researcher.setModifiedTime(dbUser.getLastModifiedTime().toLocalDateTime().atOffset(offset));
+
     researcher.setGivenName(dbUser.getGivenName());
     researcher.setFamilyName(dbUser.getFamilyName());
     if (dbUser.getAddress() != null) {
