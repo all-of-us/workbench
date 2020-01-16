@@ -133,6 +133,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     while (true) {
       dbUser = userModifier.apply(dbUser);
       updateDataAccessLevel(dbUser);
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      dbUser.setLastModifiedTime(now);
       try {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
