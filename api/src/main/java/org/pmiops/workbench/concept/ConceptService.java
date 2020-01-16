@@ -123,16 +123,20 @@ public class ConceptService {
     return domainInfoDao.findByOrderByDomainId();
   }
 
-  public List<DbDomainInfo> getAllConceptCounts(String matchExp) {
-    return domainInfoDao.findAllMatchConceptCounts(matchExp);
+  public List<DbDomainInfo> getConceptCounts(String matchExp, String standardConceptFilter) {
+    return domainInfoDao.findConceptCounts(matchExp, getConceptTypes(standardConceptFilter));
   }
 
-  public DbDomainInfo findPhysicalMeasurementConceptCounts(String matchExp) {
-    return domainInfoDao.findPhysicalMeasurementConceptCounts(matchExp);
+  public DbDomainInfo findPhysicalMeasurementConceptCounts(
+      String matchExp, String standardConceptFilter) {
+    return domainInfoDao.findPhysicalMeasurementConceptCounts(
+        matchExp, getConceptTypes(standardConceptFilter));
   }
 
-  public List<DbDomainInfo> getStandardConceptCounts(String matchExp) {
-    return domainInfoDao.findStandardConceptCounts(matchExp);
+  private List<String> getConceptTypes(String standardConceptFilter) {
+    return STANDARD_CONCEPTS.equals(standardConceptFilter)
+        ? STANDARD_CONCEPT_CODES
+        : ALL_CONCEPT_CODES;
   }
 
   public List<DbSurveyModule> getSurveyInfo() {
@@ -155,10 +159,7 @@ public class ConceptService {
       String query, String standardConceptFilter, List<String> domainIds, int limit, int page) {
     final String keyword = modifyMultipleMatchKeyword(query);
     Pageable pageable = new PageRequest(page, limit, new Sort(Direction.DESC, "countValue"));
-    List<String> conceptTypes =
-        STANDARD_CONCEPTS.equals(standardConceptFilter)
-            ? STANDARD_CONCEPT_CODES
-            : ALL_CONCEPT_CODES;
+    List<String> conceptTypes = getConceptTypes(standardConceptFilter);
     if (domainIds.contains(CommonStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT))) {
       ImmutableList domains =
           ImmutableList.of(CommonStorageEnums.domainToDomainId(Domain.MEASUREMENT));

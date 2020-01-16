@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.model.StandardConceptFilter.ALL_CONCEPTS;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
@@ -102,7 +104,7 @@ public class ConceptsController implements ConceptsApiDelegate {
   private void addDomainCounts(SearchConceptsRequest request, ConceptListResponse response) {
     if (request.getIncludeDomainCounts()) {
       StandardConceptFilter standardConceptFilter = request.getStandardConceptFilter();
-      boolean allConcepts = standardConceptFilter == StandardConceptFilter.ALL_CONCEPTS;
+      boolean allConcepts = standardConceptFilter == ALL_CONCEPTS;
       DbDomainInfo pmDomainInfo = null;
       String matchExp = ConceptService.modifyMultipleMatchKeyword(request.getQuery());
       List<DbDomainInfo> allDbDomainInfos = conceptService.getAllDomainsOrderByDomainId();
@@ -110,11 +112,11 @@ public class ConceptsController implements ConceptsApiDelegate {
           matchExp == null ? allDbDomainInfos : new ArrayList<>();
       if (matchingDbDomainInfos.isEmpty()) {
         matchingDbDomainInfos =
-            allConcepts
-                ? conceptService.getAllConceptCounts(matchExp)
-                : conceptService.getStandardConceptCounts(matchExp);
+            conceptService.getConceptCounts(matchExp, request.getStandardConceptFilter().name());
         if (allConcepts) {
-          pmDomainInfo = conceptService.findPhysicalMeasurementConceptCounts(matchExp);
+          pmDomainInfo =
+              conceptService.findPhysicalMeasurementConceptCounts(
+                  matchExp, request.getStandardConceptFilter().name());
         }
       }
       Map<Domain, DbDomainInfo> domainCountMap =
@@ -168,7 +170,7 @@ public class ConceptsController implements ConceptsApiDelegate {
 
     ConceptListResponse response = new ConceptListResponse();
     if (request.getDomain().equals(Domain.SURVEY)) {
-      if (StandardConceptFilter.ALL_CONCEPTS.equals(request.getStandardConceptFilter())) {
+      if (ALL_CONCEPTS.equals(request.getStandardConceptFilter())) {
         Slice<DbCriteria> questionList =
             conceptService.searchSurveys(
                 request.getQuery(),
