@@ -1,14 +1,17 @@
 package org.pmiops.workbench.actionaudit.auditors
 
-import com.google.common.collect.ImmutableList
 import org.pmiops.workbench.actionaudit.ActionAuditEvent
 import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
 import org.pmiops.workbench.actionaudit.AgentType
 import org.pmiops.workbench.actionaudit.TargetType
+import org.pmiops.workbench.actionaudit.targetproperties.EgressEventCommentTargetProperty
+import org.pmiops.workbench.actionaudit.targetproperties.EgressEventTargetProperty
+import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor
 import org.pmiops.workbench.api.ClusterController
 import org.pmiops.workbench.db.dao.UserDao
 import org.pmiops.workbench.db.model.DbUser
+import org.pmiops.workbench.exceptions.BadRequestException
 import org.pmiops.workbench.model.EgressEvent
 import org.pmiops.workbench.model.EgressEventRequest
 import org.pmiops.workbench.workspaces.WorkspaceService
@@ -53,8 +56,13 @@ constructor(
         // Load the workspace via the GCP project name
         val dbWorkspace = this.workspaceService.getByNamespace(event.projectName)
         if (dbWorkspace == null) {
+            // Failing to find a workspace is odd enough that we want to return a non-success
+            // response at the API level. But it's also worth storing a permanent record of the
+            // high-egress event by logging it without a workspace target.
             fireFailedToFindWorkspace(event)
-            return
+            throw BadRequestException(String.format(
+                    "The workspace '%s' referred to by the given event is no longer active or never existed.",
+                    event.projectName))
         }
         // Using service-level creds, load the FireCloud workspace ACLs to find all members
         // of the workspace. Then attempt to find the user who aligns with the named VM.
@@ -77,7 +85,7 @@ constructor(
         }
 
         val actionId = actionIdProvider.get()
-        actionAuditService.sendWithComment(ImmutableList.of(ActionAuditEvent(
+        fireEventSet(ActionAuditEvent(
                 timestamp = clock.millis(),
                 actionId = actionId,
                 actionType = ActionType.HIGH_EGRESS,
@@ -86,31 +94,59 @@ constructor(
                 agentEmailMaybe = agentEmail,
                 targetType = TargetType.WORKSPACE,
                 targetIdMaybe = dbWorkspace.workspaceId
-        )), String.format(
-                "Detected %.2fMb egress across %d seconds in workspace %s, from VM %s",
-                event.egressMib, event.timeWindowDuration, event.projectName, event.vmName))
+        ), event, null)
     }
 
     override fun fireFailedToParseEgressEvent(request: EgressEventRequest) {
-        fireGenericEventWithComment(String.format(
+        fireEventSet(getGenericBaseEvent(), null, String.format(
                 "Failed to parse egress event JSON from SumoLogic. Field contents: %s",
                 request.eventsJsonArray))
     }
 
     override fun fireBadApiKeyEgressEvent(apiKey: String, request: EgressEventRequest) {
-        fireGenericEventWithComment(String.format(
+        fireEventSet(getGenericBaseEvent(), null, String.format(
                 "Received bad API key from SumoLogic. Bad key: %s, full request: %s",
                 apiKey, request.toString()))
     }
 
     private fun fireFailedToFindWorkspace(event: EgressEvent) {
-        fireGenericEventWithComment(String.format(
+        fireEventSet(getGenericBaseEvent(), event, String.format(
                 "Failed to find workspace for high-egress event: %s",
                 event.toString()))
     }
 
-    private fun fireGenericEventWithComment(comment: String) {
-        actionAuditService.sendWithComment(ImmutableList.of(ActionAuditEvent(
+    /**
+     * Creates and fires a set of events derived from the given base event, incorporating audit rows
+     * to record properties of the egress event and a human-readable comment. Either the egress event
+     * or the comment may be null, in which case those row(s) won't be generated.
+     */
+    private fun fireEventSet(baseEvent: ActionAuditEvent, egressEvent: EgressEvent?, comment: String?) {
+        var events = ArrayList<ActionAuditEvent>()
+        if (egressEvent != null) {
+            val propertyValues = TargetPropertyExtractor.getPropertyValuesByName(
+                    EgressEventTargetProperty.values(), egressEvent)
+            events.addAll(propertyValues.map {
+                baseEvent.copy(
+                        targetPropertyMaybe = it.key,
+                        newValueMaybe = it.value)
+            })
+        }
+        if (comment != null) {
+            events.add(baseEvent.copy(
+                    targetPropertyMaybe = EgressEventCommentTargetProperty.COMMENT.propertyName,
+                    newValueMaybe = comment
+            ))
+        }
+        actionAuditService.send(events)
+    }
+
+    /**
+     * Returns an ActionAuditEvent suitable for logging system-level error messages, e.g. when
+     * an inbound high-egress event refers to an inactive workspace or when the request JSON
+     * could not be successfully parsed.
+     */
+    private fun getGenericBaseEvent(): ActionAuditEvent {
+        return ActionAuditEvent(
                 timestamp = clock.millis(),
                 actionId = actionIdProvider.get(),
                 actionType = ActionType.HIGH_EGRESS,
@@ -119,7 +155,7 @@ constructor(
                 agentEmailMaybe = null,
                 targetType = TargetType.WORKSPACE,
                 targetIdMaybe = null
-        )), comment)
+        )
     }
 
     companion object {

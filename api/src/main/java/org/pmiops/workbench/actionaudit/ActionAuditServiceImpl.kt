@@ -30,18 +30,6 @@ constructor(private val configProvider: Provider<WorkbenchConfig>, private val c
         }
     }
 
-    override fun sendWithComment(events: Collection<ActionAuditEvent>, comment: String) {
-        if (events.isEmpty()) {
-            serviceLogger.log(Level.SEVERE, "sendWithComment called with empty events collection.")
-        }
-
-        val commentEvent = events.stream().findFirst().get().copy(
-            actionType = ActionType.COMMENT,
-            newValueMaybe = comment
-        )
-        send(events.plus(commentEvent))
-    }
-
     private fun auditEventToLogEntry(auditEvent: ActionAuditEvent): LogEntry {
         val actionAuditConfig = configProvider.get().actionAudit
         return LogEntry.newBuilder(toJsonPayload(auditEvent))
