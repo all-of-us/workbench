@@ -268,6 +268,7 @@ public class RdrExportServiceImpl implements RdrExportService {
           RdrWorkspaceUser workspaceUserMap = new RdrWorkspaceUser();
           workspaceUserMap.setUserId((int) userDao.findUserByUsername(email).getUserId());
           workspaceUserMap.setRole(RdrWorkspaceUser.RoleEnum.fromValue(access.getAccessLevel()));
+          workspaceUserMap.setStatus(RdrWorkspaceUser.StatusEnum.ACTIVE);
           rdrWorkspace.addWorkspaceUsersItem(workspaceUserMap);
         });
 
