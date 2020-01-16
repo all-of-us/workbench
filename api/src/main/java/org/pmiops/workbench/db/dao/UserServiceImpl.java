@@ -133,6 +133,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     while (true) {
       dbUser = userModifier.apply(dbUser);
       updateDataAccessLevel(dbUser);
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      dbUser.setLastModifiedTime(now);
       try {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
@@ -383,10 +385,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dataUseAgreement.setUserInitials(initials);
     dataUseAgreement.setCompletionTime(timestamp);
     userDataUseAgreementDao.save(dataUseAgreement);
-    // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
-    dbUser.setDataUseAgreementCompletionTime(timestamp);
-    dbUser.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
-    return userDao.save(dbUser);
+    return updateUserWithRetries(
+        (user) -> {
+          // TODO: Teardown/reconcile duplicated state between the user profile and DUA.
+          user.setDataUseAgreementCompletionTime(timestamp);
+          user.setDataUseAgreementSignedVersion(dataUseAgreementSignedVersion);
+          return user;
+        },
+        dbUser);
   }
 
   @Override

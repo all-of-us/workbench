@@ -157,8 +157,14 @@ public class RdrExportServiceImpl implements RdrExportService {
   private RdrResearcher toRdrResearcher(DbUser dbUser) {
     RdrResearcher researcher = new RdrResearcher();
     researcher.setUserId((int) dbUser.getUserId());
-    researcher.setCreationTime(dbUser.getCreationTime().toLocalDateTime().atOffset(offset));
+    // RDR will start accepting null creation Time and later once workbench works on story
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-3741 RDR will create API to
+    // backfill data
+    if (null != researcher.getCreationTime()) {
+      researcher.setCreationTime(dbUser.getCreationTime().toLocalDateTime().atOffset(offset));
+    }
     researcher.setModifiedTime(dbUser.getLastModifiedTime().toLocalDateTime().atOffset(offset));
+
     researcher.setGivenName(dbUser.getGivenName());
     researcher.setFamilyName(dbUser.getFamilyName());
     if (dbUser.getAddress() != null) {
@@ -259,10 +265,10 @@ public class RdrExportServiceImpl implements RdrExportService {
     Map<String, FirecloudWorkspaceAccessEntry> aclMap = firecloudResponse.getAcl();
     aclMap.forEach(
         (email, access) -> {
-          RdrWorkspaceUser workspaceUderMap = new RdrWorkspaceUser();
-          workspaceUderMap.setUserId((int) userDao.findUserByUsername(email).getUserId());
-          workspaceUderMap.setRole(RdrWorkspaceUser.RoleEnum.fromValue(access.getAccessLevel()));
-          rdrWorkspace.addWorkspaceUsersItem(workspaceUderMap);
+          RdrWorkspaceUser workspaceUserMap = new RdrWorkspaceUser();
+          workspaceUserMap.setUserId((int) userDao.findUserByUsername(email).getUserId());
+          workspaceUserMap.setRole(RdrWorkspaceUser.RoleEnum.fromValue(access.getAccessLevel()));
+          rdrWorkspace.addWorkspaceUsersItem(workspaceUserMap);
         });
 
     return rdrWorkspace;
