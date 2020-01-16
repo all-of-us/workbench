@@ -437,6 +437,12 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     });
   }
 
+  getInstitutionalAffiliationPropertyOrEmptyString(property: string) {
+    const {institutionalAffiliations} = this.state.profile;
+    return institutionalAffiliations &&
+      institutionalAffiliations.length > 0 ? institutionalAffiliations[property] : '';
+  }
+
 
   render() {
     const {
@@ -446,7 +452,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         address: {
           streetAddress1, streetAddress2, city, state, zipCode, country
         },
-        institutionalAffiliations
       },
     } = this.state;
     const usernameLabelText =
@@ -587,14 +592,12 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <FlexColumn style={{justifyContent: 'space-between'}}>
             <TextInput data-test-id='institutionname' style={{width: '16rem', marginBottom: '0.5rem',
               marginTop: '0.5rem'}}
-              value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
-                  institutionalAffiliations[0].institution : ''}
+              value={this.getInstitutionalAffiliationPropertyOrEmptyString('institution')}
               placeholder='Institution Name'
               onChange={value => this.updateInstitutionAffiliation('institution', value)}
                        />
-            <Dropdown data-test-id='institutionRole' value={institutionalAffiliations &&
-            institutionalAffiliations.length > 0 ?
-                institutionalAffiliations[0].role : ''}
+            <Dropdown data-test-id='institutionRole'
+                      value={this.getInstitutionalAffiliationPropertyOrEmptyString('role')}
                       onChange={e => this.updateInstitutionAffiliation('role', e.value)}
                       placeholder='Which of the following describes your role'
                       style={{width: '16rem'}} options={AccountCreationOptions.roles}/>
@@ -603,21 +606,18 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <FlexColumn style={{justifyContent: 'space-between'}}>
             <Dropdown data-test-id='affiliation'
                       style={{width: '18rem', marginBottom: '0.5rem', marginTop: '0.5rem'}}
-                      value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
-                          institutionalAffiliations[0].nonAcademicAffiliation : ''}
+                      value={this.getInstitutionalAffiliationPropertyOrEmptyString('nonAcademicAffiliation')}
                       options={AccountCreationOptions.nonAcademicAffiliations}
                       onChange={e => this.updateNonAcademicAffiliationRoles(e.value)}
                       placeholder='Which of the following better describes your affiliation?'/>
             {this.state.showNonAcademicAffiliationRole &&
             <Dropdown data-test-id='affiliationrole' placeholder='Which of the following describes your role'
-                      options={this.state.rolesOptions} value={institutionalAffiliations
-            && institutionalAffiliations.length > 0 ?
-                institutionalAffiliations[0].role : ''}
+                      options={this.state.rolesOptions}
+                      value={this.getInstitutionalAffiliationPropertyOrEmptyString('role')}
                       onChange={e => this.selectNonAcademicAffiliationRoles(e.value)}
                       style={{width: '18rem'}}/>}
             {this.state.showNonAcademicAffiliationOther &&
-            <TextInput value={institutionalAffiliations && institutionalAffiliations.length > 0 ?
-                institutionalAffiliations[0].other : ''}
+            <TextInput value={this.getInstitutionalAffiliationPropertyOrEmptyString('other')}
                        onChange={value => this.updateInstitutionAffiliation('other', value)}
                        style={{marginTop: '1rem', width: '18rem'}}/>}
           </FlexColumn>}
