@@ -89,7 +89,8 @@
     "enableRdrExport": false,
     "enableBillingLockout": false,
     "enableSumoLogicEventHandling": false,
-    "useKeylessDelegatedCredentials": false
+    "useKeylessDelegatedCredentials": false,
+    "sendFreeTierAlertEmails": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-staging"
