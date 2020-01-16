@@ -6,7 +6,7 @@
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="nsaxena" id="db.changelog-116-drop-not-null-constraint-user-creation-date">
   	<dropNotNullConstraint columnDataType="datetime" columnName="creation_time" tableName="user"/>
-  	<sql>ALTER TABLE user MODIFY COLUMN last_modified_time DEFAULT CURRENT_TIMESTAMP()</sql>
+  	<sql>ALTER TABLE user MODIFY COLUMN last_modified_time timestamp DEFAULT CURRENT_TIMESTAMP()</sql>
     <sql>update user set last_modified_time = first_sign_in_time where first_sign_in_time is not null</sql>
   </changeSet>
 </databaseChangeLog>
