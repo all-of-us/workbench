@@ -26,6 +26,7 @@ After you've installed `gcloud`, login using your `pmi-ops` account:
 
 ```shell
 gcloud auth login
+gsutil config (choose all-of-us-workbench-test as your default project)
 ```
 
 To initialize the project, run the following:
@@ -603,14 +604,14 @@ workbench test service account against Firecloud dev. It retrieves required auth
 scopes of `email`, `profile`, and `cloud-billing`.
 
 ```Shell
-# From the "api" directory, use `oauth2l` to retrieve an authorization header: 
+# From the "api" directory, use `oauth2l` to retrieve an authorization header:
 `~/go/bin/oauth2l header --json ./sa-key.json email profile cloud-billing`
 ```
 
 Now we'll demonstrate calling Firecloud's [profile/billing API](https://api.firecloud.org/#!/Profile/billing)
 with the service account credentials.
 ```Shell
-# call Firecloud Billing API, format the JSON output and view in less 
+# call Firecloud Billing API, format the JSON output and view in less
 
 curl -X GET -H "`~/go/bin/oauth2l header --json ./sa-key.json email profile cloud-billing`" \
     -H "Content-Type: application/json" \
