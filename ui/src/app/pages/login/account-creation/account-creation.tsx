@@ -392,8 +392,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   validateAccountCreation() {
     const {
       showInstitution,
-      profile: { givenName, familyName, contactEmail,
-        address: {streetAddress1, city, country, state},
+      profile: { givenName, familyName, contactEmail, areaOfResearch, degrees, username,
+        address: {streetAddress1, city, country, state, zipCode},
         institutionalAffiliations: [{institution, nonAcademicAffiliation, role}]
       }
     } = this.state;
@@ -405,19 +405,38 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     };
 
     const validationCheck = {
+      username: {
+        presence: presenceCheck,
+        length: {
+          minimum: 4 + serverConfigStore.getValue().gsuiteDomain.length,
+          maximum: 64 + serverConfigStore.getValue().gsuiteDomain.length,
+          tooShort: 'not valid',
+          tooLong: 'not valid'
+        },
+        email: {
+          message: ' not valid'
+        }
+      },
       givenName: presenceCheck,
       familyName: presenceCheck,
       contactEmail: {
         presence: presenceCheck,
-        format: {
-          pattern: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-          message: 'Invalid email address'
+        email: {
+          message: 'invalid'
+        }
+      },
+      degrees: {
+        length: {
+          minimum: 1,
+          tooShort: 'Please provide at least one degree option (if none, select \'none\'.)',
         }
       },
       streetAddress1: presenceCheck,
       city: presenceCheck,
       state: presenceCheck,
-      country: presenceCheck
+      zipCode: presenceCheck,
+      country: presenceCheck,
+      areaOfResearch: presenceCheck
     };
 
     showInstitution ? validationCheck['institution'] = presenceCheck :
@@ -428,13 +447,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     }
 
 
-    const errors = validate({givenName, familyName, contactEmail, streetAddress1, city, state, country,
-      institution, nonAcademicAffiliation, role}, validationCheck);
-    this.setState({errors: errors}, () => {
-      if (!this.state.errors) {
-        this.props.setProfile(this.state.profile, {stepName: 'accountCreationSurvey'});
-      }
-    });
+    return validate({areaOfResearch, degrees, givenName, familyName, contactEmail, streetAddress1,
+      city, state, country, institution, nonAcademicAffiliation, role, zipCode,
+      username: username + '@' + serverConfigStore.getValue().gsuiteDomain}, validationCheck);
   }
 
   getInstitutionalAffiliationPropertyOrEmptyString(property: string) {
@@ -466,6 +481,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         </TooltipTrigger>
       </div>;
 
+    const errors = this.validateAccountCreation();
     return <div id='account-creation'
                 style={{paddingTop: environment.enableAccountPages ? '1.5rem' :
                       '3rem', paddingRight: '3rem', paddingLeft: '3rem'}}>
@@ -569,6 +585,28 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               </FlexRow>
             </FlexColumn>
           </Section>
+          <Section header={<React.Fragment>
+            <div>Please describe your research background, experience and research interests</div>
+            <div style={styles.asideText}>This information will be posted publicly on the AoU Research Hub Website
+              to inform the AoU Research Participants. <span  style={{marginLeft: 2,
+                fontSize: 12}}>(2000 character limit)</span>
+              <i style={{...styles.publiclyDisplayedText, marginLeft: 2}}>
+                Publicly displayed
+              </i></div>
+          </React.Fragment>}>
+            <TextArea style={{height: '15rem', resize: 'none', width: '26rem', borderRadius: '3px 3px 0 0',
+              borderColor: colorWithWhiteness(colors.dark, 0.5)}}
+                      id='areaOfResearch'
+                      name='areaOfResearch'
+                      placeholder='Describe Your Current Research'
+                      value={areaOfResearch}
+                      onChange={v => this.updateProfileObject('areaOfResearch', v)}/>
+            <FlexRow style={{justifyContent: 'flex-end', width: '26rem',
+              backgroundColor: colorWithWhiteness(colors.primary, 0.85), fontSize: 12,
+              color: colors.primary, padding: '0.25rem', borderRadius: '0 0 3px 3px', border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`}}>
+              {2000 - areaOfResearch.length} characters remaining
+            </FlexRow>
+          </Section>
           <Section header='Institutional Affiliation'>
             <label style={{color: colors.primary, fontSize: 16}}>
               Are you affiliated with an Academic Research Institution?
@@ -622,11 +660,18 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                        style={{marginTop: '1rem', width: '18rem'}}/>}
           </FlexColumn>}
           <FormSection style={{paddingBottom: '1rem'}}>
-            <Button disabled={this.state.usernameCheckInProgress || this.isUsernameValidationError}
-                    style={{'height': '2rem', 'width': '10rem'}}
-                    onClick={() => this.validateAccountCreation()}>
-              Next
-            </Button>
+            <TooltipTrigger content={errors && <React.Fragment>
+              <div>Please review the following: </div>
+              <ul>
+                {Object.keys(errors).map((key) => <li>{errors[key][0]}</li>)}
+              </ul>
+            </React.Fragment>} disabled={!errors}>
+              <Button disabled={this.state.usernameCheckInProgress || this.isUsernameValidationError || errors}
+                      style={{'height': '2rem', 'width': '10rem'}}
+                      onClick={() => this.props.setProfile(this.state.profile, {stepName: 'accountCreationSurvey'})}>
+                Next
+              </Button>
+            </TooltipTrigger>
           </FormSection>
         </FlexColumn>
         <FlexColumn>
