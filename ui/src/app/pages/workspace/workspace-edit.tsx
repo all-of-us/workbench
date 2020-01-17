@@ -677,6 +677,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       const {
         workspace: {
           name,
+          billingAccountName,
           researchPurpose: {
             anticipatedFindings,
             intendedStudy,
@@ -686,6 +687,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       } = this.state;
       const errors = validate({
         name,
+        billingAccountName,
         anticipatedFindings,
         intendedStudy,
         reasonForAllOfUs,
@@ -696,6 +698,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         name: {
           length: { minimum: 1, maximum: 80 }
         },
+        billingAccountName: { presence: true },
         intendedStudy: { presence: true },
         anticipatedFindings: {presence: true },
         reasonForAllOfUs: { presence: true },
@@ -966,6 +969,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <TooltipTrigger content={
               errors && <ul>
                 {errors.name && <div>{errors.name}</div>}
+                {errors.billingAccountName && <div>You must select a billing account</div>}
                 {errors.primaryPurpose && <div>You must choose at least one primary research purpose</div>}
                 {errors.reasonForAllOfUs && <div>You must specify a reason for using All of Us data</div>}
                 {errors.intendedStudy && <div>You must specify a field of intended study</div>}
