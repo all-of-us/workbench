@@ -2,6 +2,7 @@ package org.pmiops.workbench.cdr.dao;
 
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.springframework.data.domain.Page;
@@ -283,4 +284,19 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "from DbCriteria c "
               + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION'")
   long countSurveys();
+
+  default Page<DbCriteria> findSurveys(String keyword, String surveyName, Pageable pageable) {
+    if (StringUtils.isBlank(keyword)) {
+      return StringUtils.isBlank(surveyName)
+          ? findSurveys(pageable)
+          : findSurveysByName(surveyName, pageable);
+    }
+    return findSurveys(keyword, pageable);
+  }
+
+  default long countSurveys(String keyword, String surveyName) {
+    return keyword == null
+        ? surveyName == null ? countSurveys() : countSurveyByName(surveyName)
+        : countSurveyBySearchTerm(keyword);
+  }
 }
