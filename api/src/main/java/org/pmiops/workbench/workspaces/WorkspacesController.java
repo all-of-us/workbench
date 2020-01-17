@@ -5,6 +5,8 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
+import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
@@ -12,6 +14,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -54,7 +57,9 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
+import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -113,6 +118,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final UserDao userDao;
   private Provider<DbUser> userProvider;
   private final FireCloudService fireCloudService;
+  private Provider<Cloudbilling> cloudbillingProvider;
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final NotebooksService notebooksService;
@@ -120,6 +126,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private WorkspaceAuditor workspaceAuditor;
   private WorkspaceMapper workspaceMapper;
+
+  private final Provider<BillingApi> billingApiProvider;
 
   @Autowired
   public WorkspacesController(
@@ -130,12 +138,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<DbUser> userProvider,
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
+      Provider<Cloudbilling> cloudBillingProvider,
       Clock clock,
       NotebooksService notebooksService,
       UserService userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
-      WorkspaceMapper workspaceMapper) {
+      WorkspaceMapper workspaceMapper,
+      Provider<BillingApi> billingApiProvider) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -143,12 +153,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
     this.cloudStorageService = cloudStorageService;
+    this.cloudbillingProvider = cloudBillingProvider;
     this.clock = clock;
     this.notebooksService = notebooksService;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
+    this.billingApiProvider = billingApiProvider;
   }
 
   private String getRegisteredUserDomainEmail() {
@@ -244,10 +256,37 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+    try {
+      billingApiProvider.get().grantGoogleRoleToUser("projects/" + workspaceNamespace, "roles/billing.admin", user.getUsername());
+    } catch (ApiException e) {
+      e.printStackTrace();
+    }
+
+    log.info("Successfully granted role");
+
+    updateWorkspaceBillingAccount(dbWorkspace, workspace.getBillingAccountName());
+    dbWorkspace.setBillingAccountName(workspace.getBillingAccountName());
+
+    try {
+      dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+    } catch (Exception e) {
+      updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
+    }
+
     Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
+  }
+
+  private void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
+    try {
+      cloudbillingProvider.get().projects()
+          .updateBillingInfo(
+              "projects/" + workspace.getFirecloudName(),
+              new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
+    } catch (IOException e) {
+      throw new ServerErrorException("Could not update billing account");
+    }
   }
 
   private void validateWorkspaceApiModel(Workspace workspace) {
