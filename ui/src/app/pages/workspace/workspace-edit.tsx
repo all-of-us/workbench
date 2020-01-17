@@ -758,7 +758,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                               description={billingDescription}
                               tooltip={toolTipText.billingAccount}>
           <Dropdown value={this.state.workspace.billingAccountName}
-                    options={this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}))}/>
+                    options={this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}))}
+                    onChange={e => this.setState(fp.set(['workspace', 'billingAccountName'], e.value))}
+          />
         </WorkspaceEditSection>
         <WorkspaceEditSection header='Research Use Statement Questions'
             description={<div> {ResearchPurposeDescription} Therefore, please provide
