@@ -5,6 +5,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import {environment} from 'environments/environment';
 import {Domain} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
@@ -303,7 +304,7 @@ export class ConceptTable extends React.Component<Props, State> {
         selectionMode: 'multiple',
         testId: 'conceptCheckBox'
       },
-      ...(domain === Domain.SURVEY ? surveyColumns : domainColumns)
+      ...(domain === Domain.SURVEY && environment.enableNewConceptTabs ? surveyColumns : domainColumns)
     ];
     return columns.map((col, c) => <Column
       bodyStyle={col.bodyStyle}

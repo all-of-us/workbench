@@ -11,6 +11,7 @@ import {ClrIcon} from 'app/components/icons';
 import {CheckBox, TextInput} from 'app/components/inputs';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
+import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
 import {ConceptTable} from 'app/pages/data/concept/concept-table';
 import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -31,6 +32,7 @@ import {
   SurveyQuestions,
 } from 'generated/fetch';
 import {Key} from 'ts-key-enum';
+import {SurveyDetails} from './survey-details';
 
 const styles = reactStyles({
   searchBar: {
@@ -163,7 +165,8 @@ interface Props {
   workspace: WorkspaceData;
 }
 
-interface State {
+interface State { // Browse survey
+  browsingSurvey: boolean;
   // Array of domains that have finished being searched for concepts with search string
   completedDomainSearches: Array<Domain>;
   // Array of concepts found in the search
@@ -203,6 +206,8 @@ interface State {
   showSearchError: boolean;
   // Only search on standard concepts
   standardConceptsOnly: boolean;
+  // Open modal to add survey questions to concept set
+  surveyAddModalOpen: boolean;
   workspacePermissions: WorkspacePermissions;
 }
 
@@ -213,8 +218,10 @@ export const ConceptHomepage = withCurrentWorkspace()(
     constructor(props) {
       super(props);
       this.state = {
+        browsingSurvey: false,
         completedDomainSearches: [],
         conceptAddModalOpen: false,
+        surveyAddModalOpen: false,
         conceptDomainCounts: [],
         conceptDomainList: [],
         conceptPhysicalMeasurementsList: [],
@@ -286,7 +293,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
     browseDomainFromQueryParams() {
       const queryParams = queryParamsStore.getValue();
       if (queryParams.survey) {
-        this.browseDomain();
+        if (environment.enableNewConceptTabs) {
+          this.browseDomain();
+        } else {
+          this.browseSurvey(queryParams.survey);
+        }
       }
       if (queryParams.domain) {
         this.browseDomain(this.state.conceptDomainList.find(dc => dc.domain === queryParams.domain));
@@ -389,6 +400,14 @@ export const ConceptHomepage = withCurrentWorkspace()(
       this.setState({currentInputString: '', currentSearchString: '', selectedDomain: selectedDomain}, () => this.searchConcepts());
     }
 
+    browseSurvey(surveyName) {
+      if (environment.enableNewConceptTabs) {
+        this.browseDomain();
+      } else {
+        this.setState({browsingSurvey: true, selectedSurvey: surveyName});
+      }
+    }
+
     domainLoading(domain) {
       return this.state.searchLoading || !this.state.completedDomainSearches.includes(domain.domain);
     }
@@ -409,6 +428,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     get addToSetText(): string {
       const count = this.activeSelectedConceptCount;
+      return count === 0 ? 'Add to set' : 'Add (' + count + ') to set';
+    }
+
+    get addSurveyToSetText(): string {
+      const count = this.state.selectedSurveyQuestions.length;
       return count === 0 ? 'Add to set' : 'Add (' + count + ') to set';
     }
 
@@ -474,9 +498,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     render() {
-      const {loadingDomains, conceptDomainList, conceptPhysicalMeasurementsList, conceptSurveysList,
-        standardConceptsOnly, showSearchError, searching, selectedDomain, conceptAddModalOpen,
-        currentInputString, currentSearchString, conceptsSavedText, selectedConceptDomainMap} = this.state;
+      const {loadingDomains, browsingSurvey, conceptDomainList, conceptPhysicalMeasurementsList, conceptSurveysList,
+        standardConceptsOnly, showSearchError, searching, selectedDomain, conceptAddModalOpen, currentInputString, currentSearchString,
+        conceptsSavedText, selectedSurvey, selectedConceptDomainMap, selectedSurveyQuestions, surveyAddModalOpen} = this.state;
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
           <Header style={{fontSize: '20px', marginTop: 0, fontWeight: 600}}>Search Concepts</Header>
@@ -509,8 +533,19 @@ export const ConceptHomepage = withCurrentWorkspace()(
             </AlertDanger>}
             <div style={{marginTop: '0.5rem'}}>{conceptsSavedText}</div>
           </div>
-          {loadingDomains ? <div style={{position: 'relative', minHeight: '10rem'}}><SpinnerOverlay/></div> :
-            searching ? this.renderConcepts() : <div>
+          {browsingSurvey && <div><SurveyDetails surveyName={selectedSurvey}
+                                                 surveySelected={(selectedQuestion) =>
+                                                   this.setState(
+                                                     {selectedSurveyQuestions: selectedQuestion})}/>
+            <SlidingFabReact submitFunction={() => this.setState({surveyAddModalOpen: true})}
+                             iconShape='plus'
+                             tooltip={!this.state.workspacePermissions.canWrite}
+                             tooltipContent={<div>Requires Owner or Writer permission</div>}
+                             expanded={this.addSurveyToSetText}
+                             disable={selectedSurveyQuestions.length === 0}/>
+          </div>}
+          {!browsingSurvey && loadingDomains ? <div style={{position: 'relative', minHeight: '10rem'}}><SpinnerOverlay/></div> :
+            searching ? this.renderConcepts() :  !browsingSurvey && <div>
               <div style={styles.sectionHeader}>
                 Domains
               </div>
@@ -527,7 +562,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
               </div>
               <div style={styles.cardList}>
                 {conceptSurveysList.map((surveys) => {
-                  return <SurveyCard survey={surveys} key={surveys.orderNumber} browseSurvey={() => this.browseDomain()} />;
+                  return <SurveyCard survey={surveys} key={surveys.orderNumber} browseSurvey={() => this.browseSurvey(surveys.name)} />;
                 })}
                </div>
               {environment.enableNewConceptTabs && <React.Fragment>
@@ -548,6 +583,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
                              selectedConcepts={selectedConceptDomainMap[selectedDomain.domain]}
                              onSave={(conceptSet) => this.afterConceptsSaved(conceptSet)}
                              onClose={() => this.setState({conceptAddModalOpen: false})}/>}
+          {surveyAddModalOpen &&
+          <ConceptSurveyAddModal selectedSurvey={selectedSurveyQuestions}
+                                 onClose={() => this.setState({surveyAddModalOpen: false})}
+                                 onSave={() => this.setState({surveyAddModalOpen: false})}
+                                 surveyName={selectedSurvey}/>}
         </FadeBox>
       </React.Fragment>;
     }
