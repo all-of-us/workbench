@@ -2,6 +2,7 @@ package org.pmiops.workbench.cdr.dao;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +49,9 @@ public class DomainInfoDaoTest {
             .domainId("Measurement")
             .count(200L)
             .sourceCountValue(127L)
+            .standardConcept("")
             .vocabularyId("PPI")
+            .conceptClassId("Clinical Observation")
             .conceptName("name"));
     domainInfoObservation =
         domainInfoDao.save(
@@ -96,23 +99,25 @@ public class DomainInfoDaoTest {
 
   @Test
   public void findStandardConceptCounts() {
-    List<DbDomainInfo> infos = domainInfoDao.findStandardConceptCounts("name");
+    List<DbDomainInfo> infos = domainInfoDao.findConceptCounts("name", ImmutableList.of("S", "C"));
     assertEquals(2, infos.size());
-    assertEquals(domainInfoCondition.standardConceptCount(1), infos.get(0));
-    assertEquals(domainInfoObservation.standardConceptCount(1), infos.get(1));
+    assertEquals(domainInfoCondition.standardConceptCount(1).allConceptCount(1), infos.get(0));
+    assertEquals(domainInfoObservation.standardConceptCount(1).allConceptCount(1), infos.get(1));
   }
 
   @Test
   public void findAllMatchConceptCounts() {
-    List<DbDomainInfo> infos = domainInfoDao.findAllMatchConceptCounts("name");
+    List<DbDomainInfo> infos =
+        domainInfoDao.findConceptCounts("name", ImmutableList.of("S", "C", ""));
     assertEquals(2, infos.size());
-    assertEquals(domainInfoCondition.allConceptCount(1), infos.get(0));
-    assertEquals(domainInfoObservation.allConceptCount(1), infos.get(1));
+    assertEquals(domainInfoCondition.allConceptCount(1).standardConceptCount(1), infos.get(0));
+    assertEquals(domainInfoObservation.allConceptCount(1).standardConceptCount(1), infos.get(1));
   }
 
   @Test
   public void findPhysicalMeasurementConceptCounts() {
-    DbDomainInfo info = domainInfoDao.findPhysicalMeasurementConceptCounts("name");
-    assertEquals(domainInfoPM.allConceptCount(1), info);
+    DbDomainInfo info =
+        domainInfoDao.findPhysicalMeasurementConceptCounts("name", ImmutableList.of("S", "C", ""));
+    assertEquals(domainInfoPM.allConceptCount(1).standardConceptCount(1), info);
   }
 }
