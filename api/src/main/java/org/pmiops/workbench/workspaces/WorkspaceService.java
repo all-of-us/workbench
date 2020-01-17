@@ -29,7 +29,7 @@ public interface WorkspaceService {
 
   // Returns the requested workspace looked up by workspace namespace (aka billing project name).
   // Only active workspaces are searched. Returns null if no active workspace is found.
-  DbWorkspace getByNamespace(String workspaceNamespace);
+  Optional<DbWorkspace> getByNamespace(String workspaceNamespace);
 
   List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces();
 

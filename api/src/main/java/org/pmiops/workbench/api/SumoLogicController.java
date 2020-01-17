@@ -1,19 +1,19 @@
 package org.pmiops.workbench.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.inject.Provider;
-import org.pmiops.workbench.actionaudit.auditors.SumoLogicAuditor;
+import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.EgressEventRequest;
-import org.pmiops.workbench.model.EmptyResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,23 +24,22 @@ public class SumoLogicController implements SumoLogicApiDelegate {
   public static final String SUMOLOGIC_KEY_FILENAME = "inbound-sumologic-keys.txt";
 
   private static final Logger log = Logger.getLogger(SumoLogicController.class.getName());
-  private final SumoLogicAuditor sumoLogicAuditor;
+  private final EgressEventAuditor egressEventAuditor;
   private final CloudStorageService cloudStorageService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   SumoLogicController(
-      SumoLogicAuditor sumoLogicAuditor,
+      EgressEventAuditor egressEventAuditor,
       CloudStorageService cloudStorageService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
-    this.sumoLogicAuditor = sumoLogicAuditor;
+    this.egressEventAuditor = egressEventAuditor;
     this.cloudStorageService = cloudStorageService;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
-  public ResponseEntity<EmptyResponse> logEgressEvent(
-      String X_API_KEY, EgressEventRequest request) {
+  public ResponseEntity<Void> logEgressEvent(String X_API_KEY, EgressEventRequest request) {
     if (!workbenchConfigProvider.get().featureFlags.enableSumoLogicEventHandling) {
       throw new BadRequestException("SumoLogic event handling is disabled in this environment.");
     }
@@ -49,18 +48,17 @@ public class SumoLogicController implements SumoLogicApiDelegate {
 
     try {
       // The "eventsJsonArray" field is a JSON-formatted array of EgressEvent JSON objects. Parse
-      // this
-      // out so we can work with each event as a model object.
+      // this out so we can work with each event as a model object.
       ObjectMapper mapper = new ObjectMapper();
       EgressEvent[] events = mapper.readValue(request.getEventsJsonArray(), EgressEvent[].class);
-      Arrays.stream(events).forEach(event -> handleEgressEvent(event));
-      return ResponseEntity.ok(new EmptyResponse());
+      Arrays.stream(events).forEach(this::handleEgressEvent);
+      return ResponseEntity.noContent().build();
     } catch (IOException e) {
       log.severe(
           String.format(
               "Failed to parse SumoLogic egress event JSON: %s", request.getEventsJsonArray()));
       log.severe(e.getMessage());
-      this.sumoLogicAuditor.fireFailedToParseEgressEvent(request);
+      this.egressEventAuditor.fireFailedToParseEgressEventRequest(request);
       throw new BadRequestException("Error parsing event details");
     }
   }
@@ -72,9 +70,9 @@ public class SumoLogicController implements SumoLogicApiDelegate {
    * @return
    * @throws IOException
    */
-  private List<String> getSumoLogicApiKeys() throws IOException {
+  private Set<String> getSumoLogicApiKeys() throws IOException {
     String apiKeys = cloudStorageService.getCredentialsBucketString(SUMOLOGIC_KEY_FILENAME);
-    return Arrays.asList(apiKeys.split("[\\r\\n]+"));
+    return Sets.newHashSet(apiKeys.split("[\\r\\n]+"));
   }
 
   /**
@@ -86,13 +84,13 @@ public class SumoLogicController implements SumoLogicApiDelegate {
    */
   private void authorizeRequest(String apiKey, EgressEventRequest request) {
     try {
-      List<String> validApiKeys = getSumoLogicApiKeys();
+      Set<String> validApiKeys = getSumoLogicApiKeys();
       if (!validApiKeys.contains(apiKey)) {
         log.severe(
             String.format(
                 "Received SumoLogic egress event with bad API key in header: %s",
                 request.toString()));
-        this.sumoLogicAuditor.fireBadApiKeyEgressEvent(apiKey, request);
+        this.egressEventAuditor.fireBadApiKey(apiKey, request);
         throw new UnauthorizedException("Invalid API key");
       }
     } catch (IOException e) {
@@ -108,6 +106,6 @@ public class SumoLogicController implements SumoLogicApiDelegate {
         String.format(
             "Received an egress event from project %s (%.2fMib, VM %s)",
             event.getProjectName(), event.getEgressMib(), event.getVmName()));
-    this.sumoLogicAuditor.fireEgressEvent(event);
+    this.egressEventAuditor.fireEgressEvent(event);
   }
 }

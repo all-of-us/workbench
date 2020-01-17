@@ -11,5 +11,5 @@ enum class ActionType {
     DUPLICATE_TO,
     COLLABORATE,
     DELETE,
-    HIGH_EGRESS
+    EGRESS_EVENT
 }

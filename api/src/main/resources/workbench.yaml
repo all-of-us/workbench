@@ -1108,10 +1108,8 @@ paths:
           required: true
           type: string
       responses:
-        200:
-          description: Successful response.
-          schema:
-            $ref: "#/definitions/EmptyResponse"
+        204:
+          description: The egress event was successfully handled.
 
   # Cron ############################################################################
 
@@ -4064,8 +4062,7 @@ definitions:
           - prod
       time_window_duration:
         description: >
-          The duration of the time window during which the high-egress event occurred, in
-          milliseconds since Unix Epoch.
+          The duration of the time window during which the high-egress event occurred, in seconds.
         type: integer
         format: int64
       time_window_start:
@@ -4081,7 +4078,8 @@ definitions:
         type: number
         format: double
       project_name:
-        description: The Google Cloud project name, e.g. aou-rw-6b66533d. Always present.
+        description: >
+          The Google Cloud project name associated with the workspace, e.g. aou-rw-6b66533d. Always present.
         type: string
       vm_name:
         description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.

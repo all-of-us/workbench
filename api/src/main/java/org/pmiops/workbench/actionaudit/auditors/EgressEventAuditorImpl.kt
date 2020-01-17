@@ -23,14 +23,14 @@ import java.util.logging.Logger
 import javax.inject.Provider
 
 @Service
-class SumoLogicAuditorImpl @Autowired
+class EgressEventAuditorImpl @Autowired
 constructor(
     private val actionAuditService: ActionAuditService,
     private val workspaceService: WorkspaceService,
     private val userDao: UserDao,
     private val clock: Clock,
     @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
-) : SumoLogicAuditor {
+) : EgressEventAuditor {
 
     /**
      * Converts a DB-internal user ID to the corresponding VM name. Note: for now, we use the same
@@ -43,19 +43,20 @@ constructor(
 
     /**
      * Converts the AoU-chosen cluster name into the actual VM name as reported by Google Cloud's
-     * flow logs. Empirically, an "-m" suffix is added to the VM name.
+     * flow logs. Empirically, an "-m" suffix is added to the VM name, due to Leo team's use
+     * of Dataproc (see https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/metadata).
      *
      * Note: this pattern may change if the Leo team switches to using raw VMs instead of Dataproc
      * clusters!
      */
     private fun dbUserToVmName(dbUser: DbUser): String {
-        return dbUserToClusterName(dbUser) + "-m"
+        return dbUserToClusterName(dbUser) + DATAPROC_MASTER_NODE_SUFFIX
     }
 
     override fun fireEgressEvent(event: EgressEvent) {
         // Load the workspace via the GCP project name
-        val dbWorkspace = this.workspaceService.getByNamespace(event.projectName)
-        if (dbWorkspace == null) {
+        val dbWorkspaceMaybe = workspaceService.getByNamespace(event.projectName)
+        if (!dbWorkspaceMaybe.isPresent()) {
             // Failing to find a workspace is odd enough that we want to return a non-success
             // response at the API level. But it's also worth storing a permanent record of the
             // high-egress event by logging it without a workspace target.
@@ -64,6 +65,8 @@ constructor(
                     "The workspace '%s' referred to by the given event is no longer active or never existed.",
                     event.projectName))
         }
+        val dbWorkspace = dbWorkspaceMaybe.get()
+
         // Using service-level creds, load the FireCloud workspace ACLs to find all members
         // of the workspace. Then attempt to find the user who aligns with the named VM.
         val userRoles = workspaceService.getFirecloudUserRoles(dbWorkspace.workspaceNamespace,
@@ -73,7 +76,7 @@ constructor(
                 .filter { dbUserToVmName(it).equals(event.vmName) }
                 .firstOrNull()
 
-        var agentEmail = ""
+        var agentEmail: String? = null
         var agentId = 0L
         if (vmOwner != null) {
             agentEmail = vmOwner.username
@@ -85,32 +88,32 @@ constructor(
         }
 
         val actionId = actionIdProvider.get()
-        fireEventSet(ActionAuditEvent(
+        fireEventSet(baseEvent = ActionAuditEvent(
                 timestamp = clock.millis(),
                 actionId = actionId,
-                actionType = ActionType.HIGH_EGRESS,
+                actionType = ActionType.EGRESS_EVENT,
                 agentType = AgentType.USER,
                 agentId = agentId,
                 agentEmailMaybe = agentEmail,
                 targetType = TargetType.WORKSPACE,
                 targetIdMaybe = dbWorkspace.workspaceId
-        ), event, null)
+        ), egressEvent = event)
     }
 
-    override fun fireFailedToParseEgressEvent(request: EgressEventRequest) {
-        fireEventSet(getGenericBaseEvent(), null, String.format(
+    override fun fireFailedToParseEgressEventRequest(request: EgressEventRequest) {
+        fireEventSet(baseEvent = getGenericBaseEvent(), comment = String.format(
                 "Failed to parse egress event JSON from SumoLogic. Field contents: %s",
                 request.eventsJsonArray))
     }
 
-    override fun fireBadApiKeyEgressEvent(apiKey: String, request: EgressEventRequest) {
-        fireEventSet(getGenericBaseEvent(), null, String.format(
+    override fun fireBadApiKey(apiKey: String, request: EgressEventRequest) {
+        fireEventSet(baseEvent = getGenericBaseEvent(), comment = String.format(
                 "Received bad API key from SumoLogic. Bad key: %s, full request: %s",
                 apiKey, request.toString()))
     }
 
     private fun fireFailedToFindWorkspace(event: EgressEvent) {
-        fireEventSet(getGenericBaseEvent(), event, String.format(
+        fireEventSet(baseEvent = getGenericBaseEvent(), egressEvent = event, comment = String.format(
                 "Failed to find workspace for high-egress event: %s",
                 event.toString()))
     }
@@ -120,7 +123,7 @@ constructor(
      * to record properties of the egress event and a human-readable comment. Either the egress event
      * or the comment may be null, in which case those row(s) won't be generated.
      */
-    private fun fireEventSet(baseEvent: ActionAuditEvent, egressEvent: EgressEvent?, comment: String?) {
+    private fun fireEventSet(baseEvent: ActionAuditEvent, egressEvent: EgressEvent? = null, comment: String? = null) {
         var events = ArrayList<ActionAuditEvent>()
         if (egressEvent != null) {
             val propertyValues = TargetPropertyExtractor.getPropertyValuesByName(
@@ -149,7 +152,7 @@ constructor(
         return ActionAuditEvent(
                 timestamp = clock.millis(),
                 actionId = actionIdProvider.get(),
-                actionType = ActionType.HIGH_EGRESS,
+                actionType = ActionType.EGRESS_EVENT,
                 agentType = AgentType.SYSTEM,
                 agentId = 0,
                 agentEmailMaybe = null,
@@ -159,6 +162,8 @@ constructor(
     }
 
     companion object {
-        private val logger = Logger.getLogger(SumoLogicAuditorImpl::class.java.name)
+        //
+        private val DATAPROC_MASTER_NODE_SUFFIX = "-m"
+        private val logger = Logger.getLogger(EgressEventAuditorImpl::class.java.name)
     }
 }

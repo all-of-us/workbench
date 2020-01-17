@@ -4,10 +4,8 @@ import java.time.Clock;
 import java.time.Instant;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.test.FakeClock;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 /** Common beans used by action audit test classes. */
 @Configuration
@@ -27,7 +25,6 @@ public class ActionAuditTestConfig {
   }
 
   @Bean(name = "ACTION_ID")
-  @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
   public String getActionId() {
     return ACTION_ID;
   }

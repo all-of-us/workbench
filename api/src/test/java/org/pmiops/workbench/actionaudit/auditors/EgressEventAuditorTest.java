@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,7 +40,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-public class SumoLogicAuditorTest {
+public class EgressEventAuditorTest {
 
   private static final long USER_ID = 1L;
   private static final String USER_EMAIL = "user@researchallofus.org";
@@ -54,7 +56,7 @@ public class SumoLogicAuditorTest {
   private DbWorkspace dbWorkspace;
   private List<UserRole> firecloudUserRoles = new ArrayList<>();
 
-  @Autowired private SumoLogicAuditor sumoLogicAuditor;
+  @Autowired private EgressEventAuditor egressEventAuditor;
 
   @MockBean private ActionAuditService mockActionAuditService;
   @MockBean private WorkspaceService mockWorkspaceService;
@@ -63,6 +65,15 @@ public class SumoLogicAuditorTest {
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventsCaptor;
 
   @Rule public final ExpectedException exception = ExpectedException.none();
+
+  @TestConfiguration
+  @Import({
+    // Import the impl class to allow autowiring the bean.
+    EgressEventAuditorImpl.class,
+    // Import common action audit beans.
+    ActionAuditTestConfig.class
+  })
+  static class Configuration {}
 
   @Before
   public void setUp() {
@@ -75,7 +86,8 @@ public class SumoLogicAuditorTest {
     dbWorkspace.setWorkspaceId(WORKSPACE_ID);
     dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     dbWorkspace.setFirecloudName(WORKSPACE_FIRECLOUD_NAME);
-    when(mockWorkspaceService.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(dbWorkspace);
+    when(mockWorkspaceService.getByNamespace(WORKSPACE_NAMESPACE))
+        .thenReturn(Optional.of(dbWorkspace));
     firecloudUserRoles.add(new UserRole().email(USER_EMAIL));
     when(mockWorkspaceService.getFirecloudUserRoles(WORKSPACE_NAMESPACE, WORKSPACE_FIRECLOUD_NAME))
         .thenReturn(firecloudUserRoles);
@@ -88,7 +100,7 @@ public class SumoLogicAuditorTest {
 
   @Test
   public void testFireEgressEvent() {
-    sumoLogicAuditor.fireEgressEvent(
+    egressEventAuditor.fireEgressEvent(
         new EgressEvent()
             .projectName(EGRESS_EVENT_PROJECT_NAME)
             .vmName(EGRESS_EVENT_VM_NAME)
@@ -101,7 +113,7 @@ public class SumoLogicAuditorTest {
     assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
         .containsExactly(AgentType.USER);
     assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
-        .containsExactly(ActionType.HIGH_EGRESS);
+        .containsExactly(ActionType.EGRESS_EVENT);
     assertThat(events.stream().map(event -> event.getAgentId()).collect(Collectors.toSet()))
         .containsExactly(USER_ID);
     assertThat(events.stream().map(event -> event.getAgentEmailMaybe()).collect(Collectors.toSet()))
@@ -136,8 +148,8 @@ public class SumoLogicAuditorTest {
 
     // When the workspace lookup doesn't succeed, the event is filed w/ a system agent and an
     // empty target ID.
-    when(mockWorkspaceService.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(null);
-    sumoLogicAuditor.fireEgressEvent(
+    when(mockWorkspaceService.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.empty());
+    egressEventAuditor.fireEgressEvent(
         new EgressEvent().projectName(EGRESS_EVENT_PROJECT_NAME).vmName(EGRESS_EVENT_VM_NAME));
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
@@ -146,10 +158,18 @@ public class SumoLogicAuditorTest {
     // for the egress event.
     assertThat(events.stream().map(event -> event.getAgentId()).collect(Collectors.toSet()))
         .containsExactly(0);
-    assertThat(events.stream().map(event -> event.getAgentEmailMaybe()).collect(Collectors.toSet()))
-        .containsExactly((Object[]) null);
-    assertThat(events.stream().map(event -> event.getTargetIdMaybe()).collect(Collectors.toSet()))
-        .containsExactly((Object[]) null);
+    assertThat(
+            events.stream()
+                .map(event -> event.getAgentEmailMaybe())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet()))
+        .isEmpty();
+    assertThat(
+            events.stream()
+                .map(event -> event.getTargetIdMaybe())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet()))
+        .isEmpty();
 
     // We expect to see an audit event row with a comment describing the issue encountered when
     // trying to handle the high-egress message.
@@ -169,7 +189,8 @@ public class SumoLogicAuditorTest {
   public void testFailedParsing() {
     // When the inbound request parsing fails, an event is logged at the system agent.
     when(mockWorkspaceService.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(null);
-    sumoLogicAuditor.fireFailedToParseEgressEvent(new EgressEventRequest().eventsJsonArray("asdf"));
+    egressEventAuditor.fireFailedToParseEgressEventRequest(
+        new EgressEventRequest().eventsJsonArray("asdf"));
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
@@ -177,8 +198,9 @@ public class SumoLogicAuditorTest {
             events.stream()
                 .filter(
                     event ->
-                        event.getTargetPropertyMaybe()
-                            == EgressEventCommentTargetProperty.COMMENT.getPropertyName())
+                        EgressEventCommentTargetProperty.COMMENT
+                            .getPropertyName()
+                            .equals(event.getTargetPropertyMaybe()))
                 .map(event -> event.getNewValueMaybe())
                 .findFirst()
                 .get())
@@ -189,7 +211,7 @@ public class SumoLogicAuditorTest {
   public void testBadApiKey() {
     // When the inbound request parsing fails, an event is logged at the system agent.
     when(mockWorkspaceService.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(null);
-    sumoLogicAuditor.fireBadApiKeyEgressEvent("ASDF", new EgressEventRequest());
+    egressEventAuditor.fireBadApiKey("ASDF", new EgressEventRequest());
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
@@ -197,20 +219,12 @@ public class SumoLogicAuditorTest {
             events.stream()
                 .filter(
                     event ->
-                        event.getTargetPropertyMaybe()
-                            == EgressEventCommentTargetProperty.COMMENT.getPropertyName())
+                        EgressEventCommentTargetProperty.COMMENT
+                            .getPropertyName()
+                            .equals(event.getTargetPropertyMaybe()))
                 .map(event -> event.getNewValueMaybe())
                 .findFirst()
                 .get())
         .contains("Received bad API key");
   }
-
-  @TestConfiguration
-  @Import({
-    // Import the impl class to allow autowiring the bean.
-    SumoLogicAuditorImpl.class,
-    // Import common action audit beans.
-    ActionAuditTestConfig.class
-  })
-  static class Configuration {}
 }
