@@ -443,10 +443,11 @@ where d.domain_id = c.domain_id"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
 set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.standard_concept_count from
-(SELECT count(distinct concept_id) as all_concept_count, 0 as standard_concept_count
+(SELECT count(distinct concept_id) as all_concept_count, SUM(CASE WHEN c.standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
 WHERE vocabulary_id = 'PPI'
-AND domain_id = 'Measurement') c
+AND domain_id = 'Measurement'
+AND concept_class_id = 'Clinical Observation') c
 where d.domain = 8"
 
 # Set participant counts for Condition domain
@@ -499,7 +500,8 @@ WHERE measurement_source_concept_id IN (
 SELECT concept_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
 WHERE vocabulary_id = 'PPI'
-AND domain_id = 'Measurement')) as r
+AND domain_id = 'Measurement'
+AND concept_class_id = 'Clinical Observation')) as r
 where d.domain = 8"
 
 ##########################################

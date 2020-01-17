@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -243,14 +244,43 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "from DbCriteria c "
               + "where domainId = 'SURVEY' and type = 'PPI' and subtype = 'QUESTION' "
               + "and match(synonyms, :term) > 0")
-  long findSurveyCountByTerm(@Param("term") String term);
+  long countSurveyBySearchTerm(@Param("term") String term);
 
   @Query(
       value =
-          "select count(*) "
-              + "from cb_criteria "
-              + "where domain_id = 'SURVEY' and type = 'PPI' and subtype = 'QUESTION' "
-              + "and parent_id in (select id from cb_criteria where domain_id = 'SURVEY' and type = 'PPI' and name = :surveyName)",
-      nativeQuery = true)
-  long findSurveyCountBySurveyName(@Param("surveyName") String surveyName);
+          "select c "
+              + "from DbCriteria c "
+              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION' "
+              + "and match(c.synonyms, :term) > 0")
+  Page<DbCriteria> findSurveys(@Param("term") String term, Pageable page);
+
+  @Query(
+      value =
+          "select count(c) "
+              + "from DbCriteria c "
+              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION' "
+              + "and c.parentId in (select dc.id from DbCriteria dc where dc.domainId = 'SURVEY' and dc.type = 'PPI' and dc.name = :surveyName)")
+  long countSurveyByName(@Param("surveyName") String surveyName);
+
+  @Query(
+      value =
+          "select c "
+              + "from DbCriteria c "
+              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION' "
+              + "and c.parentId in (select dc.id from DbCriteria dc where dc.domainId = 'SURVEY' and dc.type = 'PPI' and dc.name = :surveyName)")
+  Page<DbCriteria> findSurveysByName(@Param("surveyName") String surveyName, Pageable page);
+
+  @Query(
+      value =
+          "select c "
+              + "from DbCriteria c "
+              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION'")
+  Page<DbCriteria> findSurveys(Pageable page);
+
+  @Query(
+      value =
+          "select count(c) "
+              + "from DbCriteria c "
+              + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION'")
+  long countSurveys();
 }

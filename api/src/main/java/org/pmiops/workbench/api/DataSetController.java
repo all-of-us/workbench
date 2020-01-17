@@ -246,7 +246,7 @@ public class DataSetController implements DataSetApiDelegate {
       Iterable<DbConcept> concepts = conceptDao.findAll(conceptSet.getConceptIds());
       result.setConcepts(
           StreamSupport.stream(concepts.spliterator(), false)
-              .map(ConceptsController.TO_CLIENT_CONCEPT)
+              .map(ConceptsController::toClientConcept)
               .collect(Collectors.toList()));
     }
     return result;
