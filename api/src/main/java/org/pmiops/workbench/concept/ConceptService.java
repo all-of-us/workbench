@@ -156,7 +156,11 @@ public class ConceptService {
   }
 
   public Slice<DbConcept> searchConcepts(
-      String query, String standardConceptFilter, List<String> domainIds, int limit, int page) {
+      String query,
+      String standardConceptFilter,
+      ImmutableList<String> domainIds,
+      int limit,
+      int page) {
     final String keyword = modifyMultipleMatchKeyword(query);
     Pageable pageable = new PageRequest(page, limit, new Sort(Direction.DESC, "countValue"));
     ImmutableList<String> conceptTypes = getConceptTypes(standardConceptFilter);

@@ -1,7 +1,6 @@
 package org.pmiops.workbench.cdr.dao;
 
 import com.google.common.collect.ImmutableList;
-import java.util.List;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +26,10 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
               + "and c.standardConcept IN (?2) "
               + "and c.domainId in (?3)")
   Page<DbConcept> findConcepts(
-      String matchExp, ImmutableList<String> conceptTypes, List<String> domainIds, Pageable page);
+      String matchExp,
+      ImmutableList<String> conceptTypes,
+      ImmutableList<String> domainIds,
+      Pageable page);
 
   /**
    * Return standard or all concepts in each vocabulary for the specified domain matching the
@@ -44,7 +46,7 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
               + "and c.standardConcept IN (?1) "
               + "and c.domainId in (?2)")
   Page<DbConcept> findConcepts(
-      ImmutableList<String> conceptTypes, List<String> domainIds, Pageable page);
+      ImmutableList<String> conceptTypes, ImmutableList<String> domainIds, Pageable page);
 
   /**
    * Return standard or all concepts in each vocabulary for the specified domain matching the
@@ -69,7 +71,7 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
   Page<DbConcept> findConcepts(
       String matchExp,
       ImmutableList<String> conceptTypes,
-      List<String> domainIds,
+      ImmutableList<String> domainIds,
       String vocabularyId,
       String conceptClassId,
       Pageable page);
@@ -94,7 +96,7 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
               + "and c.conceptClassId = ?4")
   Page<DbConcept> findConcepts(
       ImmutableList<String> conceptTypes,
-      List<String> domainIds,
+      ImmutableList<String> domainIds,
       String vocabularyId,
       String conceptClassId,
       Pageable page);
