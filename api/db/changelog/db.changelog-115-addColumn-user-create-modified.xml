@@ -14,8 +14,8 @@
       <column name="creation_time" type="datetime">
         <constraints nullable="true" />
       </column>
-      <column name="last_modified_time" type="datetime" defaultValueDate="CURRENT_TIMESTAMP">
-        <constraints nullable="false"/>
+      <column name="last_modified_time" type="datetime">
+        <constraints nullable="true"/>
       </column>
     </addColumn>
   </changeSet>
