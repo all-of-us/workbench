@@ -88,7 +88,8 @@
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": true,
     "enableRdrExport": true,
-    "enableBillingLockout": true
+    "enableBillingLockout": true,
+    "enableSumoLogicEventHandling": true
   },
   "actionAudit": {
     "logName":"workbench-action-audit-test"

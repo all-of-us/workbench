@@ -17,10 +17,6 @@ import org.springframework.stereotype.Service
 class ActionAuditServiceImpl @Autowired
 constructor(private val configProvider: Provider<WorkbenchConfig>, private val cloudLogging: Logging) : ActionAuditService {
 
-    override fun send(event: ActionAuditEvent) {
-        send(setOf(event))
-    }
-
     override fun send(events: Collection<ActionAuditEvent>) {
         try {
             val logEntries: List<LogEntry> = events

@@ -236,6 +236,12 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
+  public Optional<DbWorkspace> getByNamespace(String ns) {
+    return workspaceDao.findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
+        ns, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+  }
+
+  @Override
   @Transactional
   public DbWorkspace getRequiredWithCohorts(String ns, String firecloudName) {
     DbWorkspace workspace =
@@ -500,10 +506,12 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public List<UserRole> convertWorkspaceAclsToUserRoles(
-      Map<String, FirecloudWorkspaceAccessEntry> rolesMap) {
+  public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
+    Map<String, FirecloudWorkspaceAccessEntry> emailToRole =
+        getFirecloudWorkspaceAcls(workspaceNamespace, firecloudName);
+
     List<UserRole> userRoles = new ArrayList<>();
-    for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : rolesMap.entrySet()) {
+    for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : emailToRole.entrySet()) {
       // Filter out groups
       DbUser user = userDao.findUserByUsername(entry.getKey());
       if (user == null) {

@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -49,6 +50,9 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
   List<DbWorkspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
 
   List<DbWorkspace> findAllByWorkspaceNamespace(String workspaceNamespace);
+
+  Optional<DbWorkspace> findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
+      String workspaceNamespace, short activeStatus);
 
   List<DbWorkspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
 

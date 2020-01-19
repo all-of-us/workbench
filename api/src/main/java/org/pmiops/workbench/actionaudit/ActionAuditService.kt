@@ -3,7 +3,9 @@ package org.pmiops.workbench.actionaudit
 import java.util.logging.Logger
 
 interface ActionAuditService {
-    fun send(event: ActionAuditEvent)
+    fun send(event: ActionAuditEvent) {
+        send(setOf(event))
+    }
 
     fun send(events: Collection<ActionAuditEvent>)
 

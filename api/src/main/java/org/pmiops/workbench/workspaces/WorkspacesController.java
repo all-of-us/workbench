@@ -539,11 +539,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
-    Map<String, FirecloudWorkspaceAccessEntry> updatedWsAcls =
-        workspaceService.getFirecloudWorkspaceAcls(
-            workspaceNamespace, dbWorkspace.getFirecloudName());
     List<UserRole> updatedUserRoles =
-        workspaceService.convertWorkspaceAclsToUserRoles(updatedWsAcls);
+        workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
     resp.setItems(updatedUserRoles);
 
     workspaceAuditor.fireCollaborateAction(
@@ -731,10 +728,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    Map<String, FirecloudWorkspaceAccessEntry> firecloudAcls =
-        workspaceService.getFirecloudWorkspaceAcls(
-            workspaceNamespace, dbWorkspace.getFirecloudName());
-    List<UserRole> userRoles = workspaceService.convertWorkspaceAclsToUserRoles(firecloudAcls);
+    List<UserRole> userRoles =
+        workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setItems(userRoles);
     return ResponseEntity.ok(resp);
