@@ -113,7 +113,7 @@ public class EgressEventAuditorTest {
     assertThat(events.stream().map(event -> event.getAgentType()).collect(Collectors.toSet()))
         .containsExactly(AgentType.USER);
     assertThat(events.stream().map(event -> event.getActionType()).collect(Collectors.toSet()))
-        .containsExactly(ActionType.EGRESS_EVENT);
+        .containsExactly(ActionType.DETECT_HIGH_EGRESS_EVENT);
     assertThat(events.stream().map(event -> event.getAgentId()).collect(Collectors.toSet()))
         .containsExactly(USER_ID);
     assertThat(events.stream().map(event -> event.getAgentEmailMaybe()).collect(Collectors.toSet()))

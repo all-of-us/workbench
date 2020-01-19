@@ -91,7 +91,7 @@ constructor(
         fireEventSet(baseEvent = ActionAuditEvent(
                 timestamp = clock.millis(),
                 actionId = actionId,
-                actionType = ActionType.EGRESS_EVENT,
+                actionType = ActionType.DETECT_HIGH_EGRESS_EVENT,
                 agentType = AgentType.USER,
                 agentId = agentId,
                 agentEmailMaybe = agentEmail,
@@ -152,7 +152,7 @@ constructor(
         return ActionAuditEvent(
                 timestamp = clock.millis(),
                 actionId = actionIdProvider.get(),
-                actionType = ActionType.EGRESS_EVENT,
+                actionType = ActionType.DETECT_HIGH_EGRESS_EVENT,
                 agentType = AgentType.SYSTEM,
                 agentId = 0,
                 agentEmailMaybe = null,
