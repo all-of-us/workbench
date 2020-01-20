@@ -165,7 +165,7 @@ public class ConceptService {
     Pageable pageable = new PageRequest(page, limit, new Sort(Direction.DESC, "countValue"));
     ImmutableList<String> conceptTypes = getConceptTypes(standardConceptFilter);
     if (domainIds.contains(CommonStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT))) {
-      ImmutableList domains =
+      ImmutableList<String> domains =
           ImmutableList.of(CommonStorageEnums.domainToDomainId(Domain.MEASUREMENT));
       return StringUtils.isBlank(keyword)
           ? conceptDao.findConcepts(conceptTypes, domains, VOCAB_ID, CONCEPT_CLASS_ID, pageable)
