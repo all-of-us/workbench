@@ -99,11 +99,10 @@ public class ConceptsController implements ConceptsApiDelegate {
       String workspaceNamespace, String workspaceId, DomainCountsRequest request) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    DomainCountsListResponse response = new DomainCountsListResponse();
     List<DomainCount> counts =
         conceptService.countDomains(
             request.getQuery(), request.getSurveyName(), request.getStandardConceptFilter());
-    return ResponseEntity.ok(response.domainCounts(counts));
+    return ResponseEntity.ok(new DomainCountsListResponse().domainCounts(counts));
   }
 
   @Override
