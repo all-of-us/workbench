@@ -245,7 +245,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "from DbCriteria c "
               + "where domainId = 'SURVEY' and type = 'PPI' and subtype = 'QUESTION' "
               + "and match(synonyms, :term) > 0")
-  long countSurveyBySearchTerm(@Param("term") String term);
+  long countSurveyByKeyword(@Param("term") String term);
 
   @Query(
       value =
@@ -315,6 +315,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
     if (StringUtils.isBlank(keyword)) {
       return StringUtils.isBlank(surveyName) ? countSurveys() : countSurveyByName(surveyName);
     }
-    return countSurveyBySearchTerm(keyword);
+    return countSurveyByKeyword(keyword);
   }
 }

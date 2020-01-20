@@ -320,7 +320,7 @@ public class CBCriteriaDaoTest {
 
   @Test
   public void countSurveyBySearchTerm() {
-    assertThat(cbCriteriaDao.countSurveyBySearchTerm("test")).isEqualTo(1);
+    assertThat(cbCriteriaDao.countSurveyByKeyword("test")).isEqualTo(1);
   }
 
   @Test
