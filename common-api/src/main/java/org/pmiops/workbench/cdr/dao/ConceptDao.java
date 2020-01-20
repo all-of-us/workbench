@@ -28,7 +28,7 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
               + "and matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 "
               + "and c.standardConcept IN (?2) "
               + "and c.domainId = ?3")
-  Page<DbConcept> findConceptsWithKeyword(
+  Page<DbConcept> findConcepts(
       String keyword, ImmutableList<String> conceptTypes, String domainId, Pageable page);
 
   /**
@@ -45,8 +45,7 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
               + "where (c.countValue > 0 or c.sourceCountValue > 0) "
               + "and c.standardConcept IN (?1) "
               + "and c.domainId = ?2")
-  Page<DbConcept> findConceptsWithoutKeyword(
-      ImmutableList<String> conceptTypes, String domainId, Pageable page);
+  Page<DbConcept> findConcepts(ImmutableList<String> conceptTypes, String domainId, Pageable page);
 
   /**
    * Return PM concepts in each vocabulary for the specified domain matching the specified
@@ -54,7 +53,6 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
    *
    * @param keyword SQL MATCH expression to match concept name or synonym
    * @param conceptTypes can be 'S', 'C' or ''
-   * @param domainId domain ID to use when filtering concepts
    * @return per-vocabulary concept counts
    */
   @Query(
@@ -63,18 +61,17 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
               + "where (c.countValue > 0 or c.sourceCountValue > 0) "
               + "and matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 "
               + "and c.standardConcept IN (?2) "
-              + "and c.domainId = ?3 "
+              + "and c.domainId = 'Measurement' "
               + "and c.vocabularyId = 'PPI' "
               + "and c.conceptClassId = 'Clinical Observation'")
-  Page<DbConcept> findPhysicalMeasurementConceptsWithKeyword(
-      String keyword, ImmutableList<String> conceptTypes, String domainId, Pageable page);
+  Page<DbConcept> findPhysicalMeasurementConcepts(
+      String keyword, ImmutableList<String> conceptTypes, Pageable page);
 
   /**
    * Return PM concepts in each vocabulary for the specified domain matching the specified
    * expression, matching concept name, synonym, ID, or code.
    *
    * @param conceptTypes can be 'S', 'C' or ''
-   * @param domainId domain ID to use when filtering concepts
    * @return per-vocabulary concept counts
    */
   @Query(
@@ -82,11 +79,11 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
           "select distinct c from DbConcept c "
               + "where (c.countValue > 0 or c.sourceCountValue > 0) "
               + "and c.standardConcept IN (?1) "
-              + "and c.domainId = ?2 "
+              + "and c.domainId = 'Measurement' "
               + "and c.vocabularyId = 'PPI' "
               + "and c.conceptClassId = 'Clinical Observation'")
-  Page<DbConcept> findPhysicalMeasurementConceptWithoutKeyword(
-      ImmutableList<String> conceptTypes, String domainId, Pageable page);
+  Page<DbConcept> findPhysicalMeasurementConcepts(
+      ImmutableList<String> conceptTypes, Pageable page);
 
   /**
    * Return any concepts in each vocabulary for the specified domain matching the specified
@@ -95,15 +92,13 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
   default Page<DbConcept> findConcepts(
       String keyword, ImmutableList<String> conceptTypes, Domain domainId, Pageable pageable) {
     if (Domain.PHYSICALMEASUREMENT.equals(domainId)) {
-      String measurement = CommonStorageEnums.domainToDomainId(Domain.MEASUREMENT);
       return StringUtils.isBlank(keyword)
-          ? findPhysicalMeasurementConceptWithoutKeyword(conceptTypes, measurement, pageable)
-          : findPhysicalMeasurementConceptsWithKeyword(
-              keyword, conceptTypes, measurement, pageable);
+          ? findPhysicalMeasurementConcepts(conceptTypes, pageable)
+          : findPhysicalMeasurementConcepts(keyword, conceptTypes, pageable);
     }
     String toDomainId = CommonStorageEnums.domainToDomainId(domainId);
     return StringUtils.isBlank(keyword)
-        ? findConceptsWithoutKeyword(conceptTypes, toDomainId, pageable)
-        : findConceptsWithKeyword(keyword, conceptTypes, toDomainId, pageable);
+        ? findConcepts(conceptTypes, toDomainId, pageable)
+        : findConcepts(keyword, conceptTypes, toDomainId, pageable);
   }
 }

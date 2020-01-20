@@ -285,6 +285,15 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION'")
   long countSurveys();
 
+  /**
+   * Find surveys by specified keyword or surveyName. If both keyword and surveyName are blank
+   * return all surveys.
+   *
+   * @param keyword
+   * @param surveyName
+   * @param pageable
+   * @return
+   */
   default Page<DbCriteria> findSurveys(String keyword, String surveyName, Pageable pageable) {
     if (StringUtils.isBlank(keyword)) {
       return StringUtils.isBlank(surveyName)
@@ -294,9 +303,18 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
     return findSurveys(keyword, pageable);
   }
 
+  /**
+   * Count surveys by specified keyword or surveyName. If both keyword and surveyName are blank
+   * count all surveys.
+   *
+   * @param keyword
+   * @param surveyName
+   * @return
+   */
   default long countSurveys(String keyword, String surveyName) {
-    return keyword == null
-        ? surveyName == null ? countSurveys() : countSurveyByName(surveyName)
-        : countSurveyBySearchTerm(keyword);
+    if (StringUtils.isBlank(keyword)) {
+      return StringUtils.isBlank(surveyName) ? countSurveys() : countSurveyByName(surveyName);
+    }
+    return countSurveyBySearchTerm(keyword);
   }
 }
