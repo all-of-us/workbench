@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.concept.ConceptService.STANDARD_CONCEPT_CODES;
 import static org.pmiops.workbench.model.StandardConceptFilter.STANDARD_CONCEPTS;
 
 import java.util.ArrayList;
@@ -136,18 +137,18 @@ public class ConceptsController implements ConceptsApiDelegate {
     return maxResults;
   }
 
-  public static Concept toClientConcept(DbConcept concept) {
+  public static Concept toClientConcept(DbConcept dbConcept) {
     return new Concept()
-        .conceptClassId(concept.getConceptClassId())
-        .conceptCode(concept.getConceptCode())
-        .conceptName(concept.getConceptName())
-        .conceptId(concept.getConceptId())
-        .countValue(concept.getCountValue())
-        .domainId(concept.getDomainId())
-        .prevalence(concept.getPrevalence())
-        .standardConcept(ConceptService.STANDARD_CONCEPT_CODE.equals(concept.getStandardConcept()))
-        .vocabularyId(concept.getVocabularyId())
-        .conceptSynonyms(concept.getSynonyms());
+        .conceptClassId(dbConcept.getConceptClassId())
+        .conceptCode(dbConcept.getConceptCode())
+        .conceptName(dbConcept.getConceptName())
+        .conceptId(dbConcept.getConceptId())
+        .countValue(dbConcept.getCountValue())
+        .domainId(dbConcept.getDomainId())
+        .prevalence(dbConcept.getPrevalence())
+        .standardConcept(STANDARD_CONCEPT_CODES.contains(dbConcept.getStandardConcept()))
+        .vocabularyId(dbConcept.getVocabularyId())
+        .conceptSynonyms(dbConcept.getSynonyms());
   }
 
   private SurveyQuestions toClientSurveyQuestions(DbCriteria dbCriteria) {
