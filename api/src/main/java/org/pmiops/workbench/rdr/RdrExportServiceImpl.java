@@ -264,7 +264,8 @@ public class RdrExportServiceImpl implements RdrExportService {
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     Map<String, FirecloudWorkspaceAccessEntry> aclMap = firecloudResponse.getAcl();
 
-    // Since the USERS cannot be deleted from workbench yet, hence sending the the status of COLLABORATOR as ACTIVE
+    // Since the USERS cannot be deleted from workbench yet, hence sending the the status of
+    // COLLABORATOR as ACTIVE
     aclMap.forEach(
         (email, access) -> {
           RdrWorkspaceUser workspaceUserMap = new RdrWorkspaceUser();
