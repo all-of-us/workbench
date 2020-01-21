@@ -79,7 +79,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   public DirectoryServiceImpl(
       @Qualifier(Constants.GSUITE_ADMIN_CREDS)
           Provider<ServiceAccountCredentials> googleCredentialsProvider,
-          Provider<WorkbenchConfig> configProvider,
+      Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
       GoogleRetryHandler retryHandler) {
     this.googleCredentialsProvider = googleCredentialsProvider;
