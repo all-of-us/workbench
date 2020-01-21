@@ -155,8 +155,8 @@ public class MailServiceImpl implements MailService {
 
   private RecipientAddress validatedRecipient(final String contactEmail) throws MessagingException {
     try {
-      final InternetAddress email = new InternetAddress(contactEmail);
-      email.validate();
+      final InternetAddress contactInternetAddress = new InternetAddress(contactEmail);
+      contactInternetAddress.validate();
     } catch (AddressException e) {
       throw new MessagingException("Email: " + contactEmail + " is invalid.");
     }
