@@ -260,39 +260,31 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void addUserToBillingProject(String email, String projectName) {
-    addRoleToBillingProject(email, projectName, USER_FC_ROLE);
-  }
-
-  @Override
-  public void removeUserFromBillingProject(String email, String projectName) {
-    BillingApi billingApi = billingApiProvider.get();
-    retryHandler.run(
-        (context) -> {
-          billingApi.removeUserFromBillingProject(projectName, USER_FC_ROLE, email);
-          return null;
-        });
-  }
-
-  @Override
   public void addOwnerToBillingProject(String ownerEmail, String projectName) {
     addRoleToBillingProject(ownerEmail, projectName, OWNER_FC_ROLE);
   }
 
   @Override
   public void removeOwnerFromBillingProject(
-      String projectName, String ownerEmailToRemove, String callerAccessToken) {
+      String projectName, String ownerEmailToRemove, Optional<String> callerAccessToken) {
+    final BillingApi scopedBillingApi;
 
-    final ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
-    apiClient.setAccessToken(callerAccessToken);
+    if (callerAccessToken.isPresent()) {
+      // use a private instance of BillingApi instead of the provider
+      // b/c we don't want to modify its ApiClient globally
 
-    // use a private instance of BillingApi instead of the provider
-    // b/c we don't want to modify its ApiClient globally
-    final BillingApi billingApi = new BillingApi();
-    billingApi.setApiClient(apiClient);
+      final ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
+      apiClient.setAccessToken(callerAccessToken.get());
+      scopedBillingApi = new BillingApi();
+      scopedBillingApi.setApiClient(apiClient);
+    } else {
+      scopedBillingApi = billingApiProvider.get();
+    }
+
     retryHandler.run(
         (context) -> {
-          billingApi.removeUserFromBillingProject(projectName, OWNER_FC_ROLE, ownerEmailToRemove);
+          scopedBillingApi.removeUserFromBillingProject(
+              projectName, OWNER_FC_ROLE, ownerEmailToRemove);
           return null;
         });
   }
