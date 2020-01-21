@@ -123,7 +123,6 @@
     <include file="changelog/db.changelog-113-user-demographics-updates.xml"/>
     <include file="changelog/db.changelog-114-workspace-last-export-date.xml"/>
     <include file="changelog/db.changelog-115-addColumn-user-create-modified.xml"/>
-    <include file="changelog/db.changelog-116-add-billing-account-to-workspaces.xml"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`

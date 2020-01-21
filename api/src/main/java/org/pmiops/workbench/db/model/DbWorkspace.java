@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -114,7 +115,8 @@ public class DbWorkspace {
   private Boolean approved;
   private Timestamp timeRequested;
   private Short billingStatus = DbStorageEnums.billingStatusToStorage(BillingStatus.ACTIVE);
-  private String billingAccountName;
+  private Short billingAccountType =
+      DbStorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -567,12 +569,12 @@ public class DbWorkspace {
     this.billingStatus = DbStorageEnums.billingStatusToStorage(billingStatus);
   }
 
-  @Column(name = "billing_account_name")
-  public String getBillingAccountName() {
-    return billingAccountName;
+  @Column(name = "billing_account_type")
+  public BillingAccountType getBillingAccountType() {
+    return DbStorageEnums.billingAccountTypeFromStorage(billingAccountType);
   }
 
-  public void setBillingAccountName(String billingAccountName) {
-    this.billingAccountName = billingAccountName;
+  public void setBillingAccountType(BillingAccountType billingAccountType) {
+    this.billingAccountType = DbStorageEnums.billingAccountTypeToStorage(billingAccountType);
   }
 }
