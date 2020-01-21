@@ -1003,6 +1003,51 @@ Common.register_command({
     :fn => ->(*args) { create_auth_domain("create-auth-domain", args) }
 })
 
+def backfill_billing_project_owners(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.opts.project = TEST_PROJECT
+
+  op.add_typed_option(
+      "--dry_run=[dry_run]",
+      TrueClass,
+      ->(opts, v) { opts.dry_run = v},
+      "When true, print debug lines instead of performing writes. Defaults to true.")
+
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
+
+  if op.opts.dry_run
+    common.status "DRY RUN -- CHANGES WILL NOT BE PERSISTED"
+  end
+
+  fc_config = get_fc_config(op.opts.project)
+  flags = ([
+      ["--fc-base-url", fc_config["baseUrl"]],
+      ["--billing-project-prefix", get_billing_project_prefix(op.opts.project)]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  if op.opts.dry_run
+    flags += ["--dry-run"]
+  end
+  # Gradle args need to be single-quote wrapped.
+  flags.map! { |f| "'#{f}'" }
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+        gradle backfillBillingProjectOwners
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+Common.register_command({
+    :invocation => "backfill-billing-project-owners",
+    :description => "Backfills billing project owner role for owners",
+    :fn => ->(*args) {backfill_billing_project_owners("backfill-billing-project-owners", *args)}
+})
+
 def update_user_registered_status(cmd_name, args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
@@ -1627,6 +1672,15 @@ end
 def get_fc_config(project)
   config_json = must_get_env_value(project, :config_json)
   return JSON.parse(File.read("config/#{config_json}"))["firecloud"]
+end
+
+def get_billing_config(project)
+  config_json = must_get_env_value(project, :config_json)
+  return JSON.parse(File.read("config/#{config_json}"))["billing"]
+end
+
+def get_billing_project_prefix(project)
+  return get_billing_config(project)["projectNamePrefix"]
 end
 
 def get_leo_api_url(project)

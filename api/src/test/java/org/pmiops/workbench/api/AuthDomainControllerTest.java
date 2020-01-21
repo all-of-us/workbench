@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -66,8 +65,6 @@ public class AuthDomainControllerTest {
   public void setUp() {
     DbUser adminUser = new DbUser();
     adminUser.setUserId(0L);
-    doNothing().when(fireCloudService).addUserToBillingProject(any(), any());
-    doNothing().when(fireCloudService).removeUserFromBillingProject(any(), any());
     when(fireCloudService.createGroup(any())).thenReturn(new FirecloudManagedGroupWithMembers());
     when(userProvider.get()).thenReturn(adminUser);
     WorkbenchConfig config = new WorkbenchConfig();
