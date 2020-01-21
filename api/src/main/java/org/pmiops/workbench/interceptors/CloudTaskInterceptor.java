@@ -9,6 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+/**
+ * Interceptor for endpoints with tag cloudTask. All such endpoints should have valid value for
+ * request hander X-AppEngine-QueueName
+ */
 @Service
 public class CloudTaskInterceptor extends HandlerInterceptorAdapter {
   public static final String QUEUE_NAME_HEADER = "X-AppEngine-QueueName";
