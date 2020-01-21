@@ -138,9 +138,10 @@ export const TextInputWithLabel = (props) => {
     <FlexRow style={{alignItems: 'center', marginTop: '0.1rem'}}>
       <TextInput id={props.inputId} name={props.inputName} placeholder={props.placeholder}
                  value={props.value}
+                 disabled={props.disabled}
                  onChange={props.onChange}
                  invalid={props.invalid ? props.invalid.toString() : undefined}
-                 style={{...styles.sectionInput}}/>
+                 style={{...styles.sectionInput, ...props.inputStyle}}/>
       {props.children}
     </FlexRow>
   </FlexColumn>;
@@ -455,7 +456,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   getInstitutionalAffiliationPropertyOrEmptyString(property: string) {
     const {institutionalAffiliations} = this.state.profile;
     return institutionalAffiliations &&
-      institutionalAffiliations.length > 0 ? institutionalAffiliations[property] : '';
+      institutionalAffiliations.length > 0 ? institutionalAffiliations[0][property] : '';
   }
 
 
@@ -603,7 +604,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                       onChange={v => this.updateProfileObject('areaOfResearch', v)}/>
             <FlexRow style={{justifyContent: 'flex-end', width: '26rem',
               backgroundColor: colorWithWhiteness(colors.primary, 0.85), fontSize: 12,
-              color: colors.primary, padding: '0.25rem', borderRadius: '0 0 3px 3px', border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`}}>
+              color: colors.primary, padding: '0.25rem', borderRadius: '0 0 3px 3px',
+              border: `1px solid ${colorWithWhiteness(colors.dark, 0.5)}`}}>
               {2000 - areaOfResearch.length} characters remaining
             </FlexRow>
           </Section>
@@ -691,7 +693,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         <FlexColumn>
           <FlexColumn style={styles.asideContainer}>
             <div style={styles.asideHeader}>About your new username</div>
-            <div style={styles.asideText}>We create a 'username'{serverConfigStore.getValue().gsuiteDomain} Google
+            <div style={styles.asideText}>We create a 'username'@{serverConfigStore.getValue().gsuiteDomain} Google
                 account which you will use to login to the Workbench.</div>
             <div style={{...styles.asideHeader, marginTop: '1rem'}}>Why will some information be public?</div>
             <div style={styles.asideText}>The <AoUTitle/> is committed to transparency with the Research

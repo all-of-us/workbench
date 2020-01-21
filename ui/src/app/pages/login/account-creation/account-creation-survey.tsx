@@ -13,7 +13,7 @@ import {
   Race,
   SexAtBirth,
 } from 'generated/fetch';
-import {Section} from './account-creation';
+import {Section, TextInputWithLabel} from './account-creation';
 
 import {signedOutImages} from 'app/pages/login/signed-out-images';
 import {
@@ -109,16 +109,20 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   }
 
   toggleDisability(value) {
-    this.setState(fp.set(['profile', 'demographicSurvey', 'disability'], value));
+    this.updateDemographicAttribute('disability', value);
+  }
+
+  toggleIdentifiesAsLgbtq(value) {
+    this.updateDemographicAttribute('identifiesAsLgbtq', value);
   }
 
   updateDemographicAttribute(attribute, value) {
     this.setState(fp.set(['profile', 'demographicSurvey', attribute], value));
   }
 
-  createOptionCheckbox(checkboxLabel: string, optionKey: string, optionValue: any) {
+  createOptionCheckbox(checkboxLabel: string, optionKey: string, optionValue: any, key: string) {
     return <CheckBox label={checkboxLabel}
-                     style={styles.checkbox}
+                     style={styles.checkbox} key={key}
                      wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
                      onChange={(value) => this.updateList(optionKey, optionValue)}
     />;
@@ -136,52 +140,75 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       </ListPageHeader>
 
       {/*Race section*/}
-      <Section header='1. Race'>
+      <Section header='Race'>
         <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
           {AccountCreationOptions.race.map((race) => {
-            return this.createOptionCheckbox(race.label, 'race', race.value);
+            return this.createOptionCheckbox(race.label, 'race', race.value, race.value.toString());
           })}
         </div>
       </Section>
 
       {/*Ethnicity section*/}
-      <DropDownSection header='2. Ethnicity' options={AccountCreationOptions.ethnicity}
+      <DropDownSection header='Ethnicity' options={AccountCreationOptions.ethnicity}
                        value={demographicSurvey.ethnicity}
                        onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
+      <Section header='Do you identify as lesbian, gay, bisexual, transgender, queer (LGBTQ),
+or another sexual and/or gender minority?'>
+        <div style={{paddingTop: '0.5rem'}}>
+          <RadioButton onChange={
+            (e) => this.toggleIdentifiesAsLgbtq(true)}
+                       checked={demographicSurvey.identifiesAsLgbtq}
+                       style={{marginRight: '0.5rem'}}/>
+          <label style={{paddingRight: '3rem', color: colors.primary}}>
+            Yes
+          </label>
+          <RadioButton onChange={(e) => this.toggleIdentifiesAsLgbtq(false)}
+                       checked={!demographicSurvey.identifiesAsLgbtq}
+                       style={{marginRight: '0.5rem'}}/>
+          <label style={{color: colors.primary}}>No</label>
+        </div>
+        <label></label>
+        <TextInputWithLabel labelText='If yes, please tell us about your LGBTQ+ identity'
+                            value={demographicSurvey.lgbtqIdentity} inputName='lgbtqIdentity'
+                            containerStyle={{width: '26rem'}} inputStyle={{width: '26rem'}}
+                            onChange={(value) => this.updateDemographicAttribute('lgbtqIdentity', value)}
+                            disabled={!demographicSurvey.identifiesAsLgbtq}/>
+      </Section>
       {/*Sex at birth section*/}
-      <Section header='4. Sex at birth'>
+      <Section header='Sex at birth'>
         <FlexRow style={{flexWrap: 'wrap'}}>
           {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
-            return this.createOptionCheckbox(sexAtBirth.label, 'sexAtBirth', sexAtBirth.value);
+            return this.createOptionCheckbox(sexAtBirth.label, 'sexAtBirth',
+              sexAtBirth.value, sexAtBirth.value.toString());
           })}
         </FlexRow>
       </Section>
 
       {/*Year of birth section*/}
-      <DropDownSection header='6. Year of Birth' options={AccountCreationOptions.Years}
+      <DropDownSection header='Year of Birth' options={AccountCreationOptions.Years}
                        value={demographicSurvey.yearOfBirth}
                        onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
       />
 
       {/*Education section*/}
-      <DropDownSection header='7. Highest Level of Education Completed'
+      <DropDownSection header='Highest Level of Education Completed'
                        options={AccountCreationOptions.levelOfEducation}
                        value={demographicSurvey.education}
                        onChange={
                          (e) => this.updateDemographicAttribute('education', e)}/>
 
       {/*Disability section*/}
-      <Section header='8. Do you have a Physical or Cognitive disability?'>
+      <Section header='Do you have a Physical or Cognitive disability?'>
         <div style={{paddingTop: '0.5rem'}}>
           <RadioButton onChange={
             (e) => this.toggleDisability(true)}
-                       checked={this.state.profile.demographicSurvey.disability}
+                       checked={demographicSurvey.disability}
                        style={{marginRight: '0.5rem'}}/>
           <label style={{paddingRight: '3rem', color: colors.primary}}>
             Yes
           </label>
           <RadioButton onChange={(e) => this.toggleDisability(false)}
-                       checked={!this.state.profile.demographicSurvey.disability}
+                       checked={!demographicSurvey.disability}
                        style={{marginRight: '0.5rem'}}/>
           <label style={{color: colors.primary}}>No</label>
         </div>
