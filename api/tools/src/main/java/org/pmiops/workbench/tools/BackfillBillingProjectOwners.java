@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
  * Backfill script for granting the billing project owner role to all AoU owners (corresponding to
  * Firecloud OWNER access).
  *
- * <p>For http://broad.io/1ppw, collaborators need to be either writers or billing project users in
+ * <p>For http://broad.io/1ppw, collaborators need to be either writers or billing project owners in
  * order to launch clusters within shared billing projects, see RW-3009 and RW-3188 for details.
  *
  * <p>The original iteration of this file was used to backfill the billing project user role to all

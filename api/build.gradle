@@ -740,7 +740,7 @@ task loadDataDictionary(type: JavaExec) {
   }
 }
 
-// See project.rb command: backfill-billing-project-users
+// See project.rb command: backfill-billing-project-owners
 task backfillBillingProjectOwners(type: JavaExec) {
   classpath = sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.BackfillBillingProjectOwners"
