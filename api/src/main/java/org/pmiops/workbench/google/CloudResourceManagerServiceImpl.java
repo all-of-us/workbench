@@ -55,11 +55,11 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
       delegatedCreds =
           new DelegatedUserCredentials(
               ServiceAccounts.getServiceAccountEmail("cloud-resource-admin", configProvider.get()),
-              user.getEmail(),
+              user.getUsername(),
               SCOPES);
     } else {
       delegatedCreds =
-          credentialsProvider.get().createScoped(SCOPES).createDelegated(user.getEmail());
+          credentialsProvider.get().createScoped(SCOPES).createDelegated(user.getUsername());
     }
     delegatedCreds.refreshIfExpired();
 
