@@ -2254,12 +2254,17 @@ paths:
 
 
 ##########################################################################################
-## Endpoints for task in cloud task queue
+# Endpoints for task in cloud task queue
+# Note: all requests tagged as "cloudTask" must have the header X-AppEngine-QueueName:
+# to the queue name, which app engine itself only sets when invoking cloud task.
+# See o.p.w.interceptors.CloudTaskInterceptor which implements the header check.
 #########################################################################################
-  /v1/queueTask/exportResearcherData:
+  /v1/cloudTask/exportResearcherData:
     post:
       tags:
         - cloudTaskRdrExport
+        - cloudTask
+      security: []
       description: >
         Send Researcher data
       operationId: "exportResearcherData"
@@ -2275,10 +2280,12 @@ paths:
           description: >
             A SQL query for each domain in the Data Set
 
-  /v1/queueTask/exportWorkspaceData:
+  /v1/cloudTask/exportWorkspaceData:
     post:
       tags:
         - cloudTaskRdrExport
+        - cloudTask
+      security: []
       description: >
         Send Researcher data
       operationId: "exportWorkspaceData"

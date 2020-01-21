@@ -34,7 +34,7 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
   private RdrExportService rdrExportService;
   private WorkbenchLocationConfigService locationConfigService;
 
-  private final String BASE_PATH = "/v1/queueTask";
+  private final String BASE_PATH = "/v1/cloudTask";
   private final String EXPORT_RESEARCHER_PATH = BASE_PATH + "/exportResearcherData";
   private final String EXPORT_USER_PATH = BASE_PATH + "/exportWorkspaceData";
   private final String IDS_STRING_SPLIT = ", ";
