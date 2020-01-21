@@ -85,10 +85,11 @@ class ProfileAuditorTest {
         val demographicSurvey1 = DemographicSurvey()
             .apply { disability = false }
             .apply { ethnicity = Ethnicity.NOT_HISPANIC }
-            .apply { gender = listOf(Gender.PREFER_NO_ANSWER) }
             .apply { yearOfBirth = BigDecimal.valueOf(1999) }
             .apply { race = listOf(Race.PREFER_NO_ANSWER) }
             .apply { education = Education.MASTER }
+            .apply { identifiesAsLgbtq = true }
+            .apply { lgbtqIdentity = "gay" }
 
         return Profile()
             .apply { userId = 444 }
@@ -103,6 +104,7 @@ class ProfileAuditorTest {
             .apply { disabled = false }
             .apply { aboutYou = "Nobody in particular" }
             .apply { areaOfResearch = "Aliens" }
+            .apply { professionalUrl = "linkedin.com" }
             .apply { institutionalAffiliations = listOf(caltechAffiliation, mitAffiliation) }
             .apply { demographicSurvey = demographicSurvey1 }
     }
