@@ -87,10 +87,10 @@
     "enableVpcFlowLogs": true,
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": true,
-    "useKeylessDelegatedCredentials": true
     "enableRdrExport": true,
     "enableBillingLockout": true,
-    "enableSumoLogicEventHandling": true
+    "enableSumoLogicEventHandling": true,
+    "useKeylessDelegatedCredentials": true
   },
   "actionAudit": {
     "logName":"workbench-action-audit-local"

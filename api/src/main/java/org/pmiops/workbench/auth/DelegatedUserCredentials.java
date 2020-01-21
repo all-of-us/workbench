@@ -35,9 +35,10 @@ import java.util.List;
  *
  * <p>This class shares some patterns in common with the ImpersonatedCredentials class; namely, it
  * uses the IAM Credentials API to allow one service account to perform some actions on behalf of
- * another service account. However, ImpersonatedCredentials (1) does not support the creation of
- * delegated user credentials, and (2) supports an arbitrary "source credential", while this class
- * relies on application default credentials for simplicity.
+ * another service account. However, this class differs in two notable ways: (1) it supports
+ * impersonation of end users, while ImpersonatedCredentials supports only impersonation of service
+ * accounts, and (2) it relies on application default credentials for simplicity in the All of Us
+ * Researcher Workbench use case.
  *
  * <p>Example usage, for authorizing user requests to the Google Directory API:<br>
  *
@@ -72,7 +73,11 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
   private String userEmail;
   // The set of Google OAuth scopes to be requested.
   private List<String> scopes;
+  // The HttpTransport to be used for making requests to Google's OAuth2 token server. If null,
+  // a default NetHttpTransport instance is used.
   private HttpTransport httpTransport;
+  // The IAM Credentials API client to be used for fetching a signed JWT from Google. If null,
+  // a default API client will be used.
   private IamCredentialsClient client;
 
   public DelegatedUserCredentials(
@@ -112,7 +117,6 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
   public JsonWebToken.Payload createClaims() {
     JsonWebToken.Payload payload = new JsonWebToken.Payload();
     payload.setIssuedAtTimeSeconds(Instant.now().getEpochSecond());
-    // This effectively sets the requested token expiration time.
     payload.setExpirationTimeSeconds(
         Instant.now().getEpochSecond() + ACCESS_TOKEN_DURATION.getSeconds());
     payload.setAudience(GoogleOAuthConstants.TOKEN_SERVER_URL);
