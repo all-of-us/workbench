@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
@@ -15,6 +16,7 @@ import org.apache.commons.cli.Options;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
+import org.pmiops.workbench.firecloud.model.FirecloudRawlsBillingProjectMember;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -90,6 +92,33 @@ public class BackfillBillingProjectOwners {
       String billingProjectPrefix,
       boolean dryRun)
       throws ApiException {
+
+    String projectId = "aou-rw-test-858a2a6d";
+    String user = "ericsong@fake-research-aou.org";
+
+    FirecloudWorkspaceResponse resp = workspacesApi.getWorkspace(projectId, "break", FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS);
+    Map<String, FirecloudWorkspaceAccessEntry> acl = extractAclResponse(workspacesApi.getWorkspaceAcl(resp.getWorkspace().getNamespace(), resp.getWorkspace().getName()));
+
+    log.info("Before anything");
+    for (FirecloudRawlsBillingProjectMember member : billingApi.listBillingProjectMembers("aou-rw-test-858a2a6d")) {
+      log.info(member.toString());
+    }
+
+    log.info("After adding owner");
+    billingApi.removeUserFromBillingProject(projectId, "user", user);
+    billingApi.addUserToBillingProject(projectId, "owner", user);
+    for (FirecloudRawlsBillingProjectMember member : billingApi.listBillingProjectMembers("aou-rw-test-858a2a6d")) {
+      log.info(member.toString());
+    }
+
+    log.info("Removing owner");
+    billingApi.removeUserFromBillingProject(projectId, "owner", user);
+
+    for (FirecloudRawlsBillingProjectMember member : billingApi.listBillingProjectMembers("aou-rw-test-858a2a6d")) {
+      log.info(member.toString());
+    }
+
+    /*
     int userUpgrades = 0;
     for (FirecloudWorkspaceResponse resp :
         workspacesApi.listWorkspaces(FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS)) {
@@ -132,6 +161,7 @@ public class BackfillBillingProjectOwners {
     }
 
     dryLog(dryRun, String.format("added %d users as billing project owners", userUpgrades));
+     */
   }
 
   @Bean

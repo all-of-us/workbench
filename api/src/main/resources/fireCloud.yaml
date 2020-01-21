@@ -191,6 +191,40 @@ paths:
               - email
               - profile
 
+  /api/billing/{projectId}/members:
+    get:
+      responses:
+        200:
+          description: Success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/RawlsBillingProjectMember'
+        403:
+          description: You must be a project owner to view the members of a project
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: Rawls Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+      description: list members of billing project the caller owns
+      parameters:
+        - in: path
+          description: Project ID
+          name: projectId
+          required: true
+          type: string
+      tags:
+        - billing
+      summary: list members of billing project the caller owns
+      operationId: listBillingProjectMembers
+      security:
+        - googleoauth:
+            - openid
+            - email
+            - profile
+
   /api/billing/{projectId}/googleRole/{role}/{email}:
     put:
       responses:
@@ -1203,6 +1237,19 @@ definitions:
         description: the users or groups who were not found
         items:
           $ref: '#/definitions/WorkspaceACLUpdate'
+
+  RawlsBillingProjectMember:
+    description: an element of a list of project users and their role
+    required:
+      - email
+      - role
+    properties:
+      email:
+        type: string
+        description: the email of the user
+      role:
+        type: string
+        description: the role of the user in the project
 
   WorkspaceAccessEntry:
     description: ''
