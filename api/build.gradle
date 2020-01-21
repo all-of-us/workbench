@@ -740,6 +740,16 @@ task loadDataDictionary(type: JavaExec) {
   }
 }
 
+// See project.rb command: backfill-billing-project-users
+task backfillBillingProjectOwners(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.BackfillBillingProjectOwners"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
 compileKotlin {
   kotlinOptions {
     jvmTarget = "1.8"

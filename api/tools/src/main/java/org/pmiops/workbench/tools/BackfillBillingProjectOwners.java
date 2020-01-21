@@ -25,13 +25,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Backfill script for granting the billing project user role to all AoU owners (corresponding to
- * Firecloud OWNER access). For http://broad.io/1ppw, collaborators need to be either writers or
- * billing project users in order to launch clusters within shared billing projects, see RW-3009 and
- * RW-3188 for details.
+ * Backfill script for granting the billing project owner role to all AoU owners (corresponding to
+ * Firecloud OWNER access).
+ *
+ * <p>For http://broad.io/1ppw, collaborators need to be either writers or billing project users in
+ * order to launch clusters within shared billing projects, see RW-3009 and RW-3188 for details.
+ *
+ * <p>The original iteration of this file was used to backfill the billing project user role to all
+ * AoU owners. The current iteration has been adapted from the original to backfill the owner role.
+ * See RW-2695 for details.
  */
 @Configuration
-public class BackfillBillingProjectUsers {
+public class BackfillBillingProjectOwners {
   public static final List<String> FIRECLOUD_LIST_WORKSPACES_REQUIRED_FIELDS =
       ImmutableList.of(
           "accessLevel", "workspace.namespace", "workspace.name", "workspace.createdBy");
@@ -58,7 +63,7 @@ public class BackfillBillingProjectUsers {
   private static Options options =
       new Options().addOption(fcBaseUrlOpt).addOption(billingProjectPrefixOpt).addOption(dryRunOpt);
 
-  private static final Logger log = Logger.getLogger(BackfillBillingProjectUsers.class.getName());
+  private static final Logger log = Logger.getLogger(BackfillBillingProjectOwners.class.getName());
 
   private static void dryLog(boolean dryRun, String msg) {
     String prefix = "";
@@ -105,11 +110,6 @@ public class BackfillBillingProjectUsers {
       Map<String, FirecloudWorkspaceAccessEntry> acl =
           extractAclResponse(workspacesApi.getWorkspaceAcl(w.getNamespace(), w.getName()));
       for (String user : acl.keySet()) {
-        if (user.equals(w.getCreatedBy())) {
-          // Skip the common case, creators should already be billing project users. Any edge cases
-          // where this is not true will be fixed by the 1PPW migration (RW-2705).
-          continue;
-        }
         FirecloudWorkspaceAccessEntry entry = acl.get(user);
         if (!"OWNER".equals(entry.getAccessLevel())) {
           // Only owners should be granted billing project user.
@@ -118,20 +118,20 @@ public class BackfillBillingProjectUsers {
         dryLog(
             dryRun,
             String.format(
-                "granting billing project user on '%s' to '%s' (%s)",
+                "granting project ownership on '%s' to '%s' (%s)",
                 w.getNamespace(), user, entry.getAccessLevel()));
         if (!dryRun) {
           try {
-            billingApi.addUserToBillingProject(w.getNamespace(), "user", user);
+            billingApi.addUserToBillingProject(w.getNamespace(), "owner", user);
           } catch (ApiException e) {
-            log.log(Level.WARNING, "failed to add user to project", e);
+            log.log(Level.WARNING, "failed to add owner to project", e);
           }
         }
         userUpgrades++;
       }
     }
 
-    dryLog(dryRun, String.format("added %d users as billing project users", userUpgrades));
+    dryLog(dryRun, String.format("added %d users as billing project owners", userUpgrades));
   }
 
   @Bean
@@ -151,6 +151,6 @@ public class BackfillBillingProjectUsers {
   }
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(BackfillBillingProjectUsers.class).web(false).run(args);
+    new SpringApplicationBuilder(BackfillBillingProjectOwners.class).web(false).run(args);
   }
 }

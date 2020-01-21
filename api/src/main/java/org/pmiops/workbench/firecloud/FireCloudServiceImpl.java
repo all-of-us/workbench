@@ -65,7 +65,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
 
-  private static final String USER_FC_ROLE = "user";
   private static final String OWNER_FC_ROLE = "owner";
   private static final String THURLOE_STATUS_NAME = "Thurloe";
   private static final String SAM_STATUS_NAME = "Sam";
