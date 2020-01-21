@@ -4,12 +4,10 @@ import {
   Education,
   EducationalRole,
   Ethnicity,
-  Gender,
   IndustryRole,
   NonAcademicAffiliation,
   Race,
-  SexAtBirth,
-  SexualOrientation
+  SexAtBirth
 } from 'generated/fetch';
 
 export const AccountCreationOptions = {
