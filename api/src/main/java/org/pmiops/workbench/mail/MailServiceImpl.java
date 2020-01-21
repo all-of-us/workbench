@@ -4,7 +4,6 @@ import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
@@ -74,18 +73,28 @@ public class MailServiceImpl implements MailService {
   @Override
   public void sendWelcomeEmail(final String contactEmail, final String password, final User user)
       throws MessagingException {
-    final String msgHtml =
-        buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, user));
-    final MandrillMessage msg = buildMessage(contactEmail, msgHtml, "Your new All of Us Account");
+
+    final MandrillMessage msg =
+        new MandrillMessage()
+            .to(Collections.singletonList(validatedRecipient(contactEmail)))
+            .html(buildHtml(WELCOME_RESOURCE, welcomeMessageSubstitutionMap(password, user)))
+            .subject("Your new All of Us Account")
+            .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+
     sendWithRetries(msg, String.format("Welcome for %s", user.getName()));
   }
 
   @Override
   public void sendBetaAccessCompleteEmail(final String contactEmail, final String username)
       throws MessagingException {
-    final String msgHtml = buildHtml(BETA_ACCESS_RESOURCE, betaAccessSubstitutionMap(username));
+
     final MandrillMessage msg =
-        buildMessage(contactEmail, msgHtml, "All of Us ID Verification Complete");
+        new MandrillMessage()
+            .to(Collections.singletonList(validatedRecipient(contactEmail)))
+            .html(buildHtml(BETA_ACCESS_RESOURCE, betaAccessSubstitutionMap(username)))
+            .subject("All of Us ID Verification Complete")
+            .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+
     sendWithRetries(msg, String.format("BetaAccess Complete for %s", contactEmail));
   }
 
@@ -127,12 +136,12 @@ public class MailServiceImpl implements MailService {
   private String buildHtml(
       final String resource, final Map<EmailSubstitutionField, String> replacementMap)
       throws MessagingException {
-    final URL emailContent = Resources.getResource(resource);
-    final StringBuilder contentBuilder = new StringBuilder();
 
+    final String emailContent;
     try {
-      Resources.readLines(emailContent, StandardCharsets.UTF_8)
-          .forEach(s -> contentBuilder.append(s).append("\n"));
+      emailContent =
+          String.join(
+              "\n", Resources.readLines(Resources.getResource(resource), StandardCharsets.UTF_8));
     } catch (IOException e) {
       throw new MessagingException("Error reading in email");
     }
@@ -140,17 +149,8 @@ public class MailServiceImpl implements MailService {
     final Map<String, String> stringMap =
         replacementMap.entrySet().stream()
             .collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue));
-    return new StringSubstitutor(stringMap).replace(contentBuilder.toString());
-  }
 
-  private MandrillMessage buildMessage(
-      final String contactEmail, final String msgHtml, final String subject)
-      throws MessagingException {
-    return new MandrillMessage()
-        .to(Collections.singletonList(validatedRecipient(contactEmail)))
-        .html(msgHtml)
-        .subject(subject)
-        .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
+    return new StringSubstitutor(stringMap).replace(emailContent);
   }
 
   private RecipientAddress validatedRecipient(final String contactEmail) throws MessagingException {
