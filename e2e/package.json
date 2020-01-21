@@ -10,11 +10,11 @@
     "test:debug": "yarn run test",
     "test-dev": "WORKBENCH_ENV=dev jest /tests",
     "test-dev:debug": "PUPPETEER_HEADLESS=true yarn run test-dev",
-    "compile": "tsc",
+    "build": "tsc --build --clean",
     "lint": "tslint --project tsconfig.json",
     "lint:err": "yarn run lint --quiet",
     "lint:fix": "yarn run lint --fix",
-    "build": "rimraf tsc-out/ && yarn run lint && yarn run compile"
+    "compile": "rimraf tsc-out/ && yarn run lint && yarn run build"
   },
   "jest": {
     "verbose": true,
@@ -37,7 +37,13 @@
       "<rootDir>/node_modules/(?!tests)"
     ],
     "moduleFileExtensions": [
-      "ts", "spec.ts", "tsx", "js", "jsx", "json", "node"
+      "ts",
+      "spec.ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
     ]
   },
   "keywords": [
@@ -52,6 +58,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/faker": "^4.1.9",
     "@types/jest": "^24.0.21",
     "@types/node": "^12.12.5",
     "@types/puppeteer-core": "^1.9.0",

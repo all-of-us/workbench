@@ -8,11 +8,11 @@ const fakeUser = {
   lname: faker.name.lastName(),
   job: faker.name.jobTitle(),
   phone: faker.phone.phoneNumber(),
-  company: faker.Company.companyName,
+  company: faker.company.companyName(),
   word: faker.lorem.words(5),
-  message: faker.random.words(),
+  message: faker.lorem.words(),
   email: faker.internet.email(),
-  state: faker.Address.state_abbr(),
+  state: faker.address.stateAbbr(),
   country: 'U.S.A'
 };
 
