@@ -539,7 +539,6 @@ tasks.withType(Test) {
   if (verboseTestLogging == 'yes') {
     testLogging {
       events "passed", "skipped", "failed", "standardOut", "standardError"
-      showStandardStreams = true
     }
   } else {
     testLogging {
