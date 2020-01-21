@@ -39,7 +39,6 @@ import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actio
 import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
 import {HomepageComponent} from './pages/homepage/homepage';
 import {InitialErrorComponent} from './pages/initial-error/component';
-import {PageTemplateSignedOutComponent} from './pages/login/page-template-signed-out/component';
 import {SignInComponent} from './pages/login/sign-in';
 import {DataUseAgreementComponent} from './pages/profile/data-use-agreement';
 import {ProfilePageComponent} from './pages/profile/profile-page';
@@ -147,7 +146,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     InteractiveNotebookComponent,
     NotebookListComponent,
     NotebookRedirectComponent,
-    PageTemplateSignedOutComponent,
     ProfilePageComponent,
     QueryReportComponent,
     RoutingSpinnerComponent,
