@@ -125,7 +125,7 @@ const nameLength = 80;
 export const Section = (props) => {
   return <FormSection
       style={{...flexStyle.column, ...props.style}}>
-    <label style={styles.sectionHeader}>
+    <label style={{...styles.sectionHeader, ...props.sectionHeaderStyles}}>
       {props.header}
     </label>
     {props.children}
@@ -463,7 +463,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     const {
       profile: {
         givenName, familyName, currentPosition, organization,
-        contactEmail, username, areaOfResearch,
+        contactEmail, username, areaOfResearch, professionalUrl,
         address: {
           streetAddress1, streetAddress2, city, state, zipCode, country
         },
@@ -585,7 +585,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               </FlexRow>
             </FlexColumn>
           </Section>
-          <Section header={<React.Fragment>
+          <Section sectionHeaderStyles={{borderBottom: null}} header={<React.Fragment>
             <div>Please describe your research background, experience and research interests</div>
             <div style={styles.asideText}>This information will be posted publicly on the AoU Research Hub Website
               to inform the AoU Research Participants. <span  style={{marginLeft: 2,
@@ -659,11 +659,25 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                        onChange={value => this.updateInstitutionAffiliation('other', value)}
                        style={{marginTop: '1rem', width: '18rem'}}/>}
           </FlexColumn>}
+          <Section header={<React.Fragment>
+            <div>Please your professional profile or bio page below, if available</div>
+            <div style={styles.asideText}>You could provide link to your faculty bio page from your institution's
+              website, your LinkedIn profile page, or another webpage featuring your work. This will
+              allow <i>All of Us</i> Researchers and Participants to learn more about your work and publications.</div>
+          </React.Fragment>}>
+              <TextInputWithLabel dataTestId='professionalUrl' inputName='professionalUrl'
+                                  placeholder='Professional Url' value={professionalUrl}
+                                  labelText={<div>
+                                    Paste Professional URL here <i style={{...styles.publiclyDisplayedText,
+                                      marginLeft: 2}}>Optional and publicly displayed</i>
+                                  </div>} containerStyle={{width: '26rem'}}
+                                  onChange={value => this.updateProfileObject('professionalUrl', value)}/>
+          </Section>
           <FormSection style={{paddingBottom: '1rem'}}>
             <TooltipTrigger content={errors && <React.Fragment>
               <div>Please review the following: </div>
               <ul>
-                {Object.keys(errors).map((key) => <li>{errors[key][0]}</li>)}
+                {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
               </ul>
             </React.Fragment>} disabled={!errors}>
               <Button disabled={this.state.usernameCheckInProgress || this.isUsernameValidationError || errors}
