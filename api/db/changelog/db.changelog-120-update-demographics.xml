@@ -5,8 +5,6 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="srubenst" id="db.changelog-120-update-demographics">
-    <dropTable tableName="demographic_survey_sexual_orientation"/>
-    <dropTable tableName="demographic_survey_gender"/>
     <addColumn tableName="user">
       <column name="professional_url" type="varchar(255)">
         <constraints nullable="true"/>
