@@ -170,6 +170,7 @@ const filterIcons = {
 };
 
 const rowsPerPage = 25;
+const lazyLoadSize = 125;
 const domains = [
   DomainType.CONDITION,
   DomainType.PROCEDURE,
@@ -274,7 +275,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         lazyLoad: false,
         totalCount: null,
         requestPage: 0,
-        range: [0, 999]
+        range: [0, 124]
       };
       this.codeInputChange = fp.debounce(300, (e) => this.filterCodes(e));
     }
@@ -302,12 +303,12 @@ export const DetailTabTable = withCurrentWorkspace()(
     async getParticipantData(getCount: boolean) {
       try {
         const {columns, domain, participantId, workspace: {id, namespace}} = this.props;
-        const {sortField, sortOrder} = this.state;
+        const {page, sortField, sortOrder} = this.state;
         let {lazyLoad, totalCount} = this.state;
         const {cohortReviewId} = cohortReviewStore.getValue();
         const pageFilterRequest = {
-          page: 0,
-          pageSize: 125,
+          page: Math.floor(page / (lazyLoadSize / rowsPerPage)),
+          pageSize: lazyLoadSize,
           sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
           sortColumn: columns.find(col => col.name === sortField).filter,
           domain: domain,
@@ -317,12 +318,12 @@ export const DetailTabTable = withCurrentWorkspace()(
           await cohortReviewApi().getParticipantCount(namespace, id, cohortReviewId, participantId, pageFilterRequest).then(response => {
             totalCount = response.count;
             lazyLoad = totalCount > 1000;
-            pageFilterRequest.pageSize = lazyLoad ? 125 : totalCount;
+            pageFilterRequest.pageSize = lazyLoad ? lazyLoadSize : totalCount;
           });
         }
         this.callApi(pageFilterRequest).then(data => {
           if (lazyLoad) {
-            this.setState({data, filteredData: data, loading: false, lazyLoad, range: [0, 124], totalCount});
+            this.setState({data, filteredData: data, loading: false, lazyLoad, totalCount});
           } else {
             this.setState({data, loading: false, lazyLoad, range: [0, totalCount - 1]});
             this.filterData();
@@ -339,10 +340,10 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {columns, domain} = this.props;
       const {range, sortField, sortOrder} = this.state;
       let {filteredData} = this.state;
-      const requestPage = previous ? range[0] / 125 : (filteredData.length + range[0]) / 125;
+      const requestPage = previous ? range[0] / lazyLoadSize : (filteredData.length + range[0]) / lazyLoadSize;
       const pageFilterRequest = {
         page: requestPage,
-        pageSize: 125,
+        pageSize: lazyLoadSize,
         sortOrder: sortOrder === 1 ? SortOrder.Asc :  SortOrder.Desc,
         sortColumn: columns.find(col => col.name === sortField).filter,
         domain: domain,
@@ -351,15 +352,15 @@ export const DetailTabTable = withCurrentWorkspace()(
       this.callApi(pageFilterRequest).then(data => {
         if (previous) {
           filteredData = [...data, ...filteredData];
-          if (filteredData.length > 425) {
-            filteredData = filteredData.slice(0, filteredData.length - 125);
-            range[1] -= 125;
+          if (filteredData.length > (lazyLoadSize * 3)) {
+            filteredData = filteredData.slice(0, filteredData.length - lazyLoadSize);
+            range[1] -= lazyLoadSize;
           }
         } else {
           filteredData = [...filteredData, ...data];
-          if (filteredData.length > 425) {
-            filteredData = filteredData.slice(125);
-            range[0] += 125;
+          if (filteredData.length > (lazyLoadSize * 3)) {
+            filteredData = filteredData.slice(lazyLoadSize);
+            range[0] += lazyLoadSize;
           }
         }
         this.setState({data, filteredData, range, loadingPrevious: false, updating: false});
@@ -384,9 +385,11 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     onSort = (event: any) => {
       this.setState({sortField: event.sortField, sortOrder: event.sortOrder});
-      const {lazyLoad} = this.state;
+      const {lazyLoad, page} = this.state;
       if (lazyLoad) {
-        this.setState({loading: true}, () => this.getParticipantData(false));
+        const start = Math.floor(page / 5) * lazyLoadSize;
+        const range = [start, start + lazyLoadSize - 1];
+        this.setState({loading: true, range}, () => this.getParticipantData(false));
       }
     }
 
@@ -397,9 +400,12 @@ export const DetailTabTable = withCurrentWorkspace()(
       } else {
         this.setState({sortField, sortOrder: 1});
       }
-      const {lazyLoad} = this.state;
+      const {lazyLoad, page} = this.state;
       if (lazyLoad) {
-        this.setState({loading: true}, () => this.getParticipantData(false));
+        const start = Math.floor(page / 5) * lazyLoadSize;
+        const range = [start, start + lazyLoadSize - 1];
+        console.log(range);
+        this.setState({loading: true, range}, () => this.getParticipantData(false));
       }
     }
 
@@ -407,14 +413,17 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {lazyLoad, page, range} = this.state;
       if (lazyLoad) {
         if (event.page < page && event.page > 1 && range[0] >= (event.first - rowsPerPage)) {
-          range[0] -= 125;
-          this.updatePageData(true);
+          range[0] -= lazyLoadSize;
+          this.setState({page: event.page, range, start: event.first}, () => this.updatePageData(true));
         } else if (event.page > page && range[1] <= (event.first + (rowsPerPage * 2))) {
-          range[1] += 125;
-          this.updatePageData(false);
+          range[1] += lazyLoadSize;
+          this.setState({page: event.page, range, start: event.first}, () => this.updatePageData(false));
+        } else {
+          this.setState({page: event.page, range, start: event.first});
         }
+      } else {
+        this.setState({page: event.page, range, start: event.first});
       }
-      this.setState({page: event.page, range, start: event.first});
     }
 
     overlayTemplate = (rowData: any, column: any) => {
@@ -766,9 +775,9 @@ export const DetailTabTable = withCurrentWorkspace()(
         pageReportTemplate = `${(start + 1).toLocaleString()} -
           ${lastRowOfPage.toLocaleString()} of
           ${max.toLocaleString()} records `;
-        const pageStart = lazyLoad ? start - range[0] : start;
+        const pageStart = loadingPrevious ? start - range[0] - lazyLoadSize : start - range[0];
         value = lazyLoad
-          ? (loadingPrevious && pageStart < 125 ? [] : filteredData.slice(pageStart, pageStart + rowsPerPage))
+          ? (loadingPrevious && pageStart < 0 ? [] : filteredData.slice(pageStart, pageStart + rowsPerPage))
           : filteredData;
       }
       let paginatorTemplate = 'CurrentPageReport';
