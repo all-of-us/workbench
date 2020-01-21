@@ -10,7 +10,7 @@ import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType, PageFilterRequest, SortOrder} from 'generated/fetch';
+import {DomainType, FilterColumns, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
@@ -286,6 +286,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     componentDidUpdate(prevProps: any) {
       const {participantId, updateState} = this.props;
+      const {lazyLoad} = this.state;
       if (prevProps.participantId !== participantId) {
         this.setState({
           data: null,
@@ -296,23 +297,60 @@ export const DetailTabTable = withCurrentWorkspace()(
           start: 0,
         }, () => this.getParticipantData(true));
       } else if (prevProps.updateState !== updateState) {
-        this.filterData();
+        if (lazyLoad) {
+          this.getParticipantData(true);
+        } else {
+          this.filterData();
+        }
       }
     }
 
     async getParticipantData(getCount: boolean) {
       try {
-        const {columns, domain, participantId, workspace: {id, namespace}} = this.props;
+        const {columns, domain, filterState, participantId, workspace: {id, namespace}} = this.props;
         const {page, sortField, sortOrder} = this.state;
         let {lazyLoad, totalCount} = this.state;
         const {cohortReviewId} = cohortReviewStore.getValue();
+        const filters = {items: []};
+        if (lazyLoad) {
+          const columnFilters = filterState.tabs[domain];
+          if (!!columnFilters) {
+            for (const col in columnFilters) {
+              if (columnFilters.hasOwnProperty(col)) {
+                const filter = columnFilters[col];
+                if (Array.isArray(filter)) {
+                  // checkbox filters
+                  if (!filter.length) {
+                    // TODO show no data, don't call api
+                    break;
+                  } else if (!filter.includes('Select All')) {
+                    filters.items.push({
+                      property: columns.find(c => c.name === col).filter,
+                      operator: Operator.IN,
+                      values: filter
+                    });
+                  }
+                } else {
+                  // text filters
+                  if (!!filter) {
+                    filters.items.push({
+                      property: columns.find(c => c.name === col).filter,
+                      operator: Operator.LIKE,
+                      values: [filter]
+                    });
+                  }
+                }
+              }
+            }
+          }
+        }
         const pageFilterRequest = {
           page: Math.floor(page / (lazyLoadSize / rowsPerPage)),
           pageSize: lazyLoadSize,
           sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
           sortColumn: columns.find(col => col.name === sortField).filter,
-          domain: domain,
-          filters: {items: []}
+          domain,
+          filters
         } as PageFilterRequest;
         if (getCount) {
           await cohortReviewApi().getParticipantCount(namespace, id, cohortReviewId, participantId, pageFilterRequest).then(response => {
