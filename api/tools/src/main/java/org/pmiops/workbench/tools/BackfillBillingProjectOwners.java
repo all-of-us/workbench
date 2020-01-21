@@ -112,15 +112,21 @@ public class BackfillBillingProjectOwners {
       for (String user : acl.keySet()) {
         FirecloudWorkspaceAccessEntry entry = acl.get(user);
         if (!"OWNER".equals(entry.getAccessLevel())) {
-          // Only owners should be granted billing project user.
+          // Only owners should be granted billing project owner.
           continue;
         }
         dryLog(
             dryRun,
             String.format(
-                "granting project ownership on '%s' to '%s' (%s)",
+                "granting project ownership on '%s' to '%s' (%s) and removing user role",
                 w.getNamespace(), user, entry.getAccessLevel()));
         if (!dryRun) {
+          try {
+            billingApi.removeUserFromBillingProject(w.getNamespace(), "user", user);
+          } catch (ApiException e) {
+            log.log(Level.WARNING, "failed to remove user from project", e);
+          }
+
           try {
             billingApi.addUserToBillingProject(w.getNamespace(), "owner", user);
           } catch (ApiException e) {
@@ -131,7 +137,10 @@ public class BackfillBillingProjectOwners {
       }
     }
 
-    dryLog(dryRun, String.format("added %d users as billing project owners", userUpgrades));
+    dryLog(
+        dryRun,
+        String.format(
+            "added %d users as billing project owners and removed as users", userUpgrades));
   }
 
   @Bean
