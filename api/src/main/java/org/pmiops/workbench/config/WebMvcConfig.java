@@ -65,39 +65,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     return userAuthentication.getUser();
   }
 
-  /**
-   * Service account credentials for Gsuite administration, corresponding to the "gsuite-admin"
-   * service account in each environment. Enabled for domain-wide delegation of authority.
-   */
-  @Lazy
-  @Bean(name = Constants.GSUITE_ADMIN_CREDS)
-  public GoogleCredentials gsuiteAdminCredential(CloudStorageService cloudStorageService)
-      throws IOException {
-    return cloudStorageService.getGSuiteAdminCredentials();
-  }
-
-  /**
-   * Service account credentials for FireCloud administration. This Service Account has been enabled
-   * for domain-wide delegation of authority.
-   */
-  @Lazy
-  @Bean(name = Constants.FIRECLOUD_ADMIN_CREDS)
-  public GoogleCredentials firecloudAdminCredential(CloudStorageService cloudStorageService)
-      throws IOException {
-    return cloudStorageService.getFireCloudAdminCredentials();
-  }
-
-  /**
-   * Service account credentials for Cloud Resource Manager administration. This Service Account has
-   * been enabled for domain-wide delegation of authority.
-   */
-  @Lazy
-  @Bean(name = Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
-  public GoogleCredentials cloudResourceManagerAdminCredential(
-      CloudStorageService cloudStorageService) throws IOException {
-    return cloudStorageService.getCloudResourceManagerAdminCredentials();
-  }
-
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(corsInterceptor);

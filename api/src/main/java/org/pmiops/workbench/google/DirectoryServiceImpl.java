@@ -88,7 +88,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     this.retryHandler = retryHandler;
   }
 
-  private Directory service() {
+  private Directory getGoogleDirectoryService() {
     OAuth2Credentials delegatedCreds;
     if (configProvider.get().featureFlags.useKeylessDelegatedCredentials) {
       delegatedCreds =
@@ -131,7 +131,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     try {
       // We use the "full" projection to include custom schema fields in the Directory API response.
       return retryHandler.runAndThrowChecked(
-          (context) -> service().users().get(email).setProjection("full").execute());
+          (context) -> getGoogleDirectoryService().users().get(email).setProjection("full").execute());
     } catch (GoogleJsonResponseException e) {
       // Handle the special case where we're looking for a not found user by returning
       // null.
@@ -203,7 +203,7 @@ public class DirectoryServiceImpl implements DirectoryService {
             .setOrgUnitPath(GSUITE_WORKBENCH_ORG_UNIT_PATH);
     addCustomSchemaAndEmails(user, primaryEmail, contactEmail);
 
-    retryHandler.run((context) -> service().users().insert(user).execute());
+    retryHandler.run((context) -> getGoogleDirectoryService().users().insert(user).execute());
     return user;
   }
 
@@ -212,7 +212,7 @@ public class DirectoryServiceImpl implements DirectoryService {
     User user = getUser(email);
     String password = randomString();
     user.setPassword(password);
-    retryHandler.run((context) -> service().users().update(email, user).execute());
+    retryHandler.run((context) -> getGoogleDirectoryService().users().update(email, user).execute());
     return user;
   }
 
@@ -220,7 +220,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   public void deleteUser(String username) {
     try {
       retryHandler.runAndThrowChecked(
-          (context) -> service().users().delete(username + "@" + gSuiteDomain()).execute());
+          (context) -> getGoogleDirectoryService().users().delete(username + "@" + gSuiteDomain()).execute());
     } catch (GoogleJsonResponseException e) {
       if (e.getDetails().getCode() == HttpStatus.NOT_FOUND.value()) {
         // Deleting a user that doesn't exist will have no effect.
