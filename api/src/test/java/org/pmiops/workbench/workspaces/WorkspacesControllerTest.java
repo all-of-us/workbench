@@ -1887,7 +1887,7 @@ public class WorkspacesControllerTest {
         workspace.getNamespace(), workspace.getName(), shareWorkspaceRequest);
     verify(fireCloudService, times(1))
         .removeOwnerFromBillingProject(
-            ownerUser.getUsername(), workspace.getNamespace(), eq(Optional.empty()));
+            ownerUser.getUsername(), workspace.getNamespace(), Optional.empty());
     verify(fireCloudService, never())
         .removeOwnerFromBillingProject(eq(writerUser.getUsername()), any(), eq(Optional.empty()));
     verify(fireCloudService, never()).addOwnerToBillingProject(any(), any());
