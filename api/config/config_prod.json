@@ -12,7 +12,7 @@
     "xAppIdValue": "AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_prod",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-gatk:0.0.8",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-gatk:0.0.9",
     "welderDockerImage": "broadinstitute/welder-server:60e28bc"
   },
   "billing": {
@@ -87,7 +87,8 @@
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": false,
     "enableRdrExport": false,
-    "enableBillingLockout": false
+    "enableBillingLockout": false,
+    "enableSumoLogicEventHandling": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-prod"

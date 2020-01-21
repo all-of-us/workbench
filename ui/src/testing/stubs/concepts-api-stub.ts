@@ -132,6 +132,14 @@ export class DomainStubVariables {
       standardConceptCount: 50,
       allConceptCount: 65,
       participantCount: 200
+    },
+    {
+      domain: Domain.SURVEY,
+      name: 'Survey',
+      description: 'The Surveys Stub',
+      standardConceptCount: 4,
+      allConceptCount: 43,
+      participantCount: 150
     }
   ];
 }

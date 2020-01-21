@@ -23,8 +23,8 @@ public class WorkbenchLocationConfigService {
    */
   public String getCloudTaskLocationId() {
     String appEngineLocationId = workbenchConfig.get().server.appEngineLocationId;
-    if (appEngineLocationId == "us-central") return "us-central1";
-    else if (appEngineLocationId == "europe-west") return "europe-west1";
+    if (appEngineLocationId.equals("us-central")) return "us-central1";
+    else if (appEngineLocationId.equals("europe-west")) return "europe-west1";
     return appEngineLocationId;
   }
 }

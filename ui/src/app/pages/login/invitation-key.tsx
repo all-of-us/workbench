@@ -77,6 +77,12 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
       });
   }
 
+  keyPressed(key) {
+    if (key === 'Enter') {
+      this.next();
+    }
+  }
+
   render() {
     return <div data-test-id='invitationKey' style={{padding: '3rem 3rem 0 3rem'}}>
       <div style={{marginTop: '0', paddingTop: '.5rem'}}>
@@ -84,6 +90,7 @@ export class InvitationKey extends React.Component<InvitationKeyProps, Invitatio
           Enter your Invitation Key:
         </BoldHeader>
         <TextInput id='invitationKey' value={this.state.invitationKey}
+                   onKeyPress={(event) => this.keyPressed(event.key)}
                    style={{width: '16rem'}}
                    placeholder='Invitation Key'
           onChange={v => this.setState({invitationKey: v})}

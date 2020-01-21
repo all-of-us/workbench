@@ -3,7 +3,8 @@ import {Button} from 'app/components/buttons';
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import SignInReact, {pageImages, SignInProps} from './sign-in';
+import SignInReact, {SignInProps} from './sign-in';
+import {signedOutImages} from './signed-out-images';
 
 describe('SignInReact', () => {
   let props: SignInProps;
@@ -24,7 +25,7 @@ describe('SignInReact', () => {
     const wrapper = component();
     const templateImage = wrapper.find('[data-test-id="template"]');
     const backgroundImage = templateImage.prop('style').backgroundImage;
-    expect(backgroundImage).toBe('url(\'' + pageImages.login.backgroundImgSrc + '\')');
+    expect(backgroundImage).toBe('url(\'' + signedOutImages.login.backgroundImgSrc + '\')');
     expect(wrapper.exists('[data-test-id="login"]')).toBeTruthy();
   });
 
@@ -35,7 +36,7 @@ describe('SignInReact', () => {
     const backgroundImage = templateImage.prop('style').backgroundImage;
 
     expect(backgroundImage)
-      .toBe('url(\'' + pageImages.login.smallerBackgroundImgSrc + '\')');
+      .toBe('url(\'' + signedOutImages.login.smallerBackgroundImgSrc + '\')');
     expect(wrapper.exists('[data-test-id="login"]')).toBeTruthy();
   });
 
@@ -47,8 +48,6 @@ describe('SignInReact', () => {
     const templateImage = wrapper.find('[data-test-id="template"]');
     const backgroundImage = templateImage.prop('style').backgroundImage;
 
-    expect(backgroundImage)
-      .toBe('url(\'' + pageImages.invitationKey.backgroundImgSrc + '\')');
     expect(wrapper.exists('[data-test-id="invitationKey"]')).toBeTruthy();
   });
 
@@ -59,7 +58,5 @@ describe('SignInReact', () => {
     createAccountButton.simulate('click');
     wrapper.update();
     const templateImage = wrapper.find('[data-test-id="template"]');
-    expect(templateImage.prop('style').backgroundImage)
-      .toBe('url(\'' + pageImages.invitationKey.smallerBackgroundImgSrc + '\')');
   });
 });

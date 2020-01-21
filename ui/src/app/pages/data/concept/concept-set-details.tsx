@@ -322,6 +322,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
             </div>
             {!!conceptSet.concepts ?
             <ConceptTable concepts={conceptSet.concepts} loading={loading}
+                          domain={conceptSet.domain}
                           reactKey={conceptSet.domain.toString()}
                           onSelectConcepts={this.onSelectConcepts.bind(this)}
                           placeholderValue={'No Concepts Found'}
