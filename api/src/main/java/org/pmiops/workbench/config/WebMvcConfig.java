@@ -1,13 +1,9 @@
 package org.pmiops.workbench.config;
 
 import com.google.api.services.oauth2.model.Userinfoplus;
-import com.google.auth.oauth2.GoogleCredentials;
-import java.io.IOException;
 import javax.servlet.ServletContext;
-import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
 import org.pmiops.workbench.interceptors.CorsInterceptor;
@@ -18,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
