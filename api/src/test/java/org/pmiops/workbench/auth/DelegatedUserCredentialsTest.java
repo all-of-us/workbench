@@ -40,6 +40,9 @@ public class DelegatedUserCredentialsTest {
   static final List<String> SCOPES = Arrays.asList("openid", "profile");
 
   private static final String SA_PRIVATE_KEY_ID = "private-key-for-testing-only";
+  // A random private key string generated for testing purposed with the following commands:
+  // $ openssl genrsa -out keypair.pem 512
+  // $ openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in keypair.pem -out pkcs8.key
   static final String SA_PRIVATE_KEY_PKCS8 =
       "-----BEGIN PRIVATE KEY-----\n"
           + "MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEA04/ClUlp9Y1HEOPe\n"
@@ -52,10 +55,12 @@ public class DelegatedUserCredentialsTest {
           + "qzJzcrNQfMs=\n"
           + "-----END PRIVATE KEY-----";
 
+  // We'll handle mocking out the call to the IAM Credentials API.
   @Mock private IamCredentialsClient mockIamCredentialsClient;
+  // Google's API client library provides a convenient mock for their token server API,
+  // so we'll use that to mock out the call to request an access token.
   private MockTokenServerTransport mockTokenServerTransport;
   private DelegatedUserCredentials creds;
-  private String jwtPayload;
 
   @Before
   public void setUp() {
@@ -124,10 +129,10 @@ public class DelegatedUserCredentialsTest {
         .then(
             invocation -> {
               SignJwtRequest request = invocation.getArgument(0);
-              jwtPayload = request.getPayload();
               JsonWebToken.Payload payload =
                   DelegatedUserCredentials.JSON_FACTORY.fromInputStream(
-                      new ByteArrayInputStream(jwtPayload.getBytes()), JsonWebToken.Payload.class);
+                      new ByteArrayInputStream(request.getPayload().getBytes()),
+                      JsonWebToken.Payload.class);
               return SignJwtResponse.newBuilder()
                   .setSignedJwt(createSelfSignedJwt(payload))
                   .build();
