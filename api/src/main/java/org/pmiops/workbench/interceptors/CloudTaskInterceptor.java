@@ -35,7 +35,7 @@ public class CloudTaskInterceptor extends HandlerInterceptorAdapter {
         break;
       }
     }
-    request.getHeaderNames();
+
     boolean hasQueueNameHeader = RDR_QUEUE_NAME_HEADER.equals(request.getHeader(QUEUE_NAME_HEADER));
     if (requireCloudTaskHeader && !hasQueueNameHeader) {
       response.sendError(
