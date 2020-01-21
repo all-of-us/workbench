@@ -4,7 +4,8 @@ import com.google.api.client.auth.oauth2.TokenRequest;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
 import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.json.webtoken.JsonWebToken;
@@ -12,13 +13,13 @@ import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.cloud.iam.credentials.v1.SignJwtRequest;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * OAuth2 Credentials representing a Service Account using domain-wide delegation of authority to
@@ -58,12 +59,21 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
   static final Duration ACCESS_TOKEN_DURATION = Duration.ofMinutes(60);
 
   // The email of the service account whose system-managed key should be used to sign the JWT
-  // assertion which is exchanged for an access token. This service account does not need to be
-  // the same as the application default credentials service account; see
+  // assertion which is exchanged for an access token. This service account:
+  // - Must have domain-wide delegation enabled for the target user's G Suite domain and scopes.
+  // - Does not need to be the same service account (SA) as the application default credentials
+  // (ADC)
+  //     service account. If they are different, the ADC account must have the Service Account Token
+  //     Creator role granted on this service account. See
+  //     https://cloud.google.com/iam/docs/creating-short-lived-service-account-credentials for more
+  //     details.
   private String serviceAccountEmail;
+  // The full G Suite email address of the user for whom an access token will be generated.
   private String userEmail;
+  // The set of Google OAuth scopes to be requested.
   private List<String> scopes;
-  private List<String> delegates;
+  private HttpTransport httpTransport;
+  private IamCredentialsClient client;
 
   public DelegatedUserCredentials(
       String serviceAccountEmail, String userEmail, List<String> scopes) {
@@ -72,12 +82,19 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
     this.userEmail = userEmail;
     this.scopes = scopes;
 
-    if (this.delegates == null) {
-      this.delegates = new ArrayList<>();
-    }
     if (this.scopes == null) {
       this.scopes = new ArrayList<>();
     }
+  }
+
+  @VisibleForTesting
+  public void setIamCredentialsClient(IamCredentialsClient client) {
+    this.client = client;
+  }
+
+  @VisibleForTesting
+  public void setHttpTransport(HttpTransport httpTransport) {
+    this.httpTransport = httpTransport;
   }
 
   /**
@@ -91,7 +108,8 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
    *
    * @return
    */
-  private JsonWebToken.Payload createClaims() {
+  @VisibleForTesting
+  public JsonWebToken.Payload createClaims() {
     JsonWebToken.Payload payload = new JsonWebToken.Payload();
     payload.setIssuedAtTimeSeconds(Instant.now().getEpochSecond());
     // This effectively sets the requested token expiration time.
@@ -101,8 +119,6 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
     payload.setIssuer(this.serviceAccountEmail);
     payload.setSubject(this.userEmail);
     payload.set("scope", String.join(" ", this.scopes));
-    Logger log = Logger.getLogger("asdf");
-    log.info("Payload: " + payload);
     return payload;
   }
 
@@ -113,29 +129,32 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
     // ADC service account may be different from `serviceAccountEmail` if the ADC account has the
     // roles/iam.serviceAccountTokenCreator role on the `serviceAccountEmail` account.
     JsonWebToken.Payload payload = createClaims();
-    IamCredentialsClient client = IamCredentialsClient.create();
+
+    if (client == null) {
+      client = IamCredentialsClient.create();
+    }
     SignJwtRequest jwtRequest =
         SignJwtRequest.newBuilder()
             .setName(String.format(SERVICE_ACCOUNT_NAME_FORMAT, serviceAccountEmail))
             .setPayload(JSON_FACTORY.toString(payload))
-            .addAllDelegates(delegates)
             .build();
     String jwt = client.signJwt(jwtRequest).getSignedJwt();
 
     // With the signed JWT in hand, we call Google's OAuth2 token server to exchange the JWT for
     // an access token.
+    if (httpTransport == null) {
+      httpTransport = new NetHttpTransport();
+    }
     TokenRequest tokenRequest =
         new TokenRequest(
-            new ApacheHttpTransport(),
+            httpTransport,
             JSON_FACTORY,
             new GenericUrl(GoogleOAuthConstants.TOKEN_SERVER_URL),
             JWT_BEARER_GRANT_TYPE);
     tokenRequest.put("assertion", jwt);
     TokenResponse tokenResponse = tokenRequest.execute();
-    AccessToken token =
-        new AccessToken(
-            tokenResponse.getAccessToken(),
-            Date.from(Instant.now().plusSeconds(tokenResponse.getExpiresInSeconds())));
-    return token;
+    return new AccessToken(
+        tokenResponse.getAccessToken(),
+        Date.from(Instant.now().plusSeconds(tokenResponse.getExpiresInSeconds())));
   }
 }
