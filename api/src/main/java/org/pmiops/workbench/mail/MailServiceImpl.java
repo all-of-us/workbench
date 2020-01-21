@@ -7,13 +7,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
@@ -86,20 +89,22 @@ public class MailServiceImpl implements MailService {
     sendWithRetries(msg, String.format("BetaAccess Complete for %s", contactEmail));
   }
 
-  private ImmutableMap<String, String> welcomeMessageSubstitutionMap(
+  private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
       final String password, final User user) {
     final CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
-    return new ImmutableMap.Builder<String, String>()
-        .put("USERNAME", user.getPrimaryEmail())
-        .put("PASSWORD", password)
-        .put("URL", workbenchConfigProvider.get().admin.loginUrl)
-        .put("HEADER_IMG", cloudStorageService.getImageUrl("all_of_us_logo.png"))
-        .put("BULLET_1", cloudStorageService.getImageUrl("bullet_1.png"))
-        .put("BULLET_2", cloudStorageService.getImageUrl("bullet_2.png"))
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.USERNAME, user.getPrimaryEmail())
+        .put(EmailSubstitutionField.PASSWORD, password)
+        .put(EmailSubstitutionField.URL, workbenchConfigProvider.get().admin.loginUrl)
+        .put(
+            EmailSubstitutionField.HEADER_IMG,
+            cloudStorageService.getImageUrl("all_of_us_logo.png"))
+        .put(EmailSubstitutionField.BULLET_1, cloudStorageService.getImageUrl("bullet_1.png"))
+        .put(EmailSubstitutionField.BULLET_2, cloudStorageService.getImageUrl("bullet_2.png"))
         .build();
   }
 
-  private ImmutableMap<String, String> betaAccessSubstitutionMap(final String username) {
+  private Map<EmailSubstitutionField, String> betaAccessSubstitutionMap(final String username) {
     final CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
 
     final String action =
@@ -109,15 +114,18 @@ public class MailServiceImpl implements MailService {
             + workbenchConfigProvider.get().admin.loginUrl
             + "</a>";
 
-    return new ImmutableMap.Builder<String, String>()
-        .put("ACTION", action)
-        .put("BETA_ACCESS_REPORT", "approved for use")
-        .put("HEADER_IMG", cloudStorageService.getImageUrl("all_of_us_logo.png"))
-        .put("USERNAME", username)
+    return new ImmutableMap.Builder<EmailSubstitutionField, String>()
+        .put(EmailSubstitutionField.ACTION, action)
+        .put(EmailSubstitutionField.BETA_ACCESS_REPORT, "approved for use")
+        .put(
+            EmailSubstitutionField.HEADER_IMG,
+            cloudStorageService.getImageUrl("all_of_us_logo.png"))
+        .put(EmailSubstitutionField.USERNAME, username)
         .build();
   }
 
-  private String buildHtml(final String resource, final ImmutableMap<String, String> replacementMap)
+  private String buildHtml(
+      final String resource, final Map<EmailSubstitutionField, String> replacementMap)
       throws MessagingException {
     final URL emailContent = Resources.getResource(resource);
     final StringBuilder contentBuilder = new StringBuilder();
@@ -129,7 +137,10 @@ public class MailServiceImpl implements MailService {
       throw new MessagingException("Error reading in email");
     }
 
-    return new StringSubstitutor(replacementMap).replace(contentBuilder.toString());
+    final Map<String, String> stringMap =
+        replacementMap.entrySet().stream()
+            .collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue));
+    return new StringSubstitutor(stringMap).replace(contentBuilder.toString());
   }
 
   private MandrillMessage buildMessage(
@@ -162,7 +173,7 @@ public class MailServiceImpl implements MailService {
     keyAndMessage.setMessage(msg);
     do {
       retries--;
-      ImmutablePair<Status, String> attempt = trySend(keyAndMessage);
+      Pair<Status, String> attempt = trySend(keyAndMessage);
       Status status = Status.valueOf(attempt.getLeft().toString());
       switch (status) {
         case API_ERROR:
@@ -203,7 +214,7 @@ public class MailServiceImpl implements MailService {
     } while (retries > 0);
   }
 
-  private ImmutablePair<Status, String> trySend(MandrillApiKeyAndMessage keyAndMessage) {
+  private Pair<Status, String> trySend(MandrillApiKeyAndMessage keyAndMessage) {
     try {
       MandrillMessageStatuses msgStatuses = mandrillApiProvider.get().send(keyAndMessage);
       for (MandrillMessageStatus msgStatus : msgStatuses) {
