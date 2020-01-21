@@ -193,11 +193,6 @@ public class RdrExportServiceImpl implements RdrExportService {
             RdrExportEnums.sexAtBirthToRdrSexAtBirth(
                 dbDemographicSurvey.getSexAtBirthEnum().get(0)));
       }
-      if (dbDemographicSurvey.getSexualOrientationEnum() != null) {
-        researcher.setSexualOrientation(
-            RdrExportEnums.sexualOrientationToRdrSexualOrientation(
-                dbDemographicSurvey.getSexualOrientationEnum().get(0)));
-      }
       researcher.setDisability(
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
     }
@@ -209,14 +204,6 @@ public class RdrExportServiceImpl implements RdrExportService {
               .collect(Collectors.toList()));
     } else {
       researcher.setRace(new ArrayList<>());
-    }
-    if (null != dbDemographicSurvey && dbDemographicSurvey.getGenderEnum() != null) {
-      researcher.setGender(
-          dbDemographicSurvey.getGenderEnum().stream()
-              .map(dbUserGender -> RdrExportEnums.genderToRdrGender(dbUserGender))
-              .collect(Collectors.toList()));
-    } else {
-      researcher.setGender(new ArrayList<>());
     }
     researcher.setAffiliations(
         dbUser.getInstitutionalAffiliations().stream()

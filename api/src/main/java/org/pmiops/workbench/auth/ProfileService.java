@@ -58,10 +58,10 @@ public class ProfileService {
               }
               result.setEducation(demographicSurvey.getEducationEnum());
               result.setEthnicity(demographicSurvey.getEthnicityEnum());
-              result.setGender(demographicSurvey.getGenderEnum());
+              result.setIdentifiesAsLgbtq(demographicSurvey.getIdentifiesAsLgbtq());
+              result.setLgbtqIdentity(demographicSurvey.getLgbtqIdentity());
               result.setRace(demographicSurvey.getRaceEnum());
               result.setSexAtBirth(demographicSurvey.getSexAtBirthEnum());
-              result.setSexualOrientation(demographicSurvey.getSexualOrientationEnum());
               result.setYearOfBirth(BigDecimal.valueOf(demographicSurvey.getYear_of_birth()));
 
               return result;
@@ -121,7 +121,7 @@ public class ProfileService {
     profile.setAreaOfResearch(user.getAreaOfResearch());
     profile.setDisabled(user.getDisabled());
     profile.setEraCommonsLinkedNihUsername(user.getEraCommonsLinkedNihUsername());
-
+    profile.setProfessionalUrl(user.getProfessionalUrl());
     if (user.getComplianceTrainingCompletionTime() != null) {
       profile.setComplianceTrainingCompletionTime(
           user.getComplianceTrainingCompletionTime().getTime());

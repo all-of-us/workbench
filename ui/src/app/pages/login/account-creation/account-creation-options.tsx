@@ -77,29 +77,12 @@ export const AccountCreationOptions = {
     {label: `Not Hispanic or Latino`, value: Ethnicity.NOTHISPANIC},
     {label: ` Prefer not to answer`, value: Ethnicity.PREFERNOANSWER}
   ],
-  gender: [
-    {label: 'Male', value: Gender.MALE},
-    {label: 'Female', value: Gender.FEMALE},
-    {label: 'Non-binary', value: Gender.NONBINARY},
-    {label: 'Transgender', value: Gender.TRANSGENDER},
-    {label: 'Intersex', value: Gender.INTERSEX},
-    {label: `Prefer not to answer`, value: Gender.PREFERNOANSWER},
-    {label: `None of these describe me`, value: Gender.NONE}
-  ],
   sexAtBirth: [
     {label: 'Female', value: SexAtBirth.FEMALE},
     {label: 'Intersex', value: SexAtBirth.INTERSEX},
     {label: 'Male', value: SexAtBirth.MALE},
     {label: 'None of these describe me', value: SexAtBirth.NONEOFTHESEDESCRIBEME},
     {label: 'Prefer not to answer', value: SexAtBirth.PREFERNOANSWER}
-  ],
-  sexualOrientation: [
-    {label: 'Lesbian', value: SexualOrientation.LESBIAN},
-    {label: 'Gay', value: SexualOrientation.GAY},
-    {label: 'Straight', value: SexualOrientation.STRAIGHT},
-    {label: 'Bisexual', value: SexualOrientation.BISEXUAL},
-    {label: 'None of these describe me', value: SexualOrientation.NONEOFTHESEDESCRIBEME},
-    {label: 'Prefer not to answer', value: SexualOrientation.PREFERNOANSWER}
   ],
   levelOfEducation: [
     {label: 'Never attended school/no formal education', value: Education.NOEDUCATION},

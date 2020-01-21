@@ -9,11 +9,9 @@ import {CheckBox, RadioButton} from 'app/components/inputs';
 import colors from 'app/styles/colors';
 import {
   DataAccessLevel,
-  Gender,
   Profile,
   Race,
   SexAtBirth,
-  SexualOrientation
 } from 'generated/fetch';
 import {Section} from './account-creation';
 
@@ -69,10 +67,10 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
           disability: false,
           education: undefined,
           ethnicity: undefined,
-          gender: [] as Gender[],
+          identifiesAsLgbtq: false,
+          lgbtqIdentity: '',
           race: [] as Race[],
           sexAtBirth: [] as SexAtBirth[],
-          sexualOrientation: [] as SexualOrientation[],
           yearOfBirth: 0
         }
       }
@@ -150,30 +148,12 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       <DropDownSection header='2. Ethnicity' options={AccountCreationOptions.ethnicity}
                        value={demographicSurvey.ethnicity}
                        onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
-
-      {/*Gender section*/}
-      <Section header='3. Gender'>
-        <FlexRow style={{flexWrap: 'wrap'}}>
-          {AccountCreationOptions.gender.map((gender) => {
-            return this.createOptionCheckbox(gender.label, 'gender', gender.value);
-          })}
-        </FlexRow>
-      </Section>
       {/*Sex at birth section*/}
       <Section header='4. Sex at birth'>
         <FlexRow style={{flexWrap: 'wrap'}}>
           {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
             return this.createOptionCheckbox(sexAtBirth.label, 'sexAtBirth', sexAtBirth.value);
           })}
-        </FlexRow>
-      </Section>
-      {/*Sexual orientation section*/}
-      <Section header='5. Sexual Orientation'>
-        <FlexRow style={{flexWrap: 'wrap'}}>
-          {AccountCreationOptions.sexualOrientation.map((sexualOrientation) => {
-            return this.createOptionCheckbox(sexualOrientation.label, 'sexualOrientation', sexualOrientation.value);
-          })
-          }
         </FlexRow>
       </Section>
 

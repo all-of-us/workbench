@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="srubenst" id="db.changelog-120-update-demographics">
+    <dropTable tableName="demographic_survey_sexual_orientation"/>
+    <dropTable tableName="demographic_survey_gender"/>
+    <addColumn tableName="user">
+      <column name="professional_url" type="varchar(255)">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+    <addColumn tableName="demographic_survey">
+      <column name="identifies_as_lgbtq" type="boolean">
+        <constraints nullable="true"/>
+      </column>
+      <column name="lgbtq_identity" type="varchar(255)">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>

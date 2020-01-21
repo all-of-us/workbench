@@ -190,7 +190,7 @@ public class AuthInterceptorTest {
     when(userInfoService.getUserInfo("foo")).thenReturn(userInfo);
     when(userDao.findUserByUsername("bob@fake-domain.org")).thenReturn(null);
     when(userService.createUser(
-            "Bob", "Jones", "bob@fake-domain.org", null, null, null, null, null, null, null, null))
+            "Bob", "Jones", "bob@fake-domain.org", null, null, null, null, null, null, null, null, null))
         .thenReturn(user);
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
   }
