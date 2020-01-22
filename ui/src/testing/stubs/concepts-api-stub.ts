@@ -190,17 +190,7 @@ export class ConceptsApiStub extends ConceptsApi {
         items: [],
         standardConcepts: [],
         vocabularyCounts: [],
-        domainCounts: undefined
       };
-      if (request.includeDomainCounts) {
-        response.domainCounts = DomainStubVariables.STUB_DOMAINS.map((domainInfo) => {
-          return {
-            domain: domainInfo.domain,
-            name: domainInfo.name,
-            conceptCount: domainInfo.allConceptCount
-          };
-        });
-      }
       const foundDomain =
         DomainStubVariables.STUB_DOMAINS.find(domain => domain.domain === request.domain);
       this.concepts.forEach((concept) => {
