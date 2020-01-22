@@ -259,13 +259,14 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
       final Directory directoryService = getGoogleDirectoryService();
       Optional<String> nextPageToken = Optional.empty();
       do {
-        final Directory.Users.List listQuery = directoryService
-            .users()
-            .list()
-            .setDomain(gSuiteDomain())
-            .setViewType(USER_VIEW_TYPE)
-            .setMaxResults(MAX_USERS_LIST_PAGE_SIZE)
-            .setOrderBy(EMAIL_USER_FIELD);
+        final Directory.Users.List listQuery =
+            directoryService
+                .users()
+                .list()
+                .setDomain(gSuiteDomain())
+                .setViewType(USER_VIEW_TYPE)
+                .setMaxResults(MAX_USERS_LIST_PAGE_SIZE)
+                .setOrderBy(EMAIL_USER_FIELD);
         nextPageToken.ifPresent(listQuery::setPageToken);
 
         final Users usersQueryResult = listQuery.execute();
@@ -278,10 +279,11 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
       return Collections.emptyList();
     }
 
-    return Collections.singleton(MeasurementBundle.builder()
-        .addMeasurement(GaugeMetric.GSUITE_USER_COUNT, userCount)
-        .addTag(MetricLabel.GSUITE_DOMAIN, gSuiteDomain())
-        .build());
+    return Collections.singleton(
+        MeasurementBundle.builder()
+            .addMeasurement(GaugeMetric.GSUITE_USER_COUNT, userCount)
+            .addTag(MetricLabel.GSUITE_DOMAIN, gSuiteDomain())
+            .build());
   }
 
   private String randomString() {

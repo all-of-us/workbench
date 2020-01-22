@@ -11,7 +11,9 @@ public enum MetricLabel implements MetricLabelBase {
   BUFFER_ENTRY_STATUS("BufferEntryStatus", Enums.getValueStrings(BufferEntryStatus.class)),
   DATASET_INVALID("Invalid", Booleans.VALUE_STRINGS),
   DATA_ACCESS_LEVEL("DataAccessLevel", Enums.getValueStrings(DataAccessLevel.class)),
-  GSUITE_DOMAIN("gsuite_domain"),  // provide this (slightly redundant) in case we ever merge time series across projects or have multiple domains per project
+  GSUITE_DOMAIN(
+      "gsuite_domain"), // provide this (slightly redundant) in case we ever merge time series
+  // across projects or have multiple domains per project
   USER_BYPASSED_BETA("BypassedBeta", Booleans.VALUE_STRINGS),
   USER_DISABLED("Disabled", Booleans.VALUE_STRINGS),
   WORKSPACE_ACTIVE_STATUS("ActiveStatus");
