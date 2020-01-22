@@ -4,11 +4,12 @@ import {
   ConceptsApi,
   Domain,
   DomainCount,
+  DomainCountsListResponse,
   DomainInfo,
   DomainInfoResponse,
   SearchConceptsRequest,
   StandardConceptFilter,
-  SurveyModule,
+  SurveyModule, SurveyQuestions,
   SurveysResponse
 } from 'generated/fetch';
 
@@ -133,14 +134,6 @@ export class DomainStubVariables {
       allConceptCount: 65,
       participantCount: 200
     },
-    {
-      domain: Domain.SURVEY,
-      name: 'Survey',
-      description: 'The Surveys Stub',
-      standardConceptCount: 4,
-      allConceptCount: 43,
-      participantCount: 150
-    }
   ];
 }
 
@@ -162,6 +155,18 @@ export class DomainCountStubVariables {
   ];
 }
 
+export class SurveyQuestionStubVariables {
+  static STUB_SURVEY_QUESTIONS: SurveyQuestions[] = [
+    {
+      question: 'Survey question 1',
+      conceptId: 1
+    }, {
+      question: 'Survey question 2',
+      conceptId: 2
+    }
+  ];
+}
+
 export class ConceptsApiStub extends ConceptsApi {
   public concepts?: Concept[];
   constructor() {
@@ -177,6 +182,10 @@ export class ConceptsApiStub extends ConceptsApi {
 
   public getSurveyInfo(workspaceNamespace: string, workspaceId: string): Promise<SurveysResponse> {
     return Promise.resolve({items: SurveyStubVariables.STUB_SURVEYS});
+  }
+
+  public domainCounts(workspaceNamespace: string, workspaceId: string): Promise<DomainCountsListResponse> {
+    return Promise.resolve({domainCounts: DomainCountStubVariables.STUB_DOMAIN_COUNTS});
   }
 
   // This just returns static values rather than doing a real search.
@@ -217,6 +226,10 @@ export class ConceptsApiStub extends ConceptsApi {
       });
       resolve(response);
     });
+  }
+
+  public searchSurveys(workspaceNamespace: string, workspaceId: string, request?: SearchConceptsRequest): Promise<Array<SurveyQuestions>> {
+    return Promise.resolve(SurveyQuestionStubVariables.STUB_SURVEY_QUESTIONS);
   }
 
 }
