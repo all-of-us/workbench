@@ -208,9 +208,7 @@ or another sexual and/or gender minority?'>
             (e) => this.updateDemographicAttribute('disability', true)}
                        checked={demographicSurvey.disability}
                        style={{marginRight: '0.5rem'}}/>
-          <label style={{paddingRight: '3rem', color: colors.primary}}>
-            Yes
-          </label>
+          <label style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
           <RadioButton onChange={(e) => this.updateDemographicAttribute('disability', false)}
                        checked={!demographicSurvey.disability}
                        style={{marginRight: '0.5rem'}}/>
