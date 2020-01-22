@@ -603,7 +603,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         if (userBadgesByName.containsKey(complianceService.getResearchEthicsTrainingField())) {
           BadgeDetails badge =
               userBadgesByName.get(complianceService.getResearchEthicsTrainingField());
-          expiryEpoch = badge.getDateexpire();
+          expiryEpoch = badge.getGlobalexpiration() == null
+              ? badge.getGlobalexpiration()
+              : badge.getDateexpire();
         } else {
           // Moodle has not returned research ethics training information for the given user --
           // we should clearn the user's training completion and expiration time.
