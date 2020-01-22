@@ -115,6 +115,7 @@ public class DbWorkspace {
   private Boolean approved;
   private Timestamp timeRequested;
   private Short billingStatus = DbStorageEnums.billingStatusToStorage(BillingStatus.ACTIVE);
+  private String billingAccountName;
   private Short billingAccountType =
       DbStorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
 
@@ -567,6 +568,15 @@ public class DbWorkspace {
 
   public void setBillingStatus(BillingStatus billingStatus) {
     this.billingStatus = DbStorageEnums.billingStatusToStorage(billingStatus);
+  }
+
+  @Column(name = "billing_account_name")
+  public String getBillingAccountName() {
+    return billingAccountName;
+  }
+
+  public void setBillingAccountName(String billingAccountName) {
+    this.billingAccountName = billingAccountName;
   }
 
   @Column(name = "billing_account_type")
