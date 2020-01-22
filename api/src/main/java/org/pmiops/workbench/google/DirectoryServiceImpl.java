@@ -53,6 +53,13 @@ public class DirectoryServiceImpl implements DirectoryService {
   private static final String GSUITE_FIELD_INSTITUTION = "Institution";
   private static final String INSTITUTION_FIELD_VALUE = "All of Us Research Workbench";
 
+  private static final String ADMIN_SERVICE_ACCOUNT_NAME = "gsuite-admin";
+
+  // The username of the G Suite user which will be used to make service-level Directory API
+  // requests. A user with this name must exist in each environment's associated G Suite operational
+  // unit, and that user should have full admin privileges (e.g. to create, update, delete users).
+  private static final String DIRECTORY_SERVICE_USERNAME = "directory-service";
+
   private static SecureRandom rnd = new SecureRandom();
 
   // This list must exactly match the scopes allowed via the GSuite Domain Admin page here:
@@ -89,12 +96,13 @@ public class DirectoryServiceImpl implements DirectoryService {
   }
 
   private Directory getGoogleDirectoryService() {
-    OAuth2Credentials delegatedCreds;
+    final OAuth2Credentials delegatedCreds;
     if (configProvider.get().featureFlags.useKeylessDelegatedCredentials) {
       delegatedCreds =
           new DelegatedUserCredentials(
-              ServiceAccounts.getServiceAccountEmail("gsuite-admin", configProvider.get()),
-              "directory-service@" + gSuiteDomain(),
+              ServiceAccounts.getServiceAccountEmail(
+                  ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
+              DIRECTORY_SERVICE_USERNAME + "@" + gSuiteDomain(),
               SCOPES);
     } else {
       delegatedCreds =

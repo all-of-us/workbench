@@ -7,7 +7,6 @@ import com.google.auth.appengine.AppEngineCredentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.List;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.stereotype.Component;
 
 /**
@@ -69,9 +68,7 @@ public class ServiceAccounts {
     return scopedCreds.getAccessToken().getTokenValue();
   }
 
-  public static String getServiceAccountEmail(
-      String serviceAccountName, WorkbenchConfig workbenchConfig) {
-    return String.format(
-        "%s@%s.iam.gserviceaccount.com", serviceAccountName, workbenchConfig.server.projectId);
+  public static String getServiceAccountEmail(String serviceAccountName, String projectId) {
+    return String.format("%s@%s.iam.gserviceaccount.com", serviceAccountName, projectId);
   }
 }

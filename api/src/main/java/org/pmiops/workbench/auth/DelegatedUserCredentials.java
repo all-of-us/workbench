@@ -17,7 +17,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -47,9 +47,10 @@ import java.util.List;
  *     "service-account-with-dwd-enabled@project-name.iam.gserviceaccount.com",
  *     "admin-gsuite-user@my-gsuite-domain.com",
  *     DirectoryScopes.ADMIN_DIRECTORY_USERS);
- *   Directory service = new Directory.Builder(new NetHttpTransport(), new JacksonFactory(), null)
- *     .setHttpRequestInitializer(new HttpCredentialsAdapter(delegatedCredentials))
- *     .build();
+ *   Directory directoryClient = new Directory.Builder(
+ *       new NetHttpTransport(), new JacksonFactory(), null)
+ *       .setHttpRequestInitializer(new HttpCredentialsAdapter(delegatedCredentials))
+ *       .build();
  * </pre>
  */
 public class DelegatedUserCredentials extends OAuth2Credentials {
@@ -57,7 +58,7 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
   static final String JWT_BEARER_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
   static final String SERVICE_ACCOUNT_NAME_FORMAT = "projects/-/serviceAccounts/%s";
   static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-  static final Duration ACCESS_TOKEN_DURATION = Duration.ofMinutes(60);
+  public static final Duration ACCESS_TOKEN_DURATION = Duration.ofMinutes(60);
 
   // The email of the service account whose system-managed key should be used to sign the JWT
   // assertion which is exchanged for an access token. This service account:
@@ -88,7 +89,7 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
     this.scopes = scopes;
 
     if (this.scopes == null) {
-      this.scopes = new ArrayList<>();
+      this.scopes = Collections.emptyList();
     }
   }
 
@@ -114,7 +115,7 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
    * @return
    */
   @VisibleForTesting
-  public JsonWebToken.Payload createClaims() {
+  public JsonWebToken.Payload createJwtPayload() {
     JsonWebToken.Payload payload = new JsonWebToken.Payload();
     payload.setIssuedAtTimeSeconds(Instant.now().getEpochSecond());
     payload.setExpirationTimeSeconds(
@@ -132,7 +133,7 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
     // appropriate claims. This call is authorized with application default credentials (ADCs). The
     // ADC service account may be different from `serviceAccountEmail` if the ADC account has the
     // roles/iam.serviceAccountTokenCreator role on the `serviceAccountEmail` account.
-    JsonWebToken.Payload payload = createClaims();
+    JsonWebToken.Payload payload = createJwtPayload();
 
     if (client == null) {
       client = IamCredentialsClient.create();

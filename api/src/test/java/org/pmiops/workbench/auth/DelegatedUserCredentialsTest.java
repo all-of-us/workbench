@@ -2,6 +2,7 @@ package org.pmiops.workbench.auth;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
@@ -24,12 +25,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -38,8 +42,9 @@ public class DelegatedUserCredentialsTest {
   static final String USER_EMAIL = "john.doe@researchallofus.org";
   static final String SERVICE_ACCOUNT_EMAIL = "gsuite-admin@test-project.iam.gserviceaccount.com";
   static final List<String> SCOPES = Arrays.asList("openid", "profile");
+  static final String MOCK_ACCESS_TOKEN = "access-token";
 
-  private static final String SA_PRIVATE_KEY_ID = "private-key-for-testing-only";
+  static final String SA_PRIVATE_KEY_ID = "private-key-for-testing-only";
   // A random private key string generated for testing purposed with the following commands:
   // $ openssl genrsa -out keypair.pem 512
   // $ openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in keypair.pem -out pkcs8.key
@@ -60,15 +65,15 @@ public class DelegatedUserCredentialsTest {
   // Google's API client library provides a convenient mock for their token server API,
   // so we'll use that to mock out the call to request an access token.
   private MockTokenServerTransport mockTokenServerTransport;
-  private DelegatedUserCredentials creds;
+  private DelegatedUserCredentials delegatedCredentials;
 
   @Before
   public void setUp() {
     mockTokenServerTransport = new MockTokenServerTransport();
 
-    creds = new DelegatedUserCredentials(SERVICE_ACCOUNT_EMAIL, USER_EMAIL, SCOPES);
-    creds.setHttpTransport(mockTokenServerTransport);
-    creds.setIamCredentialsClient(mockIamCredentialsClient);
+    delegatedCredentials = new DelegatedUserCredentials(SERVICE_ACCOUNT_EMAIL, USER_EMAIL, SCOPES);
+    delegatedCredentials.setHttpTransport(mockTokenServerTransport);
+    delegatedCredentials.setIamCredentialsClient(mockIamCredentialsClient);
   }
 
   /**
@@ -113,7 +118,7 @@ public class DelegatedUserCredentialsTest {
 
   @Test
   public void testClaims() {
-    JsonWebToken.Payload payload = creds.createClaims();
+    JsonWebToken.Payload payload = delegatedCredentials.createJwtPayload();
 
     assertThat(payload.getAudience()).isEqualTo(GoogleOAuthConstants.TOKEN_SERVER_URL);
     assertThat(payload.getIssuer()).isEqualTo(SERVICE_ACCOUNT_EMAIL);
@@ -138,11 +143,23 @@ public class DelegatedUserCredentialsTest {
                   .build();
             });
     // Register the expected service account & access token with the mock token server transport.
-    mockTokenServerTransport.addServiceAccount(SERVICE_ACCOUNT_EMAIL, "access-token");
+    mockTokenServerTransport.addServiceAccount(SERVICE_ACCOUNT_EMAIL, MOCK_ACCESS_TOKEN);
 
     // Kick off the refresh flow.
-    creds.refresh();
+    delegatedCredentials.refresh();
 
-    assertThat(creds.getAccessToken().getTokenValue()).isEqualTo("access-token");
+    // Verify the call to IAM Credentials API.
+    ArgumentCaptor<SignJwtRequest> captor = ArgumentCaptor.forClass(SignJwtRequest.class);
+    verify(mockIamCredentialsClient, Mockito.times(1)).signJwt(captor.capture());
+    assertThat(captor.getValue().getName())
+        .isEqualTo("projects/-/serviceAccounts/" + SERVICE_ACCOUNT_EMAIL);
+
+    // The mockTokenServerTransport class runs some lightweight verification of its own (i.e.,
+    // ensuring the signed JWT can be parsed and that the service account is known). Beyond that,
+    // we mainly care that the access token is returned and has a correct expiration.
+    assertThat(delegatedCredentials.getAccessToken().getTokenValue()).isEqualTo(MOCK_ACCESS_TOKEN);
+    assertThat(
+            delegatedCredentials.getAccessToken().getExpirationTime().toInstant().getEpochSecond())
+        .isEqualTo(Instant.now().getEpochSecond() + 3600);
   }
 }

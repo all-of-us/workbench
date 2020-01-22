@@ -63,6 +63,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final FirecloudRetryHandler retryHandler;
   private final Provider<ServiceAccountCredentials> fcAdminCredsProvider;
 
+  private static final String ADMIN_SERVICE_ACCOUNT_NAME = "firecloud-admin";
+
   private static final String MEMBER_ROLE = "member";
   private static final String STATUS_SUBSYSTEMS_KEY = "systems";
 
@@ -133,11 +135,12 @@ public class FireCloudServiceImpl implements FireCloudService {
    * @return
    */
   public ApiClient getApiClientWithImpersonation(String userEmail) throws IOException {
-    OAuth2Credentials delegatedCreds;
+    final OAuth2Credentials delegatedCreds;
     if (configProvider.get().featureFlags.useKeylessDelegatedCredentials) {
       delegatedCreds =
           new DelegatedUserCredentials(
-              ServiceAccounts.getServiceAccountEmail("firecloud-admin", configProvider.get()),
+              ServiceAccounts.getServiceAccountEmail(
+                  ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
               userEmail,
               FIRECLOUD_API_OAUTH_SCOPES);
     } else {

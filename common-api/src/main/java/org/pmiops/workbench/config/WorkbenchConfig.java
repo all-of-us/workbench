@@ -198,20 +198,20 @@ public class WorkbenchConfig {
     // security perimeter.
     public boolean enableVpcServicePerimeter;
     // Flag to indicate whether to enable the new Create Account flow
-    // https://precisionmedicineinitiative.atlassian.net/browse/RW-3284
+    // See RW-3284.
     public boolean enableNewAccountCreation;
     // Flag to indicate if USER/WORKSPACE data is exported to RDR
     public boolean enableRdrExport;
     // Setting this to true will prevent users from making compute increasing operations on
     // inactive billing workspaces
-    // https://precisionmedicineinitiative.atlassian.net/browse/RW-3209
+    // See RW-3209.
     public boolean enableBillingLockout;
     // Whether or not AoU should handle inbound SumoLogic high-egress event requests.
     // See RW-2253.
     public boolean enableSumoLogicEventHandling;
     // Causes the server to use an API-based method for generating delegated user credentials,
     // as opposed to reading service account private keys from GCS.
-    // See https://precisionmedicineinitiative.atlassian.net/browse/RW-2840 for details.
+    // See RW-2840.
     public boolean useKeylessDelegatedCredentials;
   }
 
