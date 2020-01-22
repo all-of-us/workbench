@@ -17,10 +17,8 @@ import javax.persistence.Transient;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.Ethnicity;
-import org.pmiops.workbench.model.Gender;
 import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.SexAtBirth;
-import org.pmiops.workbench.model.SexualOrientation;
 
 @Entity
 @Table(name = "demographic_survey")
@@ -203,8 +201,6 @@ public class DbDemographicSurvey {
             .map(DemographicSurveyEnum::sexAtBirthToStorage)
             .collect(Collectors.toList());
   }
-
-
 
   @Column(name = "year_of_birth")
   public int getYear_of_birth() {

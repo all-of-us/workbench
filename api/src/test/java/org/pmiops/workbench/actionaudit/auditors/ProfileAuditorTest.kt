@@ -22,7 +22,6 @@ import org.pmiops.workbench.model.DataAccessLevel
 import org.pmiops.workbench.model.DemographicSurvey
 import org.pmiops.workbench.model.Education
 import org.pmiops.workbench.model.Ethnicity
-import org.pmiops.workbench.model.Gender
 import org.pmiops.workbench.model.InstitutionalAffiliation
 import org.pmiops.workbench.model.NonAcademicAffiliation
 import org.pmiops.workbench.model.Profile
