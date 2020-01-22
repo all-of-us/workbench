@@ -24,7 +24,8 @@ public class ComplianceServiceImpl implements ComplianceService {
   private static final String RESPONSE_FORMAT = "json";
   private static final String GET_MOODLE_ID_SEARCH_FIELD = "email";
   private static final String DUA_FIELD = "data_use_agreement";
-  private static final String RET_FIELD = "research_ethics_training"; // 'ret' too much like 'return'
+  private static final String RET_FIELD =
+      "research_ethics_training"; // 'ret' too much like 'return'
   private static final String MOODLE_EXCEPTION = "moodle_exception";
   private static final String MOODLE_USER_NOT_ALLOWED_ERROR_CODE = "guestsarenotallowed";
   private CloudStorageService cloudStorageService;
@@ -80,7 +81,8 @@ public class ComplianceServiceImpl implements ComplianceService {
       return null;
     }
 
-   UserBadgeResponseDeprecated response = moodleApiProvider.get().getMoodleBadgeDeprecated(RESPONSE_FORMAT, getToken(), userMoodleId);
+    UserBadgeResponseDeprecated response =
+        moodleApiProvider.get().getMoodleBadgeDeprecated(RESPONSE_FORMAT, getToken(), userMoodleId);
     if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
       if (response.getErrorcode().equals(MOODLE_USER_NOT_ALLOWED_ERROR_CODE)) {
         throw new ApiException(HttpStatus.NOT_FOUND.value(), response.getMessage());
@@ -97,12 +99,12 @@ public class ComplianceServiceImpl implements ComplianceService {
       return null;
     }
 
-    UserBadgeResponse response = moodleApiProvider.get().getMoodleBadge(RESPONSE_FORMAT, getToken(), email);
-    if(response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
+    UserBadgeResponse response =
+        moodleApiProvider.get().getMoodleBadge(RESPONSE_FORMAT, getToken(), email);
+    if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
       if (response.getErrorcode().equals(MOODLE_USER_NOT_ALLOWED_ERROR_CODE)) {
         throw new ApiException(HttpStatus.NOT_FOUND.value(), response.getMessage());
-      }
-      else {
+      } else {
         throw new ApiException(response.getMessage());
       }
     }

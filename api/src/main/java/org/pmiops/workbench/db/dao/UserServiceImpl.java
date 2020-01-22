@@ -598,10 +598,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       }
 
       String expiryEpoch = null;
-      if(configProvider.get().featureFlags.enableMoodleV2Api) {
+      if (configProvider.get().featureFlags.enableMoodleV2Api) {
         Map<String, BadgeDetails> userBadgesByName = complianceService.getUserBadgesByName(email);
         if (userBadgesByName.containsKey(complianceService.getResearchEthicsTrainingField())) {
-          BadgeDetails badge = userBadgesByName.get(complianceService.getResearchEthicsTrainingField());
+          BadgeDetails badge =
+              userBadgesByName.get(complianceService.getResearchEthicsTrainingField());
           expiryEpoch = badge.getDateexpire();
         } else {
           // Moodle has not returned research ethics training information for the given user --
@@ -609,8 +610,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           dbUser.setComplianceTrainingCompletionTime(null);
           dbUser.setComplianceTrainingExpirationTime(null);
         }
-      }
-      else {
+      } else {
         List<BadgeDetailsDeprecated> badgeResponse = complianceService.getUserBadge(moodleId);
         // The assumption here is that the User will always get 1 badge which will be AoU
         if (badgeResponse != null && badgeResponse.size() > 0) {
@@ -626,9 +626,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
       System.err.println("expiryEpoch: " + expiryEpoch);
       Timestamp badgeExpiration =
-          expiryEpoch == null
-              ? null
-              : new Timestamp(Long.parseLong(expiryEpoch));
+          expiryEpoch == null ? null : new Timestamp(Long.parseLong(expiryEpoch));
 
       if (badgeExpiration != null) {
         if (dbUser.getComplianceTrainingCompletionTime() == null) {
