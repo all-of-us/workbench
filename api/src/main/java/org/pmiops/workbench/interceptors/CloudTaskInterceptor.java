@@ -9,15 +9,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Interceptor for endpoints with tag cloudTask. All such endpoints should have valid value for
  * request hander X-AppEngine-QueueName
  */
 @Service
 public class CloudTaskInterceptor extends HandlerInterceptorAdapter {
-  public static final String QUEUE_NAME_HEADER = "X-AppEngine-QueueName";
+  public static final String QUEUE_NAME_REQUEST_HEADER = "X-AppEngine-QueueName";
   private static final String CLOUD_TASK_TAG = "cloudTask";
-  public static final String RDR_QUEUE_NAME_HEADER = "rdrQueueTest";
+  public static final Set<String> VALID_QUEUE_NAME_SET = new HashSet<>(Arrays.asList("rdrQueueTest"));
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -40,14 +44,14 @@ public class CloudTaskInterceptor extends HandlerInterceptorAdapter {
       }
     }
 
-    boolean hasQueueNameHeader = RDR_QUEUE_NAME_HEADER.equals(request.getHeader(QUEUE_NAME_HEADER));
+    boolean hasQueueNameHeader = VALID_QUEUE_NAME_SET.contains(request.getHeader(QUEUE_NAME_REQUEST_HEADER));
     if (requireCloudTaskHeader && !hasQueueNameHeader) {
       response.sendError(
           HttpServletResponse.SC_FORBIDDEN,
           String.format(
               "cloud task endpoints are only invocable via app engine cloudTask, and "
                   + "require the '%s' header",
-              QUEUE_NAME_HEADER));
+              QUEUE_NAME_REQUEST_HEADER));
       return false;
     }
     return true;

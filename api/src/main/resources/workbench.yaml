@@ -2256,8 +2256,10 @@ paths:
 ##########################################################################################
 # Endpoints for task in cloud task queue
 # Note: all requests tagged as "cloudTask" must have the header X-AppEngine-QueueName:
-# to the queue name, which app engine itself only sets when invoking cloud task.
-# See o.p.w.interceptors.CloudTaskInterceptor which implements the header check.
+# to the queue name, which app engine itself only sets (and overrides internally) when invoking
+# cloud task. See
+# https://cloud.google.com/tasks/docs/creating-appengine-handlers#reading_app_engine_task_request_headers
+# and o.p.w.interceptors.CloudTaskInterceptor which implements the header check.
 #########################################################################################
   /v1/cloudTask/exportResearcherData:
     post:
@@ -2266,7 +2268,7 @@ paths:
         - cloudTask
       security: []
       description: >
-        Send Researcher data
+        Task handler which handle request from cloud task queue rdrQueueTest to send Researcher data
       operationId: "exportResearcherData"
       parameters:
         - in: body
@@ -2287,7 +2289,7 @@ paths:
         - cloudTask
       security: []
       description: >
-        Send Researcher data
+         Task handler which handle request from cloud task queue rdrQueueTest to send Workspace data
       operationId: "exportWorkspaceData"
       parameters:
         - in: body
