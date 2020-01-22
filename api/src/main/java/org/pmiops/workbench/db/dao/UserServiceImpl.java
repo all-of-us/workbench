@@ -47,7 +47,7 @@ import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
-import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
+import org.pmiops.workbench.moodle.model.BadgeDetailsDeprecated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
@@ -611,10 +611,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         }
       }
       else {
-        List<BadgeDetailsV1> badgeResponse = complianceService.getUserBadge(moodleId);
+        List<BadgeDetailsDeprecated> badgeResponse = complianceService.getUserBadge(moodleId);
         // The assumption here is that the User will always get 1 badge which will be AoU
         if (badgeResponse != null && badgeResponse.size() > 0) {
-          BadgeDetailsV1 badge = badgeResponse.get(0);
+          BadgeDetailsDeprecated badge = badgeResponse.get(0);
           expiryEpoch = badge.getDateexpire();
         } else {
           // Moodle has returned zero badges for the given user -- we should clear the user's

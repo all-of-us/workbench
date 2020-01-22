@@ -5,7 +5,6 @@ import java.util.Map;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
 import org.pmiops.workbench.moodle.model.BadgeDetailsDeprecated;
-import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 
 public interface ComplianceService {
 
