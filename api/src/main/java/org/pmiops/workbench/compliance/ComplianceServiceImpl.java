@@ -113,7 +113,6 @@ public class ComplianceServiceImpl implements ComplianceService {
       userBadgesByName.put(DUA_FIELD, response.getDua());
     }
     if (response.getRet() != null) {
-      System.err.println("Research ethics training: " + response.getRet());
       userBadgesByName.put(RET_FIELD, response.getRet());
     }
     return userBadgesByName;

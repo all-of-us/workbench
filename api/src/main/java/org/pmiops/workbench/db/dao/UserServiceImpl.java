@@ -624,7 +624,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         }
       }
 
-      System.err.println("expiryEpoch: " + expiryEpoch);
       Timestamp badgeExpiration =
           expiryEpoch == null ? null : new Timestamp(Long.parseLong(expiryEpoch));
 

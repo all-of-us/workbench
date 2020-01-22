@@ -202,19 +202,19 @@ definitions:
       properties:
         valid:
           type: string
-          description: Whether the badge is valid #TODO wtf does this mean
+          description: Whether the badge is valid
         lastissued:
           type: string
-          description: Date of latest issued badge #TODO is this a freaking epoch
+          description: Date of latest issued badge. As a stringy epoch.
         dateexpire:
           type: string
-          description: Latest expiration of obtained badge #TODO is this a freaking epoch
+          description: Latest expiration of obtained badge. As a stringy epoch.
         message:
           type: string
           description: General API message
         globalexpiration:
           type: string
-          description: Global expiration, overrides badge expiration date #TODO is this a freaking epoch
+          description: Global expiration, overrides badge expiration date. As a stringy epoch.
 
     BadgeDetailsDeprecated:
       properties:
