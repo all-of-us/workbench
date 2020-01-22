@@ -29,7 +29,7 @@ public class DbDemographicSurvey {
   private Short education;
   private Short ethnicity;
   private long id;
-  private boolean identifiesAsLgbtq;
+  private Boolean identifiesAsLgbtq;
   private String lgbtqIdentity;
   private DbUser user;
   private List<Short> race;
@@ -127,7 +127,7 @@ public class DbDemographicSurvey {
     return identifiesAsLgbtq;
   }
 
-  public void setIdentifiesAsLgbtq(boolean identifiesAsLgbtq) {
+  public void setIdentifiesAsLgbtq(Boolean identifiesAsLgbtq) {
     this.identifiesAsLgbtq = identifiesAsLgbtq;
   }
 
