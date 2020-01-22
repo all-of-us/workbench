@@ -71,11 +71,7 @@ public class ComplianceServiceImpl implements ComplianceService {
   }
 
   /**
-   * With the v1 API:
-   * Returns the Moodle user badge expiry date for the given Moodle user ID.
-   *
-   * With the v2 API:
-   * Returns the Moodle user badge expiry dates for the given AoU user email address.
+   * Returns the Moodle user badge for the given Moodle user ID.
    *
    * <p>Throws a NOT_FOUND API exception if the Moodle API call returns an error because the given
    * Moodle user ID does not exist.
