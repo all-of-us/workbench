@@ -261,7 +261,7 @@ public class ParticipantCohortStatusDaoTest {
   }
 
   @Test
-  public void findAllParticipantIdBetween() throws Exception {
+  public void findAllParticipantIdBetween() {
     PageRequest pageRequest =
         new PageRequest()
             .page(PAGE)
@@ -273,20 +273,21 @@ public class ParticipantCohortStatusDaoTest {
         new Filter()
             .property(FilterColumns.PARTICIPANTID)
             .operator(Operator.BETWEEN)
-            .values(Arrays.asList("1", "2")));
+            .values(ImmutableList.of("1", "2")));
+    pageRequest.setFilters(filters);
 
-    List<ParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
+    List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
     assertEquals(2, results.size());
 
-    ParticipantCohortStatus expectedPCS1 =
+    DbParticipantCohortStatus expectedPCS1 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(1),
             CohortStatus.INCLUDED);
     expectedPCS1.setBirthDate(results.get(0).getBirthDate());
-    ParticipantCohortStatus expectedPCS2 =
+    DbParticipantCohortStatus expectedPCS2 =
         createExpectedPCS(
-            new ParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
+            new DbParticipantCohortStatusKey().cohortReviewId(COHORT_REVIEW_ID).participantId(2),
             CohortStatus.EXCLUDED);
     expectedPCS2.setBirthDate(results.get(0).getBirthDate());
 

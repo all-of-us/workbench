@@ -6,19 +6,19 @@ import static org.pmiops.workbench.model.FilterColumns.DOMAIN;
 import static org.pmiops.workbench.model.FilterColumns.DOSE;
 import static org.pmiops.workbench.model.FilterColumns.FIRST_MENTION;
 import static org.pmiops.workbench.model.FilterColumns.LAST_MENTION;
-import static org.pmiops.workbench.model.FilterColumns.NUM_OF_MENTIONS;
+import static org.pmiops.workbench.model.FilterColumns.NUM_MENTIONS;
 import static org.pmiops.workbench.model.FilterColumns.QUESTION;
 import static org.pmiops.workbench.model.FilterColumns.REF_RANGE;
 import static org.pmiops.workbench.model.FilterColumns.ROUTE;
 import static org.pmiops.workbench.model.FilterColumns.SOURCE_CODE;
 import static org.pmiops.workbench.model.FilterColumns.SOURCE_CONCEPT_ID;
 import static org.pmiops.workbench.model.FilterColumns.SOURCE_NAME;
-import static org.pmiops.workbench.model.FilterColumns.SOURCE_VOCAB;
+import static org.pmiops.workbench.model.FilterColumns.SOURCE_VOCABULARY;
 import static org.pmiops.workbench.model.FilterColumns.STANDARD_CODE;
 import static org.pmiops.workbench.model.FilterColumns.STANDARD_CONCEPT_ID;
 import static org.pmiops.workbench.model.FilterColumns.STANDARD_NAME;
-import static org.pmiops.workbench.model.FilterColumns.STANDARD_VOCAB;
-import static org.pmiops.workbench.model.FilterColumns.START_DATE;
+import static org.pmiops.workbench.model.FilterColumns.STANDARD_VOCABULARY;
+import static org.pmiops.workbench.model.FilterColumns.START_DATETIME;
 import static org.pmiops.workbench.model.FilterColumns.STRENGTH;
 import static org.pmiops.workbench.model.FilterColumns.SURVEY_NAME;
 import static org.pmiops.workbench.model.FilterColumns.UNIT;
@@ -27,14 +27,21 @@ import static org.pmiops.workbench.model.FilterColumns.VISIT_TYPE;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
+import org.pmiops.workbench.cohortbuilder.util.BQParameterUtil;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DomainType;
+import org.pmiops.workbench.model.Filter;
+import org.pmiops.workbench.model.FilterColumns;
+import org.pmiops.workbench.model.Operator;
+import org.pmiops.workbench.utils.OperatorUtils;
 import org.springframework.stereotype.Service;
 
 /** TODO: delete when ui work is done. */
@@ -48,15 +55,15 @@ public class ReviewQueryBuilder {
   private static final String SURVEY_TABLE = "cb_review_survey";
   private static final Object[] BASE_SQL_ARGS =
       new Object[] {
-        START_DATE.toString(),
+        START_DATETIME.toString(),
         DOMAIN.toString(),
         STANDARD_NAME.toString(),
         STANDARD_CODE.toString(),
-        STANDARD_VOCAB.toString(),
+        STANDARD_VOCABULARY.toString(),
         STANDARD_CONCEPT_ID.toString(),
         SOURCE_NAME.toString(),
         SOURCE_CODE.toString(),
-        SOURCE_VOCAB.toString(),
+        SOURCE_VOCABULARY.toString(),
         SOURCE_CONCEPT_ID.toString(),
         AGE_AT_EVENT.toString(),
         VISIT_TYPE.toString(),
@@ -65,7 +72,7 @@ public class ReviewQueryBuilder {
         STRENGTH.toString(),
         UNIT.toString(),
         REF_RANGE.toString(),
-        NUM_OF_MENTIONS.toString(),
+        NUM_MENTIONS.toString(),
         FIRST_MENTION.toString(),
         LAST_MENTION.toString(),
         VAL_AS_NUMBER.toString(),
@@ -74,7 +81,7 @@ public class ReviewQueryBuilder {
       };
   private static final Object[] SURVEY_ARGS =
       new Object[] {
-        START_DATE.toString(),
+        START_DATETIME.toString(),
         SURVEY_NAME.toString(),
         QUESTION.toString(),
         ANSWER.toString(),
@@ -85,6 +92,10 @@ public class ReviewQueryBuilder {
       new Object[] {
         REVIEW_TABLE, REVIEW_TABLE, PART_ID, DOMAIN_PARAM, LIMIT, PART_ID, DOMAIN_PARAM, LIMIT
       };
+  private static final ImmutableList<FilterColumns> LONG_NUMBERS =
+      ImmutableList.of(VAL_AS_NUMBER, AGE_AT_EVENT, NUM_MENTIONS);
+  private static final ImmutableList<FilterColumns> DOUBLE_NUMBERS =
+      ImmutableList.of(VAL_AS_NUMBER);
 
   private static final String DOMAIN_SQL = "and domain = @" + DOMAIN_PARAM + "\n";
   private static final String ORDER_BY = "order by %s %s, dataId\n limit %s offset %s\n";
@@ -161,6 +172,11 @@ public class ReviewQueryBuilder {
           + "FROM `${projectId}.${dataSetId}.%1$s`\n"
           + "where domain in ('CONDITION', 'PROCEDURE')\n"
           + "order by type, domain, vocabulary";
+  private static final String AND = "and";
+  private static final String UNNEST = "unnest";
+  private static final String NEW_LINE = "\n";
+  private static final String OPEN_PAREN = "(";
+  private static final String CLOSE_PAREN = ")";
 
   public QueryJobConfiguration buildQuery(
       Long participantId, DomainType domain, PageRequest pageRequest) {
@@ -194,22 +210,26 @@ public class ReviewQueryBuilder {
       Long participantId, DomainType domain, PageRequest pageRequest, boolean isCountQuery) {
     String finalSql;
     Map<String, QueryParameterValue> params = new HashMap<>();
+    List<Filter> filters = pageRequest.getFilters();
     params.put(PART_ID, QueryParameterValue.int64(participantId));
 
     switch (domain) {
       case SURVEY:
         finalSql =
             isCountQuery
-                ? String.format(COUNT_SURVEY_TEMPLATE, SURVEY_TABLE, PART_ID)
+                ? String.format(
+                    COUNT_SURVEY_TEMPLATE + filterBy(filters, params), SURVEY_TABLE, PART_ID)
                 : String.format(
-                    SURVEY_SQL_TEMPLATE + ORDER_BY, addOrderByArgs(SURVEY_ARGS, pageRequest));
+                    SURVEY_SQL_TEMPLATE + filterBy(filters, params) + ORDER_BY,
+                    addOrderByArgs(SURVEY_ARGS, pageRequest));
         break;
       case ALL_EVENTS:
         finalSql =
             isCountQuery
-                ? String.format(COUNT_TEMPLATE, REVIEW_TABLE, PART_ID)
+                ? String.format(COUNT_TEMPLATE + filterBy(filters, params), REVIEW_TABLE, PART_ID)
                 : String.format(
-                    BASE_SQL_TEMPLATE + ORDER_BY, addOrderByArgs(BASE_SQL_ARGS, pageRequest));
+                    BASE_SQL_TEMPLATE + filterBy(filters, params) + ORDER_BY,
+                    addOrderByArgs(BASE_SQL_ARGS, pageRequest));
         break;
       case CONDITION:
       case DEVICE:
@@ -222,9 +242,10 @@ public class ReviewQueryBuilder {
       case VITAL:
         finalSql =
             isCountQuery
-                ? String.format(COUNT_TEMPLATE + DOMAIN_SQL, REVIEW_TABLE, PART_ID)
+                ? String.format(
+                    COUNT_TEMPLATE + filterBy(filters, params) + DOMAIN_SQL, REVIEW_TABLE, PART_ID)
                 : String.format(
-                    BASE_SQL_TEMPLATE + DOMAIN_SQL + ORDER_BY,
+                    BASE_SQL_TEMPLATE + filterBy(filters, params) + DOMAIN_SQL + ORDER_BY,
                     addOrderByArgs(BASE_SQL_ARGS, pageRequest));
         params.put(DOMAIN_PARAM, QueryParameterValue.string(domain.name()));
         break;
@@ -237,12 +258,79 @@ public class ReviewQueryBuilder {
         .build();
   }
 
+  private String filterBy(List<Filter> filters, Map<String, QueryParameterValue> params) {
+    StringBuilder filterSql = new StringBuilder();
+    for (Filter filter : filters) {
+      StringJoiner stringJoiner = new StringJoiner(" ", AND + " ", "");
+      switch (filter.getOperator()) {
+        case EQUAL:
+        case NOT_EQUAL:
+        case LESS_THAN:
+        case GREATER_THAN:
+        case LESS_THAN_OR_EQUAL_TO:
+        case GREATER_THAN_OR_EQUAL_TO:
+        case LIKE:
+          stringJoiner
+              .add(filter.getProperty().toString())
+              .add(OperatorUtils.getSqlOperator(filter.getOperator()))
+              .add(BQParameterUtil.buildParameter(params, buildQueryParameterValue(filter, 0)))
+              .add(NEW_LINE);
+          break;
+        case IN:
+          stringJoiner
+              .add(filter.getProperty().toString())
+              .add(OperatorUtils.getSqlOperator(filter.getOperator()))
+              .add(UNNEST)
+              .add(OPEN_PAREN)
+              .add(BQParameterUtil.buildParameter(params, buildQueryParameterValue(filter)))
+              .add(CLOSE_PAREN)
+              .add(NEW_LINE);
+          break;
+        case BETWEEN:
+          stringJoiner
+              .add(filter.getProperty().toString())
+              .add(OperatorUtils.getSqlOperator(filter.getOperator()))
+              .add(BQParameterUtil.buildParameter(params, buildQueryParameterValue(filter, 0)))
+              .add(AND)
+              .add(BQParameterUtil.buildParameter(params, buildQueryParameterValue(filter, 1)))
+              .add(NEW_LINE);
+          break;
+        default:
+          throw new BadRequestException(
+              "There is no implementation for operator named: "
+                  + OperatorUtils.getSqlOperator(filter.getOperator()));
+      }
+      filterSql.append(stringJoiner.toString());
+    }
+    return filterSql.toString();
+  }
+
+  private QueryParameterValue buildQueryParameterValue(Filter filter, int index) {
+    if (LONG_NUMBERS.contains(filter.getProperty())) {
+      return QueryParameterValue.int64(new Long(filter.getValues().get(index)));
+    } else if (DOUBLE_NUMBERS.contains(filter.getProperty())) {
+      return QueryParameterValue.float64(new Double(filter.getValues().get(index)));
+    }
+    return filter.getOperator().equals(Operator.LIKE)
+        ? QueryParameterValue.string(filter.getValues().get(index) + "%")
+        : QueryParameterValue.string(filter.getValues().get(index));
+  }
+
+  private QueryParameterValue buildQueryParameterValue(Filter filter) {
+    if (LONG_NUMBERS.contains(filter.getProperty())) {
+      return QueryParameterValue.array(filter.getValues().toArray(new Long[0]), Long.class);
+    } else if (DOUBLE_NUMBERS.contains(filter.getProperty())) {
+      return QueryParameterValue.array(filter.getValues().toArray(new Double[0]), Double.class);
+    }
+    return QueryParameterValue.array(filter.getValues().toArray(new String[0]), String.class);
+  }
+
   private Object[] addOrderByArgs(Object[] args, PageRequest pageRequest) {
     List<Object> newArgs = new ArrayList<>(Arrays.asList(args));
     newArgs.add(pageRequest.getSortColumn());
     newArgs.add(pageRequest.getSortOrder().toString());
     newArgs.add(String.valueOf(pageRequest.getPageSize()));
     newArgs.add(String.valueOf(pageRequest.getPage() * pageRequest.getPageSize()));
-    return newArgs.toArray(new Object[newArgs.size()]);
+    return newArgs.toArray(new Object[0]);
   }
 }
