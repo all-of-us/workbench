@@ -105,6 +105,11 @@ public class FreeTierBillingServiceTest {
     workbenchConfig.billing.freeTierCostAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
     workbenchConfig.billing.freeTierTimeAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
     workbenchConfig.billing.accountId = FREE_TIER_BILLING_ACCOUNT_NAME;
+    workbenchConfig.billing.defaultFreeCreditsDollarLimit = 1000.0;
+    workbenchConfig.billing.defaultFreeCreditsDaysLimit = 1000;
+
+    // by default we have 0 spend
+    doReturn(mockBQTableSingleResult(0.0)).when(bigQueryService).executeQuery(any());
   }
 
   @After
@@ -261,14 +266,6 @@ public class FreeTierBillingServiceTest {
 
   @Test
   public void checkFreeTierBillingUsage_doesNotExceedDayThresholds() {
-
-    // set cost values to ensure we don't alert from cost
-
-    final double dollarLimit = 100.0;
-    final double spent = 0.0;
-    workbenchConfig.billing.defaultFreeCreditsDollarLimit = dollarLimit;
-    doReturn(mockBQTableSingleResult(spent)).when(bigQueryService).executeQuery(any());
-
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
     createWorkspace(user, SINGLE_WORKSPACE_TEST_PROJECT);
 
@@ -937,6 +934,7 @@ public class FreeTierBillingServiceTest {
   private DbUser createUser(String email) {
     DbUser user = new DbUser();
     user.setUsername(email);
+    user.setFirstRegistrationCompletionTime(Timestamp.from(START_INSTANT));
     return userDao.save(user);
   }
 

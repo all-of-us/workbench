@@ -10,6 +10,7 @@ import {
 import {DataAccessLevel} from 'generated/fetch';
 import {AccountCreationOptions} from './account-creation-options';
 import {environment} from 'environments/environment';
+import {serverConfigStore} from 'app/utils/navigation';
 
 
 let props: AccountCreationProps;
@@ -20,6 +21,7 @@ const component = () => {
 };
 
 beforeEach(() => {
+  serverConfigStore.next({gsuiteDomain: 'researchallofus.org'});
   props = {
     profile: {username: '',
       dataAccessLevel: DataAccessLevel.Unregistered,

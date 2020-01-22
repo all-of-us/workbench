@@ -250,7 +250,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   public DbBillingProjectBufferEntry assignBillingProject(DbUser dbUser) {
     DbBillingProjectBufferEntry bufferEntry = consumeBufferEntryForAssignment();
 
-    fireCloudService.addUserToBillingProject(
+    fireCloudService.addOwnerToBillingProject(
         dbUser.getUsername(), bufferEntry.getFireCloudProjectName());
     fireCloudService.addOwnerToBillingProject(dbUser.getUsername(), bufferEntry.getFireCloudProjectName());
     bufferEntry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);

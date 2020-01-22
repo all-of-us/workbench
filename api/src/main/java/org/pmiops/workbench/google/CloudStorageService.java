@@ -28,6 +28,8 @@ public interface CloudStorageService {
 
   void copyBlob(BlobId from, BlobId to);
 
+  String getCredentialsBucketString(String objectPath);
+
   JSONObject getJiraCredentials();
 
   JSONObject getElasticCredentials();

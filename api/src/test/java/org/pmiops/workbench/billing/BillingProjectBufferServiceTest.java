@@ -440,7 +440,7 @@ public class BillingProjectBufferServiceTest {
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<String> secondCaptor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService).addUserToBillingProject(captor.capture(), secondCaptor.capture());
+    verify(mockFireCloudService).addOwnerToBillingProject(captor.capture(), secondCaptor.capture());
     String invokedEmail = captor.getValue();
     String invokedProjectName = secondCaptor.getValue();
 

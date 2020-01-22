@@ -5,9 +5,11 @@ import javax.mail.MessagingException;
 
 public interface MailService {
 
-  void sendBetaAccessRequestEmail(String userName) throws MessagingException;
+  void sendBetaAccessRequestEmail(final String userName) throws MessagingException;
 
-  void sendWelcomeEmail(String contactEmail, String password, User user) throws MessagingException;
+  void sendWelcomeEmail(final String contactEmail, final String password, final User user)
+      throws MessagingException;
 
-  void sendBetaAccessCompleteEmail(String contactEmail, String username) throws MessagingException;
+  void sendBetaAccessCompleteEmail(final String contactEmail, final String username)
+      throws MessagingException;
 }

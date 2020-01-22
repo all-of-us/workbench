@@ -206,6 +206,9 @@ public class WorkbenchConfig {
     // inactive billing workspaces
     // https://precisionmedicineinitiative.atlassian.net/browse/RW-3209
     public boolean enableBillingLockout;
+    // Whether or not AoU should handle inbound SumoLogic high-egress event requests.
+    // See RW-2253.
+    public boolean enableSumoLogicEventHandling;
   }
 
   public static class ActionAuditConfig {
