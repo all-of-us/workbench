@@ -76,20 +76,20 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     }
 
     WorkbenchConfig config = workbenchConfigProvider.get();
-    String gcsPrefix = "gs://" + config.googleCloudStorageService.clusterResourcesBucketName;
+    String assetsBaseUrl = config.server.apiBaseUrl + "/static";
 
     Map<String, String> nbExtensions = new HashMap<>();
-    nbExtensions.put("aou-snippets-menu", gcsPrefix + "/aou-snippets-menu.js");
-    nbExtensions.put("aou-download-extension", gcsPrefix + "/aou-download-policy-extension.js");
+    nbExtensions.put("aou-snippets-menu", assetsBaseUrl + "/aou-snippets-menu.js");
+    nbExtensions.put("aou-download-extension", assetsBaseUrl + "/aou-download-policy-extension.js");
     nbExtensions.put(
-        "aou-activity-checker-extension", gcsPrefix + "/activity-checker-extension.js");
+        "aou-activity-checker-extension", assetsBaseUrl + "/activity-checker-extension.js");
 
     return new ClusterRequest()
         .labels(ImmutableMap.of(CLUSTER_LABEL_AOU, "true", CLUSTER_LABEL_CREATED_BY, userEmail))
         .defaultClientId(config.server.oauthClientId)
         // Note: Filenames must be kept in sync with files in cluster-resources directory.
-        .jupyterUserScriptUri(gcsPrefix + "/initialize_notebook_cluster.sh")
-        .jupyterStartUserScriptUri(gcsPrefix + "/start_notebook_cluster.sh")
+        .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_cluster.sh")
+        .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_cluster.sh")
         .userJupyterExtensionConfig(
             new UserJupyterExtensionConfig()
                 .nbExtensions(nbExtensions)
