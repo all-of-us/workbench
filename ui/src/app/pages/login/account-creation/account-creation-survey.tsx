@@ -15,11 +15,13 @@ import {
 } from 'generated/fetch';
 import {Section, TextInputWithLabel} from './account-creation';
 
+import {TooltipTrigger} from 'app/components/popups';
 import {signedOutImages} from 'app/pages/login/signed-out-images';
 import {
   profileApi
 } from 'app/services/swagger-fetch-clients';
 import {toggleIncludes} from 'app/utils';
+import * as validate from 'validate.js';
 import {AccountCreationOptions} from './account-creation-options';
 
 
@@ -130,6 +132,16 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
 
   render() {
     const {profile: {demographicSurvey}} = this.state;
+    const validationCheck = {
+      lgbtqIdentity: {
+        length: {
+          maximum: 255,
+          tooLong: 'is too long for our system. Please reduce to 255 or fewer characters.'
+        }
+      },
+    };
+    const errors = validate(demographicSurvey, validationCheck);
+    console.log(errors);
     return <div style={{marginTop: '1rem', paddingLeft: '3rem', width: '26rem'}}>
       <label style={{color: colors.primary, fontSize: 16}}>
         Please complete Step 2 of 2
@@ -219,10 +231,17 @@ or another sexual and/or gender minority?'>
                 onClick={() => this.props.setProfile(this.profileObj, {stepName: 'accountCreation'})}>
           Previous
         </Button>
-        <Button type='primary' disabled={this.state.creatingAccount || this.state.creatingAccount}
-                onClick={() => this.createAccount()}>
-          Submit
-        </Button>
+        <TooltipTrigger content={errors && <React.Fragment>
+            <div>Please review the following: </div>
+            <ul>
+              {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
+            </ul>
+        </React.Fragment>}>
+          <Button type='primary' disabled={this.state.creatingAccount || this.state.creatingAccount || errors}
+                  onClick={() => this.createAccount()}>
+            Submit
+          </Button>
+        </TooltipTrigger>
       </div>
     </div>;
   }
