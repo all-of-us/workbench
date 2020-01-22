@@ -9,9 +9,11 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.api.MoodleApi;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
+import org.pmiops.workbench.moodle.model.BadgeDetailsDeprecated;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.MoodleUserResponse;
 import org.pmiops.workbench.moodle.model.UserBadgeResponse;
+import org.pmiops.workbench.moodle.model.UserBadgeResponseDeprecated;
 import org.pmiops.workbench.moodle.model.UserBadgeResponseV1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -79,12 +81,12 @@ public class ComplianceServiceImpl implements ComplianceService {
    * Moodle user ID does not exist.
    */
   @Override
-  public List<BadgeDetailsV1> getUserBadge(int userMoodleId) throws ApiException {
+  public List<BadgeDetailsDeprecated> getUserBadge(int userMoodleId) throws ApiException {
     if (!enableMoodleCalls()) {
       return null;
     }
 
-   UserBadgeResponseV1 response = moodleApiProvider.get().getMoodleBadgeV1(RESPONSE_FORMAT, getToken(), userMoodleId);
+   UserBadgeResponseDeprecated response = moodleApiProvider.get().getMoodleBadgeDeprecated(RESPONSE_FORMAT, getToken(), userMoodleId);
     if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
       if (response.getErrorcode().equals(MOODLE_USER_NOT_ALLOWED_ERROR_CODE)) {
         throw new ApiException(HttpStatus.NOT_FOUND.value(), response.getMessage());

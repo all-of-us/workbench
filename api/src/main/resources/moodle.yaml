@@ -70,7 +70,7 @@ paths:
        - Moodle
      consumes:
        - application/json
-     operationId: getMoodleBadgeV1
+     operationId: getMoodleBadgeDeprecated
      parameters:
        - name: moodlewsrestformat
          in: query
@@ -90,7 +90,7 @@ paths:
        200:
          description: Badge /error response
          schema:
-           $ref: '#/definitions/UserBadgeResponseV1'
+           $ref: '#/definitions/UserBadgeResponseDeprecated'
        400:
          description: Bad request
        500:
@@ -161,14 +161,14 @@ definitions:
         confirmed:
           type: boolean
 
-    UserBadgeResponseV1:
+    UserBadgeResponseDeprecated:
       required:
         - badges
       properties:
         badges:
           type: array
           items:
-            $ref: '#/definitions/BadgeDetailsV1'
+            $ref: '#/definitions/BadgeDetailsDeprecated'
         exception:
           type: string
         errorcode:
@@ -216,7 +216,7 @@ definitions:
           type: string
           description: Global expiration, overrides badge expiration date #TODO is this a freaking epoch
 
-    BadgeDetailsV1:
+    BadgeDetailsDeprecated:
       properties:
         name:
           type: string
