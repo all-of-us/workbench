@@ -260,7 +260,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
           "select count(c) "
               + "from DbCriteria c "
               + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION' "
-              + "and c.parentId in (select dc.id from DbCriteria dc where dc.domainId = 'SURVEY' and dc.type = 'PPI' and dc.name = :surveyName)")
+              + "and c.path like CONCAT((select dc.id from DbCriteria dc where dc.domainId = 'SURVEY' and dc.type = 'PPI' and dc.name = :surveyName), '.%')")
   long countSurveyByName(@Param("surveyName") String surveyName);
 
   @Query(
@@ -268,7 +268,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
           "select c "
               + "from DbCriteria c "
               + "where c.domainId = 'SURVEY' and c.type = 'PPI' and c.subtype = 'QUESTION' "
-              + "and c.parentId in (select dc.id from DbCriteria dc where dc.domainId = 'SURVEY' and dc.type = 'PPI' and dc.name = :surveyName)")
+              + "and c.path like CONCAT((select dc.id from DbCriteria dc where dc.domainId = 'SURVEY' and dc.type = 'PPI' and dc.name = :surveyName), '.%')")
   Page<DbCriteria> findSurveysByName(@Param("surveyName") String surveyName, Pageable page);
 
   @Query(

@@ -63,7 +63,8 @@ public class CBCriteriaDaoTest {
                 .standard(false)
                 .selectable(true)
                 .parentId(surveyCriteria.getId())
-                .synonyms("test"));
+                .synonyms("test")
+                .path(surveyCriteria.getId() + ".1"));
     sourceCriteria =
         cbCriteriaDao.save(
             new DbCriteria()
