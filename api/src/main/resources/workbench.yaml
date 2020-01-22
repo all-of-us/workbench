@@ -4052,6 +4052,13 @@ definitions:
       user-provided billing account, this corresponds to whether payment is valid and up to date.
     enum: [ ACTIVE, INACTIVE ]
 
+  BillingAccountType:
+    type: string
+    description: >
+      Whether a billing project is provided by the Researcher Workbench as a Free Tier project
+      subject to quota checks, or the project has a billing account provided by the user
+    enum: [ FREE_TIER, USER_PROVIDED ]
+
   BillingProjectBufferStatus:
     type: object
     properties:
