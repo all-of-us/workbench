@@ -107,15 +107,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   updateList(attribute, value) {
     // Toggle Includes removes the element if it already exist and adds if not
     const attributeList = toggleIncludes(value, this.state.profile.demographicSurvey[attribute]);
-    this.setState(fp.set(['profile', 'demographicSurvey', attribute], attributeList));
-  }
-
-  toggleDisability(value) {
-    this.updateDemographicAttribute('disability', value);
-  }
-
-  toggleIdentifiesAsLgbtq(value) {
-    this.updateDemographicAttribute('identifiesAsLgbtq', value);
+    this.updateDemographicAttribute(attribute, attributeList);
   }
 
   updateDemographicAttribute(attribute, value) {
@@ -168,13 +160,13 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
 or another sexual and/or gender minority?'>
         <div style={{paddingTop: '0.5rem'}}>
           <RadioButton onChange={
-            (e) => this.toggleIdentifiesAsLgbtq(true)}
+            (e) => this.updateDemographicAttribute('identifiesAsLgbtq', true)}
                        checked={demographicSurvey.identifiesAsLgbtq}
                        style={{marginRight: '0.5rem'}}/>
           <label style={{paddingRight: '3rem', color: colors.primary}}>
             Yes
           </label>
-          <RadioButton onChange={(e) => this.toggleIdentifiesAsLgbtq(false)}
+          <RadioButton onChange={(e) => this.updateDemographicAttribute('identifiesAsLgbtq', false)}
                        checked={!demographicSurvey.identifiesAsLgbtq}
                        style={{marginRight: '0.5rem'}}/>
           <label style={{color: colors.primary}}>No</label>
@@ -213,13 +205,13 @@ or another sexual and/or gender minority?'>
       <Section header='Do you have a Physical or Cognitive disability?'>
         <div style={{paddingTop: '0.5rem'}}>
           <RadioButton onChange={
-            (e) => this.toggleDisability(true)}
+            (e) => this.updateDemographicAttribute('disability', true)}
                        checked={demographicSurvey.disability}
                        style={{marginRight: '0.5rem'}}/>
           <label style={{paddingRight: '3rem', color: colors.primary}}>
             Yes
           </label>
-          <RadioButton onChange={(e) => this.toggleDisability(false)}
+          <RadioButton onChange={(e) => this.updateDemographicAttribute('disability', false)}
                        checked={!demographicSurvey.disability}
                        style={{marginRight: '0.5rem'}}/>
           <label style={{color: colors.primary}}>No</label>
