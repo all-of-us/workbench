@@ -2,9 +2,12 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
+import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -204,6 +207,11 @@ public class CohortsControllerTest {
   static class Configuration {
 
     @Bean
+    Cloudbilling cloudbilling() {
+      return TestMockFactory.createMockedCloudbilling();
+    }
+
+    @Bean
     Clock clock() {
       return CLOCK;
     }
@@ -253,6 +261,7 @@ public class CohortsControllerTest {
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    workspace.setBillingAccountName("abc");
 
     workspace2 = new Workspace();
     workspace2.setName(WORKSPACE_NAME_2);
@@ -260,6 +269,7 @@ public class CohortsControllerTest {
     workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace2.setResearchPurpose(new ResearchPurpose());
     workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    workspace2.setBillingAccountName("abc");
 
     CLOCK.setInstant(NOW);
 

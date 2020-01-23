@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
+import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.cloud.storage.Blob;
@@ -259,6 +260,11 @@ public class WorkspacesControllerTest {
     WorkspaceAuditor.class
   })
   static class Configuration {
+
+    @Bean
+    Cloudbilling cloudbilling() {
+      return TestMockFactory.createMockedCloudbilling();
+    }
 
     @Bean
     Clock clock() {
@@ -514,6 +520,7 @@ public class WorkspacesControllerTest {
     workspace.setResearchPurpose(researchPurpose);
     workspace.setCdrVersionId(cdrVersionId);
     workspace.setGoogleBucketName(BUCKET_NAME);
+    workspace.setBillingAccountName("abc");
     return workspace;
   }
 
@@ -747,11 +754,19 @@ public class WorkspacesControllerTest {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    request.setWorkspace(new Workspace().name("updated-name").etag(ws.getEtag()));
+    request.setWorkspace(
+        new Workspace()
+            .name("updated-name")
+            .billingAccountName("billing-account")
+            .etag(ws.getEtag()));
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
 
     // Still using the initial now-stale etag; this should throw.
-    request.setWorkspace(new Workspace().name("updated-name2").etag(ws.getEtag()));
+    request.setWorkspace(
+        new Workspace()
+            .name("updated-name2")
+            .billingAccountName("billing-account")
+            .etag(ws.getEtag()));
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
   }
 
@@ -858,6 +873,7 @@ public class WorkspacesControllerTest {
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setResearchPurpose(modPurpose);
+    modWorkspace.setBillingAccountName("billing-account");
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
@@ -1113,6 +1129,7 @@ public class WorkspacesControllerTest {
     Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setBillingAccountName("billing-account");
 
     final ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
@@ -1264,6 +1281,7 @@ public class WorkspacesControllerTest {
     Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setBillingAccountName("billing-account");
     modWorkspace.setCdrVersionId(String.valueOf(cdrVersion2.getCdrVersionId()));
 
     ResearchPurpose modPurpose = new ResearchPurpose();
@@ -1357,6 +1375,7 @@ public class WorkspacesControllerTest {
     Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setBillingAccountName("billing-account");
     modWorkspace.setCdrVersionId(String.valueOf(cdrVersion2.getCdrVersionId()));
 
     ResearchPurpose modPurpose = new ResearchPurpose();
@@ -1487,6 +1506,7 @@ public class WorkspacesControllerTest {
     Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setBillingAccountName("billing-account");
 
     ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
@@ -1530,6 +1550,7 @@ public class WorkspacesControllerTest {
     Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setBillingAccountName("billing-account");
     ResearchPurpose modPurpose = new ResearchPurpose();
     modPurpose.setAncestry(true);
     modWorkspace.setResearchPurpose(modPurpose);
@@ -1561,6 +1582,7 @@ public class WorkspacesControllerTest {
         new Workspace()
             .name("cloned")
             .namespace("cloned-ns")
+            .billingAccountName("billing-account")
             .researchPurpose(workspace.getResearchPurpose())
             .cdrVersionId(cdrVersionId2);
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
@@ -1678,7 +1700,8 @@ public class WorkspacesControllerTest {
         new Workspace()
             .namespace("cloned-ns")
             .name("cloned")
-            .researchPurpose(workspace.getResearchPurpose());
+            .researchPurpose(workspace.getResearchPurpose())
+            .billingAccountName("billing-account");
 
     stubCloneWorkspace("cloned-ns", "cloned", cloner.getUsername());
     mockBillingProjectBuffer("cloned-ns");

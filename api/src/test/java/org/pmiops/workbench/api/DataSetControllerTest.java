@@ -181,7 +181,7 @@ public class DataSetControllerTest {
 
   @Autowired CloudStorageService cloudStorageService;
 
-  @Mock Provider<Cloudbilling> cloudBillingProvider;
+  @Autowired Provider<Cloudbilling> cloudBillingProvider;
 
   @Autowired CohortDao cohortDao;
 
@@ -263,6 +263,12 @@ public class DataSetControllerTest {
     UserServiceAuditor.class
   })
   static class Configuration {
+
+    @Bean
+    Cloudbilling cloudbilling() {
+      return TestMockFactory.createMockedCloudbilling();
+    }
+
     @Bean
     Clock clock() {
       return CLOCK;
@@ -394,6 +400,7 @@ public class DataSetControllerTest {
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    workspace.setBillingAccountName("abc");
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubGetWorkspace(

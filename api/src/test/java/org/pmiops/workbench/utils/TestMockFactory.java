@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import com.google.api.services.cloudbilling.Cloudbilling;
 import java.util.UUID;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
@@ -14,7 +15,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 
-/** Created by brubenst on 9/4/19. */
 public class TestMockFactory {
   public static final String BUCKET_NAME = "workspace-bucket";
 
@@ -58,5 +58,11 @@ public class TestMockFactory {
             })
         .when(billingProjectBufferService)
         .assignBillingProject(any());
+  }
+
+  public static Cloudbilling createMockedCloudbilling() {
+    Cloudbilling cloudbilling = mock(Cloudbilling.class);
+    doReturn(mock(Cloudbilling.Projects.class)).when(cloudbilling).projects();
+    return cloudbilling;
   }
 }

@@ -266,7 +266,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
-    if (workspace.getBillingAccountName().equals(newBillingAccountName)) {
+    if (newBillingAccountName.equals(workspace.getBillingAccountName())) {
       return;
     }
 
