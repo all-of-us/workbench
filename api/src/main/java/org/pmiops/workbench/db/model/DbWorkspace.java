@@ -21,6 +21,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -583,5 +584,7 @@ public class DbWorkspace {
     return DbStorageEnums.billingAccountTypeFromStorage(billingAccountType);
   }
 
-  public void setBillingAccountType() {}
+  public void setBillingAccountType(BillingAccountType billingAccountType) {
+    this.billingAccountType = DbStorageEnums.billingAccountTypeToStorage(billingAccountType);
+  }
 }

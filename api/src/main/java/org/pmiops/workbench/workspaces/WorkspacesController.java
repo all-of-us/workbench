@@ -57,9 +57,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -127,8 +125,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private WorkspaceAuditor workspaceAuditor;
   private WorkspaceMapper workspaceMapper;
 
-  private final Provider<BillingApi> billingApiProvider;
-
   @Autowired
   public WorkspacesController(
       BillingProjectBufferService billingProjectBufferService,
@@ -144,8 +140,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       UserService userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
-      WorkspaceMapper workspaceMapper,
-      Provider<BillingApi> billingApiProvider) {
+      WorkspaceMapper workspaceMapper) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -160,7 +155,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
-    this.billingApiProvider = billingApiProvider;
   }
 
   private String getRegisteredUserDomainEmail() {
@@ -256,21 +250,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    try {
-      billingApiProvider.get().grantGoogleRoleToUser("projects/" + workspaceNamespace, "roles/billing.admin", user.getUsername());
-    } catch (ApiException e) {
-      e.printStackTrace();
-    }
-
-    log.info("Successfully granted role");
-
     updateWorkspaceBillingAccount(dbWorkspace, workspace.getBillingAccountName());
-    dbWorkspace.setBillingAccountName(workspace.getBillingAccountName());
 
     try {
       dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     } catch (Exception e) {
+      // Tell Google to set the billing account back to the free tier if the workspace creation fails
       updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
+      throw e;
     }
 
     Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
@@ -279,11 +266,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
+    if (workspace.getBillingAccountName().equals(newBillingAccountName)) {
+      return;
+    }
+
     try {
-      cloudbillingProvider.get().projects()
+      cloudbillingProvider
+          .get()
+          .projects()
           .updateBillingInfo(
               "projects/" + workspace.getFirecloudName(),
               new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
+      workspace.setBillingAccountName(newBillingAccountName);
     } catch (IOException e) {
       throw new ServerErrorException("Could not update billing account");
     }
@@ -387,9 +381,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
       dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
     }
-    // The version asserted on save is the same as the one we read via
-    // getRequired() above, see RW-215 for details.
-    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+
+    updateWorkspaceBillingAccount(dbWorkspace, request.getWorkspace().getBillingAccountName());
+    try {
+      // The version asserted on save is the same as the one we read via
+      // getRequired() above, see RW-215 for details.
+      dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+    } catch (Exception e) {
+      // Tell Google Cloud to set the billing account back to the original one since our update database call failed
+      updateWorkspaceBillingAccount(dbWorkspace, originalWorkspace.getBillingAccountName());
+      throw e;
+    }
 
     final Workspace editedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
 
@@ -499,9 +501,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    DbWorkspace savedDbWorkspace =
-        workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
+    updateWorkspaceBillingAccount(dbWorkspace, body.getWorkspace().getBillingAccountName());
 
+    try {
+      dbWorkspace = workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
+    } catch (Exception e) {
+      // Tell Google to set the billing account back to the free tier if our clone fails
+      updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
+      throw e;
+    }
+
+    // TODO: File a bug about this. Can create a workspace
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
           workspaceService.getFirecloudWorkspaceAcls(
@@ -516,15 +526,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      savedDbWorkspace =
+      dbWorkspace =
           workspaceService.updateWorkspaceAcls(
-              savedDbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
+              dbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
+
+    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+
     final Workspace savedWorkspace =
-        workspaceMapper.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
+        workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
 
     workspaceAuditor.fireDuplicateAction(
-        fromWorkspace.getWorkspaceId(), savedDbWorkspace.getWorkspaceId(), savedWorkspace);
+        fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 

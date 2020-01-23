@@ -12,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValue;
@@ -180,6 +181,8 @@ public class DataSetControllerTest {
 
   @Autowired CloudStorageService cloudStorageService;
 
+  @Mock Provider<Cloudbilling> cloudBillingProvider;
+
   @Autowired CohortDao cohortDao;
 
   @Autowired CohortFactory cohortFactory;
@@ -325,6 +328,7 @@ public class DataSetControllerTest {
             userProvider,
             fireCloudService,
             cloudStorageService,
+            cloudBillingProvider,
             CLOCK,
             notebooksService,
             userService,
