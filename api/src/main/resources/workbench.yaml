@@ -2276,9 +2276,8 @@ paths:
           required: true
           description: The IDs of concepts to be added to the concept set.
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/RdrExportId"
+            type: object
+
       responses:
         200:
           description: >
@@ -2299,9 +2298,7 @@ paths:
           required: true
           description: The IDs of concepts to be added to the concept set.
           schema:
-             type: "array"
-             items:
-               $ref: "#/definitions/RdrExportId"
+             type: object
       responses:
         200:
           description: >
