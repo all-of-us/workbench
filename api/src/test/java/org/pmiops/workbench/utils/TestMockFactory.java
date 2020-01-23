@@ -1,5 +1,6 @@
 package org.pmiops.workbench.utils;
 
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -7,6 +8,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
+import java.io.IOException;
 import java.util.UUID;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
@@ -62,7 +65,21 @@ public class TestMockFactory {
 
   public static Cloudbilling createMockedCloudbilling() {
     Cloudbilling cloudbilling = mock(Cloudbilling.class);
-    doReturn(mock(Cloudbilling.Projects.class)).when(cloudbilling).projects();
+    Cloudbilling.Projects projects = mock(Cloudbilling.Projects.class);
+
+    try {
+      doAnswer(invocation -> {
+        ProjectBillingInfo projectBillingInfo = invocation.getArgument(1);
+
+        Cloudbilling.Projects.UpdateBillingInfo updateBillingInfo = mock(Cloudbilling.Projects.UpdateBillingInfo.class);
+        doReturn(projectBillingInfo).when(updateBillingInfo).execute();
+
+        return updateBillingInfo;
+      }).when(projects).updateBillingInfo(anyString(), any(ProjectBillingInfo.class));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    doReturn(projects).when(cloudbilling).projects();
     return cloudbilling;
   }
 }

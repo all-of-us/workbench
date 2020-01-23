@@ -572,10 +572,6 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
-    verify(cloudbillingProvider.get().projects())
-        .updateBillingInfo(
-            "projects/" + workspace.getNamespace(),
-            new ProjectBillingInfo().setBillingAccountName("billing-account"));
 
     stubGetWorkspace(
         workspace.getNamespace(),
@@ -613,6 +609,12 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getNamespace()).isEqualTo(workspace.getNamespace());
     assertThat(workspace2.getResearchPurpose().getReviewRequested()).isTrue();
     assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
+
+    verify(cloudbillingProvider.get().projects())
+        .updateBillingInfo(
+            "projects/" + workspace.getNamespace(),
+            new ProjectBillingInfo().setBillingAccountName("billing-account"));
+    assertThat(workspace2.getBillingAccountName()).isEqualTo("billing-account");
   }
 
   @Test
@@ -922,6 +924,7 @@ public class WorkspacesControllerTest {
     stubFcGetWorkspaceACL();
     Workspace originalWorkspace = createWorkspace();
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
+    final String newBillingAccountName = "cloned-billing-account";
 
     // The original workspace is shared with one other user.
     final DbUser writerUser = createAndSaveUser("writerfriend@gmail.com", 124L);
@@ -946,7 +949,7 @@ public class WorkspacesControllerTest {
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setResearchPurpose(modPurpose);
-    modWorkspace.setBillingAccountName("cloned-billing-account");
+    modWorkspace.setBillingAccountName(newBillingAccountName);
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
@@ -972,7 +975,7 @@ public class WorkspacesControllerTest {
         .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
     assertThat("projects/" + clonedWorkspace.getNamespace())
         .isEqualTo(projectCaptor.getAllValues().get(1));
-    assertThat(new ProjectBillingInfo().setBillingAccountName("cloned-billing-account"))
+    assertThat(new ProjectBillingInfo().setBillingAccountName(newBillingAccountName))
         .isEqualTo(billingCaptor.getAllValues().get(1));
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
@@ -997,6 +1000,7 @@ public class WorkspacesControllerTest {
     assertThat(clonedWorkspace.getName()).isEqualTo(modWorkspace.getName());
     assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
+    assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
   }
 
   @Test
