@@ -14,7 +14,7 @@
       <column name="identifies_as_lgbtq" type="boolean">
         <constraints nullable="true"/>
       </column>
-      <column name="lgbtq_identity" type="varchar(255)">
+      <column name="lgbtq_identity" type="text">
         <constraints nullable="true"/>
       </column>
     </addColumn>
