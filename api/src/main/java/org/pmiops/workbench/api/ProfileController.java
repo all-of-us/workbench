@@ -150,15 +150,13 @@ public class ProfileController implements ProfileApiDelegate {
                     demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
               if (demographicSurvey.getEducation() != null)
                 result.setEducationEnum(demographicSurvey.getEducation());
-              if (demographicSurvey.getGender() != null)
-                result.setGenderEnum(demographicSurvey.getGender());
+              result.setIdentifiesAsLgbtq(demographicSurvey.getIdentifiesAsLgbtq());
+              result.setLgbtqIdentity(demographicSurvey.getLgbtqIdentity());
               if (demographicSurvey.getDisability() != null)
                 result.setDisabilityEnum(
                     demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
               if (demographicSurvey.getSexAtBirth() != null)
                 result.setSexAtBirthEnum(demographicSurvey.getSexAtBirth());
-              if (demographicSurvey.getSexualOrientation() != null)
-                result.setSexualOrientationEnum(demographicSurvey.getSexualOrientation());
               if (demographicSurvey.getYearOfBirth() != null)
                 result.setYear_of_birth(demographicSurvey.getYearOfBirth().intValue());
               return result;
@@ -355,6 +353,7 @@ public class ProfileController implements ProfileApiDelegate {
             request.getProfile().getCurrentPosition(),
             request.getProfile().getOrganization(),
             request.getProfile().getAreaOfResearch(),
+            request.getProfile().getProfessionalUrl(),
             request.getProfile().getDegrees(),
             FROM_CLIENT_ADDRESS.apply(request.getProfile().getAddress()),
             FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(request.getProfile().getDemographicSurvey()),
@@ -561,6 +560,7 @@ public class ProfileController implements ProfileApiDelegate {
     user.setAboutYou(updatedProfile.getAboutYou());
     user.setAreaOfResearch(updatedProfile.getAreaOfResearch());
     user.setLastModifiedTime(now);
+    user.setProfessionalUrl(updatedProfile.getProfessionalUrl());
     if (updatedProfile.getContactEmail() != null
         && !updatedProfile.getContactEmail().equals(user.getContactEmail())) {
       // See RW-1488.

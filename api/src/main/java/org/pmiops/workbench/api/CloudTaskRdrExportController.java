@@ -56,7 +56,6 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
     List<Long> requestUserIdList =
         workspaceIds.stream().map(ids -> ids.getExportId()).collect(Collectors.toList());
     rdrExportService.exportWorkspaces(requestUserIdList);
-
     return ResponseEntity.noContent().build();
   }
 }
