@@ -6,6 +6,7 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.interceptors.AuthInterceptor;
 import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
+import org.pmiops.workbench.interceptors.CloudTaskInterceptor;
 import org.pmiops.workbench.interceptors.CorsInterceptor;
 import org.pmiops.workbench.interceptors.CronInterceptor;
 import org.pmiops.workbench.interceptors.SecurityHeadersInterceptor;
@@ -35,6 +36,8 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
   @Autowired private CorsInterceptor corsInterceptor;
 
   @Autowired private ClearCdrVersionContextInterceptor clearCdrVersionInterceptor;
+
+  @Autowired private CloudTaskInterceptor cloudTaskInterceptor;
 
   @Autowired private CronInterceptor cronInterceptor;
 
@@ -66,6 +69,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     registry.addInterceptor(authInterceptor);
     registry.addInterceptor(tracingInterceptor);
     registry.addInterceptor(cronInterceptor);
+    registry.addInterceptor(cloudTaskInterceptor);
     registry.addInterceptor(clearCdrVersionInterceptor);
     registry.addInterceptor(securityHeadersInterceptor);
   }
