@@ -14,6 +14,15 @@ drops the table. When the release removing the references to the dropped table i
 merge the changelog that drops the table. This way, the API server can be safely rolled back
 one version without the database changes making the previous version unusable. 
 
+Say you want to drop the table 'demographic_survey_table':
+1. Open a PR that removes all references to the 'demographic_survey_table' in server java code.
+2. Get approval to merge the server code PR.
+3. Merge the server code PR.
+4. Open a ticket in Jira to drop the table. Include the table names in the ticket, and put it in the blocked column
+5. Open a PR with just the db changelog with the following change: `<dropTable tableName="demographic_survey_table"/>`
+and no other db changes (except other db incompatible changes related to your PR)
+6. Wait for the next release to go out. When it does, merge in the droptable pr.
+
 ###Pros
 * This allows the person with the most context on the change to hit the merge button/resolve
 any conflicts.
