@@ -30,6 +30,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
 import {Dropdown} from "primereact/dropdown";
+import {getBillingAccountName} from "app/utils/workbench-gapi-client";
 
 export const ResearchPurposeDescription =
   <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
@@ -434,9 +435,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               '' : this.props.workspace.researchPurpose.diseaseOfFocus}
         }});
 
-        console.log(this.props.workspace);
-        console.log(this.state.workspace);
-
         if (this.isMode(WorkspaceEditMode.Duplicate)) {
           // This is the only field which is not automatically handled/differentiated
           // on the API level.
@@ -475,6 +473,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         this.setState({billingAccounts: response.billingAccounts})
       );
 
+      getBillingAccountName(this.props.workspace.namespace).then(billingAccountName =>
+        this.setState(fp.set(['workspace', 'billingAccountName'], billingAccountName)));
     }
 
     makeDiseaseInput() {
