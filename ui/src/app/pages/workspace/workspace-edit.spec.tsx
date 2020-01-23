@@ -1,5 +1,5 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore} from 'app/utils/navigation';
+import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore, serverConfigStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
 import {WorkspaceAccessLevel, UserApi, WorkspacesApi} from 'generated/fetch';
 import * as React from 'react';
@@ -49,6 +49,7 @@ describe('WorkspaceEdit', () => {
     currentWorkspaceStore.next(workspace);
     cdrVersionStore.next(cdrVersionListResponse);
     routeConfigDataStore.next({mode: WorkspaceEditMode.Create});
+    serverConfigStore.next({enableBillingLockout: true, gsuiteDomain: ''});
   });
 
   it('displays workspaces create page', async () => {
