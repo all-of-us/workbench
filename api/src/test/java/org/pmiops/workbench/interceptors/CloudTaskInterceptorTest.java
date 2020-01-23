@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpMethods;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;

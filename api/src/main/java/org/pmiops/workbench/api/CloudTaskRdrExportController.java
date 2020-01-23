@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.model.RdrExportId;
 import org.pmiops.workbench.rdr.RdrExportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,11 +30,14 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    */
   @Override
   public ResponseEntity<Void> exportResearcherData(Object researcherIds) {
-    if (researcherIds == null || ((ArrayList)researcherIds).isEmpty()) {
+    if (researcherIds == null || ((ArrayList) researcherIds).isEmpty()) {
       log.severe(" call to export Researcher Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    List<Long> requestUserIdList = (ArrayList<Long>)researcherIds;
+    List<Long> requestUserIdList =
+        (ArrayList<Long>)
+            ((ArrayList) researcherIds)
+                .stream().map(id -> ((Integer) id).longValue()).collect(Collectors.toList());
     rdrExportService.exportUsers(requestUserIdList);
 
     return ResponseEntity.noContent().build();
@@ -49,11 +51,11 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    */
   @Override
   public ResponseEntity<Void> exportWorkspaceData(Object workspaceIds) {
-    if (workspaceIds == null || ((ArrayList)workspaceIds).isEmpty()) {
+    if (workspaceIds == null || ((ArrayList) workspaceIds).isEmpty()) {
       log.severe(" call to export Workspace Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    List<Long> requestUserIdList =(ArrayList<Long>)workspaceIds;
+    List<Long> requestUserIdList = (ArrayList<Long>) workspaceIds;
     rdrExportService.exportWorkspaces(requestUserIdList);
     return ResponseEntity.noContent().build();
   }
