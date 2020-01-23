@@ -272,13 +272,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     try {
-      cloudbillingProvider
+      ProjectBillingInfo updateResponse = cloudbillingProvider
           .get()
           .projects()
           .updateBillingInfo(
               "projects/" + workspace.getWorkspaceNamespace(),
-              new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
-      workspace.setBillingAccountName(newBillingAccountName);
+              new ProjectBillingInfo().setBillingAccountName(newBillingAccountName))
+          .execute();
+
+      if (!newBillingAccountName.equals(updateResponse.getBillingAccountName())) {
+        throw new RuntimeException("Google Cloud updateBillingInfo call succeeded but did not set the correct billing account name");
+      }
+
+      workspace.setBillingAccountName(updateResponse.getBillingAccountName());
     } catch (IOException e) {
       throw new ServerErrorException("Could not update billing account");
     }
