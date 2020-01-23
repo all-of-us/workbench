@@ -43,7 +43,7 @@ public class WorkspaceMapperTest {
   private static final int WORKSPACE_VERSION = 2;
   private static final String WORKSPACE_AOU_NAME = "studyallthethings";
   private static final String WORKSPACE_FIRECLOUD_NAME = "aaaa-bbbb-cccc-dddd";
-  private static final String BILLING_ACCOUNT_NAME = "abc";
+  private static final String BILLING_ACCOUNT_NAME = "billing-account";
 
   private static final DataAccessLevel DATA_ACCESS_LEVEL = DataAccessLevel.REGISTERED;
   private static final Timestamp DB_CREATION_TIMESTAMP =

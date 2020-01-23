@@ -255,7 +255,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     try {
       dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     } catch (Exception e) {
-      // Tell Google to set the billing account back to the free tier if the workspace creation fails
+      // Tell Google to set the billing account back to the free tier if the workspace creation
+      // fails
       updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
       throw e;
     }
@@ -275,7 +276,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           .get()
           .projects()
           .updateBillingInfo(
-              "projects/" + workspace.getFirecloudName(),
+              "projects/" + workspace.getWorkspaceNamespace(),
               new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
       workspace.setBillingAccountName(newBillingAccountName);
     } catch (IOException e) {
@@ -388,7 +389,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       // getRequired() above, see RW-215 for details.
       dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
     } catch (Exception e) {
-      // Tell Google Cloud to set the billing account back to the original one since our update database call failed
+      // Tell Google Cloud to set the billing account back to the original one since our update
+      // database call failed
       updateWorkspaceBillingAccount(dbWorkspace, originalWorkspace.getBillingAccountName());
       throw e;
     }
@@ -504,7 +506,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     updateWorkspaceBillingAccount(dbWorkspace, body.getWorkspace().getBillingAccountName());
 
     try {
-      dbWorkspace = workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
+      dbWorkspace =
+          workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if our clone fails
       updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
@@ -533,8 +536,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
 
-    final Workspace savedWorkspace =
-        workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
+    final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
 
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);

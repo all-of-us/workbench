@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -21,6 +22,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.cloud.storage.Blob;
@@ -53,6 +55,8 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.AdditionalAnswers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
@@ -77,6 +81,7 @@ import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -157,6 +162,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -225,6 +231,7 @@ public class WorkspacesControllerTest {
   @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
+  @Autowired private Provider<Cloudbilling> cloudbillingProvider;
 
   @TestConfiguration
   @Import({
@@ -282,6 +289,12 @@ public class WorkspacesControllerTest {
     WorkbenchConfig workbenchConfig() {
       return workbenchConfig;
     }
+
+    @Bean(name = "might as well")
+    @Primary
+    public WorkspaceDao workspaceDao(WorkspaceDao workspaceDao) {
+      return mock(WorkspaceDao.class, AdditionalAnswers.delegatesTo(workspaceDao));
+    }
   }
 
   private static DbUser currentUser;
@@ -320,6 +333,12 @@ public class WorkspacesControllerTest {
     workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
     workbenchConfig.featureFlags.enableBillingLockout = true;
 
+    workbenchConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
+    workbenchConfig.firecloud.registeredDomainName = "allUsers";
+
+    workbenchConfig.billing = new BillingConfig();
+    workbenchConfig.billing.accountId = "free-tier";
+
     testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
     cdrVersion = new DbCdrVersion();
@@ -342,9 +361,6 @@ public class WorkspacesControllerTest {
     conceptDao.save(CONCEPT_3);
 
     CLOCK.setInstant(NOW.toInstant());
-
-    workbenchConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
-    workbenchConfig.firecloud.registeredDomainName = "allUsers";
 
     fcWorkspaceAcl = createWorkspaceACL();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
@@ -520,7 +536,7 @@ public class WorkspacesControllerTest {
     workspace.setResearchPurpose(researchPurpose);
     workspace.setCdrVersionId(cdrVersionId);
     workspace.setGoogleBucketName(BUCKET_NAME);
-    workspace.setBillingAccountName("abc");
+    workspace.setBillingAccountName("billing-account");
     return workspace;
   }
 
@@ -563,6 +579,10 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
+    verify(cloudbillingProvider.get().projects())
+        .updateBillingInfo(
+            "projects/" + workspace.getNamespace(),
+            new ProjectBillingInfo().setBillingAccountName("billing-account"));
 
     stubGetWorkspace(
         workspace.getNamespace(),
@@ -600,6 +620,26 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getNamespace()).isEqualTo(workspace.getNamespace());
     assertThat(workspace2.getResearchPurpose().getReviewRequested()).isTrue();
     assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
+  }
+
+  @Test
+  public void testCreateWorkspace_resetBillingAccountOnFailedSave() throws Exception {
+    doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
+
+    Workspace workspace = createWorkspace();
+
+    try {
+      workspacesController.createWorkspace(workspace).getBody();
+    } catch (Exception e) {
+      ArgumentCaptor<ProjectBillingInfo> captor = ArgumentCaptor.forClass(ProjectBillingInfo.class);
+      verify(cloudbillingProvider.get().projects(), times(2))
+          .updateBillingInfo(any(), captor.capture());
+
+      assertEquals("free-tier", captor.getAllValues().get(1).getBillingAccountName());
+      return;
+    }
+
+    fail();
   }
 
   @Test

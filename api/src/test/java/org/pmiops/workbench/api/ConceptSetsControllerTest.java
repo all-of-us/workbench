@@ -289,7 +289,7 @@ public class ConceptSetsControllerTest {
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    workspace.setBillingAccountName("abc");
+    workspace.setBillingAccountName("billing-account");
 
     workspace2 = new Workspace();
     workspace2.setName(WORKSPACE_NAME_2);
@@ -297,7 +297,7 @@ public class ConceptSetsControllerTest {
     workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace2.setResearchPurpose(new ResearchPurpose());
     workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    workspace2.setBillingAccountName("abc");
+    workspace2.setBillingAccountName("billing-account");
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     workspace2 = workspacesController.createWorkspace(workspace2).getBody();

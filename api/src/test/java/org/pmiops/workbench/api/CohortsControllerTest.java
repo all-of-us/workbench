@@ -2,8 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
@@ -261,7 +259,7 @@ public class CohortsControllerTest {
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    workspace.setBillingAccountName("abc");
+    workspace.setBillingAccountName("billing-account");
 
     workspace2 = new Workspace();
     workspace2.setName(WORKSPACE_NAME_2);
@@ -269,7 +267,7 @@ public class CohortsControllerTest {
     workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace2.setResearchPurpose(new ResearchPurpose());
     workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    workspace2.setBillingAccountName("abc");
+    workspace2.setBillingAccountName("billing-account");
 
     CLOCK.setInstant(NOW);
 

@@ -400,7 +400,7 @@ public class DataSetControllerTest {
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    workspace.setBillingAccountName("abc");
+    workspace.setBillingAccountName("billing-account");
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubGetWorkspace(
