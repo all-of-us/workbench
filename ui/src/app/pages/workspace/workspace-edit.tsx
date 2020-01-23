@@ -474,8 +474,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           this.setState({billingAccounts: response.billingAccounts})
         );
 
-        getBillingAccountName(this.props.workspace.namespace).then(billingAccountName =>
-          this.setState(fp.set(['workspace', 'billingAccountName'], billingAccountName)));
+        if (this.isMode(WorkspaceEditMode.Edit)) {
+          getBillingAccountName(this.props.workspace.namespace).then(billingAccountName =>
+            this.setState(fp.set(['workspace', 'billingAccountName'], billingAccountName)));
+        }
       } else {
         // This is a temporary hack to set the billing account name property to anything
         // so that it passes validation. The server ignores the value if the feature flag
