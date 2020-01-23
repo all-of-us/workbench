@@ -1,6 +1,5 @@
 package org.pmiops.workbench.utils;
 
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -68,14 +67,18 @@ public class TestMockFactory {
     Cloudbilling.Projects projects = mock(Cloudbilling.Projects.class);
 
     try {
-      doAnswer(invocation -> {
-        ProjectBillingInfo projectBillingInfo = invocation.getArgument(1);
+      doAnswer(
+              invocation -> {
+                ProjectBillingInfo projectBillingInfo = invocation.getArgument(1);
 
-        Cloudbilling.Projects.UpdateBillingInfo updateBillingInfo = mock(Cloudbilling.Projects.UpdateBillingInfo.class);
-        doReturn(projectBillingInfo).when(updateBillingInfo).execute();
+                Cloudbilling.Projects.UpdateBillingInfo updateBillingInfo =
+                    mock(Cloudbilling.Projects.UpdateBillingInfo.class);
+                doReturn(projectBillingInfo).when(updateBillingInfo).execute();
 
-        return updateBillingInfo;
-      }).when(projects).updateBillingInfo(anyString(), any(ProjectBillingInfo.class));
+                return updateBillingInfo;
+              })
+          .when(projects)
+          .updateBillingInfo(anyString(), any(ProjectBillingInfo.class));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

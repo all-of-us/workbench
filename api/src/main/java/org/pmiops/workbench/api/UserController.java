@@ -1,17 +1,9 @@
 package org.pmiops.workbench.api;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
-import com.google.auth.oauth2.AccessToken;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.collect.Lists;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +12,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
-import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
@@ -29,7 +20,6 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingAccount;
-import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.model.WorkbenchListBillingAccountsResponse;
 import org.pmiops.workbench.utils.PaginationToken;
@@ -37,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
 
 @RestController
 public class UserController implements UserApiDelegate {
@@ -155,27 +144,26 @@ public class UserController implements UserApiDelegate {
   public ResponseEntity<WorkbenchListBillingAccountsResponse> listBillingAccounts() {
     ListBillingAccountsResponse response;
     try {
-      response = cloudBillingProvider.get()
-          .billingAccounts().list().execute();
+      response = cloudBillingProvider.get().billingAccounts().list().execute();
     } catch (IOException e) {
       throw new ServerErrorException("Could not retrieve billing accounts list from Google Cloud");
     }
 
-    List<BillingAccount> billingAccounts = Stream.concat(
-        Stream.of(freeTierBillingAccount()),
-        response.getBillingAccounts()
-            .stream()
-            .map(googleBillingAccount ->
-                new BillingAccount()
-                    .isFreeTier(false)
-                    .displayName(googleBillingAccount.getDisplayName())
-                    .name(googleBillingAccount.getName())
-                    .isOpen(googleBillingAccount.getOpen())
-      )).collect(Collectors.toList());
+    List<BillingAccount> billingAccounts =
+        Stream.concat(
+                Stream.of(freeTierBillingAccount()),
+                response.getBillingAccounts().stream()
+                    .map(
+                        googleBillingAccount ->
+                            new BillingAccount()
+                                .isFreeTier(false)
+                                .displayName(googleBillingAccount.getDisplayName())
+                                .name(googleBillingAccount.getName())
+                                .isOpen(googleBillingAccount.getOpen())))
+            .collect(Collectors.toList());
 
     return ResponseEntity.ok(
-        new WorkbenchListBillingAccountsResponse().billingAccounts(billingAccounts)
-    );
+        new WorkbenchListBillingAccountsResponse().billingAccounts(billingAccounts));
   }
 
   private PaginationToken getPaginationTokenFromPageToken(String pageToken) {

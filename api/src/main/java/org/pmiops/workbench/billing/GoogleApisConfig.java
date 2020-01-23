@@ -18,14 +18,17 @@ public class GoogleApisConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public Cloudbilling googleCloudBillingApi(UserAuthentication userAuthentication, JsonFactory jsonFactory) {
-    GoogleCredential credential = new GoogleCredential()
-        .setAccessToken(userAuthentication.getCredentials())
-        .createScoped(Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
+  public Cloudbilling googleCloudBillingApi(
+      UserAuthentication userAuthentication, JsonFactory jsonFactory) {
+    GoogleCredential credential =
+        new GoogleCredential()
+            .setAccessToken(userAuthentication.getCredentials())
+            .createScoped(
+                Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
 
     try {
       return new Cloudbilling.Builder(
-          GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
+              GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
           .build();
     } catch (GeneralSecurityException | IOException e) {
       throw new RuntimeException("Could not construct Cloudbilling API client");
