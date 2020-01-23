@@ -6,7 +6,8 @@ export async function getBillingAccountName(workspaceNamespace: string) {
       gapi.client.load('cloudbilling', 'v1', () => {
         gapi.client.cloudbilling.projects.getBillingInfo({
           name: 'projects/' + workspaceNamespace
-        }).then(response => resolve(JSON.parse(response.body).billingAccountName))});
+        }).then(response => resolve(JSON.parse(response.body).billingAccountName));
+      });
     });
   });
 }

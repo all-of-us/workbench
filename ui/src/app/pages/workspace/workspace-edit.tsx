@@ -16,6 +16,7 @@ import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCdrVersions, withC
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
+import {getBillingAccountName} from 'app/utils/workbench-gapi-client';
 import {
   ArchivalStatus,
   BillingAccount,
@@ -27,10 +28,9 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
-import {Dropdown} from "primereact/dropdown";
-import {getBillingAccountName} from "app/utils/workbench-gapi-client";
 
 export const ResearchPurposeDescription =
   <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
