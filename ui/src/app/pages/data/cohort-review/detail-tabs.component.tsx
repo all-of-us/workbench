@@ -87,7 +87,7 @@ const itemDate = {
   name: 'itemDate',
   classNames: ['date-col'],
   displayName: 'Date',
-  filter: FilterColumns.STARTDATE
+  filter: FilterColumns.STARTDATETIME
 };
 const itemTime = {
   name: 'itemTime',
@@ -103,7 +103,7 @@ const standardVocabulary = {
   name: 'standardVocabulary',
   classNames: ['vocab-col'],
   displayName: 'Standard Vocabulary',
-  filter: FilterColumns.STANDARDVOCAB
+  filter: FilterColumns.STANDARDVOCABULARY
 };
 const standardName = {
   name: 'standardName',
@@ -119,7 +119,7 @@ const sourceVocabulary = {
   name: 'sourceVocabulary',
   classNames: ['vocab-col'],
   displayName: 'Source Vocabulary',
-  filter: FilterColumns.SOURCEVOCAB
+  filter: FilterColumns.SOURCEVOCABULARY
 };
 const sourceName = {
   name: 'sourceName',
@@ -149,7 +149,7 @@ const visitType = {
 const numMentions = {
   name: 'numMentions',
   displayName: 'Number Of Mentions',
-  filter: FilterColumns.NUMOFMENTIONS
+  filter: FilterColumns.NUMMENTIONS
 };
 const firstMention = {
   name: 'firstMention',

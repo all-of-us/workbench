@@ -10,7 +10,7 @@ import {datatableStyles} from 'app/styles/datatable';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DomainType, FilterColumns, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
+import {DomainType, Operator, PageFilterRequest, SortOrder} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
