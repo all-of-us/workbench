@@ -1,9 +1,9 @@
 package org.pmiops.workbench.api;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import org.pmiops.workbench.model.RdrExportIdList;
+import java.util.stream.Collectors;
+import org.pmiops.workbench.model.RdrExportId;
 import org.pmiops.workbench.rdr.RdrExportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,12 +29,13 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    * @return
    */
   @Override
-  public ResponseEntity<Void> exportResearcherData(RdrExportIdList researcherIds) {
-    if (researcherIds == null || ((ArrayList) researcherIds.getExportIds()).isEmpty()) {
+  public ResponseEntity<Void> exportResearcherData(List<RdrExportId> researcherIds) {
+    if (researcherIds == null || researcherIds.isEmpty()) {
       log.severe(" call to export Researcher Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    List<Long> requestUserIdList = researcherIds.getExportIds();
+    List<Long> requestUserIdList =
+        researcherIds.stream().map(ids -> ids.getExportId()).collect(Collectors.toList());
     rdrExportService.exportUsers(requestUserIdList);
 
     return ResponseEntity.noContent().build();
@@ -47,12 +48,13 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    * @return
    */
   @Override
-  public ResponseEntity<Void> exportWorkspaceData(RdrExportIdList workspaceIds) {
-    if (workspaceIds == null || ((ArrayList) workspaceIds.getExportIds()).isEmpty()) {
+  public ResponseEntity<Void> exportWorkspaceData(List<RdrExportId> workspaceIds) {
+    if (workspaceIds == null || workspaceIds.isEmpty()) {
       log.severe(" call to export Workspace Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    List<Long> requestUserIdList = workspaceIds.getExportIds();
+    List<Long> requestUserIdList =
+        workspaceIds.stream().map(ids -> ids.getExportId()).collect(Collectors.toList());
     rdrExportService.exportWorkspaces(requestUserIdList);
 
     return ResponseEntity.noContent().build();
