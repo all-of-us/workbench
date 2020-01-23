@@ -11,6 +11,6 @@
       </column>
     </addColumn>
 
-    <sql>update workspace set billing_account_name=(SELECT JSON_UNQUOTE(JSON_EXTRACT(configuration, '$.billing.accountId')) from config where config_id='main');</sql>
+    <sql>update workspace set billing_account_name=(SELECT CONCAT('billingAccounts/', JSON_UNQUOTE(JSON_EXTRACT(configuration, '$.billing.accountId'))) from config where config_id='main');</sql>
   </changeSet>
 </databaseChangeLog>
