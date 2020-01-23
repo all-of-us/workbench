@@ -57,7 +57,9 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
    */
   @Query(
       value =
-          "select distinct c from DbConcept c "
+          "select new DbConcept(c.conceptId, c.conceptName, c.standardConcept, c.conceptCode, c.conceptClassId, c.vocabularyId, "
+              + "'Physical Measurement' as domainId, c.countValue, c.sourceCountValue, c.prevalence, c.synonymsStr) "
+              + "from DbConcept c "
               + "where (c.countValue > 0 or c.sourceCountValue > 0) "
               + "and matchConcept(c.conceptName, c.conceptCode, c.vocabularyId, c.synonymsStr, ?1) > 0 "
               + "and c.standardConcept IN (?2) "
@@ -76,7 +78,9 @@ public interface ConceptDao extends CrudRepository<DbConcept, Long> {
    */
   @Query(
       value =
-          "select distinct c from DbConcept c "
+          "select new DbConcept(c.conceptId, c.conceptName, c.standardConcept, c.conceptCode, c.conceptClassId, c.vocabularyId, "
+              + "'Physical Measurement' as domainId, c.countValue, c.sourceCountValue, c.prevalence, c.synonymsStr) "
+              + "from DbConcept c "
               + "where (c.countValue > 0 or c.sourceCountValue > 0) "
               + "and c.standardConcept IN (?1) "
               + "and c.domainId = 'Measurement' "

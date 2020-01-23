@@ -368,15 +368,10 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     selectConcepts(concepts: any[]) {
       const {selectedDomain: {domain}, selectedConceptDomainMap} = this.state;
-      if (domain === Domain.PHYSICALMEASUREMENT) {
-        selectedConceptDomainMap[domain] = concepts.filter(concept =>
-          concept.domainId.toLowerCase() === Domain[Domain.MEASUREMENT].toLowerCase()
-            && concept.vocabularyId === CriteriaType[CriteriaType.PPI]
-        );
-      } else if (domain === Domain.SURVEY) {
+      if (domain === Domain.SURVEY) {
         selectedConceptDomainMap[domain] = concepts.filter(concept => !!concept.question);
       } else {
-        selectedConceptDomainMap[domain] = concepts.filter(concept => concept.domainId.toLowerCase() === Domain[domain].toLowerCase());
+        selectedConceptDomainMap[domain] = concepts.filter(concept => concept.domainId.replace(' ', '').toLowerCase() === Domain[domain].toLowerCase());
       }
       this.setState({selectedConceptDomainMap: selectedConceptDomainMap});
     }

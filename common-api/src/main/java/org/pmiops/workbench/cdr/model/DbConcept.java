@@ -49,6 +49,33 @@ public class DbConcept {
         .synonymsStr(a.getSynonymsStr());
   }
 
+  // Used from JQL queries in DomainInfoDao
+  public DbConcept(
+      long conceptId,
+      String conceptName,
+      String standardConcept,
+      String conceptCode,
+      String conceptClassId,
+      String vocabularyId,
+      String domainId,
+      long countValue,
+      long sourceCountValue,
+      float prevalence,
+      String synonymsStr) {
+    this.conceptId = conceptId;
+    this.conceptName = conceptName;
+    this.standardConcept = standardConcept;
+    this.conceptCode = conceptCode;
+    this.conceptClassId = conceptClassId;
+    this.vocabularyId = vocabularyId;
+    this.domainId = domainId;
+    this.countValue = countValue;
+    this.sourceCountValue = sourceCountValue;
+    this.prevalence = prevalence;
+    this.synonymsStr = synonymsStr;
+    this.synonyms = new ArrayList<>();
+  }
+
   @Id
   @Column(name = "concept_id")
   public long getConceptId() {

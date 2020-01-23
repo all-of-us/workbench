@@ -279,7 +279,10 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
             .filter(concept -> !concept.getConceptClassId().equals(CONCEPT_CLASS_ID_QUESTION))
             .filter(
                 concept -> {
-                  Domain domain = CommonStorageEnums.domainIdToDomain(concept.getDomainId());
+                  Domain domain =
+                      Domain.PHYSICALMEASUREMENT.equals(domainEnum)
+                          ? Domain.PHYSICALMEASUREMENT
+                          : CommonStorageEnums.domainIdToDomain(concept.getDomainId());
                   return !domainEnum.equals(domain);
                 })
             .collect(Collectors.toList());
