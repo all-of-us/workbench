@@ -296,7 +296,11 @@ export const ConceptHomepage = withCurrentWorkspace()(
         this.browseSurvey(queryParams.survey);
       }
       if (queryParams.domain) {
-        this.browseDomain(this.state.conceptDomainList.find(dc => dc.domain === queryParams.domain));
+        if (queryParams.domain === Domain.SURVEY) {
+          this.browseSurvey('');
+        } else {
+          this.browseDomain(this.state.conceptDomainList.find(dc => dc.domain === queryParams.domain));
+        }
       }
     }
 
@@ -402,7 +406,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
           currentInputString: '',
           currentSearchString: '',
           selectedDomain: {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0},
-          selectedSurvey: surveyName}, () => this.searchConcepts());
+          selectedSurvey: surveyName,
+          standardConceptsOnly: false}, () => this.searchConcepts());
       } else {
         this.setState({browsingSurvey: true, selectedSurvey: surveyName});
       }
@@ -520,6 +525,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                         labelStyle={{marginLeft: '0.2rem'}}
                         data-test-id='standardConceptsCheckBox'
                         style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
+                        manageOwnState={false}
                         onChange={() => this.handleCheckboxChange()}/>
             </div>
             {showSearchError &&
