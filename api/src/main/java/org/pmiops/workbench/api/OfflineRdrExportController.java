@@ -5,6 +5,7 @@ import com.google.cloud.tasks.v2.CloudTasksClient;
 import com.google.cloud.tasks.v2.HttpMethod;
 import com.google.cloud.tasks.v2.QueueName;
 import com.google.cloud.tasks.v2.Task;
+import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.util.Collection;
@@ -108,18 +109,20 @@ public class OfflineRdrExportController implements OfflineRdrExportApiDelegate {
 
   private void createAndPushTask(List<Long> ids, String queuePath, String taskUri) {
     List<String> idsAsString = ids.stream().map(id -> id.toString()).collect(Collectors.toList());
+    Gson gson = new Gson();
+    String daysJson = gson.toJson(ids);
     try (CloudTasksClient client = CloudTasksClient.create()) {
       String commaSepList = String.join(IDS_STRING_SPLIT, idsAsString);
-      Task.Builder taskBuilder =
-          Task.newBuilder()
-              .setAppEngineHttpRequest(
-                  AppEngineHttpRequest.newBuilder()
-                      .setRelativeUri(taskUri)
-                      .setBody(ByteString.copyFrom(commaSepList.getBytes()))
-                      .setHttpMethod(HttpMethod.POST)
-                      .build());
+      AppEngineHttpRequest req =
+          AppEngineHttpRequest.newBuilder()
+              .setRelativeUri(taskUri)
+              .setBody(ByteString.copyFromUtf8(daysJson))
+              .setHttpMethod(HttpMethod.POST)
+              .putHeaders("Content-type", "application/json")
+              .build();
 
-      Task task = client.createTask(queuePath, taskBuilder.build());
+      Task taskBuilder = Task.newBuilder().setAppEngineHttpRequest(req).build();
+      Task task = client.createTask(queuePath, taskBuilder);
 
     } catch (IOException ex) {
       log.severe(
