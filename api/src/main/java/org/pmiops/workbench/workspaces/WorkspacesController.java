@@ -700,6 +700,22 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
     }
 
+    // If a lock is held by another user, log this to establish a rough estimate of how often
+    // locked notebooks are encountered. Note that this only covers locks encountered from the
+    // Workbench - any Jupyter UI-based lock detection does not touch this code path.
+    String currentUsername = userProvider.get().getUsername();
+    if (response.getLockExpirationTime() == null
+        || response.getLastLockedBy() == null
+        || response.getLockExpirationTime() < clock.millis()
+        || response.getLastLockedBy().equals(currentUsername)) {
+      log.info(String.format("user '%s' observed notebook available for editing", currentUsername));
+    } else {
+      log.info(
+          String.format(
+              "user '%s' observed notebook locked by '%s'",
+              currentUsername, response.getLastLockedBy()));
+    }
+
     return ResponseEntity.ok(response);
   }
 

@@ -50,28 +50,19 @@ public interface FireCloudService {
   /** Get Billing Project Status */
   FirecloudBillingProjectStatus getBillingProjectStatus(String projectName);
 
-  /** Adds the specified user to the specified billing project. */
-  void addUserToBillingProject(String email, String projectName);
-
-  /**
-   * Removes the specified user from the specified billing project.
-   *
-   * <p>Only used for errored billing projects
-   */
-  void removeUserFromBillingProject(String email, String projectName);
-
   /** Adds the specified user as an owner to the specified billing project. */
   void addOwnerToBillingProject(String ownerEmail, String projectName);
 
   /**
    * Removes the specified user as an owner from the specified billing project. Since FireCloud
    * users cannot remove themselves, we need to supply the credential of a different user which will
-   * retain ownership to make the call
+   * retain ownership to make the call.
    *
-   * <p>Only used for billing project garbage collection
+   * <p>The call is made by the SA by default. An optional callerAccessToken can be passed in to use
+   * that as the caller instead.
    */
   void removeOwnerFromBillingProject(
-      String projectName, String ownerEmailToRemove, String callerAccessToken);
+      String projectName, String ownerEmailToRemove, Optional<String> callerAccessToken);
 
   /** Creates a new FC workspace. */
   FirecloudWorkspace createWorkspace(String projectName, String workspaceName);

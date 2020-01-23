@@ -401,13 +401,14 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
             String.format(
                 "removing user '%s' from billing project '%s'",
                 email, workspace.getWorkspaceNamespace()));
-        fireCloudService.removeUserFromBillingProject(email, workspace.getWorkspaceNamespace());
+        fireCloudService.removeOwnerFromBillingProject(
+            email, workspace.getWorkspaceNamespace(), Optional.empty());
       } else if (!FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER == toAccess) {
         log.info(
             String.format(
                 "adding user '%s' to billing project '%s'",
                 email, workspace.getWorkspaceNamespace()));
-        fireCloudService.addUserToBillingProject(email, workspace.getWorkspaceNamespace());
+        fireCloudService.addOwnerToBillingProject(email, workspace.getWorkspaceNamespace());
       }
     }
 

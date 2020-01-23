@@ -110,8 +110,13 @@ public class FreeTierBillingService {
       deactivateUserWorkspaces(user);
     }
 
-    sendAlertsForCostThresholds(previousUserCosts, userCosts, currentExpiredUsers);
-    sendAlertsForTimeThresholds(userCosts, currentExpiredUsers);
+    final Set<DbUser> usersWithNonNullRegistration =
+        userDao.findByFirstRegistrationCompletionTimeNotNull();
+    final Set<DbUser> usersToThresholdCheck =
+        Sets.difference(usersWithNonNullRegistration, currentExpiredUsers);
+
+    sendAlertsForCostThresholds(usersToThresholdCheck, previousUserCosts, userCosts);
+    sendAlertsForTimeThresholds(usersToThresholdCheck, userCosts);
   }
 
   private boolean expiredByCost(final DbUser user, final double currentCost) {
@@ -133,16 +138,16 @@ public class FreeTierBillingService {
   }
 
   private void sendAlertsForCostThresholds(
+      Set<DbUser> usersToCheck,
       Map<DbUser, Double> previousUserCosts,
-      Map<DbUser, Double> userCosts,
-      Set<DbUser> currentExpiredUsers) {
+      Map<DbUser, Double> userCosts) {
     final List<Double> costThresholdsInDescOrder =
         workbenchConfigProvider.get().billing.freeTierCostAlertThresholds;
     costThresholdsInDescOrder.sort(Comparator.reverseOrder());
 
     userCosts.forEach(
         (user, currentCost) -> {
-          if (!currentExpiredUsers.contains(user)) {
+          if (usersToCheck.contains(user)) {
             final double previousCost = previousUserCosts.getOrDefault(user, 0.0);
             maybeAlertOnCostThresholds(user, currentCost, previousCost, costThresholdsInDescOrder);
           }
@@ -150,21 +155,19 @@ public class FreeTierBillingService {
   }
 
   private void sendAlertsForTimeThresholds(
-      Map<DbUser, Double> userCosts, Set<DbUser> currentExpiredUsers) {
+      Set<DbUser> usersToCheck, Map<DbUser, Double> userCosts) {
     final List<Double> timeThresholdsInDescOrder =
         workbenchConfigProvider.get().billing.freeTierTimeAlertThresholds;
     timeThresholdsInDescOrder.sort(Comparator.reverseOrder());
 
-    for (final DbUser user : userDao.findByFirstRegistrationCompletionTimeNotNull()) {
-      if (!currentExpiredUsers.contains(user)) {
-        final double currentCost = userCosts.getOrDefault(user, 0.0);
-        final double remainingDollarBalance = getUserFreeTierDollarLimit(user) - currentCost;
-        maybeAlertOnTimeThresholds(user, remainingDollarBalance, timeThresholdsInDescOrder);
+    for (final DbUser user : usersToCheck) {
+      final double currentCost = userCosts.getOrDefault(user, 0.0);
+      final double remainingDollarBalance = getUserFreeTierDollarLimit(user) - currentCost;
+      maybeAlertOnTimeThresholds(user, remainingDollarBalance, timeThresholdsInDescOrder);
 
-        // save current check time
-        user.setLastFreeTierCreditsTimeCheck(Timestamp.from(clock.instant()));
-        userDao.save(user);
-      }
+      // save current check time
+      user.setLastFreeTierCreditsTimeCheck(Timestamp.from(clock.instant()));
+      userDao.save(user);
     }
   }
 

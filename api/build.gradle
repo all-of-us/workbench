@@ -436,6 +436,7 @@ dependencies {
   compile 'javax.inject:javax.inject:1'
   compile 'io.swagger:swagger-annotations:1.5.16'
   compile 'org.apache.commons:commons-lang3:3.6'
+  compile 'org.apache.commons:commons-text:1.8'
   compile 'com.google.guava:guava:26.0-jre'
   compile 'com.github.rholder:guava-retrying:2.0.0'
   compile 'org.springframework.retry:spring-retry:1.1.5.RELEASE'
@@ -734,6 +735,16 @@ task updateCdrVersions(type: JavaExec) {
 task loadDataDictionary(type: JavaExec) {
   classpath sourceSets.tools.runtimeClasspath
   main = "org.pmiops.workbench.tools.LoadDataDictionary"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// See project.rb command: backfill-billing-project-owners
+task backfillBillingProjectOwners(type: JavaExec) {
+  classpath = sourceSets.tools.runtimeClasspath
+  main = "org.pmiops.workbench.tools.BackfillBillingProjectOwners"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
