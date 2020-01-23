@@ -4097,7 +4097,7 @@ definitions:
   RdrExportIdList:
     type: object
     properties:
-      items:
+      exportIds:
         type: array
         items:
           type: integer

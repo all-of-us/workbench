@@ -30,11 +30,11 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    */
   @Override
   public ResponseEntity<Void> exportResearcherData(RdrExportIdList researcherIds) {
-    if (researcherIds == null || ((ArrayList) researcherIds.getItems()).isEmpty()) {
+    if (researcherIds == null || ((ArrayList) researcherIds.getExportIds()).isEmpty()) {
       log.severe(" call to export Researcher Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    List<Long> requestUserIdList = researcherIds.getItems();
+    List<Long> requestUserIdList = researcherIds.getExportIds();
     rdrExportService.exportUsers(requestUserIdList);
 
     return ResponseEntity.noContent().build();
@@ -48,11 +48,11 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    */
   @Override
   public ResponseEntity<Void> exportWorkspaceData(RdrExportIdList workspaceIds) {
-    if (workspaceIds == null || ((ArrayList) workspaceIds.getItems()).isEmpty()) {
+    if (workspaceIds == null || ((ArrayList) workspaceIds.getExportIds()).isEmpty()) {
       log.severe(" call to export Workspace Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    List<Long> requestUserIdList = workspaceIds.getItems();
+    List<Long> requestUserIdList = workspaceIds.getExportIds();
     rdrExportService.exportWorkspaces(requestUserIdList);
 
     return ResponseEntity.noContent().build();
