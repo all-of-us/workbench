@@ -55,7 +55,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.AdditionalAnswers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -160,9 +159,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
@@ -289,12 +288,6 @@ public class WorkspacesControllerTest {
     WorkbenchConfig workbenchConfig() {
       return workbenchConfig;
     }
-
-    @Bean(name = "might as well")
-    @Primary
-    public WorkspaceDao workspaceDao(WorkspaceDao workspaceDao) {
-      return mock(WorkspaceDao.class, AdditionalAnswers.delegatesTo(workspaceDao));
-    }
   }
 
   private static DbUser currentUser;
@@ -304,7 +297,7 @@ public class WorkspacesControllerTest {
   @Autowired private WorkspaceService workspaceService;
   @Autowired CloudStorageService cloudStorageService;
   @Autowired BigQueryService bigQueryService;
-  @Autowired WorkspaceDao workspaceDao;
+  @SpyBean @Autowired WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
   @Autowired ConceptDao conceptDao;
   @Autowired CdrVersionDao cdrVersionDao;
@@ -635,7 +628,8 @@ public class WorkspacesControllerTest {
       verify(cloudbillingProvider.get().projects(), times(2))
           .updateBillingInfo(any(), captor.capture());
 
-      assertEquals("free-tier", captor.getAllValues().get(1).getBillingAccountName());
+      assertThat(captor.getAllValues().get(1).getBillingAccountName())
+          .isEqualTo(workbenchConfig.billing.accountId);
       return;
     }
 
@@ -717,11 +711,21 @@ public class WorkspacesControllerTest {
 
     ws.setName("updated-name");
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    ws.setBillingAccountName("update-billing-account");
     request.setWorkspace(ws);
     Workspace updated =
         workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
     ws.setEtag(updated.getEtag());
     assertThat(updated).isEqualTo(ws);
+
+    ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<ProjectBillingInfo> billingCaptor =
+        ArgumentCaptor.forClass(ProjectBillingInfo.class);
+    verify(cloudbillingProvider.get().projects(), times(2))
+        .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
+    assertThat("projects/" + ws.getNamespace()).isEqualTo(projectCaptor.getAllValues().get(1));
+    assertThat(new ProjectBillingInfo().setBillingAccountName("update-billing-account"))
+        .isEqualTo(billingCaptor.getAllValues().get(1));
 
     ws.setName("updated-name2");
     updated =
@@ -731,6 +735,35 @@ public class WorkspacesControllerTest {
     Workspace got =
         workspacesController.getWorkspace(ws.getNamespace(), ws.getId()).getBody().getWorkspace();
     assertThat(got).isEqualTo(ws);
+  }
+
+  @Test
+  public void testUpdateWorkspace_resetBillingOnFailedSave() throws Exception {
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+    final String originalBillingAccountName = ws.getBillingAccountName();
+
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    ws.setBillingAccountName("update-billing-account");
+    request.setWorkspace(ws);
+
+    doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
+
+    try {
+      workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
+    } catch (Exception e) {
+      ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
+      ArgumentCaptor<ProjectBillingInfo> billingCaptor =
+          ArgumentCaptor.forClass(ProjectBillingInfo.class);
+      verify(cloudbillingProvider.get().projects(), times(3))
+          .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
+      assertThat("projects/" + ws.getNamespace()).isEqualTo(projectCaptor.getAllValues().get(2));
+      assertThat(new ProjectBillingInfo().setBillingAccountName(originalBillingAccountName))
+          .isEqualTo(billingCaptor.getAllValues().get(2));
+      return;
+    }
+
+    fail();
   }
 
   @Test
@@ -913,7 +946,7 @@ public class WorkspacesControllerTest {
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
     modWorkspace.setResearchPurpose(modPurpose);
-    modWorkspace.setBillingAccountName("billing-account");
+    modWorkspace.setBillingAccountName("cloned-billing-account");
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
@@ -931,6 +964,16 @@ public class WorkspacesControllerTest {
             .getBody()
             .getWorkspace();
     verify(mockWorkspaceAuditor).fireDuplicateAction(anyLong(), anyLong(), any(Workspace.class));
+
+    ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<ProjectBillingInfo> billingCaptor =
+        ArgumentCaptor.forClass(ProjectBillingInfo.class);
+    verify(cloudbillingProvider.get().projects(), times(2))
+        .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
+    assertThat("projects/" + clonedWorkspace.getNamespace())
+        .isEqualTo(projectCaptor.getAllValues().get(1));
+    assertThat(new ProjectBillingInfo().setBillingAccountName("cloned-billing-account"))
+        .isEqualTo(billingCaptor.getAllValues().get(1));
 
     // Stub out the FC service getWorkspace, since that's called by workspacesController.
     stubGetWorkspace(clonedFirecloudWorkspace, WorkspaceAccessLevel.WRITER);
@@ -954,6 +997,49 @@ public class WorkspacesControllerTest {
     assertThat(clonedWorkspace.getName()).isEqualTo(modWorkspace.getName());
     assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
+  }
+
+  @Test
+  public void testCloneWorkspace_resetBillingOnFailedSave() throws Exception {
+    Workspace originalWorkspace = createWorkspace();
+    originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
+
+    final Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setBillingAccountName("cloned-billing-account");
+    modWorkspace.setResearchPurpose(new ResearchPurpose());
+
+    final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    req.setWorkspace(modWorkspace);
+    final FirecloudWorkspace clonedFirecloudWorkspace =
+        stubCloneWorkspace(
+            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+
+    mockBillingProjectBuffer("cloned-ns");
+
+    doThrow(RuntimeException.class).when(workspaceDao).save(any(DbWorkspace.class));
+
+    try {
+      workspacesController
+          .cloneWorkspace(originalWorkspace.getNamespace(), originalWorkspace.getId(), req)
+          .getBody()
+          .getWorkspace();
+    } catch (Exception e) {
+      ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
+      ArgumentCaptor<ProjectBillingInfo> billingCaptor =
+          ArgumentCaptor.forClass(ProjectBillingInfo.class);
+      verify(cloudbillingProvider.get().projects(), times(3))
+          .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
+      assertThat(projectCaptor.getAllValues().get(2)).isEqualTo("projects/cloned-ns");
+      assertThat(billingCaptor.getAllValues().get(2))
+          .isEqualTo(
+              new ProjectBillingInfo().setBillingAccountName(workbenchConfig.billing.accountId));
+
+      return;
+    }
+
+    fail();
   }
 
   private void sortPopulationDetails(ResearchPurpose researchPurpose) {
