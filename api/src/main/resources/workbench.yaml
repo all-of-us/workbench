@@ -2276,7 +2276,7 @@ paths:
           required: true
           description: The IDs of concepts to be added to the concept set.
           schema:
-            type: object
+            $ref: "#/definitions/RdrExportIdList"
       responses:
         200:
           description: >
@@ -2297,7 +2297,7 @@ paths:
           required: true
           description: The IDs of concepts to be added to the concept set.
           schema:
-            type: object
+             $ref: "#/definitions/RdrExportIdList"
       responses:
         200:
           description: >
@@ -4093,3 +4093,12 @@ definitions:
       vm_name:
         description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.
         type: string
+
+  RdrExportIdList:
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          type: integer
+          format: int64
