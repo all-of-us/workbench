@@ -2288,7 +2288,7 @@ paths:
           required: true
           description: The IDs of concepts to be added to the concept set.
           schema:
-            type: object
+            $ref: "#/definitions/RdrExportIdList"
       responses:
         200:
           description: >
@@ -2309,7 +2309,7 @@ paths:
           required: true
           description: The IDs of concepts to be added to the concept set.
           schema:
-            type: object
+             $ref: "#/definitions/RdrExportIdList"
       responses:
         200:
           description: >
@@ -3560,6 +3560,9 @@ definitions:
       phoneNumber:
         description: the user's phone number
         type: string
+      professionalUrl:
+        description: the link to the user's professional url
+        type: string
       currentPosition:
         description: the user's curent position (job title)
         type: string
@@ -3694,18 +3697,14 @@ definitions:
           $ref: '#/definitions/Race'
       ethnicity:
         $ref: '#/definitions/Ethnicity'
-      gender:
-        type: array
-        items:
-          $ref: '#/definitions/Gender'
+      identifiesAsLgbtq:
+        type: boolean
+      lgbtqIdentity:
+        type: string
       sexAtBirth:
         type: array
         items:
           $ref: '#/definitions/SexAtBirth'
-      sexualOrientation:
-        type: array
-        items:
-          $ref: '#/definitions/SexualOrientation'
       yearOfBirth:
         type: number
       education:
@@ -4134,3 +4133,12 @@ definitions:
       vm_name:
         description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.
         type: string
+
+  RdrExportIdList:
+    type: object
+    properties:
+      exportIds:
+        type: array
+        items:
+          type: integer
+          format: int64

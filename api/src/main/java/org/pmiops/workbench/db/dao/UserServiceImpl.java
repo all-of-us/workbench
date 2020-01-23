@@ -302,6 +302,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         null,
         null,
         null,
+        null,
         null);
   }
 
@@ -314,6 +315,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       String currentPosition,
       String organization,
       String areaOfResearch,
+      String professionalUrl,
       List<Degree> degrees,
       DbAddress address,
       DbDemographicSurvey demographicSurvey,
@@ -328,6 +330,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     dbUser.setAreaOfResearch(areaOfResearch);
     dbUser.setFamilyName(familyName);
     dbUser.setGivenName(givenName);
+    dbUser.setProfessionalUrl(professionalUrl);
     dbUser.setDisabled(false);
     dbUser.setAboutYou(null);
     dbUser.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);

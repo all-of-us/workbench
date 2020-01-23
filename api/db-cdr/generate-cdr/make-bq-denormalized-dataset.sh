@@ -397,51 +397,41 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.PROCEDURE_SOURCE_CONCEPT_I
 echo "ds_survey - inserting data"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
-    (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer)
-SELECT
-      x.person_id
-    , x.survey_datetime
-    , y.survey
-    , y.question_concept_id
-    , y.question
-    , x.answer_concept_id
-    , x.answer
+   (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer)
+SELECT y.person_id,
+    y.survey_datetime,
+    x.survey,
+    x.question_concept_id,
+    x.question,
+    y.answer_concept_id,
+    y.answer
 FROM
     (
-        SELECT
-              person_id
-            , observation_datetime as survey_datetime
-            , observation_source_concept_id as question_concept_id
-            , case when observation_source_concept_id = 1585747 then CAST(value_as_number as STRING) else concept_name end as answer
-            , value_source_concept_id as answer_concept_id
-        FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
-        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_source_concept_id = b.concept_id
-        WHERE a.observation_source_concept_id in
-            (
-                SELECT concept_id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                WHERE domain_id = 'SURVEY'
-                    and is_group = 1
-                    and is_selectable = 1
-                    and parent_id != 0
-            )
-    ) x
-JOIN
-    (
-        select
-              b.name as survey
-            , c.concept_id as question_concept_id
-            , c.name as question
+        SELECT s.name as survey,
+            d.concept_name as question,
+            q.concept_id as question_concept_id
         FROM \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\` a
-        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` b on a.ancestor_id = b.id
-        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` c on a.descendant_id = c.id
-        where ancestor_id in
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` s on a.ancestor_id = s.id
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` q on a.descendant_id = q.id
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` d on q.concept_id = d.concept_id
+        WHERE ancestor_id in
             (
                 SELECT id
                 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                 WHERE domain_id = 'SURVEY'
                     and parent_id = 0
             )
+    ) x
+JOIN
+    (
+        SELECT a.person_id,
+            a.observation_id as data_id,
+            a.observation_datetime as survey_datetime,
+            a.observation_source_concept_id as question_concept_id,
+            case when a.value_as_number is not null then CAST(a.value_as_number as STRING) else b.concept_name END as answer,
+            a.value_source_concept_id as answer_concept_id
+        FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_source_concept_id = b.concept_id
     ) y on x.question_concept_id = y.question_concept_id"
 
 echo "ds_visit_occurrence - inserting data"
