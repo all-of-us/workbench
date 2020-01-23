@@ -76,7 +76,7 @@
     "enableMoodleBackend": true
   },
   "access": {
-    "enableComplianceTraining": false,
+    "enableComplianceTraining": true,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
