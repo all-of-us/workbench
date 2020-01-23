@@ -136,7 +136,7 @@ public class UserController implements UserApiDelegate {
     return new BillingAccount()
         .isFreeTier(true)
         .displayName("Use All of Us FREE credits")
-        .name(configProvider.get().billing.accountId)
+        .name("billingAccounts/" + configProvider.get().billing.accountId)
         .isOpen(true);
   }
 

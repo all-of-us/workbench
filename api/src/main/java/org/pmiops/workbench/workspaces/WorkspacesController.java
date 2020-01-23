@@ -270,7 +270,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
       // If billing lockout / upgrade is not enabled, ignore the normal logic
       // and set the billing account to the free tier
-      workspace.setBillingAccountName(workbenchConfigProvider.get().billing.accountId);
+      workspace.setBillingAccountName("billingAccounts/" + workbenchConfigProvider.get().billing.accountId);
       return;
     }
 
@@ -295,7 +295,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
       workspace.setBillingAccountName(updateResponse.getBillingAccountName());
     } catch (IOException e) {
-      throw new ServerErrorException("Could not update billing account");
+      throw new ServerErrorException("Could not update billing account", e);
     }
   }
 
