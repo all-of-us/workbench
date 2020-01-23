@@ -1,20 +1,27 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
-import {WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {WorkspaceAccessLevel, UserApi, WorkspacesApi} from 'generated/fetch';
 import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {WorkspaceEdit, WorkspaceEditMode, WorkspaceEditSection} from './workspace-edit';
 import {workspaceStubs, WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {UserApiStub} from 'testing/stubs/user-api-stub';
 
 jest.mock('app/utils/navigation', () => ({
   ...(require.requireActual('app/utils/navigation')),
   navigate: jest.fn()
 }));
 
+jest.mock('app/utils/workbench-gapi-client', () => ({
+  getBillingAccountName: () => new Promise(resolve => resolve('billing-account'))
+}));
+
 describe('WorkspaceEdit', () => {
   let workspacesApi: WorkspacesApiStub;
+  let userApi: UserApiStub;
+
   const workspace = {
     ...workspaceStubs[0],
     accessLevel: WorkspaceAccessLevel.OWNER,
@@ -32,6 +39,9 @@ describe('WorkspaceEdit', () => {
       reasonForAllOfUs: 'science',
       drugDevelopment: true
     };
+
+    userApi = new UserApiStub();
+    registerApiClient(UserApi, userApi);
 
     workspacesApi = new WorkspacesApiStub([workspace]);
     registerApiClient(WorkspacesApi, workspacesApi);
