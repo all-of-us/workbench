@@ -12,7 +12,9 @@ changes. For example, with dropping a table, first merge in and release a change
 code that removes all references to the table to be dropped. Open a PR (but do not merge) that
 drops the table. When the release removing the references to the dropped table is released,
 merge the changelog that drops the table. This way, the API server can be safely rolled back
-one version without the database changes making the previous version unusable. 
+one version without the database changes making the previous version unusable.
+ 
+You can only go back one version.
 
 Say you want to drop the table 'demographic_survey_table':
 1. Open a PR that removes all references to the 'demographic_survey_table' in server java code.
