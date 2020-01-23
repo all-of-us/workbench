@@ -4097,20 +4097,9 @@ definitions:
         description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.
         type: string
 
-<<<<<<< HEAD
   RdrExportId:
     type: object
     properties:
       exportId:
         type: integer
         format: int64
-=======
-  RdrExportIdList:
-    type: object
-    properties:
-      exportIds:
-        type: array
-        items:
-          type: integer
-          format: int64
->>>>>>> master
