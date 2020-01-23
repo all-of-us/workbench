@@ -3519,6 +3519,9 @@ definitions:
       phoneNumber:
         description: the user's phone number
         type: string
+      professionalUrl:
+        description: the link to the user's professional url
+        type: string
       currentPosition:
         description: the user's curent position (job title)
         type: string
@@ -3653,18 +3656,14 @@ definitions:
           $ref: '#/definitions/Race'
       ethnicity:
         $ref: '#/definitions/Ethnicity'
-      gender:
-        type: array
-        items:
-          $ref: '#/definitions/Gender'
+      identifiesAsLgbtq:
+        type: boolean
+      lgbtqIdentity:
+        type: string
       sexAtBirth:
         type: array
         items:
           $ref: '#/definitions/SexAtBirth'
-      sexualOrientation:
-        type: array
-        items:
-          $ref: '#/definitions/SexualOrientation'
       yearOfBirth:
         type: number
       education:

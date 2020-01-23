@@ -61,6 +61,7 @@ public class DbUser {
   private String givenName;
   private String familyName;
   private String phoneNumber;
+  private String professionalUrl;
   private String currentPosition;
   private String organization;
   private Double freeTierCreditsLimitDollarsOverride = null;
@@ -686,6 +687,15 @@ public class DbUser {
 
   public void setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+  }
+
+  @Column(name = "professional_url")
+  public String getProfessionalUrl() {
+    return professionalUrl;
+  }
+
+  public void setProfessionalUrl(String professionalUrl) {
+    this.professionalUrl = professionalUrl;
   }
 
   @OneToOne(
