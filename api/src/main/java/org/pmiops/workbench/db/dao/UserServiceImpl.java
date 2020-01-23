@@ -584,7 +584,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       return dbUser;
     }
 
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     try {
       Integer moodleId = dbUser.getMoodleId();
       String email = dbUser.getUsername();
@@ -603,12 +602,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         if (userBadgesByName.containsKey(complianceService.getResearchEthicsTrainingField())) {
           BadgeDetails badge =
               userBadgesByName.get(complianceService.getResearchEthicsTrainingField());
-          expiryEpoch = badge.getGlobalexpiration() == null
-              ? badge.getGlobalexpiration()
-              : badge.getDateexpire();
+          expiryEpoch =
+              badge.getGlobalexpiration() == null
+                  ? badge.getDateexpire()
+                  : badge.getGlobalexpiration();
         } else {
           // Moodle has not returned research ethics training information for the given user --
-          // we should clearn the user's training completion and expiration time.
+          // we should clear the user's training completion and expiration time.
           dbUser.setComplianceTrainingCompletionTime(null);
           dbUser.setComplianceTrainingExpirationTime(null);
         }
@@ -626,6 +626,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         }
       }
 
+      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
       Timestamp badgeExpiration =
           expiryEpoch == null ? null : new Timestamp(Long.parseLong(expiryEpoch));
 
@@ -638,6 +639,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           // The badge has a new expiration date, suggesting some sort of course completion change.
           // Reset the completion time.
           dbUser.setComplianceTrainingCompletionTime(now);
+        }
+
+        // If the badge has expired, clear the compliance training completion time.
+        if (badgeExpiration.before(now)) {
+          dbUser.setComplianceTrainingCompletionTime(null);
         }
       }
 

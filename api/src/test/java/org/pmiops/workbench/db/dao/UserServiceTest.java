@@ -123,7 +123,8 @@ public class UserServiceTest {
 
     BadgeDetailsDeprecated badge = new BadgeDetailsDeprecated();
     badge.setName("All of us badge");
-    badge.setDateexpire("12345");
+    long expiry = PROVIDED_CLOCK.instant().toEpochMilli() + 100000;
+    badge.setDateexpire(Long.toString(expiry));
 
     when(mockComplianceService.getMoodleId(USERNAME)).thenReturn(MOODLE_ID);
     when(mockComplianceService.getUserBadge(MOODLE_ID))
@@ -135,7 +136,8 @@ public class UserServiceTest {
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getComplianceTrainingCompletionTime())
         .isEqualTo(new Timestamp(TIMESTAMP_MSECS));
-    assertThat(user.getComplianceTrainingExpirationTime()).isEqualTo(new Timestamp(12345));
+    assertThat(user.getComplianceTrainingExpirationTime())
+        .isEqualTo(Timestamp.from(Instant.ofEpochMilli(expiry)));
 
     // Completion timestamp should not change when the method is called again.
     tick();
@@ -148,11 +150,12 @@ public class UserServiceTest {
   public void testSyncComplianceTrainingStatus() throws Exception {
     providedWorkbenchConfig.featureFlags.enableMoodleV2Api = true;
 
-    BadgeDetails ret_badge = new BadgeDetails();
-    ret_badge.setDateexpire("12345");
+    BadgeDetails retBadge = new BadgeDetails();
+    long expiry = PROVIDED_CLOCK.instant().toEpochMilli() + 100000;
+    retBadge.setDateexpire(Long.toString(expiry));
 
     Map<String, BadgeDetails> userBadgesByName = new HashMap<String, BadgeDetails>();
-    userBadgesByName.put(mockComplianceService.getResearchEthicsTrainingField(), ret_badge);
+    userBadgesByName.put(mockComplianceService.getResearchEthicsTrainingField(), retBadge);
 
     when(mockComplianceService.getUserBadgesByName(USERNAME)).thenReturn(userBadgesByName);
 
@@ -162,13 +165,69 @@ public class UserServiceTest {
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getComplianceTrainingCompletionTime())
         .isEqualTo(new Timestamp(TIMESTAMP_MSECS));
-    assertThat(user.getComplianceTrainingExpirationTime()).isEqualTo(new Timestamp(12345));
+    assertThat(user.getComplianceTrainingExpirationTime())
+        .isEqualTo(Timestamp.from(Instant.ofEpochMilli(expiry)));
 
     // Completion timestamp should not change when the method is called again.
     tick();
     Timestamp completionTime = user.getComplianceTrainingCompletionTime();
     userService.syncComplianceTrainingStatus();
     assertThat(user.getComplianceTrainingCompletionTime()).isEqualTo(completionTime);
+  }
+
+  @Test
+  public void testUpdateComplianceTrainingStatus() throws Exception {
+    providedWorkbenchConfig.featureFlags.enableMoodleV2Api = true;
+
+    BadgeDetails retBadge = new BadgeDetails();
+    long expiry = PROVIDED_CLOCK.instant().toEpochMilli();
+    retBadge.setDateexpire(Long.toString(expiry));
+    retBadge.setLastissued(Long.toString(expiry - 100000));
+    retBadge.setValid(true);
+
+    Map<String, BadgeDetails> userBadgesByName = new HashMap<String, BadgeDetails>();
+    userBadgesByName.put(mockComplianceService.getResearchEthicsTrainingField(), retBadge);
+
+    when(mockComplianceService.getUserBadgesByName(USERNAME)).thenReturn(userBadgesByName);
+
+    userService.syncComplianceTrainingStatus();
+
+    // The user should be updated in the database with a non-empty completion and expiration time.
+    DbUser user = userDao.findUserByUsername(USERNAME);
+    assertThat(user.getComplianceTrainingCompletionTime())
+        .isEqualTo(new Timestamp(TIMESTAMP_MSECS));
+    assertThat(user.getComplianceTrainingExpirationTime())
+        .isEqualTo(Timestamp.from(Instant.ofEpochMilli(expiry)));
+
+    // Deprecate the old training.
+    long newExpiry = expiry - 1000;
+    retBadge.setDateexpire(Long.toString(newExpiry));
+    retBadge.setValid(false);
+
+    // Completion timestamp should be wiped out by the expiry timestamp passing.
+    userService.syncComplianceTrainingStatus();
+    assertThat(user.getComplianceTrainingCompletionTime()).isNull();
+
+    // The user does a new training.
+    long newerExpiry = expiry + 1000;
+    retBadge.setDateexpire(Long.toString(newerExpiry));
+    retBadge.setValid(true);
+
+    // Completion and expiry timestamp should be updated.
+    userService.syncComplianceTrainingStatus();
+    assertThat(user.getComplianceTrainingCompletionTime())
+        .isEqualTo(new Timestamp(TIMESTAMP_MSECS));
+    assertThat(user.getComplianceTrainingExpirationTime())
+        .isEqualTo(Timestamp.from(Instant.ofEpochMilli(newerExpiry)));
+
+    // A global expiration is set.
+    long globalExpiry = expiry - 1000;
+    retBadge.setGlobalexpiration(Long.toString(globalExpiry));
+    retBadge.setValid(false);
+
+    // Completion timestamp should be wiped out by the globalexpiry timestamp passing.
+    userService.syncComplianceTrainingStatus();
+    assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
   private void tick() {

@@ -201,7 +201,7 @@ definitions:
     BadgeDetails:
       properties:
         valid:
-          type: string
+          type: boolean
           description: Whether the badge is valid
         lastissued:
           type: string
