@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
-import com.google.protobuf.ByteString;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -31,14 +30,13 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    */
   @Override
   public ResponseEntity<Void> exportResearcherData(Object researcherIds) {
-    if (researcherIds == null || ((ByteString) researcherIds).isEmpty()) {
+    if (researcherIds == null || ((ArrayList) researcherIds).isEmpty()) {
       log.severe(" call to export Researcher Data had no Ids");
       return ResponseEntity.noContent().build();
     }
     List<Long> requestUserIdList =
-        Arrays.asList(((ByteString) researcherIds).toStringUtf8().split(IDS_STRING_SPLIT)).stream()
-            .map(strUserId -> Long.parseLong(strUserId))
-            .collect(Collectors.toList());
+        ((ArrayList<String>) researcherIds)
+            .stream().map(id -> Long.parseLong(id)).collect(Collectors.toList());
     rdrExportService.exportUsers(requestUserIdList);
 
     return ResponseEntity.noContent().build();
@@ -52,14 +50,13 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    */
   @Override
   public ResponseEntity<Void> exportWorkspaceData(Object researchIds) {
-    if (researchIds == null || ((ByteString) researchIds).isEmpty()) {
+    if (researchIds == null || ((ArrayList) researchIds).isEmpty()) {
       log.severe(" call to export Workspace Data had no Ids");
       return ResponseEntity.noContent().build();
     }
     List<Long> requestUserIdList =
-        Arrays.asList(((ByteString) researchIds).toStringUtf8().split(IDS_STRING_SPLIT)).stream()
-            .map(strUserId -> Long.parseLong(strUserId))
-            .collect(Collectors.toList());
+        ((ArrayList<String>) researchIds)
+            .stream().map(id -> Long.parseLong(id)).collect(Collectors.toList());
     rdrExportService.exportWorkspaces(requestUserIdList);
 
     return ResponseEntity.noContent().build();
