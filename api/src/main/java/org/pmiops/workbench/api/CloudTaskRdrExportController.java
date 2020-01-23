@@ -3,10 +3,7 @@ package org.pmiops.workbench.api;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 import org.pmiops.workbench.model.RdrExportIdList;
-import org.pmiops.workbench.model.ResearcherData;
 import org.pmiops.workbench.rdr.RdrExportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
