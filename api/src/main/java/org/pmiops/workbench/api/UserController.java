@@ -26,6 +26,7 @@ import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.BillingAccount;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -152,12 +153,12 @@ public class UserController implements UserApiDelegate {
 
   @Override
   public ResponseEntity<WorkbenchListBillingAccountsResponse> listBillingAccounts() {
-    ListBillingAccountsResponse response = null;
+    ListBillingAccountsResponse response;
     try {
-      Cloudbilling.BillingAccounts.List request = cloudBillingProvider.get().billingAccounts().list();
-      response = request.execute();
+      response = cloudBillingProvider.get()
+          .billingAccounts().list().execute();
     } catch (IOException e) {
-      log.info(e.getMessage());
+      throw new ServerErrorException("Could not retrieve billing accounts list from Google Cloud");
     }
 
     List<BillingAccount> billingAccounts = Stream.concat(

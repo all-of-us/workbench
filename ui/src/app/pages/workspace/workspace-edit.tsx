@@ -469,12 +469,19 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         this.setState(fp.set(['workspace', 'cdrVersionId'], cdrResp.defaultCdrVersionId));
       }
 
-      userApi().listBillingAccounts().then(response =>
-        this.setState({billingAccounts: response.billingAccounts})
-      );
+      if (serverConfigStore.getValue().enableBillingLockout) {
+        userApi().listBillingAccounts().then(response =>
+          this.setState({billingAccounts: response.billingAccounts})
+        );
 
-      getBillingAccountName(this.props.workspace.namespace).then(billingAccountName =>
-        this.setState(fp.set(['workspace', 'billingAccountName'], billingAccountName)));
+        getBillingAccountName(this.props.workspace.namespace).then(billingAccountName =>
+          this.setState(fp.set(['workspace', 'billingAccountName'], billingAccountName)));
+      } else {
+        // This is a temporary hack to set the billing account name property to anything
+        // so that it passes validation. The server ignores the value if the feature flag
+        // is turned off so any value is fine.
+        this.setState(fp.set(['workspace', 'billingAccountName'], 'free-tier'));
+      }
     }
 
     makeDiseaseInput() {
@@ -757,14 +764,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             onChange={v => this.setState({cloneUserRole: v})}/>
         </WorkspaceEditSection>
         }
-        <WorkspaceEditSection header='All of Us Billing Account'
-                              description={billingDescription}
-                              tooltip={toolTipText.billingAccount}>
-          <Dropdown value={this.state.workspace.billingAccountName}
-                    options={this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}))}
-                    onChange={e => this.setState(fp.set(['workspace', 'billingAccountName'], e.value))}
-          />
-        </WorkspaceEditSection>
+        {serverConfigStore.getValue().enableBillingLockout &&
+          <WorkspaceEditSection header='All of Us Billing Account'
+                                description={billingDescription}
+                                tooltip={toolTipText.billingAccount}>
+            <Dropdown value={this.state.workspace.billingAccountName}
+                      options={this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}))}
+                      onChange={e => this.setState(fp.set(['workspace', 'billingAccountName'], e.value))}
+            />
+          </WorkspaceEditSection>
+        }
         <WorkspaceEditSection header='Research Use Statement Questions'
             description={<div> {ResearchPurposeDescription} Therefore, please provide
               sufficiently detailed responses at a 5th grade reading level.  Your responses

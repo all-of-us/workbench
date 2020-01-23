@@ -2367,6 +2367,10 @@ definitions:
         type: boolean
         default: false
         description: Feature flag for enabling eRA commons
+      enableBillingLockout:
+        type: boolean
+        default: false
+        description: Feature flag for billing lockout and upgrade
       firecloudURL:
         type: string
         description: The Firecloud URL to use for REST requests.

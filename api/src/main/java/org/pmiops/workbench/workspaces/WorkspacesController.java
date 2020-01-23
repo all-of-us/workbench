@@ -267,6 +267,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   }
 
   private void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
+      // If billing lockout / upgrade is not enabled, ignore the normal logic
+      // and set the billing account to the free tier
+      workspace.setBillingAccountName(workbenchConfigProvider.get().billing.accountId);
+      return;
+    }
+
     if (newBillingAccountName.equals(workspace.getBillingAccountName())) {
       return;
     }
@@ -281,7 +288,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           .execute();
 
       if (!newBillingAccountName.equals(updateResponse.getBillingAccountName())) {
-        throw new RuntimeException("Google Cloud updateBillingInfo call succeeded but did not set the correct billing account name");
+        throw new ServerErrorException("Google Cloud updateBillingInfo call succeeded but did not set the correct billing account name");
       }
 
       workspace.setBillingAccountName(updateResponse.getBillingAccountName());
