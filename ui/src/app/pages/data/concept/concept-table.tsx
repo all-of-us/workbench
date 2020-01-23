@@ -93,17 +93,6 @@ const domainColumns = [
     testId: null
   }
 ];
-const surveyColumns = [
-  {
-    bodyStyle: styles.colStyle,
-    className: null,
-    field: 'question',
-    header: 'Question',
-    headerStyle: styles.headerStyle,
-    selectionMode: null,
-    testId: 'question'
-  }
-];
 
 interface SynonymsObjectState {
   seeMore: boolean;
@@ -293,7 +282,18 @@ export class ConceptTable extends React.Component<Props, State> {
   }
 
   renderColumns() {
-    const {domain} = this.props;
+    const {concepts, domain} = this.props;
+    const surveyColumn = [
+      {
+        bodyStyle: styles.colStyle,
+        className: null,
+        field: concepts.length && !!concepts[0].question ? 'question' : 'conceptName',
+        header: 'Question',
+        headerStyle: styles.headerStyle,
+        selectionMode: null,
+        testId: 'question'
+      }
+    ];
     const columns = [
       {
         bodyStyle: {...styles.colStyle, textAlign: 'center'},
@@ -304,7 +304,7 @@ export class ConceptTable extends React.Component<Props, State> {
         selectionMode: 'multiple',
         testId: 'conceptCheckBox'
       },
-      ...(domain === Domain.SURVEY && environment.enableNewConceptTabs ? surveyColumns : domainColumns)
+      ...(domain === Domain.SURVEY && environment.enableNewConceptTabs ? surveyColumn : domainColumns)
     ];
     return columns.map((col, c) => <Column
       bodyStyle={col.bodyStyle}
