@@ -43,7 +43,7 @@ public class CloudTaskInterceptorTest {
   public void prehandleForCloudTaskNoHeader() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.POST);
     when(handler.getMethod())
-        .thenReturn(CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, List.class));
+        .thenReturn(CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, Object.class));
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
   }
 
@@ -51,7 +51,7 @@ public class CloudTaskInterceptorTest {
   public void prehandleForCloudTaskWithBadHeader() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.POST);
     when(handler.getMethod())
-        .thenReturn(CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, List.class));
+        .thenReturn(CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, Object.class));
     when(request.getHeader(CloudTaskInterceptor.QUEUE_NAME_REQUEST_HEADER)).thenReturn("asdf");
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
   }
@@ -60,7 +60,7 @@ public class CloudTaskInterceptorTest {
   public void prehandleForCloudTaskWithHeader() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.POST);
     when(handler.getMethod())
-        .thenReturn(CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, List.class));
+        .thenReturn(CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, Object.class));
     when(request.getHeader(CloudTaskInterceptor.QUEUE_NAME_REQUEST_HEADER))
         .thenReturn("rdrQueueTest");
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
