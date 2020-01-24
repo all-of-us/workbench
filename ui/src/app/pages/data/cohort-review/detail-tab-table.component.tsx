@@ -298,7 +298,12 @@ export const DetailTabTable = withCurrentWorkspace()(
         }, () => this.getParticipantData(true));
       } else if (prevProps.updateState !== updateState) {
         if (lazyLoad) {
-          this.getParticipantData(true);
+          this.setState({
+            data: null,
+            filteredData: null,
+            loading: true,
+            error: false,
+          }, () => this.getParticipantData(true));
         } else {
           this.filterData();
         }
@@ -355,7 +360,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         if (getCount) {
           await cohortReviewApi().getParticipantCount(namespace, id, cohortReviewId, participantId, pageFilterRequest).then(response => {
             totalCount = response.count;
-            lazyLoad = totalCount > 1000;
+            // If lazyLoad is already true, leave it as true, otherwise check the count
+            lazyLoad = lazyLoad || totalCount > 1000;
             pageFilterRequest.pageSize = lazyLoad ? lazyLoadSize : totalCount;
           });
         }
@@ -519,11 +525,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     filterData() {
       let {data, start} = this.state;
-      const {
-        domain,
-        filterState,
-        filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}, vocab}
-      } = this.props;
+      const {domain, filterState: {global: {ageMin, ageMax, dateMin, dateMax, visits}, tabs, vocab}} = this.props;
       /* Global filters */
       if (dateMin || dateMax) {
         const min = dateMin ? Date.parse(dateMin) : 0;
@@ -556,7 +558,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         'itemTime',
         'survey'
       ];
-      const columnFilters = filterState.tabs[domain];
+      const columnFilters = tabs[domain];
       if (!columnFilters) {
         if (data.length < start + rowsPerPage) {
           start = Math.floor(data.length / rowsPerPage) * rowsPerPage;
@@ -646,10 +648,11 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     checkboxFilter(column: string) {
       const {codeResults, data} = this.state;
-      const {domain, filterState, filterState: {vocab}} = this.props;
-      const columnFilters = filterState.tabs[domain];
+      const {domain, filterState: {tabs, vocab}} = this.props;
+      const columnFilters = tabs[domain];
+      const filterStyle = !columnFilters[column].includes('Select All') ? filterIcons.active : filterIcons.default;
       if (!data) {
-        return <i className='pi pi-filter' style={filterIcons.default} />;
+        return <i className='pi pi-filter' style={filterStyle} />;
       }
       const counts = {total: 0};
       let options: Array<any>;
@@ -707,11 +710,10 @@ export const DetailTabTable = withCurrentWorkspace()(
           }
           return acc;
         }, []);
-      const filtered = !columnFilters[column].includes('Select All');
       let fl: any;
       return <React.Fragment>
         <i className='pi pi-filter'
-           style={filtered ? filterIcons.active : filterIcons.default}
+           style={filterStyle}
            onClick={(e) => {
              this.filterEvent(column);
              fl.toggle(e);
