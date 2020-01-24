@@ -703,6 +703,18 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 inform the All of Us Research participants, and to comply with the 21st Century Cures Act. Some of the
                 fields noted above may not be visible currently, but will be added in the future.</div>
           </FlexColumn>
+          <FlexColumn style={{...styles.asideContainer, marginTop: '21.8rem', height: '15rem'}}>
+            <div style={styles.asideHeader}>All of Us participants are most interested in knowing:</div>
+            <ul style={{display: 'flex', height: '100%', flexDirection: 'column', justifyContent: 'space-evenly'}}>
+              <li style={styles.asideText}>Your research training and background</li>
+              <li style={styles.asideText}>How you hope to use AoU data for your research.</li>
+              <li style={styles.asideText}>Your research approach and the tools you use for answering your research
+                  questions (eg: Large datasets of phenotypes and genotypes, Community engagement and
+                  community-based participatory research methods, etc)</li>
+              <li style={styles.asideText}>Your experience working with underrepresented populations as a scientist
+                  or outside of research, and how that experience may inform your work with AoU data </li>
+            </ul>
+          </FlexColumn>
         </FlexColumn>
       </FlexRow>}
       {/*The following will be deleted once enableAccountPages is set to true in prod*/}

@@ -4,7 +4,7 @@ import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
-import {FlexRow} from 'app/components/flex';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {CheckBox, RadioButton} from 'app/components/inputs';
 import colors from 'app/styles/colors';
 import {
@@ -26,14 +26,14 @@ import {AccountCreationOptions} from './account-creation-options';
 
 
 const styles = {
-  checkbox: {marginTop: '0.3rem'},
-  checkboxWrapper: {display: 'flex', width: '9rem', marginBottom: '0.5rem'},
+  checkbox: {height: 17, width: 17, marginTop: '0.15rem'},
+  checkboxWrapper: {display: 'flex', alignItems: 'flex-start', width: '13rem', marginBottom: '0.5rem'},
   checkboxLabel: {
     color: colors.primary,
     fontFamily: 'Montserrat',
     fontSize: '14px',
     fontWeight: 400,
-    paddingLeft: '0.5rem',
+    paddingLeft: '0.25rem',
     paddingRight: '0.5rem'
   }
 };
@@ -145,11 +145,11 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
 
       {/*Race section*/}
       <Section header='Race'>
-        <div style={{display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap'}}>
+        <FlexColumn style={{justifyContent: 'flex-start', flexWrap: 'wrap', height: '9rem', width: '26rem'}}>
           {AccountCreationOptions.race.map((race) => {
             return this.createOptionCheckbox(race.label, 'race', race.value, race.value.toString());
           })}
-        </div>
+        </FlexColumn>
       </Section>
 
       {/*Ethnicity section*/}
@@ -158,19 +158,21 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
                        onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
       <Section header='Do you identify as lesbian, gay, bisexual, transgender, queer (LGBTQ),
 or another sexual and/or gender minority?'>
-        <div style={{paddingTop: '0.5rem'}}>
-          <RadioButton onChange={
-            (e) => this.updateDemographicAttribute('identifiesAsLgbtq', true)}
-                       checked={demographicSurvey.identifiesAsLgbtq}
-                       style={{marginRight: '0.5rem'}}/>
-          <label style={{paddingRight: '3rem', color: colors.primary}}>
-            Yes
-          </label>
-          <RadioButton onChange={(e) => this.updateDemographicAttribute('identifiesAsLgbtq', false)}
-                       checked={!demographicSurvey.identifiesAsLgbtq}
-                       style={{marginRight: '0.5rem'}}/>
-          <label style={{color: colors.primary}}>No</label>
-        </div>
+        <FlexColumn>
+          <FlexRow style={{alignItems: 'baseline'}}>
+            <RadioButton onChange={
+              (e) => this.updateDemographicAttribute('identifiesAsLgbtq', true)}
+                         checked={demographicSurvey.identifiesAsLgbtq}
+                         style={{marginRight: '0.5rem'}}/>
+            <label style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
+          </FlexRow>
+          <FlexRow style={{alignItems: 'baseline'}}>
+            <RadioButton onChange={(e) => this.updateDemographicAttribute('identifiesAsLgbtq', false)}
+                         checked={!demographicSurvey.identifiesAsLgbtq}
+                         style={{marginRight: '0.5rem'}}/>
+            <label style={{color: colors.primary}}>No</label>
+          </FlexRow>
+        </FlexColumn>
         <label></label>
         <TextInputWithLabel labelText='If yes, please tell us about your LGBTQ+ identity'
                             value={demographicSurvey.lgbtqIdentity} inputName='lgbtqIdentity'
@@ -180,12 +182,12 @@ or another sexual and/or gender minority?'>
       </Section>
       {/*Sex at birth section*/}
       <Section header='Sex at birth'>
-        <FlexRow style={{flexWrap: 'wrap'}}>
+        <FlexColumn style={{justifyContent: 'flex-start', flexWrap: 'wrap', height: '5rem', width: '26rem'}}>
           {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
             return this.createOptionCheckbox(sexAtBirth.label, 'sexAtBirth',
               sexAtBirth.value, sexAtBirth.value.toString());
           })}
-        </FlexRow>
+        </FlexColumn>
       </Section>
 
       {/*Year of birth section*/}
@@ -193,29 +195,30 @@ or another sexual and/or gender minority?'>
                        value={demographicSurvey.yearOfBirth}
                        onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
       />
-
+      {/*Disability section*/}
+      <Section header='Do you have a Physical or Cognitive disability?'>
+        <FlexColumn>
+          <FlexRow style={{alignItems: 'baseline'}}>
+            <RadioButton onChange={
+              (e) => this.updateDemographicAttribute('disability', true)}
+                         checked={demographicSurvey.disability}
+                         style={{marginRight: '0.5rem'}}/>
+            <label style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
+          </FlexRow>
+          <FlexRow style={{alignItems: 'baseline'}}>
+            <RadioButton onChange={(e) => this.updateDemographicAttribute('disability', false)}
+                         checked={!demographicSurvey.disability}
+                         style={{marginRight: '0.5rem'}}/>
+            <label style={{color: colors.primary}}>No</label>
+          </FlexRow>
+        </FlexColumn>
+      </Section>
       {/*Education section*/}
       <DropDownSection header='Highest Level of Education Completed'
                        options={AccountCreationOptions.levelOfEducation}
                        value={demographicSurvey.education}
                        onChange={
                          (e) => this.updateDemographicAttribute('education', e)}/>
-
-      {/*Disability section*/}
-      <Section header='Do you have a Physical or Cognitive disability?'>
-        <div style={{paddingTop: '0.5rem'}}>
-          <RadioButton onChange={
-            (e) => this.updateDemographicAttribute('disability', true)}
-                       checked={demographicSurvey.disability}
-                       style={{marginRight: '0.5rem'}}/>
-          <label style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
-          <RadioButton onChange={(e) => this.updateDemographicAttribute('disability', false)}
-                       checked={!demographicSurvey.disability}
-                       style={{marginRight: '0.5rem'}}/>
-          <label style={{color: colors.primary}}>No</label>
-        </div>
-      </Section>
-
       <div style={{display: 'flex', paddingTop: '2rem'}}>
         <Button type='secondary' style={{marginRight: '1rem'}} disabled={this.state.creatingAccount}
                 onClick={() => this.props.setProfile(this.profileObj, {stepName: 'accountCreation'})}>
