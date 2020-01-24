@@ -303,7 +303,9 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                     </div>
                   </React.Fragment>}
                   <div style={styles.conceptSetData}>
-                    <div data-test-id='participant-count'>Participant Count: {conceptSet.participantCount.toLocaleString()}</div>
+                    <div data-test-id='participant-count'>
+                      Participant Count: {!!conceptSet.participantCount ? conceptSet.participantCount.toLocaleString() : ''}
+                    </div>
                     <div style={{marginLeft: '2rem'}} data-test-id='concept-set-domain'>
                       Domain: {conceptSet.domain === Domain.PHYSICALMEASUREMENT
                         ? 'Physical Measurements' : fp.capitalize(conceptSet.domain.toString())}
