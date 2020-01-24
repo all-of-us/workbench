@@ -70,22 +70,22 @@ public class OfflineUserControllerTest {
   public void testBulkSyncTrainingStatus()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     // Mock out the service under test to simply return the passed user argument.
-    doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatus(any());
+    doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatusDeprecated(any());
     offlineUserController.bulkSyncComplianceTrainingStatus();
-    verify(userService, times(3)).syncComplianceTrainingStatus(any());
+    verify(userService, times(3)).syncComplianceTrainingStatusDeprecated(any());
   }
 
   @Test(expected = ServerErrorException.class)
   public void testBulkSyncTrainingStatusWithSingleUserError()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatus(any());
+    doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatusDeprecated(any());
     doThrow(new org.pmiops.workbench.moodle.ApiException("Unknown error"))
         .when(userService)
-        .syncComplianceTrainingStatus(
+        .syncComplianceTrainingStatusDeprecated(
             argThat(user -> user.getUsername().equals("a@fake-research-aou.org")));
     offlineUserController.bulkSyncComplianceTrainingStatus();
     // Even when a single call throws an exception, we call the service for all users.
-    verify(userService, times(3)).syncComplianceTrainingStatus(any());
+    verify(userService, times(3)).syncComplianceTrainingStatusDeprecated(any());
   }
 
   @Test
