@@ -25,10 +25,11 @@ export const initialFilterState = {
       'Select All'
     ]
   },
+  // TODO Uncomment code filters once decision has been made for server-side implementation
   tabs: {
     ALL_EVENTS: {
-      standardCode: ['Select All'],
-      sourceCode: ['Select All'],
+      // standardCode: ['Select All'],
+      // sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
       domain: ['Select All'],
@@ -37,16 +38,16 @@ export const initialFilterState = {
       value: '',
     },
     PROCEDURE: {
-      standardCode: ['Select All'],
-      sourceCode: ['Select All'],
+      // standardCode: ['Select All'],
+      // sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
       sourceName: '',
       standardName: '',
     },
     CONDITION: {
-      standardCode: ['Select All'],
-      sourceCode: ['Select All'],
+      // standardCode: ['Select All'],
+      // sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
       sourceName: '',
@@ -60,16 +61,16 @@ export const initialFilterState = {
       lastMention: '',
     },
     OBSERVATION: {
-      standardCode: ['Select All'],
-      sourceCode: ['Select All'],
+      // standardCode: ['Select All'],
+      // sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
       sourceName: '',
       standardName: '',
     },
     PHYSICAL_MEASUREMENT: {
-      standardCode: ['Select All'],
-      sourceCode: ['Select All'],
+      // standardCode: ['Select All'],
+      // sourceCode: ['Select All'],
       standardVocabulary: ['Select All'],
       sourceVocabulary: ['Select All'],
       sourceName: '',

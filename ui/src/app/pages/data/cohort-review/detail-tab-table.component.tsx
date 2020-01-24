@@ -327,7 +327,8 @@ export const DetailTabTable = withCurrentWorkspace()(
                   // checkbox filters
                   if (!filter.length) {
                     // TODO show no data, don't call api
-                    break;
+                    this.setState({data: [], filteredData: null, loading: false});
+                    return;
                   } else if (!filter.includes('Select All')) {
                     filters.items.push({
                       property: columns.find(c => c.name === col).filter,
@@ -688,7 +689,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           options = vocabs[domain] ? vocabs[domain].map(name => {
             return {name, count: counts[name] || 0};
           }) : [];
-          options.sort((a, b) => b.count - a.count);
+          // options.sort((a, b) => b.count - a.count);
           break;
       }
       options.push({name: 'Select All', count: counts.total});
@@ -704,7 +705,8 @@ export const DetailTabTable = withCurrentWorkspace()(
                 <input style={{width: '0.7rem', height: '0.7rem'}} type='checkbox' name={opt.name}
                        checked={columnFilters[column].includes(opt.name)}
                        onChange={($event) => this.updateData($event, column, options)}/>
-                <label style={{paddingLeft: '0.4rem'}}> {opt.name} ({opt.count}) </label>
+                {/* TODO Uncomment counts below once decision has been made for server-side implementation */}
+                <label style={{paddingLeft: '0.4rem'}}> {opt.name} {/*({opt.count})*/} </label>
               </div>}
             </React.Fragment>);
           }
@@ -734,7 +736,8 @@ export const DetailTabTable = withCurrentWorkspace()(
             <input style={{width: '0.7rem',  height: '0.7rem'}} type='checkbox' name='Select All'
                    checked={columnFilters[column].includes('Select All')}
                    onChange={($event) => this.updateData($event, column, options)}/>
-            <label style={{paddingLeft: '0.4rem'}}> Select All ({counts.total}) </label>
+            {/* TODO Uncomment total count below once decision has been made for server-side implementation */}
+            <label style={{paddingLeft: '0.4rem'}}> Select All {/*({counts.total})*/} </label>
           </div>
         </OverlayPanel>
       </React.Fragment>;
@@ -829,12 +832,13 @@ export const DetailTabTable = withCurrentWorkspace()(
         const asc = sortField === col.name && sortOrder === 1;
         const desc = sortField === col.name && sortOrder === -1;
         const colName = col.name === 'value' || col.name === `${vocab}Name`;
+        // TODO Uncomment code filters once decision has been made for server-side implementation
         const hasCheckboxFilter = [
           'domain',
           'sourceVocabulary',
           'standardVocabulary',
-          'sourceCode',
-          'standardCode'
+          // 'sourceCode',
+          // 'standardCode'
         ].includes(col.name);
         const hasTextFilter = [
           'sourceName',
@@ -889,8 +893,8 @@ export const DetailTabTable = withCurrentWorkspace()(
           onSort={this.onSort}
           lazy={lazyLoad}
           paginator
-          paginatorTemplate={!spinner && !!filteredData ? paginatorTemplate : ''}
-          currentPageReportTemplate={!spinner && !!filteredData ? pageReportTemplate : ''}
+          paginatorTemplate={!spinner && !!value ? paginatorTemplate : ''}
+          currentPageReportTemplate={!spinner && !!value ? pageReportTemplate : ''}
           onPage={this.onPage}
           alwaysShowPaginator={false}
           first={start}
