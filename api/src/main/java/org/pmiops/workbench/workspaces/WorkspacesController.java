@@ -247,7 +247,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (!workbenchConfigProvider
         .get()
         .billing
-        .accountId
+        .freeTierBillingAccountName()
         .equals(workspace.getBillingAccountName())) {
       try {
         workspaceService.updateWorkspaceBillingAccount(
@@ -263,7 +263,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       // Tell Google to set the billing account back to the free tier if the workspace creation
       // fails
       workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, workbenchConfigProvider.get().billing.accountId);
+          dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
       throw e;
     }
 
@@ -501,7 +501,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (!workbenchConfigProvider
         .get()
         .billing
-        .accountId
+        .freeTierBillingAccountName()
         .equals(body.getWorkspace().getBillingAccountName())) {
       try {
         workspaceService.updateWorkspaceBillingAccount(
@@ -517,7 +517,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if our clone fails
       workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, workbenchConfigProvider.get().billing.accountId);
+          dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
       throw e;
     }
 

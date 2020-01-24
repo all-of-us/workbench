@@ -654,7 +654,7 @@ public class WorkspacesControllerTest {
               any(),
               eq(
                   new ProjectBillingInfo()
-                      .setBillingAccountName(workbenchConfig.billing.accountId)));
+                      .setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName())));
       return;
     }
 
@@ -664,7 +664,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testCreateWorkspace_doNotUpdateBillingForFreeTier() throws Exception {
     Workspace workspace = createWorkspace();
-    workspace.setBillingAccountName(workbenchConfig.billing.accountId);
+    workspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
 
     workspacesController.createWorkspace(workspace);
 
@@ -782,7 +782,7 @@ public class WorkspacesControllerTest {
     verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
-    ws.setBillingAccountName(workbenchConfig.billing.accountId);
+    ws.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
     request.setWorkspace(ws);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
 
@@ -1092,7 +1092,7 @@ public class WorkspacesControllerTest {
               any(),
               eq(
                   new ProjectBillingInfo()
-                      .setBillingAccountName(workbenchConfig.billing.accountId)));
+                      .setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName())));
       return;
     }
 
@@ -1109,7 +1109,7 @@ public class WorkspacesControllerTest {
     final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
     modWorkspace.setNamespace("cloned-ns");
-    modWorkspace.setBillingAccountName(workbenchConfig.billing.accountId);
+    modWorkspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
     modWorkspace.setResearchPurpose(new ResearchPurpose());
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
