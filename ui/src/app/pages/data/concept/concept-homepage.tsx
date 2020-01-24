@@ -20,16 +20,7 @@ import {NavStore, queryParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {environment} from 'environments/environment';
-import {
-  Concept,
-  ConceptSet,
-  Domain,
-  DomainCount,
-  DomainInfo,
-  StandardConceptFilter,
-  SurveyModule,
-  SurveyQuestions,
-} from 'generated/fetch';
+import {Concept, ConceptSet, Domain, DomainCount, DomainInfo, StandardConceptFilter, SurveyModule, SurveyQuestions} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
 import {SurveyDetails} from './survey-details';
 
@@ -152,14 +143,6 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
       </DomainCardBase>;
     };
 
-// Stub used to display placeholder tabs in concept search
-const conceptCacheStub = [
-  {
-    domain: Domain.SURVEY,
-    items: []
-  }
-];
-
 interface Props {
   workspace: WorkspaceData;
 }
@@ -258,15 +241,15 @@ export const ConceptHomepage = withCurrentWorkspace()(
           domain: domain.domain,
           items: []
         }));
+        // Add ConceptCacheItem for Surveys tab
+        conceptsCache.push({domain: Domain.SURVEY, items: []});
         let conceptDomainCounts: DomainCount[] = conceptDomainInfo.items.map((domain) => ({
           domain: domain.domain,
           name: domain.name,
           conceptCount: 0
         }));
-        if (environment.enableNewConceptTabs) {
-          conceptsCache = [...conceptsCache, ...conceptCacheStub];
-          conceptDomainCounts = [...conceptDomainCounts];
-        } else {
+        if (!environment.enableNewConceptTabs) {
+          // Don't show Physical Measurements tile or tab if feature flag disabled
           conceptsCache = conceptsCache.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
           conceptDomainCounts = conceptDomainCounts.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
         }
@@ -341,7 +324,13 @@ export const ConceptHomepage = withCurrentWorkspace()(
       if (!!selectedSurvey) {
         request['surveyName'] = selectedSurvey;
       }
-      conceptsApi().domainCounts(namespace, id, request).then(counts => this.setState({conceptDomainCounts: counts.domainCounts}));
+      conceptsApi().domainCounts(namespace, id, request).then(counts => {
+        // Filter Physical Measurements if feature flag disabled
+        const conceptDomainCounts = !environment.enableNewConceptTabs
+          ? counts.domainCounts.filter(dc => dc.domain !== Domain.PHYSICALMEASUREMENT)
+          : counts.domainCounts;
+        this.setState({conceptDomainCounts: conceptDomainCounts});
+      });
       conceptsCache.forEach(async(cacheItem) => {
         selectedConceptDomainMap[cacheItem.domain] = [];
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
@@ -393,16 +382,12 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     browseSurvey(surveyName) {
-      if (environment.enableNewConceptTabs) {
-        this.setState({
-          currentInputString: '',
-          currentSearchString: '',
-          selectedDomain: {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0},
-          selectedSurvey: surveyName,
-          standardConceptsOnly: false}, () => this.searchConcepts());
-      } else {
-        this.setState({browsingSurvey: true, selectedSurvey: surveyName});
-      }
+      this.setState({
+        currentInputString: '',
+        currentSearchString: '',
+        selectedDomain: {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0},
+        selectedSurvey: surveyName,
+        standardConceptsOnly: false}, () => this.searchConcepts());
     }
 
     domainLoading(domain) {
