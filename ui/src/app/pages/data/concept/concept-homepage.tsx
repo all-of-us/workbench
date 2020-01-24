@@ -23,7 +23,6 @@ import {environment} from 'environments/environment';
 import {
   Concept,
   ConceptSet,
-  CriteriaType,
   Domain,
   DomainCount,
   DomainInfo,
@@ -371,7 +370,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
       if (domain === Domain.SURVEY) {
         selectedConceptDomainMap[domain] = concepts.filter(concept => !!concept.question);
       } else {
-        selectedConceptDomainMap[domain] = concepts.filter(concept => concept.domainId.replace(' ', '').toLowerCase() === Domain[domain].toLowerCase());
+        selectedConceptDomainMap[domain] = concepts.filter(
+          concept => concept.domainId.replace(' ', '')
+            .toLowerCase() === Domain[domain].toLowerCase());
       }
       this.setState({selectedConceptDomainMap: selectedConceptDomainMap});
     }
