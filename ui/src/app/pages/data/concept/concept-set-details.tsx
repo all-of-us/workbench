@@ -208,11 +208,10 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       const {urlParams: {ns, wsid, csid}} = this.props;
       try {
         await conceptSetsApi().deleteConceptSet(ns, wsid, csid);
-        navigate(['workspaces', ns, wsid, 'data', 'concepts', 'sets']);
+        navigate(['workspaces', ns, wsid, 'data', 'concepts']);
       } catch (error) {
-        console.log(error);
-        this.setState({error: true,
-          errorMessage: 'Could not delete concept set \'' + this.state.conceptSet.name + '\''});
+        console.error(error);
+        this.setState({error: true, errorMessage: 'Could not delete concept set \'' + this.state.conceptSet.name + '\''});
       } finally {
         this.setState({deleting: false});
       }
