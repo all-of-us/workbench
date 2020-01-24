@@ -18,8 +18,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
+import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
+import static org.pmiops.workbench.billing.GoogleApisConfig.USER_PROXY_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
@@ -156,6 +160,7 @@ import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -230,7 +235,14 @@ public class WorkspacesControllerTest {
   @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
-  @Autowired private Provider<Cloudbilling> cloudbillingProvider;
+
+  @Qualifier(USER_PROXY_CLOUD_BILLING)
+  @Autowired
+  private Provider<Cloudbilling> userProxyCloudbillingProvider;
+
+  @Qualifier(SERVICE_ACCOUNT_CLOUD_BILLING)
+  @Autowired
+  private Provider<Cloudbilling> serviceAccountCloudbillingProvider;
 
   @TestConfiguration
   @Import({
@@ -267,8 +279,13 @@ public class WorkspacesControllerTest {
   })
   static class Configuration {
 
-    @Bean
-    Cloudbilling cloudbilling() {
+    @Bean(USER_PROXY_CLOUD_BILLING)
+    Cloudbilling userProxyCloudbilling() {
+      return TestMockFactory.createMockedCloudbilling();
+    }
+
+    @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
+    Cloudbilling serviceAccountCloudbilling() {
       return TestMockFactory.createMockedCloudbilling();
     }
 
@@ -610,7 +627,7 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getResearchPurpose().getReviewRequested()).isTrue();
     assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
 
-    verify(cloudbillingProvider.get().projects())
+    verify(userProxyCloudbillingProvider.get().projects())
         .updateBillingInfo(
             "projects/" + workspace.getNamespace(),
             new ProjectBillingInfo().setBillingAccountName("billing-account"));
@@ -626,16 +643,33 @@ public class WorkspacesControllerTest {
     try {
       workspacesController.createWorkspace(workspace).getBody();
     } catch (Exception e) {
-      ArgumentCaptor<ProjectBillingInfo> captor = ArgumentCaptor.forClass(ProjectBillingInfo.class);
-      verify(cloudbillingProvider.get().projects(), times(2))
-          .updateBillingInfo(any(), captor.capture());
-
-      assertThat(captor.getAllValues().get(1).getBillingAccountName())
-          .isEqualTo(workbenchConfig.billing.accountId);
+      verify(userProxyCloudbillingProvider.get().projects())
+          .updateBillingInfo(
+              any(),
+              eq(
+                  new ProjectBillingInfo()
+                      .setBillingAccountName(workspace.getBillingAccountName())));
+      verify(serviceAccountCloudbillingProvider.get().projects())
+          .updateBillingInfo(
+              any(),
+              eq(
+                  new ProjectBillingInfo()
+                      .setBillingAccountName(workbenchConfig.billing.accountId)));
       return;
     }
 
     fail();
+  }
+
+  @Test
+  public void testCreateWorkspace_doNotUpdateBillingForFreeTier() throws Exception {
+    Workspace workspace = createWorkspace();
+    workspace.setBillingAccountName(workbenchConfig.billing.accountId);
+
+    workspacesController.createWorkspace(workspace);
+
+    verifyZeroInteractions(userProxyCloudbillingProvider.get());
+    verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
   }
 
   @Test
@@ -723,7 +757,7 @@ public class WorkspacesControllerTest {
     ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<ProjectBillingInfo> billingCaptor =
         ArgumentCaptor.forClass(ProjectBillingInfo.class);
-    verify(cloudbillingProvider.get().projects(), times(2))
+    verify(userProxyCloudbillingProvider.get().projects(), times(2))
         .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
     assertThat("projects/" + ws.getNamespace()).isEqualTo(projectCaptor.getAllValues().get(1));
     assertThat(new ProjectBillingInfo().setBillingAccountName("update-billing-account"))
@@ -737,6 +771,23 @@ public class WorkspacesControllerTest {
     Workspace got =
         workspacesController.getWorkspace(ws.getNamespace(), ws.getId()).getBody().getWorkspace();
     assertThat(got).isEqualTo(ws);
+  }
+
+  @Test
+  public void testUpdateWorkspace_freeTierBilling() throws Exception {
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+
+    verify(userProxyCloudbillingProvider.get()).projects();
+    verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
+
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    ws.setBillingAccountName(workbenchConfig.billing.accountId);
+    request.setWorkspace(ws);
+    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+
+    verifyNoMoreInteractions(userProxyCloudbillingProvider.get());
+    verify(serviceAccountCloudbillingProvider.get()).projects();
   }
 
   @Test
@@ -757,7 +808,7 @@ public class WorkspacesControllerTest {
       ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
       ArgumentCaptor<ProjectBillingInfo> billingCaptor =
           ArgumentCaptor.forClass(ProjectBillingInfo.class);
-      verify(cloudbillingProvider.get().projects(), times(3))
+      verify(userProxyCloudbillingProvider.get().projects(), times(3))
           .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
       assertThat("projects/" + ws.getNamespace()).isEqualTo(projectCaptor.getAllValues().get(2));
       assertThat(new ProjectBillingInfo().setBillingAccountName(originalBillingAccountName))
@@ -971,7 +1022,7 @@ public class WorkspacesControllerTest {
     ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<ProjectBillingInfo> billingCaptor =
         ArgumentCaptor.forClass(ProjectBillingInfo.class);
-    verify(cloudbillingProvider.get().projects(), times(2))
+    verify(userProxyCloudbillingProvider.get().projects(), times(2))
         .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
     assertThat("projects/" + clonedWorkspace.getNamespace())
         .isEqualTo(projectCaptor.getAllValues().get(1));
@@ -1030,20 +1081,50 @@ public class WorkspacesControllerTest {
           .getBody()
           .getWorkspace();
     } catch (Exception e) {
-      ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
-      ArgumentCaptor<ProjectBillingInfo> billingCaptor =
-          ArgumentCaptor.forClass(ProjectBillingInfo.class);
-      verify(cloudbillingProvider.get().projects(), times(3))
-          .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
-      assertThat(projectCaptor.getAllValues().get(2)).isEqualTo("projects/cloned-ns");
-      assertThat(billingCaptor.getAllValues().get(2))
-          .isEqualTo(
-              new ProjectBillingInfo().setBillingAccountName(workbenchConfig.billing.accountId));
-
+      verify(userProxyCloudbillingProvider.get().projects())
+          .updateBillingInfo(
+              any(),
+              eq(
+                  new ProjectBillingInfo()
+                      .setBillingAccountName(modWorkspace.getBillingAccountName())));
+      verify(serviceAccountCloudbillingProvider.get().projects())
+          .updateBillingInfo(
+              any(),
+              eq(
+                  new ProjectBillingInfo()
+                      .setBillingAccountName(workbenchConfig.billing.accountId)));
       return;
     }
 
     fail();
+  }
+
+  @Test
+  public void testCloneWorkspace_doNotUpdateBillingForFreeTier() throws Exception {
+    Workspace originalWorkspace = createWorkspace();
+    originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
+
+    verify(userProxyCloudbillingProvider.get()).projects();
+
+    final Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setBillingAccountName(workbenchConfig.billing.accountId);
+    modWorkspace.setResearchPurpose(new ResearchPurpose());
+
+    final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    req.setWorkspace(modWorkspace);
+    final FirecloudWorkspace clonedFirecloudWorkspace =
+        stubCloneWorkspace(
+            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+
+    mockBillingProjectBuffer("cloned-ns");
+
+    workspacesController.cloneWorkspace(
+        originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
+
+    verifyZeroInteractions(userProxyCloudbillingProvider.get());
+    verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
   }
 
   private void sortPopulationDetails(ResearchPurpose researchPurpose) {

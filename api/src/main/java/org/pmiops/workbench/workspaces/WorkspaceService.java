@@ -45,7 +45,7 @@ public interface WorkspaceService {
 
   DbWorkspace saveWithLastModified(DbWorkspace workspace);
 
-  void listBillingMembers(String workspaceNamespace);
+  void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName);
 
   /*
    * This function will check the workspace's billing status and throw a ForbiddenException

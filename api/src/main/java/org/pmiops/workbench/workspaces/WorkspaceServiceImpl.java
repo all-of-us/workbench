@@ -1,9 +1,22 @@
 package org.pmiops.workbench.workspaces;
 
+import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
+import static org.pmiops.workbench.billing.GoogleApisConfig.USER_PROXY_CLOUD_BILLING;
+
+import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.Cloudbilling.Projects.UpdateBillingInfo;
+import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -16,6 +29,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -40,10 +55,7 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.api.BillingApi;
-import org.pmiops.workbench.firecloud.model.FirecloudRawlsBillingProjectMember;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
@@ -60,6 +72,7 @@ import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,7 +93,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   // Note: Cannot use an @Autowired constructor with this version of Spring
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
-  private Provider<BillingApi> billingApiProvider;
+  private Provider<Cloudbilling> userProxyCloudbillingProvider;
+  private Provider<Cloudbilling> serviceAccountCloudbillingProvider;
   private CohortCloningService cohortCloningService;
   private ConceptSetService conceptSetService;
   private DataSetService dataSetService;
@@ -95,7 +109,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Autowired
   public WorkspaceServiceImpl(
-      Provider<BillingApi> billingApiProvider,
+      @Qualifier(USER_PROXY_CLOUD_BILLING) Provider<Cloudbilling> userProxyCloudbillingProvider,
+      @Qualifier(SERVICE_ACCOUNT_CLOUD_BILLING)
+          Provider<Cloudbilling> serviceAccountCloudbillingProvider,
       Clock clock,
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
@@ -106,7 +122,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao) {
-    this.billingApiProvider = billingApiProvider;
+    this.userProxyCloudbillingProvider = userProxyCloudbillingProvider;
+    this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
@@ -651,17 +668,65 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     }
   }
 
+  private Retryer<ProjectBillingInfo> cloudBillingRetryer =
+      RetryerBuilder.<ProjectBillingInfo>newBuilder()
+          .retryIfException(
+              e ->
+                  e instanceof GoogleJsonResponseException
+                      && ((GoogleJsonResponseException) e).getStatusCode() == 403)
+          .withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
+          .withStopStrategy(StopStrategies.stopAfterAttempt(12))
+          .build();
+
   @Override
-  public void listBillingMembers(String workspaceNamespace) {
-    List<FirecloudRawlsBillingProjectMember> list = null;
+  public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
+      // If billing lockout / upgrade is not enabled, ignore the normal logic
+      // and set the billing account to the free tier
+      workspace.setBillingAccountName(
+          "billingAccounts/" + workbenchConfigProvider.get().billing.accountId);
+      return;
+    }
+
+    if (newBillingAccountName.equals(workspace.getBillingAccountName())) {
+      return;
+    }
+
+    Cloudbilling cloudbilling;
+    if (newBillingAccountName.equals(workbenchConfigProvider.get().billing.accountId)) {
+      cloudbilling = serviceAccountCloudbillingProvider.get();
+    } else {
+      cloudbilling = userProxyCloudbillingProvider.get();
+    }
+
+    UpdateBillingInfo request;
     try {
-      list = billingApiProvider.get().listBillingProjectMembers(workspaceNamespace);
-    } catch (ApiException e) {
-      e.printStackTrace();
+      request =
+          cloudbilling
+              .projects()
+              .updateBillingInfo(
+                  "projects/" + workspace.getWorkspaceNamespace(),
+                  new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
+    } catch (IOException e) {
+      throw new RuntimeException("Could not create Google Cloud updateBillingInfo request", e);
     }
-    for (FirecloudRawlsBillingProjectMember member : list) {
-      log.info(member.toString());
+
+    ProjectBillingInfo response;
+    try {
+      // this is necessary because the grant ownership call in create/clone
+      // may not have propagated. Adding a few retries drastically reduces
+      // the likely of failing due to slow propagation
+      response = cloudBillingRetryer.call(() -> request.execute());
+    } catch (RetryException | ExecutionException e) {
+      throw new RuntimeException("Google Cloud updateBillingInfo call failed", e);
     }
+
+    if (!newBillingAccountName.equals(response.getBillingAccountName())) {
+      throw new RuntimeException(
+          "Google Cloud updateBillingInfo call succeeded but did not set the correct billing account name");
+    }
+
+    workspace.setBillingAccountName(response.getBillingAccountName());
   }
 
   @Override

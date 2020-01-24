@@ -19,7 +19,10 @@ import org.springframework.web.context.annotation.RequestScope;
 @Configuration
 public class GoogleApisConfig {
 
-  @Bean(name = "UserProxy")
+  public static final String USER_PROXY_CLOUD_BILLING = "USER_PROXY_CLOUD_BILLING";
+  public static final String SERVICE_ACCOUNT_CLOUD_BILLING = "SERVICE_ACCOUNT_CLOUD_BILLING";
+
+  @Bean(USER_PROXY_CLOUD_BILLING)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public Cloudbilling userProxyGoogleCloudbillingApi(
       UserAuthentication userAuthentication,
@@ -41,15 +44,18 @@ public class GoogleApisConfig {
     }
   }
 
-  @Bean(name = "ServiceAccount")
+  @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public Cloudbilling serviceAccountGoogleCloudbillingApi(JsonFactory jsonFactory, Provider<WorkbenchConfig> workbenchConfigProvider) {
+  public Cloudbilling serviceAccountGoogleCloudbillingApi(
+      JsonFactory jsonFactory, Provider<WorkbenchConfig> workbenchConfigProvider) {
     try {
       GoogleCredential credential =
           new GoogleCredential()
-              .setAccessToken(ServiceAccounts.getScopedServiceAccessToken(Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")));
+              .setAccessToken(
+                  ServiceAccounts.getScopedServiceAccessToken(
+                      Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")));
       return new Cloudbilling.Builder(
-          GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
+              GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
           .setApplicationName(workbenchConfigProvider.get().server.projectId)
           .build();
     } catch (GeneralSecurityException | IOException e) {

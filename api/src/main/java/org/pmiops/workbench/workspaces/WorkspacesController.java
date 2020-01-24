@@ -5,10 +5,6 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.services.cloudbilling.Cloudbilling;
-import com.google.api.services.cloudbilling.Cloudbilling.Projects.UpdateBillingInfo;
-import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
@@ -16,7 +12,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -92,7 +87,6 @@ import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -119,7 +113,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final UserDao userDao;
   private Provider<DbUser> userProvider;
   private final FireCloudService fireCloudService;
-  private Provider<Cloudbilling> cloudbillingProvider;
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final NotebooksService notebooksService;
@@ -137,7 +130,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<DbUser> userProvider,
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
-      @Qualifier("ServiceAccount") Provider<Cloudbilling> cloudBillingProvider,
       Clock clock,
       NotebooksService notebooksService,
       UserService userService,
@@ -151,7 +143,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
     this.cloudStorageService = cloudStorageService;
-    this.cloudbillingProvider = cloudBillingProvider;
     this.clock = clock;
     this.notebooksService = notebooksService;
     this.userService = userService;
@@ -253,76 +244,32 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    updateWorkspaceBillingAccount(dbWorkspace, workspace.getBillingAccountName());
+    if (!workbenchConfigProvider
+        .get()
+        .billing
+        .accountId
+        .equals(workspace.getBillingAccountName())) {
+      try {
+        workspaceService.updateWorkspaceBillingAccount(
+            dbWorkspace, workspace.getBillingAccountName());
+      } catch (Exception e) {
+        throw new ServerErrorException("Could not update workspace's billing account", e);
+      }
+    }
 
     try {
       dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if the workspace creation
       // fails
-      updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, workbenchConfigProvider.get().billing.accountId);
       throw e;
     }
 
     Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
-  }
-
-  private Retryer<ProjectBillingInfo> cloudBillingRetryer =
-      RetryerBuilder.<ProjectBillingInfo>newBuilder()
-          .retryIfException(
-              e ->
-                  e instanceof GoogleJsonResponseException
-                      && ((GoogleJsonResponseException) e).getStatusCode() == 403)
-          .withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
-          .withStopStrategy(StopStrategies.stopAfterAttempt(12))
-          .build();
-
-  private void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
-    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
-      // If billing lockout / upgrade is not enabled, ignore the normal logic
-      // and set the billing account to the free tier
-      workspace.setBillingAccountName(
-          "billingAccounts/" + workbenchConfigProvider.get().billing.accountId);
-      return;
-    }
-
-    if (newBillingAccountName.equals(workspace.getBillingAccountName())) {
-      return;
-    }
-
-    try {
-      UpdateBillingInfo request =
-          cloudbillingProvider
-              .get()
-              .projects()
-              .updateBillingInfo(
-                  "projects/" + workspace.getWorkspaceNamespace(),
-                  new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
-
-      ProjectBillingInfo response;
-
-      workspaceService.listBillingMembers(workspace.getWorkspaceNamespace());
-
-      try {
-        // this is necessary because the grant ownership call in create/clone
-        // may not have propagated. Adding a few retries drastically reduces
-        // the likely of failing due to slow propagation
-        response = cloudBillingRetryer.call(() -> request.execute());
-      } catch (RetryException | ExecutionException e) {
-        throw new ServerErrorException("Google Cloud updateBillingInfo call failed", e);
-      }
-
-      if (!newBillingAccountName.equals(response.getBillingAccountName())) {
-        throw new ServerErrorException(
-            "Google Cloud updateBillingInfo call succeeded but did not set the correct billing account name");
-      }
-
-      workspace.setBillingAccountName(response.getBillingAccountName());
-    } catch (IOException e) {
-      throw new ServerErrorException("Could not update billing account", e);
-    }
   }
 
   private void validateWorkspaceApiModel(Workspace workspace) {
@@ -424,7 +371,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
     }
 
-    updateWorkspaceBillingAccount(dbWorkspace, request.getWorkspace().getBillingAccountName());
+    try {
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, request.getWorkspace().getBillingAccountName());
+    } catch (Exception e) {
+      throw new ServerErrorException("Could not update workspace's billing account", e);
+    }
+
     try {
       // The version asserted on save is the same as the one we read via
       // getRequired() above, see RW-215 for details.
@@ -432,7 +385,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } catch (Exception e) {
       // Tell Google Cloud to set the billing account back to the original one since our update
       // database call failed
-      updateWorkspaceBillingAccount(dbWorkspace, originalWorkspace.getBillingAccountName());
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, originalWorkspace.getBillingAccountName());
       throw e;
     }
 
@@ -544,14 +498,26 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    updateWorkspaceBillingAccount(dbWorkspace, body.getWorkspace().getBillingAccountName());
+    if (!workbenchConfigProvider
+        .get()
+        .billing
+        .accountId
+        .equals(body.getWorkspace().getBillingAccountName())) {
+      try {
+        workspaceService.updateWorkspaceBillingAccount(
+            dbWorkspace, body.getWorkspace().getBillingAccountName());
+      } catch (Exception e) {
+        throw new ServerErrorException("Could not update workspace's billing account", e);
+      }
+    }
 
     try {
       dbWorkspace =
           workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if our clone fails
-      updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, workbenchConfigProvider.get().billing.accountId);
       throw e;
     }
 

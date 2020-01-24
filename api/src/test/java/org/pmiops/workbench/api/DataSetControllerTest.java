@@ -11,6 +11,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
+import static org.pmiops.workbench.billing.GoogleApisConfig.USER_PROXY_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.cloud.bigquery.Field;
@@ -181,8 +183,6 @@ public class DataSetControllerTest {
 
   @Autowired CloudStorageService cloudStorageService;
 
-  @Autowired Provider<Cloudbilling> cloudBillingProvider;
-
   @Autowired CohortDao cohortDao;
 
   @Autowired CohortFactory cohortFactory;
@@ -264,8 +264,13 @@ public class DataSetControllerTest {
   })
   static class Configuration {
 
-    @Bean
-    Cloudbilling cloudbilling() {
+    @Bean(USER_PROXY_CLOUD_BILLING)
+    Cloudbilling userProxyCloudbilling() {
+      return TestMockFactory.createMockedCloudbilling();
+    }
+
+    @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
+    Cloudbilling serviceAccountCloudbilling() {
       return TestMockFactory.createMockedCloudbilling();
     }
 
@@ -290,6 +295,8 @@ public class DataSetControllerTest {
       WorkbenchConfig workbenchConfig = new WorkbenchConfig();
       workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
       workbenchConfig.featureFlags.enableBillingLockout = true;
+      workbenchConfig.billing = new WorkbenchConfig.BillingConfig();
+      workbenchConfig.billing.accountId = "free-tier";
       return workbenchConfig;
     }
   }
@@ -334,7 +341,6 @@ public class DataSetControllerTest {
             userProvider,
             fireCloudService,
             cloudStorageService,
-            cloudBillingProvider,
             CLOCK,
             notebooksService,
             userService,
