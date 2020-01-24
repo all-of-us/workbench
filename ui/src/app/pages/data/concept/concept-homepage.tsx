@@ -178,8 +178,6 @@ interface State { // Browse survey
   conceptDomainCounts: Array<DomainCount>;
   // Array of domains and their metadata
   conceptDomainList: Array<DomainInfo>;
-  // Array of Physical Measurements
-  conceptPhysicalMeasurementsList: Array<any>;
   conceptsSavedText: string;
   // Array of surveys
   conceptSurveysList: Array<SurveyModule>;
@@ -223,7 +221,6 @@ export const ConceptHomepage = withCurrentWorkspace()(
         surveyAddModalOpen: false,
         conceptDomainCounts: [],
         conceptDomainList: [],
-        conceptPhysicalMeasurementsList: [],
         concepts: [],
         conceptsCache: [],
         conceptsSavedText: '',
@@ -275,11 +272,10 @@ export const ConceptHomepage = withCurrentWorkspace()(
         }
         this.setState({
           conceptsCache: conceptsCache,
-          conceptDomainList: conceptDomainInfo.items.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT),
+          conceptDomainList: conceptDomainInfo.items,
           conceptDomainCounts: conceptDomainCounts,
           conceptSurveysList: surveysInfo.items,
           selectedDomain: conceptDomainCounts[0],
-          conceptPhysicalMeasurementsList: conceptDomainInfo.items.filter(item => item.domain === Domain.PHYSICALMEASUREMENT),
         });
       } catch (e) {
         console.error(e);
@@ -497,7 +493,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     render() {
-      const {loadingDomains, browsingSurvey, conceptDomainList, conceptPhysicalMeasurementsList, conceptSurveysList,
+      const {loadingDomains, browsingSurvey, conceptDomainList, conceptSurveysList,
         standardConceptsOnly, showSearchError, searching, selectedDomain, conceptAddModalOpen, currentInputString, currentSearchString,
         conceptsSavedText, selectedSurvey, selectedConceptDomainMap, selectedSurveyQuestions, surveyAddModalOpen} = this.state;
       return <React.Fragment>
@@ -550,7 +546,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                 Domains
               </div>
               <div style={styles.cardList}>
-              {conceptDomainList.map((domain, i) => {
+              {conceptDomainList.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT).map((domain, i) => {
                 return <DomainCard conceptDomainInfo={domain}
                                      standardConceptsOnly={standardConceptsOnly}
                                      browseInDomain={() => this.browseDomain(domain)}
@@ -570,7 +566,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                   Program Physical Measurements
                 </div>
                 <div style={styles.cardList}>
-                  {conceptPhysicalMeasurementsList.map((physicalMeasurement, p) => {
+                  {conceptDomainList.filter(item => item.domain === Domain.PHYSICALMEASUREMENT).map((physicalMeasurement, p) => {
                     return <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement} key={p}
                                        browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurement)}/>;
                   })}
