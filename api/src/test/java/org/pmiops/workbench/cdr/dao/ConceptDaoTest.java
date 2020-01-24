@@ -145,7 +145,10 @@ public class ConceptDaoTest {
     Slice<DbConcept> concepts =
         conceptDao.findConcepts(
             "Height", ImmutableList.of("S", "C", ""), Domain.PHYSICALMEASUREMENT, page);
-    assertThat(concepts).containsExactly(physicalMeasurement);
+    assertThat(concepts)
+        .containsExactly(
+            physicalMeasurement.domainId(
+                CommonStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT)));
   }
 
   @Test
@@ -154,6 +157,9 @@ public class ConceptDaoTest {
     Slice<DbConcept> concepts =
         conceptDao.findConcepts(
             null, ImmutableList.of("S", "C", ""), Domain.PHYSICALMEASUREMENT, page);
-    assertThat(concepts).containsExactly(physicalMeasurement);
+    assertThat(concepts)
+        .containsExactly(
+            physicalMeasurement.domainId(
+                CommonStorageEnums.domainToDomainId(Domain.PHYSICALMEASUREMENT)));
   }
 }

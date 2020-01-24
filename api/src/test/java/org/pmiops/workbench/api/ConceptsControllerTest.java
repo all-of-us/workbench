@@ -348,7 +348,8 @@ public class ConceptsControllerTest {
                 .selectable(true)
                 .standard(true)
                 .subtype("QUESTION")
-                .type("PPI"));
+                .type("PPI")
+                .path("0"));
 
     cbCriteriaDao.save(
         new DbCriteria()
@@ -366,7 +367,8 @@ public class ConceptsControllerTest {
             .standard(true)
             .subtype("QUESTION")
             .type("PPI")
-            .synonyms("test"));
+            .synonyms("test")
+            .path(parentSurvey.getId() + ".1"));
   }
 
   @Test
