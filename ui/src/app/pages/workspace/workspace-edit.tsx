@@ -118,9 +118,6 @@ export const toolTipText = {
   cdrSelect: <div>The curated data repository (CDR) is where research data from the <i>All of Us</i>
     Research Program is stored. The CDR is periodically updated as new data becomes available for
     use. You can select which version of the CDR you wish to query in this Workspace.</div>,
-  billingAccount: <div>Throughout this period of testing and development, your use of the Workbench
-    is being funded by the National Institutes of Health. In the future researchers may be required
-    to enter billing account information to cover the cost of computing time in the cloud.</div>,
   researchPurpose: <div>You  are required to describe your research purpose, or the reason why you
     are conducting this study. This information, along with your name, will be posted on the
     publicly available <i>All of Us</i> website (https://www.researchallofus.org/) to inform our
@@ -212,9 +209,9 @@ export const specificPopulations = [
   }
 ];
 
-const billingDescription = 'The All of Us Program provides $200 in free credits per user. ' +
-  'When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account. ' +
-  'At any time, you can update your Workspace billing account.';
+const billingDescription = <div>The <i>All of Us</i> Program provides $200 in free credits per user.
+  When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account.
+  At any time, you can update your Workspace billing account.</div>;
 
 // Poll parameters to check Workspace ACLs after creation of a new workspace. See
 // SATURN-104 for details, eventually the root cause should be resolved by fixes
@@ -767,10 +764,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </WorkspaceEditSection>
         }
         {serverConfigStore.getValue().enableBillingLockout &&
-          <WorkspaceEditSection header='All of Us Billing Account'
-                                description={billingDescription}
-                                tooltip={toolTipText.billingAccount}>
-            <Dropdown value={this.state.workspace.billingAccountName}
+          <WorkspaceEditSection header={<div><i>All of Us</i> Billing account</div>}
+                                description={billingDescription}>
+            <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
+              Select account
+            </div>
+            <Dropdown style={{width: '14rem'}}
+                      value={this.state.workspace.billingAccountName}
                       options={this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}))}
                       onChange={e => this.setState(fp.set(['workspace', 'billingAccountName'], e.value))}
             />
