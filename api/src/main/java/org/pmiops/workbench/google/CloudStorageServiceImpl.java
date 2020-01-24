@@ -48,10 +48,10 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   @Override
   public String getMoodleApiKey() {
     if(configProvider.get().featureFlags.enableMoodleV2Api) {
-      return getCredentialsBucketString("moodle.txt");
+      return getCredentialsBucketString(configProvider.get().moodle.credentialsKey);
     }
     else {
-      return getCredentialsBucketString("moodle-key.txt");
+      return getCredentialsBucketString(configProvider.get().moodle.credentialsKeyDeprecated);
     }
   }
 

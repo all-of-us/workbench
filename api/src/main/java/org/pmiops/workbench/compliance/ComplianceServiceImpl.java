@@ -3,9 +3,11 @@ package org.pmiops.workbench.compliance;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.monitoring.MonitoringServiceImpl;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.api.MoodleApi;
 import org.pmiops.workbench.moodle.model.BadgeDetails;
@@ -32,6 +34,8 @@ public class ComplianceServiceImpl implements ComplianceService {
   private Provider<WorkbenchConfig> configProvider;
 
   private Provider<MoodleApi> moodleApiProvider;
+
+  private static final Logger logger = Logger.getLogger(MonitoringServiceImpl.class.getName());
 
   @Autowired
   public ComplianceServiceImpl(
@@ -96,12 +100,13 @@ public class ComplianceServiceImpl implements ComplianceService {
   @Override
   public Map<String, BadgeDetails> getUserBadgesByName(String email) throws ApiException {
     if (!enableMoodleCalls()) {
-      return null;
+      return new HashMap<>();
     }
 
     UserBadgeResponse response =
         moodleApiProvider.get().getMoodleBadge(RESPONSE_FORMAT, getToken(), email);
     if (response.getException() != null && response.getException().equals(MOODLE_EXCEPTION)) {
+      logger.warning(response.getMessage());
       if (response.getErrorcode().equals(MOODLE_USER_NOT_ALLOWED_ERROR_CODE)) {
         throw new ApiException(HttpStatus.NOT_FOUND.value(), response.getMessage());
       } else {

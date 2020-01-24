@@ -75,7 +75,9 @@
   },
   "moodle": {
     "host": "aoudev.nnlm.gov",
-    "enableMoodleBackend": true
+    "enableMoodleBackend": true,
+    "credentialsKeyDeprecated": "moodle-key.txt",
+    "credentialsKey": "moodle-credentials-key.txt"
   },
   "access": {
     "enableComplianceTraining": true,
