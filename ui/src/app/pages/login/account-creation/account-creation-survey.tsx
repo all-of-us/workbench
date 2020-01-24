@@ -35,6 +35,12 @@ const styles = {
     fontWeight: 400,
     paddingLeft: '0.25rem',
     paddingRight: '0.5rem'
+  },
+  checkboxAreaContainer: {
+    justifyContent: 'flex-start',
+    flexWrap: 'wrap',
+    height: '9rem',
+    width: '26rem'
   }
 };
 
@@ -145,7 +151,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
 
       {/*Race section*/}
       <Section header='Race'>
-        <FlexColumn style={{justifyContent: 'flex-start', flexWrap: 'wrap', height: '9rem', width: '26rem'}}>
+        <FlexColumn style={styles.checkboxAreaContainer}>
           {AccountCreationOptions.race.map((race) => {
             return this.createOptionCheckbox(race.label, 'race', race.value, race.value.toString());
           })}
@@ -182,7 +188,7 @@ or another sexual and/or gender minority?'>
       </Section>
       {/*Sex at birth section*/}
       <Section header='Sex at birth'>
-        <FlexColumn style={{justifyContent: 'flex-start', flexWrap: 'wrap', height: '5rem', width: '26rem'}}>
+        <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
             return this.createOptionCheckbox(sexAtBirth.label, 'sexAtBirth',
               sexAtBirth.value, sexAtBirth.value.toString());
