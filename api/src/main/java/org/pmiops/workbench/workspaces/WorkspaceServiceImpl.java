@@ -683,7 +683,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
       // If billing lockout / upgrade is not enabled, ignore the normal logic
       // and set the billing account to the free tier
-      workspace.setBillingAccountName(workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+      workspace.setBillingAccountName(
+          workbenchConfigProvider.get().billing.freeTierBillingAccountName());
       return;
     }
 
@@ -692,7 +693,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     }
 
     Cloudbilling cloudbilling;
-    if (newBillingAccountName.equals(workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {
+    if (newBillingAccountName.equals(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {
       cloudbilling = serviceAccountCloudbillingProvider.get();
     } else {
       cloudbilling = userProxyCloudbillingProvider.get();

@@ -654,7 +654,8 @@ public class WorkspacesControllerTest {
               any(),
               eq(
                   new ProjectBillingInfo()
-                      .setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName())));
+                      .setBillingAccountName(
+                          workbenchConfig.billing.freeTierBillingAccountName())));
       return;
     }
 
@@ -1092,7 +1093,8 @@ public class WorkspacesControllerTest {
               any(),
               eq(
                   new ProjectBillingInfo()
-                      .setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName())));
+                      .setBillingAccountName(
+                          workbenchConfig.billing.freeTierBillingAccountName())));
       return;
     }
 
