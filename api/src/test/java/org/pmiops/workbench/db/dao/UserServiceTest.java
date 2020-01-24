@@ -151,10 +151,8 @@ public class UserServiceTest {
     providedWorkbenchConfig.featureFlags.enableMoodleV2Api = true;
 
     BadgeDetails retBadge = new BadgeDetails();
-    long now = PROVIDED_CLOCK.instant().toEpochMilli();
-    long expiry = now + 100000;
-    retBadge.setDateexpire(Long.toString(expiry));
-    retBadge.setLastissued(Long.toString(now));
+    long expiry = PROVIDED_CLOCK.instant().toEpochMilli() + 100000;
+    retBadge.setDateexpire(expiry);
     retBadge.setValid(true);
 
     Map<String, BadgeDetails> userBadgesByName = new HashMap<String, BadgeDetails>();
@@ -184,9 +182,7 @@ public class UserServiceTest {
 
     BadgeDetails retBadge = new BadgeDetails();
     long expiry = PROVIDED_CLOCK.instant().toEpochMilli();
-    long completion = expiry - 100000;
-    retBadge.setDateexpire(Long.toString(expiry));
-    retBadge.setLastissued(Long.toString(completion));
+    retBadge.setDateexpire(expiry);
     retBadge.setValid(true);
 
     Map<String, BadgeDetails> userBadgesByName = new HashMap<String, BadgeDetails>();
@@ -205,7 +201,7 @@ public class UserServiceTest {
 
     // Deprecate the old training.
     long newExpiry = expiry - 1000;
-    retBadge.setDateexpire(Long.toString(newExpiry));
+    retBadge.setDateexpire(newExpiry);
     retBadge.setValid(false);
 
     // Completion timestamp should be wiped out by the expiry timestamp passing.
@@ -214,7 +210,7 @@ public class UserServiceTest {
 
     // The user does a new training.
     long newerExpiry = expiry + 1000;
-    retBadge.setDateexpire(Long.toString(newerExpiry));
+    retBadge.setDateexpire(newerExpiry);
     retBadge.setValid(true);
 
     // Completion and expiry timestamp should be updated.
@@ -226,7 +222,7 @@ public class UserServiceTest {
 
     // A global expiration is set.
     long globalExpiry = expiry - 1000;
-    retBadge.setGlobalexpiration(Long.toString(globalExpiry));
+    retBadge.setGlobalexpiration(globalExpiry);
     retBadge.setValid(false);
 
     // Completion timestamp should be wiped out by the globalexpiry timestamp passing.

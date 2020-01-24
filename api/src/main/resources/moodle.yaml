@@ -204,16 +204,19 @@ definitions:
           type: boolean
           description: Whether the badge is valid
         lastissued:
-          type: string
+          type: integer
+          format: int64
           description: Date of latest issued badge. As a stringy epoch.
         dateexpire:
-          type: string
+          type: integer
+          format: int64
           description: Latest expiration of obtained badge. As a stringy epoch.
         message:
           type: string
           description: General API message
         globalexpiration:
-          type: string
+          type: integer
+          format: int64
           description: Global expiration, overrides badge expiration date. As a stringy epoch.
 
     BadgeDetailsDeprecated:
