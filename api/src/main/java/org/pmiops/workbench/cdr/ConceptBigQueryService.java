@@ -12,6 +12,7 @@ import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.concept.ConceptService.ConceptIds;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
+import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +37,7 @@ public class ConceptBigQueryService {
     this.conceptService = conceptService;
   }
 
-  public int getParticipantCountForConcepts(String omopTable, Set<Long> conceptIds) {
+  public int getParticipantCountForConcepts(Domain domain, String omopTable, Set<Long> conceptIds) {
     ConceptColumns conceptColumns = cdrBigQuerySchemaConfigService.getConceptColumns(omopTable);
     ConceptIds classifiedConceptIds = conceptService.classifyConceptIds(conceptIds);
     if (classifiedConceptIds.getSourceConceptIds().isEmpty()
@@ -60,7 +61,11 @@ public class ConceptBigQueryService {
       }
     }
     if (!classifiedConceptIds.getSourceConceptIds().isEmpty()) {
-      innerSql.append(conceptColumns.getSourceConceptColumn().name);
+      if (Domain.SURVEY.equals(domain)) {
+        innerSql.append("observation_source_concept_id");
+      } else {
+        innerSql.append(conceptColumns.getSourceConceptColumn().name);
+      }
       innerSql.append(" in unnest(@sourceConceptIds)");
       paramMap.put(
           "sourceConceptIds",

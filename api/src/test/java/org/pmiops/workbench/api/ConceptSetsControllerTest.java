@@ -509,9 +509,12 @@ public class ConceptSetsControllerTest {
   public void testUpdateConceptSetConceptsAddAndRemove() {
     saveConcepts();
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            "condition_occurrence", ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId())))
+            Domain.CONDITION,
+            "condition_occurrence",
+            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId())))
         .thenReturn(123);
     when(conceptBigQueryService.getParticipantCountForConcepts(
+            Domain.CONDITION,
             "condition_occurrence",
             ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_3.getConceptId())))
         .thenReturn(246);
@@ -546,6 +549,7 @@ public class ConceptSetsControllerTest {
   public void testUpdateConceptSetConceptsAddMany() {
     saveConcepts();
     when(conceptBigQueryService.getParticipantCountForConcepts(
+            Domain.CONDITION,
             "condition_occurrence",
             ImmutableSet.of(
                 CLIENT_CONCEPT_1.getConceptId(),
@@ -571,7 +575,9 @@ public class ConceptSetsControllerTest {
     assertThat(updated.getParticipantCount()).isEqualTo(456);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            "condition_occurrence", ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId())))
+            Domain.CONDITION,
+            "condition_occurrence",
+            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId())))
         .thenReturn(123);
     ConceptSet removed =
         conceptSetsController
@@ -594,6 +600,7 @@ public class ConceptSetsControllerTest {
   public void testUpdateConceptSetConceptsAddManyOnCreate() {
     saveConcepts();
     when(conceptBigQueryService.getParticipantCountForConcepts(
+            Domain.CONDITION,
             "condition_occurrence",
             ImmutableSet.of(
                 CLIENT_CONCEPT_1.getConceptId(),
