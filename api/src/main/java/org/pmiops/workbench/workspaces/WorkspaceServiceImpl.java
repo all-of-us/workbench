@@ -693,7 +693,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     }
 
     Cloudbilling cloudbilling;
-    if (newBillingAccountName.equals(workbenchConfigProvider.get().billing.accountId)) {
+    if (newBillingAccountName.equals("billingAccounts/" + workbenchConfigProvider.get().billing.accountId)) {
       cloudbilling = serviceAccountCloudbillingProvider.get();
     } else {
       cloudbilling = userProxyCloudbillingProvider.get();
