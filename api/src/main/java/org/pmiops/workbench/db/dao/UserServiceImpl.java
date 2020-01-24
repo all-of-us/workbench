@@ -596,7 +596,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         dbUser.setMoodleId(moodleId);
       }
 
-      List<BadgeDetailsDeprecated> badgeResponse = complianceService.getUserBadge(moodleId);
+      List<BadgeDetailsDeprecated> badgeResponse = complianceService.getUserBadgeDeprecated(moodleId);
       // The assumption here is that the User will always get 1 badge which will be AoU
       if (badgeResponse != null && badgeResponse.size() > 0) {
         BadgeDetailsDeprecated badge = badgeResponse.get(0);

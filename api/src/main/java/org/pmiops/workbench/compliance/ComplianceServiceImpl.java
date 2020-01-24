@@ -80,7 +80,7 @@ public class ComplianceServiceImpl implements ComplianceService {
    * Moodle user ID does not exist.
    */
   @Override
-  public List<BadgeDetailsDeprecated> getUserBadge(int userMoodleId) throws ApiException {
+  public List<BadgeDetailsDeprecated> getUserBadgeDeprecated(int userMoodleId) throws ApiException {
     if (!enableMoodleCalls()) {
       return null;
     }

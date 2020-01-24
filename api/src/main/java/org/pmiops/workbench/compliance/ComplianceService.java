@@ -24,7 +24,7 @@ public interface ComplianceService {
    * @return list of badges/completed training by user
    * @throws ApiException
    */
-  List<BadgeDetailsDeprecated> getUserBadge(int userMoodleId) throws ApiException;
+  List<BadgeDetailsDeprecated> getUserBadgeDeprecated(int userMoodleId) throws ApiException;
 
   /**
    * Get details about the Research Ethics Training and the Data Use Agreement badges for a user

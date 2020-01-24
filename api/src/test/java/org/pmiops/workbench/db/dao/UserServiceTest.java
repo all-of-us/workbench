@@ -127,7 +127,7 @@ public class UserServiceTest {
     badge.setDateexpire(Long.toString(expiry));
 
     when(mockComplianceService.getMoodleId(USERNAME)).thenReturn(MOODLE_ID);
-    when(mockComplianceService.getUserBadge(MOODLE_ID))
+    when(mockComplianceService.getUserBadgeDeprecated(MOODLE_ID))
         .thenReturn(Collections.singletonList(badge));
 
     userService.syncComplianceTrainingStatusDeprecated();
@@ -239,7 +239,7 @@ public class UserServiceTest {
     when(mockComplianceService.getMoodleId(USERNAME)).thenReturn(null);
     userService.syncComplianceTrainingStatusDeprecated();
 
-    verify(mockComplianceService, never()).getUserBadge(anyInt());
+    verify(mockComplianceService, never()).getUserBadgeDeprecated(anyInt());
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
@@ -252,7 +252,7 @@ public class UserServiceTest {
     userDao.save(user);
 
     when(mockComplianceService.getMoodleId(USERNAME)).thenReturn(1);
-    when(mockComplianceService.getUserBadge(1)).thenReturn(null);
+    when(mockComplianceService.getUserBadgeDeprecated(1)).thenReturn(null);
     userService.syncComplianceTrainingStatusDeprecated();
     user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
@@ -279,7 +279,7 @@ public class UserServiceTest {
   public void testSyncComplianceTrainingStatusBadgeNotFoundDeprecated() throws ApiException {
     // We should propagate a NOT_FOUND exception from the compliance service.
     when(mockComplianceService.getMoodleId(USERNAME)).thenReturn(MOODLE_ID);
-    when(mockComplianceService.getUserBadge(MOODLE_ID))
+    when(mockComplianceService.getUserBadgeDeprecated(MOODLE_ID))
         .thenThrow(
             new org.pmiops.workbench.moodle.ApiException(
                 HttpStatus.NOT_FOUND.value(), "user not found"));
