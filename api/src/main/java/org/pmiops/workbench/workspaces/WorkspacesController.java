@@ -5,7 +5,9 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.Cloudbilling.Projects.UpdateBillingInfo;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
@@ -266,6 +268,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(createdWorkspace);
   }
 
+  private Retryer<ProjectBillingInfo> cloudBillingRetryer =
+      RetryerBuilder.<ProjectBillingInfo>newBuilder()
+          .retryIfException(e ->
+            e instanceof GoogleJsonResponseException && ((GoogleJsonResponseException) e).getStatusCode() == 403
+          ).withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
+          .withStopStrategy(StopStrategies.stopAfterAttempt(12))
+          .build();
+
   private void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
     if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
       // If billing lockout / upgrade is not enabled, ignore the normal logic
@@ -279,21 +289,28 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     try {
-      ProjectBillingInfo updateResponse =
+      UpdateBillingInfo request =
           cloudbillingProvider
               .get()
               .projects()
               .updateBillingInfo(
                   "projects/" + workspace.getWorkspaceNamespace(),
-                  new ProjectBillingInfo().setBillingAccountName(newBillingAccountName))
-              .execute();
+                  new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
 
-      if (!newBillingAccountName.equals(updateResponse.getBillingAccountName())) {
+      ProjectBillingInfo response;
+
+      try {
+        response = cloudBillingRetryer.call(() -> request.execute());
+      } catch (RetryException | ExecutionException e) {
+        throw new ServerErrorException("Google Cloud updateBillingInfo call failed", e);
+      }
+
+      if (!newBillingAccountName.equals(response.getBillingAccountName())) {
         throw new ServerErrorException(
             "Google Cloud updateBillingInfo call succeeded but did not set the correct billing account name");
       }
 
-      workspace.setBillingAccountName(updateResponse.getBillingAccountName());
+      workspace.setBillingAccountName(response.getBillingAccountName());
     } catch (IOException e) {
       throw new ServerErrorException("Could not update billing account", e);
     }
