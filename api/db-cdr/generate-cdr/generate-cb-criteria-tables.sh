@@ -1153,7 +1153,8 @@ FROM
         FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
         GROUP BY 1
     ) a
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.race_concept_id = b.concept_id"
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.race_concept_id = b.concept_id
+WHERE b.concept_id is not null"
 
 echo "DEMO - Ethnicity parent"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -1177,7 +1178,8 @@ FROM
         FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
         GROUP BY 1
     ) a
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.ethnicity_concept_id = b.concept_id"
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.ethnicity_concept_id = b.concept_id
+WHERE b.concept_id is not null"
 
 
 ################################################
