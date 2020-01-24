@@ -45,6 +45,8 @@ public interface WorkspaceService {
 
   DbWorkspace saveWithLastModified(DbWorkspace workspace);
 
+  void listBillingMembers(String workspaceNamespace);
+
   /*
    * This function will check the workspace's billing status and throw a ForbiddenException
    * if it is inactive.

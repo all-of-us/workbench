@@ -40,7 +40,10 @@ import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.api.BillingApi;
+import org.pmiops.workbench.firecloud.model.FirecloudRawlsBillingProjectMember;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
@@ -77,6 +80,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   // Note: Cannot use an @Autowired constructor with this version of Spring
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
+  private Provider<BillingApi> billingApiProvider;
   private CohortCloningService cohortCloningService;
   private ConceptSetService conceptSetService;
   private DataSetService dataSetService;
@@ -91,6 +95,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Autowired
   public WorkspaceServiceImpl(
+      Provider<BillingApi> billingApiProvider,
       Clock clock,
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
@@ -101,6 +106,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao) {
+    this.billingApiProvider = billingApiProvider;
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
@@ -642,6 +648,19 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       return true;
     } else {
       return false;
+    }
+  }
+
+  @Override
+  public void listBillingMembers(String workspaceNamespace) {
+    List<FirecloudRawlsBillingProjectMember> list = null;
+    try {
+      list = billingApiProvider.get().listBillingProjectMembers(workspaceNamespace);
+    } catch (ApiException e) {
+      e.printStackTrace();
+    }
+    for (FirecloudRawlsBillingProjectMember member : list) {
+      log.info(member.toString());
     }
   }
 

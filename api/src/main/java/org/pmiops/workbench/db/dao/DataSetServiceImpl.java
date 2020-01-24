@@ -294,7 +294,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final ImmutableList.Builder<DbConceptSet> selectedConceptSetsBuilder = ImmutableList.builder();
     selectedConceptSetsBuilder.addAll(initialSelectedConceptSets);
 
-    // If pre packaged all survey concept set is selected create a temp concept set with concept ids
+    // If pre packaged all survey concept set is selected create a listBillingMembers concept set with concept ids
     // of all survey questions
     if (CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY.contains(prePackagedConceptSet)) {
       selectedConceptSetsBuilder.add(buildPrePackagedSurveyConceptSet());

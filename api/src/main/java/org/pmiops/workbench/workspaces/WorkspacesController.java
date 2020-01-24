@@ -92,6 +92,7 @@ import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -136,7 +137,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<DbUser> userProvider,
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
-      Provider<Cloudbilling> cloudBillingProvider,
+      @Qualifier("ServiceAccount") Provider<Cloudbilling> cloudBillingProvider,
       Clock clock,
       NotebooksService notebooksService,
       UserService userService,
@@ -301,6 +302,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                   new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
 
       ProjectBillingInfo response;
+
+      workspaceService.listBillingMembers(workspace.getWorkspaceNamespace());
 
       try {
         // this is necessary because the grant ownership call in create/clone

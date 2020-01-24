@@ -24,6 +24,7 @@ import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.model.WorkbenchListBillingAccountsResponse;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,7 +58,7 @@ public class UserController implements UserApiDelegate {
       Provider<WorkbenchConfig> configProvider,
       FireCloudService fireCloudService,
       UserService userService,
-      Provider<Cloudbilling> cloudBillingProvider) {
+      @Qualifier("UserProxy") Provider<Cloudbilling> cloudBillingProvider) {
     this.userProvider = userProvider;
     this.configProvider = configProvider;
     this.userService = userService;

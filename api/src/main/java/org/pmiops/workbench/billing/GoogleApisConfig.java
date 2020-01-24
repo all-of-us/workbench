@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import javax.inject.Provider;
+import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.context.annotation.Bean;
@@ -18,9 +19,9 @@ import org.springframework.web.context.annotation.RequestScope;
 @Configuration
 public class GoogleApisConfig {
 
-  @Bean
+  @Bean(name = "UserProxy")
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public Cloudbilling googleCloudBillingApi(
+  public Cloudbilling userProxyGoogleCloudbillingApi(
       UserAuthentication userAuthentication,
       JsonFactory jsonFactory,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
@@ -33,6 +34,22 @@ public class GoogleApisConfig {
     try {
       return new Cloudbilling.Builder(
               GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
+          .setApplicationName(workbenchConfigProvider.get().server.projectId)
+          .build();
+    } catch (GeneralSecurityException | IOException e) {
+      throw new RuntimeException("Could not construct Cloudbilling API client");
+    }
+  }
+
+  @Bean(name = "ServiceAccount")
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public Cloudbilling serviceAccountGoogleCloudbillingApi(JsonFactory jsonFactory, Provider<WorkbenchConfig> workbenchConfigProvider) {
+    try {
+      GoogleCredential credential =
+          new GoogleCredential()
+              .setAccessToken(ServiceAccounts.getScopedServiceAccessToken(Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")));
+      return new Cloudbilling.Builder(
+          GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
           .setApplicationName(workbenchConfigProvider.get().server.projectId)
           .build();
     } catch (GeneralSecurityException | IOException e) {
