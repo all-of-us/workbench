@@ -17,6 +17,7 @@ import com.google.api.services.directory.model.Users;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -61,9 +62,9 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   // Name of the "institution" custom field, whose value is the same for all Workbench users.
   private static final String GSUITE_FIELD_INSTITUTION = "Institution";
   private static final String INSTITUTION_FIELD_VALUE = "All of Us Research Workbench";
-  public static final int MAX_USERS_LIST_PAGE_SIZE = 500;
-  public static final String EMAIL_USER_FIELD = "email";
-  public static final String USER_VIEW_TYPE = "domain_public";
+  private static final int MAX_USERS_LIST_PAGE_SIZE = 500;
+  private static final String EMAIL_USER_FIELD = "email";
+  private static final String USER_VIEW_TYPE = "domain_public";
 
   private static SecureRandom rnd = new SecureRandom();
 
@@ -124,6 +125,15 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
 
   private String gSuiteDomain() {
     return configProvider.get().googleDirectoryService.gSuiteDomain;
+  }
+
+  private String getTopLevelGSuiteDomain() {
+    final String domain = gSuiteDomain();
+    final String[] parts = domain.split("\\.");
+    // return the last two parts
+    final int numParts = parts.length;
+    final int firstIndex = numParts - 2;
+    return String.format("%s.%s", parts[firstIndex], parts[firstIndex + 1]);
   }
 
   @Override
@@ -254,7 +264,31 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    long userCount = 0;
+    ImmutableSet.Builder<MeasurementBundle> resultBuilder = ImmutableSet.builder();
+
+    final String localDomain = gSuiteDomain();
+    final long localDomainUserCount = countUsersInDomain(localDomain);
+    resultBuilder.add(
+        MeasurementBundle.builder()
+            .addMeasurement(GaugeMetric.GSUITE_USER_COUNT, localDomainUserCount)
+            .addTag(MetricLabel.GSUITE_DOMAIN, localDomain)
+            .build());
+
+    final String topLevelDomain = getTopLevelGSuiteDomain();
+    // Avoid creating duplicate data point if the local domain is the top domain
+    if (!localDomain.equals(topLevelDomain)) {
+      final long topLevelDomainUserCount = countUsersInDomain(topLevelDomain);
+      resultBuilder.add(
+          MeasurementBundle.builder()
+              .addMeasurement(GaugeMetric.GSUITE_USER_COUNT, topLevelDomainUserCount)
+              .addTag(MetricLabel.GSUITE_DOMAIN, topLevelDomain)
+              .build());
+    }
+    return resultBuilder.build();
+  }
+
+  private long countUsersInDomain(String gSuiteDomain) {
+    long result = 0;
     try {
       final Directory directoryService = getGoogleDirectoryService();
       Optional<String> nextPageToken = Optional.empty();
@@ -263,27 +297,23 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
             directoryService
                 .users()
                 .list()
-                .setDomain(gSuiteDomain())
+                .setDomain(gSuiteDomain)
                 .setViewType(USER_VIEW_TYPE)
+                .setCustomFieldMask("email")
                 .setMaxResults(MAX_USERS_LIST_PAGE_SIZE)
                 .setOrderBy(EMAIL_USER_FIELD);
         nextPageToken.ifPresent(listQuery::setPageToken);
 
         final Users usersQueryResult = listQuery.execute();
 
-        userCount += usersQueryResult.getUsers().size();
+        result += usersQueryResult.getUsers().size();
         nextPageToken = Optional.ofNullable(usersQueryResult.getNextPageToken());
       } while (nextPageToken.isPresent());
+      return result;
     } catch (IOException e) {
       log.warn("Failed to retrieve GSuite User List.", e);
-      return Collections.emptyList();
+      return 0;
     }
-
-    return Collections.singleton(
-        MeasurementBundle.builder()
-            .addMeasurement(GaugeMetric.GSUITE_USER_COUNT, userCount)
-            .addTag(MetricLabel.GSUITE_DOMAIN, gSuiteDomain())
-            .build());
   }
 
   private String randomString() {
