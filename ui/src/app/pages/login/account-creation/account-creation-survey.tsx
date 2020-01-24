@@ -182,7 +182,7 @@ or another sexual and/or gender minority?'>
         <label></label>
         <TextInputWithLabel labelText='If yes, please tell us about your LGBTQ+ identity'
                             value={demographicSurvey.lgbtqIdentity} inputName='lgbtqIdentity'
-                            containerStyle={{width: '26rem'}} inputStyle={{width: '26rem'}}
+                            containerStyle={{width: '26rem', marginTop: '0.5rem'}} inputStyle={{width: '26rem'}}
                             onChange={(value) => this.updateDemographicAttribute('lgbtqIdentity', value)}
                             disabled={!demographicSurvey.identifiesAsLgbtq}/>
       </Section>
