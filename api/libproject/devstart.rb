@@ -1301,6 +1301,61 @@ Common.register_command({
   :fn => ->(*args) { delete_clusters("delete-clusters", *args) }
 })
 
+def describe_cluster(cmd_name, *args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--id [CLUSTER_ID]",
+      ->(opts, v) { opts.cluster_id = v},
+      "Required cluster ID to describe, e.g. 'aou-test-f1-1/all-of-us'")
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Optional project ID; by default will infer the project form the cluster ID")
+  op.add_validator ->(opts) { raise ArgumentError unless opts.cluster_id }
+  op.parse.validate
+
+  # Infer the project from the cluster ID project ID. If for some reason, the
+  # target cluster ID does not conform to the current billing prefix (e.g. if we
+  # changed the prefix), --project will override this.
+  common = Common.new
+  project_from_cluster = nil
+  ENVIRONMENTS.each_key do |env|
+    if op.opts.cluster_id.start_with?(get_billing_project_prefix(env))
+      # Take the most specific prefix match, since prod is a substring of the others.
+      if not project_from_cluster or project_from_cluster.length < env.length
+        project_from_cluster = env
+      end
+    end
+  end
+  common.warning "unable to determine project by cluster ID" unless project_from_cluster
+  if not op.opts.project
+    op.opts.project = project_from_cluster
+  end
+
+  # Add the GcloudContext after setting up the project parameter to avoid
+  # earlier validation failures.
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  api_url = get_leo_api_url(gcc.project)
+  sa_ctx = ServiceAccountContext.new(gcc.project)
+  sa_ctx.run do
+    common = Common.new
+    common.run_inline %W{
+       gradle manageClusters
+      -PappArgs=['describe','#{api_url}','#{gcc.project}','#{sa_ctx.service_account}','#{op.opts.cluster_id}']}
+  end
+end
+
+Common.register_command({
+  :invocation => "describe-cluster",
+  :description => "Describe all cluster in this environment",
+  :fn => ->(*args) { describe_cluster("describe-cluster", *args) }
+})
+
+
 def list_clusters(cmd_name, *args)
   ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
@@ -1322,6 +1377,7 @@ Common.register_command({
   :description => "List all clusters in this environment",
   :fn => ->(*args) { list_clusters("list-clusters", *args) }
 })
+
 
 def load_es_index(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
