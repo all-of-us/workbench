@@ -21,7 +21,7 @@
     "projectNamePrefix": "aou-rw-local1-",
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.gcp_billing_export_v1_014D91_FCB792_33D2C0",
     "retryCount": 2,
-    "bufferCapacity": 12,
+    "bufferCapacity": 2,
     "bufferRefillProjectsPerTask": 1,
     "defaultFreeCreditsLimit": 100.0,
     "defaultFreeCreditsDollarLimit": 100.0,
