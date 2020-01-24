@@ -270,9 +270,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private Retryer<ProjectBillingInfo> cloudBillingRetryer =
       RetryerBuilder.<ProjectBillingInfo>newBuilder()
-          .retryIfException(e ->
-            e instanceof GoogleJsonResponseException && ((GoogleJsonResponseException) e).getStatusCode() == 403
-          ).withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
+          .retryIfException(
+              e ->
+                  e instanceof GoogleJsonResponseException
+                      && ((GoogleJsonResponseException) e).getStatusCode() == 403)
+          .withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
           .withStopStrategy(StopStrategies.stopAfterAttempt(12))
           .build();
 
@@ -280,7 +282,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
       // If billing lockout / upgrade is not enabled, ignore the normal logic
       // and set the billing account to the free tier
-      workspace.setBillingAccountName("billingAccounts/" + workbenchConfigProvider.get().billing.accountId);
+      workspace.setBillingAccountName(
+          "billingAccounts/" + workbenchConfigProvider.get().billing.accountId);
       return;
     }
 
