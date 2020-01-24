@@ -680,15 +680,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
-    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
-      // If billing lockout / upgrade is not enabled, ignore the normal logic
-      // and set the billing account to the free tier
-      workspace.setBillingAccountName(
-          workbenchConfigProvider.get().billing.freeTierBillingAccountName());
-      return;
-    }
-
-    if (newBillingAccountName.equals(workspace.getBillingAccountName())) {
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout
+        || newBillingAccountName.equals(workspace.getBillingAccountName())) {
       return;
     }
 
