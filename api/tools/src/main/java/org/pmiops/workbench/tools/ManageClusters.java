@@ -91,7 +91,7 @@ public class ManageClusters {
 
   private static void listClusters(String apiUrl) throws IOException, ApiException {
     AtomicInteger count = new AtomicInteger();
-    newApiClient(apiUrl).listClusters(null, true).stream()
+    newApiClient(apiUrl).listClusters(null, false).stream()
         .sorted(Comparator.comparing(c -> Instant.parse(c.getCreatedDate())))
         .forEachOrdered(
             (c) -> {
@@ -111,11 +111,18 @@ public class ManageClusters {
               "given cluster ID '%s' is invalid, wanted format 'project/clusterName'", clusterId));
       return;
     }
+    String clusterProject = parts[0];
+    String clusterName = parts[1];
 
     // Leo's getCluster API swagger tends to be outdated; issue a raw getCluster request to ensure
     // we get all available information for debugging.
     ClusterApi client = newApiClient(apiUrl);
-    com.squareup.okhttp.Call call = client.getClusterCall(parts[0], parts[1], null, null);
+    com.squareup.okhttp.Call call =
+        client.getClusterCall(
+            clusterProject,
+            clusterName,
+            /* progressListener */ null,
+            /* progressRequestListener */ null);
     ApiResponse<Object> resp = client.getApiClient().execute(call, Object.class);
 
     // Parse the response as well so we can log specific structured fields.

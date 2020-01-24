@@ -1329,7 +1329,7 @@ def describe_cluster(cmd_name, *args)
     end
   end
   common.warning "unable to determine project by cluster ID" unless project_from_cluster
-  if not op.opts.project
+  unless op.opts.project
     op.opts.project = project_from_cluster
   end
 
@@ -1377,7 +1377,6 @@ Common.register_command({
   :description => "List all clusters in this environment",
   :fn => ->(*args) { list_clusters("list-clusters", *args) }
 })
-
 
 def load_es_index(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
