@@ -2298,6 +2298,93 @@ paths:
           description: >
             A SQL query for each domain in the Data Set
 
+# Institution endpoints, for Verified Institutional Affiliation
+
+  /v1/institutions:
+    get:
+      tags:
+        - institution
+      description: >
+        Gets a list of all Institutions.
+        Requires INSTITUTION_ADMIN authority.
+      operationId: "getInstitutions"
+      responses:
+        200:
+          description: >
+            A list of all Institutions
+          schema:
+            $ref: "#/definitions/GetInstitutionsResponse"
+    post:
+      tags:
+        - institution
+      description: >
+        Create an Institution.
+        Requires INSTITUTION_ADMIN authority.
+      operationId: "createInstitution"
+      parameters:
+        - in: body
+          name: institutionToCreate
+          required: true
+          description: The Institution to be created by this operation.
+          schema:
+            $ref: "#/definitions/Institution"
+      responses:
+        200:
+          description: >
+            The Institution created by this operation.
+          schema:
+            $ref: "#/definitions/Institution"
+
+  /v1/institutions/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        type: string
+    get:
+      tags:
+        - institution
+      description: >
+        Gets the Institution corresponding to the id.
+        Requires INSTITUTION_ADMIN authority.
+      operationId: "getInstitution"
+      responses:
+        200:
+          description: >
+            The Institution corresponding to the id.
+          schema:
+            $ref: "#/definitions/Institution"
+    delete:
+      tags:
+        - institution
+      description: >
+        Deletes the Institution corresponding to the id.
+        Requires INSTITUTION_ADMIN authority.
+      operationId: "deleteInstitution"
+      responses:
+        204:
+          description: >
+            Successful deletion of the Institution corresponding to the id.
+    patch:
+      tags:
+        - institution
+      description: >
+        Updates an Institution.
+        Requires INSTITUTION_ADMIN authority.
+      operationId: "updateInstitution"
+      parameters:
+        - in: body
+          name: institutionToUpdate
+          required: true
+          description: The Institution to update.
+          schema:
+            $ref: "#/definitions/Institution"
+      responses:
+        200:
+          description: >
+            The updated Institution.
+          schema:
+            $ref: "#/definitions/Institution"
 
 ##########################################################################################
 ## DEFINITIONS
@@ -4190,3 +4277,45 @@ definitions:
       items:
         type: integer
         format: int64
+
+  OrganizationType:
+    type: string
+    description: A categorization of institutions derived from CAPS requirements
+    enum: [ACADEMIC_RESEARCH_INSTITUTION, INDUSTRY, EDUCATIONAL_INSTITUTION, HEALTH_CENTER_NON_PROFIT, OTHER]
+
+  Institution:
+    type: object
+    description: Represents an institution which has been approved to validate researchers who wish to use the system
+    required:
+      - name
+    properties:
+      id:
+        type: string
+      longName:
+        type: string
+      organizationTypeEnum:
+        $ref: '#/definitions/OrganizationType'
+        description: The Organization Type of this institution, if it is one of the enumerated OrganizationTypes
+      organizationTypeOtherText:
+        type: string
+        description: The Organization Type of this institution, as text, if it is not one of the enumerated OrganizationTypes
+      emailAddresses:
+        type: array
+        description: A list of email addresses which can be validated as members of this Institution
+        items:
+          type: string
+      emailDomains:
+        type: array
+        description: A list of email domains which can be validated as members of this Institution
+        items:
+          type: string
+
+  GetInstitutionsResponse:
+    type: object
+    required:
+      - institutions
+    properties:
+      institutions:
+        type: "array"
+        items:
+          $ref: "#/definitions/Institution"
