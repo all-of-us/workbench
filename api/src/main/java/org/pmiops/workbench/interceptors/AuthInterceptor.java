@@ -165,6 +165,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
               null,
               null,
               null,
+              null,
               null);
     } else {
       if (user.getDisabled()) {

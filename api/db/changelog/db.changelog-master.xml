@@ -125,6 +125,9 @@
     <include file="changelog/db.changelog-115-addColumn-user-create-modified.xml"/>
     <include file="changelog/db.changelog-116-drop-user-creation-modified.xml"/>
     <include file="changelog/db.changelog-117-add-user-creation-modified-column-again.xml"/>
+    <include file="changelog/db.changelog-118-add-billing-account-to-workspaces.xml"/>
+    <include file="changelog/db.changelog-119-drop-billing-account-name.xml"/>
+    <include file="changelog/db.changelog-120-update-demographics.xml"/>
     <!--
     Note: to update the DB locally, do the following:
     - Migrate schema changes: `./project.rb run-local-all-migrations`

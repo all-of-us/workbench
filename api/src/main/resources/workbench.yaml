@@ -2254,14 +2254,21 @@ paths:
 
 
 ##########################################################################################
-## Endpoints for task in cloud task queue
+# Endpoints for task in cloud task queue
+# Note: all requests tagged as "cloudTask" must have the header X-AppEngine-QueueName:
+# to the queue name, which app engine itself only sets (and overrides internally) when invoking
+# cloud task. See
+# https://cloud.google.com/tasks/docs/creating-appengine-handlers#reading_app_engine_task_request_headers
+# and o.p.w.interceptors.CloudTaskInterceptor which implements the header check.
 #########################################################################################
-  /v1/queueTask/exportResearcherData:
+  /v1/cloudTask/exportResearcherData:
     post:
       tags:
         - cloudTaskRdrExport
+        - cloudTask
+      security: []
       description: >
-        Send Researcher data
+        Task handler which handle request from cloud task queue rdrQueueTest to send Researcher data
       operationId: "exportResearcherData"
       parameters:
         - in: body
@@ -2270,17 +2277,20 @@ paths:
           description: The IDs of concepts to be added to the concept set.
           schema:
             type: object
+
       responses:
         200:
           description: >
             A SQL query for each domain in the Data Set
 
-  /v1/queueTask/exportWorkspaceData:
+  /v1/cloudTask/exportWorkspaceData:
     post:
       tags:
         - cloudTaskRdrExport
+        - cloudTask
+      security: []
       description: >
-        Send Researcher data
+         Task handler which handle request from cloud task queue rdrQueueTest to send Workspace data
       operationId: "exportWorkspaceData"
       parameters:
         - in: body
@@ -2288,7 +2298,7 @@ paths:
           required: true
           description: The IDs of concepts to be added to the concept set.
           schema:
-            type: object
+             type: object
       responses:
         200:
           description: >
@@ -3510,6 +3520,9 @@ definitions:
       phoneNumber:
         description: the user's phone number
         type: string
+      professionalUrl:
+        description: the link to the user's professional url
+        type: string
       currentPosition:
         description: the user's curent position (job title)
         type: string
@@ -3644,18 +3657,14 @@ definitions:
           $ref: '#/definitions/Race'
       ethnicity:
         $ref: '#/definitions/Ethnicity'
-      gender:
-        type: array
-        items:
-          $ref: '#/definitions/Gender'
+      identifiesAsLgbtq:
+        type: boolean
+      lgbtqIdentity:
+        type: string
       sexAtBirth:
         type: array
         items:
           $ref: '#/definitions/SexAtBirth'
-      sexualOrientation:
-        type: array
-        items:
-          $ref: '#/definitions/SexualOrientation'
       yearOfBirth:
         type: number
       education:
@@ -4084,3 +4093,10 @@ definitions:
       vm_name:
         description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.
         type: string
+
+  RdrExportId:
+    type: object
+    properties:
+      exportId:
+        type: integer
+        format: int64

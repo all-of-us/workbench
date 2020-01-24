@@ -34,6 +34,7 @@ public interface UserService {
       String currentPosition,
       String organization,
       String areaOfResearch,
+      String professionalUrl,
       List<Degree> degrees,
       DbAddress address,
       DbDemographicSurvey demographicSurvey,
