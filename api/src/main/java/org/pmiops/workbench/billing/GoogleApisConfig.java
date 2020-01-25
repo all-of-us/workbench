@@ -28,17 +28,19 @@ public class GoogleApisConfig {
       UserAuthentication userAuthentication,
       JsonFactory jsonFactory,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
-    return createCloudbillingClient(userAuthentication.getCredentials(), jsonFactory, workbenchConfigProvider.get());
+    return createCloudbillingClient(
+        userAuthentication.getCredentials(), jsonFactory, workbenchConfigProvider.get());
   }
 
   @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public Cloudbilling serviceAccountGoogleCloudbillingApi(
       JsonFactory jsonFactory, Provider<WorkbenchConfig> workbenchConfigProvider) {
-    String accessToken = null;
+    String accessToken;
     try {
-      accessToken = ServiceAccounts.getScopedServiceAccessToken(
-          Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
+      accessToken =
+          ServiceAccounts.getScopedServiceAccessToken(
+              Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
     } catch (IOException e) {
       throw new RuntimeException("Could not create service account access token for cloud billing");
     }
@@ -46,11 +48,12 @@ public class GoogleApisConfig {
     return createCloudbillingClient(accessToken, jsonFactory, workbenchConfigProvider.get());
   }
 
-  private Cloudbilling createCloudbillingClient(String accessToken, JsonFactory jsonFactory, WorkbenchConfig workbenchConfig) {
+  private Cloudbilling createCloudbillingClient(
+      String accessToken, JsonFactory jsonFactory, WorkbenchConfig workbenchConfig) {
     try {
       GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
       return new Cloudbilling.Builder(
-          GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
+              GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
           .setApplicationName(workbenchConfig.server.projectId)
           .build();
     } catch (GeneralSecurityException | IOException e) {
