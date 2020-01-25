@@ -28,35 +28,30 @@ public class GoogleApisConfig {
       UserAuthentication userAuthentication,
       JsonFactory jsonFactory,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
-    GoogleCredential credential =
-        new GoogleCredential()
-            .setAccessToken(userAuthentication.getCredentials())
-            .createScoped(
-                Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
-
-    try {
-      return new Cloudbilling.Builder(
-              GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
-          .setApplicationName(workbenchConfigProvider.get().server.projectId)
-          .build();
-    } catch (GeneralSecurityException | IOException e) {
-      throw new RuntimeException("Could not construct Cloudbilling API client");
-    }
+    return createCloudbillingClient(userAuthentication.getCredentials(), jsonFactory, workbenchConfigProvider.get());
   }
 
   @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public Cloudbilling serviceAccountGoogleCloudbillingApi(
       JsonFactory jsonFactory, Provider<WorkbenchConfig> workbenchConfigProvider) {
+    String accessToken = null;
     try {
-      GoogleCredential credential =
-          new GoogleCredential()
-              .setAccessToken(
-                  ServiceAccounts.getScopedServiceAccessToken(
-                      Collections.singletonList("https://www.googleapis.com/auth/cloud-platform")));
+      accessToken = ServiceAccounts.getScopedServiceAccessToken(
+          Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
+    } catch (IOException e) {
+      throw new RuntimeException("Could not create service account access token for cloud billing");
+    }
+
+    return createCloudbillingClient(accessToken, jsonFactory, workbenchConfigProvider.get());
+  }
+
+  private Cloudbilling createCloudbillingClient(String accessToken, JsonFactory jsonFactory, WorkbenchConfig workbenchConfig) {
+    try {
+      GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
       return new Cloudbilling.Builder(
-              GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
-          .setApplicationName(workbenchConfigProvider.get().server.projectId)
+          GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
+          .setApplicationName(workbenchConfig.server.projectId)
           .build();
     } catch (GeneralSecurityException | IOException e) {
       throw new RuntimeException("Could not construct Cloudbilling API client");
