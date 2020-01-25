@@ -226,7 +226,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     DbWorkspace dbWorkspace = new DbWorkspace();
     // A little unintuitive but setting this here reflects the current state of the workspace
-    // while it was in the billing buffer. Setting this value will inform the update code to
+    // while it was in the billing buffer. Setting this value will inform the update billing code to
     // skip an unnecessary GCP API call if the billing account is being kept at the free tier
     dbWorkspace.setBillingAccountName(
         workbenchConfigProvider.get().billing.freeTierBillingAccountName());
@@ -253,7 +253,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace, workspace.getBillingAccountName());
     } catch (Exception e) {
-      throw new ServerErrorException("Could not update workspace's billing account", e);
+      throw new ServerErrorException("Could not update the workspace's billing account", e);
     }
 
     try {
@@ -374,7 +374,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace, request.getWorkspace().getBillingAccountName());
     } catch (Exception e) {
-      throw new ServerErrorException("Could not update workspace's billing account", e);
+      throw new ServerErrorException("Could not update the workspace's billing account", e);
     }
 
     try {
@@ -472,7 +472,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // transient failure.
     DbWorkspace dbWorkspace = new DbWorkspace();
     // A little unintuitive but setting this here reflects the current state of the workspace
-    // while it was in the billing buffer. Setting this value will inform the update code to
+    // while it was in the billing buffer. Setting this value will inform the update billing code to
     // skip an unnecessary GCP API call if the billing account is being kept at the free tier
     dbWorkspace.setBillingAccountName(
         workbenchConfigProvider.get().billing.freeTierBillingAccountName());
@@ -510,7 +510,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workspaceService.updateWorkspaceBillingAccount(
             dbWorkspace, body.getWorkspace().getBillingAccountName());
       } catch (Exception e) {
-        throw new ServerErrorException("Could not update workspace's billing account", e);
+        throw new ServerErrorException("Could not update the workspace's billing account", e);
       }
     }
 
