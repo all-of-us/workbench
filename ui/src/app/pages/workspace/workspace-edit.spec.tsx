@@ -26,11 +26,13 @@ describe('WorkspaceEdit', () => {
 
   beforeEach(() => {
     workspace = {
-      // accessLevel is a WorkspaceData property.
+      // accessLevel is a required WorkspaceData property (WorkspaceData extends
+      // from Workspace)
       accessLevel: WorkspaceAccessLevel.OWNER,
       // Apply all properties from the default workspace stub.
       ...workspaceStubs[0],
-      // Override some of the researchPurpose properties.
+      // Override some of the researchPurpose properties, to fill required
+      // fields in the workspace form.
       researchPurpose: {
         ...workspaceStubs[0].researchPurpose,
         intendedStudy: 'greyscale',
@@ -48,7 +50,7 @@ describe('WorkspaceEdit', () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Create});
   });
 
-  it('displays workspaces create page', async() => {
+  it('displays workspaces create page', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find(WorkspaceEditSection).first().text()).toContain('Create a new Workspace');
@@ -58,7 +60,7 @@ describe('WorkspaceEdit', () => {
     .toEqual(false);
   });
 
-  it('displays workspaces duplicate page', async() => {
+  it('displays workspaces duplicate page', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -69,7 +71,7 @@ describe('WorkspaceEdit', () => {
     .toEqual(true);
   });
 
-  it('displays workspaces edit page', async() => {
+  it('displays workspaces edit page', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Edit});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -80,7 +82,7 @@ describe('WorkspaceEdit', () => {
       .toEqual(true);
   });
 
-  it('pre-fills "specific populations" form elements when editing', async() => {
+  it('pre-fills "specific populations" form elements when editing', async () => {
     // Set the workspace state to represent a workspace which is studying a
     // specific population group.
     workspace.researchPurpose.population = true;
@@ -98,7 +100,7 @@ describe('WorkspaceEdit', () => {
       .first().prop('checked')).toEqual(true);
   });
 
-  it('supports successful duplication', async() => {
+  it('supports successful duplication', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -111,7 +113,7 @@ describe('WorkspaceEdit', () => {
     expect(navigate).toHaveBeenCalledTimes(1);
   });
 
-  it('supports waiting on access delays', async() => {
+  it('supports waiting on access delays', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -139,7 +141,7 @@ describe('WorkspaceEdit', () => {
     jest.useRealTimers();
   });
 
-  it('shows confirmation on extended access delays', async() => {
+  it('shows confirmation on extended access delays', async () => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
