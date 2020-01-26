@@ -301,8 +301,8 @@ sourceSets {
       srcDir "config/"
     }
     java {
-      compileClasspath += main.output + test.output + generated.output
-      runtimeClasspath += main.output + test.output + generated.output
+      compileClasspath += main.output + generated.output
+      runtimeClasspath += main.output + generated.output
       srcDir file('src/integration/java')
     }
   }

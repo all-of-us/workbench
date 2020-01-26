@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.pmiops.workbench.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
@@ -17,6 +18,7 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
   @Autowired private DirectoryService service;
 
   @TestConfiguration
+  @ComponentScan(basePackageClasses = DirectoryServiceImpl.class)
   @Import(DirectoryServiceImpl.class)
   static class Configuration {}
 

@@ -9,6 +9,7 @@ import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +28,8 @@ import org.springframework.stereotype.Service;
 public class CloudResourceManagerServiceImpl implements CloudResourceManagerService {
   private static final String APPLICATION_NAME = "All of Us Researcher Workbench";
 
+  public static final String ADMIN_SERVICE_ACCOUNT_NAME = "cloud-resource-admin";
+
   public static final List<String> SCOPES =
       Arrays.asList(CloudResourceManagerScopes.CLOUD_PLATFORM_READ_ONLY);
 
@@ -34,6 +37,7 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
+  private final IamCredentialsClient iamCredentialsClient;
 
   @Autowired
   public CloudResourceManagerServiceImpl(
@@ -41,11 +45,13 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
           Provider<ServiceAccountCredentials> credentialsProvider,
       Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
-      GoogleRetryHandler retryHandler) {
+      GoogleRetryHandler retryHandler,
+      IamCredentialsClient iamCredentialsClient) {
     this.credentialsProvider = credentialsProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
+    this.iamCredentialsClient = iamCredentialsClient;
   }
 
   private CloudResourceManager getCloudResourceManagerServiceWithImpersonation(DbUser user)
@@ -55,9 +61,11 @@ public class CloudResourceManagerServiceImpl implements CloudResourceManagerServ
       delegatedCreds =
           new DelegatedUserCredentials(
               ServiceAccounts.getServiceAccountEmail(
-                  "cloud-resource-admin", configProvider.get().server.projectId),
+                  ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
               user.getUsername(),
-              SCOPES);
+              SCOPES,
+              iamCredentialsClient,
+              httpTransport);
     } else {
       delegatedCreds =
           credentialsProvider.get().createScoped(SCOPES).createDelegated(user.getUsername());

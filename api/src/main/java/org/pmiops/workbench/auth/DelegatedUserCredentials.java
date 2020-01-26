@@ -5,7 +5,6 @@ import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleOAuthConstants;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.json.webtoken.JsonWebToken;
@@ -15,9 +14,9 @@ import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.cloud.iam.credentials.v1.SignJwtRequest;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.IOException;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -55,52 +54,50 @@ import java.util.List;
  */
 public class DelegatedUserCredentials extends OAuth2Credentials {
 
+  // 60 minutes is the default access token duration time for Google-generated OAuth2 tokens.
+  public static final Duration ACCESS_TOKEN_DURATION = Duration.ofMinutes(60);
   static final String JWT_BEARER_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
   static final String SERVICE_ACCOUNT_NAME_FORMAT = "projects/-/serviceAccounts/%s";
   static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-  public static final Duration ACCESS_TOKEN_DURATION = Duration.ofMinutes(60);
 
   // The email of the service account whose system-managed key should be used to sign the JWT
   // assertion which is exchanged for an access token. This service account:
-  // - Must have domain-wide delegation enabled for the target user's G Suite domain and scopes.
-  // - Does not need to be the same service account (SA) as the application default credentials
-  // (ADC)
-  //     service account. If they are different, the ADC account must have the Service Account Token
-  //     Creator role granted on this service account. See
-  //     https://cloud.google.com/iam/docs/creating-short-lived-service-account-credentials for more
-  //     details.
+  // (1) Must have domain-wide delegation enabled for the target user's G Suite domain and scopes.
+  //
+  // (2) Does not need to be the same service account (SA) as the application default credentials
+  // (ADC) service account. If they are different, the ADC account must have the Service Account
+  // Token Creator role granted on this service account. See
+  // https://cloud.google.com/iam/docs/creating-short-lived-service-account-credentials for more
+  // details.
   private String serviceAccountEmail;
   // The full G Suite email address of the user for whom an access token will be generated.
   private String userEmail;
   // The set of Google OAuth scopes to be requested.
   private List<String> scopes;
-  // The HttpTransport to be used for making requests to Google's OAuth2 token server. If null,
-  // a default NetHttpTransport instance is used.
+  // The HttpTransport to be used for making requests to Google's OAuth2 token server.
   private HttpTransport httpTransport;
-  // The IAM Credentials API client to be used for fetching a signed JWT from Google. If null,
-  // a default API client will be used.
-  private IamCredentialsClient client;
+  // The IAM Credentials API client to be used for fetching a signed JWT from Google.
+  private IamCredentialsClient credentialsClient;
+  // The Clock to use when generating the expiration timestamp for the returned token.
+  private Clock clock = Clock.systemUTC();
 
   public DelegatedUserCredentials(
-      String serviceAccountEmail, String userEmail, List<String> scopes) {
+      String serviceAccountEmail,
+      String userEmail,
+      List<String> scopes,
+      IamCredentialsClient credentialsClient,
+      HttpTransport httpTransport) {
     super();
     this.serviceAccountEmail = serviceAccountEmail;
     this.userEmail = userEmail;
     this.scopes = scopes;
-
-    if (this.scopes == null) {
-      this.scopes = Collections.emptyList();
-    }
-  }
-
-  @VisibleForTesting
-  public void setIamCredentialsClient(IamCredentialsClient client) {
-    this.client = client;
-  }
-
-  @VisibleForTesting
-  public void setHttpTransport(HttpTransport httpTransport) {
+    this.credentialsClient = credentialsClient;
     this.httpTransport = httpTransport;
+  }
+
+  @VisibleForTesting
+  public void setClock(Clock clock) {
+    this.clock = clock;
   }
 
   /**
@@ -133,23 +130,15 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
     // appropriate claims. This call is authorized with application default credentials (ADCs). The
     // ADC service account may be different from `serviceAccountEmail` if the ADC account has the
     // roles/iam.serviceAccountTokenCreator role on the `serviceAccountEmail` account.
-    JsonWebToken.Payload payload = createJwtPayload();
-
-    if (client == null) {
-      client = IamCredentialsClient.create();
-    }
     SignJwtRequest jwtRequest =
         SignJwtRequest.newBuilder()
             .setName(String.format(SERVICE_ACCOUNT_NAME_FORMAT, serviceAccountEmail))
-            .setPayload(JSON_FACTORY.toString(payload))
+            .setPayload(JSON_FACTORY.toString(createJwtPayload()))
             .build();
-    String jwt = client.signJwt(jwtRequest).getSignedJwt();
+    String jwt = credentialsClient.signJwt(jwtRequest).getSignedJwt();
 
     // With the signed JWT in hand, we call Google's OAuth2 token server to exchange the JWT for
     // an access token.
-    if (httpTransport == null) {
-      httpTransport = new NetHttpTransport();
-    }
     TokenRequest tokenRequest =
         new TokenRequest(
             httpTransport,
@@ -160,6 +149,6 @@ public class DelegatedUserCredentials extends OAuth2Credentials {
     TokenResponse tokenResponse = tokenRequest.execute();
     return new AccessToken(
         tokenResponse.getAccessToken(),
-        Date.from(Instant.now().plusSeconds(tokenResponse.getExpiresInSeconds())));
+        Date.from(Instant.now(clock).plusSeconds(tokenResponse.getExpiresInSeconds())));
   }
 }

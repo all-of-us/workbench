@@ -16,6 +16,7 @@ import com.google.api.services.directory.model.UserName;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -81,6 +82,7 @@ public class DirectoryServiceImpl implements DirectoryService {
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
+  private final IamCredentialsClient iamCredentialsClient;
 
   @Autowired
   public DirectoryServiceImpl(
@@ -88,11 +90,13 @@ public class DirectoryServiceImpl implements DirectoryService {
           Provider<ServiceAccountCredentials> googleCredentialsProvider,
       Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
-      GoogleRetryHandler retryHandler) {
+      GoogleRetryHandler retryHandler,
+      IamCredentialsClient iamCredentialsClient) {
     this.googleCredentialsProvider = googleCredentialsProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
+    this.iamCredentialsClient = iamCredentialsClient;
   }
 
   private Directory getGoogleDirectoryService() {
@@ -103,7 +107,9 @@ public class DirectoryServiceImpl implements DirectoryService {
               ServiceAccounts.getServiceAccountEmail(
                   ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
               DIRECTORY_SERVICE_USERNAME + "@" + gSuiteDomain(),
-              SCOPES);
+              SCOPES,
+              iamCredentialsClient,
+              httpTransport);
     } else {
       delegatedCreds =
           googleCredentialsProvider

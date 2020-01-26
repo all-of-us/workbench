@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.pmiops.workbench.test.FakeClock;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -42,7 +42,7 @@ public class DelegatedUserCredentialsTest {
   static final String USER_EMAIL = "john.doe@researchallofus.org";
   static final String SERVICE_ACCOUNT_EMAIL = "gsuite-admin@test-project.iam.gserviceaccount.com";
   static final List<String> SCOPES = Arrays.asList("openid", "profile");
-  static final String MOCK_ACCESS_TOKEN = "access-token";
+  static final String MOCK_ACCESS_TOKEN = "FAKE_ya29.QQIBibTwvKkE39hY8mdkT_mXZoRh7...";
 
   static final String SA_PRIVATE_KEY_ID = "private-key-for-testing-only";
   // A random private key string generated for testing purposed with the following commands:
@@ -66,14 +66,21 @@ public class DelegatedUserCredentialsTest {
   // so we'll use that to mock out the call to request an access token.
   private MockTokenServerTransport mockTokenServerTransport;
   private DelegatedUserCredentials delegatedCredentials;
+  private FakeClock fakeClock;
 
   @Before
   public void setUp() {
     mockTokenServerTransport = new MockTokenServerTransport();
+    fakeClock = new FakeClock(Instant.ofEpochSecond(12345));
 
-    delegatedCredentials = new DelegatedUserCredentials(SERVICE_ACCOUNT_EMAIL, USER_EMAIL, SCOPES);
-    delegatedCredentials.setHttpTransport(mockTokenServerTransport);
-    delegatedCredentials.setIamCredentialsClient(mockIamCredentialsClient);
+    delegatedCredentials =
+        new DelegatedUserCredentials(
+            SERVICE_ACCOUNT_EMAIL,
+            USER_EMAIL,
+            SCOPES,
+            mockIamCredentialsClient,
+            mockTokenServerTransport);
+    delegatedCredentials.setClock(fakeClock);
   }
 
   /**
@@ -150,7 +157,7 @@ public class DelegatedUserCredentialsTest {
 
     // Verify the call to IAM Credentials API.
     ArgumentCaptor<SignJwtRequest> captor = ArgumentCaptor.forClass(SignJwtRequest.class);
-    verify(mockIamCredentialsClient, Mockito.times(1)).signJwt(captor.capture());
+    verify(mockIamCredentialsClient).signJwt(captor.capture());
     assertThat(captor.getValue().getName())
         .isEqualTo("projects/-/serviceAccounts/" + SERVICE_ACCOUNT_EMAIL);
 
@@ -160,6 +167,6 @@ public class DelegatedUserCredentialsTest {
     assertThat(delegatedCredentials.getAccessToken().getTokenValue()).isEqualTo(MOCK_ACCESS_TOKEN);
     assertThat(
             delegatedCredentials.getAccessToken().getExpirationTime().toInstant().getEpochSecond())
-        .isEqualTo(Instant.now().getEpochSecond() + 3600);
+        .isEqualTo(Instant.now(fakeClock).getEpochSecond() + 3600);
   }
 }

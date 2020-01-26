@@ -1,8 +1,10 @@
 package org.pmiops.workbench.firecloud;
 
 import com.google.api.client.http.HttpStatusCodes;
+import com.google.api.client.http.HttpTransport;
 import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
@@ -62,6 +64,8 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<StaticNotebooksApi> staticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
   private final Provider<ServiceAccountCredentials> fcAdminCredsProvider;
+  private final IamCredentialsClient iamCredentialsClient;
+  private final HttpTransport httpTransport;
 
   private static final String ADMIN_SERVICE_ACCOUNT_NAME = "firecloud-admin";
 
@@ -110,7 +114,9 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<StaticNotebooksApi> staticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
       @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
-          Provider<ServiceAccountCredentials> fcAdminCredsProvider) {
+          Provider<ServiceAccountCredentials> fcAdminCredsProvider,
+      IamCredentialsClient iamCredentialsClient,
+      HttpTransport httpTransport) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
@@ -122,6 +128,8 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.retryHandler = retryHandler;
     this.fcAdminCredsProvider = fcAdminCredsProvider;
     this.staticNotebooksApiProvider = staticNotebooksApiProvider;
+    this.iamCredentialsClient = iamCredentialsClient;
+    this.httpTransport = httpTransport;
   }
 
   /**
@@ -142,7 +150,9 @@ public class FireCloudServiceImpl implements FireCloudService {
               ServiceAccounts.getServiceAccountEmail(
                   ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
               userEmail,
-              FIRECLOUD_API_OAUTH_SCOPES);
+              FIRECLOUD_API_OAUTH_SCOPES,
+              iamCredentialsClient,
+              httpTransport);
     } else {
       delegatedCreds =
           fcAdminCredsProvider
