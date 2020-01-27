@@ -258,7 +258,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if the workspace creation
       // fails
-      log.severe("Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.");
+      log.severe(
+          "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.");
       log.severe(e.getMessage());
       updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
       throw e;
