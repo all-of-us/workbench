@@ -169,8 +169,8 @@ public class WorkbenchConfig {
   public static class MoodleConfig {
     public String host;
     public boolean enableMoodleBackend;
-    public String credentialsKeyDeprecated;
-    public String credentialsKey;
+    public String credentialsKeyV1;
+    public String credentialsKeyV2;
   }
 
   // The access object specifies whether each of the following access requirements block access
