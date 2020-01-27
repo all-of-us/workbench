@@ -16,7 +16,7 @@ import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCdrVersions, withC
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
-import {getBillingAccountName} from 'app/utils/workbench-gapi-client';
+import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
 import {
   ArchivalStatus,
   BillingAccount,
@@ -208,10 +208,6 @@ export const specificPopulations = [
     ubrDescription: 'Less than USD 25,000 [for a family of four]'
   }
 ];
-
-const billingDescription = <div>The <i>All of Us</i> Program provides $200 in free credits per user.
-  When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account.
-  At any time, you can update your Workspace billing account.</div>;
 
 // Poll parameters to check Workspace ACLs after creation of a new workspace. See
 // SATURN-104 for details, eventually the root cause should be resolved by fixes
@@ -472,8 +468,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         );
 
         if (this.isMode(WorkspaceEditMode.Edit)) {
-          getBillingAccountName(this.props.workspace.namespace).then(billingAccountName =>
-            this.setState(fp.set(['workspace', 'billingAccountName'], billingAccountName)));
+          getBillingAccountInfo(this.props.workspace.namespace).then(billingAccountInfo =>
+            this.setState(fp.set(['workspace', 'billingAccountName'], billingAccountInfo.billingAccountName)));
         }
       } else {
         // This is a temporary hack to set the billing account name property to anything
@@ -497,6 +493,13 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             'diseaseOfFocus'
           ], disease))}/>
       );
+    }
+
+    renderBillingDescription() {
+      return <div>The <i>All of Us</i> Program provides ${serverConfigStore.getValue().defaultFreeCreditsDollarLimit.toFixed(0)} in free credits per user.
+        When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account.
+        At any time, you can update your Workspace billing account.
+      </div>;
     }
 
     renderHeader() {
@@ -765,7 +768,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         }
         {serverConfigStore.getValue().enableBillingLockout &&
           <WorkspaceEditSection header={<div><i>All of Us</i> Billing account</div>}
-                                description={billingDescription}>
+                                description={this.renderBillingDescription()}>
             <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
               Select account
             </div>

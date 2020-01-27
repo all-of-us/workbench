@@ -15,7 +15,7 @@ jest.mock('app/utils/navigation', () => ({
 }));
 
 jest.mock('app/utils/workbench-gapi-client', () => ({
-  getBillingAccountName: () => new Promise(resolve => resolve('billing-account'))
+  getBillingAccountInfo: () => new Promise(resolve => resolve({billingAccountName: 'billing-account'}))
 }));
 
 describe('WorkspaceEdit', () => {
