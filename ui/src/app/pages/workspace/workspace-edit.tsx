@@ -12,7 +12,14 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {TwoColPaddedTable} from 'app/components/tables';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCdrVersions, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
+import {
+  reactStyles,
+  ReactWrapperBase,
+  sliceByHalfLength,
+  withCdrVersions,
+  withCurrentWorkspace,
+  withRouteConfigData
+} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
@@ -31,6 +38,7 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
+import {WorkspaceData} from "app/utils/workspace-data";
 
 export const ResearchPurposeDescription =
   <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
@@ -338,7 +346,7 @@ function getDiseaseNames(keyword) {
 export interface WorkspaceEditProps {
   routeConfigData: any;
   cdrVersionListResponse: CdrVersionListResponse;
-  workspace: Workspace;
+  workspace: WorkspaceData;
   cancel: Function;
 }
 
@@ -377,49 +385,57 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       };
     }
 
+    async fetchBillingAccounts() {
+      const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
+
+      if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
+        this.setState(
+          fp.set(['workspace', 'billingAccountName',
+            billingAccounts.find(billingAccount => billingAccount.isFreeTier).name]));
+      } else if (this.isMode(WorkspaceEditMode.Edit)) {
+        const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
+
+        if (!billingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
+          // If the user has owner access on the workspace but does not have access to the billing account
+          // that it is attached to, keep the server's current value for billingAccountName and add a shim
+          // entry into billingAccounts so the dropdown entry is not empty.
+          //
+          // The server will not perform an updateBillingInfo call if the received billingAccountName
+          // is the same as what is currently stored.
+          //
+          // This can happen if a workspace is shared to another researcher as an owner.
+          billingAccounts.push({
+            name: this.props.workspace.billingAccountName,
+            displayName: 'User Provided Billing Account',
+            isFreeTier: false,
+            isOpen: true
+          });
+
+          if (fetchedBillingInfo.billingAccountName !== this.props.workspace.billingAccountName) {
+            // This should never happen but it means the database is out of sync with Google
+            // and does not have the correct billing account stored.
+            // We cannot send over the correct billing account info since the current user
+            // does not have permissions to set it.
+
+            reportError({
+              name: 'Out of date billing account name',
+              message: `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
+                `Stored value is ${this.props.workspace.billingAccountName}. ` +
+                `True value is ${fetchedBillingInfo.billingAccountName}`
+            });
+          }
+        } else {
+          // Otherwise, use this as an opportunity to sync the fetched billing account name from the source of truth, Google
+          this.setState(fp.set(['workspace', 'billingAccountName'], fetchedBillingInfo.billingAccountName));
+        }
+      }
+
+      this.setState({billingAccounts});
+    }
+
     async componentDidMount() {
       if (serverConfigStore.getValue().enableBillingLockout) {
-        const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
-
-        if (this.isMode(WorkspaceEditMode.Edit)) {
-          const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
-
-          if (!billingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
-            // If the user has owner access on the workspace but does not have access to the billing account
-            // that it is attached to, keep the server's current value for billingAccountName and add a shim
-            // entry into billingAccounts so the dropdown entry is not empty.
-            //
-            // The server will not perform an updateBillingInfo call if the received billingAccountName
-            // is the same as what is currently stored.
-            //
-            // This can happen if a workspace is shared to another researcher as an owner.
-            billingAccounts.push({
-              name: this.props.workspace.billingAccountName,
-              displayName: 'User Provided Billing Account',
-              isFreeTier: false,
-              isOpen: true
-            });
-
-            if (fetchedBillingInfo.billingAccountName !== this.props.workspace.billingAccountName) {
-              // This should never happen but it means the database is out of sync with Google
-              // and does not have the correct billing account stored.
-              // We cannot send over the correct billing account info since the current user
-              // does not have permissions to set it.
-
-              reportError({
-                name: 'Out of date billing account name',
-                message: `Workspace ${this.props.workspace.namespace} has an out of date billing account name.
-                Stored value is ${this.props.workspace.billingAccountName}. True value is ${fetchedBillingInfo.billingAccountName}`
-              });
-            }
-          } else {
-            // Otherwise, use this as an opportunity to sync the fetched billing account name from the source of truth, Google
-            this.setState(fp.set(['workspace', 'billingAccountName'], fetchedBillingInfo.billingAccountName));
-          }
-
-        }
-
-        this.setState({billingAccounts});
+        this.fetchBillingAccounts();
       } else {
         // This is a temporary hack to set the billing account name property to anything
         // so that it passes validation. The server ignores the value if the feature flag
@@ -539,7 +555,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     renderBillingDescription() {
       return <div>
-        The <i>All of Us</i> Program provides ${serverConfigStore.getValue().defaultFreeCreditsDollarLimit.toFixed(0)}
+        The <i> Us</i> Program provides ${serverConfigStore.getValue().defaultFreeCreditsDollarLimit.toFixed(0)}
         in free credits per user. When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account.
         At any time, you can update your Workspace billing account.
       </div>;
@@ -864,6 +880,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </WorkspaceEditSection>
         }
         {serverConfigStore.getValue().enableBillingLockout &&
+          (!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
           <WorkspaceEditSection header={<div><i>All of Us</i> Billing account</div>}
                                 description={this.renderBillingDescription()}>
             <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
