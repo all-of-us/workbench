@@ -19,5 +19,5 @@ export const testEnvironmentBase = {
   enableHomepageRestyle: true,
   enableProfileCapsFeatures: true,
   enableAccountPages: true,
-  enableNewConceptTabs: true
+  enableNewConceptTabs: false
 };

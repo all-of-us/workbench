@@ -1967,50 +1967,28 @@ paths:
           schema:
             $ref: "#/definitions/SurveysResponse"
 
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/{surveyName}/surveyQuestions:
-    get:
+  /v1/workspaces/{workspaceNamespace}/{workspaceId}/searchSurveys:
+    post:
       tags:
         - concepts
       description: >
-        Returns survey questions and answers in the workspace's CDR version
-      operationId: "getSurveyQuestions"
+        Searches for surveys in criteria table by synonyms or survey name
+      operationId: "searchSurveys"
       parameters:
         - $ref: '#/parameters/workspaceNamespace'
         - $ref: '#/parameters/workspaceId'
-        - in: path
-          name: surveyName
-          required: true
-          type: string
+        - in: body
+          name: request
+          description: survey search request
+          schema:
+            $ref: "#/definitions/SearchSurveysRequest"
       responses:
         200:
-          description: information about the surveys
+          description: collection of survey questions
           schema:
             type: "array"
             items:
               $ref: "#/definitions/SurveyQuestions"
-
-  /v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyAnswer:
-    get:
-      tags:
-        - concepts
-      description: >
-        Returns with all the answer for survey Question
-      operationId: "getSurveyAnswers"
-      parameters:
-        - $ref: '#/parameters/workspaceNamespace'
-        - $ref: '#/parameters/workspaceId'
-        - in: query
-          name: questionConceptId
-          required: true
-          type: integer
-          format: int64
-      responses:
-        200:
-          description: List of Survey Details with Answer
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/SurveyAnswerResponse"
 
   ### Data set ############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
@@ -2288,7 +2266,8 @@ paths:
           required: true
           description: The IDs of concepts to be added to the concept set.
           schema:
-            $ref: "#/definitions/RdrExportIdList"
+            type: object
+
       responses:
         200:
           description: >
@@ -2309,7 +2288,7 @@ paths:
           required: true
           description: The IDs of concepts to be added to the concept set.
           schema:
-             $ref: "#/definitions/RdrExportIdList"
+             type: object
       responses:
         200:
           description: >
@@ -3435,6 +3414,36 @@ definitions:
         items:
           $ref: "#/definitions/SurveyModule"
 
+  SearchSurveysRequest:
+    type: object
+    required:
+      - standardConceptFilter
+    properties:
+      query:
+        type: string
+        description: >
+          A query string that can be used to match a subset of the name (case-insensitively),
+          the entire code value (case-insensitively), or the concept ID. If not specified, all
+          concepts are returned.
+      standardConceptFilter:
+        description: >
+          STANDARD_CONCEPTS if only standard concepts should be returned,
+          NON_STANDARD_CONCEPTS if only non-standard
+          concepts should be returned; defaults to ALL_CONCEPTS, meaning both
+          standard and non-standard concepts will be returned.
+        $ref: "#/definitions/StandardConceptFilter"
+      surveyName:
+        description: The name of the survey clicked
+        type: string
+      maxResults:
+        type: integer
+        format: int32
+        description: The maximum number of results returned. Defaults to 20.
+      pageNumber:
+        type: integer
+        default: 0
+        description: By default it returns the first page and then its next pages from that on.
+
   SurveyQuestions:
     type: object
     properties:
@@ -4142,11 +4151,9 @@ definitions:
         description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.
         type: string
 
-  RdrExportIdList:
+  RdrExportId:
     type: object
     properties:
-      exportIds:
-        type: array
-        items:
-          type: integer
-          format: int64
+      exportId:
+        type: integer
+        format: int64

@@ -117,7 +117,7 @@ VALUES
 (1586134,'The Basics','Survey includes participant demographic information.',0,0,1),
 (43529712,'Personal Medical History','This survey includes information about past medical history, including medical conditions and approximate age of diagnosis.',0,0,4),
 (43528895,'Healthcare Access & Utilization','Survey includes information about a participants access to and use of health care.',0,0,5),
-(43528698,'Family Medical History','Survey includes information about the medical history of a participants immediate biological family members.',0,0,6)"
+(43528698,'Family History','Survey includes information about the medical history of a participants immediate biological family members.',0,0,6)"
 
 # Populate some tables from cdr data
 ###############
