@@ -101,7 +101,7 @@ VALUES
 (21,4,'Measurement','Measurements','Measurement',0,0,0),
 (10,6,'Procedure','Procedures','Procedure',0,0,0),
 (27,5,'Observation','Observations','Observation',0,0,0),
-(0,8,'Physical Measurements','Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process',0,0,0)"
+(0,10,'Physical Measurements','Physical Measurements','Participants have the option to provide a standard set of physical measurements as part of the enrollment process',0,0,0)"
 
 # Populate survey_module
 #################
