@@ -7,7 +7,7 @@ import {EditComponentReact} from 'app/icons/edit';
 import {
   ResearchPurposeDescription,
   ResearchPurposeItems,
-  specificPopulations} from 'app/pages/workspace/workspace-edit';
+  SpecificPopulationItems} from 'app/pages/workspace/workspace-edit';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {sliceByHalfLength} from 'app/utils/index';
@@ -56,8 +56,8 @@ export const ResearchPurpose = withCurrentWorkspace()(
     }
 
     getSelectedPopulations() {
-      const populations = specificPopulations.filter(sp =>
-        this.props.workspace.researchPurpose.populationDetails.includes(sp.object))
+      const populations = SpecificPopulationItems.filter(sp =>
+        this.props.workspace.researchPurpose.populationDetails.includes(sp.shortName))
         .map(sp => sp.ubrLabel);
       if (this.props.workspace.researchPurpose.populationDetails
         .includes(SpecificPopulationEnum.OTHER)) {

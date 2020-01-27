@@ -144,58 +144,65 @@ export const researchPurposeQuestions = [
   }
 ];
 
-export const specificPopulations = [
+interface SpecificPopulationItem {
+  label: string;
+  shortName: SpecificPopulationEnum;
+  ubrLabel: string;
+  ubrDescription: string;
+}
+
+export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
   {
     label: 'Race/Ethnicity',
-    object: SpecificPopulationEnum.RACEETHNICITY,
+    shortName: SpecificPopulationEnum.RACEETHNICITY,
     ubrLabel: 'Ancestry (Race/Ethnicity)',
     ubrDescription: 'American Indian and Alaska Native (AIAN); Black, African American, or ' +
        'African; Middle Eastern or North African (MENA); Native Hawaiian or Other Pacific ' +
        'Islander (NHPI); Hispanic, Latino, or Spanish (H/L/S); Multi-Ancestry (2+ Races)'
   }, {
     label: 'Age Groups',
-    object: SpecificPopulationEnum.AGEGROUPS,
+    shortName: SpecificPopulationEnum.AGEGROUPS,
     ubrLabel: 'Age',
     ubrDescription: 'Children (0-11); Adolescents (12-17); Older Adults (65-74); Older ' +
       'Adults (75+)'
   }, {
     label: 'Sex',
-    object: SpecificPopulationEnum.SEX,
+    shortName: SpecificPopulationEnum.SEX,
     ubrLabel: 'Sex',
     ubrDescription: 'Intersex'
   }, {
     label: 'Gender Identity',
-    object: SpecificPopulationEnum.GENDERIDENTITY,
+    shortName: SpecificPopulationEnum.GENDERIDENTITY,
     ubrLabel: 'Gender Identity (GI)',
     ubrDescription: 'Nonbinary; Transgender; or Other Gender Identity Choices'
   }, {
     label: 'Sexual Orientation',
-    object: SpecificPopulationEnum.SEXUALORIENTATION,
+    shortName: SpecificPopulationEnum.SEXUALORIENTATION,
     ubrLabel: 'Sexual Orientation (SO)',
     ubrDescription: 'Gay; Lesbian; Bisexual; Queer; Other Sexual Orientation Choices'
   }, {
     label: 'Geography (e.g. Rural, urban, suburban, etc.)',
-    object: SpecificPopulationEnum.GEOGRAPHY,
+    shortName: SpecificPopulationEnum.GEOGRAPHY,
     ubrLabel: 'Geography',
     ubrDescription: 'Rural and Non-Metropolitan Zip codes'
   }, {
     label: 'Disability status',
-    object: SpecificPopulationEnum.DISABILITYSTATUS,
+    shortName: SpecificPopulationEnum.DISABILITYSTATUS,
     ubrLabel: 'Disability Status',
     ubrDescription: 'Physical and Cognitive Disabilities'
   }, {
     label: 'Access to care',
-    object: SpecificPopulationEnum.ACCESSTOCARE,
+    shortName: SpecificPopulationEnum.ACCESSTOCARE,
     ubrLabel: 'Access to Care',
     ubrDescription: 'Limited access to care; Cannot easily obtain or access medical care'
   }, {
     label: 'Education level',
-    object: SpecificPopulationEnum.EDUCATIONLEVEL,
+    shortName: SpecificPopulationEnum.EDUCATIONLEVEL,
     ubrLabel: 'Educational Attainment',
     ubrDescription: 'Less than high school graduate or General Education Development (GED)'
   }, {
     label: 'Income level',
-    object: SpecificPopulationEnum.INCOMELEVEL,
+    shortName: SpecificPopulationEnum.INCOMELEVEL,
     ubrLabel: 'Income Level',
     ubrDescription: 'Less than USD 25,000 [for a family of four]'
   }
@@ -306,26 +313,6 @@ export const WorkspaceEditSection = (props) => {
   </div>;
 };
 
-export const WorkspaceCategory = (props) => {
-  return <div style={...fp.merge(styles.categoryRow, props.style)}>
-    <CheckBox id={props.uniqueId}
-              style={styles.checkboxStyle}
-              checked={!!props.value}
-              onChange={e => props.onChange(e)}/>
-    <FlexColumn style={{marginTop: '-0.2rem'}}>
-      <label style={styles.shortDescription} htmlFor={props.uniqueId}>
-        {props.shortDescription}
-      </label>
-      <div>
-        <label style={{...styles.longDescription, ...styles.text}}>
-          {props.longDescription}
-        </label>
-        {props.children}
-      </div>
-    </FlexColumn>
-  </div>;
-};
-
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Duplicate = 3 }
 
 function getDiseaseNames(keyword) {
@@ -366,8 +353,32 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     constructor(props: WorkspaceEditProps) {
       super(props);
       this.state = {
-        cdrVersionItems: [],
-        workspace: {
+        cdrVersionItems: this.createInitialCdrVersionsList(),
+        workspace: this.createInitialWorkspaceState(),
+        workspaceCreationConflictError: false,
+        workspaceCreationError: false,
+        workspaceCreationErrorMessage: '',
+        workspaceNewAclDelayed: false,
+        workspaceNewAclDelayedContinueFn: () => {},
+        cloneUserRole: false,
+        loading: false,
+        showUnderservedPopulationDetails: false,
+        showStigmatizationDetails: false,
+      };
+    }
+
+    /**
+     * Creates the initial workspace state object. For a CREATE mode dialog,
+     * this is effectively an empty Workspace object. For EDIT or DUPLICATE
+     * mode, this will be based on props.workspace.
+     *
+     * This is where logic lives to auto-set the CDR version and
+     * "reviewRequested" flag, which depend on the workspace state & edit mode.
+     */
+    createInitialWorkspaceState(): Workspace {
+      let workspace: Workspace = this.props.workspace;
+      if (this.isMode(WorkspaceEditMode.Create)) {
+        workspace = {
           name: '',
           dataAccessLevel: DataAccessLevel.Registered,
           cdrVersionId: '',
@@ -392,67 +403,63 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             socialBehavioral: false,
             reasonForAllOfUs: '',
           }
-        },
-        workspaceCreationConflictError: false,
-        workspaceCreationError: false,
-        workspaceCreationErrorMessage: '',
-        workspaceNewAclDelayed: false,
-        workspaceNewAclDelayedContinueFn: () => {},
-        cloneUserRole: false,
-        loading: false,
-        showUnderservedPopulationDetails: false,
-        showStigmatizationDetails: false,
-      };
-    }
-
-    async componentDidMount() {
-      if (!this.isMode(WorkspaceEditMode.Create)) {
-        this.setState({workspace : {
-          ...this.props.workspace,
-            // Replace potential nulls with empty string or empty array
-          researchPurpose: {
-            ...this.props.workspace.researchPurpose,
-            populationDetails: !this.props.workspace.researchPurpose.populationDetails ?
-              [] : this.props.workspace.researchPurpose.populationDetails,
-            diseaseOfFocus: !this.props.workspace.researchPurpose.diseaseOfFocus ?
-              '' : this.props.workspace.researchPurpose.diseaseOfFocus}
-        }});
-        if (this.isMode(WorkspaceEditMode.Duplicate)) {
-          // This is the only field which is not automatically handled/differentiated
-          // on the API level.
-          this.setState(fp.set(['workspace', 'name'], 'Duplicate of ' + this.props.workspace.name));
-          // if the original workspace was reviewed, it's unlikely that we need a re-review
-          this.updateResearchPurpose('reviewRequested', false);
-        }
+        };
       }
 
+      // Replace potential nulls with empty string or empty array
+      if (workspace.researchPurpose.populationDetails == null) {
+        workspace.researchPurpose.populationDetails = [];
+      }
+      if (workspace.researchPurpose.diseaseOfFocus == null) {
+        workspace.researchPurpose.diseaseOfFocus = '';
+      }
+
+      if (this.isMode(WorkspaceEditMode.Duplicate)) {
+        // This is the only field which is not automatically handled/differentiated
+        // on the API level.
+        workspace.name = 'Duplicate of ' + workspace.name;
+        // if the original workspace was reviewed, it's unlikely that we need a re-review
+        workspace.researchPurpose.reviewRequested = false;
+      }
+
+      const selectedCdrIsLive = this.getLiveCdrVersions().some(
+        cdr => cdr.cdrVersionId === workspace.cdrVersionId);
+      // We preselect the default CDR version when a new workspace is being
+      // created (via create or duplicate), but leave as-is if the selected CDR
+      // version is live.
+      if (this.isMode(WorkspaceEditMode.Create) ||
+        (this.isMode(WorkspaceEditMode.Duplicate) && !selectedCdrIsLive)) {
+        workspace.cdrVersionId = this.props.cdrVersionListResponse.defaultCdrVersionId;
+      }
+
+      return workspace;
+    }
+
+    createInitialCdrVersionsList(): Array<CdrVersion> {
+      if (this.isMode(WorkspaceEditMode.Edit)) {
+        // In edit mode, you cannot modify the CDR version, therefore it's fine
+        // to show archived CDRs in the drop-down so that it accurately displays
+        // the current value.
+        return this.getAllCdrVersions();
+      } else {
+        return this.getLiveCdrVersions();
+      }
+    }
+
+    getLiveCdrVersions(): Array<CdrVersion> {
       const cdrResp = this.props.cdrVersionListResponse;
       const liveCdrVersions = cdrResp.items.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
       if (liveCdrVersions.length === 0) {
         throw Error('no live CDR versions were found');
       }
-      if (this.isMode(WorkspaceEditMode.Edit)) {
-        // In edit mode, you cannot modify the CDR version, therefore it's fine
-        // to show archived CDRs in the drop-down so that it accurately displays
-        // the current value.
-        this.setState({cdrVersionItems: cdrResp.items.slice()});
-      } else {
-        // In create/clone, disallow selection of archived versions by omitting
-        // them. The server will also reject archived CDRs.
-        this.setState({cdrVersionItems: liveCdrVersions});
-      }
-
-      const selectedCdrIsLive = liveCdrVersions.some(cdr => cdr.cdrVersionId === this.state.workspace.cdrVersionId);
-      if (this.isMode(WorkspaceEditMode.Create) || (
-        this.isMode(WorkspaceEditMode.Duplicate) && !selectedCdrIsLive)) {
-        // We preselect the default CDR version when a new workspace is being
-        // created (via create or duplicate) with one exception: cloning a
-        // workspace which references a non-default, non-archived CDR version.
-        this.setState(fp.set(['workspace', 'cdrVersionId'], cdrResp.defaultCdrVersionId));
-      }
+      return liveCdrVersions;
     }
 
-    makeDiseaseInput() {
+    getAllCdrVersions(): Array<CdrVersion> {
+      return [...this.props.cdrVersionListResponse.items];
+    }
+
+    makeDiseaseInput(): React.ReactNode {
       return (
         <SearchInput
           enabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}
@@ -466,6 +473,60 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             'diseaseOfFocus'
           ], disease))}/>
       );
+    }
+
+    /**
+     * Creates a form element containing the checkbox, header, and description
+     * (plus optional child elements) for each of the "primary purpose of your
+     * project" options.
+     */
+    makePrimaryPurposeForm(rp: ResearchPurposeItem, index: number): React.ReactNode {
+      let children: React.ReactNode;
+      if (rp.shortName === 'diseaseFocusedResearch') {
+        children = this.makeDiseaseInput();
+      } else if (rp.shortName === 'otherPurpose') {
+        children = <TextArea value={this.state.workspace.researchPurpose.otherPurposeDetails}
+                  onChange={v => this.updateResearchPurpose('otherPurposeDetails', v)}
+                  disabled={!this.state.workspace.researchPurpose.otherPurpose}
+                  style={{marginTop: '0.5rem'}}/>;
+      }
+
+      return <div key={index} style={styles.categoryRow}>
+        <CheckBox id={rp.uniqueId}
+                  data-test-id={rp.shortName + '-checkbox'}
+                  style={styles.checkboxStyle}
+                  checked={!!this.state.workspace.researchPurpose[rp.shortName]}
+                  onChange={e => this.updateResearchPurpose(rp.shortName, e)}/>
+        <FlexColumn style={{marginTop: '-0.2rem'}}>
+          <label style={styles.shortDescription} htmlFor={rp.uniqueId}>
+            {rp.shortDescription}
+          </label>
+          <div>
+            <label style={{...styles.longDescription, ...styles.text}}>
+              {rp.longDescription}
+            </label>
+            {children}
+          </div>
+        </FlexColumn>
+      </div>;
+    }
+
+    /**
+     * Creates the form element for each of the "focus on specific populations"
+     * options.
+     */
+    makeSpecificPopulationForm(item: SpecificPopulationItem): React.ReactNode {
+      return <CheckBox
+        wrapperStyle={styles.checkboxRow}
+        style={styles.checkboxStyle}
+        label={item.label}
+        labelStyle={styles.text}
+        key={item.label}
+        data-test-id={item.shortName + '-checkbox'}
+        checked={this.specificPopulationCheckboxSelected(item.shortName)}
+        onChange={v => this.updateSpecificPopulation(item.shortName, v)}
+        disabled={!this.state.workspace.researchPurpose.population}
+        />;
     }
 
     renderHeader() {
@@ -533,7 +594,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       }
     }
 
-    specificPopulationCheckboxSelected(populationEnum): boolean {
+    specificPopulationCheckboxSelected(populationEnum: SpecificPopulationEnum): boolean {
       return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
     }
 
@@ -745,33 +806,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           <FlexRow>
             <FlexColumn style={{flex: '1 1 0'}}>
               {ResearchPurposeItems.slice(0, sliceByHalfLength(ResearchPurposeItems))
-                .map((rp, i) =>
-                  <WorkspaceCategory
-                    shortDescription={rp.shortDescription}
-                    key={i}
-                    longDescription={rp.longDescription}
-                    uniqueId={rp.uniqueId}
-                    value={this.state.workspace.researchPurpose[rp.shortName]}
-                    onChange={v => this.updateResearchPurpose(rp.shortName, v)}
-                    children={rp.shortName === 'diseaseFocusedResearch' ?
-                      this.makeDiseaseInput() : undefined} />)}
+                .map((rp, i) => this.makePrimaryPurposeForm(rp, i))}
             </FlexColumn>
             <FlexColumn style={{flex: '1 1 0'}}>
               {ResearchPurposeItems.slice(sliceByHalfLength(ResearchPurposeItems))
-                .map((rp, i) =>
-                  <WorkspaceCategory
-                    shortDescription={rp.shortDescription}
-                    longDescription={rp.longDescription}
-                    key={i}
-                    uniqueId={rp.uniqueId}
-                    value={this.state.workspace.researchPurpose[rp.shortName]}
-                    onChange={v => this.updateResearchPurpose(rp.shortName, v)}
-                    children={rp.shortName === 'otherPurpose' ?
-                      <TextArea value={this.state.workspace.researchPurpose.otherPurposeDetails}
-                        onChange={v => this.updateResearchPurpose('otherPurposeDetails', v)}
-                        disabled={!this.state.workspace.researchPurpose.otherPurpose}
-                        style={{marginTop: '0.5rem'}}/> : undefined}/>
-                )}
+                .map((rp, i) => this.makePrimaryPurposeForm(rp, i))}
             </FlexColumn>
           </FlexRow>
         </WorkspaceEditSection>
@@ -812,6 +851,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </div>}
           <div style={{marginTop: '0.5rem'}}>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
+                         data-test-id='specific-population-no'
                          onChange={v => this.updateResearchPurpose('population', false)}
                          checked={!this.state.workspace.researchPurpose.population}/>
             <label style={styles.text}>No, I am not interested in focusing on
@@ -819,6 +859,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </div>
           <div>
             <RadioButton name='population' style={{marginRight: '0.5rem'}}
+                         data-test-id='specific-population-yes'
                          onChange={v => this.updateResearchPurpose('population', true)}
                          checked={this.state.workspace.researchPurpose.population}/>
             <label style={styles.text}>Yes, I am interested in the focused study of specific
@@ -830,32 +871,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             Select as many as applicable.
             <FlexRow style={{flex: '1 1 0', marginTop: '0.5rem'}}>
               <FlexColumn>
-                {specificPopulations.slice(0, sliceByHalfLength(specificPopulations) + 1).map(i =>
-                  <CheckBox
-                      wrapperStyle={styles.checkboxRow}
-                      style={styles.checkboxStyle}
-                      label={i.label}
-                      labelStyle={styles.text}
-                      key={i.label}
-                      checked={this.specificPopulationCheckboxSelected(i.object)}
-                      onChange={v => this.updateSpecificPopulation(i.object, v)}
-                      disabled={!this.state.workspace.researchPurpose.population}
-                  />
-                )}
+                {SpecificPopulationItems.slice(0, sliceByHalfLength(SpecificPopulationItems) + 1).map(sp =>
+                  this.makeSpecificPopulationForm(sp))}
               </FlexColumn>
               <FlexColumn>
-                {specificPopulations.slice(sliceByHalfLength(specificPopulations) + 1).map(i =>
-                  <CheckBox
-                      wrapperStyle={styles.checkboxRow}
-                      style={styles.checkboxStyle}
-                      label={i.label}
-                      labelStyle={styles.text}
-                      key={i.label}
-                      checked={this.specificPopulationCheckboxSelected(i.object)}
-                      onChange={v => this.updateSpecificPopulation(i.object, v)}
-                      disabled={!this.state.workspace.researchPurpose.population}
-                  />
-                )}
+                {SpecificPopulationItems.slice(sliceByHalfLength(SpecificPopulationItems) + 1).map(sp =>
+                  this.makeSpecificPopulationForm(sp))}
                 <CheckBox
                     wrapperStyle={styles.checkboxRow}
                     style={styles.checkboxStyle}
@@ -896,8 +917,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <TwoColPaddedTable header={true} headerLeft='Diversity Categories'
                  headerRight='Groups that are Underrepresented in Biomedical Research (UBR)*'
                  cellWidth={{left: '30%', right: '70%'}}
-                 contentLeft={specificPopulations.map(sp => sp.ubrLabel)}
-                 contentRight={specificPopulations.map(sp => sp.ubrDescription)}/>
+                 contentLeft={SpecificPopulationItems.map(sp => sp.ubrLabel)}
+                 contentRight={SpecificPopulationItems.map(sp => sp.ubrDescription)}/>
             </div>
           }
           <FlexRow style={{paddingTop: '0.3rem'}}>
