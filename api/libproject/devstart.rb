@@ -1340,12 +1340,11 @@ def describe_cluster(cmd_name, *args)
   gcc.validate
 
   api_url = get_leo_api_url(gcc.project)
-  sa_ctx = ServiceAccountContext.new(gcc.project)
-  sa_ctx.run do
+  ServiceAccountContext.new(gcc.project).run do |ctx|
     common = Common.new
     common.run_inline %W{
        gradle manageClusters
-      -PappArgs=['describe','#{api_url}','#{gcc.project}','#{sa_ctx.service_account}','#{op.opts.cluster_id}']}
+      -PappArgs=['describe','#{api_url}','#{gcc.project}','#{ctx.service_account}','#{op.opts.cluster_id}']}
   end
 end
 

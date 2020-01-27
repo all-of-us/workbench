@@ -137,7 +137,8 @@ public class ManageClusters {
         "    gcloud iam service-accounts keys create %s --iam-account %s\n",
         keyPath, workbenchServiceAccount);
     System.out.printf("    gcloud auth activate-service-account --key-file %s\n\n", keyPath);
-    System.out.printf("    gsutil ls gs://%s\n\n", cluster.getStagingBucket());
+    System.out.printf("    gsutil ls gs://%s/**\n", cluster.getStagingBucket());
+    System.out.printf("    gsutil cat ... # inspect or copy logs\n\n");
     System.out.printf("    # Delete the key when done\n");
     System.out.printf(
         "    gcloud iam service-accounts keys delete $(jq -r .private_key_id %s) --iam-account %s\n\n",
