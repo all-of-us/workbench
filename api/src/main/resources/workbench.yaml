@@ -2822,6 +2822,9 @@ definitions:
           $ref: "#/definitions/BillingAccount"
 
   BillingAccount:
+    description: >
+      See https://cloud.google.com/billing/reference/rest/v1/billingAccounts#BillingAccount
+      for documentation on name, displayName, and isOpen.
     type: object
     required:
       - isFreeTier
@@ -2830,6 +2833,7 @@ definitions:
       - isOpen
     properties:
       isFreeTier:
+        description: Returns true if this is the billing account used for free tier
         type: boolean
       name:
         type: string

@@ -310,7 +310,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         // this is necessary because the grant ownership call in create/clone
         // may not have propagated. Adding a few retries drastically reduces
         // the likely of failing due to slow propagation
-        response = cloudBillingRetryer.call(() -> request.execute());
+        response = cloudBillingRetryer.call(request::execute);
       } catch (RetryException | ExecutionException e) {
         throw new ServerErrorException("Google Cloud updateBillingInfo call failed", e);
       }
@@ -556,7 +556,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
 
-    // TODO: File a bug about this. Can create a workspace
+    // Note: It is possible for a workspace to be (partially) created and return
+    // a 500 to the user if this block of code fails since the workspace is already
+    // committed to the database in an earlier call
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
           workspaceService.getFirecloudWorkspaceAcls(

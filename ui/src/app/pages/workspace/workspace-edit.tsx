@@ -389,10 +389,12 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
+        // This does not work. Overwrites the existing workspace object with just {billingAccountName: 'abc'})
+        this.setState(fp.set(['workspace', 'billingAccountName'], 'abc'));
+
+        // this works. preserves the original state of workspace
         this.setState(prevState => fp.set(
-          ['workspace', 'billingAccountName'],
-          billingAccounts.find(billingAccount => billingAccount.isFreeTier).name,
-          prevState));
+          ['workspace', 'billingAccountName'], 'abc', prevState));
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
         const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
 
@@ -511,7 +513,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         workspace.cdrVersionId = this.props.cdrVersionListResponse.defaultCdrVersionId;
       }
 
-      console.log(workspace);
       return workspace;
     }
 
@@ -558,8 +559,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
     renderBillingDescription() {
       return <div>
-        The <i> Us</i> Program provides ${serverConfigStore.getValue().defaultFreeCreditsDollarLimit.toFixed(0)}
-        in free credits per user. When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account.
+        The <i> Us</i> Program provides ${serverConfigStore.getValue().defaultFreeCreditsDollarLimit.toFixed(0)} in
+        free credits per user. When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account.
         At any time, you can update your Workspace billing account.
       </div>;
     }
@@ -799,7 +800,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     render() {
-      console.log(this.state.workspace);
       const {
         workspace: {
           name,

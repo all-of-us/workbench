@@ -1,12 +1,13 @@
 package org.pmiops.workbench.billing;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -25,14 +26,13 @@ public class GoogleApisConfig {
       JsonFactory jsonFactory,
       Provider<WorkbenchConfig> workbenchConfigProvider)
       throws GeneralSecurityException, IOException {
-    GoogleCredential credential =
-        new GoogleCredential()
-            .setAccessToken(userAuthentication.getCredentials())
-            .createScoped(
-                Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
+    GoogleCredentials credentials =
+        new GoogleCredentials(new AccessToken(userAuthentication.getCredentials(), null));
 
     return new Cloudbilling.Builder(
-            GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
+            GoogleNetHttpTransport.newTrustedTransport(),
+            jsonFactory,
+            new HttpCredentialsAdapter(credentials))
         .setApplicationName(workbenchConfigProvider.get().server.projectId)
         .build();
   }
