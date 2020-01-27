@@ -38,8 +38,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   public OfflineUserController(
       CloudResourceManagerService cloudResourceManagerService,
       UserService userService,
-      Provider<WorkbenchConfig> workbenchConfigProvider
-  ) {
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -74,10 +73,10 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
 
         DbUser updatedUser;
-        if(workbenchConfigProvider.get().featureFlags.enableMoodleV2Api) {
-          updatedUser = userService.syncComplianceTrainingStatus(user);
+        if (workbenchConfigProvider.get().featureFlags.enableMoodleV2Api) {
+          updatedUser = userService.syncComplianceTrainingStatusV2(user);
         } else {
-          updatedUser = userService.syncComplianceTrainingStatusDeprecated(user);
+          updatedUser = userService.syncComplianceTrainingStatusV1(user);
         }
 
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();

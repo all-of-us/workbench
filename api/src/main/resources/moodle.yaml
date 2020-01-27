@@ -70,7 +70,7 @@ paths:
        - Moodle
      consumes:
        - application/json
-     operationId: getMoodleBadgeDeprecated
+     operationId: getMoodleBadgeV1
      parameters:
        - name: moodlewsrestformat
          in: query
@@ -90,7 +90,7 @@ paths:
        200:
          description: Badge /error response
          schema:
-           $ref: '#/definitions/UserBadgeResponseDeprecated'
+           $ref: '#/definitions/UserBadgeResponseV1'
        400:
          description: Bad request
        500:
@@ -105,7 +105,7 @@ paths:
         - Moodle
       consumes:
         - application/json
-      operationId: getMoodleBadge
+      operationId: getMoodleBadgeV2
       parameters:
         - name: moodlewsrestformat
           in: query
@@ -125,7 +125,7 @@ paths:
         200:
           description: Badge /error response
           schema:
-            $ref: '#/definitions/UserBadgeResponse'
+            $ref: '#/definitions/UserBadgeResponseV2'
         400:
           description: Bad request
         500:
@@ -161,14 +161,14 @@ definitions:
         confirmed:
           type: boolean
 
-    UserBadgeResponseDeprecated:
+    UserBadgeResponseV1:
       required:
         - badges
       properties:
         badges:
           type: array
           items:
-            $ref: '#/definitions/BadgeDetailsDeprecated'
+            $ref: '#/definitions/BadgeDetailsV1'
         exception:
           type: string
         errorcode:
@@ -176,7 +176,7 @@ definitions:
         message:
           type: string
 
-    UserBadgeResponse:
+    UserBadgeResponseV2:
       properties:
         id:
           type: integer
@@ -186,10 +186,10 @@ definitions:
           description: Moodle username
         ret:
           type: object
-          $ref: '#/definitions/BadgeDetails'
+          $ref: '#/definitions/BadgeDetailsV2'
         dua:
           type: object
-          $ref: '#/definitions/BadgeDetails'
+          $ref: '#/definitions/BadgeDetailsV2'
         exception:
           type: string
         errorcode:
@@ -198,7 +198,7 @@ definitions:
           type: string
           description: A message describing the error
 
-    BadgeDetails:
+    BadgeDetailsV2:
       properties:
         valid:
           type: boolean
@@ -219,7 +219,7 @@ definitions:
           format: int64
           description: Global expiration, overrides badge expiration date. As a stringy epoch.
 
-    BadgeDetailsDeprecated:
+    BadgeDetailsV1:
       properties:
         name:
           type: string

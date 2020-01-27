@@ -28,8 +28,8 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.moodle.ApiException;
-import org.pmiops.workbench.moodle.model.BadgeDetails;
-import org.pmiops.workbench.moodle.model.BadgeDetailsDeprecated;
+import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
+import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -118,19 +118,19 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusDeprecated() throws Exception {
+  public void testSyncComplianceTrainingStatusV1() throws Exception {
     providedWorkbenchConfig.featureFlags.enableMoodleV2Api = false;
 
-    BadgeDetailsDeprecated badge = new BadgeDetailsDeprecated();
+    BadgeDetailsV1 badge = new BadgeDetailsV1();
     badge.setName("All of us badge");
     long expiry = PROVIDED_CLOCK.instant().toEpochMilli() + 100000;
     badge.setDateexpire(Long.toString(expiry));
 
     when(mockComplianceService.getMoodleId(USERNAME)).thenReturn(MOODLE_ID);
-    when(mockComplianceService.getUserBadgeDeprecated(MOODLE_ID))
+    when(mockComplianceService.getUserBadgeV1(MOODLE_ID))
         .thenReturn(Collections.singletonList(badge));
 
-    userService.syncComplianceTrainingStatusDeprecated();
+    userService.syncComplianceTrainingStatusV1();
 
     // The user should be updated in the database with a non-empty completion and expiration time.
     DbUser user = userDao.findUserByUsername(USERNAME);
@@ -142,7 +142,7 @@ public class UserServiceTest {
     // Completion timestamp should not change when the method is called again.
     tick();
     Timestamp completionTime = user.getComplianceTrainingCompletionTime();
-    userService.syncComplianceTrainingStatusDeprecated();
+    userService.syncComplianceTrainingStatusV1();
     assertThat(user.getComplianceTrainingCompletionTime()).isEqualTo(completionTime);
   }
 
@@ -150,17 +150,17 @@ public class UserServiceTest {
   public void testSyncComplianceTrainingStatus() throws Exception {
     providedWorkbenchConfig.featureFlags.enableMoodleV2Api = true;
 
-    BadgeDetails retBadge = new BadgeDetails();
+    BadgeDetailsV2 retBadge = new BadgeDetailsV2();
     long expiry = PROVIDED_CLOCK.instant().toEpochMilli() + 100000;
     retBadge.setDateexpire(expiry);
     retBadge.setValid(true);
 
-    Map<String, BadgeDetails> userBadgesByName = new HashMap<String, BadgeDetails>();
+    Map<String, BadgeDetailsV2> userBadgesByName = new HashMap<>();
     userBadgesByName.put(mockComplianceService.getResearchEthicsTrainingField(), retBadge);
 
-    when(mockComplianceService.getUserBadgesByName(USERNAME)).thenReturn(userBadgesByName);
+    when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
-    userService.syncComplianceTrainingStatus();
+    userService.syncComplianceTrainingStatusV2();
 
     // The user should be updated in the database with a non-empty completion and expiration time.
     DbUser user = userDao.findUserByUsername(USERNAME);
@@ -172,7 +172,7 @@ public class UserServiceTest {
     // Completion timestamp should not change when the method is called again.
     tick();
     Timestamp completionTime = user.getComplianceTrainingCompletionTime();
-    userService.syncComplianceTrainingStatus();
+    userService.syncComplianceTrainingStatusV2();
     assertThat(user.getComplianceTrainingCompletionTime()).isEqualTo(completionTime);
   }
 
@@ -180,17 +180,17 @@ public class UserServiceTest {
   public void testUpdateComplianceTrainingStatus() throws Exception {
     providedWorkbenchConfig.featureFlags.enableMoodleV2Api = true;
 
-    BadgeDetails retBadge = new BadgeDetails();
+    BadgeDetailsV2 retBadge = new BadgeDetailsV2();
     long expiry = PROVIDED_CLOCK.instant().toEpochMilli();
     retBadge.setDateexpire(expiry);
     retBadge.setValid(true);
 
-    Map<String, BadgeDetails> userBadgesByName = new HashMap<String, BadgeDetails>();
+    Map<String, BadgeDetailsV2> userBadgesByName = new HashMap<>();
     userBadgesByName.put(mockComplianceService.getResearchEthicsTrainingField(), retBadge);
 
-    when(mockComplianceService.getUserBadgesByName(USERNAME)).thenReturn(userBadgesByName);
+    when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
-    userService.syncComplianceTrainingStatus();
+    userService.syncComplianceTrainingStatusV2();
 
     // The user should be updated in the database with a non-empty completion and expiration time.
     DbUser user = userDao.findUserByUsername(USERNAME);
@@ -205,7 +205,7 @@ public class UserServiceTest {
     retBadge.setValid(false);
 
     // Completion timestamp should be wiped out by the expiry timestamp passing.
-    userService.syncComplianceTrainingStatus();
+    userService.syncComplianceTrainingStatusV2();
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
 
     // The user does a new training.
@@ -214,7 +214,7 @@ public class UserServiceTest {
     retBadge.setValid(true);
 
     // Completion and expiry timestamp should be updated.
-    userService.syncComplianceTrainingStatus();
+    userService.syncComplianceTrainingStatusV2();
     assertThat(user.getComplianceTrainingCompletionTime())
         .isEqualTo(Timestamp.from(Instant.ofEpochMilli(TIMESTAMP_MSECS)));
     assertThat(user.getComplianceTrainingExpirationTime())
@@ -226,7 +226,7 @@ public class UserServiceTest {
     retBadge.setValid(false);
 
     // Completion timestamp should be wiped out by the globalexpiry timestamp passing.
-    userService.syncComplianceTrainingStatus();
+    userService.syncComplianceTrainingStatusV2();
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
@@ -235,25 +235,25 @@ public class UserServiceTest {
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusNoMoodleIdDeprecated() throws Exception {
+  public void testSyncComplianceTrainingStatusNoMoodleIdV1() throws Exception {
     when(mockComplianceService.getMoodleId(USERNAME)).thenReturn(null);
-    userService.syncComplianceTrainingStatusDeprecated();
+    userService.syncComplianceTrainingStatusV1();
 
-    verify(mockComplianceService, never()).getUserBadgeDeprecated(anyInt());
+    verify(mockComplianceService, never()).getUserBadgeV1(anyInt());
     DbUser user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test
-  public void testSyncComplianceTrainingStatusNullBadgeDeprecated() throws ApiException {
+  public void testSyncComplianceTrainingStatusNullBadgeV1() throws ApiException {
     // When Moodle returns an empty badge response, we should clear the completion bit.
     DbUser user = userDao.findUserByUsername(USERNAME);
     user.setComplianceTrainingCompletionTime(new Timestamp(12345));
     userDao.save(user);
 
     when(mockComplianceService.getMoodleId(USERNAME)).thenReturn(1);
-    when(mockComplianceService.getUserBadgeDeprecated(1)).thenReturn(null);
-    userService.syncComplianceTrainingStatusDeprecated();
+    when(mockComplianceService.getUserBadgeV1(1)).thenReturn(null);
+    userService.syncComplianceTrainingStatusV1();
     user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
@@ -266,47 +266,47 @@ public class UserServiceTest {
     userDao.save(user);
 
     // An empty map should be returned when we have no badge information.
-    Map<String, BadgeDetails> userBadgesByName = new HashMap<>();
+    Map<String, BadgeDetailsV2> userBadgesByName = new HashMap<>();
 
-    when(mockComplianceService.getUserBadgesByName(USERNAME)).thenReturn(userBadgesByName);
+    when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
-    userService.syncComplianceTrainingStatus();
+    userService.syncComplianceTrainingStatusV2();
     user = userDao.findUserByUsername(USERNAME);
     assertThat(user.getComplianceTrainingCompletionTime()).isNull();
   }
 
   @Test(expected = NotFoundException.class)
-  public void testSyncComplianceTrainingStatusBadgeNotFoundDeprecated() throws ApiException {
+  public void testSyncComplianceTrainingStatusBadgeNotFoundV1() throws ApiException {
     // We should propagate a NOT_FOUND exception from the compliance service.
     when(mockComplianceService.getMoodleId(USERNAME)).thenReturn(MOODLE_ID);
-    when(mockComplianceService.getUserBadgeDeprecated(MOODLE_ID))
+    when(mockComplianceService.getUserBadgeV1(MOODLE_ID))
         .thenThrow(
             new org.pmiops.workbench.moodle.ApiException(
                 HttpStatus.NOT_FOUND.value(), "user not found"));
-    userService.syncComplianceTrainingStatusDeprecated();
+    userService.syncComplianceTrainingStatusV1();
   }
 
   @Test(expected = NotFoundException.class)
   public void testSyncComplianceTrainingStatusBadgeNotFound() throws ApiException {
     // We should propagate a NOT_FOUND exception from the compliance service.
-    when(mockComplianceService.getUserBadgesByName(USERNAME))
+    when(mockComplianceService.getUserBadgesByBadgeName(USERNAME))
         .thenThrow(
             new org.pmiops.workbench.moodle.ApiException(
                 HttpStatus.NOT_FOUND.value(), "user not found"));
-    userService.syncComplianceTrainingStatus();
+    userService.syncComplianceTrainingStatusV2();
   }
 
   @Test
-  public void testSyncComplianceTraining_SkippedForServiceAccountDeprecated() throws ApiException {
+  public void testSyncComplianceTraining_SkippedForServiceAccountV1() throws ApiException {
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
-    userService.syncComplianceTrainingStatusDeprecated();
+    userService.syncComplianceTrainingStatusV1();
     assertThat(providedDbUser.getMoodleId()).isNull();
   }
 
   @Test
   public void testSyncComplianceTraining_SkippedForServiceAccount() throws ApiException {
     providedWorkbenchConfig.auth.serviceAccountApiUsers.add(USERNAME);
-    userService.syncComplianceTrainingStatus();
+    userService.syncComplianceTrainingStatusV2();
     assertThat(providedDbUser.getMoodleId()).isNull();
   }
 
