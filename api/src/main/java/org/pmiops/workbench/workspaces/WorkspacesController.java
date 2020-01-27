@@ -258,7 +258,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if the workspace creation
       // fails
-      log.log(Level.SEVERE,
+      log.log(
+          Level.SEVERE,
           "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.",
           e);
 
