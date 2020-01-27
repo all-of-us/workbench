@@ -463,10 +463,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       }
 
       if (serverConfigStore.getValue().enableBillingLockout) {
-        let billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
+        const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
         if (this.isMode(WorkspaceEditMode.Edit)) {
-          let fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
+          const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
 
           if (!billingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
             // If the user has owner access on the workspace but does not have access to the billing account
@@ -490,7 +490,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               // We cannot send over the correct billing account info since the current user
               // does not have permissions to set it.
 
-             console.error("The workspace's billing account name is out of date.");
+              console.error('The workspace\'s billing account name is out of date.');
             }
           } else {
             // Otherwise, use this as an opportunity to sync the fetched billing account name from the source of truth, Google
@@ -525,8 +525,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     renderBillingDescription() {
-      return <div>The <i>All of Us</i> Program provides ${serverConfigStore.getValue().defaultFreeCreditsDollarLimit.toFixed(0)} in free credits per user.
-        When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account.
+      return <div>
+        The <i>All of Us</i> Program provides ${serverConfigStore.getValue().defaultFreeCreditsDollarLimit.toFixed(0)}
+        in free credits per user. When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account.
         At any time, you can update your Workspace billing account.
       </div>;
     }

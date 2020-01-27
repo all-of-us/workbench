@@ -1,8 +1,8 @@
 declare const gapi: any;
 
 interface GoogleBillingAccountInfo {
-  billingAccountName: string,
-  billingEnabled: boolean
+  billingAccountName: string;
+  billingEnabled: boolean;
 }
 
 export async function getBillingAccountInfo(workspaceNamespace: string) {
