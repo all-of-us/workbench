@@ -490,7 +490,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               // We cannot send over the correct billing account info since the current user
               // does not have permissions to set it.
 
-              console.error('The workspace\'s billing account name is out of date.');
+              reportError({
+                name: 'Out of date billing account name',
+                message: `Workspace ${this.props.workspace.namespace} has an out of date billing account name. 
+                Stored value is ${this.props.workspace.billingAccountName}. True value is ${fetchedBillingInfo.billingAccountName}`
+              });
             }
           } else {
             // Otherwise, use this as an opportunity to sync the fetched billing account name from the source of truth, Google
