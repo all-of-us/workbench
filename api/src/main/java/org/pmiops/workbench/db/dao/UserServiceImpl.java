@@ -676,6 +676,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     try {
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+      final Timestamp newComplianceTrainingCompletionTime;
+      final Timestamp newComplianceTrainingExpirationTime;
       Map<String, BadgeDetailsV2> userBadgesByName =
           complianceService.getUserBadgesByBadgeName(dbUser.getUsername());
       if (userBadgesByName.containsKey(complianceService.getResearchEthicsTrainingField())) {
@@ -684,32 +686,34 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         if (complianceBadge.getValid()) {
           if (dbUser.getComplianceTrainingCompletionTime() == null) {
             // The badge was previously invalid and is now valid.
-            dbUser.setComplianceTrainingCompletionTime(now);
+            newComplianceTrainingCompletionTime = now;
           } else if (!dbUser
               .getComplianceTrainingExpirationTime()
               .equals(new Timestamp(complianceBadge.getDateexpire()))) {
             // The badge was previously valid, but has a new expiration date (and so is a new
             // training)
-            dbUser.setComplianceTrainingCompletionTime(now);
+            newComplianceTrainingCompletionTime = now;
+          } else {
+            // The badge status has not changed since the last time the status was synced.
+            newComplianceTrainingCompletionTime = dbUser.getComplianceTrainingCompletionTime();
           }
-          // Always update the expiration time.
-          dbUser.setComplianceTrainingExpirationTime(
-              new Timestamp(complianceBadge.getDateexpire()));
+          // Always update the expiration time if the training badge is valid
+          newComplianceTrainingExpirationTime = new Timestamp(complianceBadge.getDateexpire());
         } else {
           // The current badge is invalid or expired, the training must be completed or retaken.
-          dbUser.clearComplianceTrainingCompletionTime();
-          dbUser.clearComplianceTrainingExpirationTime();
+          newComplianceTrainingCompletionTime = null;
+          newComplianceTrainingExpirationTime = null;
         }
       } else {
         // There is no record of this person having taken the training.
-        dbUser.clearComplianceTrainingCompletionTime();
-        dbUser.clearComplianceTrainingExpirationTime();
+        newComplianceTrainingCompletionTime = null;
+        newComplianceTrainingExpirationTime = null;
       }
 
       return updateUserWithRetries(
           u -> {
-            u.setComplianceTrainingExpirationTime(u.getComplianceTrainingExpirationTime());
-            u.setComplianceTrainingCompletionTime(u.getComplianceTrainingCompletionTime());
+            u.setComplianceTrainingCompletionTime(newComplianceTrainingCompletionTime);
+            u.setComplianceTrainingExpirationTime(newComplianceTrainingExpirationTime);
             return u;
           },
           dbUser);
