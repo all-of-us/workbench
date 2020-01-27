@@ -1,11 +1,12 @@
 declare const gapi: any;
 
-interface BillingAccountInfo {
-  billingAccountName: string
+interface GoogleBillingAccountInfo {
+  billingAccountName: string,
+  billingEnabled: boolean
 }
 
 export async function getBillingAccountInfo(workspaceNamespace: string) {
-  return new Promise<BillingAccountInfo>((resolve) => {
+  return new Promise<GoogleBillingAccountInfo>((resolve) => {
     gapi.load('client', () => {
       gapi.client.load('cloudbilling', 'v1', () => {
         gapi.client.cloudbilling.projects.getBillingInfo({

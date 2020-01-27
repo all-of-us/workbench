@@ -463,14 +463,43 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       }
 
       if (serverConfigStore.getValue().enableBillingLockout) {
-        userApi().listBillingAccounts().then(response =>
-          this.setState({billingAccounts: response.billingAccounts})
-        );
+        let billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
         if (this.isMode(WorkspaceEditMode.Edit)) {
-          getBillingAccountInfo(this.props.workspace.namespace).then(billingAccountInfo =>
-            this.setState(fp.set(['workspace', 'billingAccountName'], billingAccountInfo.billingAccountName)));
+          let fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
+
+          if (!billingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
+            // If the user has owner access on the workspace but does not have access to the billing account
+            // that it is attached to, keep the server's current value for billingAccountName and add a shim
+            // entry into billingAccounts so the dropdown entry is not empty.
+            //
+            // The server will not perform an updateBillingInfo call if the received billingAccountName
+            // is the same as what is currently stored.
+            //
+            // This can happen if a workspace is shared to another researcher as an owner.
+            billingAccounts.push({
+              name: this.props.workspace.billingAccountName,
+              displayName: 'User Provided Billing Account',
+              isFreeTier: false,
+              isOpen: true
+            });
+
+            if (fetchedBillingInfo.billingAccountName !== this.props.workspace.billingAccountName) {
+              // This should never happen but it means the database is out of sync with Google
+              // and does not have the correct billing account stored.
+              // We cannot send over the correct billing account info since the current user
+              // does not have permissions to set it.
+
+             console.error("The workspace's billing account name is out of date.");
+            }
+          } else {
+            // Otherwise, use this as an opportunity to sync the fetched billing account name from the source of truth, Google
+            this.setState(fp.set(['workspace', 'billingAccountName'], fetchedBillingInfo.billingAccountName));
+          }
+
         }
+
+        this.setState({billingAccounts});
       } else {
         // This is a temporary hack to set the billing account name property to anything
         // so that it passes validation. The server ignores the value if the feature flag
