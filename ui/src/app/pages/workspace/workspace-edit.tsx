@@ -492,7 +492,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
 
               reportError({
                 name: 'Out of date billing account name',
-                message: `Workspace ${this.props.workspace.namespace} has an out of date billing account name. 
+                message: `Workspace ${this.props.workspace.namespace} has an out of date billing account name.
                 Stored value is ${this.props.workspace.billingAccountName}. True value is ${fetchedBillingInfo.billingAccountName}`
               });
             }
