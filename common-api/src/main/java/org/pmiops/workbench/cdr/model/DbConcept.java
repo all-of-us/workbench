@@ -14,8 +14,6 @@ import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
-// TODO need to add a way to dynamically switch between database versions
-// this dynamic connection will eliminate the need for the catalog attribute
 @Table(name = "concept")
 public class DbConcept {
 
@@ -47,6 +45,33 @@ public class DbConcept {
         .sourceCountValue(a.getSourceCountValue())
         .prevalence(a.getPrevalence())
         .synonymsStr(a.getSynonymsStr());
+  }
+
+  // Used from JQL queries in DbConcept
+  public DbConcept(
+      long conceptId,
+      String conceptName,
+      String standardConcept,
+      String conceptCode,
+      String conceptClassId,
+      String vocabularyId,
+      String domainId,
+      long countValue,
+      long sourceCountValue,
+      float prevalence,
+      String synonymsStr) {
+    this.conceptId = conceptId;
+    this.conceptName = conceptName;
+    this.standardConcept = standardConcept;
+    this.conceptCode = conceptCode;
+    this.conceptClassId = conceptClassId;
+    this.vocabularyId = vocabularyId;
+    this.domainId = domainId;
+    this.countValue = countValue;
+    this.sourceCountValue = sourceCountValue;
+    this.prevalence = prevalence;
+    this.synonymsStr = synonymsStr;
+    this.synonyms = new ArrayList<>();
   }
 
   @Id

@@ -79,32 +79,48 @@ describe('ConceptHomepage', () => {
       .toBe(SurveyStubVariables.STUB_SURVEYS.length);
   });
 
-  it('should default to standard concepts only, and performs a full search', async() => {
-    const spy = jest.spyOn(conceptsApi(), 'searchConcepts');
+  it('should default to standard concepts only, and performs a count call and full search', async() => {
+    const conceptSpy = jest.spyOn(conceptsApi(), 'searchConcepts');
+    const countSpy = jest.spyOn(conceptsApi(), 'domainCounts');
+    const surveySpy = jest.spyOn(conceptsApi(), 'searchSurveys');
     const wrapper = mount(<ConceptHomepage />);
     await waitOneTickAndUpdate(wrapper);
     searchTable(defaultSearchTerm, wrapper);
     await waitOneTickAndUpdate(wrapper);
+    const request = {
+      query: defaultSearchTerm,
+      // Tests that it searches only standard concepts.
+      standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
+      maxResults: 1000
+    };
+
+    // Tests that the domain tab counts are called
+    expect(countSpy).toHaveBeenCalledWith(
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+      request
+    );
+    expect(countSpy).toHaveBeenCalledTimes(1);
 
     DomainStubVariables.STUB_DOMAINS.forEach((domain) => {
-      const includeDomainCounts = isSelectedDomain(domain, wrapper);
-      const expectedRequest = {
-        query: defaultSearchTerm,
-        // Tests that it searches only standard concepts.
-        standardConceptFilter: StandardConceptFilter.STANDARDCONCEPTS,
-        domain: domain.domain,
-        includeDomainCounts: includeDomainCounts,
-        maxResults: 1000
-      };
-      expect(spy).toHaveBeenCalledWith(
+      const expectedRequest = {...request, domain: domain.domain};
+      expect(conceptSpy).toHaveBeenCalledWith(
         WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
         WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
         expectedRequest
       );
     });
 
-    // Test that it makes a call for each domain. Adding 1 to the length since currently we manually add surveys to conceptsCache on init
-    expect(spy).toHaveBeenCalledTimes(DomainStubVariables.STUB_DOMAINS.length + 1);
+    // Test that it makes a call for each domain.
+    expect(conceptSpy).toHaveBeenCalledTimes(DomainStubVariables.STUB_DOMAINS.length);
+
+    // Test that it makes a separate call for surveys.
+    expect(surveySpy).toHaveBeenCalledWith(
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
+      WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
+      request
+    );
+    expect(surveySpy).toHaveBeenCalledTimes(1);
 
     // Test that it switches to the table view
     expect(wrapper.find('[data-test-id="conceptTable"]').length).toBeGreaterThan(0);
@@ -133,13 +149,11 @@ describe('ConceptHomepage', () => {
     await waitOneTickAndUpdate(wrapper);
 
     DomainStubVariables.STUB_DOMAINS.forEach((domain) => {
-      const includeDomainCounts = isSelectedDomain(domain, wrapper);
       const expectedRequest = {
         query: defaultSearchTerm,
         // Tests that it searches only standard concepts.
         standardConceptFilter: StandardConceptFilter.ALLCONCEPTS,
         domain: domain.domain,
-        includeDomainCounts: includeDomainCounts,
         maxResults: 1000
       };
       expect(spy).toHaveBeenCalledWith(

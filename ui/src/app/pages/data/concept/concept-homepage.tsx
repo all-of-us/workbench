@@ -20,17 +20,7 @@ import {NavStore, queryParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {environment} from 'environments/environment';
-import {
-  Concept,
-  ConceptSet,
-  CriteriaType,
-  Domain,
-  DomainCount,
-  DomainInfo,
-  StandardConceptFilter,
-  SurveyModule,
-  SurveyQuestions,
-} from 'generated/fetch';
+import {Concept, ConceptSet, Domain, DomainCount, DomainInfo, StandardConceptFilter, SurveyModule, SurveyQuestions} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
 import {SurveyDetails} from './survey-details';
 
@@ -153,14 +143,6 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
       </DomainCardBase>;
     };
 
-// Stub used to display placeholder tabs in concept search
-const conceptCacheStub = [
-  {
-    domain: Domain.SURVEY,
-    items: []
-  }
-];
-
 interface Props {
   workspace: WorkspaceData;
 }
@@ -179,8 +161,6 @@ interface State { // Browse survey
   conceptDomainCounts: Array<DomainCount>;
   // Array of domains and their metadata
   conceptDomainList: Array<DomainInfo>;
-  // Array of Physical Measurements
-  conceptPhysicalMeasurementsList: Array<any>;
   conceptsSavedText: string;
   // Array of surveys
   conceptSurveysList: Array<SurveyModule>;
@@ -224,7 +204,6 @@ export const ConceptHomepage = withCurrentWorkspace()(
         surveyAddModalOpen: false,
         conceptDomainCounts: [],
         conceptDomainList: [],
-        conceptPhysicalMeasurementsList: [],
         concepts: [],
         conceptsCache: [],
         conceptsSavedText: '',
@@ -262,25 +241,24 @@ export const ConceptHomepage = withCurrentWorkspace()(
           domain: domain.domain,
           items: []
         }));
+        // Add ConceptCacheItem for Surveys tab
+        conceptsCache.push({domain: Domain.SURVEY, items: []});
         let conceptDomainCounts: DomainCount[] = conceptDomainInfo.items.map((domain) => ({
           domain: domain.domain,
           name: domain.name,
           conceptCount: 0
         }));
-        if (environment.enableNewConceptTabs) {
-          conceptsCache = [...conceptsCache, ...conceptCacheStub];
-          conceptDomainCounts = [...conceptDomainCounts];
-        } else {
+        if (!environment.enableNewConceptTabs) {
+          // Don't show Physical Measurements tile or tab if feature flag disabled
           conceptsCache = conceptsCache.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
           conceptDomainCounts = conceptDomainCounts.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
         }
         this.setState({
           conceptsCache: conceptsCache,
-          conceptDomainList: conceptDomainInfo.items.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT),
+          conceptDomainList: conceptDomainInfo.items,
           conceptDomainCounts: conceptDomainCounts,
           conceptSurveysList: surveysInfo.items,
           selectedDomain: conceptDomainCounts[0],
-          conceptPhysicalMeasurementsList: conceptDomainInfo.items.filter(item => item.domain === Domain.PHYSICALMEASUREMENT),
         });
       } catch (e) {
         console.error(e);
@@ -293,14 +271,14 @@ export const ConceptHomepage = withCurrentWorkspace()(
     browseDomainFromQueryParams() {
       const queryParams = queryParamsStore.getValue();
       if (queryParams.survey) {
-        if (environment.enableNewConceptTabs) {
-          this.browseDomain();
-        } else {
-          this.browseSurvey(queryParams.survey);
-        }
+        this.browseSurvey(queryParams.survey);
       }
       if (queryParams.domain) {
-        this.browseDomain(this.state.conceptDomainList.find(dc => dc.domain === queryParams.domain));
+        if (queryParams.domain === Domain.SURVEY) {
+          this.browseSurvey('');
+        } else {
+          this.browseDomain(this.state.conceptDomainList.find(dc => dc.domain === queryParams.domain));
+        }
       }
     }
 
@@ -336,33 +314,36 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     async searchConcepts() {
-      const {standardConceptsOnly, currentSearchString, conceptsCache, selectedDomain,
-        selectedConceptDomainMap} = this.state;
+      const {standardConceptsOnly, currentSearchString, conceptsCache, selectedDomain, selectedConceptDomainMap, selectedSurvey}
+        = this.state;
       const {namespace, id} = this.props.workspace;
       this.setState({concepts: [], searchLoading: true, searching: true, completedDomainSearches: []});
       const standardConceptFilter = standardConceptsOnly ? StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
       const completedDomainSearches = [];
+      const request = {query: currentSearchString, standardConceptFilter: standardConceptFilter, maxResults: this.MAX_CONCEPT_FETCH};
+      if (!!selectedSurvey) {
+        request['surveyName'] = selectedSurvey;
+      }
+      conceptsApi().domainCounts(namespace, id, request).then(counts => {
+        // Filter Physical Measurements if feature flag disabled
+        const conceptDomainCounts = !environment.enableNewConceptTabs
+          ? counts.domainCounts.filter(dc => dc.domain !== Domain.PHYSICALMEASUREMENT)
+          : counts.domainCounts;
+        this.setState({conceptDomainCounts: conceptDomainCounts});
+      });
       conceptsCache.forEach(async(cacheItem) => {
         selectedConceptDomainMap[cacheItem.domain] = [];
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
-        const resp = await conceptsApi().searchConcepts(namespace, id, {
-          query: currentSearchString,
-          standardConceptFilter: standardConceptFilter,
-          domain: cacheItem.domain,
-          includeDomainCounts: activeTabSearch,
-          maxResults: this.MAX_CONCEPT_FETCH
-        });
+        if (cacheItem.domain === Domain.SURVEY) {
+          await conceptsApi().searchSurveys(namespace, id, request).then(resp => cacheItem.items = resp);
+        } else {
+          await conceptsApi().searchConcepts(namespace, id, {...request, domain: cacheItem.domain})
+            .then(resp => cacheItem.items = resp.items);
+        }
         completedDomainSearches.push(cacheItem.domain);
-        cacheItem.items = cacheItem.domain === Domain.SURVEY ? resp.questions || [] : resp.items;
         this.setState({completedDomainSearches: completedDomainSearches});
         if (activeTabSearch) {
-          const conceptDomainCounts = environment.enableNewConceptTabs ? resp.domainCounts
-            : resp.domainCounts.filter(item => ![Domain.PHYSICALMEASUREMENT, Domain.SURVEY].includes(item.domain));
-          this.setState({
-            searchLoading: false,
-            conceptDomainCounts: conceptDomainCounts,
-            selectedDomain: resp.domainCounts.find(domainCount => domainCount.domain === cacheItem.domain)
-          });
+          this.setState({searchLoading: false});
           this.setConceptsAndVocabularies();
         }
       });
@@ -371,15 +352,12 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     selectConcepts(concepts: any[]) {
       const {selectedDomain: {domain}, selectedConceptDomainMap} = this.state;
-      if (domain === Domain.PHYSICALMEASUREMENT) {
-        selectedConceptDomainMap[domain] = concepts.filter(concept =>
-          concept.domainId.toLowerCase() === Domain[Domain.MEASUREMENT].toLowerCase()
-            && concept.vocabularyId === CriteriaType[CriteriaType.PPI]
-        );
-      } else if (domain === Domain.SURVEY) {
+      if (domain === Domain.SURVEY) {
         selectedConceptDomainMap[domain] = concepts.filter(concept => !!concept.question);
       } else {
-        selectedConceptDomainMap[domain] = concepts.filter(concept => concept.domainId.toLowerCase() === Domain[domain].toLowerCase());
+        selectedConceptDomainMap[domain] = concepts.filter(
+          concept => concept.domainId.replace(' ', '')
+            .toLowerCase() === Domain[domain].toLowerCase());
       }
       this.setState({selectedConceptDomainMap: selectedConceptDomainMap});
     }
@@ -388,24 +366,28 @@ export const ConceptHomepage = withCurrentWorkspace()(
       this.setState({
         currentInputString: '',
         currentSearchString: '',
+        selectedSurvey: '',
         showSearchError: false,
         searching: false // reset the search result table to show browse/domain cards instead
       });
     }
 
-    browseDomain(domain?: DomainInfo) {
+    browseDomain(domain: DomainInfo) {
       const {conceptDomainCounts} = this.state;
-      const selectedDomain = !domain ? {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0}
-        : conceptDomainCounts.find(domainCount => domainCount.domain === domain.domain);
-      this.setState({currentInputString: '', currentSearchString: '', selectedDomain: selectedDomain}, () => this.searchConcepts());
+      const selectedDomain = conceptDomainCounts.find(domainCount => domainCount.domain === domain.domain);
+      this.setState(
+        {currentInputString: '', currentSearchString: '', selectedDomain: selectedDomain, selectedSurvey: ''},
+        () => this.searchConcepts()
+      );
     }
 
     browseSurvey(surveyName) {
-      if (environment.enableNewConceptTabs) {
-        this.browseDomain();
-      } else {
-        this.setState({browsingSurvey: true, selectedSurvey: surveyName});
-      }
+      this.setState({
+        currentInputString: '',
+        currentSearchString: '',
+        selectedDomain: {domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0},
+        selectedSurvey: surveyName,
+        standardConceptsOnly: false}, () => this.searchConcepts());
     }
 
     domainLoading(domain) {
@@ -418,9 +400,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     get activeSelectedConceptCount(): number {
       const {selectedDomain, selectedConceptDomainMap} = this.state;
-      if (!selectedDomain
-        || !selectedDomain.domain
-        || !selectedConceptDomainMap[selectedDomain.domain]) {
+      if (!selectedDomain || !selectedDomain.domain || !selectedConceptDomainMap[selectedDomain.domain]) {
         return 0;
       }
       return selectedConceptDomainMap[selectedDomain.domain].length;
@@ -446,7 +426,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
       const {concepts, searchLoading, conceptDomainCounts, selectedDomain, selectedConceptDomainMap} = this.state;
 
       return <React.Fragment>
-        <button style={styles.backBtn} type='button' onClick={() => this.setState({searching: false})}>
+        <button style={styles.backBtn} type='button' onClick={() => this.setState({searching: false, selectedSurvey: ''})}>
           &lt; Back to Concept Set Homepage
         </button>
         <FadeBox>
@@ -469,7 +449,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                       </FlexRow>
                   }
                 </Clickable>
-                {domain === selectedDomain && <hr data-test-id='active-domain'
+                {domain.domain === selectedDomain.domain && <hr data-test-id='active-domain'
                                                   key={selectedDomain.domain}
                                                   style={styles.domainHeaderSelected}/>}
               </FlexColumn>;
@@ -498,7 +478,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     render() {
-      const {loadingDomains, browsingSurvey, conceptDomainList, conceptPhysicalMeasurementsList, conceptSurveysList,
+      const {loadingDomains, browsingSurvey, conceptDomainList, conceptSurveysList,
         standardConceptsOnly, showSearchError, searching, selectedDomain, conceptAddModalOpen, currentInputString, currentSearchString,
         conceptsSavedText, selectedSurvey, selectedConceptDomainMap, selectedSurveyQuestions, surveyAddModalOpen} = this.state;
       return <React.Fragment>
@@ -522,6 +502,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                         labelStyle={{marginLeft: '0.2rem'}}
                         data-test-id='standardConceptsCheckBox'
                         style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
+                        manageOwnState={false}
                         onChange={() => this.handleCheckboxChange()}/>
             </div>
             {showSearchError &&
@@ -550,7 +531,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                 Domains
               </div>
               <div style={styles.cardList}>
-              {conceptDomainList.map((domain, i) => {
+              {conceptDomainList.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT).map((domain, i) => {
                 return <DomainCard conceptDomainInfo={domain}
                                      standardConceptsOnly={standardConceptsOnly}
                                      browseInDomain={() => this.browseDomain(domain)}
@@ -570,7 +551,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                   Program Physical Measurements
                 </div>
                 <div style={styles.cardList}>
-                  {conceptPhysicalMeasurementsList.map((physicalMeasurement, p) => {
+                  {conceptDomainList.filter(item => item.domain === Domain.PHYSICALMEASUREMENT).map((physicalMeasurement, p) => {
                     return <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement} key={p}
                                        browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurement)}/>;
                   })}

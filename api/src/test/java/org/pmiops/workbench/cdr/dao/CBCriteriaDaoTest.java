@@ -1,8 +1,6 @@
 package org.pmiops.workbench.cdr.dao;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import java.util.HashSet;
@@ -65,7 +63,8 @@ public class CBCriteriaDaoTest {
                 .standard(false)
                 .selectable(true)
                 .parentId(surveyCriteria.getId())
-                .synonyms("test"));
+                .synonyms("test")
+                .path(surveyCriteria.getId() + ".1"));
     sourceCriteria =
         cbCriteriaDao.save(
             new DbCriteria()
@@ -148,8 +147,7 @@ public class CBCriteriaDaoTest {
             DomainType.SURVEY.toString(),
             CriteriaType.PPI.toString(),
             CriteriaSubType.SURVEY.toString());
-    assertEquals(1, criteriaList.size());
-    assertEquals(surveyCriteria, criteriaList.get(0));
+    assertThat(criteriaList).containsExactly(surveyCriteria);
   }
 
   @Test
@@ -157,9 +155,7 @@ public class CBCriteriaDaoTest {
     // test that we match both source and standard codes
     List<DbCriteria> exactMatchByCode =
         cbCriteriaDao.findExactMatchByCode(DomainType.CONDITION.toString(), "120");
-    assertEquals(2, exactMatchByCode.size());
-    assertEquals(standardCriteria, exactMatchByCode.get(0));
-    assertEquals(sourceCriteria, exactMatchByCode.get(1));
+    assertThat(exactMatchByCode).containsExactly(standardCriteria, sourceCriteria);
   }
 
   @Test
@@ -172,8 +168,7 @@ public class CBCriteriaDaoTest {
             Boolean.FALSE,
             "00",
             page);
-    assertEquals(1, criteriaList.size());
-    assertEquals(icd9Criteria, criteriaList.get(0));
+    assertThat(criteriaList).containsExactly(icd9Criteria);
   }
 
   @Test
@@ -182,8 +177,7 @@ public class CBCriteriaDaoTest {
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findCriteriaByDomainAndCode(
             DomainType.CONDITION.toString(), Boolean.FALSE, "001", page);
-    assertEquals(1, criteriaList.size());
-    assertEquals(icd9Criteria, criteriaList.get(0));
+    assertThat(criteriaList).containsExactly(icd9Criteria);
   }
 
   @Test
@@ -192,25 +186,19 @@ public class CBCriteriaDaoTest {
     List<DbCriteria> measurements =
         cbCriteriaDao.findCriteriaByDomainAndSynonyms(
             DomainType.MEASUREMENT.toString(), Boolean.TRUE, "001", page);
-    assertEquals(1, measurements.size());
-    assertEquals(measurementCriteria, measurements.get(0));
+    assertThat(measurements).containsExactly(measurementCriteria);
   }
 
   @Test
   public void findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc() {
-    DbCriteria actualIcd9 =
-        cbCriteriaDao
-            .findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
-                DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 0L)
-            .get(0);
-    assertEquals(sourceCriteria, actualIcd9);
-
-    DbCriteria actualIcd10 =
-        cbCriteriaDao
-            .findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
-                DomainType.CONDITION.toString(), CriteriaType.ICD10CM.toString(), false, 0L)
-            .get(0);
-    assertEquals(icd10Criteria, actualIcd10);
+    List<DbCriteria> actualIcd9s =
+        cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
+            DomainType.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 0L);
+    assertThat(actualIcd9s).containsExactly(sourceCriteria, icd9Criteria);
+    List<DbCriteria> actualIcd10s =
+        cbCriteriaDao.findCriteriaByDomainIdAndTypeAndParentIdOrderByIdAsc(
+            DomainType.CONDITION.toString(), CriteriaType.ICD10CM.toString(), false, 0L);
+    assertThat(actualIcd10s).containsExactly(icd10Criteria);
   }
 
   @Test
@@ -218,10 +206,7 @@ public class CBCriteriaDaoTest {
     final List<DbCriteria> demoList =
         cbCriteriaDao.findCriteriaByDomainAndTypeOrderByIdAsc(
             DomainType.PERSON.toString(), CriteriaType.RACE.toString());
-    assertEquals(3, demoList.size());
-    assertEquals(raceParent, demoList.get(0));
-    assertEquals(raceAsian, demoList.get(1));
-    assertEquals(raceWhite, demoList.get(2));
+    assertThat(demoList).containsExactly(raceParent, raceAsian, raceWhite);
   }
 
   @Test
@@ -230,8 +215,7 @@ public class CBCriteriaDaoTest {
     List<DbCriteria> labs =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
             DomainType.MEASUREMENT.toString(), CriteriaType.LOINC.toString(), true, "LP123", page);
-    assertEquals(1, labs.size());
-    assertEquals(measurementCriteria, labs.get(0));
+    assertThat(labs).containsExactly(measurementCriteria);
   }
 
   @Test
@@ -240,8 +224,7 @@ public class CBCriteriaDaoTest {
     List<DbCriteria> conditions =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndSynonyms(
             DomainType.CONDITION.toString(), CriteriaType.SNOMED.toString(), true, "myMatch", page);
-    assertEquals(1, conditions.size());
-    assertEquals(standardCriteria, conditions.get(0));
+    assertThat(conditions).containsExactly(standardCriteria);
   }
 
   @Test
@@ -250,18 +233,16 @@ public class CBCriteriaDaoTest {
         "create table cb_criteria_relationship(concept_id_1 integer, concept_id_2 integer)");
     jdbcTemplate.execute(
         "insert into cb_criteria_relationship(concept_id_1, concept_id_2) values (12345, 1)");
-    assertEquals(1, cbCriteriaDao.findConceptId2ByConceptId1(12345L).get(0).intValue());
+    assertThat(cbCriteriaDao.findConceptId2ByConceptId1(12345L)).containsExactly(1);
     jdbcTemplate.execute("drop table cb_criteria_relationship");
   }
 
   @Test
   public void findStandardCriteriaByDomainAndConceptId() {
-    assertEquals(
-        icd10Criteria,
-        cbCriteriaDao
-            .findStandardCriteriaByDomainAndConceptId(
-                DomainType.CONDITION.toString(), false, ImmutableList.of("1"))
-            .get(0));
+    assertThat(
+            cbCriteriaDao.findStandardCriteriaByDomainAndConceptId(
+                DomainType.CONDITION.toString(), false, ImmutableList.of("1")))
+        .containsExactly(icd10Criteria);
   }
 
   @Test
@@ -274,20 +255,18 @@ public class CBCriteriaDaoTest {
             CriteriaType.SNOMED.toString(),
             true,
             parentConceptIds);
-    assertEquals(standardCriteria, results.get(0));
+    assertThat(results).containsExactly(standardCriteria);
   }
 
   @Test
   public void findCriteriaLeavesAndParentsByPath() {
-    assertEquals(icd9Criteria, cbCriteriaDao.findCriteriaLeavesAndParentsByPath("5").get(0));
+    assertThat(cbCriteriaDao.findCriteriaLeavesAndParentsByPath("5")).containsExactly(icd9Criteria);
   }
 
   @Test
   public void findGenderRaceEthnicity() {
     List<DbCriteria> criteriaList = cbCriteriaDao.findGenderRaceEthnicity();
-    assertEquals(2, criteriaList.size());
-    assertTrue(criteriaList.contains(raceAsian));
-    assertTrue(criteriaList.contains(raceWhite));
+    assertThat(criteriaList).containsExactly(raceAsian, raceWhite);
   }
 
   @Test
@@ -296,87 +275,81 @@ public class CBCriteriaDaoTest {
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findByDomainIdAndTypeAndParentIdNotIn(
             DomainType.PERSON.toString(), FilterColumns.RACE.toString(), 0L, sort);
-    assertEquals(2, criteriaList.size());
-    assertEquals(raceAsian, criteriaList.get(0));
-    assertEquals(raceWhite, criteriaList.get(1));
+    assertThat(criteriaList).containsExactly(raceAsian, raceWhite).inOrder();
 
     // reverse
     sort = new Sort(Direction.DESC, "name");
     criteriaList =
         cbCriteriaDao.findByDomainIdAndTypeAndParentIdNotIn(
             DomainType.PERSON.toString(), FilterColumns.RACE.toString(), 0L, sort);
-    assertEquals(2, criteriaList.size());
-    assertEquals(raceWhite, criteriaList.get(0));
-    assertEquals(raceAsian, criteriaList.get(1));
+    assertThat(criteriaList).containsExactly(raceWhite, raceAsian).inOrder();
   }
 
   @Test
   public void findMenuOptions() {
     List<DbMenuOption> options = cbCriteriaDao.findMenuOptions();
-    assertEquals(6, options.size());
+    DbMenuOption option1 = options.get(0);
+    assertThat(option1.getDomain()).isEqualTo(DomainType.CONDITION.toString());
+    assertThat(option1.getType()).isEqualTo("ICD10CM");
+    assertThat(option1.getStandard()).isFalse();
 
-    DbMenuOption option = options.get(0);
-    assertEquals(DomainType.CONDITION.toString(), option.getDomain());
-    assertEquals("ICD10CM", option.getType());
-    assertFalse(option.getStandard());
+    DbMenuOption option2 = options.get(1);
+    assertThat(option2.getDomain()).isEqualTo(DomainType.CONDITION.toString());
+    assertThat(option2.getType()).isEqualTo("ICD9CM");
+    assertThat(option2.getStandard()).isFalse();
 
-    option = options.get(1);
-    assertEquals(DomainType.CONDITION.toString(), option.getDomain());
-    assertEquals("ICD9CM", option.getType());
-    assertFalse(option.getStandard());
+    DbMenuOption option3 = options.get(2);
+    assertThat(option3.getDomain()).isEqualTo(DomainType.CONDITION.toString());
+    assertThat(option3.getType()).isEqualTo("SNOMED");
+    assertThat(option3.getStandard()).isTrue();
 
-    option = options.get(2);
-    assertEquals(DomainType.CONDITION.toString(), option.getDomain());
-    assertEquals("SNOMED", option.getType());
-    assertTrue(option.getStandard());
+    DbMenuOption option4 = options.get(3);
+    assertThat(option4.getDomain()).isEqualTo(DomainType.MEASUREMENT.toString());
+    assertThat(option4.getType()).isEqualTo("LOINC");
+    assertThat(option4.getStandard()).isTrue();
 
-    option = options.get(3);
-    assertEquals(DomainType.MEASUREMENT.toString(), option.getDomain());
-    assertEquals("LOINC", option.getType());
-    assertTrue(option.getStandard());
+    DbMenuOption option5 = options.get(4);
+    assertThat(option5.getDomain()).isEqualTo(DomainType.PERSON.toString());
+    assertThat(option5.getType()).isEqualTo("RACE");
+    assertThat(option5.getStandard()).isTrue();
 
-    option = options.get(4);
-    assertEquals(DomainType.PERSON.toString(), option.getDomain());
-    assertEquals("RACE", option.getType());
-    assertTrue(option.getStandard());
-
-    option = options.get(5);
-    assertEquals(DomainType.SURVEY.toString(), option.getDomain());
-    assertEquals("PPI", option.getType());
-    assertFalse(option.getStandard());
+    DbMenuOption option6 = options.get(5);
+    assertThat(option6.getDomain()).isEqualTo(DomainType.SURVEY.toString());
+    assertThat(option6.getType()).isEqualTo("PPI");
+    assertThat(option6.getStandard()).isFalse();
   }
 
   @Test
   public void countSurveyBySearchTerm() {
-    assertEquals(1, cbCriteriaDao.countSurveyBySearchTerm("test"));
+    assertThat(cbCriteriaDao.countSurveyByKeyword("test")).isEqualTo(1);
   }
 
   @Test
-  public void findSurveys() {
+  public void findSurveysKeyword() {
     PageRequest page = new PageRequest(0, 10);
-    assertEquals(questionCriteria, cbCriteriaDao.findSurveys("test", page).getContent().get(0));
+    assertThat(cbCriteriaDao.findSurveys("test", null, page)).containsExactly(questionCriteria);
   }
 
   @Test
   public void countSurveyByName() {
-    assertEquals(1, cbCriteriaDao.countSurveyByName("The Basics"));
+    assertThat(cbCriteriaDao.countSurveyByName("The Basics")).isEqualTo(1);
   }
 
   @Test
   public void findSurveysByName() {
     PageRequest page = new PageRequest(0, 10);
-    assertEquals(
-        questionCriteria, cbCriteriaDao.findSurveysByName("The Basics", page).getContent().get(0));
+    assertThat(cbCriteriaDao.findSurveys(null, "The Basics", page))
+        .containsExactly(questionCriteria);
   }
 
   @Test
   public void findSurveysNoSurveyName() {
     PageRequest page = new PageRequest(0, 10);
-    assertEquals(questionCriteria, cbCriteriaDao.findSurveys(page).getContent().get(0));
+    assertThat(cbCriteriaDao.findSurveys(null, null, page)).containsExactly(questionCriteria);
   }
 
   @Test
   public void countSurveys() {
-    assertEquals(1, cbCriteriaDao.countSurveys());
+    assertThat(cbCriteriaDao.countSurveys()).isEqualTo(1);
   }
 }
