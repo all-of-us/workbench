@@ -2270,14 +2270,15 @@ paths:
       description: >
         Task handler which handle request from cloud task queue rdrQueueTest to send Researcher data
       operationId: "exportResearcherData"
+      consumes:
+        - application/json
       parameters:
         - in: body
           name: researcherIds
           required: true
-          description: The IDs of concepts to be added to the concept set.
+          description: The IDs of Users to be exported to Rdr.
           schema:
-            type: object
-
+            $ref: "#/definitions/ArrayOfLong"
       responses:
         200:
           description: >
@@ -2296,9 +2297,9 @@ paths:
         - in: body
           name: researchIds
           required: true
-          description: The IDs of concepts to be added to the concept set.
+          description: The IDs of workspace to be exported to Rdr.
           schema:
-             type: object
+            $ref: "#/definitions/ArrayOfLong"
       responses:
         200:
           description: >
@@ -4094,9 +4095,8 @@ definitions:
         description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.
         type: string
 
-  RdrExportId:
-    type: object
-    properties:
-      exportId:
+  ArrayOfLong:
+      type: array
+      items:
         type: integer
         format: int64
