@@ -540,11 +540,11 @@ paths:
     get:
       tags:
         - user
-      description: Placeholder
+      description: Returns a list of billing accounts the caller can set a workspace's billing account to
       operationId: listBillingAccounts
       responses:
         200:
-          description: Placeholder
+          description: List of billing accounts
           schema:
             $ref: "#/definitions/WorkbenchListBillingAccountsResponse"
 
@@ -2367,6 +2367,10 @@ definitions:
         type: boolean
         default: false
         description: Feature flag for enabling eRA commons
+      defaultFreeCreditsDollarLimit:
+        type: number
+        format: double
+        description: The default dollar amount of free credits alloted to each user
       enableBillingLockout:
         type: boolean
         default: false

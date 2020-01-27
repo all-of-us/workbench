@@ -23,20 +23,17 @@ public class GoogleApisConfig {
   public Cloudbilling googleCloudBillingApi(
       UserAuthentication userAuthentication,
       JsonFactory jsonFactory,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider)
+      throws GeneralSecurityException, IOException {
     GoogleCredential credential =
         new GoogleCredential()
             .setAccessToken(userAuthentication.getCredentials())
             .createScoped(
                 Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
 
-    try {
-      return new Cloudbilling.Builder(
-              GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
-          .setApplicationName(workbenchConfigProvider.get().server.projectId)
-          .build();
-    } catch (GeneralSecurityException | IOException e) {
-      throw new RuntimeException("Could not construct Cloudbilling API client");
-    }
+    return new Cloudbilling.Builder(
+            GoogleNetHttpTransport.newTrustedTransport(), jsonFactory, credential)
+        .setApplicationName(workbenchConfigProvider.get().server.projectId)
+        .build();
   }
 }

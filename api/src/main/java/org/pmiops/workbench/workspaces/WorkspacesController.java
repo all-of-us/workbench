@@ -108,8 +108,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Retryer<Boolean> retryer =
       RetryerBuilder.<Boolean>newBuilder()
           .retryIfExceptionOfType(StorageException.class)
-          .withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
-          .withStopStrategy(StopStrategies.stopAfterAttempt(12))
+          .withWaitStrategy(WaitStrategies.exponentialWait())
+          .withStopStrategy(StopStrategies.stopAfterDelay(60, TimeUnit.SECONDS))
           .build();
 
   private final BillingProjectBufferService billingProjectBufferService;
@@ -253,12 +253,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
     updateWorkspaceBillingAccount(dbWorkspace, workspace.getBillingAccountName());
-
     try {
       dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if the workspace creation
       // fails
+      log.severe("Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.");
+      log.severe(e.getMessage());
       updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
       throw e;
     }
@@ -274,8 +275,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
               e ->
                   e instanceof GoogleJsonResponseException
                       && ((GoogleJsonResponseException) e).getStatusCode() == 403)
-          .withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
-          .withStopStrategy(StopStrategies.stopAfterAttempt(12))
+          .withWaitStrategy(WaitStrategies.exponentialWait())
+          .withStopStrategy(StopStrategies.stopAfterDelay(60, TimeUnit.SECONDS))
           .build();
 
   private void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
