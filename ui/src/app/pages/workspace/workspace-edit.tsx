@@ -389,9 +389,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-        this.setState(
-          fp.set(['workspace', 'billingAccountName',
-            billingAccounts.find(billingAccount => billingAccount.isFreeTier).name]));
+        this.setState(prevState => fp.set(
+          ['workspace', 'billingAccountName'],
+          billingAccounts.find(billingAccount => billingAccount.isFreeTier).name,
+          prevState));
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
         const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
 
@@ -426,7 +427,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           }
         } else {
           // Otherwise, use this as an opportunity to sync the fetched billing account name from the source of truth, Google
-          this.setState(fp.set(['workspace', 'billingAccountName'], fetchedBillingInfo.billingAccountName));
+          this.setState(prevState => fp.set(
+            ['workspace', 'billingAccountName'], fetchedBillingInfo.billingAccountName, prevState));
         }
       }
 
@@ -509,6 +511,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         workspace.cdrVersionId = this.props.cdrVersionListResponse.defaultCdrVersionId;
       }
 
+      console.log(workspace);
       return workspace;
     }
 
@@ -796,6 +799,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     render() {
+      console.log(this.state.workspace);
       const {
         workspace: {
           name,
