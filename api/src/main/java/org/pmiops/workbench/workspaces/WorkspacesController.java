@@ -5,10 +5,12 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
+import com.google.api.Monitoring;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
@@ -83,6 +85,10 @@ import org.pmiops.workbench.model.WorkspaceListResponse;
 import org.pmiops.workbench.model.WorkspaceResponse;
 import org.pmiops.workbench.model.WorkspaceResponseListResponse;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.MonitoringService;
+import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.WorkspaceMapper;
@@ -120,6 +126,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private WorkspaceAuditor workspaceAuditor;
   private WorkspaceMapper workspaceMapper;
+  private MonitoringService monitoringService;
 
   @Autowired
   public WorkspacesController(
@@ -135,7 +142,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       UserService userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
-      WorkspaceMapper workspaceMapper) {
+      WorkspaceMapper workspaceMapper,
+      MonitoringService monitoringService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -149,6 +157,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
+    this.monitoringService = monitoringService;
   }
 
   private String getRegisteredUserDomainEmail() {
@@ -304,7 +313,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
+
+    final Stopwatch stopwatch = Stopwatch.createStarted();
     response.setItems(workspaceService.getWorkspaces());
+    stopwatch.stop();
+
+    monitoringService.recordBundle(MeasurementBundle.builder()
+        .addMeasurement(DistributionMetric.LIST_WORKSPACES_TIME, stopwatch.elapsed().toMillis())
+        .addTag(MetricLabel.OPERATION_NAME, "getWorkspaces")
+        .build());
     return ResponseEntity.ok(response);
   }
 
