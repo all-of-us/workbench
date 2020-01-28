@@ -7,8 +7,12 @@ import java.util.List;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 
 public enum DistributionMetric implements Metric {
-  LIST_WORKSPACES_TIME("operation_time_tmp", "Time to list complete some operation.",
-      Collections.singletonList(MetricLabel.OPERATION_NAME), DistributionAggregation.TIME, MeasureLong.class);
+  LIST_WORKSPACES_TIME(
+      "operation_time_tmp",
+      "Time to list complete some operation.",
+      Collections.singletonList(MetricLabel.OPERATION_NAME),
+      DistributionAggregation.TIME,
+      MeasureLong.class);
 
   private final String name;
   private final String description;
@@ -16,9 +20,12 @@ public enum DistributionMetric implements Metric {
   private final DistributionAggregation distributionAggregation;
   private final Class measureClass;
 
-
-  DistributionMetric(String name, String description, List<MetricLabel> metricLabels,
-      DistributionAggregation distributionAggregation, Class measureClass) {
+  DistributionMetric(
+      String name,
+      String description,
+      List<MetricLabel> metricLabels,
+      DistributionAggregation distributionAggregation,
+      Class measureClass) {
     this.name = name;
     this.description = description;
     this.metricLabels = metricLabels;
@@ -55,5 +62,4 @@ public enum DistributionMetric implements Metric {
   public List<MetricLabel> getLabels() {
     return metricLabels;
   }
-
 }

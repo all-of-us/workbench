@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import org.jetbrains.annotations.NotNull;
+import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
@@ -55,6 +56,7 @@ public class MonitoringServiceImpl implements MonitoringService {
     StreamSupport.stream(
             Iterables.concat(
                     Arrays.<Metric>asList(GaugeMetric.values()),
+                    Arrays.<Metric>asList(DistributionMetric.values()),
                     Arrays.<Metric>asList(EventMetric.values()))
                 .spliterator(),
             false)

@@ -6,10 +6,13 @@ import io.opencensus.stats.Aggregation.Distribution;
 import io.opencensus.stats.BucketBoundaries;
 
 public enum DistributionAggregation {
-  TIME(UnitOfMeasure.MILLISECOND, Aggregation.Distribution.create(BucketBoundaries.create(
-      ImmutableList
-          .of(0.0, 25.0, 50.0, 75.0, 100.0, 200.0, 400.0, 600.0, 800.0, 1000.0, 2000.0, 4000.0,
-              6000.0))));
+  TIME(
+      UnitOfMeasure.MILLISECOND,
+      Aggregation.Distribution.create(
+          BucketBoundaries.create(
+              ImmutableList.of(
+                  0.0, 25.0, 50.0, 75.0, 100.0, 200.0, 400.0, 600.0, 800.0, 1000.0, 2000.0, 4000.0,
+                  6000.0))));
 
   private final UnitOfMeasure unitOfMeasure;
   private final Aggregation.Distribution distribution;

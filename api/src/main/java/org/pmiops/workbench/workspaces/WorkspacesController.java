@@ -5,7 +5,6 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
-import com.google.api.Monitoring;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
@@ -318,10 +317,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     response.setItems(workspaceService.getWorkspaces());
     stopwatch.stop();
 
-    monitoringService.recordBundle(MeasurementBundle.builder()
-        .addMeasurement(DistributionMetric.LIST_WORKSPACES_TIME, stopwatch.elapsed().toMillis())
-        .addTag(MetricLabel.OPERATION_NAME, "getWorkspaces")
-        .build());
+    monitoringService.recordBundle(
+        MeasurementBundle.builder()
+            .addMeasurement(DistributionMetric.LIST_WORKSPACES_TIME, stopwatch.elapsed().toMillis())
+            .addTag(MetricLabel.OPERATION_NAME, "getWorkspaces")
+            .build());
     return ResponseEntity.ok(response);
   }
 
