@@ -1317,16 +1317,22 @@ def describe_cluster(cmd_name, *args)
 
   # Infer the project from the cluster ID project ID. If for some reason, the
   # target cluster ID does not conform to the current billing prefix (e.g. if we
-  # changed the prefix), --project will override this.
+  # changed the prefix), --project can be used to override this.
   common = Common.new
+  matching_prefix = ""
   project_from_cluster = nil
   ENVIRONMENTS.each_key do |env|
-    if op.opts.cluster_id.start_with?(get_billing_project_prefix(env))
+    env_prefix = get_billing_project_prefix(env)
+    if op.opts.cluster_id.start_with?(env_prefix)
       # Take the most specific prefix match, since prod is a substring of the others.
-      if not project_from_cluster or project_from_cluster.length < env.length
+      if matching_prefix.length < env_prefix.length
         project_from_cluster = env
+        matching_prefix = env_prefix
       end
     end
+  end
+  if project_from_cluster == "local"
+    project_from_cluster = TEST_PROJECT
   end
   common.warning "unable to determine project by cluster ID" unless project_from_cluster
   unless op.opts.project
