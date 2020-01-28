@@ -23,7 +23,7 @@ public class GoogleApisConfig {
   public static final String SERVICE_ACCOUNT_CLOUD_BILLING = "SERVICE_ACCOUNT_CLOUD_BILLING";
 
   @Bean(END_USER_CLOUD_BILLING)
-  public Cloudbilling endUserCloudbillingApi(
+  public Cloudbilling endUserCloudbilling(
       UserAuthentication userAuthentication,
       JsonFactory jsonFactory,
       Provider<WorkbenchConfig> workbenchConfigProvider)
@@ -40,7 +40,7 @@ public class GoogleApisConfig {
   }
 
   @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
-  public Cloudbilling serviceAccountGoogleCloudbillingApi(
+  public Cloudbilling serviceAccountGoogleCloudbilling(
       JsonFactory jsonFactory, Provider<WorkbenchConfig> workbenchConfigProvider)
       throws IOException, GeneralSecurityException {
     GoogleCredentials credentials =
