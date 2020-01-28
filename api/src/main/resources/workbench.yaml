@@ -2251,6 +2251,9 @@ paths:
 # https://cloud.google.com/tasks/docs/creating-appengine-handlers#reading_app_engine_task_request_headers
 # and o.p.w.interceptors.CloudTaskInterceptor which implements the header check.
 #########################################################################################
+
+# Using body parameter ref ArrayOfLong instead of defining array of type long here because of
+# bug in swagger version 2.3.0 https://github.com/swagger-api/swagger-codegen/issues/6745.2.2.3
   /v1/cloudTask/exportResearcherData:
     post:
       tags:
@@ -2260,14 +2263,15 @@ paths:
       description: >
         Task handler which handle request from cloud task queue rdrQueueTest to send Researcher data
       operationId: "exportResearcherData"
+      consumes:
+        - application/json
       parameters:
         - in: body
           name: researcherIds
           required: true
-          description: The IDs of concepts to be added to the concept set.
+          description: The IDs of Users to be exported to Rdr.
           schema:
-            type: object
-
+            $ref: "#/definitions/ArrayOfLong"
       responses:
         200:
           description: >
@@ -2286,9 +2290,9 @@ paths:
         - in: body
           name: researchIds
           required: true
-          description: The IDs of concepts to be added to the concept set.
+          description: The IDs of workspace to be exported to Rdr.
           schema:
-             type: object
+            $ref: "#/definitions/ArrayOfLong"
       responses:
         200:
           description: >
@@ -4155,9 +4159,8 @@ definitions:
         description: The name of the Jupyter VM which generated egress, e.g. all-of-us-260-m.
         type: string
 
-  RdrExportId:
-    type: object
-    properties:
-      exportId:
+  ArrayOfLong:
+      type: array
+      items:
         type: integer
         format: int64
