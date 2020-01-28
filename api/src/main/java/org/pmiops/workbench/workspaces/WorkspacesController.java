@@ -18,6 +18,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -306,22 +308,31 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceId) {
-    return ResponseEntity.ok(workspaceService.getWorkspace(workspaceNamespace, workspaceId));
+    AtomicReference<WorkspaceResponse> workspaceResponse = new AtomicReference<>();
+
+    final Duration elapsed = timeAction(() ->
+        workspaceResponse.set(workspaceService.getWorkspace(workspaceNamespace, workspaceId)));
+
+    monitoringService.recordBundle(
+        MeasurementBundle.builder()
+            .addMeasurement(DistributionMetric.LIST_WORKSPACES_TIME, elapsed.toMillis())
+            .addTag(MetricLabel.OPERATION_NAME, "getWorkspace")
+            .build());
+
+    return ResponseEntity.ok(workspaceResponse.get());
   }
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
-
-    final Stopwatch stopwatch = Stopwatch.createStarted();
-    response.setItems(workspaceService.getWorkspaces());
-    stopwatch.stop();
+    final Duration elapsed = timeAction(() -> response.setItems(workspaceService.getWorkspaces()));
 
     monitoringService.recordBundle(
         MeasurementBundle.builder()
-            .addMeasurement(DistributionMetric.LIST_WORKSPACES_TIME, stopwatch.elapsed().toMillis())
+            .addMeasurement(DistributionMetric.LIST_WORKSPACES_TIME, elapsed.toMillis())
             .addTag(MetricLabel.OPERATION_NAME, "getWorkspaces")
             .build());
+
     return ResponseEntity.ok(response);
   }
 
@@ -516,6 +527,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       log.warning("Service Account does not have access to bucket " + bucketName);
       throw e;
     }
+  }
+
+  private Duration timeAction(Runnable action) {
+    final Stopwatch stopwatch = Stopwatch.createStarted();
+    action.run();
+    stopwatch.stop();
+    return stopwatch.elapsed();
   }
 
   @Override
