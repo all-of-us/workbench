@@ -19,6 +19,7 @@ interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSp
   resource: RecentResource;
   existingNameList: string[];
   onUpdate: Function;
+  disableDuplicate: boolean;
 }
 
 interface State {
@@ -83,7 +84,7 @@ export const NotebookResourceCard = fp.flow(
           AnalyticsTracker.Notebooks.Duplicate();
           this.duplicateNotebook();
         },
-        disabled: !this.writePermission,
+        disabled: this.props.disableDuplicate || !this.writePermission,
       },
       {
         icon: 'copy',

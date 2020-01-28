@@ -12,6 +12,7 @@ import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -36,6 +37,7 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.RecentResourceResponse;
+import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -174,29 +176,33 @@ public class UserMetricsController implements UserMetricsApiDelegate {
             .limit(distinctWorkspacelimit)
             .collect(Collectors.toList());
 
-    final ImmutableMap<Long, FirecloudWorkspaceResponse> idToLiveWorkspace =
-        workspaceIdList.stream()
-            .map(
-                id ->
-                    workspaceService
-                        .findActiveByWorkspaceId(id)
-                        .map(
-                            dbWorkspace ->
-                                new AbstractMap.SimpleImmutableEntry<>(
-                                    dbWorkspace.getWorkspaceId(), dbWorkspace)))
-            .flatMap(Streams::stream)
-            .map(
-                entry ->
-                    fireCloudService
-                        .getWorkspace(entry.getValue())
-                        .map(
-                            workspaceResponse ->
-                                new AbstractMap.SimpleImmutableEntry<>(
-                                    entry.getKey(), workspaceResponse)))
-            .flatMap(Streams::stream)
-            .collect(
-                ImmutableMap.toImmutableMap(
-                    SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+    final Map<Long, DbWorkspace> idToDbWorkspace = workspaceIdList
+        .stream()
+        .map(
+            id ->
+                workspaceService
+                    .findActiveByWorkspaceId(id)
+                    .map(
+                        dbWorkspace ->
+                            new AbstractMap.SimpleImmutableEntry<>(
+                                dbWorkspace.getWorkspaceId(), dbWorkspace)))
+        .flatMap(Streams::stream)
+        .collect(ImmutableMap.toImmutableMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+
+    final ImmutableMap<Long, FirecloudWorkspaceResponse> idToLiveWorkspace = idToDbWorkspace.entrySet()
+        .stream()
+        .map(
+            entry ->
+                fireCloudService
+                    .getWorkspace(entry.getValue())
+                    .map(
+                        workspaceResponse ->
+                            new AbstractMap.SimpleImmutableEntry<>(
+                                entry.getKey(), workspaceResponse)))
+        .flatMap(Streams::stream)
+        .collect(
+            ImmutableMap.toImmutableMap(
+                SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
 
     final ImmutableList<DbUserRecentResource> workspaceFilteredResources =
         userRecentResourceList.stream()
@@ -223,7 +229,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     final ImmutableList<RecentResource> userVisibleRecentResources =
         workspaceFilteredResources.stream()
             .filter(urr -> foundBlobIdsContainsUserRecentResource(foundBlobIds, urr))
-            .map(urr -> buildRecentResource(idToLiveWorkspace, urr))
+            .map(urr -> buildRecentResource(idToDbWorkspace, idToLiveWorkspace, urr))
             .collect(ImmutableList.toImmutableList());
     final RecentResourceResponse recentResponse = new RecentResourceResponse();
     recentResponse.addAll(userVisibleRecentResources);
@@ -247,12 +253,15 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   }
 
   private RecentResource buildRecentResource(
+      Map<Long, DbWorkspace> idToDbWorkspace,
       ImmutableMap<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentResource dbUserRecentResource) {
     RecentResource resource = TO_CLIENT.apply(dbUserRecentResource);
     FirecloudWorkspaceResponse workspaceDetails =
         idToFcWorkspaceResponse.get(dbUserRecentResource.getWorkspaceId());
-    resource.setPermission(workspaceDetails.getAccessLevel());
+    resource.setWorkspaceBillingStatus(idToDbWorkspace.get(dbUserRecentResource.getWorkspaceId()).getBillingStatus());
+    resource.setPermission(
+        WorkspaceConversionUtils.toApiWorkspaceAccessLevel(workspaceDetails.getAccessLevel()).toString());
     resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
     resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
     return resource;

@@ -18,7 +18,9 @@ import {isAbortError} from 'app/utils/errors';
 import {navigate, userProfileStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {ClusterStatus} from 'generated/fetch';
+import {BillingStatus, ClusterStatus} from 'generated/fetch';
+import {TooltipTrigger} from "app/components/popups";
+import {ACTION_DISABLED_INVALID_BILLING} from "app/utils/strings";
 
 
 const styles = reactStyles({
@@ -200,7 +202,7 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
     }
 
     private startEditMode() {
-      if (this.canWrite) {
+      if (this.canStartClusters) {
         if (!this.notebookInUse) {
           this.setState({userRequestedExecutableNotebook: true});
           this.runCluster(() => { this.navigateEditMode(); });
@@ -212,17 +214,15 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       }
     }
 
-
-
     private startPlaygroundMode() {
-      if (this.canWrite) {
+      if (this.canStartClusters) {
         this.setState({userRequestedExecutableNotebook: true});
         this.runCluster(() => { this.navigatePlaygroundMode(); });
       }
     }
 
     private onPlaygroundModeClick() {
-      if (!this.canWrite) {
+      if (!this.canStartClusters) {
         return;
       }
       if (Cookies.get(ConfirmPlaygroundModeModal.DO_NOT_SHOW_AGAIN) === String(true)) {
@@ -253,9 +253,17 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
       return WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel);
     }
 
+    private get billingLocked() {
+      return this.props.workspace.billingStatus === BillingStatus.INACTIVE;
+    }
+
+    private get canStartClusters() {
+      return this.canWrite && !this.billingLocked;
+    }
+
     private get buttonStyleObj() {
       return Object.assign({}, styles.navBarItem,
-        this.canWrite ? styles.clickable : styles.disabled);
+        this.canStartClusters ? styles.clickable : styles.disabled);
     }
 
     private cloneNotebook() {
@@ -327,27 +335,33 @@ export const InteractiveNotebook = fp.flow(withUrlParams(), withCurrentWorkspace
                 <ClrIcon shape='sync' style={{...styles.navBarIcon, ...styles.rotate}}/>
                 {this.renderNotebookText()}
               </div>) : (
-              <div style={{display: 'flex'}}>
-                <div style={this.buttonStyleObj}
-                     onClick={() => {
-                       AnalyticsTracker.Notebooks.Edit();
-                       this.startEditMode();
-                     }}>
-                  <EditComponentReact enableHoverEffect={false}
-                                      disabled={!this.canWrite}
-                                      style={styles.navBarIcon}/>
-                  Edit {this.notebookInUse && '(In Use)'}
-                </div>
-                <div style={this.buttonStyleObj}
-                     onClick={() => {
-                       AnalyticsTracker.Notebooks.Run();
-                       this.onPlaygroundModeClick();
-                     }}>
-                  <PlaygroundModeIcon enableHoverEffect={false} disabled={!this.canWrite}
-                                      style={styles.navBarIcon}/>
-                  Run (Playground Mode)
-                </div>
-              </div>)
+                  <div style={{display: 'flex'}}>
+                    <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+                      <div style={this.buttonStyleObj}
+                           onClick={() => {
+                             AnalyticsTracker.Notebooks.Edit();
+                             this.startEditMode();
+                           }}>
+                        <EditComponentReact enableHoverEffect={false}
+                                            disabled={!this.canStartClusters}
+                                            style={styles.navBarIcon}/>
+                        Edit {this.notebookInUse && '(In Use)'}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipTrigger content={this.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+                      <div style={this.buttonStyleObj}
+                           onClick={() => {
+                             AnalyticsTracker.Notebooks.Run();
+                             this.onPlaygroundModeClick();
+                           }}>
+                        <PlaygroundModeIcon enableHoverEffect={false}
+                                            disabled={!this.canStartClusters}
+                                            style={styles.navBarIcon}/>
+                        Run (Playground Mode)
+                      </div>
+                    </TooltipTrigger>
+                  </div>
+              )
             }
           </div>
           <div style={styles.previewDiv}>

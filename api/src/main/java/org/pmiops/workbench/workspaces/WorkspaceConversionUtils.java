@@ -41,6 +41,7 @@ public class WorkspaceConversionUtils {
             .lastModifiedTime(workspace.getLastModifiedTime().getTime())
             .creationTime(workspace.getCreationTime().getTime())
             .dataAccessLevel(workspace.getDataAccessLevelEnum())
+            .billingStatus(workspace.getBillingStatus())
             .name(workspace.getName())
             .id(workspaceId.getWorkspaceName())
             .namespace(workspaceId.getWorkspaceNamespace())
@@ -71,6 +72,7 @@ public class WorkspaceConversionUtils {
             .researchPurpose(researchPurpose)
             .published(workspace.getPublished())
             .googleBucketName(fcWorkspace.getBucketName())
+            .billingStatus(workspace.getBillingStatus())
             .billingAccountName(workspace.getBillingAccountName());
     if (fcWorkspace.getCreatedBy() != null) {
       result.setCreator(fcWorkspace.getCreatedBy());
