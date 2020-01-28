@@ -112,15 +112,13 @@ def publish_cdr(cmd_name, args)
     # hit enter.
     # TODO: Figure out how to prepopulate this value or disable interactivity.
 
-    # Copy through an intermediate project and delete after, per
+    # Copy through an intermediate project and delete after (2h TTL), per
     # https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
-    common.run_inline %W{bq mk -f --dataset #{ingest_dataset}}
+    common.run_inline %W{bq mk -f --default_table_expiration 7200 --dataset #{ingest_dataset}}
     common.run_inline %W{./copy-bq-dataset.sh #{source_dataset} #{ingest_dataset} #{env.fetch(:source_cdr_project)} #{table_filter}}
 
     common.run_inline %W{bq mk -f --dataset #{dest_dataset}}
     common.run_inline %W{./copy-bq-dataset.sh #{ingest_dataset} #{dest_dataset} #{env.fetch(:ingest_cdr_project)} #{table_filter}}
-
-    common.run_inline %W{bq rm --dataset #{ingest_dataset}}
 
     auth_domain_group = get_auth_domain_group(op.opts.project)
 
