@@ -10,14 +10,33 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {TwoColPaddedTable} from 'app/components/tables';
-import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, sliceByHalfLength, withCdrVersions, withCurrentWorkspace, withRouteConfigData} from 'app/utils';
+import {
+  reactStyles,
+  ReactWrapperBase,
+  sliceByHalfLength,
+  withCdrVersions,
+  withCurrentWorkspace,
+  withRouteConfigData
+} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
-import {ArchivalStatus, CdrVersion, CdrVersionListResponse, DataAccessLevel, SpecificPopulationEnum, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
+import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {
+  ArchivalStatus,
+  BillingAccount,
+  CdrVersion,
+  CdrVersionListResponse,
+  DataAccessLevel,
+  SpecificPopulationEnum,
+  Workspace,
+  WorkspaceAccessLevel
+} from 'generated/fetch';
 import * as fp from 'lodash/fp';
+import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
@@ -107,9 +126,6 @@ export const toolTipText = {
   cdrSelect: <div>The curated data repository (CDR) is where research data from the <i>All of Us</i>
     Research Program is stored. The CDR is periodically updated as new data becomes available for
     use. You can select which version of the CDR you wish to query in this Workspace.</div>,
-  billingAccount: <div>Throughout this period of testing and development, your use of the Workbench
-    is being funded by the National Institutes of Health. In the future researchers may be required
-    to enter billing account information to cover the cost of computing time in the cloud.</div>,
   researchPurpose: <div>You  are required to describe your research purpose, or the reason why you
     are conducting this study. This information, along with your name, will be posted on the
     publicly available <i>All of Us</i> website (https://www.researchallofus.org/) to inform our
@@ -307,7 +323,7 @@ export const WorkspaceEditSection = (props) => {
     <div style={styles.text}>
       {props.description}
     </div>
-    <div>
+    <div style={{marginTop: '0.5rem'}}>
       {props.children}
     </div>
   </div>;
@@ -330,7 +346,7 @@ function getDiseaseNames(keyword) {
 export interface WorkspaceEditProps {
   routeConfigData: any;
   cdrVersionListResponse: CdrVersionListResponse;
-  workspace: Workspace;
+  workspace: WorkspaceData;
   cancel: Function;
 }
 
@@ -346,6 +362,7 @@ export interface WorkspaceEditState {
   loading: boolean;
   showUnderservedPopulationDetails: boolean;
   showStigmatizationDetails: boolean;
+  billingAccounts: Array<BillingAccount>;
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions())(
@@ -364,7 +381,69 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         loading: false,
         showUnderservedPopulationDetails: false,
         showStigmatizationDetails: false,
+        billingAccounts: []
       };
+    }
+
+    async fetchBillingAccounts() {
+      const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
+
+      if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
+        this.setState(prevState => fp.set(
+          ['workspace', 'billingAccountName'],
+          billingAccounts.find(billingAccount => billingAccount.isFreeTier).name,
+          prevState));
+      } else if (this.isMode(WorkspaceEditMode.Edit)) {
+        const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
+
+        if (!billingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
+          // If the user has owner access on the workspace but does not have access to the billing account
+          // that it is attached to, keep the server's current value for billingAccountName and add a shim
+          // entry into billingAccounts so the dropdown entry is not empty.
+          //
+          // The server will not perform an updateBillingInfo call if the received billingAccountName
+          // is the same as what is currently stored.
+          //
+          // This can happen if a workspace is shared to another researcher as an owner.
+          billingAccounts.push({
+            name: this.props.workspace.billingAccountName,
+            displayName: 'User Provided Billing Account',
+            isFreeTier: false,
+            isOpen: true
+          });
+
+          if (fetchedBillingInfo.billingAccountName !== this.props.workspace.billingAccountName) {
+            // This should never happen but it means the database is out of sync with Google
+            // and does not have the correct billing account stored.
+            // We cannot send over the correct billing account info since the current user
+            // does not have permissions to set it.
+
+            reportError({
+              name: 'Out of date billing account name',
+              message: `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
+                `Stored value is ${this.props.workspace.billingAccountName}. ` +
+                `True value is ${fetchedBillingInfo.billingAccountName}`
+            });
+          }
+        } else {
+          // Otherwise, use this as an opportunity to sync the fetched billing account name from the source of truth, Google
+          this.setState(prevState => fp.set(
+            ['workspace', 'billingAccountName'], fetchedBillingInfo.billingAccountName, prevState));
+        }
+      }
+
+      this.setState({billingAccounts});
+    }
+
+    async componentDidMount() {
+      if (serverConfigStore.getValue().enableBillingLockout) {
+        this.fetchBillingAccounts();
+      } else {
+        // This is a temporary hack to set the billing account name property to anything
+        // so that it passes validation. The server ignores the value if the feature flag
+        // is turned off so any value is fine.
+        this.setState(fp.set(['workspace', 'billingAccountName'], 'free-tier'));
+      }
     }
 
     /**
@@ -452,6 +531,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       if (liveCdrVersions.length === 0) {
         throw Error('no live CDR versions were found');
       }
+
       return liveCdrVersions;
     }
 
@@ -473,6 +553,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             'diseaseOfFocus'
           ], disease))}/>
       );
+    }
+
+    renderBillingDescription() {
+      return <div>
+        The <i> Us</i> Program provides ${serverConfigStore.getValue().defaultFreeCreditsDollarLimit.toFixed(0)} in
+        free credits per user. When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account.
+        At any time, you can update your Workspace billing account.
+      </div>;
     }
 
     /**
@@ -713,6 +801,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       const {
         workspace: {
           name,
+          billingAccountName,
           researchPurpose: {
             anticipatedFindings,
             intendedStudy,
@@ -722,6 +811,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       } = this.state;
       const errors = validate({
         name,
+        billingAccountName,
         anticipatedFindings,
         intendedStudy,
         reasonForAllOfUs,
@@ -732,6 +822,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         name: {
           length: { minimum: 1, maximum: 80 }
         },
+        billingAccountName: { presence: true },
         intendedStudy: { presence: true },
         anticipatedFindings: {presence: true },
         reasonForAllOfUs: { presence: true },
@@ -776,7 +867,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </div>
             </TooltipTrigger>
             <TooltipTrigger content={toolTipText.cdrSelect}>
-              <InfoIcon style={{...styles.infoIcon, marginTop: '0.5rem'}}/>
+              <InfoIcon style={{...styles.infoIcon}}/>
             </TooltipTrigger>
           </FlexRow>
         </WorkspaceEditSection>
@@ -790,8 +881,20 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             onChange={v => this.setState({cloneUserRole: v})}/>
         </WorkspaceEditSection>
         }
-        <WorkspaceEditSection header='Billing Account' subHeader='National Institutes of Health'
-            tooltip={toolTipText.billingAccount}/>
+        {serverConfigStore.getValue().enableBillingLockout &&
+          (!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
+          <WorkspaceEditSection header={<div><i>All of Us</i> Billing account</div>}
+                                description={this.renderBillingDescription()}>
+            <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
+              Select account
+            </div>
+            <Dropdown style={{width: '14rem'}}
+                      value={this.state.workspace.billingAccountName}
+                      options={this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}))}
+                      onChange={e => this.setState(fp.set(['workspace', 'billingAccountName'], e.value))}
+            />
+          </WorkspaceEditSection>
+        }
         <WorkspaceEditSection header='Research Use Statement Questions'
             description={<div> {ResearchPurposeDescription} Therefore, please provide
               sufficiently detailed responses at a 5th grade reading level.  Your responses
@@ -818,25 +921,22 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           header={researchPurposeQuestions[1].header}
           description={researchPurposeQuestions[1].description} required>
           <TextArea value={this.state.workspace.researchPurpose.reasonForAllOfUs}
-                    onChange={v => this.updateResearchPurpose('reasonForAllOfUs', v)}
-                    style={{marginTop: '0.5rem'}}/>
+                    onChange={v => this.updateResearchPurpose('reasonForAllOfUs', v)}/>
         </WorkspaceEditSection>
         <WorkspaceEditSection
           header={researchPurposeQuestions[2].header}
           description={researchPurposeQuestions[2].description} required>
           <TextArea value={this.state.workspace.researchPurpose.intendedStudy}
-                    onChange={v => this.updateResearchPurpose('intendedStudy', v)}
-                    style={{marginTop: '0.5rem'}}/>
+                    onChange={v => this.updateResearchPurpose('intendedStudy', v)}/>
         </WorkspaceEditSection>
         <WorkspaceEditSection header={researchPurposeQuestions[3].header}
                               description={researchPurposeQuestions[3].description} required>
           <TextArea value={this.state.workspace.researchPurpose.anticipatedFindings}
-                    onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}
-                    style={{marginTop: '0.5rem'}}/>
+                    onChange={v => this.updateResearchPurpose('anticipatedFindings', v)}/>
         </WorkspaceEditSection>
         <WorkspaceEditSection required header={researchPurposeQuestions[4].header}>
           <Link onClick={() => this.setState({showUnderservedPopulationDetails:
-              !this.state.showUnderservedPopulationDetails})} style={{marginTop: '0.5rem'}}>
+              !this.state.showUnderservedPopulationDetails})}>
             More info on underserved populations
             {this.state.showUnderservedPopulationDetails ? <ClrIcon shape='caret' dir='up'/> :
               <ClrIcon shape='caret' dir='down'/>}
@@ -899,7 +999,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <WorkspaceEditSection header='Request a review of your research purpose for potential
                                       stigmatization of research participants'>
           <Link onClick={() => this.setState({showStigmatizationDetails:
-              !this.state.showStigmatizationDetails})} style={{marginTop: '0.5rem'}}>
+              !this.state.showStigmatizationDetails})}>
             More info on stigmatization
             {this.state.showStigmatizationDetails ? <ClrIcon shape='caret' dir='up'/> :
               <ClrIcon shape='caret' dir='down'/>}
@@ -959,6 +1059,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <TooltipTrigger content={
               errors && <ul>
                 {errors.name && <div>{errors.name}</div>}
+                {errors.billingAccountName && <div>You must select a billing account</div>}
                 {errors.primaryPurpose && <div>You must choose at least one primary research purpose</div>}
                 {errors.reasonForAllOfUs && <div>You must specify a reason for using All of Us data</div>}
                 {errors.intendedStudy && <div>You must specify a field of intended study</div>}

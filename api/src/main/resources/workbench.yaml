@@ -536,6 +536,18 @@ paths:
           type: string
           required: false
 
+  /v1/user/billingAccounts:
+    get:
+      tags:
+        - user
+      description: Returns a list of billing accounts the caller can set a workspace's billing account to
+      operationId: listBillingAccounts
+      responses:
+        200:
+          description: List of billing accounts
+          schema:
+            $ref: "#/definitions/WorkbenchListBillingAccountsResponse"
+
   # Notebook clusters ####################################################################
 
   /v1/admin/security/clusters/{billingProjectId}/delete-clusters:
@@ -2334,6 +2346,14 @@ definitions:
         type: boolean
         default: false
         description: Feature flag for enabling eRA commons
+      defaultFreeCreditsDollarLimit:
+        type: number
+        format: double
+        description: The default dollar amount of free credits alloted to each user
+      enableBillingLockout:
+        type: boolean
+        default: false
+        description: Feature flag for billing lockout and upgrade
       firecloudURL:
         type: string
         description: The Firecloud URL to use for REST requests.
@@ -2493,6 +2513,8 @@ definitions:
       cdrVersionId:
         type: string
       creator:
+        type: string
+      billingAccountName:
         type: string
       googleBucketName:
         type: string
@@ -2788,6 +2810,37 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/CohortReview"
+
+  WorkbenchListBillingAccountsResponse:
+    type: object
+    required:
+      - billingAccounts
+    properties:
+      billingAccounts:
+        type: "array"
+        items:
+          $ref: "#/definitions/BillingAccount"
+
+  BillingAccount:
+    description: >
+      See https://cloud.google.com/billing/reference/rest/v1/billingAccounts#BillingAccount
+      for documentation on name, displayName, and isOpen.
+    type: object
+    required:
+      - isFreeTier
+      - name
+      - displayName
+      - isOpen
+    properties:
+      isFreeTier:
+        description: Returns true if this is the billing account used for free tier
+        type: boolean
+      name:
+        type: string
+      displayName:
+        type: string
+      isOpen:
+        type: boolean
 
   CohortListResponse:
     type: object

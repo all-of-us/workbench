@@ -70,7 +70,8 @@ public class WorkspaceConversionUtils {
             .namespace(fcWorkspace.getNamespace())
             .researchPurpose(researchPurpose)
             .published(workspace.getPublished())
-            .googleBucketName(fcWorkspace.getBucketName());
+            .googleBucketName(fcWorkspace.getBucketName())
+            .billingAccountName(workspace.getBillingAccountName());
     if (fcWorkspace.getCreatedBy() != null) {
       result.setCreator(fcWorkspace.getCreatedBy());
     }

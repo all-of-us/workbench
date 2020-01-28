@@ -5,6 +5,10 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.Cloudbilling.Projects.UpdateBillingInfo;
+import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
@@ -12,6 +16,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -103,8 +108,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Retryer<Boolean> retryer =
       RetryerBuilder.<Boolean>newBuilder()
           .retryIfExceptionOfType(StorageException.class)
-          .withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
-          .withStopStrategy(StopStrategies.stopAfterAttempt(12))
+          .withWaitStrategy(WaitStrategies.exponentialWait())
+          .withStopStrategy(StopStrategies.stopAfterDelay(60, TimeUnit.SECONDS))
           .build();
 
   private final BillingProjectBufferService billingProjectBufferService;
@@ -113,6 +118,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final UserDao userDao;
   private Provider<DbUser> userProvider;
   private final FireCloudService fireCloudService;
+  private Provider<Cloudbilling> cloudbillingProvider;
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final NotebooksService notebooksService;
@@ -130,6 +136,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       Provider<DbUser> userProvider,
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
+      Provider<Cloudbilling> cloudBillingProvider,
       Clock clock,
       NotebooksService notebooksService,
       UserService userService,
@@ -143,6 +150,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.userProvider = userProvider;
     this.fireCloudService = fireCloudService;
     this.cloudStorageService = cloudStorageService;
+    this.cloudbillingProvider = cloudBillingProvider;
     this.clock = clock;
     this.notebooksService = notebooksService;
     this.userService = userService;
@@ -244,10 +252,78 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+    updateWorkspaceBillingAccount(dbWorkspace, workspace.getBillingAccountName());
+    try {
+      dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+    } catch (Exception e) {
+      // Tell Google to set the billing account back to the free tier if the workspace creation
+      // fails
+      log.log(
+          Level.SEVERE,
+          "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.",
+          e);
+
+      updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
+      throw e;
+    }
+
     Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
+  }
+
+  private Retryer<ProjectBillingInfo> cloudBillingRetryer =
+      RetryerBuilder.<ProjectBillingInfo>newBuilder()
+          .retryIfException(
+              e ->
+                  e instanceof GoogleJsonResponseException
+                      && ((GoogleJsonResponseException) e).getStatusCode() == 403)
+          .withWaitStrategy(WaitStrategies.exponentialWait())
+          .withStopStrategy(StopStrategies.stopAfterDelay(60, TimeUnit.SECONDS))
+          .build();
+
+  private void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
+      // If billing lockout / upgrade is not enabled, ignore the normal logic
+      // and set the billing account to the free tier
+      workspace.setBillingAccountName(
+          "billingAccounts/" + workbenchConfigProvider.get().billing.accountId);
+      return;
+    }
+
+    if (newBillingAccountName.equals(workspace.getBillingAccountName())) {
+      return;
+    }
+
+    try {
+      UpdateBillingInfo request =
+          cloudbillingProvider
+              .get()
+              .projects()
+              .updateBillingInfo(
+                  "projects/" + workspace.getWorkspaceNamespace(),
+                  new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
+
+      ProjectBillingInfo response;
+
+      try {
+        // this is necessary because the grant ownership call in create/clone
+        // may not have propagated. Adding a few retries drastically reduces
+        // the likely of failing due to slow propagation
+        response = cloudBillingRetryer.call(request::execute);
+      } catch (RetryException | ExecutionException e) {
+        throw new ServerErrorException("Google Cloud updateBillingInfo call failed", e);
+      }
+
+      if (!newBillingAccountName.equals(response.getBillingAccountName())) {
+        throw new ServerErrorException(
+            "Google Cloud updateBillingInfo call succeeded but did not set the correct billing account name");
+      }
+
+      workspace.setBillingAccountName(response.getBillingAccountName());
+    } catch (IOException e) {
+      throw new ServerErrorException("Could not update billing account", e);
+    }
   }
 
   private void validateWorkspaceApiModel(Workspace workspace) {
@@ -348,9 +424,18 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
       dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
     }
-    // The version asserted on save is the same as the one we read via
-    // getRequired() above, see RW-215 for details.
-    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+
+    updateWorkspaceBillingAccount(dbWorkspace, request.getWorkspace().getBillingAccountName());
+    try {
+      // The version asserted on save is the same as the one we read via
+      // getRequired() above, see RW-215 for details.
+      dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+    } catch (Exception e) {
+      // Tell Google Cloud to set the billing account back to the original one since our update
+      // database call failed
+      updateWorkspaceBillingAccount(dbWorkspace, originalWorkspace.getBillingAccountName());
+      throw e;
+    }
 
     final Workspace editedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
 
@@ -460,9 +545,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    DbWorkspace savedDbWorkspace =
-        workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
+    updateWorkspaceBillingAccount(dbWorkspace, body.getWorkspace().getBillingAccountName());
 
+    try {
+      dbWorkspace =
+          workspaceService.saveAndCloneCohortsConceptSetsAndDataSets(fromWorkspace, dbWorkspace);
+    } catch (Exception e) {
+      // Tell Google to set the billing account back to the free tier if our clone fails
+      updateWorkspaceBillingAccount(dbWorkspace, workbenchConfigProvider.get().billing.accountId);
+      throw e;
+    }
+
+    // Note: It is possible for a workspace to be (partially) created and return
+    // a 500 to the user if this block of code fails since the workspace is already
+    // committed to the database in an earlier call
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
           workspaceService.getFirecloudWorkspaceAcls(
@@ -477,15 +573,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      savedDbWorkspace =
+      dbWorkspace =
           workspaceService.updateWorkspaceAcls(
-              savedDbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
+              dbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
-    final Workspace savedWorkspace =
-        workspaceMapper.toApiWorkspace(savedDbWorkspace, toFcWorkspace);
+
+    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+
+    final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
 
     workspaceAuditor.fireDuplicateAction(
-        fromWorkspace.getWorkspaceId(), savedDbWorkspace.getWorkspaceId(), savedWorkspace);
+        fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 

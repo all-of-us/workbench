@@ -12,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.cloud.bigquery.Field;
 import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValue;
@@ -180,6 +181,8 @@ public class DataSetControllerTest {
 
   @Autowired CloudStorageService cloudStorageService;
 
+  @Autowired Provider<Cloudbilling> cloudBillingProvider;
+
   @Autowired CohortDao cohortDao;
 
   @Autowired CohortFactory cohortFactory;
@@ -260,6 +263,12 @@ public class DataSetControllerTest {
     UserServiceAuditor.class
   })
   static class Configuration {
+
+    @Bean
+    Cloudbilling cloudbilling() {
+      return TestMockFactory.createMockedCloudbilling();
+    }
+
     @Bean
     Clock clock() {
       return CLOCK;
@@ -325,6 +334,7 @@ public class DataSetControllerTest {
             userProvider,
             fireCloudService,
             cloudStorageService,
+            cloudBillingProvider,
             CLOCK,
             notebooksService,
             userService,
@@ -390,6 +400,7 @@ public class DataSetControllerTest {
     workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    workspace.setBillingAccountName("billing-account");
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubGetWorkspace(

@@ -1,10 +1,11 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore} from 'app/utils/navigation';
+import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore, serverConfigStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
-import {Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {UserApi, Workspace, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceEdit, WorkspaceEditMode, WorkspaceEditSection} from './workspace-edit';
 import {WorkspaceData} from '../../utils/workspace-data';
@@ -15,10 +16,14 @@ jest.mock('app/utils/navigation', () => ({
   navigate: jest.fn()
 }));
 
-let workspace: WorkspaceData;
+jest.mock('app/utils/workbench-gapi-client', () => ({
+  getBillingAccountInfo: () => new Promise(resolve => resolve({billingAccountName: 'billing-account'}))
+}));
 
 describe('WorkspaceEdit', () => {
   let workspacesApi: WorkspacesApiStub;
+  let userApi: UserApiStub;
+  let workspace: WorkspaceData;
 
   const component = () => {
     return mount(<WorkspaceEdit cancel={() => {}} />);
@@ -42,12 +47,16 @@ describe('WorkspaceEdit', () => {
       }
     };
 
+    userApi = new UserApiStub();
+    registerApiClient(UserApi, userApi);
+
     workspacesApi = new WorkspacesApiStub([workspace]);
     registerApiClient(WorkspacesApi, workspacesApi);
 
     currentWorkspaceStore.next(workspace);
     cdrVersionStore.next(cdrVersionListResponse);
     routeConfigDataStore.next({mode: WorkspaceEditMode.Create});
+    serverConfigStore.next({enableBillingLockout: true, defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''});
   });
 
   it('displays workspaces create page', async () => {
