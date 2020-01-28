@@ -52,10 +52,11 @@ public class ServiceAccounts {
       credentials = GoogleCredentials.getApplicationDefault().createScoped(scopes);
     } else {
       AppIdentityService appIdentityService = AppIdentityServiceFactory.getAppIdentityService();
-      credentials = AppEngineCredentials.newBuilder()
-          .setScopes(scopes)
-          .setAppIdentityService(appIdentityService)
-          .build();
+      credentials =
+          AppEngineCredentials.newBuilder()
+              .setScopes(scopes)
+              .setAppIdentityService(appIdentityService)
+              .build();
     }
 
     credentials.refreshIfExpired();

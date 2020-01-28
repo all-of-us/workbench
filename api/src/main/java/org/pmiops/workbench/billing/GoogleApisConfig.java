@@ -1,6 +1,5 @@
 package org.pmiops.workbench.billing;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.cloudbilling.Cloudbilling;
@@ -36,11 +35,11 @@ public class GoogleApisConfig {
         new GoogleCredentials(new AccessToken(userAuthentication.getCredentials(), null));
 
     return new Cloudbilling.Builder(
-        GoogleNetHttpTransport.newTrustedTransport(),
-        jsonFactory,
-        new HttpCredentialsAdapter(credentials))
-          .setApplicationName(workbenchConfigProvider.get().server.projectId)
-          .build();
+            GoogleNetHttpTransport.newTrustedTransport(),
+            jsonFactory,
+            new HttpCredentialsAdapter(credentials))
+        .setApplicationName(workbenchConfigProvider.get().server.projectId)
+        .build();
   }
 
   @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
@@ -48,13 +47,15 @@ public class GoogleApisConfig {
   public Cloudbilling serviceAccountGoogleCloudbillingApi(
       JsonFactory jsonFactory, Provider<WorkbenchConfig> workbenchConfigProvider)
       throws IOException, GeneralSecurityException {
-    GoogleCredentials credentials = ServiceAccounts.getScopedServiceCredentials(Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
+    GoogleCredentials credentials =
+        ServiceAccounts.getScopedServiceCredentials(
+            Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
 
     return new Cloudbilling.Builder(
-        GoogleNetHttpTransport.newTrustedTransport(),
-        jsonFactory,
-        new HttpCredentialsAdapter(credentials))
-          .setApplicationName(workbenchConfigProvider.get().server.projectId)
-          .build();
+            GoogleNetHttpTransport.newTrustedTransport(),
+            jsonFactory,
+            new HttpCredentialsAdapter(credentials))
+        .setApplicationName(workbenchConfigProvider.get().server.projectId)
+        .build();
   }
 }
