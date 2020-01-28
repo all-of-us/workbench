@@ -265,15 +265,15 @@ export class ConceptTable extends React.Component<Props, State> {
   selectAllHeader() {
     const {concepts} = this.props;
     if (this.state.showBanner && concepts.length > ROWS_TO_DISPLAY) {
-      const selectedConceptSize = this.state.selectAll ? concepts.length : '20';
+      const selectedConceptSize = this.state.selectAll ? concepts.length : ROWS_TO_DISPLAY;
       const clickableText = this.state.selectAll ? 'Clear Selection' :
           'Select all ' + concepts.length + ' concepts';
       return <div data-test-id='selection'><FlexRow style={{fontWeight: '200'}}>
-        You’ve selected all {selectedConceptSize} concepts.&nbsp;
+        You’ve selected all {selectedConceptSize} concepts. &nbsp;
         <Clickable data-test-id='banner-link' style={{color: 'blue'}} onClick={() => this.selectAll()}>
           {clickableText}
         </Clickable>
-        {!this.state.selectAll && <div> &nbsp; in this domain </div>}
+        {!this.state.selectAll && <div> &nbsp;in this domain </div>}
       </FlexRow></div>;
     }
     return;
