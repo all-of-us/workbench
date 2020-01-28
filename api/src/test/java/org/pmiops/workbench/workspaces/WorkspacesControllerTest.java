@@ -22,8 +22,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
-import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
+import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;

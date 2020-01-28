@@ -1,7 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
-import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
+import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 
 import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.Retryer;
