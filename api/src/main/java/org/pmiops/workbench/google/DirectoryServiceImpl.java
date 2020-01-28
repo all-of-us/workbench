@@ -280,24 +280,25 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
     ImmutableSet.Builder<MeasurementBundle> resultBuilder = ImmutableSet.builder();
 
     final String localDomain = gSuiteDomain();
-    final long localDomainUserCount = countUsersInDomain(localDomain);
-    resultBuilder.add(
-        MeasurementBundle.builder()
-            .addMeasurement(GaugeMetric.GSUITE_USER_COUNT, localDomainUserCount)
-            .addTag(MetricLabel.GSUITE_DOMAIN, localDomain)
-            .build());
+    addDomainCountMeasurement(resultBuilder, localDomain, countUsersInDomain(localDomain));
 
     final String topLevelDomain = getTopLevelGSuiteDomain();
     // Avoid creating duplicate data point if the local domain is the top domain
     if (!localDomain.equals(topLevelDomain)) {
-      final long topLevelDomainUserCount = countUsersInDomain(topLevelDomain);
-      resultBuilder.add(
-          MeasurementBundle.builder()
-              .addMeasurement(GaugeMetric.GSUITE_USER_COUNT, topLevelDomainUserCount)
-              .addTag(MetricLabel.GSUITE_DOMAIN, topLevelDomain)
-              .build());
+      addDomainCountMeasurement(resultBuilder, topLevelDomain, countUsersInDomain(topLevelDomain));
     }
     return resultBuilder.build();
+  }
+
+  private void addDomainCountMeasurement(
+      ImmutableSet.Builder<MeasurementBundle> resultBuilder,
+      String gSuiteDomain,
+      long domainUserCount) {
+    resultBuilder.add(
+        MeasurementBundle.builder()
+            .addMeasurement(GaugeMetric.GSUITE_USER_COUNT, domainUserCount)
+            .addTag(MetricLabel.GSUITE_DOMAIN, gSuiteDomain)
+            .build());
   }
 
   private long countUsersInDomain(String gSuiteDomain) {
