@@ -263,15 +263,18 @@ export class ConceptTable extends React.Component<Props, State> {
   }
 
   selectAllHeader() {
-    if (this.state.showBanner) {
-      const {concepts} = this.props;
-      const bannerText = this.state.selectAll ? 'Clear Selection' : 'Select ' + concepts.length;
-      return <FlexRow  data-test-id='selection' style={{fontWeight: '200'}}>
-        All concepts on this page are selected.&nbsp;
+    const {concepts} = this.props;
+    if (this.state.showBanner && concepts.length > ROWS_TO_DISPLAY) {
+      const selectedConceptSize = this.state.selectAll ? concepts.length : '20';
+      const clickableText = this.state.selectAll ? 'Clear Selection' :
+          'Select all ' + concepts.length + ' concepts';
+      return <div data-test-id='selection'><FlexRow style={{fontWeight: '200'}}>
+        You’ve selected all {selectedConceptSize} concepts.&nbsp;
         <Clickable data-test-id='banner-link' style={{color: 'blue'}} onClick={() => this.selectAll()}>
-          {bannerText}
+          {clickableText}
         </Clickable>
-      </FlexRow>;
+        {!this.state.selectAll && <div> &nbsp; in this domain </div>}
+      </FlexRow></div>;
     }
     return;
   }
