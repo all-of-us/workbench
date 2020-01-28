@@ -224,10 +224,6 @@ export const SpecificPopulationItems: Array<SpecificPopulationItem> = [
   }
 ];
 
-const billingDescription = <div>The <i>All of Us</i> Program provides $200 in free credits per user.
-  When free credits are exhausted, you will need to provide a valid Google Cloud Platform billing account.
-  At any time, you can update your Workspace billing account.</div>;
-
 // Poll parameters to check Workspace ACLs after creation of a new workspace. See
 // SATURN-104 for details, eventually the root cause should be resolved by fixes
 // to Sam (as part of Postgres migration).
