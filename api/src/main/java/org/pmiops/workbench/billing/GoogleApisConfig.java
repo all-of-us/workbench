@@ -15,6 +15,7 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
 public class GoogleApisConfig {
@@ -23,6 +24,7 @@ public class GoogleApisConfig {
   public static final String SERVICE_ACCOUNT_CLOUD_BILLING = "SERVICE_ACCOUNT_CLOUD_BILLING";
 
   @Bean(END_USER_CLOUD_BILLING)
+  @RequestScope
   public Cloudbilling endUserCloudbilling(
       UserAuthentication userAuthentication,
       JsonFactory jsonFactory,
@@ -40,6 +42,7 @@ public class GoogleApisConfig {
   }
 
   @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
+  @RequestScope
   public Cloudbilling serviceAccountGoogleCloudbilling(
       JsonFactory jsonFactory, Provider<WorkbenchConfig> workbenchConfigProvider)
       throws IOException, GeneralSecurityException {
