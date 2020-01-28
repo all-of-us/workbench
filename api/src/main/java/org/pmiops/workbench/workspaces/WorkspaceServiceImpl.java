@@ -674,8 +674,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
               e ->
                   e instanceof GoogleJsonResponseException
                       && ((GoogleJsonResponseException) e).getStatusCode() == 403)
-          .withWaitStrategy(WaitStrategies.fixedWait(5, TimeUnit.SECONDS))
-          .withStopStrategy(StopStrategies.stopAfterAttempt(12))
+          .withWaitStrategy(WaitStrategies.exponentialWait())
+          .withStopStrategy(StopStrategies.stopAfterDelay(60, TimeUnit.SECONDS))
           .build();
 
   @Override
@@ -710,7 +710,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       // this is necessary because the grant ownership call in create/clone
       // may not have propagated. Adding a few retries drastically reduces
       // the likely of failing due to slow propagation
-      response = cloudBillingRetryer.call(() -> request.execute());
+      response = cloudBillingRetryer.call(request::execute);
     } catch (RetryException | ExecutionException e) {
       throw new RuntimeException("Google Cloud updateBillingInfo call failed", e);
     }

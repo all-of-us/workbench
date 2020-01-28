@@ -284,60 +284,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(createdWorkspace);
   }
 
-  private Retryer<ProjectBillingInfo> cloudBillingRetryer =
-      RetryerBuilder.<ProjectBillingInfo>newBuilder()
-          .retryIfException(
-              e ->
-                  e instanceof GoogleJsonResponseException
-                      && ((GoogleJsonResponseException) e).getStatusCode() == 403)
-          .withWaitStrategy(WaitStrategies.exponentialWait())
-          .withStopStrategy(StopStrategies.stopAfterDelay(60, TimeUnit.SECONDS))
-          .build();
-
-  private void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
-    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
-      // If billing lockout / upgrade is not enabled, ignore the normal logic
-      // and set the billing account to the free tier
-      workspace.setBillingAccountName(
-          "billingAccounts/" + workbenchConfigProvider.get().billing.accountId);
-      return;
-    }
-
-    if (newBillingAccountName.equals(workspace.getBillingAccountName())) {
-      return;
-    }
-
-    try {
-      UpdateBillingInfo request =
-          cloudbillingProvider
-              .get()
-              .projects()
-              .updateBillingInfo(
-                  "projects/" + workspace.getWorkspaceNamespace(),
-                  new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
-
-      ProjectBillingInfo response;
-
-      try {
-        // this is necessary because the grant ownership call in create/clone
-        // may not have propagated. Adding a few retries drastically reduces
-        // the likely of failing due to slow propagation
-        response = cloudBillingRetryer.call(request::execute);
-      } catch (RetryException | ExecutionException e) {
-        throw new ServerErrorException("Google Cloud updateBillingInfo call failed", e);
-      }
-
-      if (!newBillingAccountName.equals(response.getBillingAccountName())) {
-        throw new ServerErrorException(
-            "Google Cloud updateBillingInfo call succeeded but did not set the correct billing account name");
-      }
-
-      workspace.setBillingAccountName(response.getBillingAccountName());
-    } catch (IOException e) {
-      throw new ServerErrorException("Could not update billing account", e);
-    }
-  }
-
   private void validateWorkspaceApiModel(Workspace workspace) {
     if (Strings.isNullOrEmpty(workspace.getName())) {
       throw new BadRequestException("missing required field 'name'");
@@ -568,17 +514,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    if (!workbenchConfigProvider
-        .get()
-        .billing
-        .freeTierBillingAccountName()
-        .equals(body.getWorkspace().getBillingAccountName())) {
-      try {
-        workspaceService.updateWorkspaceBillingAccount(
-            dbWorkspace, body.getWorkspace().getBillingAccountName());
-      } catch (Exception e) {
-        throw new ServerErrorException("Could not update the workspace's billing account", e);
-      }
+    try {
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, body.getWorkspace().getBillingAccountName());
+    } catch (Exception e) {
+      throw new ServerErrorException("Could not update the workspace's billing account", e);
     }
 
     try {

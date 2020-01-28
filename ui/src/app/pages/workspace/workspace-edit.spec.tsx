@@ -56,11 +56,7 @@ describe('WorkspaceEdit', () => {
     currentWorkspaceStore.next(workspace);
     cdrVersionStore.next(cdrVersionListResponse);
     routeConfigDataStore.next({mode: WorkspaceEditMode.Create});
-<<<<<<< HEAD
-    serverConfigStore.next({enableBillingLockout: true, gsuiteDomain: ''});
-=======
     serverConfigStore.next({enableBillingLockout: true, defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''});
->>>>>>> 26ba799ec7325cf53550f05a3805baaafa22903e
   });
 
   it('displays workspaces create page', async () => {
