@@ -385,10 +385,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       };
     }
 
-    async sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
     async fetchBillingAccounts() {
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
