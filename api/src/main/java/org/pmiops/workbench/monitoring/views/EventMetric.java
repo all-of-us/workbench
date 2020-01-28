@@ -38,7 +38,7 @@ public enum EventMetric implements Metric {
 
   @Override
   public String getUnit() {
-    return Metric.UNITLESS_UNIT;
+    return UnitOfMeasure.COUNT.getUcmSymbol();
   }
 
   @Override

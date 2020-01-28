@@ -32,8 +32,6 @@ public interface Metric {
           MeasureLong.class, Metric::getMeasureLong,
           MeasureDouble.class, Metric::getMeasureDouble);
 
-  String UNITLESS_UNIT = "1";
-
   String getName();
 
   default Name getStatsName() {

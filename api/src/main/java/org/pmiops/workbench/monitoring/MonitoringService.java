@@ -6,6 +6,8 @@ import io.opencensus.tags.TagValue;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import org.pmiops.workbench.monitoring.MeasurementBundle.Builder;
+import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
 
@@ -56,4 +58,7 @@ public interface MonitoringService {
   default void recordBundles(Collection<MeasurementBundle> viewBundles) {
     viewBundles.forEach(this::recordBundle);
   }
+
+  void timeAndRecordOperation(Builder measurementBundleBuilder,
+      DistributionMetric distributionMetric, Runnable operation);
 }

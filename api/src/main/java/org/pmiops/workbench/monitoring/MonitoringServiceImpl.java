@@ -1,5 +1,6 @@
 package org.pmiops.workbench.monitoring;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
 import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
@@ -16,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import org.jetbrains.annotations.NotNull;
+import org.pmiops.workbench.monitoring.MeasurementBundle.Builder;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
@@ -79,6 +81,17 @@ public class MonitoringServiceImpl implements MonitoringService {
 
     // Finally, send the data to the backend (Stackdriver/Cloud Monitoring for now).
     measureMap.record(tagContextBuilder.build());
+  }
+
+  @Override
+  public void timeAndRecordOperation(Builder measurementBundleBuilder,
+      DistributionMetric distributionMetric, Runnable operation) {
+      final Stopwatch stopwatch = Stopwatch.createStarted();
+      operation.run();
+      stopwatch.stop();
+      recordBundle(measurementBundleBuilder
+              .addMeasurement(distributionMetric, stopwatch.elapsed().toMillis())
+              .build());
   }
 
   /**
