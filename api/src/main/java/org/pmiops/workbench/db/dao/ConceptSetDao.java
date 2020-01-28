@@ -22,6 +22,7 @@ public interface ConceptSetDao extends CrudRepository<DbConceptSet, Long> {
           .put(Domain.PERSON, "person")
           .put(Domain.VISIT, "visit_occurrence")
           .put(Domain.SURVEY, "observation")
+          .put(Domain.PHYSICALMEASUREMENT, "measurement")
           .build();
 
   List<DbConceptSet> findByWorkspaceId(long workspaceId);

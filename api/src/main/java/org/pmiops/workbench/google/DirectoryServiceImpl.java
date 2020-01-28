@@ -15,8 +15,9 @@ import com.google.api.services.directory.model.UserEmail;
 import com.google.api.services.directory.model.UserName;
 import com.google.api.services.directory.model.Users;
 import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.Constants;
+import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
@@ -66,6 +68,13 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   private static final String EMAIL_USER_FIELD = "email";
   private static final String USER_VIEW_TYPE = "domain_public";
 
+  private static final String ADMIN_SERVICE_ACCOUNT_NAME = "gsuite-admin";
+
+  // The username of the G Suite user which will be used to make service-level Directory API
+  // requests. A user with this name must exist in each environment's associated G Suite operational
+  // unit, and that user should have full admin privileges (e.g. to create, update, delete users).
+  private static final String DIRECTORY_SERVICE_USERNAME = "directory-service";
+
   private static SecureRandom rnd = new SecureRandom();
 
   // This list must exactly match the scopes allowed via the GSuite Domain Admin page here:
@@ -87,6 +96,7 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
+  private final IamCredentialsClient iamCredentialsClient;
 
   @Autowired
   public DirectoryServiceImpl(
@@ -94,32 +104,36 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
           Provider<ServiceAccountCredentials> googleCredentialsProvider,
       Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
-      GoogleRetryHandler retryHandler) {
+      GoogleRetryHandler retryHandler,
+      IamCredentialsClient iamCredentialsClient) {
     this.googleCredentialsProvider = googleCredentialsProvider;
     this.configProvider = configProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
+    this.iamCredentialsClient = iamCredentialsClient;
   }
 
-  private GoogleCredentials createCredentialWithImpersonation() throws IOException {
-    String gSuiteDomain = configProvider.get().googleDirectoryService.gSuiteDomain;
-    return ServiceAccounts.getImpersonatedCredentials(
-        googleCredentialsProvider.get(), "directory-service@" + gSuiteDomain, SCOPES);
-  }
+  private Directory getGoogleDirectoryService() {
+    final OAuth2Credentials delegatedCreds;
+    if (configProvider.get().featureFlags.useKeylessDelegatedCredentials) {
+      delegatedCreds =
+          new DelegatedUserCredentials(
+              ServiceAccounts.getServiceAccountEmail(
+                  ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
+              DIRECTORY_SERVICE_USERNAME + "@" + gSuiteDomain(),
+              SCOPES,
+              iamCredentialsClient,
+              httpTransport);
+    } else {
+      delegatedCreds =
+          googleCredentialsProvider
+              .get()
+              .createScoped(SCOPES)
+              .createDelegated("directory-service@" + gSuiteDomain());
+    }
 
-  /**
-   * Creates a G Suite Directory API client instance. This requires loading the gsuite-admin service
-   * account credentials from GCS and using domain-wide-delegation to impersonate the
-   * 'directory-service@researchallofus.org' admin user.
-   *
-   * @throws IOException if the GCS-stored credentials cannot be loaded.
-   */
-  private Directory getGoogleDirectoryService() throws IOException {
     return new Directory.Builder(
-            httpTransport,
-            getDefaultJsonFactory(),
-            new HttpCredentialsAdapter(createCredentialWithImpersonation()))
-        .setApplicationName(APPLICATION_NAME)
+            httpTransport, getDefaultJsonFactory(), new HttpCredentialsAdapter(delegatedCreds))
         .build();
   }
 
@@ -174,7 +188,6 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
   }
 
   // Returns a user's contact email address via the custom schema in the directory API.
-  @Override
   public String getContactEmailAddress(String username) {
     return (String)
         getUserByUsername(username)

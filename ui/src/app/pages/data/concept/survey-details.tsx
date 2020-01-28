@@ -5,7 +5,7 @@ import {conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {SurveyAnswerResponse, SurveyQuestions} from 'generated/fetch';
+import {StandardConceptFilter, SurveyAnswerResponse, SurveyQuestions} from 'generated/fetch';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
@@ -82,11 +82,11 @@ export const SurveyDetails = withCurrentWorkspace()(
 
     async loadSurveyDetails() {
       try {
-        const {workspace, surveyName} = this.props;
-        const surveys = await conceptsApi().getSurveyQuestions(
-          workspace.namespace, workspace.id, surveyName);
+        const {surveyName, workspace} = this.props;
+        const request = {standardConceptFilter: StandardConceptFilter.ALLCONCEPTS, surveyName};
+        const surveys = await conceptsApi().searchSurveys(workspace.namespace, workspace.id, request);
         const seeMyAnsList = [];
-        surveys.forEach(survey => seeMyAnsList.push(false));
+        surveys.forEach(() => seeMyAnsList.push(false));
         const surveyDetails = surveys.map((survey) => {
           return {
             question: survey,
@@ -151,15 +151,16 @@ export const SurveyDetails = withCurrentWorkspace()(
       const answerLoadinglist = this.state.answerLoading;
       answerLoadinglist[index] = true;
       this.setState({answerLoading: answerLoadinglist});
-      const {workspace} = this.props;
+      const {surveyName, workspace} = this.props;
+      const {surveyList} = this.state;
       const seeMyAnsList = this.state.seeMyAnswers;
       seeMyAnsList[index] = !this.state.seeMyAnswers[index];
       this.setState({seeMyAnswers: seeMyAnsList});
       // Call api to retrieve answer if it has never been called for the question before
-      if (this.state.surveyList[index].answer && this.state.surveyList[index].answer.length === 0) {
-        const answers =
-            await conceptsApi().getSurveyAnswers(workspace.namespace, workspace.id,
-              this.state.surveyList[index].question.conceptId);
+      if (surveyList[index].answer && surveyList[index].answer.length === 0) {
+        const conceptId = surveyList[index].question.conceptId.toString();
+        const request = {query: conceptId, standardConceptFilter: StandardConceptFilter.ALLCONCEPTS, surveyName};
+        const answers = await conceptsApi().searchSurveys(workspace.namespace, workspace.id, request);
         const answersList = this.state.surveyList;
         answersList[index].answer =  answers;
         this.setState({surveyList: answersList});

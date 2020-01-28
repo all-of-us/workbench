@@ -9,8 +9,6 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Entity
-// TODO need to add a way to dynamically switch between database versions
-// this dynamic connection will eliminate the need for the catalog attribute
 @Table(name = "concept_relationship")
 public class DbConceptRelationship {
 

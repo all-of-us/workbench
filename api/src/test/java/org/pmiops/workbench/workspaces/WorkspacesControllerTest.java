@@ -1073,6 +1073,7 @@ public class WorkspacesControllerTest {
             .getBody();
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
+            Domain.CONDITION,
             "condition_occurrence",
             ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
         .thenReturn(123);
@@ -1244,6 +1245,7 @@ public class WorkspacesControllerTest {
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
+            Domain.CONDITION,
             "condition_occurrence",
             ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
         .thenReturn(123);
@@ -1276,6 +1278,7 @@ public class WorkspacesControllerTest {
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
+            Domain.CONDITION,
             "condition_occurrence",
             ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
         .thenReturn(456);

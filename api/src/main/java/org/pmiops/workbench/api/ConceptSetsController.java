@@ -153,7 +153,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(dbConceptSet.getDomainEnum());
       dbConceptSet.setParticipantCount(
           conceptBigQueryService.getParticipantCountForConcepts(
-              omopTable, dbConceptSet.getConceptIds()));
+              dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
     }
 
     try {
@@ -279,7 +279,10 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
             .filter(concept -> !concept.getConceptClassId().equals(CONCEPT_CLASS_ID_QUESTION))
             .filter(
                 concept -> {
-                  Domain domain = CommonStorageEnums.domainIdToDomain(concept.getDomainId());
+                  Domain domain =
+                      Domain.PHYSICALMEASUREMENT.equals(domainEnum)
+                          ? Domain.PHYSICALMEASUREMENT
+                          : CommonStorageEnums.domainIdToDomain(concept.getDomainId());
                   return !domainEnum.equals(domain);
                 })
             .collect(Collectors.toList());
@@ -339,7 +342,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(dbConceptSet.getDomainEnum());
       dbConceptSet.setParticipantCount(
           conceptBigQueryService.getParticipantCountForConcepts(
-              omopTable, dbConceptSet.getConceptIds()));
+              dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
     }
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
