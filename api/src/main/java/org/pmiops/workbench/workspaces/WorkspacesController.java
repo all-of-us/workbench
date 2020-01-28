@@ -400,6 +400,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<CloneWorkspaceResponse> cloneWorkspace(
       String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body)
       throws BadRequestException, TooManyRequestsException {
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "cloneWorkspace"),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        () -> cloneWorkspaceImpl(fromWorkspaceNamespace, fromWorkspaceId, body));
+  }
+
+  private ResponseEntity<CloneWorkspaceResponse> cloneWorkspaceImpl(
+      String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body) {
     Workspace toWorkspace = body.getWorkspace();
     if (Strings.isNullOrEmpty(toWorkspace.getName())) {
       throw new BadRequestException("missing required field 'workspace.name'");
@@ -634,14 +642,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<List<FileDetail>> getNoteBookList(
       String workspaceNamespace, String workspaceId) {
-    List<FileDetail> fileList = notebooksService.getNotebooks(workspaceNamespace, workspaceId);
+    List<FileDetail> fileList =
+        monitoringService.timeAndRecordOperation(
+            MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getNoteBookList"),
+            DistributionMetric.WORKSPACE_OPERATION_TIME,
+            () -> notebooksService.getNotebooks(workspaceNamespace, workspaceId));
     return ResponseEntity.ok(fileList);
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteNotebook(
       String workspace, String workspaceName, String notebookName) {
-    notebooksService.deleteNotebook(workspace, workspaceName, notebookName);
+    monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "deleteNotebook"),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        () -> notebooksService.deleteNotebook(workspace, workspaceName, notebookName));
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -651,21 +666,26 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String fromWorkspaceId,
       String fromNotebookName,
       CopyRequest copyRequest) {
-    FileDetail fileDetail;
-    try {
-      fileDetail =
-          notebooksService.copyNotebook(
-              fromWorkspaceNamespace,
-              fromWorkspaceId,
-              NotebooksService.withNotebookExtension(fromNotebookName),
-              copyRequest.getToWorkspaceNamespace(),
-              copyRequest.getToWorkspaceName(),
-              NotebooksService.withNotebookExtension(copyRequest.getNewName()));
-    } catch (BlobAlreadyExistsException e) {
-      throw new ConflictException("File already exists at copy destination");
-    }
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "copyNotebook"),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        () -> {
+          FileDetail fileDetail;
+          try {
+            fileDetail =
+                notebooksService.copyNotebook(
+                    fromWorkspaceNamespace,
+                    fromWorkspaceId,
+                    NotebooksService.withNotebookExtension(fromNotebookName),
+                    copyRequest.getToWorkspaceNamespace(),
+                    copyRequest.getToWorkspaceName(),
+                    NotebooksService.withNotebookExtension(copyRequest.getNewName()));
+          } catch (BlobAlreadyExistsException e) {
+            throw new ConflictException("File already exists at copy destination");
+          }
 
-    return ResponseEntity.ok(fileDetail);
+          return ResponseEntity.ok(fileDetail);
+        });
   }
 
   @Override
