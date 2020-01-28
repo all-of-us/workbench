@@ -34,7 +34,13 @@ export class UserApiStub extends UserApi {
 
   listBillingAccounts(): Promise<WorkbenchListBillingAccountsResponse> {
     return new Promise<WorkbenchListBillingAccountsResponse>(resolve => {
-      resolve({billingAccounts: []});
+      resolve({
+        billingAccounts: [{
+          displayName: 'Free Tier',
+          name: 'free-tier',
+          isFreeTier: true,
+          isOpen: true}]
+      });
     });
   }
 

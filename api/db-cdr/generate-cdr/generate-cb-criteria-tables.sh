@@ -924,21 +924,20 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 set x.est_count = y.cnt
 from
     (
-        select concept_id, CAST(value_source_concept_id as STRING) as value, count(distinct person_id) cnt
-        from \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
-        where is_standard = 0
+        SELECT concept_id, CAST(value_source_concept_id as STRING) as value, count(distinct person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
+        WHERE is_standard = 0
             and concept_id in
                 (
-                    select concept_id
-                    from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                    where domain_id = 'SURVEY'
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                    WHERE domain_id = 'SURVEY'
                         and type = 'PPI'
-                        and is_group = 1
-                        and is_selectable = 1
-                        and parent_id != 0
+                        and subtype = 'ANSWER'
                         and concept_id != 1585747
                 )
-        group by 1,2
+        GROUP BY 1,2
+        ORDER BY 1,2
     ) y
 where x.domain_id = 'SURVEY'
     and x.type = 'PPI'
@@ -1153,7 +1152,8 @@ FROM
         FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
         GROUP BY 1
     ) a
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.race_concept_id = b.concept_id"
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.race_concept_id = b.concept_id
+WHERE b.concept_id is not null"
 
 echo "DEMO - Ethnicity parent"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
@@ -1177,7 +1177,8 @@ FROM
         FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
         GROUP BY 1
     ) a
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.ethnicity_concept_id = b.concept_id"
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.ethnicity_concept_id = b.concept_id
+WHERE b.concept_id is not null"
 
 
 ################################################

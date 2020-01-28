@@ -89,7 +89,9 @@
     "enableNewAccountCreation": true,
     "enableRdrExport": true,
     "enableBillingLockout": true,
-    "enableSumoLogicEventHandling": true
+    "enableSumoLogicEventHandling": true,
+    "useKeylessDelegatedCredentials": true,
+    "sendFreeTierAlertEmails": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-local"

@@ -31,7 +31,7 @@ public class ConceptSetService {
       String omopTable = ConceptSetDao.DOMAIN_TO_TABLE_NAME.get(conceptSet.getDomainEnum());
       dbConceptSet.setParticipantCount(
           conceptBigQueryService.getParticipantCountForConcepts(
-              omopTable, conceptSet.getConceptIds()));
+              conceptSet.getDomainEnum(), omopTable, conceptSet.getConceptIds()));
     }
     dbConceptSet.setWorkspaceId(targetWorkspace.getWorkspaceId());
     dbConceptSet.setCreator(targetWorkspace.getCreator());

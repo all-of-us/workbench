@@ -31,7 +31,7 @@ public abstract class BaseIntegrationTest {
     // modifications may be made from within each test case.
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    WorkbenchConfig getTestConfig() throws IOException {
+    WorkbenchConfig getIntegrationTestConfig() throws IOException {
       return config;
     }
   }

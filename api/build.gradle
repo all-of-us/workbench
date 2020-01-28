@@ -301,8 +301,8 @@ sourceSets {
       srcDir "config/"
     }
     java {
-      compileClasspath += main.output + test.output + generated.output
-      runtimeClasspath += main.output + test.output + generated.output
+      compileClasspath += main.output + generated.output
+      runtimeClasspath += main.output + generated.output
       srcDir file('src/integration/java')
     }
   }
@@ -416,6 +416,7 @@ dependencies {
   compile 'com.google.apis:google-api-services-admin-directory:directory_v1-rev20190806-1.30.3'
   compile 'com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0'
   compile 'com.google.cloud:google-cloud-bigquery:1.51.0'
+  compile 'com.google.cloud:google-cloud-iamcredentials:0.43.0-alpha'
   compile 'com.google.cloud:google-cloud-storage:1.51.0'
   compile 'com.google.cloud:google-cloud-tasks:1.27.0'
   compile 'com.google.oauth-client:google-oauth-client-jetty:1.30.3'

@@ -183,6 +183,8 @@ public class DataSetControllerTest {
 
   @Autowired CloudStorageService cloudStorageService;
 
+  @Autowired Provider<Cloudbilling> cloudBillingProvider;
+
   @Autowired CohortDao cohortDao;
 
   @Autowired CohortFactory cohortFactory;
@@ -341,6 +343,7 @@ public class DataSetControllerTest {
             userProvider,
             fireCloudService,
             cloudStorageService,
+            cloudBillingProvider,
             CLOCK,
             notebooksService,
             userService,

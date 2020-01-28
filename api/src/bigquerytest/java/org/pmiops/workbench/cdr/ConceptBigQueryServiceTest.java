@@ -20,6 +20,7 @@ import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
@@ -70,7 +71,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
   public void testGetConceptCountNoConceptsSaved() {
     assertThat(
             conceptBigQueryService.getParticipantCountForConcepts(
-                "condition_occurrence", ImmutableSet.of(1L, 6L, 13L, 192819L)))
+                Domain.CONDITION, "condition_occurrence", ImmutableSet.of(1L, 6L, 13L, 192819L)))
         .isEqualTo(0);
   }
 
@@ -83,7 +84,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
     assertThat(
             conceptBigQueryService.getParticipantCountForConcepts(
-                "condition_occurrence", ImmutableSet.of(1L, 6L, 13L, 192819L)))
+                Domain.CONDITION, "condition_occurrence", ImmutableSet.of(1L, 6L, 13L, 192819L)))
         .isEqualTo(2);
   }
 

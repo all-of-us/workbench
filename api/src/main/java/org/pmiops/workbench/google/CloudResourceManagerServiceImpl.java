@@ -7,14 +7,17 @@ import com.google.api.services.cloudresourcemanager.CloudResourceManager;
 import com.google.api.services.cloudresourcemanager.CloudResourceManagerScopes;
 import com.google.api.services.cloudresourcemanager.model.Project;
 import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.auth.Constants;
+import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,35 +28,52 @@ import org.springframework.stereotype.Service;
 public class CloudResourceManagerServiceImpl implements CloudResourceManagerService {
   private static final String APPLICATION_NAME = "All of Us Researcher Workbench";
 
+  public static final String ADMIN_SERVICE_ACCOUNT_NAME = "cloud-resource-admin";
+
   public static final List<String> SCOPES =
       Arrays.asList(CloudResourceManagerScopes.CLOUD_PLATFORM_READ_ONLY);
 
-  private final Provider<ServiceAccountCredentials> cloudResourceManagerAdminCredsProvider;
+  private final Provider<ServiceAccountCredentials> credentialsProvider;
+  private final Provider<WorkbenchConfig> configProvider;
   private final HttpTransport httpTransport;
   private final GoogleRetryHandler retryHandler;
+  private final IamCredentialsClient iamCredentialsClient;
 
   @Autowired
   public CloudResourceManagerServiceImpl(
       @Qualifier(Constants.CLOUD_RESOURCE_MANAGER_ADMIN_CREDS)
-          Provider<ServiceAccountCredentials> cloudResourceManagerAdminCredsProvider,
+          Provider<ServiceAccountCredentials> credentialsProvider,
+      Provider<WorkbenchConfig> configProvider,
       HttpTransport httpTransport,
-      GoogleRetryHandler retryHandler) {
-    this.cloudResourceManagerAdminCredsProvider = cloudResourceManagerAdminCredsProvider;
+      GoogleRetryHandler retryHandler,
+      IamCredentialsClient iamCredentialsClient) {
+    this.credentialsProvider = credentialsProvider;
+    this.configProvider = configProvider;
     this.httpTransport = httpTransport;
     this.retryHandler = retryHandler;
+    this.iamCredentialsClient = iamCredentialsClient;
   }
 
   private CloudResourceManager getCloudResourceManagerServiceWithImpersonation(DbUser user)
       throws IOException {
-    // Load credentials for the cloud-resource-manager Service Account. This account has been
-    // granted
-    // domain-wide delegation for the OAuth scopes required by cloud apis.
-    GoogleCredentials credentials =
-        ServiceAccounts.getImpersonatedCredentials(
-            cloudResourceManagerAdminCredsProvider.get(), user.getUsername(), SCOPES);
+    final OAuth2Credentials delegatedCreds;
+    if (configProvider.get().featureFlags.useKeylessDelegatedCredentials) {
+      delegatedCreds =
+          new DelegatedUserCredentials(
+              ServiceAccounts.getServiceAccountEmail(
+                  ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
+              user.getUsername(),
+              SCOPES,
+              iamCredentialsClient,
+              httpTransport);
+    } else {
+      delegatedCreds =
+          credentialsProvider.get().createScoped(SCOPES).createDelegated(user.getUsername());
+    }
+    delegatedCreds.refreshIfExpired();
 
     return new CloudResourceManager.Builder(
-            httpTransport, getDefaultJsonFactory(), new HttpCredentialsAdapter(credentials))
+            httpTransport, getDefaultJsonFactory(), new HttpCredentialsAdapter(delegatedCreds))
         .setApplicationName(APPLICATION_NAME)
         .build();
   }

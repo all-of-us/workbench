@@ -12,7 +12,7 @@ import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Concept, ConceptSet, CreateConceptSetRequest, CriteriaType, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
+import {Concept, ConceptSet, CreateConceptSetRequest, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
 import {validate} from 'validate.js';
 
 const styles = reactStyles({
@@ -26,13 +26,10 @@ const styles = reactStyles({
 });
 
 const filterConcepts = (concepts: any[], domain: Domain) => {
-  if (domain === Domain.PHYSICALMEASUREMENT) {
-    return concepts.filter(concept => concept.domainId === fp.capitalize(Domain[Domain.MEASUREMENT])
-      && concept.vocabularyId === CriteriaType[CriteriaType.PPI]);
-  } else if (domain === Domain.SURVEY) {
+  if (domain === Domain.SURVEY) {
     return concepts.filter(concept => !!concept.question);
   } else {
-    return concepts.filter(concept => concept.domainId === fp.capitalize(Domain[domain]));
+    return concepts.filter(concept => concept.domainId.replace(' ', '').toLowerCase() === Domain[domain].toLowerCase());
   }
 };
 
@@ -132,7 +129,7 @@ export const ConceptAddModal = withCurrentWorkspace()
       const conceptSet: ConceptSet = {
         name: name,
         description: newSetDescription,
-        domain: selectedDomain.domain === Domain.PHYSICALMEASUREMENT ? Domain.MEASUREMENT : selectedDomain.domain
+        domain: selectedDomain.domain
       };
       const request: CreateConceptSetRequest = {
         conceptSet: conceptSet,
