@@ -42,6 +42,10 @@ import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.TableQuery;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.monitoring.MeasurementBundle;
+import org.pmiops.workbench.monitoring.MonitoringService;
+import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -91,6 +95,7 @@ public class CohortsController implements CohortsApiDelegate {
   private final Clock clock;
   private final CdrVersionService cdrVersionService;
   private final UserRecentResourceService userRecentResourceService;
+  private MonitoringService monitoringService;
 
   @Autowired
   CohortsController(
@@ -104,7 +109,8 @@ public class CohortsController implements CohortsApiDelegate {
       Provider<DbUser> userProvider,
       Clock clock,
       CdrVersionService cdrVersionService,
-      UserRecentResourceService userRecentResourceService) {
+      UserRecentResourceService userRecentResourceService,
+      MonitoringService monitoringService) {
     this.workspaceService = workspaceService;
     this.cohortDao = cohortDao;
     this.cdrVersionDao = cdrVersionDao;
@@ -116,6 +122,7 @@ public class CohortsController implements CohortsApiDelegate {
     this.clock = clock;
     this.cdrVersionService = cdrVersionService;
     this.userRecentResourceService = userRecentResourceService;
+    this.monitoringService = monitoringService;
   }
 
   private void checkForDuplicateCohortNameException(String newCohortName, DbWorkspace workspace) {
@@ -131,144 +138,183 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> createCohort(
       String workspaceNamespace, String workspaceId, Cohort cohort) {
-    // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "createCohort"),
+        DistributionMetric.COHORT_OPERATION_TIME,
+        () -> {
+          // This also enforces registered auth domain.
+          workspaceService.enforceWorkspaceAccessLevel(
+              workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+          DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    checkForDuplicateCohortNameException(cohort.getName(), workspace);
+          checkForDuplicateCohortNameException(cohort.getName(), workspace);
 
-    DbCohort newCohort =
-        cohortFactory.createCohort(cohort, userProvider.get(), workspace.getWorkspaceId());
-    try {
-      // TODO Make this a pre-check within a transaction?
-      newCohort = cohortDao.save(newCohort);
-      userRecentResourceService.updateCohortEntry(
-          workspace.getWorkspaceId(), userProvider.get().getUserId(), newCohort.getCohortId());
-    } catch (DataIntegrityViolationException e) {
-      // TODO The exception message doesn't show up anywhere; neither logged nor returned to the
-      // client by Spring (the client gets a default reason string).
-      throw new ServerErrorException(
-          String.format(
-              "Could not save Cohort (\"/%s/%s/%s\")",
-              workspace.getWorkspaceNamespace(), workspace.getWorkspaceId(), newCohort.getName()),
-          e);
-    }
+          DbCohort newCohort =
+              cohortFactory.createCohort(cohort, userProvider.get(), workspace.getWorkspaceId());
+          try {
+            // TODO Make this a pre-check within a transaction?
+            newCohort = cohortDao.save(newCohort);
+            userRecentResourceService.updateCohortEntry(
+                workspace.getWorkspaceId(),
+                userProvider.get().getUserId(),
+                newCohort.getCohortId());
+          } catch (DataIntegrityViolationException e) {
+            // TODO The exception message doesn't show up anywhere; neither logged nor returned to
+            // the
+            // client by Spring (the client gets a default reason string).
+            throw new ServerErrorException(
+                String.format(
+                    "Could not save Cohort (\"/%s/%s/%s\")",
+                    workspace.getWorkspaceNamespace(),
+                    workspace.getWorkspaceId(),
+                    newCohort.getName()),
+                e);
+          }
 
-    return ResponseEntity.ok(TO_CLIENT_COHORT.apply(newCohort));
+          return ResponseEntity.ok(TO_CLIENT_COHORT.apply(newCohort));
+        });
   }
 
   @Override
   public ResponseEntity<Cohort> duplicateCohort(
       String workspaceNamespace, String workspaceId, DuplicateCohortRequest params) {
-    workspaceService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "duplicateCohort"),
+        DistributionMetric.COHORT_OPERATION_TIME,
+        () -> {
+          workspaceService.enforceWorkspaceAccessLevel(
+              workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+          DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
 
-    checkForDuplicateCohortNameException(params.getNewName(), workspace);
+          checkForDuplicateCohortNameException(params.getNewName(), workspace);
 
-    DbCohort originalCohort =
-        getDbCohort(workspaceNamespace, workspaceId, params.getOriginalCohortId());
-    DbCohort newCohort =
-        cohortFactory.duplicateCohort(
-            params.getNewName(), userProvider.get(), workspace, originalCohort);
-    try {
-      newCohort = cohortDao.save(newCohort);
-      userRecentResourceService.updateCohortEntry(
-          workspace.getWorkspaceId(), userProvider.get().getUserId(), newCohort.getCohortId());
-    } catch (Exception e) {
-      throw new ServerErrorException(
-          String.format(
-              "Could not save Cohort (\"/%s/%s/%s\")",
-              workspace.getWorkspaceNamespace(), workspace.getWorkspaceId(), newCohort.getName()),
-          e);
-    }
+          DbCohort originalCohort =
+              getDbCohort(workspaceNamespace, workspaceId, params.getOriginalCohortId());
+          DbCohort newCohort =
+              cohortFactory.duplicateCohort(
+                  params.getNewName(), userProvider.get(), workspace, originalCohort);
+          try {
+            newCohort = cohortDao.save(newCohort);
+            userRecentResourceService.updateCohortEntry(
+                workspace.getWorkspaceId(),
+                userProvider.get().getUserId(),
+                newCohort.getCohortId());
+          } catch (Exception e) {
+            throw new ServerErrorException(
+                String.format(
+                    "Could not save Cohort (\"/%s/%s/%s\")",
+                    workspace.getWorkspaceNamespace(),
+                    workspace.getWorkspaceId(),
+                    newCohort.getName()),
+                e);
+          }
 
-    return ResponseEntity.ok(TO_CLIENT_COHORT.apply(newCohort));
+          return ResponseEntity.ok(TO_CLIENT_COHORT.apply(newCohort));
+        });
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteCohort(
       String workspaceNamespace, String workspaceId, Long cohortId) {
-    // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "deleteCohort"),
+        DistributionMetric.COHORT_OPERATION_TIME,
+        () -> {
+          // This also enforces registered auth domain.
+          workspaceService.enforceWorkspaceAccessLevel(
+              workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
-    cohortDao.delete(dbCohort);
-    return ResponseEntity.ok(new EmptyResponse());
+          DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
+          cohortDao.delete(dbCohort);
+          return ResponseEntity.ok(new EmptyResponse());
+        });
   }
 
   @Override
   public ResponseEntity<Cohort> getCohort(
       String workspaceNamespace, String workspaceId, Long cohortId) {
-    // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohort"),
+        DistributionMetric.COHORT_OPERATION_TIME,
+        () -> {
+          // This also enforces registered auth domain.
+          workspaceService.enforceWorkspaceAccessLevel(
+              workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
-    return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
+          DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
+          return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
+        });
   }
 
   @Override
   public ResponseEntity<CohortListResponse> getCohortsInWorkspace(
       String workspaceNamespace, String workspaceId) {
-    // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohortsInWorkspace"),
+        DistributionMetric.COHORT_OPERATION_TIME,
+        () -> {
+          // This also enforces registered auth domain.
+          workspaceService.enforceWorkspaceAccessLevel(
+              workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    DbWorkspace workspace =
-        workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
-    CohortListResponse response = new CohortListResponse();
-    Set<DbCohort> cohorts = workspace.getCohorts();
-    if (cohorts != null) {
-      response.setItems(
-          cohorts.stream()
-              .map(TO_CLIENT_COHORT)
-              .sorted(Comparator.comparing(c -> c.getName()))
-              .collect(Collectors.toList()));
-    }
-    return ResponseEntity.ok(response);
+          DbWorkspace workspace =
+              workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
+          CohortListResponse response = new CohortListResponse();
+          Set<DbCohort> cohorts = workspace.getCohorts();
+          if (cohorts != null) {
+            response.setItems(
+                cohorts.stream()
+                    .map(TO_CLIENT_COHORT)
+                    .sorted(Comparator.comparing(Cohort::getName))
+                    .collect(Collectors.toList()));
+          }
+          return ResponseEntity.ok(response);
+        });
   }
 
   @Override
   public ResponseEntity<Cohort> updateCohort(
       String workspaceNamespace, String workspaceId, Long cohortId, Cohort cohort) {
-    // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohortsInWorkspace"),
+        DistributionMetric.COHORT_OPERATION_TIME,
+        () -> {
+          // This also enforces registered auth domain.
+          workspaceService.enforceWorkspaceAccessLevel(
+              workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
-    if (Strings.isNullOrEmpty(cohort.getEtag())) {
-      throw new BadRequestException("missing required update field 'etag'");
-    }
-    int version = Etags.toVersion(cohort.getEtag());
-    if (dbCohort.getVersion() != version) {
-      throw new ConflictException("Attempted to modify outdated cohort version");
-    }
-    if (cohort.getType() != null) {
-      dbCohort.setType(cohort.getType());
-    }
-    if (cohort.getName() != null) {
-      dbCohort.setName(cohort.getName());
-    }
-    if (cohort.getDescription() != null) {
-      dbCohort.setDescription(cohort.getDescription());
-    }
-    if (cohort.getCriteria() != null) {
-      dbCohort.setCriteria(cohort.getCriteria());
-    }
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    dbCohort.setLastModifiedTime(now);
-    try {
-      // The version asserted on save is the same as the one we read via
-      // getRequired() above, see RW-215 for details.
-      dbCohort = cohortDao.save(dbCohort);
-    } catch (OptimisticLockException e) {
-      log.log(Level.WARNING, "version conflict for cohort update", e);
-      throw new ConflictException("Failed due to concurrent cohort modification");
-    }
-    return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
+          DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
+          if (Strings.isNullOrEmpty(cohort.getEtag())) {
+            throw new BadRequestException("missing required update field 'etag'");
+          }
+          int version = Etags.toVersion(cohort.getEtag());
+          if (dbCohort.getVersion() != version) {
+            throw new ConflictException("Attempted to modify outdated cohort version");
+          }
+          if (cohort.getType() != null) {
+            dbCohort.setType(cohort.getType());
+          }
+          if (cohort.getName() != null) {
+            dbCohort.setName(cohort.getName());
+          }
+          if (cohort.getDescription() != null) {
+            dbCohort.setDescription(cohort.getDescription());
+          }
+          if (cohort.getCriteria() != null) {
+            dbCohort.setCriteria(cohort.getCriteria());
+          }
+          Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+          dbCohort.setLastModifiedTime(now);
+          try {
+            // The version asserted on save is the same as the one we read via
+            // getRequired() above, see RW-215 for details.
+            dbCohort = cohortDao.save(dbCohort);
+          } catch (OptimisticLockException e) {
+            log.log(Level.WARNING, "version conflict for cohort update", e);
+            throw new ConflictException("Failed due to concurrent cohort modification");
+          }
+          return ResponseEntity.ok(TO_CLIENT_COHORT.apply(dbCohort));
+        });
   }
 
   private Set<Long> getConceptIds(DbWorkspace workspace, TableQuery tableQuery) {
@@ -302,143 +348,164 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<MaterializeCohortResponse> materializeCohort(
       String workspaceNamespace, String workspaceId, MaterializeCohortRequest request) {
-    // This also enforces registered auth domain.
-    DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    DbCdrVersion cdrVersion = workspace.getCdrVersion();
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "materializeCohort"),
+        DistributionMetric.COHORT_OPERATION_TIME,
+        () -> {
 
-    if (request.getCdrVersionName() != null) {
-      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
-      if (cdrVersion == null) {
-        throw new NotFoundException(
-            String.format("Couldn't find CDR version with name %s", request.getCdrVersionName()));
-      }
-      cdrVersionService.setCdrVersion(cdrVersion);
-    }
-    String cohortSpec;
-    DbCohortReview cohortReview = null;
-    if (request.getCohortName() != null) {
-      DbCohort cohort =
-          cohortDao.findCohortByNameAndWorkspaceId(
-              request.getCohortName(), workspace.getWorkspaceId());
-      if (cohort == null) {
-        throw new NotFoundException(
-            String.format(
-                "Couldn't find cohort with name %s in workspace %s/%s",
-                request.getCohortName(), workspaceNamespace, workspaceId));
-      }
-      cohortReview =
-          cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
-              cohort.getCohortId(), cdrVersion.getCdrVersionId());
-      cohortSpec = cohort.getCriteria();
-    } else if (request.getCohortSpec() != null) {
-      cohortSpec = request.getCohortSpec();
-      if (request.getStatusFilter() != null) {
-        throw new BadRequestException("statusFilter cannot be used with cohortSpec");
-      }
-    } else {
-      throw new BadRequestException("Must specify either cohortName or cohortSpec");
-    }
-    Set<Long> conceptIds = null;
-    if (request.getFieldSet() != null && request.getFieldSet().getTableQuery() != null) {
-      conceptIds = getConceptIds(workspace, request.getFieldSet().getTableQuery());
-    }
+          // This also enforces registered auth domain.
+          DbWorkspace workspace =
+              workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+                  workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+          DbCdrVersion cdrVersion = workspace.getCdrVersion();
 
-    Integer pageSize = request.getPageSize();
-    if (pageSize == null || pageSize == 0) {
-      request.setPageSize(DEFAULT_PAGE_SIZE);
-    } else if (pageSize < 0) {
-      throw new BadRequestException(
-          String.format(
-              "Invalid page size: %s; must be between 1 and %d", pageSize, MAX_PAGE_SIZE));
-    } else if (pageSize > MAX_PAGE_SIZE) {
-      request.setPageSize(MAX_PAGE_SIZE);
-    }
+          if (request.getCdrVersionName() != null) {
+            cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
+            if (cdrVersion == null) {
+              throw new NotFoundException(
+                  String.format(
+                      "Couldn't find CDR version with name %s", request.getCdrVersionName()));
+            }
+            cdrVersionService.setCdrVersion(cdrVersion);
+          }
+          String cohortSpec;
+          DbCohortReview cohortReview = null;
+          if (request.getCohortName() != null) {
+            DbCohort cohort =
+                cohortDao.findCohortByNameAndWorkspaceId(
+                    request.getCohortName(), workspace.getWorkspaceId());
+            if (cohort == null) {
+              throw new NotFoundException(
+                  String.format(
+                      "Couldn't find cohort with name %s in workspace %s/%s",
+                      request.getCohortName(), workspaceNamespace, workspaceId));
+            }
+            cohortReview =
+                cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
+                    cohort.getCohortId(), cdrVersion.getCdrVersionId());
+            cohortSpec = cohort.getCriteria();
+          } else if (request.getCohortSpec() != null) {
+            cohortSpec = request.getCohortSpec();
+            if (request.getStatusFilter() != null) {
+              throw new BadRequestException("statusFilter cannot be used with cohortSpec");
+            }
+          } else {
+            throw new BadRequestException("Must specify either cohortName or cohortSpec");
+          }
+          Set<Long> conceptIds = null;
+          if (request.getFieldSet() != null && request.getFieldSet().getTableQuery() != null) {
+            conceptIds = getConceptIds(workspace, request.getFieldSet().getTableQuery());
+          }
 
-    MaterializeCohortResponse response =
-        cohortMaterializationService.materializeCohort(
-            cohortReview, cohortSpec, conceptIds, request);
-    return ResponseEntity.ok(response);
+          Integer pageSize = request.getPageSize();
+          if (pageSize == null || pageSize == 0) {
+            request.setPageSize(DEFAULT_PAGE_SIZE);
+          } else if (pageSize < 0) {
+            throw new BadRequestException(
+                String.format(
+                    "Invalid page size: %s; must be between 1 and %d", pageSize, MAX_PAGE_SIZE));
+          } else if (pageSize > MAX_PAGE_SIZE) {
+            request.setPageSize(MAX_PAGE_SIZE);
+          }
+
+          MaterializeCohortResponse response =
+              cohortMaterializationService.materializeCohort(
+                  cohortReview, cohortSpec, conceptIds, request);
+          return ResponseEntity.ok(response);
+        });
   }
 
   @Override
   public ResponseEntity<CdrQuery> getDataTableQuery(
       String workspaceNamespace, String workspaceId, DataTableSpecification request) {
-    DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    DbCdrVersion cdrVersion = workspace.getCdrVersion();
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getDataTableQuery"),
+        DistributionMetric.COHORT_OPERATION_TIME,
+        () -> {
+          DbWorkspace workspace =
+              workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+                  workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+          DbCdrVersion cdrVersion = workspace.getCdrVersion();
 
-    if (request.getCdrVersionName() != null) {
-      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
-      if (cdrVersion == null) {
-        throw new NotFoundException(
-            String.format("Couldn't find CDR version with name %s", request.getCdrVersionName()));
-      }
-      cdrVersionService.setCdrVersion(cdrVersion);
-    }
-    String cohortSpec;
-    DbCohortReview cohortReview = null;
-    if (request.getCohortName() != null) {
-      DbCohort cohort =
-          cohortDao.findCohortByNameAndWorkspaceId(
-              request.getCohortName(), workspace.getWorkspaceId());
-      if (cohort == null) {
-        throw new NotFoundException(
-            String.format(
-                "Couldn't find cohort with name %s in workspace %s/%s",
-                request.getCohortName(), workspaceNamespace, workspaceId));
-      }
-      cohortReview =
-          cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
-              cohort.getCohortId(), cdrVersion.getCdrVersionId());
-      cohortSpec = cohort.getCriteria();
-    } else if (request.getCohortSpec() != null) {
-      cohortSpec = request.getCohortSpec();
-      if (request.getStatusFilter() != null) {
-        throw new BadRequestException("statusFilter cannot be used with cohortSpec");
-      }
-    } else {
-      throw new BadRequestException("Must specify either cohortName or cohortSpec");
-    }
-    Set<Long> conceptIds = getConceptIds(workspace, request.getTableQuery());
-    CdrQuery query =
-        cohortMaterializationService.getCdrQuery(cohortSpec, request, cohortReview, conceptIds);
-    return ResponseEntity.ok(query);
+          if (request.getCdrVersionName() != null) {
+            cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
+            if (cdrVersion == null) {
+              throw new NotFoundException(
+                  String.format(
+                      "Couldn't find CDR version with name %s", request.getCdrVersionName()));
+            }
+            cdrVersionService.setCdrVersion(cdrVersion);
+          }
+          String cohortSpec;
+          DbCohortReview cohortReview = null;
+          if (request.getCohortName() != null) {
+            DbCohort cohort =
+                cohortDao.findCohortByNameAndWorkspaceId(
+                    request.getCohortName(), workspace.getWorkspaceId());
+            if (cohort == null) {
+              throw new NotFoundException(
+                  String.format(
+                      "Couldn't find cohort with name %s in workspace %s/%s",
+                      request.getCohortName(), workspaceNamespace, workspaceId));
+            }
+            cohortReview =
+                cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
+                    cohort.getCohortId(), cdrVersion.getCdrVersionId());
+            cohortSpec = cohort.getCriteria();
+          } else if (request.getCohortSpec() != null) {
+            cohortSpec = request.getCohortSpec();
+            if (request.getStatusFilter() != null) {
+              throw new BadRequestException("statusFilter cannot be used with cohortSpec");
+            }
+          } else {
+            throw new BadRequestException("Must specify either cohortName or cohortSpec");
+          }
+          Set<Long> conceptIds = getConceptIds(workspace, request.getTableQuery());
+          CdrQuery query =
+              cohortMaterializationService.getCdrQuery(
+                  cohortSpec, request, cohortReview, conceptIds);
+          return ResponseEntity.ok(query);
+        });
   }
 
   @Override
   public ResponseEntity<CohortAnnotationsResponse> getCohortAnnotations(
       String workspaceNamespace, String workspaceId, CohortAnnotationsRequest request) {
-    DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    DbCdrVersion cdrVersion = workspace.getCdrVersion();
-    if (request.getCdrVersionName() != null) {
-      cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
-      if (cdrVersion == null) {
-        throw new NotFoundException(
-            String.format("Couldn't find CDR version with name %s", request.getCdrVersionName()));
-      }
-    }
-    DbCohort cohort =
-        cohortDao.findCohortByNameAndWorkspaceId(
-            request.getCohortName(), workspace.getWorkspaceId());
-    if (cohort == null) {
-      throw new NotFoundException(
-          String.format(
-              "Couldn't find cohort with name %s in workspace %s/%s",
-              request.getCohortName(), workspaceNamespace, workspaceId));
-    }
-    DbCohortReview cohortReview =
-        cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
-            cohort.getCohortId(), cdrVersion.getCdrVersionId());
-    if (cohortReview == null) {
-      return ResponseEntity.ok(
-          new CohortAnnotationsResponse().columns(request.getAnnotationQuery().getColumns()));
-    }
-    return ResponseEntity.ok(cohortMaterializationService.getAnnotations(cohortReview, request));
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getCohortAnnotations"),
+        DistributionMetric.COHORT_OPERATION_TIME,
+        () -> {
+          DbWorkspace workspace =
+              workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+                  workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+          DbCdrVersion cdrVersion = workspace.getCdrVersion();
+          if (request.getCdrVersionName() != null) {
+            cdrVersion = cdrVersionDao.findByName(request.getCdrVersionName());
+            if (cdrVersion == null) {
+              throw new NotFoundException(
+                  String.format(
+                      "Couldn't find CDR version with name %s", request.getCdrVersionName()));
+            }
+          }
+          DbCohort cohort =
+              cohortDao.findCohortByNameAndWorkspaceId(
+                  request.getCohortName(), workspace.getWorkspaceId());
+          if (cohort == null) {
+            throw new NotFoundException(
+                String.format(
+                    "Couldn't find cohort with name %s in workspace %s/%s",
+                    request.getCohortName(), workspaceNamespace, workspaceId));
+          }
+          DbCohortReview cohortReview =
+              cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
+                  cohort.getCohortId(), cdrVersion.getCdrVersionId());
+          if (cohortReview == null) {
+            return ResponseEntity.ok(
+                new CohortAnnotationsResponse().columns(request.getAnnotationQuery().getColumns()));
+          }
+          return ResponseEntity.ok(
+              cohortMaterializationService.getAnnotations(cohortReview, request));
+        });
   }
 
   private DbCohort getDbCohort(String workspaceNamespace, String workspaceId, Long cohortId) {

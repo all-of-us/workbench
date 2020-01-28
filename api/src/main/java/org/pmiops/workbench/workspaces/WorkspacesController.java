@@ -9,7 +9,6 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.StorageException;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.BaseEncoding;
@@ -544,18 +543,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       log.warning("Service Account does not have access to bucket " + bucketName);
       throw e;
     }
-  }
-
-  private void timeAndRecordOperation(
-      Runnable operation, DistributionMetric metric, String operationName) {
-    final Stopwatch stopwatch = Stopwatch.createStarted();
-    operation.run();
-    stopwatch.stop();
-    monitoringService.recordBundle(
-        MeasurementBundle.builder()
-            .addMeasurement(metric, stopwatch.elapsed().toMillis())
-            .addTag(MetricLabel.OPERATION_NAME, operationName)
-            .build());
   }
 
   @Override
