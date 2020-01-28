@@ -385,16 +385,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       };
     }
 
+    async sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     async fetchBillingAccounts() {
       const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-        // This does not work. Overwrites the existing workspace object with just {billingAccountName: 'abc'})
-        this.setState(fp.set(['workspace', 'billingAccountName'], 'abc'));
-
-        // this works. preserves the original state of workspace
         this.setState(prevState => fp.set(
-          ['workspace', 'billingAccountName'], 'abc', prevState));
+          ['workspace', 'billingAccountName'],
+          billingAccounts.find(billingAccount => billingAccount.isFreeTier).name,
+          prevState));
       } else if (this.isMode(WorkspaceEditMode.Edit)) {
         const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
 
