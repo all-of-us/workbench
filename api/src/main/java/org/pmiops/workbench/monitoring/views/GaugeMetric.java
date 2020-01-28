@@ -49,7 +49,11 @@ public enum GaugeMetric implements Metric {
   }
 
   GaugeMetric(
-      String name, String description, List<MetricLabel> labels, UnitOfMeasure unit, Class measureClass) {
+      String name,
+      String description,
+      List<MetricLabel> labels,
+      UnitOfMeasure unit,
+      Class measureClass) {
     this.name = name;
     this.description = description;
     this.allowedAttachments = labels;

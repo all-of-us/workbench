@@ -7,9 +7,15 @@ import java.util.List;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 
 public enum DistributionMetric implements Metric {
-  OPERATION_TIME(
-      "operation_time_tmp_2",
-      "Time to list complete some operation.",
+  COHORT_OPERATION_TIME(
+      "cohort_operation_time",
+      "Time to complete Cohort-related operation.",
+      Collections.singletonList(MetricLabel.OPERATION_NAME),
+      DistributionAggregation.TIME,
+      MeasureLong.class),
+  WORKSPACE_OPERATION_TIME(
+      "workspace_operation_time",
+      "Time to complete Workspace-related operation.",
       Collections.singletonList(MetricLabel.OPERATION_NAME),
       DistributionAggregation.TIME,
       MeasureLong.class);

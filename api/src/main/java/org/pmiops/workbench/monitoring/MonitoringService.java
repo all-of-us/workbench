@@ -6,6 +6,7 @@ import io.opencensus.tags.TagValue;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Supplier;
 import org.pmiops.workbench.monitoring.MeasurementBundle.Builder;
 import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.monitoring.views.EventMetric;
@@ -59,6 +60,30 @@ public interface MonitoringService {
     viewBundles.forEach(this::recordBundle);
   }
 
-  void timeAndRecordOperation(Builder measurementBundleBuilder,
-      DistributionMetric distributionMetric, Runnable operation);
+  /**
+   * Use a Stopwatch to time the supplied operation, then add a measurement to the supplied
+   * measurementBundleBuilder and record the associated DistributionMetric.
+   *
+   * @param measurementBundleBuilder - Builder for a MeasurementBundle to be recorded. Typically
+   *     only has tags.
+   * @param distributionMetric - Metric to be recorded. Always a distribution, as gauge and count
+   *     don't make sense for timings
+   * @param operation - Code to be run, e.g. () -> myService.computeThings()
+   */
+  void timeAndRecordOperation(
+      Builder measurementBundleBuilder, DistributionMetric distributionMetric, Runnable operation);
+
+  /**
+   * Same as above, but returns the result of the operation
+   *
+   * @param measurementBundleBuilder - Builder for a MeasurementBundle to be recorded. Typically
+   *     only has tags.
+   * @param distributionMetric - Metric to be recorded. Always a distribution, as gauge and count
+   *     don't make sense for timings
+   * @param operation - Code to be run, e.g. myService::getFooList
+   */
+  <T> T timeAndRecordOperation(
+      Builder measurementBundleBuilder,
+      DistributionMetric distributionMetric,
+      Supplier<T> operation);
 }

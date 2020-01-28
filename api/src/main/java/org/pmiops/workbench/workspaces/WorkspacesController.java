@@ -26,7 +26,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -215,48 +214,55 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
-    validateWorkspaceApiModel(workspace);
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "createWorkspace"),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        () -> {
+          validateWorkspaceApiModel(workspace);
 
-    DbUser user = userProvider.get();
-    String workspaceNamespace;
-    DbBillingProjectBufferEntry bufferedBillingProject;
-    try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
-    } catch (EmptyBufferException e) {
-      throw new TooManyRequestsException();
-    }
-    workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+          DbUser user = userProvider.get();
+          String workspaceNamespace;
+          DbBillingProjectBufferEntry bufferedBillingProject;
+          try {
+            bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+          } catch (EmptyBufferException e) {
+            throw new TooManyRequestsException();
+          }
+          workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
 
-    // Note: please keep any initialization logic here in sync with CloneWorkspace().
-    FirecloudWorkspaceId workspaceId =
-        generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
-    FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
+          // Note: please keep any initialization logic here in sync with CloneWorkspace().
+          FirecloudWorkspaceId workspaceId =
+              generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
+          FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
 
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbWorkspace dbWorkspace = new DbWorkspace();
-    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
+          Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+          DbWorkspace dbWorkspace = new DbWorkspace();
+          setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
 
-    setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
+          setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    DbWorkspace reqWorkspace = WorkspaceConversionUtils.toDbWorkspace(workspace);
-    // TODO: enforce data access level authorization
-    dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
-    dbWorkspace.setName(reqWorkspace.getName());
+          DbWorkspace reqWorkspace = WorkspaceConversionUtils.toDbWorkspace(workspace);
+          // TODO: enforce data access level authorization
+          dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
+          dbWorkspace.setName(reqWorkspace.getName());
 
-    // Ignore incoming fields pertaining to review status; clients can only request a review.
-    WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
-    if (reqWorkspace.getReviewRequested()) {
-      // Use a consistent timestamp.
-      dbWorkspace.setTimeRequested(now);
-    }
-    dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
+          // Ignore incoming fields pertaining to review status; clients can only request a review.
+          WorkspaceConversionUtils.setResearchPurposeDetails(
+              dbWorkspace, workspace.getResearchPurpose());
+          if (reqWorkspace.getReviewRequested()) {
+            // Use a consistent timestamp.
+            dbWorkspace.setTimeRequested(now);
+          }
+          dbWorkspace.setReviewRequested(reqWorkspace.getReviewRequested());
 
-    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
+          dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
 
-    dbWorkspace = workspaceService.getDao().save(dbWorkspace);
-    Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
-    workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
-    return ResponseEntity.ok(createdWorkspace);
+          dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+          Workspace createdWorkspace =
+              WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
+          workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
+          return ResponseEntity.ok(createdWorkspace);
+        });
   }
 
   private void validateWorkspaceApiModel(Workspace workspace) {
@@ -290,38 +296,45 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteWorkspace(
       String workspaceNamespace, String workspaceId) {
-    // This deletes all Firecloud and google resources, however saves all references
-    // to the workspace and its resources in the Workbench database.
-    // This is for auditing purposes and potentially workspace restore.
-    // TODO: do we want to delete workspace resource references and save only metadata?
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    // This automatically handles access control to the workspace.
-    fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
-    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
-    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
-    workspaceService.maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
-    workspaceAuditor.fireDeleteAction(dbWorkspace);
-    return ResponseEntity.ok(new EmptyResponse());
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "deleteWorkspace"),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        () -> {
+          // This deletes all Firecloud and google resources, however saves all references
+          // to the workspace and its resources in the Workbench database.
+          // This is for auditing purposes and potentially workspace restore.
+          // TODO: do we want to delete workspace resource references and save only metadata?
+          DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+          // This automatically handles access control to the workspace.
+          fireCloudService.deleteWorkspace(workspaceNamespace, workspaceId);
+          dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
+          dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+          workspaceService.maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
+          workspaceAuditor.fireDeleteAction(dbWorkspace);
+          return ResponseEntity.ok(new EmptyResponse());
+        });
   }
 
   @Override
   public ResponseEntity<WorkspaceResponse> getWorkspace(
       String workspaceNamespace, String workspaceId) {
-    AtomicReference<WorkspaceResponse> workspaceResponse = new AtomicReference<>();
-    monitoringService.timeAndRecordOperation(
-        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getWorkspace"),
-        DistributionMetric.OPERATION_TIME,
-        () -> workspaceResponse.set(workspaceService.getWorkspace(workspaceNamespace, workspaceId)));
-    return ResponseEntity.ok(workspaceResponse.get());
+    final WorkspaceResponse workspaceResponse =
+        monitoringService.timeAndRecordOperation(
+            MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getWorkspace"),
+            DistributionMetric.WORKSPACE_OPERATION_TIME,
+            () -> workspaceService.getWorkspace(workspaceNamespace, workspaceId));
+    return ResponseEntity.ok(workspaceResponse);
   }
 
   @Override
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
     WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
-    monitoringService.timeAndRecordOperation(
-        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getWorkspaces"),
-        DistributionMetric.OPERATION_TIME,
-        () -> response.setItems(workspaceService.getWorkspaces()));
+    List<WorkspaceResponse> workspaces =
+        monitoringService.timeAndRecordOperation(
+            MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "getWorkspaces"),
+            DistributionMetric.WORKSPACE_OPERATION_TIME,
+            workspaceService::getWorkspaces);
+    response.setItems(workspaces);
     return ResponseEntity.ok(response);
   }
 
@@ -329,51 +342,58 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<Workspace> updateWorkspace(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request)
       throws NotFoundException {
+    return monitoringService.timeAndRecordOperation(
+        MeasurementBundle.builder().addTag(MetricLabel.OPERATION_NAME, "updateWorkspace"),
+        DistributionMetric.WORKSPACE_OPERATION_TIME,
+        () -> {
+          DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+          workspaceService.enforceWorkspaceAccessLevel(
+              workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
+          Workspace workspace = request.getWorkspace();
+          FirecloudWorkspace fcWorkspace =
+              fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace();
+          if (workspace == null) {
+            throw new BadRequestException("No workspace provided in request");
+          }
+          if (Strings.isNullOrEmpty(workspace.getEtag())) {
+            throw new BadRequestException("Missing required update field 'etag'");
+          }
 
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
-    Workspace workspace = request.getWorkspace();
-    FirecloudWorkspace fcWorkspace =
-        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getWorkspace();
-    if (workspace == null) {
-      throw new BadRequestException("No workspace provided in request");
-    }
-    if (Strings.isNullOrEmpty(workspace.getEtag())) {
-      throw new BadRequestException("Missing required update field 'etag'");
-    }
+          final Workspace originalWorkspace =
+              workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
 
-    final Workspace originalWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+          int version = Etags.toVersion(workspace.getEtag());
+          if (dbWorkspace.getVersion() != version) {
+            throw new ConflictException("Attempted to modify outdated workspace version");
+          }
+          if (workspace.getDataAccessLevel() != null
+              && !dbWorkspace.getDataAccessLevelEnum().equals(workspace.getDataAccessLevel())) {
+            throw new BadRequestException("Attempted to change data access level");
+          }
+          if (workspace.getName() != null) {
+            dbWorkspace.setName(workspace.getName());
+          }
+          ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
+          if (researchPurpose != null) {
+            WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+            if (researchPurpose.getReviewRequested()) {
+              Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+              dbWorkspace.setTimeRequested(now);
+            }
+            dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
+          }
+          // The version asserted on save is the same as the one we read via
+          // getRequired() above, see RW-215 for details.
+          dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
 
-    int version = Etags.toVersion(workspace.getEtag());
-    if (dbWorkspace.getVersion() != version) {
-      throw new ConflictException("Attempted to modify outdated workspace version");
-    }
-    if (workspace.getDataAccessLevel() != null
-        && !dbWorkspace.getDataAccessLevelEnum().equals(workspace.getDataAccessLevel())) {
-      throw new BadRequestException("Attempted to change data access level");
-    }
-    if (workspace.getName() != null) {
-      dbWorkspace.setName(workspace.getName());
-    }
-    ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
-    if (researchPurpose != null) {
-      WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, researchPurpose);
-      if (researchPurpose.getReviewRequested()) {
-        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-        dbWorkspace.setTimeRequested(now);
-      }
-      dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
-    }
-    // The version asserted on save is the same as the one we read via
-    // getRequired() above, see RW-215 for details.
-    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+          final Workspace editedWorkspace =
+              workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
 
-    final Workspace editedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
-
-    workspaceAuditor.fireEditAction(
-        originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
-    return ResponseEntity.ok(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
+          workspaceAuditor.fireEditAction(
+              originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
+          return ResponseEntity.ok(
+              WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
+        });
   }
 
   @Override
@@ -518,7 +538,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
   }
 
-  private void timeAndRecordOperation(Runnable operation, DistributionMetric metric, String operationName) {
+  private void timeAndRecordOperation(
+      Runnable operation, DistributionMetric metric, String operationName) {
     final Stopwatch stopwatch = Stopwatch.createStarted();
     operation.run();
     stopwatch.stop();

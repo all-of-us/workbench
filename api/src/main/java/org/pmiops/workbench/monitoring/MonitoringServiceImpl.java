@@ -13,6 +13,7 @@ import io.opencensus.tags.TagValue;
 import io.opencensus.tags.Tagger;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
@@ -84,14 +85,30 @@ public class MonitoringServiceImpl implements MonitoringService {
   }
 
   @Override
-  public void timeAndRecordOperation(Builder measurementBundleBuilder,
-      DistributionMetric distributionMetric, Runnable operation) {
-      final Stopwatch stopwatch = Stopwatch.createStarted();
-      operation.run();
-      stopwatch.stop();
-      recordBundle(measurementBundleBuilder
-              .addMeasurement(distributionMetric, stopwatch.elapsed().toMillis())
-              .build());
+  public void timeAndRecordOperation(
+      Builder measurementBundleBuilder, DistributionMetric distributionMetric, Runnable operation) {
+    final Stopwatch stopwatch = Stopwatch.createStarted();
+    operation.run();
+    stopwatch.stop();
+    recordBundle(
+        measurementBundleBuilder
+            .addMeasurement(distributionMetric, stopwatch.elapsed().toMillis())
+            .build());
+  }
+
+  @Override
+  public <T> T timeAndRecordOperation(
+      Builder measurementBundleBuilder,
+      DistributionMetric distributionMetric,
+      Supplier<T> operation) {
+    final Stopwatch stopwatch = Stopwatch.createStarted();
+    final T result = operation.get();
+    stopwatch.stop();
+    recordBundle(
+        measurementBundleBuilder
+            .addMeasurement(distributionMetric, stopwatch.elapsed().toMillis())
+            .build());
+    return result;
   }
 
   /**
