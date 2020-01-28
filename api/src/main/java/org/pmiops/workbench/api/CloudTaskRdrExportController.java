@@ -1,9 +1,8 @@
 package org.pmiops.workbench.api;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import org.pmiops.workbench.model.ArrayOfLong;
 import org.pmiops.workbench.rdr.RdrExportService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,7 +13,6 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
   private RdrExportService rdrExportService;
 
   private static final Logger log = Logger.getLogger(CloudTaskRdrExportController.class.getName());
-  private final String IDS_STRING_SPLIT = ", ";
 
   CloudTaskRdrExportController(RdrExportService rdrExportService) {
     this.rdrExportService = rdrExportService;
@@ -29,16 +27,12 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    * @return
    */
   @Override
-  public ResponseEntity<Void> exportResearcherData(Object researcherIds) {
-    if (researcherIds == null || ((ArrayList) researcherIds).isEmpty()) {
+  public ResponseEntity<Void> exportResearcherData(ArrayOfLong researcherIds) {
+    if (researcherIds == null || researcherIds.isEmpty()) {
       log.severe(" call to export Researcher Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    List<Long> requestUserIdList =
-        (ArrayList<Long>)
-            ((ArrayList) researcherIds)
-                .stream().map(id -> ((Integer) id).longValue()).collect(Collectors.toList());
-    rdrExportService.exportUsers(requestUserIdList);
+    rdrExportService.exportUsers(researcherIds);
 
     return ResponseEntity.noContent().build();
   }
@@ -50,13 +44,12 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    * @return
    */
   @Override
-  public ResponseEntity<Void> exportWorkspaceData(Object workspaceIds) {
+  public ResponseEntity<Void> exportWorkspaceData(ArrayOfLong workspaceIds) {
     if (workspaceIds == null || ((ArrayList) workspaceIds).isEmpty()) {
       log.severe(" call to export Workspace Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    List<Long> requestUserIdList = (ArrayList<Long>) workspaceIds;
-    rdrExportService.exportWorkspaces(requestUserIdList);
+    rdrExportService.exportWorkspaces(workspaceIds);
     return ResponseEntity.noContent().build();
   }
 }

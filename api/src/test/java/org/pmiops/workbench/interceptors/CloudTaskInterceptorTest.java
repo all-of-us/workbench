@@ -14,6 +14,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.api.CloudTaskRdrExportApi;
 import org.pmiops.workbench.api.WorkspacesApi;
+import org.pmiops.workbench.model.ArrayOfLong;
 import org.springframework.web.method.HandlerMethod;
 
 public class CloudTaskInterceptorTest {
@@ -42,7 +43,8 @@ public class CloudTaskInterceptorTest {
   public void prehandleForCloudTaskNoHeader() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.POST);
     when(handler.getMethod())
-        .thenReturn(CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, Object.class));
+        .thenReturn(
+            CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, ArrayOfLong.class));
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
   }
 
@@ -50,7 +52,8 @@ public class CloudTaskInterceptorTest {
   public void prehandleForCloudTaskWithBadHeader() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.POST);
     when(handler.getMethod())
-        .thenReturn(CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, Object.class));
+        .thenReturn(
+            CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, ArrayOfLong.class));
     when(request.getHeader(CloudTaskInterceptor.QUEUE_NAME_REQUEST_HEADER)).thenReturn("asdf");
     assertThat(interceptor.preHandle(request, response, handler)).isFalse();
   }
@@ -59,7 +62,8 @@ public class CloudTaskInterceptorTest {
   public void prehandleForCloudTaskWithHeader() throws Exception {
     when(request.getMethod()).thenReturn(HttpMethods.POST);
     when(handler.getMethod())
-        .thenReturn(CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, Object.class));
+        .thenReturn(
+            CloudTaskRdrExportApi.class.getMethod(CLOUD_TASK_METHOD_NAME, ArrayOfLong.class));
     when(request.getHeader(CloudTaskInterceptor.QUEUE_NAME_REQUEST_HEADER))
         .thenReturn("rdrQueueTest");
     assertThat(interceptor.preHandle(request, response, handler)).isTrue();
