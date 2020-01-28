@@ -2261,6 +2261,9 @@ paths:
 # https://cloud.google.com/tasks/docs/creating-appengine-handlers#reading_app_engine_task_request_headers
 # and o.p.w.interceptors.CloudTaskInterceptor which implements the header check.
 #########################################################################################
+
+# Using body parameter ref ArrayOfLong instead of defining array of type long here because of
+# bug in swagger version 2.3.0 https://github.com/swagger-api/swagger-codegen/issues/6745.2.2.3
   /v1/cloudTask/exportResearcherData:
     post:
       tags:
