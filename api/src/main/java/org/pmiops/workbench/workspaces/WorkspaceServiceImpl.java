@@ -1,7 +1,7 @@
 package org.pmiops.workbench.workspaces;
 
 import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
-import static org.pmiops.workbench.billing.GoogleApisConfig.USER_PROXY_CLOUD_BILLING;
+import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
 
 import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.Retryer;
@@ -93,7 +93,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   // Note: Cannot use an @Autowired constructor with this version of Spring
   // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
-  private Provider<Cloudbilling> userProxyCloudbillingProvider;
+  private Provider<Cloudbilling> endUserCloudbillingProvider;
   private Provider<Cloudbilling> serviceAccountCloudbillingProvider;
   private CohortCloningService cohortCloningService;
   private ConceptSetService conceptSetService;
@@ -109,7 +109,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Autowired
   public WorkspaceServiceImpl(
-      @Qualifier(USER_PROXY_CLOUD_BILLING) Provider<Cloudbilling> userProxyCloudbillingProvider,
+      @Qualifier(END_USER_CLOUD_BILLING) Provider<Cloudbilling> endUserCloudbillingProvider,
       @Qualifier(SERVICE_ACCOUNT_CLOUD_BILLING)
           Provider<Cloudbilling> serviceAccountCloudbillingProvider,
       Clock clock,
@@ -122,7 +122,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao) {
-    this.userProxyCloudbillingProvider = userProxyCloudbillingProvider;
+    this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
@@ -690,7 +690,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {
       cloudbilling = serviceAccountCloudbillingProvider.get();
     } else {
-      cloudbilling = userProxyCloudbillingProvider.get();
+      cloudbilling = endUserCloudbillingProvider.get();
     }
 
     UpdateBillingInfo request;

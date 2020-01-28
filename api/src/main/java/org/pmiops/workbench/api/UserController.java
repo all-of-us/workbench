@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static org.pmiops.workbench.billing.GoogleApisConfig.USER_PROXY_CLOUD_BILLING;
+import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
@@ -60,7 +60,7 @@ public class UserController implements UserApiDelegate {
       Provider<WorkbenchConfig> configProvider,
       FireCloudService fireCloudService,
       UserService userService,
-      @Qualifier(USER_PROXY_CLOUD_BILLING) Provider<Cloudbilling> cloudBillingProvider) {
+      @Qualifier(END_USER_CLOUD_BILLING) Provider<Cloudbilling> cloudBillingProvider) {
     this.userProvider = userProvider;
     this.configProvider = configProvider;
     this.userService = userService;

@@ -15,18 +15,15 @@ import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
 public class GoogleApisConfig {
 
-  public static final String USER_PROXY_CLOUD_BILLING = "USER_PROXY_CLOUD_BILLING";
+  public static final String END_USER_CLOUD_BILLING = "END_USER_CLOUD_BILLING";
   public static final String SERVICE_ACCOUNT_CLOUD_BILLING = "SERVICE_ACCOUNT_CLOUD_BILLING";
 
-  @Bean(USER_PROXY_CLOUD_BILLING)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public Cloudbilling userProxyCloudbillingApi(
+  @Bean(END_USER_CLOUD_BILLING)
+  public Cloudbilling endUserCloudbillingApi(
       UserAuthentication userAuthentication,
       JsonFactory jsonFactory,
       Provider<WorkbenchConfig> workbenchConfigProvider)
@@ -43,7 +40,6 @@ public class GoogleApisConfig {
   }
 
   @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public Cloudbilling serviceAccountGoogleCloudbillingApi(
       JsonFactory jsonFactory, Provider<WorkbenchConfig> workbenchConfigProvider)
       throws IOException, GeneralSecurityException {

@@ -12,7 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
-import static org.pmiops.workbench.billing.GoogleApisConfig.USER_PROXY_CLOUD_BILLING;
+import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.cloud.bigquery.Field;
@@ -266,8 +266,8 @@ public class DataSetControllerTest {
   })
   static class Configuration {
 
-    @Bean(USER_PROXY_CLOUD_BILLING)
-    Cloudbilling userProxyCloudbilling() {
+    @Bean(END_USER_CLOUD_BILLING)
+    Cloudbilling endUserCloudbilling() {
       return TestMockFactory.createMockedCloudbilling();
     }
 

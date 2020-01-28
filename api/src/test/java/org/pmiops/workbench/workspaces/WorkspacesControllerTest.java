@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
-import static org.pmiops.workbench.billing.GoogleApisConfig.USER_PROXY_CLOUD_BILLING;
+import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
@@ -235,11 +235,10 @@ public class WorkspacesControllerTest {
   @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
   @Autowired private WorkspacesController workspacesController;
-  @Autowired private Provider<Cloudbilling> cloudbillingProvider;
 
-  @Qualifier(USER_PROXY_CLOUD_BILLING)
+  @Qualifier(END_USER_CLOUD_BILLING)
   @Autowired
-  private Provider<Cloudbilling> userProxyCloudbillingProvider;
+  private Provider<Cloudbilling> endUserCloudbillingProvider;
 
   @Qualifier(SERVICE_ACCOUNT_CLOUD_BILLING)
   @Autowired
@@ -280,8 +279,8 @@ public class WorkspacesControllerTest {
   })
   static class Configuration {
 
-    @Bean(USER_PROXY_CLOUD_BILLING)
-    Cloudbilling userProxyCloudbilling() {
+    @Bean(END_USER_CLOUD_BILLING)
+    Cloudbilling endUserCloudbilling() {
       return TestMockFactory.createMockedCloudbilling();
     }
 
@@ -633,7 +632,7 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getResearchPurpose().getReviewRequested()).isTrue();
     assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
 
-    verify(userProxyCloudbillingProvider.get().projects())
+    verify(endUserCloudbillingProvider.get().projects())
         .updateBillingInfo(
             "projects/" + workspace.getNamespace(),
             new ProjectBillingInfo().setBillingAccountName("billing-account"));
@@ -649,7 +648,7 @@ public class WorkspacesControllerTest {
     try {
       workspacesController.createWorkspace(workspace).getBody();
     } catch (Exception e) {
-      verify(userProxyCloudbillingProvider.get().projects())
+      verify(endUserCloudbillingProvider.get().projects())
           .updateBillingInfo(
               any(),
               eq(
@@ -675,7 +674,7 @@ public class WorkspacesControllerTest {
 
     workspacesController.createWorkspace(workspace);
 
-    verifyZeroInteractions(userProxyCloudbillingProvider.get());
+    verifyZeroInteractions(endUserCloudbillingProvider.get());
     verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
   }
 
@@ -764,7 +763,7 @@ public class WorkspacesControllerTest {
     ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<ProjectBillingInfo> billingCaptor =
         ArgumentCaptor.forClass(ProjectBillingInfo.class);
-    verify(userProxyCloudbillingProvider.get().projects(), times(2))
+    verify(endUserCloudbillingProvider.get().projects(), times(2))
         .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
     assertThat("projects/" + ws.getNamespace()).isEqualTo(projectCaptor.getAllValues().get(1));
     assertThat(new ProjectBillingInfo().setBillingAccountName("update-billing-account"))
@@ -785,7 +784,7 @@ public class WorkspacesControllerTest {
     Workspace ws = createWorkspace();
     ws = workspacesController.createWorkspace(ws).getBody();
 
-    verify(userProxyCloudbillingProvider.get()).projects();
+    verify(endUserCloudbillingProvider.get()).projects();
     verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
 
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
@@ -793,7 +792,7 @@ public class WorkspacesControllerTest {
     request.setWorkspace(ws);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
 
-    verifyNoMoreInteractions(userProxyCloudbillingProvider.get());
+    verifyNoMoreInteractions(endUserCloudbillingProvider.get());
     verify(serviceAccountCloudbillingProvider.get()).projects();
   }
 
@@ -815,7 +814,7 @@ public class WorkspacesControllerTest {
       ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
       ArgumentCaptor<ProjectBillingInfo> billingCaptor =
           ArgumentCaptor.forClass(ProjectBillingInfo.class);
-      verify(userProxyCloudbillingProvider.get().projects(), times(3))
+      verify(endUserCloudbillingProvider.get().projects(), times(3))
           .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
       assertThat("projects/" + ws.getNamespace()).isEqualTo(projectCaptor.getAllValues().get(2));
       assertThat(new ProjectBillingInfo().setBillingAccountName(originalBillingAccountName))
@@ -1029,7 +1028,7 @@ public class WorkspacesControllerTest {
     ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<ProjectBillingInfo> billingCaptor =
         ArgumentCaptor.forClass(ProjectBillingInfo.class);
-    verify(userProxyCloudbillingProvider.get().projects(), times(2))
+    verify(endUserCloudbillingProvider.get().projects(), times(2))
         .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
     assertThat("projects/" + clonedWorkspace.getNamespace())
         .isEqualTo(projectCaptor.getAllValues().get(1));
@@ -1088,7 +1087,7 @@ public class WorkspacesControllerTest {
           .getBody()
           .getWorkspace();
     } catch (Exception e) {
-      verify(userProxyCloudbillingProvider.get().projects())
+      verify(endUserCloudbillingProvider.get().projects())
           .updateBillingInfo(
               any(),
               eq(
@@ -1112,7 +1111,7 @@ public class WorkspacesControllerTest {
     Workspace originalWorkspace = createWorkspace();
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
-    verify(userProxyCloudbillingProvider.get()).projects();
+    verify(endUserCloudbillingProvider.get()).projects();
 
     final Workspace modWorkspace = new Workspace();
     modWorkspace.setName("cloned");
@@ -1131,7 +1130,7 @@ public class WorkspacesControllerTest {
     workspacesController.cloneWorkspace(
         originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
 
-    verifyZeroInteractions(userProxyCloudbillingProvider.get());
+    verifyZeroInteractions(endUserCloudbillingProvider.get());
     verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
   }
 
