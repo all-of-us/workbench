@@ -408,10 +408,14 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     const {
       showInstitution,
       profile: { givenName, familyName, contactEmail, areaOfResearch, degrees, username,
-        address: {streetAddress1, city, country, state, zipCode},
-        institutionalAffiliations: [{institution, nonAcademicAffiliation, role}]
+        address: {streetAddress1, city, country, state, zipCode}, institutionalAffiliations
       }
     } = this.state;
+
+    let institution, nonAcademicAffiliation, role;
+    if (institutionalAffiliations.length) {
+      ({institution, nonAcademicAffiliation, role} = institutionalAffiliations[0]);
+    }
 
     const presenceCheck = {
       presence: {
