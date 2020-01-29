@@ -2,7 +2,7 @@ package org.pmiops.workbench.auth;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,7 +55,7 @@ public class ProfileServiceTest {
     v2.setAgreementTime(new Timestamp(2));
 
     DbUser user = new DbUser();
-    user.setTermsOfServiceRows(ImmutableList.of(v1, v2));
+    user.setTermsOfServiceRows(ImmutableSet.of(v1, v2));
     Profile profile = profileService.getProfile(user);
     assertThat(profile.getLatestTermsOfServiceVersion()).isEqualTo(2);
     assertThat(profile.getLatestTermsOfServiceTime()).isEqualTo(2);
