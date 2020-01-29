@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
@@ -39,6 +40,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
+import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -97,6 +99,7 @@ public class ProfileControllerTest {
   @Autowired private UserDao userDao;
   @Autowired private AdminActionHistoryDao adminActionHistoryDao;
   @Autowired private UserDataUseAgreementDao userDataUseAgreementDao;
+  @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
   @Mock private FireCloudService fireCloudService;
   @Mock private LeonardoNotebooksClient leonardoNotebooksClient;
   @Mock private DirectoryService directoryService;
@@ -144,18 +147,20 @@ public class ProfileControllerTest {
 
     doNothing().when(mailService).sendBetaAccessRequestEmail(Mockito.any());
     userService =
-        new UserServiceImpl(
-            userProvider,
-            userDao,
-            adminActionHistoryDao,
-            userDataUseAgreementDao,
-            clock,
-            new FakeLongRandom(NONCE_LONG),
-            fireCloudService,
-            Providers.of(config),
-            complianceTrainingService,
-            directoryService,
-            mockUserServiceAuditAdapter);
+        spy(
+            new UserServiceImpl(
+                userProvider,
+                userDao,
+                adminActionHistoryDao,
+                userTermsOfServiceDao,
+                userDataUseAgreementDao,
+                clock,
+                new FakeLongRandom(NONCE_LONG),
+                fireCloudService,
+                Providers.of(config),
+                complianceTrainingService,
+                directoryService,
+                mockUserServiceAuditAdapter));
     ProfileService profileService = new ProfileService(userDao, freeTierBillingService);
     this.profileController =
         new ProfileController(
@@ -192,6 +197,24 @@ public class ProfileControllerTest {
     final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(dbUser).isNotNull();
     assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
+  }
+
+  @Test
+  public void testCreateAccount_withTosVersion() throws Exception {
+    createAccountRequest.setTermsOfServiceVersion(1);
+    Profile profile = createUser();
+
+    verify(userService).submitTermsOfService(any(DbUser.class), eq(1));
+    final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    assertThat(dbUser.getTermsOfServiceRows().size()).isEqualTo(1);
+    assertThat(dbUser.getTermsOfServiceRows().iterator().next().getTosVersion()).isEqualTo(1);
+    assertThat(profile.getLatestTermsOfServiceVersion()).isEqualTo(1);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCreateAccount_withBadTosVersion() throws Exception {
+    createAccountRequest.setTermsOfServiceVersion(999);
+    createUser();
   }
 
   @Test
@@ -555,23 +578,7 @@ public class ProfileControllerTest {
   @Test
   public void testBypassAccessModule() throws Exception {
     Profile profile = createUser();
-    userService = spy(userService);
     WorkbenchConfig config = generateConfig();
-    ProfileService profileService = new ProfileService(userDao, freeTierBillingService);
-    this.profileController =
-        new ProfileController(
-            profileService,
-            userProvider,
-            userAuthenticationProvider,
-            userDao,
-            clock,
-            userService,
-            fireCloudService,
-            directoryService,
-            cloudStorageService,
-            Providers.of(config),
-            Providers.of(mailService),
-            mockProfileAuditor);
     profileController.bypassAccessRequirement(
         profile.getUserId(),
         new AccessBypassRequest().isBypassed(true).moduleName(AccessModule.DATA_USE_AGREEMENT));

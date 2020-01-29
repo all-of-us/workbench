@@ -43,6 +43,9 @@ public interface UserService {
   DbUser submitDataUseAgreement(
       DbUser user, Integer dataUseAgreementSignedVersion, String initials);
 
+  // Registers that a user has agreed to a given version of the Terms of Service.
+  void submitTermsOfService(DbUser dbUser, Integer tosVersion);
+
   void setDataUseAgreementNameOutOfDate(String newGivenName, String newFamilyName);
 
   void setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime);

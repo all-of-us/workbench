@@ -31,6 +31,7 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -71,11 +72,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private final int MAX_RETRIES = 3;
   private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
+  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
 
   private final Provider<DbUser> userProvider;
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
   private final UserDataUseAgreementDao userDataUseAgreementDao;
+  private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final Clock clock;
   private final Random random;
   private final FireCloudService fireCloudService;
@@ -90,6 +93,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Provider<DbUser> userProvider,
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
+      UserTermsOfServiceDao userTermsOfServiceDao,
       UserDataUseAgreementDao userDataUseAgreementDao,
       Clock clock,
       Random random,
@@ -101,6 +105,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
+    this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.userDataUseAgreementDao = userDataUseAgreementDao;
     this.clock = clock;
     this.random = random;
@@ -412,6 +417,21 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                 !dua.getUserGivenName().equalsIgnoreCase(newGivenName)
                     || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
     userDataUseAgreementDao.save(dataUseAgreements);
+  }
+
+  @Override
+  @Transactional
+  public void submitTermsOfService(DbUser dbUser, Integer tosVersion) {
+    if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
+      throw new BadRequestException("Terms of Service version is not up to date");
+    }
+    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+    DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
+    userTermsOfService.setTosVersion(tosVersion);
+    userTermsOfService.setAgreementTime(timestamp);
+    userTermsOfService.setUser(dbUser);
+
+    userTermsOfServiceDao.save(userTermsOfService);
   }
 
   @Override

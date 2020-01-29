@@ -84,6 +84,7 @@ public class DbUser {
   private Integer clusterCreateRetries;
   private Integer billingProjectRetries;
   private Integer moodleId;
+  private Set<DbUserTermsOfService> termsOfServiceRows = new HashSet<>();
 
   // Access module fields go here. See http://broad.io/aou-access-modules for docs.
   private String eraCommonsLinkedNihUsername;
@@ -717,5 +718,18 @@ public class DbUser {
 
   public void setAddress(DbAddress address) {
     this.address = address;
+  }
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+  public Set<DbUserTermsOfService> getTermsOfServiceRows() {
+    return termsOfServiceRows;
+  }
+
+  public void setTermsOfServiceRows(Set<DbUserTermsOfService> termsOfServiceRows) {
+    this.termsOfServiceRows = termsOfServiceRows;
+  }
+
+  public void addTermsOfServiceRow(DbUserTermsOfService termsOfServiceRow) {
+    this.termsOfServiceRows.add(termsOfServiceRow);
   }
 }

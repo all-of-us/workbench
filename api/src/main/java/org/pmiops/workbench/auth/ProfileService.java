@@ -2,6 +2,8 @@ package org.pmiops.workbench.auth;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.billing.FreeTierBillingService;
@@ -11,6 +13,7 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
@@ -206,6 +209,16 @@ public class ProfileService {
 
     profile.setFreeTierUsage(freeTierBillingService.getUserCachedFreeTierUsage(user));
     profile.setFreeTierDollarQuota(freeTierBillingService.getUserFreeTierDollarLimit(user));
+
+    Optional<DbUserTermsOfService> latestTermsOfServiceMaybe =
+        user.getTermsOfServiceRows().stream()
+            .sorted(Comparator.comparing(DbUserTermsOfService::getTosVersion).reversed())
+            .findFirst();
+    if (latestTermsOfServiceMaybe.isPresent()) {
+      profile.setLatestTermsOfServiceVersion(latestTermsOfServiceMaybe.get().getTosVersion());
+      profile.setLatestTermsOfServiceTime(
+          latestTermsOfServiceMaybe.get().getAgreementTime().getTime());
+    }
 
     return profile;
   }
