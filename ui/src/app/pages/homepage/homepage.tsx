@@ -296,7 +296,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                 </FlexRow>
               </FlexRow>
               <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
-                The secure analysis platform to analyze All of Us data</SmallHeader>
+                The secure analysis platform to analyze <i>All of Us</i> data</SmallHeader>
             </FlexColumn>
             <div></div>
           </FlexRow>
@@ -356,7 +356,7 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                       <CustomBulletList>
                                         <CustomBulletListItem bullet='→'>
                                           Create a <a href='https://support.google.com/chrome/answer/2364824'>Chrome Profile </a>
-                                          with your All of Us Researcher Workbench Google account. This will keep your Workbench
+                                          with your <i>All of Us</i> Researcher Workbench Google account. This will keep your Workbench
                                           browser sessions isolated from your other Google accounts.
                                         </CustomBulletListItem>
                                         <CustomBulletListItem bullet='→'>

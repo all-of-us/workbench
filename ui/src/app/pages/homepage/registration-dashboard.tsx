@@ -77,7 +77,7 @@ interface RegistrationTask {
   key: string;
   completionPropsKey: string;
   title: string;
-  description: string;
+  description: JSX.Element;
   buttonText: string;
   completedText: string;
   isRefreshable?: boolean;
@@ -94,8 +94,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'twoFactorAuth',
     completionPropsKey: 'twoFactorAuthCompleted',
     title: 'Turn on Google 2-Step Verification',
-    description: 'Add an extra layer of security to your account by providing your ' +
-      'phone number in addition to your password to verify your identity upon login.',
+    description: <span>Add an extra layer of security to your account by providing your phone number in addition to your password to verify
+       your identity upon login.</span>,
     buttonText: 'Get Started',
     completedText: 'Completed',
     isRefreshable: true,
@@ -107,8 +107,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'complianceTraining',
     completionPropsKey: 'trainingCompleted',
     title: 'Complete Online Training',
-    description: 'Complete mandatory compliance training courses on how data should be used ' +
-      'and handled.',
+    description: <span>Complete mandatory compliance training courses on how data should be used and handled.</span>,
     buttonText: 'Complete training',
     featureFlag: serverConfigStore.getValue().enableComplianceTraining,
     completedText: 'Completed',
@@ -120,8 +119,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'eraCommons',
     completionPropsKey: 'eraCommonsLinked',
     title: 'Login to eRA Commons',
-    description: 'Link to your eRA Commons account to the workbench to gain full access to data ' +
-      'and tools.',
+    description: <span>Link to your eRA Commons account to the workbench to gain full access to data and tools.</span>,
     buttonText: 'Login',
     completedText: 'Linked',
     completionTimestamp: (profile: Profile) => {
@@ -132,7 +130,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'dataUseAgreement',
     completionPropsKey: 'dataUseAgreementCompleted',
     title: 'Data Use Agreement',
-    description: 'Sign our data use agreement consenting to the All of Us data use policy.',
+    description: <span>Sign our data use agreement consenting to the <i>All of Us</i> data use policy.</span>,
     buttonText: 'View & Sign',
     featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
     completedText: 'Signed',

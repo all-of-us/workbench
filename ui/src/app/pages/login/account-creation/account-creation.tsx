@@ -718,11 +718,11 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 participants on who can access their data, and the purpose of such access. Therefore, your name,
                 institution and role, as well as your research background/interests and link to your professional
                 profile will be displayed publicly on the Research Projects Directory on the <AoUTitle/> website to
-                inform the All of Us Research participants, and to comply with the 21st Century Cures Act. Some of the
+                inform the <i>All of Us</i> Research participants, and to comply with the 21st Century Cures Act. Some of the
                 fields noted above may not be visible currently, but will be added in the future.</div>
           </FlexColumn>
           <FlexColumn style={{...styles.asideContainer, marginTop: '21.8rem', height: '15rem'}}>
-            <div style={styles.asideHeader}>All of Us participants are most interested in knowing:</div>
+            <div style={styles.asideHeader}><i>All of Us</i> participants are most interested in knowing:</div>
             <ul style={styles.asideList}>
               {researchPurposeList.map(value => <li style={styles.asideText}>{value}</li>)}
             </ul>
@@ -796,8 +796,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                         placeholder='Describe Your Current Research'
                         value={areaOfResearch}
                         onChange={v => this.updateProfileToBeDeleted('areaOfResearch', v)}/>
-          <TooltipTrigger content='You are required to describe your current research in
-                      order to help All of Us improve the Researcher Workbench.'>
+          <TooltipTrigger content={<span>You are required to describe your current research in
+            order to help <i>All of Us</i> improve the Researcher Workbench.</span>}>
             <InfoIcon style={{
               'height': '22px',
               'marginTop': '2.2rem',
