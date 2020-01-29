@@ -918,6 +918,16 @@ WHERE a.value_source_concept_id in (903096, 903079, 903087)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_criteria\` e on
     (d.observation_source_concept_id = e.concept_id and e.domain_id = 'SURVEY' and e.is_group = 1)"
 
+echo "PPI SURVEYS - add items into ancestor table"
+bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+    (ancestor_concept_id, descendant_concept_id, is_standard)
+SELECT DISTINCT b.concept_id as ancestor_concept_id, a.concept_id as descendant_concept_id, a.is_standard
+FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` a
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` b on CAST(regexp_extract(a.path, r'^\d+') AS INT64) = b.id
+WHERE a.domain_id = 'SURVEY'
+    and a.subtype = 'ANSWER'"
+
 echo "PPI SURVEYS - generate answer counts for all questions EXCEPT where question concept_id = 1585747"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
@@ -993,43 +1003,27 @@ echo "PPI SURVEYS - generate survey counts"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.est_count = y.cnt
-from
+FROM
     (
-        select e.id, count(distinct person_id) cnt
-        from
+        SELECT b.ancestor_concept_id, count(DISTINCT a.person_id) as cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
+        JOIN
             (
                 SELECT *
-                FROM
+                FROM \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
+                WHERE ancestor_concept_id in
                     (
-                        SELECT id
+                        SELECT concept_id
                         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
                         WHERE domain_id = 'SURVEY'
-                            and type = 'PPI'
                             and parent_id = 0
-                    ) a
-                LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.prep_criteria_ancestor\` b on a.id = b.ancestor_id
-            ) e
-        left join
-            (
-                SELECT a.person_id, a.concept_id, b.id
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` a
-                JOIN
-                    (
-                        SELECT id, concept_id
-                        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                        WHERE domain_id = 'SURVEY'
-                            and type = 'PPI'
-                            and is_group = 1
-                            and is_selectable = 1
-                            and parent_id != 0
-                    ) b on a.concept_id = b.concept_id
-                WHERE a.is_standard = 0
-            ) f on e.descendant_id = f.id
-        group by 1
+                    )
+            ) b on a.concept_id = b.descendant_concept_id
+        WHERE a.is_standard = 0
+        GROUP BY 1
     ) y
-where x.domain_id = 'SURVEY'
-    and x.type = 'PPI'
-    and x.id = y.id"
+WHERE x.domain_id = 'SURVEY'
+    and x.concept_id = y.ancestor_concept_id"
 
 
 ################################################
@@ -1358,7 +1352,7 @@ FROM (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_
     LEFT JOIN (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'CONDITION' and type = 'SNOMED' and is_standard = 0) t on s.id = t.parent_id"
 
 # Join Count: 19 - If loop count above is changed, the number of JOINS below must be updated
-# there last UNION statement is to add the ancestor item to itself
+# the last UNION statement is to add the ancestor item to itself
 echo "CONDITIONS - SOURCE SNOMED - add items into ancestor table"
 bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
