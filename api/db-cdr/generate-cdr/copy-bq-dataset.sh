@@ -12,8 +12,9 @@ set -ex
 export SOURCE_DATASET=$1  # project1:dataset1
 export DEST_DATASET=$2  # project2:dataset2
 export JOB_PROJECT=$3 # project3
+export TABLE_FILTER=$4 # table grep filter
 
-for f in $(bq ls -n 1000 $SOURCE_DATASET | grep TABLE | awk '{print $1}')
+for f in $(bq ls -n 1000 $SOURCE_DATASET | grep TABLE | awk '{print $1}' | grep "${TABLE_FILTER}")
 do
   bq --project_id="${JOB_PROJECT}" cp -f "${SOURCE_DATASET}.${f}" "${DEST_DATASET}.${f}"
 done
