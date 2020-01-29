@@ -18,6 +18,7 @@ interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSp
   resource: RecentResource;
   existingNameList: string[];
   onUpdate: Function;
+  disableExportToNotebook: boolean;
 }
 
 interface State {
@@ -37,6 +38,8 @@ export const DatasetResourceCard = fp.flow(
       showRenameModal: false,
       showExportToNotebookModal: false
     };
+
+    console.log(props);
   }
 
   get resourceType(): ResourceType {
@@ -92,7 +95,7 @@ export const DatasetResourceCard = fp.flow(
           AnalyticsTracker.DatasetBuilder.OpenExportModal();
           this.setState({showExportToNotebookModal: true});
         },
-        disabled: !this.canWrite
+        disabled: this.props.disableExportToNotebook || !this.canWrite
       },
       {
         icon: 'trash',

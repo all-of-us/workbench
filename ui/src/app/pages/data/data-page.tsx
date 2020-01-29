@@ -18,7 +18,8 @@ import {navigate} from 'app/utils/navigation';
 import {convertToResources} from 'app/utils/resourceActions';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Domain, RecentResource, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {BillingStatus, Domain, RecentResource, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {workspace} from "@angular-devkit/core/src/experimental";
 
 const styles = {
   cardButtonArea: {
@@ -171,6 +172,7 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
     } if (resource.dataSet) {
       return <DatasetResourceCard resource={resource}
                                   existingNameList={this.getExistingNameList(resource)}
+                                  disableExportToNotebook={this.props.workspace.billingStatus === BillingStatus.INACTIVE}
                                   onUpdate={() => this.loadResources()}/>;
     } else {
       return <ResourceCard resourceCard={resource}
