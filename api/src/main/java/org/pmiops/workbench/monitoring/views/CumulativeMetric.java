@@ -7,7 +7,8 @@ import java.util.List;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 
 /** Metric enum values for events to be counted. */
-public enum EventMetric implements Metric {
+public enum CumulativeMetric implements Metric {
+  DEBUG_COUNT("debug_count", "Debug Cumulative"),
   NOTEBOOK_CLONE("notebook_clone_2", "Clone (duplicate) a notebook"),
   NOTEBOOK_DELETE("notebook_delete_2", "Delete a notebook"),
   NOTEBOOK_SAVE("notebook_save_2", "Save (or create) a notebook");
@@ -16,11 +17,11 @@ public enum EventMetric implements Metric {
   private final String description;
   private final List<MetricLabel> labels;
 
-  EventMetric(String name, String description) {
+  CumulativeMetric(String name, String description) {
     this(name, description, Collections.emptyList());
   }
 
-  EventMetric(String name, String description, List<MetricLabel> labels) {
+  CumulativeMetric(String name, String description, List<MetricLabel> labels) {
     this.name = name;
     this.description = description;
     this.labels = labels;

@@ -28,7 +28,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.views.EventMetric;
+import org.pmiops.workbench.monitoring.views.CumulativeMetric;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,7 +172,7 @@ public class NotebooksServiceTest {
   @Test
   public void testSaveNotebook_firesMetric() {
     notebooksService.saveNotebook(BUCKET_NAME, NOTEBOOK_NAME, NOTEBOOK_CONTENTS);
-    verify(mockMonitoringService).recordEvent(EventMetric.NOTEBOOK_SAVE);
+    verify(mockMonitoringService).recordEvent(CumulativeMetric.NOTEBOOK_SAVE);
   }
 
   @Test
@@ -181,7 +181,7 @@ public class NotebooksServiceTest {
     doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
 
     notebooksService.deleteNotebook(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
-    verify(mockMonitoringService).recordEvent(EventMetric.NOTEBOOK_DELETE);
+    verify(mockMonitoringService).recordEvent(CumulativeMetric.NOTEBOOK_DELETE);
   }
 
   @Test
@@ -190,7 +190,7 @@ public class NotebooksServiceTest {
     doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
 
     notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
-    verify(mockMonitoringService).recordEvent(EventMetric.NOTEBOOK_CLONE);
+    verify(mockMonitoringService).recordEvent(CumulativeMetric.NOTEBOOK_CLONE);
   }
 
   private void stubNotebookToJson() {

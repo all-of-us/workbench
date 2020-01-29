@@ -23,7 +23,7 @@ import org.pmiops.workbench.google.GoogleCloudLocators;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.views.EventMetric;
+import org.pmiops.workbench.monitoring.views.CumulativeMetric;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -168,7 +168,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             workspaceNamespace,
             workspaceName,
             newName);
-    monitoringService.recordEvent(EventMetric.NOTEBOOK_CLONE);
+    monitoringService.recordEvent(CumulativeMetric.NOTEBOOK_CLONE);
     return copiedNotebookFileDetail;
   }
 
@@ -181,7 +181,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         workspaceService.getRequired(workspaceNamespace, workspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
         notebookLocators.fullPath);
-    monitoringService.recordEvent(EventMetric.NOTEBOOK_DELETE);
+    monitoringService.recordEvent(CumulativeMetric.NOTEBOOK_DELETE);
   }
 
   @Override
@@ -224,7 +224,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         bucketName,
         "notebooks/" + NotebooksService.withNotebookExtension(notebookName),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
-    monitoringService.recordEvent(EventMetric.NOTEBOOK_SAVE);
+    monitoringService.recordEvent(CumulativeMetric.NOTEBOOK_SAVE);
   }
 
   @Override
