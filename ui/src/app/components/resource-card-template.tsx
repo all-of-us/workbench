@@ -54,11 +54,6 @@ const styles = reactStyles({
   }
 });
 
-export interface ActionDisabledState {
-  disabled: boolean;
-  reason: string;
-}
-
 export interface Action {
   icon: string;
   displayName: string;
