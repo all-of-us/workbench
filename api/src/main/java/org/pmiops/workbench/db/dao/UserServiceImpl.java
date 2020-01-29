@@ -727,8 +727,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                 "Error while querying Moodle for badges for %s: %s ",
                 dbUser.getUsername(), ex.getMessage()));
         throw new NotFoundException(ex.getMessage());
-      }
-      else {
+      } else {
         log.severe(String.format("Error while syncing compliance training: %s", ex.getMessage()));
       }
       throw ex;

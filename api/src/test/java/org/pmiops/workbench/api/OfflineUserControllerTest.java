@@ -45,6 +45,7 @@ public class OfflineUserControllerTest {
   private Long incrementedUserId = 1L;
 
   private static WorkbenchConfig workbenchConfig;
+
   @TestConfiguration
   @Import({OfflineUserController.class})
   @MockBean({CloudResourceManagerService.class, UserService.class})
