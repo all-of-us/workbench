@@ -69,7 +69,7 @@ There are four types of models in the system - [API models](#swagger), [DB model
 
 ## API
 
-The actual REST API is defined in a series of YAML files according to the [Swagger OpenAPI spec](https://swagger.io/specification/). Swagger takes these YAML files, merges them, and generates all the classes defined by the YAMLs. The command to do so is `./project.rb compile-generated-java`.
+The actual REST API is defined in a series of YAML files according to the [Swagger OpenAPI spec](https://swagger.io/specification/). [swagger-codegen](https://github.com/swagger-api/swagger-codegen) takes these YAML files, merges them, and generates all the classes defined by the YAMLs. The command to do so is `./project.rb compile-generated-java`.
 
 One non-Swagger-standard thing about these YAML files is that the `tag` param is used to indicate which Controller / APIController an endpoint should be associated with.
 
