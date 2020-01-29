@@ -161,15 +161,6 @@ export class ResourceCard extends React.Component<Props, State> {
     }
   }
 
-  // DELETE?
-  edit(): void {
-    switch (this.resourceType) {
-      default: {
-        this.setState({renaming: true});
-      }
-    }
-  }
-
   renameResource(): void {
     this.setState({renaming: true});
   }
@@ -337,8 +328,7 @@ export class ResourceCard extends React.Component<Props, State> {
                               canDelete={this.ownerPermission}
                               onDeleteResource={() => this.openConfirmDelete()}
                               onRenameResource={() => this.renameResource()}
-                              canEdit={this.writerPermission}
-                              onEdit={() => this.edit()}/>
+                              canEdit={this.writerPermission}/>
             <Clickable>
               <a style={styles.cardName}
                    data-test-id='card-name'

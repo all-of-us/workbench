@@ -44,7 +44,7 @@ export const DatasetResourceCard = fp.flow(
   }
 
   get displayName(): string {
-    return this.props.resource.dataSet.name + ' v2';
+    return this.props.resource.dataSet.name;
   }
 
   get canWrite(): boolean {
