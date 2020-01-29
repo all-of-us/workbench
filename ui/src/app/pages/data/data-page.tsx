@@ -19,7 +19,6 @@ import {convertToResources} from 'app/utils/resourceActions';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {BillingStatus, Domain, RecentResource, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
-import {workspace} from "@angular-devkit/core/src/experimental";
 
 const styles = {
   cardButtonArea: {

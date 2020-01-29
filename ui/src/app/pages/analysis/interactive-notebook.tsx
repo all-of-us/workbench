@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {ClrIcon} from 'app/components/icons';
+import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit';
 import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
@@ -16,11 +17,10 @@ import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {navigate, userProfileStore} from 'app/utils/navigation';
+import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, ClusterStatus} from 'generated/fetch';
-import {TooltipTrigger} from "app/components/popups";
-import {ACTION_DISABLED_INVALID_BILLING} from "app/utils/strings";
 
 
 const styles = reactStyles({

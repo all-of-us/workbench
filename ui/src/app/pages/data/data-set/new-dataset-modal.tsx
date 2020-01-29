@@ -16,8 +16,8 @@ import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
+import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {
-  BillingStatus,
   DataSet,
   DataSetRequest,
   DomainValuePair,
@@ -25,7 +25,6 @@ import {
   KernelTypeEnum,
   PrePackagedConceptSetEnum
 } from 'generated/fetch';
-import {ACTION_DISABLED_INVALID_BILLING} from "app/utils/strings";
 
 interface Props {
   closeFunction: Function;

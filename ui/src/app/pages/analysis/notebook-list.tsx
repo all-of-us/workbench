@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {CardButton} from 'app/components/buttons';
@@ -18,11 +17,9 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {BillingStatus, FileDetail, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
-import {WorkspacePermissionsUtil} from "app/utils/workspace-permissions";
-import canWrite = WorkspacePermissionsUtil.canWrite;
-import {workspace} from "@angular-devkit/core/src/experimental";
-import {ACTION_DISABLED_INVALID_BILLING} from "app/utils/strings";
 
 const styles = {
   heading: {

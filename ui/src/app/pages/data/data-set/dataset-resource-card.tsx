@@ -10,10 +10,10 @@ import {formatRecentResourceDisplayDate} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resourceActions';
+import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {RecentResource, ResourceType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {ACTION_DISABLED_INVALID_BILLING} from "app/utils/strings";
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: RecentResource;
