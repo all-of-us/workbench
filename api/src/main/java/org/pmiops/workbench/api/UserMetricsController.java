@@ -196,7 +196,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 ImmutableMap.toImmutableMap(
                     SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
 
-    final ImmutableMap<Long, FirecloudWorkspaceResponse> idToLiveWorkspace =
+    final Map<Long, FirecloudWorkspaceResponse> idToLiveWorkspace =
         idToDbWorkspace.entrySet().stream()
             .map(
                 entry ->
@@ -261,7 +261,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   private RecentResource buildRecentResource(
       Map<Long, DbWorkspace> idToDbWorkspace,
-      ImmutableMap<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
+      Map<Long, FirecloudWorkspaceResponse> idToFcWorkspaceResponse,
       DbUserRecentResource dbUserRecentResource) {
     RecentResource resource = TO_CLIENT.apply(dbUserRecentResource);
     FirecloudWorkspaceResponse workspaceDetails =
