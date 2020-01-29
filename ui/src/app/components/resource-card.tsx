@@ -8,12 +8,11 @@ import {ResourceCardMenu} from 'app/components/resources';
 import {TextModal} from 'app/components/text-modal';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {navigate, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resourceActions';
 
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {CopyModal} from 'app/components/copy-modal';
-import {ExportDataSetModal} from 'app/pages/data/data-set/export-data-set-modal';
 import {CopyRequest, DataSet, RecentResource, ResourceType} from 'generated/fetch';
 
 import {Modal, ModalBody, ModalTitle} from 'app/components/modals';

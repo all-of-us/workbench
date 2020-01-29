@@ -1,18 +1,18 @@
+import {RenameModal} from 'app/components/rename-modal';
 import {Action, ResourceCardTemplate} from 'app/components/resource-card-template';
 import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/components/with-confirm-delete-modal';
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
+import {ExportDataSetModal} from 'app/pages/data/data-set/export-data-set-modal';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {formatRecentResourceDisplayDate} from 'app/utils';
+import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resourceActions';
 import {RecentResource, ResourceType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {AnalyticsTracker} from "app/utils/analytics";
-import {ExportDataSetModal} from "app/pages/data/data-set/export-data-set-modal";
-import {RenameModal} from "app/components/rename-modal";
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: RecentResource;
@@ -68,6 +68,7 @@ export const DatasetResourceCard = fp.flow(
         icon: 'pencil',
         displayName: 'Rename Dataset',
         onClick: () => {
+          AnalyticsTracker.DatasetBuilder.OpenRenameModal();
           this.setState({showRenameModal: true});
         },
         disabled: !this.canWrite
@@ -76,23 +77,28 @@ export const DatasetResourceCard = fp.flow(
         icon: 'pencil',
         displayName: 'Edit',
         onClick: () => {
+          AnalyticsTracker.DatasetBuilder.OpenEditPage('From Card Snowman');
           navigate(['workspaces',
             this.props.resource.workspaceNamespace,
             this.props.resource.workspaceFirecloudName,
-            'data', 'data-sets', this.props.resource.dataSet.id])
+            'data', 'data-sets', this.props.resource.dataSet.id]);
         },
         disabled: !this.canWrite
       },
       {
         icon: 'pencil',
         displayName: 'Export to Notebook',
-        onClick: () => {this.setState({showExportToNotebookModal: true})},
+        onClick: () => {
+          AnalyticsTracker.DatasetBuilder.OpenExportModal();
+          this.setState({showExportToNotebookModal: true});
+        },
         disabled: !this.canWrite
       },
       {
         icon: 'trash',
         displayName: 'Delete',
         onClick: () => {
+          AnalyticsTracker.DatasetBuilder.OpenDeleteModal();
           this.props.showConfirmDeleteModal(this.displayName,
             this.resourceType, () => this.delete());
         },
@@ -113,6 +119,7 @@ export const DatasetResourceCard = fp.flow(
   }
 
   rename(name, description) {
+    AnalyticsTracker.DatasetBuilder.Rename();
     const dataset = this.props.resource.dataSet;
 
     const request = {

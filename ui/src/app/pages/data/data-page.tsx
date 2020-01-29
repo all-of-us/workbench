@@ -9,6 +9,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {ResourceCard} from 'app/components/resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
+import {DatasetResourceCard} from 'app/pages/data/data-set/dataset-resource-card';
 import {cohortReviewApi, cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
@@ -18,7 +19,6 @@ import {convertToResources} from 'app/utils/resourceActions';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Domain, RecentResource, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
-import {DatasetResourceCard} from "app/pages/data/data-set/dataset-resource-card";
 
 const styles = {
   cardButtonArea: {

@@ -12,7 +12,6 @@ import {ResourceCard} from 'app/components/resource-card';
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {CohortResourceCard} from 'app/pages/data/cohort/cohort-resource-card';
 import {RecentResource} from 'generated/fetch';
-import {DatasetResourceCard} from "app/pages/data/data-set/dataset-resource-card";
 
 export const RecentResources = (fp.flow as any)(
   withContentRect('client'),
