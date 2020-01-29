@@ -61,5 +61,4 @@ public enum EventMetric implements MetricBase {
   public MetricKind getMetricKind() {
     return MetricKind.CUMULATIVE;
   }
-
 }

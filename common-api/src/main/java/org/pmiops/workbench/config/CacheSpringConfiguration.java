@@ -67,7 +67,7 @@ public class CacheSpringConfiguration {
   }
 
   @Bean
-//  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  //  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   WorkbenchConfig getWorkbenchConfig(
       @Qualifier("configCache") LoadingCache<String, Object> configCache)
       throws ExecutionException {

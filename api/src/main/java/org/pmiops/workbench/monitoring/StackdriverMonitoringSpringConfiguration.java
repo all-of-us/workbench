@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.UUID;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,11 +31,11 @@ public class StackdriverMonitoringSpringConfiguration {
   }
 
   /**
-   * Provide a  MonitoredResource object for Stackdriver Monitoring. (Additionally, this could
-   * be used for tracing and logging as well, though we should tread carefully there.
+   * Provide a MonitoredResource object for Stackdriver Monitoring. (Additionally, this could be
+   * used for tracing and logging as well, though we should tread carefully there.
    *
-   * This method was moved of an OpenCensus-specific service for use by both the Cloud Monitoring API-
-   * based monitoring service implementation and the OC-based one.
+   * <p>This method was moved of an OpenCensus-specific service for use by both the Cloud Monitoring
+   * API- based monitoring service implementation and the OC-based one.
    */
   @Bean
   @Scope("prototype")

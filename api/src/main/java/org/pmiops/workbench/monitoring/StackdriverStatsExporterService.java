@@ -72,6 +72,7 @@ public class StackdriverStatsExporterService {
         .setMonitoredResource(monitoredResourceProvider.get())
         .build();
   }
+
   private String getProjectId() {
     return workbenchConfigProvider.get().server.projectId;
   }

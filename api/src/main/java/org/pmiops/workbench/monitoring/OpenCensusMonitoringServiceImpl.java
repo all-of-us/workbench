@@ -24,7 +24,8 @@ import org.springframework.stereotype.Service;
 
 @Service("OPEN_CENSUS_MONITORING_SERVICE")
 public class OpenCensusMonitoringServiceImpl implements MonitoringService {
-  private static final Logger logger = Logger.getLogger(OpenCensusMonitoringServiceImpl.class.getName());
+  private static final Logger logger =
+      Logger.getLogger(OpenCensusMonitoringServiceImpl.class.getName());
   private boolean viewsAreRegistered = false;
   private ViewManager viewManager;
   private StatsRecorder statsRecorder;

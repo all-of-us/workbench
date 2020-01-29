@@ -26,8 +26,9 @@ import org.pmiops.workbench.monitoring.attachments.MetricLabelBase;
  * we may wish to support other metrics backends, and don't want to depend on Stackdriver concepts
  * or implementation details.
  *
- * Currenlty, there is a  mix of both Stackdriver and OpenCensus types referenced in this interface.
- * The plan is to avoid that by moving these backend-specific functions into translator classes/services.
+ * <p>Currenlty, there is a mix of both Stackdriver and OpenCensus types referenced in this
+ * interface. The plan is to avoid that by moving these backend-specific functions into translator
+ * classes/services.
  */
 public interface MetricBase {
 
@@ -47,6 +48,7 @@ public interface MetricBase {
 
   /**
    * Return
+   *
    * @return
    */
   default String getMetricPathName() {
