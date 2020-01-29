@@ -1,18 +1,16 @@
 package org.pmiops.workbench.monitoring;
 
 import com.google.api.MonitoredResource;
-import com.google.appengine.api.modules.ModulesException;
 import com.google.appengine.api.modules.ModulesService;
 import com.google.common.annotations.VisibleForTesting;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
 import java.io.IOException;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.monitoring.views.MetricBase;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,22 +22,25 @@ public class StackdriverStatsExporterService {
 
   private static final Logger logger =
       Logger.getLogger(StackdriverStatsExporterService.class.getName());
-  private static final String STACKDRIVER_CUSTOM_METRICS_PREFIX = "custom.googleapis.com/";
   private static final String MONITORED_RESOURCE_TYPE = "generic_node";
   private static final String PROJECT_ID_LABEL = "project_id";
   private static final String LOCATION_LABEL = "location";
   private static final String NAMESPACE_LABEL = "namespace";
   private static final String NODE_ID_LABEL = "node_id";
-  public static final String UNKNOWN_INSTANCE_PREFIX = "unknown-";
+  private static final String UNKNOWN_INSTANCE_PREFIX = "unknown-";
 
   private boolean initialized;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private ModulesService modulesService;
+  private Provider<MonitoredResource> monitoredResourceProvider;
 
   public StackdriverStatsExporterService(
-      Provider<WorkbenchConfig> workbenchConfigProvider, ModulesService modulesService) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      ModulesService modulesService,
+      Provider<MonitoredResource> monitoredResourceProvider) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.modulesService = modulesService;
+    this.monitoredResourceProvider = monitoredResourceProvider;
     this.initialized = false;
   }
 
@@ -66,52 +67,12 @@ public class StackdriverStatsExporterService {
   @VisibleForTesting
   public StackdriverStatsConfiguration makeStackdriverStatsConfiguration() {
     return StackdriverStatsConfiguration.builder()
-        .setMetricNamePrefix(STACKDRIVER_CUSTOM_METRICS_PREFIX)
+        .setMetricNamePrefix(MetricBase.STACKDRIVER_CUSTOM_METRICS_PREFIX)
         .setProjectId(getProjectId())
-        .setMonitoredResource(makeMonitoredResource())
+        .setMonitoredResource(monitoredResourceProvider.get())
         .build();
   }
-
-  private MonitoredResource makeMonitoredResource() {
-    return MonitoredResource.newBuilder()
-        .setType(MONITORED_RESOURCE_TYPE)
-        .putLabels(PROJECT_ID_LABEL, getProjectId())
-        .putLabels(LOCATION_LABEL, getLocation())
-        .putLabels(NAMESPACE_LABEL, getEnvironmentShortName())
-        .putLabels(NODE_ID_LABEL, getNodeId())
-        .build();
-  }
-
   private String getProjectId() {
     return workbenchConfigProvider.get().server.projectId;
-  }
-
-  private String getLocation() {
-    return workbenchConfigProvider.get().server.appEngineLocationId;
-  }
-
-  private String getNodeId() {
-    try {
-      return modulesService.getCurrentInstanceId();
-    } catch (ModulesException e) {
-      logger.log(Level.INFO, "Failed to retrieve instance ID from ModulesService");
-      return makeRandomNodeId();
-    }
-  }
-
-  /**
-   * Stackdriver instances have very long, random ID strings. When running locally, however, the
-   * ModulesService throws an exception, so we need to assign non-conflicting and non-repeating ID
-   * strings.
-   *
-   * @return
-   */
-  private String makeRandomNodeId() {
-    return UNKNOWN_INSTANCE_PREFIX + UUID.randomUUID().toString();
-  }
-
-  @NotNull
-  private String getEnvironmentShortName() {
-    return workbenchConfigProvider.get().server.shortName.toLowerCase();
   }
 }

@@ -18,13 +18,13 @@ import java.util.stream.StreamSupport;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.MetricBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service
-public class MonitoringServiceImpl implements MonitoringService {
-  private static final Logger logger = Logger.getLogger(MonitoringServiceImpl.class.getName());
+@Service("OPEN_CENSUS_MONITORING_SERVICE")
+public class OpenCensusMonitoringServiceImpl implements MonitoringService {
+  private static final Logger logger = Logger.getLogger(OpenCensusMonitoringServiceImpl.class.getName());
   private boolean viewsAreRegistered = false;
   private ViewManager viewManager;
   private StatsRecorder statsRecorder;
@@ -32,7 +32,7 @@ public class MonitoringServiceImpl implements MonitoringService {
   private Tagger tagger;
 
   @Autowired
-  MonitoringServiceImpl(
+  OpenCensusMonitoringServiceImpl(
       ViewManager viewManager,
       StatsRecorder statsRecorder,
       StackdriverStatsExporterService stackdriverStatsExporterService,
@@ -54,16 +54,16 @@ public class MonitoringServiceImpl implements MonitoringService {
   private void registerMetricViews() {
     StreamSupport.stream(
             Iterables.concat(
-                    Arrays.<Metric>asList(GaugeMetric.values()),
-                    Arrays.<Metric>asList(EventMetric.values()))
+                    Arrays.<MetricBase>asList(GaugeMetric.values()),
+                    Arrays.<MetricBase>asList(EventMetric.values()))
                 .spliterator(),
             false)
-        .map(Metric::toView)
+        .map(MetricBase::toView)
         .forEach(viewManager::registerView);
   }
 
   @Override
-  public void recordValues(Map<Metric, Number> metricToValue, Map<TagKey, TagValue> tags) {
+  public void recordValues(Map<MetricBase, Number> metricToValue, Map<TagKey, TagValue> tags) {
     initStatsConfigurationIdempotent();
     if (metricToValue.isEmpty()) {
       logger.warning("recordValue() called with empty map.");
@@ -88,7 +88,7 @@ public class MonitoringServiceImpl implements MonitoringService {
    * @param value
    */
   private void addToMeasureMap(
-      @NotNull MeasureMap measureMap, @NotNull Metric metric, @NotNull Number value) {
+      @NotNull MeasureMap measureMap, @NotNull MetricBase metric, @NotNull Number value) {
     if (metric.getMeasureClass().equals(MeasureLong.class)) {
       measureMap.put(metric.getMeasureLong(), value.longValue());
     } else if (metric.getMeasureClass().equals(MeasureDouble.class)) {

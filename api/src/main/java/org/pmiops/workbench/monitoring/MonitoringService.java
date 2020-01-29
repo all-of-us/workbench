@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import org.pmiops.workbench.monitoring.views.EventMetric;
-import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.MetricBase;
 
 public interface MonitoringService {
 
@@ -28,11 +28,11 @@ public interface MonitoringService {
     recordValues(ImmutableMap.of(eventMetric, DELTA_VALUE), tags);
   }
 
-  default void recordValue(Metric metric, Number value) {
+  default void recordValue(MetricBase metric, Number value) {
     recordValues(ImmutableMap.of(metric, value));
   }
 
-  default void recordValues(Map<Metric, Number> metricToValue) {
+  default void recordValues(Map<MetricBase, Number> metricToValue) {
     recordValues(metricToValue, DEFAULT_TAGS);
   }
 
@@ -45,7 +45,7 @@ public interface MonitoringService {
    *     attachments should apply to all entries in this map.
    * @param tags Map of String/AttachmentValue pairs to be associated with these data.
    */
-  void recordValues(Map<Metric, Number> metricToValue, Map<TagKey, TagValue> tags);
+  void recordValues(Map<MetricBase, Number> metricToValue, Map<TagKey, TagValue> tags);
 
   default void recordBundle(MeasurementBundle measurementBundle) {
     recordValues(measurementBundle.getMeasurements(), measurementBundle.getTags());

@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
-import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.MetricBase;
 
 /**
  * Simple bundle class to avoid dealing with lists of pairs of maps. This situation can occur in
@@ -16,15 +16,15 @@ import org.pmiops.workbench.monitoring.views.Metric;
  * to avoid excessive proliferation of (confusing) argument list types, we try to consolidate here.
  */
 public class MeasurementBundle {
-  private final Map<Metric, Number> measurements;
+  private final Map<MetricBase, Number> measurements;
   private final Map<MetricLabel, TagValue> tags;
 
-  private MeasurementBundle(Map<Metric, Number> measurements, Map<MetricLabel, TagValue> tags) {
+  private MeasurementBundle(Map<MetricBase, Number> measurements, Map<MetricLabel, TagValue> tags) {
     this.measurements = measurements;
     this.tags = tags;
   }
 
-  public Map<Metric, Number> getMeasurements() {
+  public Map<MetricBase, Number> getMeasurements() {
     return measurements;
   }
 
@@ -68,7 +68,7 @@ public class MeasurementBundle {
   }
 
   public static class Builder {
-    private ImmutableMap.Builder<Metric, Number> measurementsBuilder;
+    private ImmutableMap.Builder<MetricBase, Number> measurementsBuilder;
     private ImmutableMap.Builder<MetricLabel, TagValue> tagsBuilder;
 
     private Builder() {
@@ -76,17 +76,17 @@ public class MeasurementBundle {
       tagsBuilder = ImmutableMap.builder();
     }
 
-    public Builder addEvent(Metric metric) {
+    public Builder addEvent(MetricBase metric) {
       measurementsBuilder.put(metric, MonitoringService.DELTA_VALUE);
       return this;
     }
 
-    public Builder addMeasurement(Metric metric, Number value) {
+    public Builder addMeasurement(MetricBase metric, Number value) {
       measurementsBuilder.put(metric, value);
       return this;
     }
 
-    public Builder addAllMeasurements(Map<Metric, Number> map) {
+    public Builder addAllMeasurements(Map<MetricBase, Number> map) {
       measurementsBuilder.putAll(ImmutableMap.copyOf(map));
       return this;
     }
@@ -117,7 +117,7 @@ public class MeasurementBundle {
      * attachments, according to Attachment#supportsDiscreteValue()
      */
     private void validate() {
-      ImmutableMap<Metric, Number> measurements = measurementsBuilder.build();
+      ImmutableMap<MetricBase, Number> measurements = measurementsBuilder.build();
       ImmutableMap<MetricLabel, TagValue> tags = tagsBuilder.build();
       if (measurements.isEmpty()) {
         throw new IllegalStateException("MeasurementBundle must have at least one measurement.");
@@ -127,7 +127,7 @@ public class MeasurementBundle {
         final MetricLabel attachment = entry.getKey();
         final TagValue attachmentValue = entry.getValue();
 
-        for (Metric metric : measurements.keySet()) {
+        for (MetricBase metric : measurements.keySet()) {
           if (!metric.supportsLabel(attachment)) {
             throw new IllegalStateException(
                 (String.format(

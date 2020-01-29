@@ -1,5 +1,6 @@
 package org.pmiops.workbench.monitoring.views;
 
+import com.google.api.MetricDescriptor.MetricKind;
 import com.google.common.collect.ImmutableList;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Aggregation.LastValue;
@@ -8,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 
-public enum GaugeMetric implements Metric {
+public enum GaugeMetric implements MetricBase {
   BILLING_BUFFER_PROJECT_COUNT(
       "billing_buffer_project_count",
       "Number of projects in the billing buffer for each status",
@@ -30,7 +31,7 @@ public enum GaugeMetric implements Metric {
       "workspace_count_3",
       "Count of all workspaces",
       ImmutableList.of(MetricLabel.WORKSPACE_ACTIVE_STATUS, MetricLabel.DATA_ACCESS_LEVEL),
-      Metric.UNITLESS_UNIT,
+      MetricBase.UNITLESS_UNIT,
       MeasureLong.class);
 
   public static final LastValue AGGREGATION = LastValue.create();
@@ -41,11 +42,11 @@ public enum GaugeMetric implements Metric {
   private final List<MetricLabel> allowedAttachments;
 
   GaugeMetric(String name, String description) {
-    this(name, description, Collections.emptyList(), Metric.UNITLESS_UNIT, MeasureLong.class);
+    this(name, description, Collections.emptyList(), MetricBase.UNITLESS_UNIT, MeasureLong.class);
   }
 
   GaugeMetric(String name, String description, List<MetricLabel> labels) {
-    this(name, description, labels, Metric.UNITLESS_UNIT, MeasureLong.class);
+    this(name, description, labels, MetricBase.UNITLESS_UNIT, MeasureLong.class);
   }
 
   GaugeMetric(
@@ -90,6 +91,11 @@ public enum GaugeMetric implements Metric {
   @Override
   public List<MetricLabel> getLabels() {
     return allowedAttachments;
+  }
+
+  @Override
+  public MetricKind getMetricKind() {
+    return MetricKind.GAUGE;
   }
 
   @Override

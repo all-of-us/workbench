@@ -48,7 +48,7 @@ public class MonitoringServiceTest {
   @Autowired private MonitoringService monitoringService;
 
   @TestConfiguration
-  @Import({MonitoringServiceImpl.class})
+  @Import({OpenCensusMonitoringServiceImpl.class})
   @MockBean({
     ViewManager.class,
     StatsRecorder.class,
