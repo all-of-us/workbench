@@ -2,7 +2,7 @@ import {Clickable, MenuItem} from 'app/components/buttons';
 import {ResourceCardBase} from 'app/components/card';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SnowmanIcon} from 'app/components/icons';
-import {PopupTrigger} from 'app/components/popups';
+import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
@@ -54,11 +54,17 @@ const styles = reactStyles({
   }
 });
 
+export interface ActionDisabledState {
+  disabled: boolean;
+  reason: string;
+}
+
 export interface Action {
   icon: string;
   displayName: string;
   onClick: () => void;
   disabled: boolean;
+  hoverText?: string;
 }
 
 interface Props {
@@ -97,13 +103,16 @@ export class ResourceCardTemplate extends React.Component<Props, {}> {
               content={
                 <React.Fragment>
                   {this.props.actions.map((action, i) => {
-                    return (<MenuItem
-                      key={i}
-                      icon={action.icon}
-                      onClick={() => action.onClick()}
-                      disabled={action.disabled}>
-                      {action.displayName}
-                    </MenuItem>);
+                    return (
+                      <TooltipTrigger content={action.hoverText}>
+                        <MenuItem
+                          key={i}
+                          icon={action.icon}
+                          onClick={() => action.onClick()}
+                          disabled={action.disabled}>
+                          {action.displayName}
+                        </MenuItem>
+                      </TooltipTrigger>);
                   })}
                 </React.Fragment>
               }

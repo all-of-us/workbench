@@ -13,6 +13,7 @@ import {toDisplay} from 'app/utils/resourceActions';
 import {RecentResource, ResourceType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {ACTION_DISABLED_INVALID_BILLING} from "app/utils/strings";
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: RecentResource;
@@ -38,8 +39,6 @@ export const DatasetResourceCard = fp.flow(
       showRenameModal: false,
       showExportToNotebookModal: false
     };
-
-    console.log(props);
   }
 
   get resourceType(): ResourceType {
@@ -95,7 +94,8 @@ export const DatasetResourceCard = fp.flow(
           AnalyticsTracker.DatasetBuilder.OpenExportModal();
           this.setState({showExportToNotebookModal: true});
         },
-        disabled: this.props.disableExportToNotebook || !this.canWrite
+        disabled: this.props.disableExportToNotebook || !this.canWrite,
+        hoverText: this.props.disableExportToNotebook && ACTION_DISABLED_INVALID_BILLING
       },
       {
         icon: 'trash',

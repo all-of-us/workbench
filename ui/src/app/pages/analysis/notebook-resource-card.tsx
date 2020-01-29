@@ -14,6 +14,7 @@ import {toDisplay} from 'app/utils/resourceActions';
 import {CopyRequest, RecentResource, ResourceType} from 'generated/fetch';
 import * as fp from 'lodash';
 import * as React from 'react';
+import {ACTION_DISABLED_INVALID_BILLING} from "app/utils/strings";
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: RecentResource;
@@ -85,6 +86,7 @@ export const NotebookResourceCard = fp.flow(
           this.duplicateNotebook();
         },
         disabled: this.props.disableDuplicate || !this.writePermission,
+        hoverText: this.props.disableDuplicate && ACTION_DISABLED_INVALID_BILLING
       },
       {
         icon: 'copy',

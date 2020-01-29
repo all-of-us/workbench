@@ -89,7 +89,6 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
 
   render() {
     const {workspace, workspace: {namespace, id, accessLevel}} = this.props;
-    console.log(workspace);
     const {notebookList, notebookNameList, creating, loading} = this.state;
     // TODO Remove this cast when we switch to fetch types
     const al = accessLevel as unknown as WorkspaceAccessLevel;
