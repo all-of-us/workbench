@@ -23,6 +23,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.WorkbenchDbConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbUser;
@@ -53,6 +55,7 @@ public class UserMetricsControllerTest {
   @Mock private CloudStorageService mockCloudStorageService;
   @Mock private UserRecentResourceService mockUserRecentResourceService;
   @Mock private Provider<DbUser> mockUserProvider;
+  @Mock private Provider<WorkbenchConfig> mockWorkbenchConfigProvider;
   @Mock private FireCloudService mockFireCloudService;
   @Mock private WorkspaceService mockWorkspaceService;
 
@@ -172,6 +175,7 @@ public class UserMetricsControllerTest {
     userMetricsController =
         new UserMetricsController(
             mockUserProvider,
+            mockWorkbenchConfigProvider,
             mockUserRecentResourceService,
             mockWorkspaceService,
             mockFireCloudService,
