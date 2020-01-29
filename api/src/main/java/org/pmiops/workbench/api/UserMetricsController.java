@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -30,6 +31,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -37,7 +39,7 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResource;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.RecentResourceResponse;
-import org.pmiops.workbench.workspaces.WorkspaceConversionUtils;
+import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +52,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private static final int MAX_RECENT_NOTEBOOKS = 8;
   private static final Logger log = Logger.getLogger(UserMetricsController.class.getName());
   private final Provider<DbUser> userProvider;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserRecentResourceService userRecentResourceService;
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
@@ -111,12 +114,14 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   @Autowired
   UserMetricsController(
       Provider<DbUser> userProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
       Clock clock) {
     this.userProvider = userProvider;
+    this.workbenchConfigProvider = workbenchConfigProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
@@ -176,33 +181,35 @@ public class UserMetricsController implements UserMetricsApiDelegate {
             .limit(distinctWorkspacelimit)
             .collect(Collectors.toList());
 
-    final Map<Long, DbWorkspace> idToDbWorkspace = workspaceIdList
-        .stream()
-        .map(
-            id ->
-                workspaceService
-                    .findActiveByWorkspaceId(id)
-                    .map(
-                        dbWorkspace ->
-                            new AbstractMap.SimpleImmutableEntry<>(
-                                dbWorkspace.getWorkspaceId(), dbWorkspace)))
-        .flatMap(Streams::stream)
-        .collect(ImmutableMap.toImmutableMap(SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+    final Map<Long, DbWorkspace> idToDbWorkspace =
+        workspaceIdList.stream()
+            .map(
+                id ->
+                    workspaceService
+                        .findActiveByWorkspaceId(id)
+                        .map(
+                            dbWorkspace ->
+                                new AbstractMap.SimpleImmutableEntry<>(
+                                    dbWorkspace.getWorkspaceId(), dbWorkspace)))
+            .flatMap(Streams::stream)
+            .collect(
+                ImmutableMap.toImmutableMap(
+                    SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
 
-    final ImmutableMap<Long, FirecloudWorkspaceResponse> idToLiveWorkspace = idToDbWorkspace.entrySet()
-        .stream()
-        .map(
-            entry ->
-                fireCloudService
-                    .getWorkspace(entry.getValue())
-                    .map(
-                        workspaceResponse ->
-                            new AbstractMap.SimpleImmutableEntry<>(
-                                entry.getKey(), workspaceResponse)))
-        .flatMap(Streams::stream)
-        .collect(
-            ImmutableMap.toImmutableMap(
-                SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
+    final ImmutableMap<Long, FirecloudWorkspaceResponse> idToLiveWorkspace =
+        idToDbWorkspace.entrySet().stream()
+            .map(
+                entry ->
+                    fireCloudService
+                        .getWorkspace(entry.getValue())
+                        .map(
+                            workspaceResponse ->
+                                new AbstractMap.SimpleImmutableEntry<>(
+                                    entry.getKey(), workspaceResponse)))
+            .flatMap(Streams::stream)
+            .collect(
+                ImmutableMap.toImmutableMap(
+                    SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
 
     final ImmutableList<DbUserRecentResource> workspaceFilteredResources =
         userRecentResourceList.stream()
@@ -259,9 +266,15 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     RecentResource resource = TO_CLIENT.apply(dbUserRecentResource);
     FirecloudWorkspaceResponse workspaceDetails =
         idToFcWorkspaceResponse.get(dbUserRecentResource.getWorkspaceId());
-    resource.setWorkspaceBillingStatus(idToDbWorkspace.get(dbUserRecentResource.getWorkspaceId()).getBillingStatus());
+    if (workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
+      resource.setWorkspaceBillingStatus(
+          idToDbWorkspace.get(dbUserRecentResource.getWorkspaceId()).getBillingStatus());
+    } else {
+      resource.setWorkspaceBillingStatus(BillingStatus.ACTIVE);
+    }
     resource.setPermission(
-        WorkspaceConversionUtils.toApiWorkspaceAccessLevel(workspaceDetails.getAccessLevel()).toString());
+        ManualWorkspaceMapper.toApiWorkspaceAccessLevel(workspaceDetails.getAccessLevel())
+            .toString());
     resource.setWorkspaceNamespace(workspaceDetails.getWorkspace().getNamespace());
     resource.setWorkspaceFirecloudName(workspaceDetails.getWorkspace().getName());
     return resource;

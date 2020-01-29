@@ -6,7 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
@@ -14,14 +16,24 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.RecentWorkspace;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.springframework.stereotype.Service;
 
-public class WorkspaceConversionUtils {
+// We should migrate over to the Mapstruct supported WorkspaceMapper
+@Service
+public class ManualWorkspaceMapper {
+
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+
+  public ManualWorkspaceMapper(Provider<WorkbenchConfig> workbenchConfigProvider) {
+    this.workbenchConfigProvider = workbenchConfigProvider;
+  }
 
   public static WorkspaceAccessLevel toApiWorkspaceAccessLevel(String firecloudAccessLevel) {
     if (firecloudAccessLevel.equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
@@ -31,7 +43,7 @@ public class WorkspaceConversionUtils {
     }
   }
 
-  public static Workspace toApiWorkspace(DbWorkspace workspace) {
+  public Workspace toApiWorkspace(DbWorkspace workspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
     FirecloudWorkspaceId workspaceId = workspace.getFirecloudWorkspaceId();
 
@@ -47,9 +59,15 @@ public class WorkspaceConversionUtils {
             .namespace(workspaceId.getWorkspaceNamespace())
             .published(workspace.getPublished())
             .researchPurpose(researchPurpose);
+
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
+      result.billingStatus(BillingStatus.ACTIVE);
+    }
+
     if (workspace.getCreator() != null) {
       result.setCreator(workspace.getCreator().getUsername());
     }
+
     if (workspace.getCdrVersion() != null) {
       result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
@@ -57,7 +75,7 @@ public class WorkspaceConversionUtils {
     return result;
   }
 
-  public static Workspace toApiWorkspace(DbWorkspace workspace, FirecloudWorkspace fcWorkspace) {
+  public Workspace toApiWorkspace(DbWorkspace workspace, FirecloudWorkspace fcWorkspace) {
     ResearchPurpose researchPurpose = createResearchPurpose(workspace);
 
     Workspace result =
@@ -74,9 +92,15 @@ public class WorkspaceConversionUtils {
             .googleBucketName(fcWorkspace.getBucketName())
             .billingStatus(workspace.getBillingStatus())
             .billingAccountName(workspace.getBillingAccountName());
+
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout) {
+      result.billingStatus(BillingStatus.ACTIVE);
+    }
+
     if (fcWorkspace.getCreatedBy() != null) {
       result.setCreator(fcWorkspace.getCreatedBy());
     }
+
     if (workspace.getCdrVersion() != null) {
       result.setCdrVersionId(String.valueOf(workspace.getCdrVersion().getCdrVersionId()));
     }
@@ -84,7 +108,7 @@ public class WorkspaceConversionUtils {
     return result;
   }
 
-  public static DbWorkspace toDbWorkspace(Workspace workspace) {
+  public DbWorkspace toDbWorkspace(Workspace workspace) {
     DbWorkspace result = new DbWorkspace();
 
     if (workspace.getDataAccessLevel() != null) {
@@ -105,7 +129,7 @@ public class WorkspaceConversionUtils {
     return result;
   }
 
-  public static UserRole toApiUserRole(DbUser user, FirecloudWorkspaceAccessEntry aclEntry) {
+  public UserRole toApiUserRole(DbUser user, FirecloudWorkspaceAccessEntry aclEntry) {
     UserRole result = new UserRole();
     result.setEmail(user.getUsername());
     result.setGivenName(user.getGivenName());
@@ -118,7 +142,7 @@ public class WorkspaceConversionUtils {
    * This probably doesn't belong in a mapper service but it makes the refactoring easier atm. Sets
    * user-editable research purpose detail fields.
    */
-  public static void setResearchPurposeDetails(DbWorkspace dbWorkspace, ResearchPurpose purpose) {
+  public void setResearchPurposeDetails(DbWorkspace dbWorkspace, ResearchPurpose purpose) {
     dbWorkspace.setDiseaseFocusedResearch(purpose.getDiseaseFocusedResearch());
     dbWorkspace.setDiseaseOfFocus(purpose.getDiseaseOfFocus());
     dbWorkspace.setMethodsDevelopment(purpose.getMethodsDevelopment());
@@ -142,7 +166,7 @@ public class WorkspaceConversionUtils {
     dbWorkspace.setOtherPopulationDetails(purpose.getOtherPopulationDetails());
   }
 
-  private static ResearchPurpose createResearchPurpose(DbWorkspace workspace) {
+  private ResearchPurpose createResearchPurpose(DbWorkspace workspace) {
     ResearchPurpose researchPurpose =
         new ResearchPurpose()
             .diseaseFocusedResearch(workspace.getDiseaseFocusedResearch())
@@ -185,7 +209,7 @@ public class WorkspaceConversionUtils {
     return researchPurpose;
   }
 
-  public static RecentWorkspace buildRecentWorkspace(
+  public RecentWorkspace buildRecentWorkspace(
       DbUserRecentWorkspace userRecentWorkspace,
       DbWorkspace dbWorkspace,
       WorkspaceAccessLevel accessLevel) {
@@ -195,7 +219,7 @@ public class WorkspaceConversionUtils {
         .accessLevel(accessLevel);
   }
 
-  public static List<RecentWorkspace> buildRecentWorkspaceList(
+  public List<RecentWorkspace> buildRecentWorkspaceList(
       List<DbUserRecentWorkspace> userRecentWorkspaces,
       Map<Long, DbWorkspace> dbWorkspacesByWorkspaceId,
       Map<Long, WorkspaceAccessLevel> workspaceAccessLevelsByWorkspaceId) {
