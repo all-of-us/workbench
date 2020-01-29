@@ -86,7 +86,7 @@ export const DatasetResourceCard = fp.flow(
         disabled: !this.canWrite
       },
       {
-        icon: 'pencil',
+        icon: 'clipboard',
         displayName: 'Export to Notebook',
         onClick: () => {
           AnalyticsTracker.DatasetBuilder.OpenExportModal();
