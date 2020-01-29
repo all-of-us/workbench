@@ -76,6 +76,7 @@ public class FreeTierBillingServiceTest {
 
   private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
   private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
+  private static final String FREE_TIER_BILLING_ACCOUNT_NAME = "free-tier";
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
@@ -103,6 +104,7 @@ public class FreeTierBillingServiceTest {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.freeTierCostAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
     workbenchConfig.billing.freeTierTimeAlertThresholds = new ArrayList<>(Doubles.asList(.5, .75));
+    workbenchConfig.billing.accountId = FREE_TIER_BILLING_ACCOUNT_NAME;
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 1000.0;
     workbenchConfig.billing.defaultFreeCreditsDaysLimit = 1000;
 
@@ -985,6 +987,7 @@ public class FreeTierBillingServiceTest {
     workspace.setCreator(creator);
     workspace.setWorkspaceNamespace(namespace);
     workspace.setBillingMigrationStatusEnum(billingMigrationStatus);
+    workspace.setBillingAccountName(FREE_TIER_BILLING_ACCOUNT_NAME);
     return workspaceDao.save(workspace);
   }
 

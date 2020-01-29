@@ -58,7 +58,8 @@ function buildWorkspaceStub(suffix): Workspace {
       reasonForAllOfUs: '',
     },
     published: false,
-    dataAccessLevel: DataAccessLevel.Registered
+    dataAccessLevel: DataAccessLevel.Registered,
+    billingAccountName: 'billing-account'
   };
 }
 

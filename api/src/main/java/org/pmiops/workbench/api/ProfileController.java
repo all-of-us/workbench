@@ -414,7 +414,11 @@ public class ProfileController implements ProfileApiDelegate {
    */
   public ResponseEntity<Profile> syncComplianceTrainingStatus() {
     try {
-      userService.syncComplianceTrainingStatus();
+      if (workbenchConfigProvider.get().featureFlags.enableMoodleV2Api) {
+        userService.syncComplianceTrainingStatusV2();
+      } else {
+        userService.syncComplianceTrainingStatusV1();
+      }
     } catch (NotFoundException ex) {
       throw ex;
     } catch (ApiException e) {
