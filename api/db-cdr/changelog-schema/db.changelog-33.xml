@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+  <changeSet author="brianfreeman" id="changelog-33">
+
+    <dropIndex tableName="concept" indexName="idx_concept_name"></dropIndex>
+    <dropIndex tableName="concept" indexName="idx_concept_code"></dropIndex>
+    <dropIndex tableName="concept" indexName="idx_domain_id"></dropIndex>
+    <dropIndex tableName="concept" indexName="idx_vocabulary_id"></dropIndex>
+    <dropIndex tableName="concept" indexName="idx_standard_concept"></dropIndex>
+
+    <createIndex
+      indexName="idx_standard_concept_count"
+      tableName="concept"
+      unique="false">
+      <column name="domain_id"/>
+      <column name="standard_concept"/>
+      <column name="count_value"/>
+      <column name="source_count_value"/>
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>
