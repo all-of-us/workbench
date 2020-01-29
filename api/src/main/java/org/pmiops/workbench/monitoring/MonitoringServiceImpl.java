@@ -82,6 +82,7 @@ public class MonitoringServiceImpl implements MonitoringService {
 
     // Finally, send the data to the backend (Stackdriver/Cloud Monitoring for now).
     measureMap.record(tagContextBuilder.build());
+    logger.info(String.format("Record measurements: %s, tags: %s", metricToValue, tags));
   }
 
   @Override

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.monitoring.views;
 
 import io.opencensus.stats.Aggregation;
+import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
 import java.util.Collections;
 import java.util.List;
@@ -11,13 +12,19 @@ public enum DistributionMetric implements Metric {
       "cohort_operation_time",
       "Time to complete Cohort-related operation.",
       Collections.singletonList(MetricLabel.OPERATION_NAME),
-      DistributionAggregation.TIME,
+      DistributionAggregation.OPERATION_TIME,
       MeasureLong.class),
+  RANDOM_SAMPLE(
+      "random_sample_2",
+      "Random values",
+      Collections.emptyList(),
+      DistributionAggregation.RANDOM_DOUBLE,
+      MeasureDouble.class),
   WORKSPACE_OPERATION_TIME(
       "workspace_operation_time",
       "Time to complete Workspace-related operation.",
       Collections.singletonList(MetricLabel.OPERATION_NAME),
-      DistributionAggregation.TIME,
+      DistributionAggregation.OPERATION_TIME,
       MeasureLong.class);
 
   private final String name;

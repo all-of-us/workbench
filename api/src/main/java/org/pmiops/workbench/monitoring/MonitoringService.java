@@ -15,7 +15,6 @@ import org.pmiops.workbench.monitoring.views.Metric;
 public interface MonitoringService {
 
   int DELTA_VALUE = 1;
-  Map<TagKey, TagValue> DEFAULT_TAGS = Collections.emptyMap();
 
   /**
    * Record an occurrence of a counted (a.k.a. delta or cumulative) time series. These are events
@@ -36,7 +35,7 @@ public interface MonitoringService {
   }
 
   default void recordValues(Map<Metric, Number> metricToValue) {
-    recordValues(metricToValue, DEFAULT_TAGS);
+    recordValues(metricToValue, Collections.emptyMap());
   }
 
   /**
