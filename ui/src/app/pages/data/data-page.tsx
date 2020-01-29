@@ -18,6 +18,7 @@ import {convertToResources} from 'app/utils/resourceActions';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Domain, RecentResource, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {DatasetResourceCard} from "app/pages/data/data-set/dataset-resource-card";
 
 const styles = {
   cardButtonArea: {
@@ -167,6 +168,10 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
       return <CohortResourceCard resource={resource}
                                  existingNameList={this.getExistingNameList(resource)}
                                  onUpdate={() => this.loadResources()}/>;
+    } if (resource.dataSet) {
+      return <DatasetResourceCard resource={resource}
+                                  existingNameList={this.getExistingNameList(resource)}
+                                  onUpdate={() => this.loadResources()}/>;
     } else {
       return <ResourceCard resourceCard={resource}
                            onDuplicateResource={(duplicating) =>

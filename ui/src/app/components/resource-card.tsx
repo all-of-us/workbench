@@ -72,8 +72,6 @@ const resourceTypeColor = (resourceType: ResourceType) => {
       return colors.resourceCardHighlights.cohortReview;
     case ResourceType.CONCEPTSET:
       return colors.resourceCardHighlights.conceptSet;
-    case ResourceType.DATASET:
-      return colors.resourceCardHighlights.dataSet;
   }
 };
 
@@ -89,7 +87,6 @@ export interface State {
   copyingConceptSet: boolean;
   errorModalBody: string;
   errorModalTitle: string;
-  exportingDataSet: boolean;
   invalidResourceError: boolean;
   renaming: boolean;
   showErrorModal: boolean;
@@ -105,10 +102,8 @@ export class ResourceCard extends React.Component<Props, State> {
       copyingConceptSet: false,
       errorModalTitle: 'Error Title',
       errorModalBody: 'Error Body',
-      exportingDataSet: false,
       invalidResourceError: !(props.resourceCard.cohortReview ||
-        props.resourceCard.conceptSet ||
-        props.resourceCard.dataSet),
+        props.resourceCard.conceptSet),
       renaming: false,
       showErrorModal: false,
       dataSetByResourceIdList: []
@@ -120,8 +115,6 @@ export class ResourceCard extends React.Component<Props, State> {
       return ResourceType.COHORTREVIEW;
     } else if (this.props.resourceCard.conceptSet) {
       return ResourceType.CONCEPTSET;
-    } else if (this.props.resourceCard.dataSet) {
-      return ResourceType.DATASET;
     }
   }
 
@@ -131,10 +124,6 @@ export class ResourceCard extends React.Component<Props, State> {
 
   get isConceptSet(): boolean {
     return this.resourceType === ResourceType.CONCEPTSET;
-  }
-
-  get isDataSet(): boolean {
-    return this.resourceType === ResourceType.DATASET;
   }
 
   get writerPermission(): boolean {
@@ -151,8 +140,6 @@ export class ResourceCard extends React.Component<Props, State> {
       return this.props.resourceCard.cohortReview.cohortName;
     } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.name;
-    } else if (this.isDataSet) {
-      return this.props.resourceCard.dataSet.name;
     }
   }
 
@@ -171,20 +158,12 @@ export class ResourceCard extends React.Component<Props, State> {
       return this.props.resourceCard.cohortReview.description;
     } else if (this.isConceptSet) {
       return this.props.resourceCard.conceptSet.description;
-    } else if (this.isDataSet) {
-      return this.props.resourceCard.dataSet.description;
     }
   }
 
+  // DELETE?
   edit(): void {
     switch (this.resourceType) {
-      case ResourceType.DATASET: {
-        navigate(['workspaces',
-          this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName,
-          'data', 'data-sets', this.props.resourceCard.dataSet.id]);
-        break;
-      }
       default: {
         this.setState({renaming: true});
       }
@@ -256,18 +235,6 @@ export class ResourceCard extends React.Component<Props, State> {
           });
         break;
       }
-      case ResourceType.DATASET: {
-        AnalyticsTracker.DatasetBuilder.Delete();
-        dataSetApi().deleteDataSet(
-          this.props.resourceCard.workspaceNamespace,
-          this.props.resourceCard.workspaceFirecloudName,
-          this.props.resourceCard.dataSet.id)
-          .then(() => {
-            this.closeConfirmDelete();
-            this.props.onUpdate();
-          });
-        break;
-      }
     }
   }
 
@@ -306,31 +273,8 @@ export class ResourceCard extends React.Component<Props, State> {
 
   }
 
-  async receiveDataSetRename(newName: string, newDescription: string) {
-    const {resourceCard} = this.props;
-    try {
-      const request = {
-        ...resourceCard.dataSet,
-        name: newName,
-        description: newDescription,
-        conceptSetIds: resourceCard.dataSet.conceptSets.map(concept => concept.id),
-        cohortIds: resourceCard.dataSet.cohorts.map(cohort => cohort.id),
-      };
-      await dataSetApi().updateDataSet(
-        resourceCard.workspaceNamespace,
-        resourceCard.workspaceFirecloudName,
-        resourceCard.dataSet.id,
-        request);
-    } catch (error) {
-      console.error(error); // TODO: better error handling
-    } finally {
-      this.setState({renaming: false});
-      this.props.onUpdate();
-    }
-  }
-
   getResourceUrl(): string {
-    const {workspaceNamespace, workspaceFirecloudName, conceptSet, dataSet, cohortReview} =
+    const {workspaceNamespace, workspaceFirecloudName, conceptSet, cohortReview} =
       this.props.resourceCard;
     const workspacePrefix = `/workspaces/${workspaceNamespace}/${workspaceFirecloudName}`;
 
@@ -341,14 +285,7 @@ export class ResourceCard extends React.Component<Props, State> {
       case ResourceType.CONCEPTSET: {
         return `${workspacePrefix}/data/concepts/sets/${conceptSet.id}`;
       }
-      case ResourceType.DATASET: {
-        return `${workspacePrefix}/data/data-sets/${dataSet.id}`;
-      }
     }
-  }
-
-  exportDataSet(): void {
-    this.setState({exportingDataSet: true});
   }
 
   async markDataSetDirty() {
@@ -401,8 +338,7 @@ export class ResourceCard extends React.Component<Props, State> {
                               onDeleteResource={() => this.openConfirmDelete()}
                               onRenameResource={() => this.renameResource()}
                               canEdit={this.writerPermission}
-                              onEdit={() => this.edit()}
-                              onExportDataSet={() => this.exportDataSet()}/>
+                              onEdit={() => this.edit()}/>
             <Clickable>
               <a style={styles.cardName}
                    data-test-id='card-name'
@@ -450,23 +386,6 @@ export class ResourceCard extends React.Component<Props, State> {
                           resourceType={this.resourceType}
                           receiveDelete={() => this.receiveDelete()}
                           closeFunction={() => this.closeConfirmDelete()}/>}
-      {this.state.exportingDataSet &&
-      <ExportDataSetModal dataSet={this.props.resourceCard.dataSet}
-                          workspaceNamespace={this.props.resourceCard.workspaceNamespace}
-                          workspaceFirecloudName={this.props.resourceCard.workspaceFirecloudName}
-                          closeFunction={() => this.setState({exportingDataSet: false})}/>}
-      {this.state.renaming && this.isDataSet &&
-        <RenameModal
-          onRename={(newName, newDescription) => {
-            AnalyticsTracker.DatasetBuilder.Rename();
-            this.receiveDataSetRename(newName, newDescription);
-          }}
-          resourceType={ResourceType.DATASET}
-          onCancel={() => this.cancelRename()}
-          oldDescription ={this.props.resourceCard.dataSet.description}
-          oldName={this.props.resourceCard.dataSet.name}
-          existingNames={this.props.existingNameList}/>
-      }
       {this.state.copyingConceptSet && <CopyModal
         fromWorkspaceNamespace={this.props.resourceCard.workspaceNamespace}
         fromWorkspaceName={this.props.resourceCard.workspaceFirecloudName}
