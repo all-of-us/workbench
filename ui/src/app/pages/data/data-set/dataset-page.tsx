@@ -11,13 +11,8 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
-import {
-  cohortsApi,
-  conceptSetsApi,
-  dataSetApi
-} from 'app/services/swagger-fetch-clients';
-import colors from 'app/styles/colors';
-import {colorWithWhiteness} from 'app/styles/colors';
+import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
   formatDomainString,
@@ -34,6 +29,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {
+  BillingStatus,
   Cohort,
   ConceptSet,
   DataDictionaryEntry,
@@ -1052,6 +1048,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                            selectedDomainValuePairs={selectedDomainValuePairs}
                                            workspaceNamespace={namespace}
                                            workspaceId={id}
+                                           billingLocked={this.props.workspace.billingStatus === BillingStatus.INACTIVE}
                                            prePackagedConceptSet={this.getPrePackagedConceptSet()}
                                            dataSet={dataSet ? dataSet : undefined}
                                            closeFunction={() => {

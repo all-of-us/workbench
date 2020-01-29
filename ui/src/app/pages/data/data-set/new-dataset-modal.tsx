@@ -7,13 +7,7 @@ import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {AlertDanger} from 'app/components/alert';
 import {Button, TabButton} from 'app/components/buttons';
 import {SmallHeader, styles as headerStyles} from 'app/components/headers';
-import {
-  CheckBox,
-  RadioButton,
-  Select,
-  TextArea,
-  TextInput
-} from 'app/components/inputs';
+import {CheckBox, RadioButton, Select, TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -23,6 +17,7 @@ import {summarizeErrors} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {
+  BillingStatus,
   DataSet,
   DataSetRequest,
   DomainValuePair,
@@ -30,6 +25,7 @@ import {
   KernelTypeEnum,
   PrePackagedConceptSetEnum
 } from 'generated/fetch';
+import {ACTION_DISABLED_INVALID_BILLING} from "app/utils/strings";
 
 interface Props {
   closeFunction: Function;
@@ -41,6 +37,7 @@ interface Props {
   selectedDomainValuePairs: DomainValuePair[];
   workspaceNamespace: string;
   workspaceId: string;
+  billingLocked: boolean;
 }
 
 interface State {
@@ -76,7 +73,7 @@ class NewDataSetModal extends React.Component<Props, State> {
     this.state = {
       conflictDataSetName: false,
       existingNotebooks: [],
-      exportToNotebook: true,
+      exportToNotebook: !props.billingLocked,
       kernelType: KernelTypeEnum.Python,
       loading: false,
       missingDataSetInfo: false,
@@ -279,14 +276,17 @@ class NewDataSetModal extends React.Component<Props, State> {
                        name: v, conflictDataSetName: false
                      })}/>
         </div>
-        <div style={{display: 'flex', alignItems: 'center', marginTop: '1rem'}}>
-          <CheckBox style={{height: 17, width: 17}}
-                    data-test-id='export-to-notebook'
-                    onChange={(checked) => this.changeExportToNotebook(checked)}
-                    checked={false} />
-          <div style={{marginLeft: '.5rem',
-            color: colors.primary}}>Export to notebook</div>
-        </div>
+        <TooltipTrigger content={this.props.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+          <div style={{display: 'inline-flex', alignItems: 'center', marginTop: '1rem', ...(this.props.billingLocked && {opacity: 0.5})}}>
+            <CheckBox style={{height: 17, width: 17}}
+                      disabled={this.props.billingLocked}
+                      data-test-id='export-to-notebook'
+                      onChange={(checked) => this.changeExportToNotebook(checked)}
+                      checked={this.state.exportToNotebook} />
+            <div style={{marginLeft: '.5rem',
+              color: colors.primary}}>Export to notebook</div>
+          </div>
+        </TooltipTrigger>
         {exportToNotebook && <React.Fragment>
           {notebooksLoading && <SpinnerOverlay />}
           <Button style={{marginTop: '1rem'}} data-test-id='code-preview-button'
