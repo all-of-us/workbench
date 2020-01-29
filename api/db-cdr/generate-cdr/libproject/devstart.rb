@@ -9,24 +9,28 @@ ENVIRONMENTS = {
   "all-of-us-workbench-test" => {
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
     :source_cdr_project => "all-of-us-ehr-dev",
+    :ingest_cdr_project => "fc-aou-vpc-ingest-test",
     :dest_cdr_project => "fc-aou-cdr-synth-test",
     :config_json => "config_test.json"
   },
   "all-of-us-rw-staging" => {
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
     :source_cdr_project => "all-of-us-ehr-dev",
+    :ingest_cdr_project => "fc-aou-vpc-ingest-staging",
     :dest_cdr_project => "fc-aou-cdr-synth-staging",
     :config_json => "config_staging.json"
   },
   "all-of-us-rw-stable" => {
     :publisher_account => "deploy@all-of-us-rw-stable.iam.gserviceaccount.com",
     :source_cdr_project => "all-of-us-ehr-dev",
+    :ingest_cdr_project => "fc-aou-vpc-ingest-stable",
     :dest_cdr_project => "fc-aou-cdr-synth-stable",
     :config_json => "config_stable.json"
   },
   "all-of-us-rw-prod" => {
     :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
     :source_cdr_project => "aou-res-curation-output-prod",
+    :ingest_cdr_project => "fc-aou-vpc-ingest-prod",
     :dest_cdr_project => "fc-aou-cdr-prod",
     :config_json => "config_prod.json"
   }
@@ -64,9 +68,25 @@ def publish_cdr(cmd_name, args)
     ->(opts, v) { opts.project = v},
     "The Google Cloud project associated with this environment."
   )
+  op.add_option(
+    "--table-prefixes [prefix1,prefix2,...]",
+    ->(opts, v) { opts.table_prefixes = v},
+    "Comma-delimited table prefixes to filter the publish by, e.g. cb_,ds_. " +
+    "This should only be used in special situations e.g. when the auxilliary " +
+    "cb_ or ds_ tables need to be updated, or if there was an issue with the " +
+    "publish. In general, CDRs should be treated as immutable after the " +
+    "initial publish."
+  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.parse.validate
+
+  # This is a grep filter. It matches all tables, by default.
+  table_filter = ""
+  if op.opts.table_prefixes
+    prefixes = op.opts.table_prefixes.split(",")
+    table_filter = "^\\(#{prefixes.join("\\|")}\\)"
+  end
 
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]
@@ -78,8 +98,9 @@ def publish_cdr(cmd_name, args)
     common.run_inline %W{gcloud auth activate-service-account -q --key-file #{key_file.path}}
 
     source_dataset = "#{env.fetch(:source_cdr_project)}:#{op.opts.bq_dataset}"
+    ingest_dataset = "#{env.fetch(:ingest_cdr_project)}:#{op.opts.bq_dataset}"
     dest_dataset = "#{env.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
-    common.status "Copying from '#{source_dataset}' to '#{dest_dataset}' as #{account}"
+    common.status "Copying from '#{source_dataset}' -> '#{ingest_dataset}' -> '#{dest_dataset}' as #{account}"
 
     # If you receive an error from "bq" like "Invalid JWT Signature", you may
     # need to delete cached BigQuery creds on your local machine. Try deleting
@@ -90,8 +111,14 @@ def publish_cdr(cmd_name, args)
     # If you receive a prompt from "bq" for selecting a default project ID, just
     # hit enter.
     # TODO: Figure out how to prepopulate this value or disable interactivity.
+
+    # Copy through an intermediate project and delete after (2h TTL), per
+    # https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
+    common.run_inline %W{bq mk -f --default_table_expiration 7200 --dataset #{ingest_dataset}}
+    common.run_inline %W{./copy-bq-dataset.sh #{source_dataset} #{ingest_dataset} #{env.fetch(:source_cdr_project)} #{table_filter}}
+
     common.run_inline %W{bq mk -f --dataset #{dest_dataset}}
-    common.run_inline %W{./copy-bq-dataset.sh #{source_dataset} #{dest_dataset} #{env.fetch(:source_cdr_project)}}
+    common.run_inline %W{./copy-bq-dataset.sh #{ingest_dataset} #{dest_dataset} #{env.fetch(:ingest_cdr_project)} #{table_filter}}
 
     auth_domain_group = get_auth_domain_group(op.opts.project)
 

@@ -88,7 +88,7 @@
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": true,
     "enableRdrExport": true,
-    "enableBillingLockout": true,
+    "enableBillingLockout": false,
     "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
     "sendFreeTierAlertEmails": false

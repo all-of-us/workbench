@@ -771,7 +771,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       const dataTestId = 'data-test-id-' + text;
       return <TooltipTrigger data-test-id={dataTestId} side='top' content={text}
                              disabled={this.isEllipsisActive(text)}>
-        <div style={{overflow: 'hidden', textOverflow: 'ellipsis'}}>
+        <div style={{overflow: 'hidden', textOverflow: 'ellipsis'}} title={text}>
           {text}
         </div>
       </TooltipTrigger>;
@@ -793,7 +793,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         {filteredPreviewData.values.map(value =>
           <Column key={value.value} header={this.getHeaderValue(value)}
                   headerStyle={{textAlign: 'left', width: '5rem'}} style={{width: '5rem'}}
-                  field={value.value}/>
+                  bodyStyle={{hyphens: 'auto'}} field={value.value}/>
         )}
       </DataTable>;
     }
