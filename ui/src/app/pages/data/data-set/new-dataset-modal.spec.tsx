@@ -30,6 +30,7 @@ const createNewDataSetModal = () => {
     workspaceId={workspaceId}
     dataSet={dataSet}
     prePackagedConceptSet={prePackagedConceptSet}
+    billingLocked={false}
   />;
 }
 
@@ -78,7 +79,7 @@ describe('NewDataSetModal', () => {
     wrapper.find('[data-test-id="data-set-name-input"]')
       .first().simulate('change', {target: {value: nameStub}});
     await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="export-to-notebook"]').first().simulate('change');
+    wrapper.find('[data-test-id="export-to-notebook"]').first().simulate('change', {target: {checked: false}});
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="save-data-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
