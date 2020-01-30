@@ -425,12 +425,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
       throw new BadRequestException("Terms of Service version is not up to date");
     }
-    final Timestamp timestamp = new Timestamp(clock.instant().toEpochMilli());
+
     DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
     userTermsOfService.setTosVersion(tosVersion);
-    userTermsOfService.setAgreementTime(timestamp);
-    userTermsOfService.setUser(dbUser);
-
+    userTermsOfService.setUserId(dbUser.getUserId());
     userTermsOfServiceDao.save(userTermsOfService);
   }
 

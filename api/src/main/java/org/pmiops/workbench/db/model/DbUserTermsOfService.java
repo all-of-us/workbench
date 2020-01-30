@@ -7,14 +7,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "user_terms_of_service")
 public class DbUserTermsOfService {
   private long userTermsOfServiceId;
-  private DbUser user;
+  private long userId;
   private int tosVersion;
   private Timestamp agreementTime;
 
@@ -29,19 +29,16 @@ public class DbUserTermsOfService {
     this.userTermsOfServiceId = userTermsOfServiceId;
   }
 
-  @ManyToOne
-  public DbUser getUser() {
-    return user;
+  @Column(name = "user_id", nullable = false)
+  public long getUserId() {
+    return userId;
   }
 
-  public void setUser(DbUser user) {
-    this.user = user;
-    // Because this is a bidirectional parent-child relation, when we set the parent reference here,
-    // we also want to track this instance as a child in the parent object.
-    user.addTermsOfServiceRow(this);
+  public void setUserId(long userId) {
+    this.userId = userId;
   }
 
-  @Column(name = "tos_version")
+  @Column(name = "tos_version", nullable = false)
   public int getTosVersion() {
     return tosVersion;
   }
@@ -51,6 +48,7 @@ public class DbUserTermsOfService {
   }
 
   @Column(name = "agreement_time")
+  @CreationTimestamp
   public Timestamp getAgreementTime() {
     return agreementTime;
   }
@@ -65,13 +63,13 @@ public class DbUserTermsOfService {
     if (o == null || getClass() != o.getClass()) return false;
     DbUserTermsOfService that = (DbUserTermsOfService) o;
     return userTermsOfServiceId == that.userTermsOfServiceId
-        && user.equals(that.user)
+        && userId == that.userId
         && tosVersion == that.tosVersion
         && Objects.equals(agreementTime, that.agreementTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(userTermsOfServiceId, user, tosVersion, agreementTime);
+    return Objects.hash(userTermsOfServiceId, userId, tosVersion, agreementTime);
   }
 }

@@ -719,17 +719,4 @@ public class DbUser {
   public void setAddress(DbAddress address) {
     this.address = address;
   }
-
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-  public Set<DbUserTermsOfService> getTermsOfServiceRows() {
-    return termsOfServiceRows;
-  }
-
-  public void setTermsOfServiceRows(Set<DbUserTermsOfService> termsOfServiceRows) {
-    this.termsOfServiceRows = termsOfServiceRows;
-  }
-
-  public void addTermsOfServiceRow(DbUserTermsOfService termsOfServiceRow) {
-    this.termsOfServiceRows.add(termsOfServiceRow);
-  }
 }

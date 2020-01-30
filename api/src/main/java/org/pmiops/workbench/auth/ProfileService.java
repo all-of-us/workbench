@@ -2,12 +2,12 @@ package org.pmiops.workbench.auth;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
@@ -91,11 +91,16 @@ public class ProfileService {
 
   private final UserDao userDao;
   private final FreeTierBillingService freeTierBillingService;
+  private final UserTermsOfServiceDao userTermsOfServiceDao;
 
   @Autowired
-  public ProfileService(UserDao userDao, FreeTierBillingService freeTierBillingService) {
+  public ProfileService(
+      UserDao userDao,
+      FreeTierBillingService freeTierBillingService,
+      UserTermsOfServiceDao userTermsOfServiceDao) {
     this.userDao = userDao;
     this.freeTierBillingService = freeTierBillingService;
+    this.userTermsOfServiceDao = userTermsOfServiceDao;
   }
 
   public Profile getProfile(DbUser user) {
@@ -211,9 +216,7 @@ public class ProfileService {
     profile.setFreeTierDollarQuota(freeTierBillingService.getUserFreeTierDollarLimit(user));
 
     Optional<DbUserTermsOfService> latestTermsOfServiceMaybe =
-        user.getTermsOfServiceRows().stream()
-            .sorted(Comparator.comparing(DbUserTermsOfService::getTosVersion).reversed())
-            .findFirst();
+        userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId());
     if (latestTermsOfServiceMaybe.isPresent()) {
       profile.setLatestTermsOfServiceVersion(latestTermsOfServiceMaybe.get().getTosVersion());
       profile.setLatestTermsOfServiceTime(

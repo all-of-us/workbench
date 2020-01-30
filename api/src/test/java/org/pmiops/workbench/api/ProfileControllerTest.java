@@ -12,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -161,7 +163,8 @@ public class ProfileControllerTest {
                 complianceTrainingService,
                 directoryService,
                 mockUserServiceAuditAdapter));
-    ProfileService profileService = new ProfileService(userDao, freeTierBillingService);
+    ProfileService profileService =
+        new ProfileService(userDao, freeTierBillingService, userTermsOfServiceDao);
     this.profileController =
         new ProfileController(
             profileService,
@@ -206,8 +209,11 @@ public class ProfileControllerTest {
 
     verify(userService).submitTermsOfService(any(DbUser.class), eq(1));
     final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
-    assertThat(dbUser.getTermsOfServiceRows().size()).isEqualTo(1);
-    assertThat(dbUser.getTermsOfServiceRows().iterator().next().getTosVersion()).isEqualTo(1);
+    final List<DbUserTermsOfService> tosRows = Lists.newArrayList(userTermsOfServiceDao.findAll());
+    assertThat(tosRows.size()).isEqualTo(1);
+    assertThat(tosRows.get(0).getTosVersion()).isEqualTo(1);
+    assertThat(tosRows.get(0).getUserId()).isEqualTo(dbUser.getUserId());
+    assertThat(tosRows.get(0).getAgreementTime()).isNotNull();
     assertThat(profile.getLatestTermsOfServiceVersion()).isEqualTo(1);
   }
 
