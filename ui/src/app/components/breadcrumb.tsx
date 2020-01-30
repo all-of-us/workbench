@@ -168,6 +168,10 @@ export const Breadcrumb = fp.flow(
         this.props.workspace.billingStatus === BillingStatus.INACTIVE) {
         this.setState({showInvalidBillingBanner: true});
       }
+
+      if (prevProps.workspace && !this.props.workspace) {
+        this.setState({showInvalidBillingBanner: false});
+      }
     }
 
     trail(): Array<BreadcrumbData> {
@@ -189,6 +193,8 @@ export const Breadcrumb = fp.flow(
     }
 
     render() {
+      console.log(this.props.workspace);
+
       return <React.Fragment>
         {this.state.showInvalidBillingBanner &&
         <InvalidBillingBanner onClose={() => this.setState({showInvalidBillingBanner: false})}/>}
