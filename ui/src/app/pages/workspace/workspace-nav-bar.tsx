@@ -1,17 +1,15 @@
 import {Component, Input} from '@angular/core';
 
-import {Button, Clickable} from 'app/components/buttons';
+import {Clickable} from 'app/components/buttons';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams, withUserProfile} from 'app/utils';
-import {navigate, NavStore} from 'app/utils/navigation';
+import {NavStore} from 'app/utils/navigation';
 
-import {StatusAlertBanner} from 'app/components/status-alert-banner';
+import {InvalidBillingBanner} from 'app/pages/workspace/invalid-billing-banner';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {openZendeskWidget} from 'app/utils/zendesk';
 import {BillingStatus, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {InvalidBillingBanner} from "app/pages/workspace/invalid-billing-banner";
 
 
 const styles = reactStyles({

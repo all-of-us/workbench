@@ -1,12 +1,12 @@
-import {WorkspaceData} from "app/utils/workspace-data";
-import {BillingStatus, Profile} from "generated/fetch";
-import * as fp from "lodash";
-import {withCurrentWorkspace, withUrlParams, withUserProfile} from "app/utils";
-import * as React from "react";
-import {StatusAlertBanner} from "app/components/status-alert-banner";
-import {Button, Clickable} from "app/components/buttons";
-import {openZendeskWidget} from "app/utils/zendesk";
-import {navigate, NavStore} from "app/utils/navigation";
+import {Button} from 'app/components/buttons';
+import {StatusAlertBanner} from 'app/components/status-alert-banner';
+import {withCurrentWorkspace, withUserProfile} from 'app/utils';
+import {navigate} from 'app/utils/navigation';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {openZendeskWidget} from 'app/utils/zendesk';
+import {Profile} from 'generated/fetch';
+import * as fp from 'lodash';
+import * as React from 'react';
 
 interface Props {
   workspace: WorkspaceData;
@@ -48,5 +48,5 @@ export const InvalidBillingBanner = fp.flow(
         </a>
       </div>
     }
-  />
+  />;
 });
