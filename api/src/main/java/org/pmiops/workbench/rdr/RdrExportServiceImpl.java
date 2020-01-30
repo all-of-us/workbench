@@ -7,7 +7,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -20,11 +19,11 @@ import org.pmiops.workbench.db.model.DbRdrExport;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.RdrEntity;
+import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.rdr.api.RdrApi;
 import org.pmiops.workbench.rdr.model.*;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +41,7 @@ public class RdrExportServiceImpl implements RdrExportService {
   private RdrExportDao rdrExportDao;
   private WorkspaceDao workspaceDao;
   private UserDao userDao;
+  private WorkspaceService workspacesApi;
 
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
   ZoneOffset offset = OffsetDateTime.now().getOffset();
@@ -53,12 +53,14 @@ public class RdrExportServiceImpl implements RdrExportService {
       Provider<RdrApi> RdrApiProvider,
       RdrExportDao rdrExportDao,
       WorkspaceDao workspaceDao,
+      WorkspaceService workspaceService,
       UserDao userDao) {
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.rdrExportDao = rdrExportDao;
     this.rdrApiProvider = RdrApiProvider;
     this.workspaceDao = workspaceDao;
+    this.workspacesApi = workspaceService;
     this.userDao = userDao;
   }
 
@@ -245,22 +247,28 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setIntendToStudy(dbWorkspace.getIntendedStudy());
     rdrWorkspace.setFindingsFromStudy(dbWorkspace.getAnticipatedFindings());
 
-    // Call Firecloud to get a list of Collaborators
-    FirecloudWorkspaceACL firecloudResponse =
-        fireCloudService.getWorkspaceAcl(
-            dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
-    Map<String, FirecloudWorkspaceAccessEntry> aclMap = firecloudResponse.getAcl();
+    try {
+      // Call Firecloud to get a list of Collaborators
+      List<UserRole> collaboratorsMap =
+          workspacesApi.getFirecloudUserRoles(
+              dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
-    // Since the USERS cannot be deleted from workbench yet, hence sending the the status of
-    // COLLABORATOR as ACTIVE
-    aclMap.forEach(
-        (email, access) -> {
-          RdrWorkspaceUser workspaceUserMap = new RdrWorkspaceUser();
-          workspaceUserMap.setUserId((int) userDao.findUserByUsername(email).getUserId());
-          workspaceUserMap.setRole(RdrWorkspaceUser.RoleEnum.fromValue(access.getAccessLevel()));
-          workspaceUserMap.setStatus(RdrWorkspaceUser.StatusEnum.ACTIVE);
-          rdrWorkspace.addWorkspaceUsersItem(workspaceUserMap);
-        });
+      // Since the USERS cannot be deleted from workbench yet, hence sending the the status of
+      // COLLABORATOR as ACTIVE
+      collaboratorsMap.forEach(
+          (userRole) -> {
+            RdrWorkspaceUser workspaceUserMap = new RdrWorkspaceUser();
+            workspaceUserMap.setUserId(
+                (int) userDao.findUserByUsername(userRole.getEmail()).getUserId());
+            workspaceUserMap.setRole(
+                RdrWorkspaceUser.RoleEnum.fromValue(userRole.getRole().toString()));
+            workspaceUserMap.setStatus(RdrWorkspaceUser.StatusEnum.ACTIVE);
+            rdrWorkspace.addWorkspaceUsersItem(workspaceUserMap);
+          });
+    } catch (Exception ex) {
+      log.warning("Exception while retrieving workspace Collaborators");
+      rdrWorkspace.addWorkspaceUsersItem(new RdrWorkspaceUser());
+    }
 
     return rdrWorkspace;
   }
