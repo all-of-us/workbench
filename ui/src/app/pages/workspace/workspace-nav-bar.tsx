@@ -2,12 +2,12 @@ import {Component, Input} from '@angular/core';
 
 import {Clickable} from 'app/components/buttons';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams, withUserProfile} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {NavStore} from 'app/utils/navigation';
 
 import {InvalidBillingBanner} from 'app/pages/workspace/invalid-billing-banner';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {BillingStatus, Profile} from 'generated/fetch';
+import {BillingStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
