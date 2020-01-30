@@ -1,6 +1,6 @@
 import {Component, Input} from '@angular/core';
 
-import {Clickable} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {NavStore} from 'app/utils/navigation';
@@ -8,6 +8,7 @@ import {NavStore} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {StatusAlertBanner} from "app/components/status-alert-banner";
+import {WorkspaceData} from "app/utils/workspace-data";
 
 
 const styles = reactStyles({
@@ -42,47 +43,74 @@ const tabs = [
 
 const navSeparator = <div style={styles.separator}/>;
 
+interface Props {
+  workspace: WorkspaceData;
+  urlParams: any;
+  tabPath: string;
+}
+
+interface State {
+  showInvalidBillingBanner: boolean
+}
+
 export const WorkspaceNavBarReact = fp.flow(
   withCurrentWorkspace(),
   withUrlParams(),
-)(props => {
-  const {tabPath, urlParams: {ns: namespace, wsid: id}} = props;
-  const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
+)(
+  class extends React.Component<Props, State> {
 
-
-  const navTab = currentTab => {
-    const {name, link} = currentTab;
-    const selected = tabPath === link;
-    const hideSeparator = selected || (activeTabIndex === tabs.indexOf(currentTab) + 1);
-
-    return <React.Fragment key={name}>
-      {false &&
-        <StatusAlertBanner
-          title={'title'}
-          message={'messge'}
-          link={'issa link'}
-          onClose={() => {}}
-        />
+    constructor(props) {
+      super(props);
+      this.state = {
+        showInvalidBillingBanner: true
       }
-      <Clickable
-        data-test-id={name}
-        aria-selected={selected}
-        style={{...styles.tab, ...(selected ? styles.active : {})}}
-        hover={{color: styles.active.color}}
-        onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
-      >
-        {name}
-      </Clickable>
-      {!hideSeparator && navSeparator}
-    </React.Fragment>;
-  };
+    }
 
-  return <div id='workspace-top-nav-bar' className='do-not-print' style={styles.container}>
-    {activeTabIndex > 0 && navSeparator}
-    {fp.map(tab => navTab(tab), tabs)}
-    <div style={{flexGrow: 1}}/>
-  </div>;
-});
+    render() {
+      const {tabPath, urlParams: {ns: namespace, wsid: id}} = this.props;
+      const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
+
+      const navTab = (currentTab) => {
+        const {name, link} = currentTab;
+        const selected = tabPath === link;
+        const hideSeparator = selected || (activeTabIndex === tabs.indexOf(currentTab) + 1);
+
+        return <React.Fragment key={name}>
+          {true &&
+          <StatusAlertBanner
+            title={'This workspace has run out of free credits'}
+            message={'The free credits for the creator of this workspace have run out or expired. Please provide a valid billing account or contact support to extend free credits.'}
+            footer={
+              <div style={{display: 'flex', flexDirection: 'column'}}>
+                <Button style={{height: '38px', width: '70%', fontWeight: 400}}>
+                  Request Extension
+                </Button>
+                <a style={{marginTop: '.5rem', marginLeft: '.2rem'}}>Provide billing account</a>
+              </div>
+            }
+            onClose={() => {this.setState({showInvalidBillingBanner: false})}}
+          />
+          }
+          <Clickable
+            data-test-id={name}
+            aria-selected={selected}
+            style={{...styles.tab, ...(selected ? styles.active : {})}}
+            hover={{color: styles.active.color}}
+            onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
+          >
+            {name}
+          </Clickable>
+          {!hideSeparator && navSeparator}
+        </React.Fragment>;
+      };
+
+      return <div id='workspace-top-nav-bar' className='do-not-print' style={styles.container}>
+        {activeTabIndex > 0 && navSeparator}
+        {fp.map(tab => navTab(tab), tabs)}
+        <div style={{flexGrow: 1}}/>
+      </div>;
+    }
+  });
 
 @Component({
   selector: 'app-workspace-nav-bar',

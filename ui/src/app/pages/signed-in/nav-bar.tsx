@@ -8,6 +8,8 @@ import colors from 'app/styles/colors';
 import {cookiesEnabled, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
+import {Button} from "app/components/buttons";
+import {FlexColumn} from "app/components/flex";
 
 const styles = reactStyles({
   headerContainer: {
@@ -166,6 +168,10 @@ export const NavBar = withUserProfile()(
       }
     }
 
+    navigateToLink(link) {
+      window.open(link, '_blank');
+    }
+
     handleStatusAlertBannerUnmount() {
       if (cookiesEnabled()) {
         localStorage.setItem(cookieKey, `${this.state.statusAlertDetails.statusAlertId}`);
@@ -214,7 +220,13 @@ export const NavBar = withUserProfile()(
           this.state.statusAlertVisible && <StatusAlertBanner
               title={this.state.statusAlertDetails.title}
               message={this.state.statusAlertDetails.message}
-              link={this.state.statusAlertDetails.link}
+              footer={
+                  this.state.statusAlertDetails.link &&
+                  <Button data-test-id='status-banner-read-more-button'
+                          onClick={() => this.navigateToLink(this.state.statusAlertDetails.link)}>
+                    READ MORE
+                  </Button>
+              }
               onClose={this.handleStatusAlertBannerUnmount}
           />
         }
