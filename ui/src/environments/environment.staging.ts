@@ -16,9 +16,7 @@ export const environment: Environment = {
   shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   inactivityTimeoutSeconds: 30 * 60,
   inactivityWarningBeforeSeconds: 5 * 60,
-  enableHomepageRestyle: true,
   enablePublishedWorkspaces: false,
-  enableAccountPages: false,
   enableProfileCapsFeatures: false,
   enableNewConceptTabs: false
 };

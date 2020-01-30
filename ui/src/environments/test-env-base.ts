@@ -13,11 +13,9 @@ export const testEnvironmentBase = {
   zendeskHelpCenterUrl: 'http://aousupporthelp.zendesk.com/hc',
   shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   shouldShowDisplayTag: true,
-  enablePublishedWorkspaces: true,
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
-  enableHomepageRestyle: true,
+  enablePublishedWorkspaces: true,
   enableProfileCapsFeatures: true,
-  enableAccountPages: true,
   enableNewConceptTabs: false
 };

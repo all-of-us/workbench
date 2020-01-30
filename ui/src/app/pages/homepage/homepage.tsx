@@ -5,7 +5,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {
-  CardButton,
   Clickable,
 } from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
@@ -23,7 +22,6 @@ import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {environment} from 'environments/environment';
 import {
   Profile,
 } from 'generated/fetch';
@@ -64,40 +62,6 @@ export const styles = reactStyles({
   },
   welcomeMessageIcon: {
     height: '2.25rem', width: '2.75rem'
-  },
-  // once enableHomepageRestyle is enabled, delete all styles ending in 'ToDelete'
-  // '/assets/images/AoU-HP-background.jpg' can also be deleted when the feature flag is removed
-  mainHeaderToDelete: {
-    color: colors.white, fontSize: 28, fontWeight: 400,
-    display: 'flex', letterSpacing: 'normal'
-  },
-  backgroundImageToDelete: {
-    backgroundImage: 'url("/assets/images/AoU-HP-background.jpg")',
-    backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: '100%',
-    marginLeft: '-1rem', marginRight: '-0.6rem', display: 'flex',
-    flexDirection: 'column', justifyContent: 'space-between'
-  },
-  quickRowToDelete: {
-    display: 'flex', justifyContent: 'flex-start', maxHeight: '26rem',
-    flexDirection: 'row', marginLeft: '4rem', padding: '1rem'
-  },
-  quickTourLabelToDelete: {
-    fontSize: 28, lineHeight: '34px', color: colors.white, paddingRight: '2.3rem',
-    marginTop: '2rem', width: '33%'
-  },
-  bottomBannerToDelete: {
-    width: '100%', display: 'flex', backgroundColor: colors.primary, height: '5rem',
-    paddingLeft: '3.5rem', alignItems: 'center', marginTop: '1rem'
-  },
-  bottomLinksToDelete: {
-    color: colors.white, fontSize: '0.7rem', height: '1rem',
-    marginLeft: '2.5rem', fontWeight: 400
-  },
-  singleCardToDelete: {
-    width: '87.34%', minHeight: '18rem', maxHeight: '26rem',
-    borderRadius: '5px', backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    boxShadow: '0 0 2px 0 rgba(0, 0, 0, 0.12), 0 3px 2px 0 rgba(0, 0, 0, 0.12)',
-    border: 'none', marginTop: '1rem', padding: '1rem'
   },
 });
 
@@ -277,156 +241,32 @@ export const Homepage = withUserProfile()(class extends React.Component<
       }
     ];
 
-    if (environment.enableHomepageRestyle) {
-      return <React.Fragment>
-        <FlexColumn style={styles.pageWrapper}>
-          <FlexRow style={{marginLeft: '3%'}}>
-            <FlexColumn style={{width: '50%'}}>
-              <FlexRow>
-                <FlexColumn>
-                  <Header style={{fontWeight: 500, color: colors.secondary, fontSize: '0.92rem'}}>
-                    Welcome to</Header>
-                  <Header style={{textTransform: 'uppercase', marginTop: '0.2rem'}}>
-                    Researcher Workbench</Header>
-                </FlexColumn>
-                <FlexRow style={{alignItems: 'flex-end', marginLeft: '1rem'}}>
-                  <img style={styles.welcomeMessageIcon} src='/assets/images/workspace-icon.svg'/>
-                  <img style={styles.welcomeMessageIcon} src='/assets/images/cohort-icon.svg'/>
-                  <img style={styles.welcomeMessageIcon} src='/assets/images/analysis-icon.svg'/>
-                </FlexRow>
+    return <React.Fragment>
+      <FlexColumn style={styles.pageWrapper}>
+        <FlexRow style={{marginLeft: '3%'}}>
+          <FlexColumn style={{width: '50%'}}>
+            <FlexRow>
+              <FlexColumn>
+                <Header style={{fontWeight: 500, color: colors.secondary, fontSize: '0.92rem'}}>
+                  Welcome to</Header>
+                <Header style={{textTransform: 'uppercase', marginTop: '0.2rem'}}>
+                  Researcher Workbench</Header>
+              </FlexColumn>
+              <FlexRow style={{alignItems: 'flex-end', marginLeft: '1rem'}}>
+                <img style={styles.welcomeMessageIcon} src='/assets/images/workspace-icon.svg'/>
+                <img style={styles.welcomeMessageIcon} src='/assets/images/cohort-icon.svg'/>
+                <img style={styles.welcomeMessageIcon} src='/assets/images/analysis-icon.svg'/>
               </FlexRow>
-              <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
-                The secure analysis platform to analyze <i>All of Us</i> data</SmallHeader>
-            </FlexColumn>
-            <div></div>
-          </FlexRow>
-          <FadeBox style={styles.fadeBox}>
-            {/* The elements inside this fadeBox will be changed as part of ongoing
-            homepage redesign work*/}
-            <FlexColumn style={{justifyContent: 'flex-start'}}>
-                {accessTasksLoaded ?
-                  (accessTasksRemaining ?
-                      (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
-                                              eraCommonsError={eraCommonsError}
-                                              trainingCompleted={trainingCompleted}
-                                              firstVisitTraining={firstVisitTraining}
-                                              betaAccessGranted={betaAccessGranted}
-                                              twoFactorAuthCompleted={twoFactorAuthCompleted}
-                                            dataUseAgreementCompleted={dataUseAgreementCompleted}/>
-                      ) : (
-                          <React.Fragment>
-                            <FlexColumn>
-                              <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
-                                <FlexRow style={{alignItems: 'center'}}>
-                                  <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
-                                  <ClrIcon
-                                    shape='plus-circle'
-                                    size={30}
-                                    className={'is-solid'}
-                                    style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
-                                    onClick={() => {
-                                      AnalyticsTracker.Workspaces.OpenCreatePage();
-                                      navigate(['workspaces/build']);
-                                    }}
-                                  />
-                                </FlexRow>
-                                <span
-                                  style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
-                                  onClick={() => navigate(['workspaces'])}
-                                >
-                                  See all Workspaces
-                                </span>
-                              </FlexRow>
-                              <RecentWorkspaces />
-                            </FlexColumn>
-                            <FlexColumn>
-                              {this.state.userHasWorkspaces !== null &&
-
-                                <React.Fragment>
-                                  {this.state.userHasWorkspaces ?
-                                  <RecentResources/> :
-
-                                  <div style={{
-                                    backgroundColor: addOpacity(colors.primary, .1).toString(),
-                                    color: colors.primary,
-                                    borderRadius: 10,
-                                    margin: '2em 0em'}}>
-                                    <div style={{margin: '1em 2em'}}>
-                                      <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
-                                      <CustomBulletList>
-                                        <CustomBulletListItem bullet='→'>
-                                          Create a <a href='https://support.google.com/chrome/answer/2364824'>Chrome Profile </a>
-                                          with your <i>All of Us</i> Researcher Workbench Google account. This will keep your Workbench
-                                          browser sessions isolated from your other Google accounts.
-                                        </CustomBulletListItem>
-                                        <CustomBulletListItem bullet='→'>
-                                          Check out <a onClick={() => navigate(['library'])}> Featured Workspaces </a>
-                                          from the left hand panel to browse through example workspaces.
-                                        </CustomBulletListItem>
-                                        <CustomBulletListItem bullet='→'>
-                                          Browse through our <a href='https://aousupporthelp.zendesk.com/hc/en-us'> support materials </a>
-                                          and forum topics.
-                                        </CustomBulletListItem>
-                                      </CustomBulletList>
-                                    </div>
-                                  </div>}
-                                </React.Fragment>
-                              }
-                            </FlexColumn>
-                          </React.Fragment>
-                        )
-                  ) :
-                  <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
-            </FlexColumn>
-          </FadeBox>
-          <div style={{backgroundColor: addOpacity(colors.light, .4).toString()}}>
-            <FlexColumn style={{marginLeft: '3%'}}>
-              <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
-              <FlexRow style={styles.quickTourCardsRow}>
-                {quickTourResources.map((thumbnail, i) => {
-                  return <React.Fragment key={i}>
-                    <Clickable onClick={thumbnail.onClick}
-                               data-test-id={'quick-tour-resource-' + i}>
-                      <img style={{width: '11rem', marginRight: '0.5rem'}}
-                           src={thumbnail.src}/>
-                    </Clickable>
-                  </React.Fragment>;
-                })}
-              </FlexRow>
-            </FlexColumn>
-            <div style={styles.bottomBanner}>
-              <div style={styles.logo}>
-                <img src='/assets/images/all-of-us-logo-footer.svg'/>
-              </div>
-              <div style={styles.bottomLinks}>Copyright ©2018</div>
-              <div style={styles.bottomLinks}>Privacy Policy</div>
-              <div style={styles.bottomLinks}>Terms of Service</div>
-            </div>
-          </div>
-        </FlexColumn>
-        {quickTour &&
-        <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
-        {videoOpen && <Modal width={900}>
-          <div style={{display: 'flex'}}>
-            <div style={{flexGrow: 1}}></div>
-            <Clickable onClick={() => this.setState({videoOpen: false})}>
-              <ClrIcon
-                shape='times'
-                size='24'
-                style={{color: colors.accent, marginBottom: 17}}
-              />
-            </Clickable>
-          </div>
-          <video width='100%' controls autoPlay>
-            <source src={videoLink} type='video/mp4'/>
-          </video>
-        </Modal>}
-      </React.Fragment>;
-    } else { // delete this block below once enableHomepageRestyle is removed
-      return <React.Fragment>
-        <div style={styles.backgroundImageToDelete}>
-          <div style={{display: 'flex', justifyContent: 'center'}}>
-            <div style={styles.singleCardToDelete}>
+            </FlexRow>
+            <SmallHeader style={{color: colors.primary, marginTop: '0.25rem'}}>
+              The secure analysis platform to analyze <i>All of Us</i> data</SmallHeader>
+          </FlexColumn>
+          <div></div>
+        </FlexRow>
+        <FadeBox style={styles.fadeBox}>
+          {/* The elements inside this fadeBox will be changed as part of ongoing
+          homepage redesign work*/}
+          <FlexColumn style={{justifyContent: 'flex-start'}}>
               {accessTasksLoaded ?
                 (accessTasksRemaining ?
                     (<RegistrationDashboard eraCommonsLinked={eraCommonsLinked}
@@ -435,78 +275,116 @@ export const Homepage = withUserProfile()(class extends React.Component<
                                             firstVisitTraining={firstVisitTraining}
                                             betaAccessGranted={betaAccessGranted}
                                             twoFactorAuthCompleted={twoFactorAuthCompleted}
-                                            dataUseAgreementCompleted={dataUseAgreementCompleted}/>
+                                          dataUseAgreementCompleted={dataUseAgreementCompleted}/>
                     ) : (
-                      <FlexRow style={{paddingTop: '2rem'}}>
-                        <div style={styles.contentWrapperLeft}>
-                          <div style={styles.mainHeaderToDelete}>Researcher Workbench</div>
-                          <CardButton onClick={() => {
-                            AnalyticsTracker.Workspaces.OpenCreatePage();
-                            navigate(['workspaces/build']);
-                          }}
-                                      style={{margin: '1.9rem 106px 0 3%'}}>
-                            Create a <br/> New Workspace
-                            <ClrIcon shape='plus-circle' style={{height: '32px', width: '32px'}}/>
-                          </CardButton>
-                        </div>
-                        <div style={styles.contentWrapperRight}>
-                          <a onClick={() => navigate(['workspaces'])}
-                             style={{fontSize: '14px', color: colors.white}}>
-                            See All Workspaces</a>
-                          <FlexColumn style={{marginRight: '3%'}}>
-                            <div style={{color: colors.white, height: '1.9rem'}}>
-                              <div style={{marginTop: '.5rem'}}>Your Last Accessed Items</div>
-                            </div>
-                            <RecentResources dark={true}/>
+                        <React.Fragment>
+                          <FlexColumn>
+                            <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
+                              <FlexRow style={{alignItems: 'center'}}>
+                                <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
+                                <ClrIcon
+                                  shape='plus-circle'
+                                  size={30}
+                                  className={'is-solid'}
+                                  style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
+                                  onClick={() => {
+                                    AnalyticsTracker.Workspaces.OpenCreatePage();
+                                    navigate(['workspaces/build']);
+                                  }}
+                                />
+                              </FlexRow>
+                              <span
+                                style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
+                                onClick={() => navigate(['workspaces'])}
+                              >
+                                See all Workspaces
+                              </span>
+                            </FlexRow>
+                            <RecentWorkspaces />
                           </FlexColumn>
-                        </div>
-                      </FlexRow>)
+                          <FlexColumn>
+                            {this.state.userHasWorkspaces !== null &&
+
+                              <React.Fragment>
+                                {this.state.userHasWorkspaces ?
+                                <RecentResources/> :
+
+                                <div style={{
+                                  backgroundColor: addOpacity(colors.primary, .1).toString(),
+                                  color: colors.primary,
+                                  borderRadius: 10,
+                                  margin: '2em 0em'}}>
+                                  <div style={{margin: '1em 2em'}}>
+                                    <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
+                                    <CustomBulletList>
+                                      <CustomBulletListItem bullet='→'>
+                                        Create a <a href='https://support.google.com/chrome/answer/2364824'>Chrome Profile </a>
+                                        with your <i>All of Us</i> Researcher Workbench Google account. This will keep your Workbench
+                                        browser sessions isolated from your other Google accounts.
+                                      </CustomBulletListItem>
+                                      <CustomBulletListItem bullet='→'>
+                                        Check out <a onClick={() => navigate(['library'])}> Featured Workspaces </a>
+                                        from the left hand panel to browse through example workspaces.
+                                      </CustomBulletListItem>
+                                      <CustomBulletListItem bullet='→'>
+                                        Browse through our <a href='https://aousupporthelp.zendesk.com/hc/en-us'> support materials </a>
+                                        and forum topics.
+                                      </CustomBulletListItem>
+                                    </CustomBulletList>
+                                  </div>
+                                </div>}
+                              </React.Fragment>
+                            }
+                          </FlexColumn>
+                        </React.Fragment>
+                      )
                 ) :
                 <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
-            </div>
-          </div>
-          <div>
-            <div style={styles.quickRowToDelete}>
-              <div style={styles.quickTourLabelToDelete}>Quick Tour & Videos</div>
+          </FlexColumn>
+        </FadeBox>
+        <div style={{backgroundColor: addOpacity(colors.light, .4).toString()}}>
+          <FlexColumn style={{marginLeft: '3%'}}>
+            <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
+            <FlexRow style={styles.quickTourCardsRow}>
               {quickTourResources.map((thumbnail, i) => {
                 return <React.Fragment key={i}>
                   <Clickable onClick={thumbnail.onClick}
                              data-test-id={'quick-tour-resource-' + i}>
-                    <img style={{maxHeight: '121px', width: '8rem', marginRight: '1rem'}}
+                    <img style={{width: '11rem', marginRight: '0.5rem'}}
                          src={thumbnail.src}/>
                   </Clickable>
                 </React.Fragment>;
               })}
+            </FlexRow>
+          </FlexColumn>
+          <div style={styles.bottomBanner}>
+            <div style={styles.logo}>
+              <img src='/assets/images/all-of-us-logo-footer.svg'/>
             </div>
-            <div style={styles.bottomBannerToDelete}>
-              <div style={styles.logo}>
-                <img src='/assets/images/all-of-us-logo-footer.svg'/>
-              </div>
-              <div style={styles.bottomLinksToDelete}>Privacy Policy</div>
-              <div style={styles.bottomLinksToDelete}>Terms of Service</div>
-            </div>
+            <div style={styles.bottomLinks}>Copyright ©2018</div>
+            <div style={styles.bottomLinks}>Privacy Policy</div>
+            <div style={styles.bottomLinks}>Terms of Service</div>
           </div>
         </div>
-
-        {quickTour &&
-        <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
-        {videoOpen && <Modal width={900}>
-          <div style={{display: 'flex'}}>
-            <div style={{flexGrow: 1}}></div>
-            <Clickable onClick={() => this.setState({videoOpen: false})}>
-              <ClrIcon
-                shape='times'
-                size='24'
-                style={{color: colors.accent, marginBottom: 17}}
-              />
-            </Clickable>
-          </div>
-          <video width='100%' controls autoPlay>
-            <source src={videoLink} type='video/mp4'/>
-          </video>
-        </Modal>}
-      </React.Fragment>;
-    }
+      </FlexColumn>
+      {quickTour &&
+      <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
+      {videoOpen && <Modal width={900}>
+        <div style={{display: 'flex'}}>
+          <div style={{flexGrow: 1}}></div>
+          <Clickable onClick={() => this.setState({videoOpen: false})}>
+            <ClrIcon
+              shape='times'
+              size='24'
+              style={{color: colors.accent, marginBottom: 17}}
+            />
+          </Clickable>
+        </div>
+        <video width='100%' controls autoPlay>
+          <source src={videoLink} type='video/mp4'/>
+        </video>
+      </Modal>}
+    </React.Fragment>;
   }
 
 });
