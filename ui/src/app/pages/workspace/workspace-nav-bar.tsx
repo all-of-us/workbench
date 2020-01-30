@@ -7,6 +7,7 @@ import {NavStore} from 'app/utils/navigation';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {StatusAlertBanner} from "app/components/status-alert-banner";
 
 
 const styles = reactStyles({
@@ -55,6 +56,14 @@ export const WorkspaceNavBarReact = fp.flow(
     const hideSeparator = selected || (activeTabIndex === tabs.indexOf(currentTab) + 1);
 
     return <React.Fragment key={name}>
+      {false &&
+        <StatusAlertBanner
+          title={'title'}
+          message={'messge'}
+          link={'issa link'}
+          onClose={() => {}}
+        />
+      }
       <Clickable
         data-test-id={name}
         aria-selected={selected}

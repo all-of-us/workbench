@@ -212,7 +212,6 @@ export const NavBar = withUserProfile()(
         <Breadcrumb/>
         {
           this.state.statusAlertVisible && <StatusAlertBanner
-              statusAlertId={this.state.statusAlertDetails.statusAlertId}
               title={this.state.statusAlertDetails.title}
               message={this.state.statusAlertDetails.message}
               link={this.state.statusAlertDetails.link}

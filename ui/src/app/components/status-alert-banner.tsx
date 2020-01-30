@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -25,7 +26,6 @@ const styles = reactStyles({
 
 
 export interface Props {
-  statusAlertId: number;
   title: string;
   message: string;
   link: string;
@@ -41,18 +41,18 @@ export class StatusAlertBanner extends React.Component<Props, {}> {
     window.open(link, '_blank');
   }
 
-  render() {
+  renderBanner() {
     const {title, message, link} = this.props;
     return <FlexColumn style={styles.alertBanner}>
       <FlexRow style={{width: '100%'}}>
         <ClrIcon
-            shape={'warning-standard'}
-            class={'is-solid'}
-            size={20}
-            style={{
-              color: colors.warning,
-              flex: '0 0 auto'
-            }}
+          shape={'warning-standard'}
+          class={'is-solid'}
+          size={20}
+          style={{
+            color: colors.warning,
+            flex: '0 0 auto'
+          }}
         />
         <div style={{
           fontWeight: 'bold',
@@ -63,22 +63,27 @@ export class StatusAlertBanner extends React.Component<Props, {}> {
           top: '-0.2rem'
         }}>{title}</div>
         <ClrIcon
-            shape={'times'}
-            size={20}
-            style={{marginLeft: 'auto', flex: '0 0 auto'}}
-            onClick={() => this.props.onClose()}
+          shape={'times'}
+          size={20}
+          style={{marginLeft: 'auto', flex: '0 0 auto'}}
+          onClick={() => this.props.onClose()}
         />
       </FlexRow>
       <div>{message}</div>
       {
         link && <Button
-            style={{marginTop: 'auto', width: '125px'}}
-            onClick={() => this.navigateToLink(link)}
-            data-test-id='status-banner-read-more-button'
+          style={{marginTop: 'auto', width: '125px'}}
+          onClick={() => this.navigateToLink(link)}
+          data-test-id='status-banner-read-more-button'
         >
           READ MORE
         </Button>
       }
     </FlexColumn>;
+  }
+
+  render() {
+    return ReactDOM.createPortal(this.renderBanner(),
+      document.getElementById('body'))
   }
 }
