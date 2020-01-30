@@ -350,12 +350,12 @@ export const DetailTabs = withCurrentWorkspace()(
         })
         .subscribe();
 
-      filterStateStore.subscribe(filterState => {
+      this.subscription.add(filterStateStore.subscribe(filterState => {
         let {updateState} = this.state;
         // this.vocab = filterState.vocab;
         updateState++;
         this.setState({filterState, updateState});
-      });
+      }));
     }
 
     componentWillUnmount() {

@@ -312,55 +312,26 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     async getParticipantData(getCount: boolean) {
       try {
-        const {columns, domain, filterState, participantId, workspace: {id, namespace}} = this.props;
+        const {columns, domain, participantId, workspace: {id, namespace}} = this.props;
         const {page, sortField, sortOrder} = this.state;
-        let {lazyLoad, totalCount} = this.state;
+        let {lazyLoad, start, totalCount} = this.state;
         const {cohortReviewId} = cohortReviewStore.getValue();
-        const filters = {items: []};
-        if (lazyLoad) {
-          const columnFilters = filterState.tabs[domain];
-          if (!!columnFilters) {
-            for (const col in columnFilters) {
-              if (columnFilters.hasOwnProperty(col)) {
-                const filter = columnFilters[col];
-                if (Array.isArray(filter)) {
-                  // checkbox filters
-                  if (!filter.length) {
-                    // TODO show no data, don't call api
-                    this.setState({data: [], filteredData: null, loading: false});
-                    return;
-                  } else if (!filter.includes('Select All')) {
-                    filters.items.push({
-                      property: columns.find(c => c.name === col).filter,
-                      operator: Operator.IN,
-                      values: filter
-                    });
-                  }
-                } else {
-                  // text filters
-                  if (!!filter) {
-                    filters.items.push({
-                      property: columns.find(c => c.name === col).filter,
-                      operator: Operator.LIKE,
-                      values: [filter]
-                    });
-                  }
-                }
-              }
-            }
-          }
-        }
         const pageFilterRequest = {
           page: Math.floor(page / (lazyLoadSize / rowsPerPage)),
           pageSize: lazyLoadSize,
           sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
           sortColumn: columns.find(col => col.name === sortField).filter,
           domain,
-          filters
+          filters: this.getFilters()
         } as PageFilterRequest;
         if (getCount) {
           await cohortReviewApi().getParticipantCount(namespace, id, cohortReviewId, participantId, pageFilterRequest).then(response => {
             totalCount = response.count;
+            if (start > totalCount) {
+              // If the data was filtered to a smaller count than the previous start, reset to the last page of the new data
+              start = Math.floor(totalCount / rowsPerPage) * rowsPerPage;
+              pageFilterRequest.page = Math.floor(totalCount / lazyLoadSize);
+            }
             // If lazyLoad is already true, leave it as true, otherwise check the count
             lazyLoad = lazyLoad || totalCount > 1000;
             pageFilterRequest.pageSize = lazyLoad ? lazyLoadSize : totalCount;
@@ -368,7 +339,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         }
         this.callApi(pageFilterRequest).then(data => {
           if (lazyLoad) {
-            this.setState({data, filteredData: data, loading: false, lazyLoad, totalCount});
+            const end = Math.min(start + lazyLoadSize, totalCount);
+            this.setState({data, filteredData: data, loading: false, lazyLoad, range: [start, end], start, totalCount});
           } else {
             this.setState({data, loading: false, lazyLoad, range: [0, totalCount - 1]});
             this.filterData();
@@ -392,7 +364,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         sortOrder: sortOrder === 1 ? SortOrder.Asc :  SortOrder.Desc,
         sortColumn: columns.find(col => col.name === sortField).filter,
         domain: domain,
-        filters: {items: []}
+        filters: this.getFilters()
       } as PageFilterRequest;
       this.callApi(pageFilterRequest).then(data => {
         if (previous) {
@@ -426,6 +398,46 @@ export const DetailTabTable = withCurrentWorkspace()(
         });
       });
       return data;
+    }
+
+    getFilters() {
+      const {columns, domain, filterState} = this.props;
+      const {lazyLoad} = this.state;
+      const filters = {items: []};
+      if (lazyLoad) {
+        const columnFilters = filterState.tabs[domain];
+        if (!!columnFilters) {
+          for (const col in columnFilters) {
+            if (columnFilters.hasOwnProperty(col)) {
+              const filter = columnFilters[col];
+              if (Array.isArray(filter)) {
+                // checkbox filters
+                if (!filter.length) {
+                  // TODO show no data, don't call api
+                  this.setState({data: [], filteredData: null, loading: false});
+                  return;
+                } else if (!filter.includes('Select All')) {
+                  filters.items.push({
+                    property: columns.find(c => c.name === col).filter,
+                    operator: Operator.IN,
+                    values: filter
+                  });
+                }
+              } else {
+                // text filters
+                if (!!filter) {
+                  filters.items.push({
+                    property: columns.find(c => c.name === col).filter,
+                    operator: Operator.LIKE,
+                    values: [filter]
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+      return filters;
     }
 
     onSort = (event: any) => {
@@ -822,6 +834,9 @@ export const DetailTabTable = withCurrentWorkspace()(
         value = lazyLoad
           ? (loadingPrevious && pageStart < 0 ? [] : filteredData.slice(pageStart, pageStart + rowsPerPage))
           : filteredData;
+        console.log(pageStart);
+        console.log(filteredData);
+        console.log(value);
       }
       let paginatorTemplate = 'CurrentPageReport';
       if (filteredData && filteredData.length > rowsPerPage) {
@@ -881,6 +896,8 @@ export const DetailTabTable = withCurrentWorkspace()(
       });
       return <div style={styles.container}>
         <style>{datatableStyles}</style>
+        <div>{start}</div>
+        <div>{range[0]} {range[1]}</div>
         <DataTable
           expandedRows={expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
