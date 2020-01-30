@@ -6,18 +6,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.api.client.http.HttpTransport;
 import com.google.auth.oauth2.ServiceAccountCredentials;
-import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -35,49 +32,28 @@ import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFu
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudSystemStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Scope;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.pmiops.workbench.test.Providers;
+import org.springframework.retry.backoff.NoBackOffPolicy;
 
-@RunWith(SpringRunner.class)
 public class FireCloudServiceImplTest {
 
   private static final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
 
-  @Autowired private FireCloudService service;
+  private FireCloudServiceImpl service;
 
-  private static WorkbenchConfig workbenchConfig;
+  private WorkbenchConfig workbenchConfig;
 
-  @MockBean private ProfileApi profileApi;
-  @MockBean private BillingApi billingApi;
-
-  @MockBean(name = "workspacesApi")
-  private WorkspacesApi workspacesApi;
-
-  @MockBean private GroupsApi groupsApi;
-  @MockBean private NihApi nihApi;
-  @MockBean private StatusApi statusApi;
-  @MockBean private StaticNotebooksApi staticNotebooksApi;
-  @MockBean private ServiceAccountCredentials fireCloudCredentials;
-  @MockBean private IamCredentialsClient iamCredentialsClient;
-  @MockBean private HttpTransport httpTransport;
+  @Mock private ProfileApi profileApi;
+  @Mock private BillingApi billingApi;
+  @Mock private WorkspacesApi workspacesApi;
+  @Mock private WorkspacesApi workspaceAclsApi;
+  @Mock private GroupsApi groupsApi;
+  @Mock private NihApi nihApi;
+  @Mock private StatusApi statusApi;
+  @Mock private StaticNotebooksApi staticNotebooksApi;
+  @Mock private ServiceAccountCredentials fireCloudCredentials;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
-
-  @TestConfiguration
-  @Import({FireCloudServiceImpl.class, RetryConfig.class})
-  static class Configuration {
-    @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public WorkbenchConfig getWorkbenchConfig() {
-      return workbenchConfig;
-    }
-  }
 
   @Before
   public void setUp() {
@@ -86,6 +62,20 @@ public class FireCloudServiceImplTest {
     workbenchConfig.firecloud.debugEndpoints = true;
     workbenchConfig.firecloud.timeoutInSeconds = 20;
     workbenchConfig.billing.accountId = "test-billing-account";
+
+    service =
+        new FireCloudServiceImpl(
+            Providers.of(workbenchConfig),
+            Providers.of(profileApi),
+            Providers.of(billingApi),
+            Providers.of(groupsApi),
+            Providers.of(nihApi),
+            Providers.of(workspacesApi),
+            Providers.of(workspaceAclsApi),
+            Providers.of(statusApi),
+            Providers.of(staticNotebooksApi),
+            new FirecloudRetryHandler(new NoBackOffPolicy()),
+            Providers.of(fireCloudCredentials));
   }
 
   @Test

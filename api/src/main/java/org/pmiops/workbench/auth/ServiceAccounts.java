@@ -7,13 +7,11 @@ import com.google.auth.appengine.AppEngineCredentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.List;
-import org.springframework.stereotype.Component;
 
 /**
  * Handles functionality related to loading service account credentials and generating derived /
  * impersonated credentials.
  */
-@Component
 public class ServiceAccounts {
 
   private static final String SIGN_JWT_URL_FORMAT =
@@ -68,7 +66,25 @@ public class ServiceAccounts {
     return scopedCreds.getAccessToken().getTokenValue();
   }
 
-  public static String getServiceAccountEmail(String serviceAccountName, String projectId) {
-    return String.format("%s@%s.iam.gserviceaccount.com", serviceAccountName, projectId);
+  /**
+   * Converts a service account Google credential into credentials for impersonating an end user.
+   * This method assumes that the given service account has been enabled for domain-wide delegation,
+   * and the given set of scopes have been included in the GSuite admin panel.
+   *
+   * <p>See docs/domain-delegation.md for more details.
+   *
+   * @param originalCredentials
+   * @param userEmail Email address of the user to impersonate.
+   * @param scopes The list of Google / OAuth API scopes to be authorized for.
+   * @return
+   * @throws IOException
+   */
+  public static GoogleCredentials getImpersonatedCredentials(
+      GoogleCredentials originalCredentials, String userEmail, List<String> scopes)
+      throws IOException {
+    GoogleCredentials impersonatedCreds =
+        originalCredentials.createScoped(scopes).createDelegated(userEmail);
+    impersonatedCreds.refresh();
+    return impersonatedCreds;
   }
 }

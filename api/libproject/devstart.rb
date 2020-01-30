@@ -300,10 +300,8 @@ Common.register_command({
 def start_local_api()
   setup_local_environment
   common = Common.new
-  ServiceAccountContext.new(TEST_PROJECT).run do
-    common.status "Starting API server..."
-    common.run_inline %W{gradle appengineStart}
-  end
+  common.status "Starting API server..."
+  common.run_inline %W{gradle appengineStart}
 end
 
 Common.register_command({

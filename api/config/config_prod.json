@@ -88,8 +88,7 @@
     "enableNewAccountCreation": false,
     "enableRdrExport": false,
     "enableBillingLockout": false,
-    "enableSumoLogicEventHandling": false,
-    "useKeylessDelegatedCredentials": false
+    "enableSumoLogicEventHandling": false
   },
   "actionAudit": {
     "logName":"workbench-action-audit-prod"
