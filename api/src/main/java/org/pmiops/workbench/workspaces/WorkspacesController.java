@@ -371,12 +371,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     ResearchPurpose researchPurpose = request.getWorkspace().getResearchPurpose();
     if (researchPurpose != null) {
+      // Note: this utility does not set the "review requested" bit or time. This is currently
+      // immutable on a workspace, see RW-4132.
       WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, researchPurpose);
-      if (researchPurpose.getReviewRequested()) {
-        Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-        dbWorkspace.setTimeRequested(now);
-      }
-      dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
     }
 
     if (workspace.getBillingAccountName() != null) {

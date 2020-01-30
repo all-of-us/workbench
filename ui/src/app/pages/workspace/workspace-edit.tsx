@@ -1037,12 +1037,14 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           </FlexRow>
           <div>
             <RadioButton name='reviewRequested'
+                         disabled={this.isMode(WorkspaceEditMode.Edit)}
                          onChange={() => {
                            this.updateResearchPurpose('reviewRequested', true);
                          }}
                          checked={this.state.workspace.researchPurpose.reviewRequested}/>
             <label style={{...styles.text, marginLeft: '0.5rem', marginRight: '3rem'}}>Yes</label>
             <RadioButton name='reviewRequested'
+                         disabled={this.isMode(WorkspaceEditMode.Edit)}
                          onChange={() => {
                            this.updateResearchPurpose('reviewRequested', false);
                          }}
