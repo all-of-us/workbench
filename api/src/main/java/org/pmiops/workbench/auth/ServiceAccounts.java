@@ -39,23 +39,28 @@ public class ServiceAccounts {
    * @return
    * @throws IOException
    */
-  private static GoogleCredentials getScopedServiceCredentials(List<String> scopes)
+  public static GoogleCredentials getScopedServiceCredentials(List<String> scopes)
       throws IOException {
 
+    GoogleCredentials credentials;
     if (SystemProperty.environment.value().equals(SystemProperty.Environment.Value.Development)) {
       // When running in a local dev environment, we simply get the application default credentials.
       //
       // TODO(gjuggler): it may be possible to remove this branch point altogether, and use the
       // AppIdentityService approach even when running a local app engine server. I tested this
       // out locally and it *seemed* to work, but it needs a bit more careful vetting.
-      return GoogleCredentials.getApplicationDefault().createScoped(scopes);
+      credentials = GoogleCredentials.getApplicationDefault().createScoped(scopes);
     } else {
       AppIdentityService appIdentityService = AppIdentityServiceFactory.getAppIdentityService();
-      return AppEngineCredentials.newBuilder()
-          .setScopes(scopes)
-          .setAppIdentityService(appIdentityService)
-          .build();
+      credentials =
+          AppEngineCredentials.newBuilder()
+              .setScopes(scopes)
+              .setAppIdentityService(appIdentityService)
+              .build();
     }
+
+    credentials.refreshIfExpired();
+    return credentials;
   }
 
   /**
@@ -63,9 +68,7 @@ public class ServiceAccounts {
    * credentials.
    */
   public static String getScopedServiceAccessToken(List<String> scopes) throws IOException {
-    GoogleCredentials scopedCreds = getScopedServiceCredentials(scopes);
-    scopedCreds.refreshIfExpired();
-    return scopedCreds.getAccessToken().getTokenValue();
+    return getScopedServiceCredentials(scopes).getAccessToken().getTokenValue();
   }
 
   public static String getServiceAccountEmail(String serviceAccountName, String projectId) {

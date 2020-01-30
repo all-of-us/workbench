@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import com.google.api.services.cloudbilling.Cloudbilling;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -57,6 +58,7 @@ public class WorkspaceServiceTest {
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private FireCloudService mockFireCloudService;
   @Mock private Provider<WorkbenchConfig> mockWorkbenchConfigProvider;
+  @Mock private Provider<Cloudbilling> mockCloudbillingProvider;
   @Mock private Clock mockClock;
 
   private WorkspaceService workspaceService;
@@ -74,6 +76,8 @@ public class WorkspaceServiceTest {
     MockitoAnnotations.initMocks(this);
     workspaceService =
         new WorkspaceServiceImpl(
+            mockCloudbillingProvider,
+            mockCloudbillingProvider,
             mockClock,
             mockCohortCloningService,
             mockConceptSetService,

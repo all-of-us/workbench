@@ -72,6 +72,11 @@ public class WorkbenchConfig {
     public String projectNamePrefix;
     // The free tier GCP billing account ID to associate with Terra / GCP projects.
     public String accountId;
+
+    public String freeTierBillingAccountName() {
+      return "billingAccounts/" + accountId;
+    }
+
     // The full table name for the BigQuery billing export, which is read from by the free-tier
     // usage tracking cron endpoint.
     public String exportBigQueryTable;
