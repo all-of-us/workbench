@@ -91,18 +91,17 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   protected static final int RECENT_WORKSPACE_COUNT = 4;
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
-  // Note: Cannot use an @Autowired constructor with this version of Spring
-  // Boot due to https://jira.spring.io/browse/SPR-15600. See RW-256.
-  private Provider<Cloudbilling> endUserCloudbillingProvider;
-  private Provider<Cloudbilling> serviceAccountCloudbillingProvider;
-  private CohortCloningService cohortCloningService;
-  private ConceptSetService conceptSetService;
-  private DataSetService dataSetService;
-  private UserDao userDao;
-  private Provider<DbUser> userProvider;
-  private UserRecentWorkspaceDao userRecentWorkspaceDao;
-  private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private WorkspaceDao workspaceDao;
+  private final Provider<Cloudbilling> endUserCloudbillingProvider;
+  private final Provider<Cloudbilling> serviceAccountCloudbillingProvider;
+  private final CohortCloningService cohortCloningService;
+  private final ConceptSetService conceptSetService;
+  private final DataSetService dataSetService;
+  private final UserDao userDao;
+  private final Provider<DbUser> userProvider;
+  private final UserRecentWorkspaceDao userRecentWorkspaceDao;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final WorkspaceDao workspaceDao;
+  private final ManualWorkspaceMapper manualWorkspaceMapper;
 
   private FireCloudService fireCloudService;
   private Clock clock;
@@ -121,7 +120,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       Provider<DbUser> userProvider,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceDao workspaceDao) {
+      WorkspaceDao workspaceDao,
+      ManualWorkspaceMapper manualWorkspaceMapper) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.clock = clock;
@@ -134,6 +134,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.userRecentWorkspaceDao = userRecentWorkspaceDao;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
+    this.manualWorkspaceMapper = manualWorkspaceMapper;
   }
 
   /**
@@ -189,9 +190,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
               String fcWorkspaceAccessLevel =
                   fcWorkspaces.get(dbWorkspace.getFirecloudUuid()).getAccessLevel();
               WorkspaceResponse currentWorkspace = new WorkspaceResponse();
-              currentWorkspace.setWorkspace(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace));
+              currentWorkspace.setWorkspace(manualWorkspaceMapper.toApiWorkspace(dbWorkspace));
               currentWorkspace.setAccessLevel(
-                  WorkspaceConversionUtils.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
+                  ManualWorkspaceMapper.toApiWorkspaceAccessLevel(fcWorkspaceAccessLevel));
               return currentWorkspace;
             })
         .collect(Collectors.toList());
@@ -220,8 +221,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         throw new ServerErrorException("Unsupported access level: " + fcResponse.getAccessLevel());
       }
     }
-    workspaceResponse.setWorkspace(
-        WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
+    workspaceResponse.setWorkspace(manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
 
     return workspaceResponse;
   }
@@ -541,7 +541,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       if (user == null) {
         log.log(Level.WARNING, "No user found for " + entry.getKey());
       } else {
-        userRoles.add(WorkspaceConversionUtils.toApiUserRole(user, entry.getValue()));
+        userRoles.add(manualWorkspaceMapper.toApiUserRole(user, entry.getValue()));
       }
     }
     return userRoles.stream()

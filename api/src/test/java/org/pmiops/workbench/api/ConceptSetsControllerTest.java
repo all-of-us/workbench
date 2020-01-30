@@ -67,6 +67,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -215,7 +216,8 @@ public class ConceptSetsControllerTest {
     ConceptSetsController.class,
     WorkspacesController.class,
     ConceptSetService.class,
-    WorkspaceMapperImpl.class
+    WorkspaceMapperImpl.class,
+    ManualWorkspaceMapper.class
   })
   @MockBean({
     BillingProjectBufferService.class,

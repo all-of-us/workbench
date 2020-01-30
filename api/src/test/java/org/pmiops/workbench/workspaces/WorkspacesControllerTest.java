@@ -60,7 +60,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.CohortAnnotationDefinitionController;
@@ -260,7 +259,8 @@ public class WorkspacesControllerTest {
     ReviewQueryBuilder.class,
     ConceptSetService.class,
     ConceptSetsController.class,
-    WorkspaceMapperImpl.class
+    WorkspaceMapperImpl.class,
+    ManualWorkspaceMapper.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -334,7 +334,6 @@ public class WorkspacesControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
-  @Mock private Provider<WorkbenchConfig> configProvider;
 
   private DbCdrVersion cdrVersion;
   private String cdrVersionId;

@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {CardButton} from 'app/components/buttons';
@@ -18,7 +17,9 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {NotebookResourceCard} from 'app/pages/analysis/notebook-resource-card';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {FileDetail, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
+import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {BillingStatus, FileDetail, ResourceType, WorkspaceAccessLevel} from 'generated/fetch';
 
 const styles = {
   heading: {
@@ -71,12 +72,23 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
     }
   }
 
+  private canWrite(): boolean {
+    return WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel);
+  }
+
+  private disabledCreateButtonText(): string {
+    if (this.props.workspace.billingStatus === BillingStatus.INACTIVE) {
+      return ACTION_DISABLED_INVALID_BILLING;
+    } else if (!this.canWrite()) {
+      return 'Write permission required to create notebooks';
+    }
+  }
+
   render() {
     const {workspace, workspace: {namespace, id, accessLevel}} = this.props;
     const {notebookList, notebookNameList, creating, loading} = this.state;
     // TODO Remove this cast when we switch to fetch types
     const al = accessLevel as unknown as WorkspaceAccessLevel;
-    const canWrite = fp.includes(al, [WorkspaceAccessLevel.OWNER, WorkspaceAccessLevel.WRITER]);
     return <FadeBox style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
       <div style={styles.heading}>
         Notebooks&nbsp;
@@ -86,9 +98,9 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
         ><InfoIcon size={16} /></TooltipTrigger>
       </div>
       <div style={{display: 'flex', alignItems: 'flex-start'}}>
-        <TooltipTrigger content={!canWrite && 'Write permission required to create notebooks'}>
+        <TooltipTrigger content={this.disabledCreateButtonText()}>
           <CardButton
-            disabled={!canWrite}
+            disabled={workspace.billingStatus === BillingStatus.INACTIVE || !this.canWrite()}
             type='small'
             onClick={() => {
               AnalyticsTracker.Notebooks.OpenCreateModal();
@@ -105,6 +117,7 @@ export const NotebookList = withCurrentWorkspace()(class extends React.Component
               resource={convertToResource(notebook, namespace, id, al, ResourceType.NOTEBOOK)}
               existingNameList={notebookNameList}
               onUpdate={() => this.loadNotebooks()}
+              disableDuplicate={workspace.billingStatus === BillingStatus.INACTIVE}
             />;
           })}
         </div>

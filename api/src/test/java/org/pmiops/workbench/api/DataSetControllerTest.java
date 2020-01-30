@@ -119,6 +119,7 @@ import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.WorkspaceMapper;
 import org.pmiops.workbench.utils.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.ManualWorkspaceMapper;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.pmiops.workbench.workspaces.WorkspacesController;
@@ -233,6 +234,8 @@ public class DataSetControllerTest {
 
   @Autowired WorkspaceMapper workspaceMapper;
 
+  @Autowired ManualWorkspaceMapper manualWorkspaceMapper;
+
   @TestConfiguration
   @Import({
     CohortFactoryImpl.class,
@@ -241,7 +244,8 @@ public class DataSetControllerTest {
     UserServiceImpl.class,
     WorkspacesController.class,
     WorkspaceServiceImpl.class,
-    WorkspaceMapperImpl.class
+    WorkspaceMapperImpl.class,
+    ManualWorkspaceMapper.class
   })
   @MockBean({
     BillingProjectBufferService.class,
@@ -349,7 +353,8 @@ public class DataSetControllerTest {
             userService,
             workbenchConfigProvider,
             workspaceAuditor,
-            workspaceMapper);
+            workspaceMapper,
+            manualWorkspaceMapper);
     CohortsController cohortsController =
         new CohortsController(
             workspaceService,

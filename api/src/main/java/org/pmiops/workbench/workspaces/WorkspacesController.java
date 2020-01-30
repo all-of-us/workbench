@@ -112,16 +112,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceService workspaceService;
   private final CdrVersionDao cdrVersionDao;
   private final UserDao userDao;
-  private Provider<DbUser> userProvider;
+  private final Provider<DbUser> userProvider;
   private final FireCloudService fireCloudService;
-  private Provider<Cloudbilling> cloudbillingProvider;
+  private final Provider<Cloudbilling> cloudbillingProvider;
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final NotebooksService notebooksService;
   private final UserService userService;
-  private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private WorkspaceAuditor workspaceAuditor;
-  private WorkspaceMapper workspaceMapper;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final WorkspaceAuditor workspaceAuditor;
+  private final WorkspaceMapper workspaceMapper;
+  private final ManualWorkspaceMapper manualWorkspaceMapper;
 
   @Autowired
   public WorkspacesController(
@@ -138,7 +139,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       UserService userService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuditor workspaceAuditor,
-      WorkspaceMapper workspaceMapper) {
+      WorkspaceMapper workspaceMapper,
+      ManualWorkspaceMapper manualWorkspaceMapper) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.workspaceService = workspaceService;
     this.cdrVersionDao = cdrVersionDao;
@@ -153,6 +155,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuditor = workspaceAuditor;
     this.workspaceMapper = workspaceMapper;
+    this.manualWorkspaceMapper = manualWorkspaceMapper;
   }
 
   private String getRegisteredUserDomainEmail() {
@@ -238,13 +241,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
 
-    DbWorkspace reqWorkspace = WorkspaceConversionUtils.toDbWorkspace(workspace);
+    DbWorkspace reqWorkspace = manualWorkspaceMapper.toDbWorkspace(workspace);
     // TODO: enforce data access level authorization
     dbWorkspace.setDataAccessLevel(reqWorkspace.getDataAccessLevel());
     dbWorkspace.setName(reqWorkspace.getName());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
-    WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
+    manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, workspace.getResearchPurpose());
     if (reqWorkspace.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -275,7 +278,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
 
-    Workspace createdWorkspace = WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace);
+    Workspace createdWorkspace = manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(createdWorkspace);
   }
@@ -373,7 +376,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (researchPurpose != null) {
       // Note: this utility does not set the "review requested" bit or time. This is currently
       // immutable on a workspace, see RW-4132.
-      WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+      manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
     }
 
     if (workspace.getBillingAccountName() != null) {
@@ -401,7 +404,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceAuditor.fireEditAction(
         originalWorkspace, editedWorkspace, dbWorkspace.getWorkspaceId());
-    return ResponseEntity.ok(WorkspaceConversionUtils.toApiWorkspace(dbWorkspace, fcWorkspace));
+    return ResponseEntity.ok(manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace));
   }
 
   @Override
@@ -489,7 +492,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     dbWorkspace.setName(body.getWorkspace().getName());
     ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
-    WorkspaceConversionUtils.setResearchPurposeDetails(dbWorkspace, researchPurpose);
+    manualWorkspaceMapper.setResearchPurposeDetails(dbWorkspace, researchPurpose);
     if (researchPurpose.getReviewRequested()) {
       // Use a consistent timestamp.
       dbWorkspace.setTimeRequested(now);
@@ -645,7 +648,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     List<DbWorkspace> workspaces = workspaceService.findForReview();
     response.setItems(
         workspaces.stream()
-            .map(WorkspaceConversionUtils::toApiWorkspace)
+            .map(ws -> manualWorkspaceMapper.toApiWorkspace(ws))
             .collect(Collectors.toList()));
     return ResponseEntity.ok(response);
   }
@@ -875,7 +878,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     List<RecentWorkspace> recentWorkspaces =
-        WorkspaceConversionUtils.buildRecentWorkspaceList(
+        manualWorkspaceMapper.buildRecentWorkspaceList(
             userRecentWorkspaces, dbWorkspacesById, workspaceAccessLevelsById);
     recentWorkspaceResponse.addAll(recentWorkspaces);
     return ResponseEntity.ok(recentWorkspaceResponse);
@@ -898,7 +901,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     RecentWorkspaceResponse recentWorkspaceResponse = new RecentWorkspaceResponse();
     RecentWorkspace recentWorkspace =
-        WorkspaceConversionUtils.buildRecentWorkspace(
+        manualWorkspaceMapper.buildRecentWorkspace(
             userRecentWorkspace, dbWorkspace, workspaceAccessLevel);
     recentWorkspaceResponse.add(recentWorkspace);
     return ResponseEntity.ok(recentWorkspaceResponse);

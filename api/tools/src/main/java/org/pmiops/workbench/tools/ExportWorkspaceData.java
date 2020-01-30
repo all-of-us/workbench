@@ -85,7 +85,7 @@ public class ExportWorkspaceData {
   @Bean
   public WorkspaceService workspaceService() {
     return new WorkspaceServiceImpl(
-        null, null, null, null, null, null, null, null, null, null, null, null);
+        null, null, null, null, null, null, null, null, null, null, null, null, null);
   }
 
   @Bean
