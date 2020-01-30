@@ -668,6 +668,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     }
   }
 
+  // this is necessary because the grant ownership call in create/clone
+  // may not have propagated. Adding a few retries drastically reduces
+  // the likely of failing due to slow propagation
   private Retryer<ProjectBillingInfo> cloudBillingRetryer =
       RetryerBuilder.<ProjectBillingInfo>newBuilder()
           .retryIfException(
@@ -707,9 +710,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
     ProjectBillingInfo response;
     try {
-      // this is necessary because the grant ownership call in create/clone
-      // may not have propagated. Adding a few retries drastically reduces
-      // the likely of failing due to slow propagation
       response = cloudBillingRetryer.call(request::execute);
     } catch (RetryException | ExecutionException e) {
       throw new RuntimeException("Google Cloud updateBillingInfo call failed", e);

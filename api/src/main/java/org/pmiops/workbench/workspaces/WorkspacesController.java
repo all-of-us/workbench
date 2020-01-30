@@ -379,11 +379,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
     }
 
-    try {
-      workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, request.getWorkspace().getBillingAccountName());
-    } catch (Exception e) {
-      throw new ServerErrorException("Could not update the workspace's billing account", e);
+    if (workspace.getBillingAccountName() != null) {
+      try {
+        workspaceService.updateWorkspaceBillingAccount(
+            dbWorkspace, request.getWorkspace().getBillingAccountName());
+      } catch (Exception e) {
+        throw new ServerErrorException("Could not update the workspace's billing account", e);
+      }
     }
 
     try {

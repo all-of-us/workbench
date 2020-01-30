@@ -48,7 +48,7 @@ public class GoogleApisConfig {
       throws IOException, GeneralSecurityException {
     GoogleCredentials credentials =
         ServiceAccounts.getScopedServiceCredentials(
-            Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
+            Collections.singletonList("https://www.googleapis.com/auth/cloud-billing"));
 
     return new Cloudbilling.Builder(
             GoogleNetHttpTransport.newTrustedTransport(),
