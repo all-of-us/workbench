@@ -50,6 +50,7 @@ export class StatusAlertBanner extends React.Component<Props, {}> {
         />
         <div style={{
           fontWeight: 600,
+          width: '80%',
           marginLeft: '.4rem',
           lineHeight: '18px'
           // These next two styles fake the appearance of only having spacing below the line

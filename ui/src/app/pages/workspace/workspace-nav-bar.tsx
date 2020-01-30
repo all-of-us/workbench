@@ -2,13 +2,15 @@ import {Component, Input} from '@angular/core';
 
 import {Button, Clickable} from 'app/components/buttons';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
-import {NavStore} from 'app/utils/navigation';
+import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams, withUserProfile} from 'app/utils';
+import {navigate, NavStore} from 'app/utils/navigation';
 
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {StatusAlertBanner} from "app/components/status-alert-banner";
 import {WorkspaceData} from "app/utils/workspace-data";
+import {openZendeskWidget} from "app/utils/zendesk";
+import {BillingStatus, Profile} from "generated/fetch";
 
 
 const styles = reactStyles({
@@ -47,6 +49,9 @@ interface Props {
   workspace: WorkspaceData;
   urlParams: any;
   tabPath: string;
+  profileState: {
+    profile: Profile
+  }
 }
 
 interface State {
@@ -56,13 +61,20 @@ interface State {
 export const WorkspaceNavBarReact = fp.flow(
   withCurrentWorkspace(),
   withUrlParams(),
+  withUserProfile()
 )(
   class extends React.Component<Props, State> {
 
     constructor(props) {
       super(props);
       this.state = {
-        showInvalidBillingBanner: true
+        showInvalidBillingBanner: false
+      }
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+      if (!prevProps.workspace && this.props.workspace && this.props.workspace.billingStatus === BillingStatus.INACTIVE) {
+        this.setState({showInvalidBillingBanner: true});
       }
     }
 
@@ -76,16 +88,31 @@ export const WorkspaceNavBarReact = fp.flow(
         const hideSeparator = selected || (activeTabIndex === tabs.indexOf(currentTab) + 1);
 
         return <React.Fragment key={name}>
-          {true &&
+          {this.state.showInvalidBillingBanner &&
           <StatusAlertBanner
             title={'This workspace has run out of free credits'}
             message={'The free credits for the creator of this workspace have run out or expired. Please provide a valid billing account or contact support to extend free credits.'}
             footer={
               <div style={{display: 'flex', flexDirection: 'column'}}>
-                <Button style={{height: '38px', width: '70%', fontWeight: 400}}>
+                <Button style={{height: '38px', width: '70%', fontWeight: 400}}
+                        onClick={() => {
+                          openZendeskWidget(
+                            this.props.profileState.profile.givenName,
+                            this.props.profileState.profile.familyName,
+                            this.props.profileState.profile.username,
+                            this.props.profileState.profile.contactEmail,
+                          );
+                        }}
+                >
                   Request Extension
                 </Button>
-                <a style={{marginTop: '.5rem', marginLeft: '.2rem'}}>Provide billing account</a>
+                <a style={{marginTop: '.5rem', marginLeft: '.2rem'}}
+                   onClick={() => {
+                     navigate(['workspaces', this.props.workspace.namespace, this.props.workspace.id, 'edit']);
+                   }}
+                >
+                  Provide billing account
+                </a>
               </div>
             }
             onClose={() => {this.setState({showInvalidBillingBanner: false})}}
