@@ -828,6 +828,7 @@ public class WorkspacesControllerTest {
   @Test
   public void testUpdateWorkspaceResearchPurpose() throws Exception {
     Workspace ws = createWorkspace();
+    ws.getResearchPurpose().reviewRequested(true);
     ws = workspacesController.createWorkspace(ws).getBody();
 
     ResearchPurpose rp =
@@ -841,8 +842,7 @@ public class WorkspacesControllerTest {
             .populationHealth(false)
             .socialBehavioral(false)
             .drugDevelopment(false)
-            .additionalNotes(null)
-            .reviewRequested(false);
+            .additionalNotes(null);
     ws.setResearchPurpose(rp);
     UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
     request.setWorkspace(ws);
@@ -863,7 +863,25 @@ public class WorkspacesControllerTest {
     assertThat(updatedRp.getDrugDevelopment()).isFalse();
     assertThat(updatedRp.getPopulation()).isFalse();
     assertThat(updatedRp.getAdditionalNotes()).isNull();
+    assertThat(updatedRp.getReviewRequested()).isTrue();
+  }
+
+  @Test
+  public void testUpdateWorkspaceResearchPurpose_cannotUpdateReviewRequest() throws Exception {
+    Workspace ws = createWorkspace();
+    ws.getResearchPurpose().setReviewRequested(false);
+    ws = workspacesController.createWorkspace(ws).getBody();
+
+    ws.getResearchPurpose().setReviewRequested(true);
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest().workspace(ws);
+    ResearchPurpose updatedRp =
+        workspacesController
+            .updateWorkspace(ws.getNamespace(), ws.getId(), request)
+            .getBody()
+            .getResearchPurpose();
+
     assertThat(updatedRp.getReviewRequested()).isFalse();
+    assertThat(updatedRp.getTimeRequested()).isNull();
   }
 
   @Test(expected = ForbiddenException.class)
