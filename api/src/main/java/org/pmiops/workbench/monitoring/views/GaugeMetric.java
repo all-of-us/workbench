@@ -19,6 +19,10 @@ public enum GaugeMetric implements Metric {
       "dataset_count_2",
       "Count of all datasets in existence",
       ImmutableList.of(MetricLabel.DATASET_INVALID)),
+  GSUITE_USER_COUNT(
+      "gsuite_user_count",
+      "Number of users in GSuite Directory.",
+      ImmutableList.of(MetricLabel.GSUITE_DOMAIN)),
   USER_COUNT(
       "user_count_2",
       "total number of users",
