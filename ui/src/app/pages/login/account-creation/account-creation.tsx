@@ -7,7 +7,7 @@ import {
 } from 'app/components/icons';
 
 import {
-  Error,
+  Error as ErrorDiv,
   ErrorMessage,
   RadioButton,
   styles as inputStyles,
@@ -24,7 +24,6 @@ import {
 } from 'app/services/swagger-fetch-clients';
 
 import {FlexColumn, FlexRow, flexStyle} from 'app/components/flex';
-import {signedOutImages} from 'app/pages/login/signed-out-images';
 import {AoUTitle} from 'app/pages/profile/data-use-agreement-styles';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -48,32 +47,6 @@ import {AccountCreationOptions} from './account-creation-options';
 
 function isBlank(s: string) {
   return (!s || /^\s*$/.test(s));
-}
-
-
-export interface AccountCreationProps {
-  profile: Profile;
-  invitationKey: string;
-  setProfile: Function;
-}
-
-export interface AccountCreationState {
-  creatingAccount: boolean;
-  errors: any;
-  invalidEmail: boolean;
-  rolesOptions: any;
-  profile: Profile;
-  showAllFieldsRequiredError: boolean;
-  showInstitution: boolean;
-  showNonAcademicAffiliationRole: boolean;
-  showNonAcademicAffiliationOther: boolean;
-  usernameCheckInProgress: boolean;
-  usernameConflictError: boolean;
-  institutionName: string;
-  institutionRole: string;
-  nonAcademicAffiliation: string;
-  nonAcademicAffiliationRole: string;
-  nonAcademicAffiliationOther: string;
 }
 
 const styles = reactStyles({
@@ -166,7 +139,8 @@ export const MultiSelectWithLabel = (props) => {
   return <FlexColumn style={{width: '12rem', ...props.containerStyle}}>
     <label style={{...styles.text, fontWeight: 600}}>{props.labelText}</label>
     <FlexRow style={{alignItems: 'center', marginTop: '0.1rem'}}>
-      <MultiSelect placeholder={props.placeholder}
+      <MultiSelect className='create-account__degree-select' placeholder={props.placeholder}
+                   filter={false}
                    value={props.value} onChange={props.onChange}
                    options={props.options} data-test-id={props.dataTestId}
                    style={{...styles.sectionInput, overflowY: 'none'}}/>
@@ -175,45 +149,59 @@ export const MultiSelectWithLabel = (props) => {
   </FlexColumn>;
 };
 
+export interface AccountCreationProps {
+  profile: Profile;
+  invitationKey: string;
+  onComplete: (profile: Profile) => void;
+}
+
+export interface AccountCreationState {
+  creatingAccount: boolean;
+  errors: any;
+  invalidEmail: boolean;
+  rolesOptions: any;
+  profile: Profile;
+  showAllFieldsRequiredError: boolean;
+  showInstitution: boolean;
+  showNonAcademicAffiliationRole: boolean;
+  showNonAcademicAffiliationOther: boolean;
+  usernameCheckInProgress: boolean;
+  usernameConflictError: boolean;
+  institutionName: string;
+  institutionRole: string;
+  nonAcademicAffiliation: string;
+  nonAcademicAffiliationRole: string;
+  nonAcademicAffiliationOther: string;
+}
+
 export class AccountCreation extends React.Component<AccountCreationProps, AccountCreationState> {
   private usernameCheckTimeout: NodeJS.Timer;
 
   constructor(props: AccountCreationProps) {
+    if (props.profile.institutionalAffiliations.length !== 1) {
+      throw new Error('Profile must be pre-allocated with 1 institutional affiliation.');
+    }
     super(props);
-    this.state = {
+    this.state = this.createInitialState();
+
+  }
+
+  componentDidMount() {
+    this.updateNonAcademicAffiliationRoles(
+      this.state.profile.institutionalAffiliations[0].nonAcademicAffiliation);
+    this.selectNonAcademicAffiliationRoles(
+      this.state.profile.institutionalAffiliations[0].role);
+  }
+
+  createInitialState(): AccountCreationState {
+    const state: AccountCreationState = {
       errors: undefined,
-      profile: {
-        // Note: We abuse the "username" field here by omitting "@domain.org". After
-        // profile creation, this field is populated with the full email address.
-        username: '',
-        dataAccessLevel: DataAccessLevel.Unregistered,
-        givenName: '',
-        familyName: '',
-        contactEmail: '',
-        currentPosition: '',
-        organization: '',
-        areaOfResearch: '',
-        address: {
-          streetAddress1: '',
-          streetAddress2: '',
-          city: '',
-          state: '',
-          country: '',
-          zipCode: '',
-        },
-        institutionalAffiliations: [
-          {
-            institution: undefined,
-            nonAcademicAffiliation: undefined,
-            role: undefined
-          }
-        ],
-        degrees: [] as Degree[]
-      },
+      profile: this.props.profile,
       usernameCheckInProgress: false,
       usernameConflictError: false,
       creatingAccount: false,
       showAllFieldsRequiredError: false,
+      // showInstitution defaults to true, since we expect most users coming in will be academics.
       showInstitution: true,
       showNonAcademicAffiliationRole: false,
       showNonAcademicAffiliationOther: false,
@@ -225,27 +213,18 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       nonAcademicAffiliationRole: '',
       nonAcademicAffiliationOther: ''
     };
-  }
 
-  componentDidMount() {
-    if (this.props.profile.address) {
-      const {institutionalAffiliations} = this.props.profile;
-      if (institutionalAffiliations[0].institution) {
-        this.setState({showInstitution: true});
-      } else {
-        this.setState({showInstitution: false});
-        this.updateNonAcademicAffiliationRoles(institutionalAffiliations[0].nonAcademicAffiliation);
-        this.selectNonAcademicAffiliationRoles(institutionalAffiliations[0].role);
-      }
-      this.setState({profile: this.props.profile});
-
-
+    const institutionalAffiliation = this.props.profile.institutionalAffiliations[0];
+    if (institutionalAffiliation.institution) {
+      state.showInstitution = true;
     }
+
+    return state;
   }
 
   // This method will be deleted once we enable new account pages
   createAccount(): void {
-    const {invitationKey, setProfile} = this.props;
+    const {invitationKey, onComplete} = this.props;
     const profile = this.state.profile;
     profile.institutionalAffiliations = [];
     const emailValidRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/);
@@ -267,7 +246,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     profileApi().createAccount({profile, invitationKey})
       .then((savedProfile) => {
         this.setState({profile: savedProfile, creatingAccount: false});
-        setProfile(savedProfile, {stepName: 'accountCreationSuccess', backgroundImages: signedOutImages.login}); })
+        onComplete(savedProfile);
+      })
       .catch(error => {
         console.log(error);
         this.setState({creatingAccount: false});
@@ -345,15 +325,11 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
 
   // As of now we can add just one industry name role, this will change later
   updateInstitutionAffiliation(attribute: string, value) {
-    const profile = this.state.profile;
-    if (profile.institutionalAffiliations && profile.institutionalAffiliations.length > 0) {
+    this.setState((currentState) => {
+      const profile = currentState.profile;
       profile.institutionalAffiliations[0][attribute] = value;
-    } else {
-      const institutionalAffiliation = {} as InstitutionalAffiliation;
-      institutionalAffiliation[attribute] = value;
-      profile.institutionalAffiliations = [institutionalAffiliation];
-    }
-    this.setState({profile: profile});
+      return currentState;
+    });
   }
 
   showFreeTextField(option) {
@@ -362,10 +338,14 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   clearInstitutionAffiliation() {
-    this.updateInstitutionAffiliation('nonAcademicAffiliation', '');
-    this.updateInstitutionAffiliation('role', '');
-    this.updateInstitutionAffiliation('institution', '');
-    this.updateInstitutionAffiliation('other', '');
+    this.setState(currentState => {
+      const affiliation = currentState.profile.institutionalAffiliations[0];
+      affiliation.nonAcademicAffiliation = null;
+      affiliation.role = '';
+      affiliation.institution = '';
+      affiliation.other = '';
+      return currentState;
+    });
   }
 
   updateNonAcademicAffiliationRoles(nonAcademicAffiliation) {
@@ -445,12 +425,6 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           message: 'invalid'
         }
       },
-      degrees: {
-        length: {
-          minimum: 1,
-          tooShort: 'Please provide at least one degree option (if none, select \'none\'.)',
-        }
-      },
       streetAddress1: presenceCheck,
       city: presenceCheck,
       state: presenceCheck,
@@ -473,11 +447,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   getInstitutionalAffiliationPropertyOrEmptyString(property: string) {
-    const {institutionalAffiliations} = this.state.profile;
-    return institutionalAffiliations &&
-      institutionalAffiliations.length > 0 ? institutionalAffiliations[0][property] : '';
+    return this.state.profile.institutionalAffiliations[0][property];
   }
-
 
   render() {
     const {
@@ -490,6 +461,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       },
     } = this.state;
     const enableNewAccountCreation = serverConfigStore.getValue().enableNewAccountCreation;
+    const institutionalAffiliation: InstitutionalAffiliation =
+      this.state.profile.institutionalAffiliations[0];
 
     const usernameLabelText =
       <div>New Username
@@ -504,6 +477,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
       </div>;
 
     const errors = this.validateAccountCreation();
+
     return <div id='account-creation'
                 style={{paddingTop: enableNewAccountCreation ? '1.5rem' :
                       '3rem', paddingRight: '3rem', paddingLeft: '3rem'}}>
@@ -531,13 +505,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               </FlexRow>
               {this.state.usernameConflictError &&
               <div style={{height: '1.5rem'}}>
-                <Error id='usernameConflictError'>
+                <ErrorDiv id='usernameConflictError'>
                   Username is already taken.
-                </Error></div>}
+                </ErrorDiv></div>}
               {this.usernameInvalidError() &&
-              <div style={{height: '1.5rem'}}><Error id='usernameError'>
+              <div style={{height: '1.5rem'}}><ErrorDiv id='usernameError'>
                 {username} is not a valid username.
-              </Error></div>}
+              </ErrorDiv></div>}
             </div>
           </Section>
           <Section header={<div>About you <i style={styles.publiclyDisplayedText}>Publicly displayed</i></div>}>
@@ -565,13 +539,16 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                                     invalid={this.state.invalidEmail} labelText='Email Address'
                                     onChange={v => this.updateProfileObject('contactEmail', v)}/>
                 {this.state.invalidEmail &&
-                <Error id='invalidEmailError'>
+                <ErrorDiv id='invalidEmailError'>
                   Contact Email is invalid
-                </Error>}
-                <MultiSelectWithLabel placeholder={'You can select more than one'} options={AccountCreationOptions.degree}
+                </ErrorDiv>}
+                <MultiSelectWithLabel placeholder={'Select one or more'} options={AccountCreationOptions.degree}
                                       containerStyle={styles.multiInputSpacing} value={this.state.profile.degrees}
-                                      labelText='Your degree'
-                                      onChange={(e) => this.updateProfileObject('degrees', e.value)}/>
+                                      labelText='Your degrees (optional)'
+                                      onChange={(e) => this.setState(currentState => {
+                                        currentState.profile.degrees = e.value;
+                                        return currentState;
+                                      })}/>
               </FlexRow>
             </FlexColumn>
           </Section>
@@ -635,25 +612,25 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
               Are you affiliated with an Academic Research Institution?
             </label>
             <div style={{paddingTop: '0.5rem'}}>
-              <RadioButton data-test-id='show-institution-yes'
+              <RadioButton id='show-institution-yes' data-test-id='show-institution-yes'
                            onChange={() => {this.clearInstitutionAffiliation();
                              this.setState({showInstitution: true}); }}
-                           checked={this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
-              <label style={{paddingRight: '3rem', color: colors.primary}}>
+                           checked={this.state.showInstitution === true} style={{marginRight: '0.5rem'}}/>
+              <label htmlFor='show-institution-yes' style={{paddingRight: '3rem', color: colors.primary}}>
                 Yes
               </label>
-              <RadioButton data-test-id='show-institution-no'
+              <RadioButton id='show-institution-no' data-test-id='show-institution-no'
                            onChange={() => {this.clearInstitutionAffiliation();
                              this.setState({showInstitution: false}); }}
-                           checked={!this.state.showInstitution} style={{marginRight: '0.5rem'}}/>
-              <label style={{color: colors.primary}}>No</label>
+                           checked={this.state.showInstitution === false} style={{marginRight: '0.5rem'}}/>
+              <label htmlFor='show-institution-no' style={{color: colors.primary}}>No</label>
             </div>
           </Section>
           {this.state.showInstitution &&
           <FlexColumn style={{justifyContent: 'space-between'}}>
-            <TextInput data-test-id='institutionname' style={{width: '16rem', marginBottom: '0.5rem',
+            <TextInput data-test-id='institution-name' style={{width: '16rem', marginBottom: '0.5rem',
               marginTop: '0.5rem'}}
-              value={this.getInstitutionalAffiliationPropertyOrEmptyString('institution')}
+              value={institutionalAffiliation.institution}
               placeholder='Institution Name'
               onChange={value => this.updateInstitutionAffiliation('institution', value)}
                        />
@@ -705,7 +682,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
             </React.Fragment>} disabled={!errors}>
               <Button disabled={this.state.usernameCheckInProgress || this.isUsernameValidationError || errors}
                       style={{'height': '2rem', 'width': '10rem'}}
-                      onClick={() => this.props.setProfile(this.state.profile, {stepName: 'accountCreationSurvey'})}>
+                      onClick={() => this.props.onComplete(this.state.profile)}>
                 Next
               </Button>
             </TooltipTrigger>
@@ -727,7 +704,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <FlexColumn style={{...styles.asideContainer, marginTop: '21.8rem', height: '15rem'}}>
             <div style={styles.asideHeader}><i>All of Us</i> participants are most interested in knowing:</div>
             <ul style={styles.asideList}>
-              {researchPurposeList.map(value => <li style={styles.asideText}>{value}</li>)}
+              {researchPurposeList.map(value => <li key={value} style={styles.asideText}>{value}</li>)}
             </ul>
           </FlexColumn>
         </FlexColumn>
@@ -764,9 +741,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                      style={{width: '16rem'}}
                      onChange={v => this.updateProfileToBeDeleted('contactEmail', v)}/>
           {this.state.invalidEmail &&
-          <Error id='invalidEmailError'>
+          <ErrorDiv id='invalidEmailError'>
             Contact Email Id is invalid
-          </Error>}
+          </ErrorDiv>}
         </FormSection>
         <FormSection>
           <TextInput id='currentPosition' name='currentPosition'
@@ -826,13 +803,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </TooltipTrigger>
           <div style={{height: '1.5rem'}}>
             {this.state.usernameConflictError &&
-            <Error id='usernameConflictError'>
+            <ErrorDiv id='usernameConflictError'>
               Username is already taken.
-            </Error>}
+            </ErrorDiv>}
             {this.usernameInvalidError() &&
-            <Error id='usernameError'>
+            <ErrorDiv id='usernameError'>
               Username is not a valid username.
-            </Error>}
+            </ErrorDiv>}
           </div>
         </FormSection>
         <FormSection>
@@ -845,9 +822,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         </FormSection>
       </div>}
       {!enableNewAccountCreation && this.state.showAllFieldsRequiredError &&
-      <Error>
+      <ErrorDiv>
         All fields are required.
-      </Error>}
+      </ErrorDiv>}
     </div>;
   }
 }

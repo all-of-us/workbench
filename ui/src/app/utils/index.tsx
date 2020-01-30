@@ -129,7 +129,7 @@ export const withWindowSize = () => WrappedComponent => {
     }
   }
 
-  return Wrapper as any;
+  return Wrapper;
 };
 
 export const nextSort = ({field, direction}, newField) => {

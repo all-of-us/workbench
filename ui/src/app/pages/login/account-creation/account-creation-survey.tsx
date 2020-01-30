@@ -16,13 +16,13 @@ import {
 import {Section, TextInputWithLabel} from './account-creation';
 
 import {TooltipTrigger} from 'app/components/popups';
-import {signedOutImages} from 'app/pages/login/signed-out-images';
 import {
   profileApi
 } from 'app/services/swagger-fetch-clients';
 import {toggleIncludes} from 'app/utils';
 import * as validate from 'validate.js';
 import {AccountCreationOptions} from './account-creation-options';
+import {SpinnerOverlay} from '../../../components/spinners';
 
 
 const styles = {
@@ -55,7 +55,8 @@ export const DropDownSection = (props) => {
 export interface AccountCreationSurveyProps {
   invitationKey: string;
   profile: Profile;
-  setProfile: Function;
+  onComplete: (profile: Profile) => void;
+  onPreviousClick: (profile: Profile) => void;
 }
 
 export interface AccountCreationState {
@@ -68,45 +69,25 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     super(props);
     this.state = {
       creatingAccount: false,
-      profile: {
-        username: '',
-        dataAccessLevel: DataAccessLevel.Protected,
-        demographicSurvey: {
-          disability: false,
-          education: undefined,
-          ethnicity: undefined,
-          identifiesAsLgbtq: false,
-          lgbtqIdentity: '',
-          race: [] as Race[],
-          sexAtBirth: [] as SexAtBirth[],
-          yearOfBirth: 0
-        }
-      }
+      profile: this.props.profile,
     };
   }
 
-  componentDidMount() {
-    this.setState({profile: this.profileObj});
-  }
-
-  get profileObj() {
-    const demographicSurvey = this.state.profile.demographicSurvey;
-    return {
-      ...this.props.profile,
-      demographicSurvey
-    };
-  }
-
+  // TODO: we should probably bump this logic out of the survey component and either into its own
+  // component or into the top-level SignIn component. The fact that we're awkwardly passing the
+  // invitation key and tos version into this component (for the sole purpose of relaying this data
+  // to the backend) is a telltale sign that this should be refactored.
   createAccount(): void {
-    const {invitationKey, setProfile} = this.props;
+    const {invitationKey, onComplete} = this.props;
     this.setState({creatingAccount: true});
-    profileApi().createAccount({profile: this.profileObj, invitationKey: invitationKey})
+    profileApi().createAccount({profile: this.state.profile, invitationKey: invitationKey})
       .then((savedProfile) => {
         this.setState({profile: savedProfile, creatingAccount: false});
-        setProfile(savedProfile, {stepName: 'accountCreationSuccess', backgroundImages: signedOutImages.login});
+        onComplete(savedProfile);
       }).catch(error => {
         console.log(error);
         this.setState({creatingAccount: false});
+        // TODO: we need to show some user-facing error message when this fails.
       });
   }
 
@@ -129,7 +110,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   }
 
   render() {
-    const {profile: {demographicSurvey}} = this.state;
+    const {profile: {demographicSurvey}, creatingAccount} = this.state;
     const validationCheck = {
       lgbtqIdentity: {
         length: {
@@ -139,7 +120,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
       },
     };
     const errors = validate(demographicSurvey, validationCheck);
-    console.log(errors);
+
     return <div style={{marginTop: '1rem', paddingLeft: '3rem', width: '26rem'}}>
       <label style={{color: colors.primary, fontSize: 16}}>
         Please complete Step 2 of 2
@@ -237,8 +218,8 @@ or another sexual and/or gender minority?'>
                        onChange={
                          (e) => this.updateDemographicAttribute('education', e)}/>
       <div style={{display: 'flex', paddingTop: '2rem'}}>
-        <Button type='secondary' style={{marginRight: '1rem'}} disabled={this.state.creatingAccount}
-                onClick={() => this.props.setProfile(this.profileObj, {stepName: 'accountCreation'})}>
+        <Button type='secondary' style={{marginRight: '1rem'}} disabled={creatingAccount}
+                onClick={() => this.props.onPreviousClick(this.state.profile)}>
           Previous
         </Button>
         <TooltipTrigger content={errors && <React.Fragment>
@@ -247,12 +228,13 @@ or another sexual and/or gender minority?'>
               {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
             </ul>
         </React.Fragment>}>
-          <Button type='primary' disabled={this.state.creatingAccount || this.state.creatingAccount || errors}
+          <Button type='primary' disabled={creatingAccount || creatingAccount || errors}
                   onClick={() => this.createAccount()}>
             Submit
           </Button>
         </TooltipTrigger>
       </div>
+      {creatingAccount && <SpinnerOverlay />}
     </div>;
   }
 }

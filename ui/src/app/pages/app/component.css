@@ -103,3 +103,7 @@
 button.btn:focus {
   outline: none;
 }
+
+.create-account__degree-select .p-multiselect-header {
+  display: none;
+}

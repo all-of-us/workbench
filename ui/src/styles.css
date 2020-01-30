@@ -196,3 +196,11 @@ iframe#launcher {
     transform: rotate(359deg);
   }
 }
+
+/*
+ * Hides the unnecessary "select all" header from the multiselect drop-down for the
+ * Degrees multi-select in the Account Creation component.
+ */
+.create-account__degree-select .p-multiselect-header {
+  display: none;
+}
