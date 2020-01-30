@@ -1,16 +1,18 @@
 package org.pmiops.workbench.monitoring;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import io.opencensus.tags.TagKey;
 import io.opencensus.tags.TagValue;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.pmiops.workbench.monitoring.MeasurementBundle.Builder;
-import org.pmiops.workbench.monitoring.views.DistributionMetric;
 import org.pmiops.workbench.monitoring.views.CumulativeMetric;
-import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.DistributionMetric;
+import org.pmiops.workbench.monitoring.views.MetricBase;
 
 public interface MonitoringService {
 
@@ -30,11 +32,11 @@ public interface MonitoringService {
     recordValues(ImmutableMap.of(eventMetric, DELTA_VALUE), tags);
   }
 
-  default void recordValue(Metric metric, Number value) {
+  default void recordValue(MetricBase metric, Number value) {
     recordValues(ImmutableMap.of(metric, value));
   }
 
-  default void recordValues(Map<Metric, Number> metricToValue) {
+  default void recordValues(Map<MetricBase, Number> metricToValue) {
     recordValues(metricToValue, Collections.emptyMap());
   }
 
@@ -47,7 +49,7 @@ public interface MonitoringService {
    *     attachments should apply to all entries in this map.
    * @param tags Map of String/AttachmentValue pairs to be associated with these data.
    */
-  void recordValues(Map<Metric, Number> metricToValue, Map<TagKey, TagValue> tags);
+  void recordValues(Map<MetricBase, Number> metricToValue, Map<TagKey, TagValue> tags);
 
   default void recordBundle(MeasurementBundle measurementBundle) {
     recordValues(measurementBundle.getMeasurements(), measurementBundle.getTags());
@@ -60,6 +62,13 @@ public interface MonitoringService {
   }
 
   /**
+   * Record a pre-aggregated histogram to a distribution metric.
+   * @param metric
+   * @param values
+   */
+  void recordDistribution(DistributionMetric metric, List<Double> values);
+
+  /**
    * Use a Stopwatch to time the supplied operation, then add a measurement to the supplied
    * measurementBundleBuilder and record the associated DistributionMetric.
    *
@@ -69,8 +78,16 @@ public interface MonitoringService {
    *     don't make sense for timings
    * @param operation - Code to be run, e.g. () -> myService.computeThings()
    */
-  void timeAndRecordOperation(
-      Builder measurementBundleBuilder, DistributionMetric distributionMetric, Runnable operation);
+  default void timeAndRecordOperation(
+      Builder measurementBundleBuilder, DistributionMetric distributionMetric, Runnable operation) {
+    final Stopwatch stopwatch = Stopwatch.createStarted();
+    operation.run();
+    stopwatch.stop();
+    recordBundle(
+        measurementBundleBuilder
+            .addMeasurement(distributionMetric, stopwatch.elapsed().toMillis())
+            .build());
+  }
 
   /**
    * Same as above, but returns the result of the operation
@@ -81,8 +98,17 @@ public interface MonitoringService {
    *     don't make sense for timings
    * @param operation - Code to be run, e.g. myService::getFooList
    */
-  <T> T timeAndRecordOperation(
+  default <T> T timeAndRecordOperation(
       Builder measurementBundleBuilder,
       DistributionMetric distributionMetric,
-      Supplier<T> operation);
+      Supplier<T> operation) {
+    final Stopwatch stopwatch = Stopwatch.createStarted();
+    final T result = operation.get();
+    stopwatch.stop();
+    recordBundle(
+        measurementBundleBuilder
+            .addMeasurement(distributionMetric, stopwatch.elapsed().toMillis())
+            .build());
+    return result;
+  }
 }

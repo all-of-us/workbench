@@ -1,6 +1,9 @@
 package org.pmiops.workbench.monitoring.views;
 
+import com.google.api.MetricDescriptor.MetricKind;
 import com.google.common.collect.ImmutableMap;
+import com.google.monitoring.v3.TypedValue;
+import com.google.monitoring.v3.TypedValue.Builder;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure;
 import io.opencensus.stats.Measure.MeasureDouble;
@@ -10,6 +13,7 @@ import io.opencensus.stats.View.Name;
 import io.opencensus.tags.TagKey;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
@@ -24,18 +28,33 @@ import org.pmiops.workbench.monitoring.attachments.MetricLabelBase;
  * there's no such thing as a Metric in the latter. We use OpenCensus terminology in this system as
  * we may wish to support other metrics backends, and don't want to depend on Stackdriver concepts
  * or implementation details.
+ *
+ * <p>Currenlty, there is a mix of both Stackdriver and OpenCensus types referenced in this
+ * interface. The plan is to avoid that by moving these backend-specific functions into translator
+ * classes/services.
  */
-public interface Metric {
+public interface MetricBase {
 
-  Map<Class, Function<Metric, Measure>> MEASURE_CLASS_TO_MEASURE_FUNCTION =
+  Map<Class, Function<MetricBase, Measure>> MEASURE_CLASS_TO_MEASURE_FUNCTION =
       ImmutableMap.of(
-          MeasureLong.class, Metric::getMeasureLong,
-          MeasureDouble.class, Metric::getMeasureDouble);
+          MeasureLong.class, MetricBase::getMeasureLong,
+          MeasureDouble.class, MetricBase::getMeasureDouble);
+
+  String STACKDRIVER_CUSTOM_METRICS_PREFIX = "custom.googleapis.com/";
 
   String getName();
 
   default Name getStatsName() {
     return Name.create(getName());
+  }
+
+  /**
+   * Return
+   *
+   * @return
+   */
+  default String getMetricPathName() {
+    return String.format("%s%s", STACKDRIVER_CUSTOM_METRICS_PREFIX, getName());
   }
 
   String getDescription();
@@ -83,4 +102,8 @@ public interface Metric {
   default boolean supportsLabel(MetricLabel label) {
     return getLabels().contains(label);
   }
+
+  MetricKind getMetricKind();
+
+//  BiConsumer<Builder, ? extends Number> getTypedValueSetter();
 }

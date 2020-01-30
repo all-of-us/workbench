@@ -39,8 +39,8 @@ import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.model.FileDetail;
-import org.pmiops.workbench.monitoring.MonitoringServiceImpl;
-import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
+import org.pmiops.workbench.monitoring.OpenCensusMonitoringServiceImpl;
+import org.pmiops.workbench.monitoring.OpenCensusMonitoringSpringConfiguration;
 import org.pmiops.workbench.monitoring.StackdriverStatsExporterService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
@@ -57,8 +57,8 @@ import org.springframework.context.annotation.Primary;
 /** A tool that will generate a CSV export of our workspace data */
 @Configuration
 @Import({
-  MonitoringServiceImpl.class,
-  MonitoringSpringConfiguration.class,
+  OpenCensusMonitoringServiceImpl.class,
+  OpenCensusMonitoringSpringConfiguration.class,
   NotebooksServiceImpl.class,
   StackdriverStatsExporterService.class,
   UserRecentResourceServiceImpl.class

@@ -1,5 +1,6 @@
 package org.pmiops.workbench.monitoring.views;
 
+import com.google.api.MetricDescriptor.MetricKind;
 import com.google.common.collect.ImmutableList;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Aggregation.LastValue;
@@ -8,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 
-public enum GaugeMetric implements Metric {
+public enum GaugeMetric implements MetricBase {
   BILLING_BUFFER_PROJECT_COUNT(
       "billing_buffer_project_count",
       "Number of projects in the billing buffer for each status",
@@ -95,6 +96,16 @@ public enum GaugeMetric implements Metric {
   public List<MetricLabel> getLabels() {
     return allowedAttachments;
   }
+
+  @Override
+  public MetricKind getMetricKind() {
+    return MetricKind.GAUGE;
+  }
+  //
+  //  @Override
+  //  public BiConsumer<Builder, ? extends Number> getTypedValueSetter() {
+  //    return Builder::setInt64Value;
+  //  }
 
   @Override
   public String toString() {

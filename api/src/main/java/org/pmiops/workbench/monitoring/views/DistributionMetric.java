@@ -1,13 +1,16 @@
 package org.pmiops.workbench.monitoring.views;
 
+import com.google.api.MetricDescriptor.MetricKind;
+import com.google.common.collect.ImmutableList;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 
-public enum DistributionMetric implements Metric {
+public enum DistributionMetric implements MetricBase {
   COHORT_OPERATION_TIME(
       "cohort_operation_time",
       "Time to complete Cohort-related operation.",
@@ -74,5 +77,41 @@ public enum DistributionMetric implements Metric {
   @Override
   public List<MetricLabel> getLabels() {
     return metricLabels;
+  }
+
+  @Override
+  public MetricKind getMetricKind() {
+    return MetricKind.CUMULATIVE;
+  }
+
+  public List<Long> getHistogram(List<Double> values) {
+    final ImmutableList<Double> boundaryValues = ImmutableList.copyOf(getBoundaryValues());
+    final ArrayList<Long> result = new ArrayList<>(boundaryValues.size());
+
+    for (double value : values) {
+      final int index = bucketIndex(value, boundaryValues);
+      final long existingCount = result.get(index);
+      result.set(bucketIndex(value, boundaryValues), existingCount + 1);
+    }
+
+    return result;
+  }
+
+  /**
+   * Pull the double values used by Stackdriver when setting up a bucket.
+   */
+  public List<Double> getBoundaryValues() {
+    return ImmutableList.copyOf(distributionAggregation.getDistribution().getBucketBoundaries().getBoundaries());
+  }
+
+  private int bucketIndex(double value, ImmutableList<Double> boundaryValues) {
+    int index = 0;
+    for (double boundaryValue : boundaryValues) {
+      if (value <= boundaryValue) {
+        return index;
+      }
+      index++;
+    }
+    return Math.max(boundaryValues.size() - 1, 0);
   }
 }

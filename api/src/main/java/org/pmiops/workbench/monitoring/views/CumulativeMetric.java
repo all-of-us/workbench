@@ -1,5 +1,6 @@
 package org.pmiops.workbench.monitoring.views;
 
+import com.google.api.MetricDescriptor.MetricKind;
 import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure.MeasureLong;
 import java.util.Collections;
@@ -7,7 +8,7 @@ import java.util.List;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 
 /** Metric enum values for events to be counted. */
-public enum CumulativeMetric implements Metric {
+public enum CumulativeMetric implements MetricBase {
   DEBUG_COUNT("debug_count", "Debug Cumulative"),
   NOTEBOOK_CLONE("notebook_clone_2", "Clone (duplicate) a notebook"),
   NOTEBOOK_DELETE("notebook_delete_2", "Delete a notebook"),
@@ -47,6 +48,11 @@ public enum CumulativeMetric implements Metric {
     return MeasureLong.class;
   }
 
+  /**
+   * For OpenCensus, we aggregate by counting events durding the reporting interval.
+   * The pure Stackdriver approach requires that we count ourselves before sending the metrics over.
+   * The Stackdriver "aggregation" will then be Sum.
+   */
   @Override
   public Aggregation getAggregation() {
     return Aggregation.Count.create();
@@ -55,5 +61,10 @@ public enum CumulativeMetric implements Metric {
   @Override
   public List<MetricLabel> getLabels() {
     return labels;
+  }
+
+  @Override
+  public MetricKind getMetricKind() {
+    return MetricKind.CUMULATIVE;
   }
 }

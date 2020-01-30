@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.monitoring.views.Metric;
+import org.pmiops.workbench.monitoring.views.MetricBase;
 
 public class MeasurementBundleTest {
 
@@ -25,7 +25,7 @@ public class MeasurementBundleTest {
 
   @Test
   public void testBuild_multipleMeasurementsNoAttachments() {
-    final ImmutableMap<Metric, Number> measurementMap =
+    final ImmutableMap<MetricBase, Number> measurementMap =
         ImmutableMap.of(
             GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, 202L,
             GaugeMetric.COHORT_COUNT, 300L,
