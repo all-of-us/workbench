@@ -241,7 +241,7 @@ describe('ConceptHomepage', () => {
     await waitOneTickAndUpdate(wrapper);
 
     expect(wrapper.find('[data-test-id="selection"]').text())
-      .toContain('You’ve selected all 20 concepts.');
+      .toContain('You’ve selected all 20 concepts on this page.');
     expect(wrapper.find('[data-test-id="banner-link"]').text())
       .toBe('Select all 41 concepts');
 
@@ -251,7 +251,7 @@ describe('ConceptHomepage', () => {
 
     // Should have link to clear all selection
     expect(wrapper.find('[data-test-id="selection"]').text())
-      .toContain('You’ve selected all 41 concepts.');
+      .toContain('You’ve selected all 41 concepts');
     expect(wrapper.find('[data-test-id="banner-link"]').text())
       .toEqual('Clear Selection');
 
