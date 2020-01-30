@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
+
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.ListBillingAccountsResponse;
 import com.google.common.collect.Lists;
@@ -24,6 +26,7 @@ import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.model.WorkbenchListBillingAccountsResponse;
 import org.pmiops.workbench.utils.PaginationToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,7 +60,7 @@ public class UserController implements UserApiDelegate {
       Provider<WorkbenchConfig> configProvider,
       FireCloudService fireCloudService,
       UserService userService,
-      Provider<Cloudbilling> cloudBillingProvider) {
+      @Qualifier(END_USER_CLOUD_BILLING) Provider<Cloudbilling> cloudBillingProvider) {
     this.userProvider = userProvider;
     this.configProvider = configProvider;
     this.userService = userService;
@@ -136,7 +139,7 @@ public class UserController implements UserApiDelegate {
     return new BillingAccount()
         .isFreeTier(true)
         .displayName("Use All of Us free credits")
-        .name("billingAccounts/" + configProvider.get().billing.accountId)
+        .name(configProvider.get().billing.freeTierBillingAccountName())
         .isOpen(true);
   }
 

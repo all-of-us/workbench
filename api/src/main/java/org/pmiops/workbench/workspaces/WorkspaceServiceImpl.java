@@ -1,9 +1,22 @@
 package org.pmiops.workbench.workspaces;
 
+import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
+import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
+
+import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.api.services.cloudbilling.Cloudbilling.Projects.UpdateBillingInfo;
+import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -16,6 +29,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -57,6 +72,7 @@ import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,6 +91,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   protected static final int RECENT_WORKSPACE_COUNT = 4;
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
 
+  private final Provider<Cloudbilling> endUserCloudbillingProvider;
+  private final Provider<Cloudbilling> serviceAccountCloudbillingProvider;
   private final CohortCloningService cohortCloningService;
   private final ConceptSetService conceptSetService;
   private final DataSetService dataSetService;
@@ -90,6 +108,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Autowired
   public WorkspaceServiceImpl(
+      @Qualifier(END_USER_CLOUD_BILLING) Provider<Cloudbilling> endUserCloudbillingProvider,
+      @Qualifier(SERVICE_ACCOUNT_CLOUD_BILLING)
+          Provider<Cloudbilling> serviceAccountCloudbillingProvider,
       Clock clock,
       CohortCloningService cohortCloningService,
       ConceptSetService conceptSetService,
@@ -101,6 +122,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceDao workspaceDao,
       ManualWorkspaceMapper manualWorkspaceMapper) {
+    this.endUserCloudbillingProvider = endUserCloudbillingProvider;
+    this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.clock = clock;
     this.cohortCloningService = cohortCloningService;
     this.conceptSetService = conceptSetService;
@@ -643,6 +666,61 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     } else {
       return false;
     }
+  }
+
+  // this is necessary because the grant ownership call in create/clone
+  // may not have propagated. Adding a few retries drastically reduces
+  // the likely of failing due to slow propagation
+  private Retryer<ProjectBillingInfo> cloudBillingRetryer =
+      RetryerBuilder.<ProjectBillingInfo>newBuilder()
+          .retryIfException(
+              e ->
+                  e instanceof GoogleJsonResponseException
+                      && ((GoogleJsonResponseException) e).getStatusCode() == 403)
+          .withWaitStrategy(WaitStrategies.exponentialWait())
+          .withStopStrategy(StopStrategies.stopAfterDelay(60, TimeUnit.SECONDS))
+          .build();
+
+  @Override
+  public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {
+    if (!workbenchConfigProvider.get().featureFlags.enableBillingLockout
+        || newBillingAccountName.equals(workspace.getBillingAccountName())) {
+      return;
+    }
+
+    Cloudbilling cloudbilling;
+    if (newBillingAccountName.equals(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName())) {
+      cloudbilling = serviceAccountCloudbillingProvider.get();
+    } else {
+      cloudbilling = endUserCloudbillingProvider.get();
+    }
+
+    UpdateBillingInfo request;
+    try {
+      request =
+          cloudbilling
+              .projects()
+              .updateBillingInfo(
+                  "projects/" + workspace.getWorkspaceNamespace(),
+                  new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
+    } catch (IOException e) {
+      throw new RuntimeException("Could not create Google Cloud updateBillingInfo request", e);
+    }
+
+    ProjectBillingInfo response;
+    try {
+      response = cloudBillingRetryer.call(request::execute);
+    } catch (RetryException | ExecutionException e) {
+      throw new RuntimeException("Google Cloud updateBillingInfo call failed", e);
+    }
+
+    if (!newBillingAccountName.equals(response.getBillingAccountName())) {
+      throw new RuntimeException(
+          "Google Cloud updateBillingInfo call succeeded but did not set the correct billing account name");
+    }
+
+    workspace.setBillingAccountName(response.getBillingAccountName());
   }
 
   @Override

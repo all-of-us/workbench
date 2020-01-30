@@ -196,7 +196,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
                 ImmutableMap.toImmutableMap(
                     SimpleImmutableEntry::getKey, SimpleImmutableEntry::getValue));
 
-    final Map<Long, FirecloudWorkspaceResponse> idToLiveWorkspace =
+    final Map<Long, FirecloudWorkspaceResponse> idToFirecloudWorkspace =
         idToDbWorkspace.entrySet().stream()
             .map(
                 entry ->
@@ -213,7 +213,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
     final ImmutableList<DbUserRecentResource> workspaceFilteredResources =
         userRecentResourceList.stream()
-            .filter(r -> idToLiveWorkspace.containsKey(r.getWorkspaceId()))
+            .filter(r -> idToFirecloudWorkspace.containsKey(r.getWorkspaceId()))
             .filter(this::hasValidBlobIdIfNotebookNamePresent)
             .collect(ImmutableList.toImmutableList());
 
@@ -236,7 +236,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     final ImmutableList<RecentResource> userVisibleRecentResources =
         workspaceFilteredResources.stream()
             .filter(urr -> foundBlobIdsContainsUserRecentResource(foundBlobIds, urr))
-            .map(urr -> buildRecentResource(idToDbWorkspace, idToLiveWorkspace, urr))
+            .map(urr -> buildRecentResource(idToDbWorkspace, idToFirecloudWorkspace, urr))
             .collect(ImmutableList.toImmutableList());
     final RecentResourceResponse recentResponse = new RecentResourceResponse();
     recentResponse.addAll(userVisibleRecentResources);

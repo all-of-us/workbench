@@ -127,12 +127,14 @@ const styles = reactStyles({
   }
 });
 
-const researchPurposeList = ['Your research training and background',
-  'How you hope to use AoU data for your research.',
-  'Your research approach and the tools you use for answering your research questions (eg: Large datasets ' +
-  'of phenotypes and genotypes, Community engagement and community-based participatory research methods, etc)',
-  'Your experience working with underrepresented populations as a scientist or outside of research, and how that' +
-  ' experience may inform your work with AoU data'];
+const researchPurposeList = [
+  <span>Your research training and background</span>,
+  <span>How you hope to use <i>All of Us</i> data for your research.</span>,
+  <span>Your research approach and the tools you use for answering your research questions (eg: Large datasets
+     of phenotypes and genotypes, Community engagement and community-based participatory research methods, etc)</span>,
+  <span>Your experience working with underrepresented populations as a scientist or outside of research, and how that
+     experience may inform your work with <i>All of Us</i> data</span>
+];
 
 const nameLength = 80;
 
@@ -606,8 +608,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </Section>
           <Section sectionHeaderStyles={{borderBottom: null}} header={<React.Fragment>
             <div>Please describe your research background, experience and research interests</div>
-            <div style={styles.asideText}>This information will be posted publicly on the AoU Research Hub Website
-              to inform the AoU Research Participants. <span  style={{marginLeft: 2,
+            <div style={styles.asideText}>This information will be posted publicly on the <i>All of Us</i> Research Hub Website
+              to inform the <i>All of Us</i> Research Participants. <span  style={{marginLeft: 2,
                 fontSize: 12}}>(2000 character limit)</span>
               <i style={{...styles.publiclyDisplayedText, marginLeft: 2}}>
                 Publicly displayed
@@ -718,11 +720,11 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                 participants on who can access their data, and the purpose of such access. Therefore, your name,
                 institution and role, as well as your research background/interests and link to your professional
                 profile will be displayed publicly on the Research Projects Directory on the <AoUTitle/> website to
-                inform the All of Us Research participants, and to comply with the 21st Century Cures Act. Some of the
+                inform the <i>All of Us</i> Research participants, and to comply with the 21st Century Cures Act. Some of the
                 fields noted above may not be visible currently, but will be added in the future.</div>
           </FlexColumn>
           <FlexColumn style={{...styles.asideContainer, marginTop: '21.8rem', height: '15rem'}}>
-            <div style={styles.asideHeader}>All of Us participants are most interested in knowing:</div>
+            <div style={styles.asideHeader}><i>All of Us</i> participants are most interested in knowing:</div>
             <ul style={styles.asideList}>
               {researchPurposeList.map(value => <li style={styles.asideText}>{value}</li>)}
             </ul>
@@ -796,8 +798,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
                         placeholder='Describe Your Current Research'
                         value={areaOfResearch}
                         onChange={v => this.updateProfileToBeDeleted('areaOfResearch', v)}/>
-          <TooltipTrigger content='You are required to describe your current research in
-                      order to help All of Us improve the Researcher Workbench.'>
+          <TooltipTrigger content={<span>You are required to describe your current research in
+            order to help <i>All of Us</i> improve the Researcher Workbench.</span>}>
             <InfoIcon style={{
               'height': '22px',
               'marginTop': '2.2rem',

@@ -73,10 +73,12 @@
   },
   "moodle": {
     "host": "aoudev.nnlm.gov",
-    "enableMoodleBackend": true
+    "enableMoodleBackend": true,
+    "credentialsKeyV1": "moodle-key.txt",
+    "credentialsKeyV2": "moodle-key-v2.txt"
   },
   "access": {
-    "enableComplianceTraining": false,
+    "enableComplianceTraining": true,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": true,
@@ -88,10 +90,11 @@
     "enableVpcServicePerimeter": true,
     "enableNewAccountCreation": true,
     "enableRdrExport": true,
-    "enableBillingLockout": false,
+    "enableBillingLockout": true,
     "enableSumoLogicEventHandling": true,
     "useKeylessDelegatedCredentials": true,
-    "sendFreeTierAlertEmails": false
+    "sendFreeTierAlertEmails": false,
+    "enableMoodleV2Api": true
   },
   "actionAudit": {
     "logName":"workbench-action-audit-test"

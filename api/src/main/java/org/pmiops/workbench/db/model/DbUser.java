@@ -568,6 +568,10 @@ public class DbUser {
     this.complianceTrainingCompletionTime = complianceTrainingCompletionTime;
   }
 
+  public void clearComplianceTrainingCompletionTime() {
+    this.complianceTrainingCompletionTime = null;
+  }
+
   @Column(name = "compliance_training_bypass_time")
   public Timestamp getComplianceTrainingBypassTime() {
     return complianceTrainingBypassTime;
@@ -584,6 +588,10 @@ public class DbUser {
 
   public void setComplianceTrainingExpirationTime(Timestamp complianceTrainingExpirationTime) {
     this.complianceTrainingExpirationTime = complianceTrainingExpirationTime;
+  }
+
+  public void clearComplianceTrainingExpirationTime() {
+    this.complianceTrainingExpirationTime = null;
   }
 
   @Column(name = "beta_access_bypass_time")

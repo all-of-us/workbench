@@ -46,6 +46,13 @@ public interface WorkspaceService {
   DbWorkspace saveWithLastModified(DbWorkspace workspace);
 
   /*
+   * This function will call the Google Cloud Billing API to set the given billing
+   * account name to the given workspace. It will also update the billingAccountName
+   * field on the workspace model.
+   */
+  void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName);
+
+  /*
    * This function will check the workspace's billing status and throw a ForbiddenException
    * if it is inactive.
    *
