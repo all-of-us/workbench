@@ -164,7 +164,8 @@ export const Breadcrumb = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (!prevProps.workspace && this.props.workspace && this.props.workspace.billingStatus === BillingStatus.INACTIVE) {
+      if (!prevProps.workspace && this.props.workspace &&
+        this.props.workspace.billingStatus === BillingStatus.INACTIVE) {
         this.setState({showInvalidBillingBanner: true});
       }
     }
