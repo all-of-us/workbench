@@ -77,7 +77,7 @@ interface RegistrationTask {
   key: string;
   completionPropsKey: string;
   title: string;
-  description: JSX.Element;
+  description: React.ReactNode;
   buttonText: string;
   completedText: string;
   isRefreshable?: boolean;
@@ -94,8 +94,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'twoFactorAuth',
     completionPropsKey: 'twoFactorAuthCompleted',
     title: 'Turn on Google 2-Step Verification',
-    description: <span>Add an extra layer of security to your account by providing your phone number in addition to your password to verify
-       your identity upon login.</span>,
+    description: 'Add an extra layer of security to your account by providing your phone number in addition to your password to verify your identity upon login.',
     buttonText: 'Get Started',
     completedText: 'Completed',
     isRefreshable: true,
@@ -107,7 +106,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'complianceTraining',
     completionPropsKey: 'trainingCompleted',
     title: 'Complete Online Training',
-    description: <span>Complete mandatory compliance training courses on how data should be used and handled.</span>,
+    description: 'Complete mandatory compliance training courses on how data should be used and handled.',
     buttonText: 'Complete training',
     featureFlag: serverConfigStore.getValue().enableComplianceTraining,
     completedText: 'Completed',
@@ -119,7 +118,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'eraCommons',
     completionPropsKey: 'eraCommonsLinked',
     title: 'Login to eRA Commons',
-    description: <span>Link to your eRA Commons account to the workbench to gain full access to data and tools.</span>,
+    description: 'Link to your eRA Commons account to the workbench to gain full access to data and tools.',
     buttonText: 'Login',
     completedText: 'Linked',
     completionTimestamp: (profile: Profile) => {
