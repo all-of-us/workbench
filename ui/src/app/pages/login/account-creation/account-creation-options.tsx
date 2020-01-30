@@ -45,7 +45,7 @@ export const AccountCreationOptions = {
     {label: 'Industry', value: NonAcademicAffiliation.INDUSTRY },
     {label: `Educational institution (High school, Community college, 4-year college, trade
         school)`, value: NonAcademicAffiliation.EDUCATIONALINSTITUTION},
-    {label: `Community Scientist (i.e. I am accessing AoU for independent research, unrelated to my
+    {label: `Community Scientist (i.e. I am accessing All of Us for independent research, unrelated to my
         professional affiliation)`, value: NonAcademicAffiliation.COMMUNITYSCIENTIST},
     {label: `Other (free text)`, value: NonAcademicAffiliation.FREETEXT}
   ],
