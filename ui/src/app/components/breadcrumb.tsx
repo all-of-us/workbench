@@ -12,7 +12,8 @@ import {
 } from 'app/utils';
 import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Cohort, ConceptSet} from 'generated/fetch';
+import {BillingStatus, Cohort, ConceptSet} from 'generated/fetch';
+import {InvalidBillingBanner} from "app/pages/workspace/invalid-billing-banner";
 
 const styles = {
   firstLink: {
@@ -143,6 +144,10 @@ interface Props {
   routeConfigData: any;
 }
 
+interface State {
+  showInvalidBillingBanner: boolean;
+}
+
 export const Breadcrumb = fp.flow(
   withCurrentWorkspace(),
   withCurrentCohort(),
@@ -150,9 +155,18 @@ export const Breadcrumb = fp.flow(
   withUrlParams(),
   withRouteConfigData()
 )(
-  class extends React.Component<Props> {
+  class extends React.Component<Props, State> {
     constructor(props) {
       super(props);
+      this.state = {
+        showInvalidBillingBanner: false
+      }
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+      if (!prevProps.workspace && this.props.workspace && this.props.workspace.billingStatus === BillingStatus.INACTIVE) {
+        this.setState({showInvalidBillingBanner: true});
+      }
     }
 
     trail(): Array<BreadcrumbData> {
@@ -174,26 +188,31 @@ export const Breadcrumb = fp.flow(
     }
 
     render() {
-      return <div style={{
-        marginLeft: '3.25rem',
-        display: 'inline-block',
-      }}>
-        {this.first().map(({label, url}, i) => {
-          return <React.Fragment key={i}>
-            <BreadcrumbLink href={url} style={styles.firstLink}>
-              {label}
+      return <React.Fragment>
+        {this.state.showInvalidBillingBanner &&
+        <InvalidBillingBanner onClose={() => this.setState({showInvalidBillingBanner: false})}/>}
+
+        <div style={{
+          marginLeft: '3.25rem',
+          display: 'inline-block',
+        }}>
+          {this.first().map(({label, url}, i) => {
+            return <React.Fragment key={i}>
+              <BreadcrumbLink href={url} style={styles.firstLink}>
+                {label}
+              </BreadcrumbLink>
+              <span style={{
+                color: colors.primary
+              }}> &gt; </span>
+            </React.Fragment>;
+          })}
+          {this.last() && <div>
+            <BreadcrumbLink href={this.last().url} style={styles.lastLink}>
+              {this.last().label}
             </BreadcrumbLink>
-            <span style={{
-              color: colors.primary
-            }}> &gt; </span>
-          </React.Fragment>;
-        })}
-        {this.last() && <div>
-          <BreadcrumbLink href={this.last().url} style={styles.lastLink}>
-            {this.last().label}
-          </BreadcrumbLink>
-        </div>}
-      </div>;
+          </div>}
+        </div>
+      </React.Fragment>;
     }
   }
 );

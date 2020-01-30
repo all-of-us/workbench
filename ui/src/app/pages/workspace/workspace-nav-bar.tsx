@@ -5,9 +5,6 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {NavStore} from 'app/utils/navigation';
 
-import {InvalidBillingBanner} from 'app/pages/workspace/invalid-billing-banner';
-import {WorkspaceData} from 'app/utils/workspace-data';
-import {BillingStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -44,67 +41,39 @@ const tabs = [
 
 const navSeparator = <div style={styles.separator}/>;
 
-interface Props {
-  workspace: WorkspaceData;
-  urlParams: any;
-  tabPath: string;
-}
-
-interface State {
-  showInvalidBillingBanner: boolean;
-}
-
 export const WorkspaceNavBarReact = fp.flow(
   withCurrentWorkspace(),
   withUrlParams(),
-)(
-  class extends React.Component<Props, State> {
+)(props => {
+  const {tabPath, urlParams: {ns: namespace, wsid: id}} = props;
+  const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
 
-    constructor(props) {
-      super(props);
-      this.state = {
-        showInvalidBillingBanner: false
-      };
-    }
 
-    componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (!prevProps.workspace && this.props.workspace && this.props.workspace.billingStatus === BillingStatus.INACTIVE) {
-        this.setState({showInvalidBillingBanner: true});
-      }
-    }
+  const navTab = currentTab => {
+    const {name, link} = currentTab;
+    const selected = tabPath === link;
+    const hideSeparator = selected || (activeTabIndex === tabs.indexOf(currentTab) + 1);
 
-    render() {
-      const {tabPath, urlParams: {ns: namespace, wsid: id}} = this.props;
-      const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
+    return <React.Fragment key={name}>
+      <Clickable
+        data-test-id={name}
+        aria-selected={selected}
+        style={{...styles.tab, ...(selected ? styles.active : {})}}
+        hover={{color: styles.active.color}}
+        onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
+      >
+        {name}
+      </Clickable>
+      {!hideSeparator && navSeparator}
+    </React.Fragment>;
+  };
 
-      const navTab = (currentTab) => {
-        const {name, link} = currentTab;
-        const selected = tabPath === link;
-        const hideSeparator = selected || (activeTabIndex === tabs.indexOf(currentTab) + 1);
-
-        return <React.Fragment key={name}>
-          {this.state.showInvalidBillingBanner &&
-          <InvalidBillingBanner onClose={() => {this.setState({showInvalidBillingBanner: false}); }}/>}
-          <Clickable
-            data-test-id={name}
-            aria-selected={selected}
-            style={{...styles.tab, ...(selected ? styles.active : {})}}
-            hover={{color: styles.active.color}}
-            onClick={() => NavStore.navigate(fp.compact(['/workspaces', namespace, id, link]))}
-          >
-            {name}
-          </Clickable>
-          {!hideSeparator && navSeparator}
-        </React.Fragment>;
-      };
-
-      return <div id='workspace-top-nav-bar' className='do-not-print' style={styles.container}>
-        {activeTabIndex > 0 && navSeparator}
-        {fp.map(tab => navTab(tab), tabs)}
-        <div style={{flexGrow: 1}}/>
-      </div>;
-    }
-  });
+  return <div id='workspace-top-nav-bar' className='do-not-print' style={styles.container}>
+    {activeTabIndex > 0 && navSeparator}
+    {fp.map(tab => navTab(tab), tabs)}
+    <div style={{flexGrow: 1}}/>
+  </div>;
+});
 
 @Component({
   selector: 'app-workspace-nav-bar',
