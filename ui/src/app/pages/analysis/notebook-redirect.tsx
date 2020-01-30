@@ -446,10 +446,10 @@ export const NotebookRedirect = fp.flow(withUserProfile(), withCurrentWorkspace(
           <div style={styles.reminderText}>
             <ReminderIcon
               style={{height: '80px', width: '80px', marginRight: '0.5rem'}}/>
-            It is All of Us data use policy that researchers should not make copies of
+            It is <i>All of Us</i> data use policy that researchers should not make copies of
             or download individual-level data (including taking screenshots or other means
-            of viewing individual-level data) outside of the All of Us research environment
-            without approval from All of Us Resource Access Board (RAB).
+            of viewing individual-level data) outside of the <i>All of Us</i> research environment
+            without approval from <i>All of Us</i> Resource Access Board (RAB).
           </div>
         </div> : <div style={{height: '100%'}}>
           <div style={{borderBottom: '5px solid #2691D0', width: '100%'}}/>

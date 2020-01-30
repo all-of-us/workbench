@@ -181,7 +181,7 @@ export const DataUseAgreementContent = () => {
       <IndentedListItem>
         <strong>NOT</strong> use <AoUTitle/> data or any external data, files, or software that I upload
         into the Research Workbench for research that is discriminatory or stigmatizing of individuals, families,
-        groups, or communities. Please review the All of Us policy on stigmatizing
+        groups, or communities. Please review the <i>All of Us</i> policy on stigmatizing
         research <a href={STIGMATIZING_RESEARCH_URL} target='_blank'>here</a>.
         <IndentedUnorderedList>
           <IndentedListItem>I will contact the <AoUTitle/> Resource Access Board (RAB) for

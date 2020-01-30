@@ -85,7 +85,7 @@ export class StigmatizatonPage extends React.Component<{}, {}> {
     return <div style={styles.stigmaPage}>
       <div style={styles.header}>Stigmatizing research</div>
       <div style={styles.subHeader}>Policy</div>
-      <div style={styles.text}>Central to the mission of the All of Us Research Program is the
+      <div style={styles.text}>Central to the mission of the <i>All of Us</i> Research Program is the
         collection of information from diverse groups of people within the U.S. population.
         However, the Program must
         recognize the potential for resources collected in good faith to be used towards social
@@ -95,7 +95,7 @@ export class StigmatizatonPage extends React.Component<{}, {}> {
         in the research design (i.e. the formation of a research question based on prejudicial
         biases) or a byproduct of the research findings (i.e. the interpretation of findings in
         such a way as to promote negative stereotypes) and may be intentional or unintentional.
-        While complete elimination of stigmatizing research based on use of the All of Us data
+        While complete elimination of stigmatizing research based on use of the <i>All of Us</i> data
         resources is likely impossible, the Program is taking steps in earnest to prevent resource
         use with the potential to stigmatize and to punish people who misuse the resource to the
         detriment of others as appropriate.
