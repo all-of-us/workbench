@@ -48,9 +48,6 @@ interface Props {
   workspace: WorkspaceData;
   urlParams: any;
   tabPath: string;
-  profileState: {
-    profile: Profile
-  };
 }
 
 interface State {
@@ -60,7 +57,6 @@ interface State {
 export const WorkspaceNavBarReact = fp.flow(
   withCurrentWorkspace(),
   withUrlParams(),
-  withUserProfile()
 )(
   class extends React.Component<Props, State> {
 
@@ -71,7 +67,7 @@ export const WorkspaceNavBarReact = fp.flow(
       };
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+    componentDidUpdate(prevProps: Readonly<Props>): void {
       if (!prevProps.workspace && this.props.workspace && this.props.workspace.billingStatus === BillingStatus.INACTIVE) {
         this.setState({showInvalidBillingBanner: true});
       }
@@ -88,8 +84,7 @@ export const WorkspaceNavBarReact = fp.flow(
 
         return <React.Fragment key={name}>
           {this.state.showInvalidBillingBanner &&
-          <InvalidBillingBanner onClose={() => {this.setState({showInvalidBillingBanner: false}); }}/>
-          }
+          <InvalidBillingBanner onClose={() => {this.setState({showInvalidBillingBanner: false}); }}/>}
           <Clickable
             data-test-id={name}
             aria-selected={selected}
