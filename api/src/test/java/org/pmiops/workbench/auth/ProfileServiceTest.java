@@ -1,7 +1,6 @@
 package org.pmiops.workbench.auth;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
@@ -25,14 +24,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 public class ProfileServiceTest {
 
+  @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
+
+  @Autowired ProfileService profileService;
+
   @TestConfiguration
   @MockBean({FreeTierBillingService.class})
   @Import(ProfileService.class)
   static class Configuration {}
-
-  @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
-
-  @Autowired ProfileService profileService;
 
   @Test
   public void testGetProfile_empty() {
@@ -52,10 +51,11 @@ public class ProfileServiceTest {
     DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
     userTermsOfService.setTosVersion(1);
     userTermsOfService.setAgreementTime(new Timestamp(1));
-    when(mockUserTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(any()))
+    when(mockUserTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(1))
         .thenReturn(Optional.of(userTermsOfService));
 
     DbUser user = new DbUser();
+    user.setUserId(1);
     Profile profile = profileService.getProfile(user);
     assertThat(profile.getLatestTermsOfServiceVersion()).isEqualTo(1);
     assertThat(profile.getLatestTermsOfServiceTime()).isEqualTo(1);

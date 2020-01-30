@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
-  private final UserServiceAuditor userServiceAuditAdapter;
+  private final UserServiceAuditor userServiceAuditor;
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
   @Autowired
@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
       DirectoryService directoryService,
-      UserServiceAuditor userServiceAuditAdapter) {
+      UserServiceAuditor userServiceAuditor) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.configProvider = configProvider;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
-    this.userServiceAuditAdapter = userServiceAuditAdapter;
+    this.userServiceAuditor = userServiceAuditor;
   }
 
   /**
@@ -194,7 +194,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
     if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
       dbUser.setDataAccessLevelEnum(newDataAccessLevel);
-      userServiceAuditAdapter.fireUpdateDataAccessAction(
+      userServiceAuditor.fireUpdateDataAccessAction(
           dbUser, newDataAccessLevel, previousDataAccessLevel);
     }
   }
@@ -430,6 +430,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     userTermsOfService.setTosVersion(tosVersion);
     userTermsOfService.setUserId(dbUser.getUserId());
     userTermsOfServiceDao.save(userTermsOfService);
+
+    userServiceAuditor.fireAcknowledgeTermsOfService(dbUser, tosVersion);
   }
 
   @Override
@@ -505,7 +507,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           return u;
         },
         dbUser);
-    userServiceAuditAdapter.fireAdministrativeBypassTime(
+    userServiceAuditor.fireAdministrativeBypassTime(
         dbUser.getUserId(),
         targetProperty,
         Optional.ofNullable(bypassTime).map(Timestamp::toInstant));
