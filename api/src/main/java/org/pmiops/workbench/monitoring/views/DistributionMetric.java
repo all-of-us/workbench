@@ -6,6 +6,7 @@ import io.opencensus.stats.Aggregation;
 import io.opencensus.stats.Measure.MeasureDouble;
 import io.opencensus.stats.Measure.MeasureLong;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.pmiops.workbench.monitoring.attachments.MetricLabel;
@@ -86,15 +87,16 @@ public enum DistributionMetric implements MetricBase {
 
   public List<Long> getHistogram(List<Double> values) {
     final ImmutableList<Double> boundaryValues = ImmutableList.copyOf(getBoundaryValues());
-    final ArrayList<Long> result = new ArrayList<>(boundaryValues.size());
+//    final ArrayList<Long> result = new ArrayList<>(boundaryValues.size());
+    final Long[] resultArray = new Long[boundaryValues.size() - 1];
 
     for (double value : values) {
       final int index = bucketIndex(value, boundaryValues);
-      final long existingCount = result.get(index);
-      result.set(bucketIndex(value, boundaryValues), existingCount + 1);
+      final long existingCount = resultArray[index];
+      resultArray[bucketIndex(value, boundaryValues)] = existingCount + 1;
     }
 
-    return result;
+    return Arrays.asList(resultArray);
   }
 
   /**
