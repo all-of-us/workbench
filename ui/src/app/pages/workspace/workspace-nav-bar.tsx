@@ -5,12 +5,13 @@ import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withCurrentWorkspace, withUrlParams, withUserProfile} from 'app/utils';
 import {navigate, NavStore} from 'app/utils/navigation';
 
+import {StatusAlertBanner} from 'app/components/status-alert-banner';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {openZendeskWidget} from 'app/utils/zendesk';
+import {BillingStatus, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {StatusAlertBanner} from "app/components/status-alert-banner";
-import {WorkspaceData} from "app/utils/workspace-data";
-import {openZendeskWidget} from "app/utils/zendesk";
-import {BillingStatus, Profile} from "generated/fetch";
+import {InvalidBillingBanner} from "app/pages/workspace/invalid-billing-banner";
 
 
 const styles = reactStyles({
@@ -51,11 +52,11 @@ interface Props {
   tabPath: string;
   profileState: {
     profile: Profile
-  }
+  };
 }
 
 interface State {
-  showInvalidBillingBanner: boolean
+  showInvalidBillingBanner: boolean;
 }
 
 export const WorkspaceNavBarReact = fp.flow(
@@ -69,7 +70,7 @@ export const WorkspaceNavBarReact = fp.flow(
       super(props);
       this.state = {
         showInvalidBillingBanner: false
-      }
+      };
     }
 
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
@@ -89,34 +90,7 @@ export const WorkspaceNavBarReact = fp.flow(
 
         return <React.Fragment key={name}>
           {this.state.showInvalidBillingBanner &&
-          <StatusAlertBanner
-            title={'This workspace has run out of free credits'}
-            message={'The free credits for the creator of this workspace have run out or expired. Please provide a valid billing account or contact support to extend free credits.'}
-            footer={
-              <div style={{display: 'flex', flexDirection: 'column'}}>
-                <Button style={{height: '38px', width: '70%', fontWeight: 400}}
-                        onClick={() => {
-                          openZendeskWidget(
-                            this.props.profileState.profile.givenName,
-                            this.props.profileState.profile.familyName,
-                            this.props.profileState.profile.username,
-                            this.props.profileState.profile.contactEmail,
-                          );
-                        }}
-                >
-                  Request Extension
-                </Button>
-                <a style={{marginTop: '.5rem', marginLeft: '.2rem'}}
-                   onClick={() => {
-                     navigate(['workspaces', this.props.workspace.namespace, this.props.workspace.id, 'edit']);
-                   }}
-                >
-                  Provide billing account
-                </a>
-              </div>
-            }
-            onClose={() => {this.setState({showInvalidBillingBanner: false})}}
-          />
+          <InvalidBillingBanner onClose={() => {this.setState({showInvalidBillingBanner: false}); }}/>
           }
           <Clickable
             data-test-id={name}

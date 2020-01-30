@@ -84,6 +84,6 @@ export class StatusAlertBanner extends React.Component<Props, {}> {
 
   render() {
     return ReactDOM.createPortal(this.renderBanner(),
-      document.getElementById('body'))
+      document.getElementById('body'));
   }
 }

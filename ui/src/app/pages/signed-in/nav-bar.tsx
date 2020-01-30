@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {Breadcrumb} from 'app/components/breadcrumb';
+import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
@@ -8,8 +9,6 @@ import colors from 'app/styles/colors';
 import {cookiesEnabled, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
-import {Button} from "app/components/buttons";
-import {FlexColumn} from "app/components/flex";
 
 const styles = reactStyles({
   headerContainer: {
