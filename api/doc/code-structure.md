@@ -24,8 +24,6 @@ CrudRepository also allows queries to be [automatically derived](https://docs.sp
 
 To define a query that uses a foreign key, there are a couple of options. First, you could use `@JoinColumn`/`@[One|Many]ToOne` annotation on the corresponding DB Model, as described [below](#db-models). Second, you could use an [@Query](https://www.baeldung.com/spring-data-jpa-query) annotation to just describe the query in stringy SQL.
 
-TODO: do we have a preference of which of those to do?
-
 ## DB Models
 
 DB Models represent a single row of a single table in the database, possibly with extender tables attached. We denote DB models by prefixing `Db` to the name of the database table. DB models heavily use `javax.persistence` annotations to describe where in the database table each part of the model lives.
