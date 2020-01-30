@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
+import {InvalidBillingBanner} from 'app/pages/workspace/invalid-billing-banner';
 import colors from 'app/styles/colors';
 import {
   withCurrentCohort,
@@ -13,7 +14,6 @@ import {
 import {BreadcrumbType, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {BillingStatus, Cohort, ConceptSet} from 'generated/fetch';
-import {InvalidBillingBanner} from "app/pages/workspace/invalid-billing-banner";
 
 const styles = {
   firstLink: {
@@ -160,7 +160,7 @@ export const Breadcrumb = fp.flow(
       super(props);
       this.state = {
         showInvalidBillingBanner: false
-      }
+      };
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
