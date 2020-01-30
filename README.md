@@ -2,7 +2,7 @@
 
 [![CircleCI Build Status](https://circleci.com/gh/all-of-us/workbench.svg)](https://circleci.com/gh/all-of-us/workflows/workbench)
 
-[Documenation on API Structure](https://github.com/all-of-us/workbench/blob/master/api/STRUCTURE.md)
+[Documentation on API Structure](https://github.com/all-of-us/workbench/blob/master/api/doc/code-structure.md)
 
 ## Setup for Development
 

@@ -53,7 +53,9 @@ Practically, this allows one ServiceImpl to implement multiple interfaces. This 
 
 Services / ServiceImpls are generally named after a feature or functional area, like 'UserService', 'CohortService', or 'MonitoringService'.
 
-ServiceImpls can call into other services, but we try to keep the number of dependencies down. We try to avoid having ServiceImpls call into a large number of DAOs, especially DAOs not directly related to the functional area for which the ServiceImpl is responsible. For instance, the `UserServiceImpl` calls into the `UserDao`, the `AdminActionHistoryDao`
+ServiceImpls can call into other services, but we try to keep the number of dependencies down. We try to avoid having ServiceImpls call into a large number of DAOs, especially DAOs not directly related to the functional area for which the ServiceImpl is responsible. Ideally, each DAO would roll up to exactly one Service.
+
+As a positive example, the `UserServiceImpl` calls into the `UserDao`, the `AdminActionHistoryDao`, and the `UserDataUseAgreementDao`, all three of which are directly related to the `UserService`. As an example of something to avoid, the `WorkspaceServiceImpl` (and a number of Controllers!) talk to the `UserDao` without going through the `UserService`.
 
 ServiceImpls should handle only application logic. They should not need explicit knowledge of the database, the REST API, or the UI.
 
