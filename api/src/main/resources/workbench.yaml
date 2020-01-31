@@ -2329,6 +2329,9 @@ definitions:
       projectId:
         type: string
         description: The cloud project in which this app is running.
+      firecloudURL:
+        type: string
+        description: The Firecloud URL to use for REST requests.
       publicApiKeyForErrorReports:
         type: string
         description: |
@@ -2337,19 +2340,19 @@ definitions:
       enableComplianceTraining:
         type: boolean
         default: false
-        description: Feature flag for enabling compliance training in registration steps
+        description: Whether the compliance training access module is enabled.
       enableDataUseAgreement:
         type: boolean
         default: false
-        description: Feature flag for enabling data use agreement
-      unsafeAllowSelfBypass:
-        type: boolean
-        default: false
-        description: Enable a user to bypass themself
+        description: Whether the data use agreement access module is enabled.
       enableEraCommons:
         type: boolean
         default: false
-        description: Feature flag for enabling eRA commons
+        description: Whether the eRA Commons access module is enabled.
+      unsafeAllowSelfBypass:
+        type: boolean
+        default: false
+        description: Whether a user is allowed to self-bypass. Only enabled in test environments.
       defaultFreeCreditsDollarLimit:
         type: number
         format: double
@@ -2358,9 +2361,10 @@ definitions:
         type: boolean
         default: false
         description: Feature flag for billing lockout and upgrade
-      firecloudURL:
-        type: string
-        description: The Firecloud URL to use for REST requests.
+      enableNewAccountCreation:
+        type: boolean
+        default: false
+        description: Feature flag for collecting new demographics & TOS acknowledgement on user creation.
 
   FeaturedWorkspacesConfigResponse:
     type: object

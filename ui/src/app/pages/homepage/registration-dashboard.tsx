@@ -253,9 +253,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     // it within the registration box.
     return <FlexColumn style={{position: 'relative'}} data-test-id='registration-dashboard'>
       {bypassInProgress && <SpinnerOverlay />}
-      {environment.enableHomepageRestyle && <div style={styles.mainHeader}>Getting Started</div>}
-      {!environment.enableHomepageRestyle &&
-        <div style={{...styles.mainHeader, color: colors.white}}>Getting Started</div>}
+      <div style={styles.mainHeader}>Getting Started</div>
       {canUnsafeSelfBypass &&
         <div data-test-id='self-bypass'
              style={{...baseStyles.card, ...styles.warningModal, margin: '0.85rem 0 0'}}>

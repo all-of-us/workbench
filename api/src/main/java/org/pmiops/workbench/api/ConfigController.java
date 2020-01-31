@@ -31,6 +31,7 @@ public class ConfigController implements ConfigApiDelegate {
             .defaultFreeCreditsDollarLimit(config.billing.defaultFreeCreditsDollarLimit)
             .enableBillingLockout(config.featureFlags.enableBillingLockout)
             .firecloudURL(config.firecloud.baseUrl)
-            .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass));
+            .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass)
+            .enableNewAccountCreation(config.featureFlags.enableNewAccountCreation));
   }
 }
