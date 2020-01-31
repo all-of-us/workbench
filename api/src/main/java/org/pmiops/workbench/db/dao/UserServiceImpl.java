@@ -683,7 +683,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       if (userBadgesByName.containsKey(complianceService.getResearchEthicsTrainingField())) {
         BadgeDetailsV2 complianceBadge =
             userBadgesByName.get(complianceService.getResearchEthicsTrainingField());
-        System.err.println(complianceBadge);
         if (complianceBadge.getValid()) {
           if (dbUser.getComplianceTrainingCompletionTime() == null) {
             // The badge was previously invalid and is now valid.
