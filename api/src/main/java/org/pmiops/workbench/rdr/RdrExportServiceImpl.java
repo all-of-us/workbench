@@ -41,7 +41,7 @@ public class RdrExportServiceImpl implements RdrExportService {
   private RdrExportDao rdrExportDao;
   private WorkspaceDao workspaceDao;
   private UserDao userDao;
-  private WorkspaceService workspacesApi;
+  private WorkspaceService workspaceService;
 
   private static final Logger log = Logger.getLogger(RdrExportService.class.getName());
   ZoneOffset offset = OffsetDateTime.now().getOffset();
@@ -60,7 +60,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     this.rdrExportDao = rdrExportDao;
     this.rdrApiProvider = RdrApiProvider;
     this.workspaceDao = workspaceDao;
-    this.workspacesApi = workspaceService;
+    this.workspaceService = workspaceService;
     this.userDao = userDao;
   }
 
@@ -250,7 +250,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     try {
       // Call Firecloud to get a list of Collaborators
       List<UserRole> collaboratorsMap =
-          workspacesApi.getFirecloudUserRoles(
+          workspaceService.getFirecloudUserRoles(
               dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
       // Since the USERS cannot be deleted from workbench yet, hence sending the the status of
