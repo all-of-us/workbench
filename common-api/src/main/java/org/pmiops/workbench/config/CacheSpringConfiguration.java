@@ -13,6 +13,8 @@ import org.pmiops.workbench.db.model.DbConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
 
@@ -20,6 +22,8 @@ import org.springframework.web.context.annotation.RequestScope;
 public class CacheSpringConfiguration {
 
   private static final Map<String, Class<?>> CONFIG_CLASS_MAP = new HashMap<>();
+  public static final String WORKBENCH_CONFIG_REQUEST_SCOPED = "WORKBENCH_CONFIG_SINGLETON";
+  public static final String WORKBENCH_CONFIG_SINGLETON = "WORKBENCH_CONFIG_SINGLETON";
 
   static {
     CONFIG_CLASS_MAP.put(DbConfig.MAIN_CONFIG_ID, WorkbenchConfig.class);
@@ -66,9 +70,27 @@ public class CacheSpringConfiguration {
     return (FeaturedWorkspacesConfig) configCache.get(DbConfig.FEATURED_WORKSPACES_CONFIG_ID);
   }
 
-  @Bean
+  /**
+   * Request-scoped WorkbenchConfig bean. This version should be used in all
+   * cases where updates during execution are desired. It may not be used in
+   * an Autowired Constructor or Bean function
+   */
+  @Bean(name = "WORKBENCH_CONFIG_REQUEST_SCOPED")
+  @Primary
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   WorkbenchConfig getWorkbenchConfig(
+      @Qualifier("configCache") LoadingCache<String, Object> configCache)
+      throws ExecutionException {
+    return lookupWorkbenchConfig(configCache);
+  }
+
+  /**
+   * Singleton version for use in Service constructors and Bean function
+   * arguments. Not updated dynamically
+   */
+  @Bean(name = WORKBENCH_CONFIG_SINGLETON)
+  @Scope("SINGLETON")
+  WorkbenchConfig getWorkbenchConfigSingleton(
       @Qualifier("configCache") LoadingCache<String, Object> configCache)
       throws ExecutionException {
     return lookupWorkbenchConfig(configCache);

@@ -30,9 +30,8 @@ public class StackdriverStatsExporterService {
   private static final String LOCATION_LABEL = "location";
   private static final String NAMESPACE_LABEL = "namespace";
   private static final String NODE_ID_LABEL = "node_id";
-  public static final String UNKNOWN_INSTANCE_PREFIX = "unknown-";
+  private static final String UNKNOWN_INSTANCE_PREFIX = "unknown-";
 
-  private boolean initialized;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private ModulesService modulesService;
 
@@ -40,7 +39,7 @@ public class StackdriverStatsExporterService {
       Provider<WorkbenchConfig> workbenchConfigProvider, ModulesService modulesService) {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.modulesService = modulesService;
-    this.initialized = false;
+    createAndRegister();
   }
 
   /**
@@ -48,18 +47,16 @@ public class StackdriverStatsExporterService {
    * happen once, so we have an isInitialized guard for that.
    */
   public void createAndRegister() {
-    if (!initialized) {
-      try {
-        final StackdriverStatsConfiguration configuration = makeStackdriverStatsConfiguration();
-        StackdriverStatsExporter.createAndRegister(configuration);
-        logger.info(
-            String.format(
-                "Configured StackDriver exports with configuration:\n%s",
-                configuration.toString()));
-        initialized = true;
-      } catch (IOException e) {
-        logger.log(Level.WARNING, "Failed to initialize global StackdriverStatsExporter.", e);
-      }
+    try {
+      final StackdriverStatsConfiguration configuration = makeStackdriverStatsConfiguration();
+      StackdriverStatsExporter.createAndRegister(configuration);
+      logger.info(
+          String.format(
+              "Configured StackDriver exports with configuration:\n%s",
+              configuration.toString()));
+      initialized = true;
+    } catch (IOException e) {
+      logger.log(Level.WARNING, "Failed to initialize global StackdriverStatsExporter.", e);
     }
   }
 
