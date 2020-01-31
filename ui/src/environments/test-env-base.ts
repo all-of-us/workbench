@@ -15,7 +15,7 @@ export const testEnvironmentBase = {
   shouldShowDisplayTag: true,
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
-  enablePublishedWorkspaces: true,
+  enablePublishedWorkspaces: false,
   enableProfileCapsFeatures: true,
   enableNewConceptTabs: false
 };
