@@ -193,8 +193,6 @@ export const Breadcrumb = fp.flow(
     }
 
     render() {
-      console.log(this.props.workspace);
-
       return <React.Fragment>
         {this.state.showInvalidBillingBanner &&
         <InvalidBillingBanner onClose={() => this.setState({showInvalidBillingBanner: false})}/>}
