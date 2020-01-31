@@ -340,7 +340,7 @@ public class UserServiceTest {
   public void testClearsEraCommonsStatus() {
     DbUser testUser = userDao.findUserByUsername(USERNAME);
     // Put the test user in a state where eRA commons is completed.
-    testUser.setEraCommonsCompletionTime(new Timestamp(TIMESTAMP_MSECS));
+    testUser.setEraCommonsCompletionTime(Timestamp.from(Instant.ofEpochSecond(TIMESTAMP_SECS)));
     testUser.setEraCommonsLinkedNihUsername("nih-user");
 
     //noinspection UnusedAssignment
