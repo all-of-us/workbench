@@ -698,7 +698,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             newComplianceTrainingCompletionTime = dbUser.getComplianceTrainingCompletionTime();
           }
           // Always update the expiration time if the training badge is valid
-          newComplianceTrainingExpirationTime = Timestamp.from(Instant.ofEpochSecond(complianceBadge.getDateexpire()));
+          newComplianceTrainingExpirationTime =
+              Timestamp.from(Instant.ofEpochSecond(complianceBadge.getDateexpire()));
         } else {
           // The current badge is invalid or expired, the training must be completed or retaken.
           newComplianceTrainingCompletionTime = null;

@@ -53,8 +53,7 @@ public class UserServiceTest {
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
-  @Deprecated
-  private static final long TIMESTAMP_MSECS = START_INSTANT.toEpochMilli();
+  @Deprecated private static final long TIMESTAMP_MSECS = START_INSTANT.toEpochMilli();
   private static final long TIMESTAMP_SECS = START_INSTANT.getEpochSecond();
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
   private static final int CLOCK_INCREMENT_MILLIS = 1000;
