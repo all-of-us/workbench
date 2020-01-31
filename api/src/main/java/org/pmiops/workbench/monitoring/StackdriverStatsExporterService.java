@@ -12,7 +12,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
+import org.pmiops.workbench.config.CacheSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -33,12 +35,14 @@ public class StackdriverStatsExporterService {
   private static final String UNKNOWN_INSTANCE_PREFIX = "unknown-";
 
   private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private ModulesService modulesService;
+  private Provider<MonitoredResource> monitoredResourceProvider;
 
   public StackdriverStatsExporterService(
-      Provider<WorkbenchConfig> workbenchConfigProvider, ModulesService modulesService) {
+      @Qualifier(CacheSpringConfiguration.WORKBENCH_CONFIG_SINGLETON) Provider<WorkbenchConfig> workbenchConfigProvider,
+      Provider<MonitoredResource> monitoredResourceProvider) {
+    this.monitoredResourceProvider = monitoredResourceProvider;
+    logger.warning("Making StackdriverStatsExporterService");
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.modulesService = modulesService;
     createAndRegister();
   }
 
@@ -46,7 +50,7 @@ public class StackdriverStatsExporterService {
    * Create and register the stats configuration on the stats exporter. This operation should only
    * happen once, so we have an isInitialized guard for that.
    */
-  public void createAndRegister() {
+  private void createAndRegister() {
     try {
       final StackdriverStatsConfiguration configuration = makeStackdriverStatsConfiguration();
       StackdriverStatsExporter.createAndRegister(configuration);
@@ -54,7 +58,6 @@ public class StackdriverStatsExporterService {
           String.format(
               "Configured StackDriver exports with configuration:\n%s",
               configuration.toString()));
-      initialized = true;
     } catch (IOException e) {
       logger.log(Level.WARNING, "Failed to initialize global StackdriverStatsExporter.", e);
     }
@@ -64,51 +67,8 @@ public class StackdriverStatsExporterService {
   public StackdriverStatsConfiguration makeStackdriverStatsConfiguration() {
     return StackdriverStatsConfiguration.builder()
         .setMetricNamePrefix(STACKDRIVER_CUSTOM_METRICS_PREFIX)
-        .setProjectId(getProjectId())
-        .setMonitoredResource(makeMonitoredResource())
+        .setProjectId(workbenchConfigProvider.get().server.projectId)
+        .setMonitoredResource(monitoredResourceProvider.get())
         .build();
-  }
-
-  private MonitoredResource makeMonitoredResource() {
-    return MonitoredResource.newBuilder()
-        .setType(MONITORED_RESOURCE_TYPE)
-        .putLabels(PROJECT_ID_LABEL, getProjectId())
-        .putLabels(LOCATION_LABEL, getLocation())
-        .putLabels(NAMESPACE_LABEL, getEnvironmentShortName())
-        .putLabels(NODE_ID_LABEL, getNodeId())
-        .build();
-  }
-
-  private String getProjectId() {
-    return workbenchConfigProvider.get().server.projectId;
-  }
-
-  private String getLocation() {
-    return workbenchConfigProvider.get().server.appEngineLocationId;
-  }
-
-  private String getNodeId() {
-    try {
-      return modulesService.getCurrentInstanceId();
-    } catch (ModulesException e) {
-      logger.log(Level.INFO, "Failed to retrieve instance ID from ModulesService");
-      return makeRandomNodeId();
-    }
-  }
-
-  /**
-   * Stackdriver instances have very long, random ID strings. When running locally, however, the
-   * ModulesService throws an exception, so we need to assign non-conflicting and non-repeating ID
-   * strings.
-   *
-   * @return
-   */
-  private String makeRandomNodeId() {
-    return UNKNOWN_INSTANCE_PREFIX + UUID.randomUUID().toString();
-  }
-
-  @NotNull
-  private String getEnvironmentShortName() {
-    return workbenchConfigProvider.get().server.shortName.toLowerCase();
   }
 }

@@ -48,7 +48,6 @@ public class MonitoringServiceImpl implements MonitoringService {
       registerMetricViews();
       viewsAreRegistered = true;
     }
-    stackdriverStatsExporterService.createAndRegister();
   }
 
   private void registerMetricViews() {

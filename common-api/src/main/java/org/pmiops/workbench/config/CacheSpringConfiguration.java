@@ -8,9 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -20,9 +22,9 @@ import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
 public class CacheSpringConfiguration {
-
+  private static final Logger logger = Logger.getLogger(CacheSpringConfiguration.class.getName());
   private static final Map<String, Class<?>> CONFIG_CLASS_MAP = new HashMap<>();
-  public static final String WORKBENCH_CONFIG_REQUEST_SCOPED = "WORKBENCH_CONFIG_SINGLETON";
+  public static final String WORKBENCH_CONFIG_REQUEST_SCOPED = "WORKBENCH_CONFIG_REQUEST_SCOPED";
   public static final String WORKBENCH_CONFIG_SINGLETON = "WORKBENCH_CONFIG_SINGLETON";
 
   static {
@@ -75,7 +77,7 @@ public class CacheSpringConfiguration {
    * cases where updates during execution are desired. It may not be used in
    * an Autowired Constructor or Bean function
    */
-  @Bean(name = "WORKBENCH_CONFIG_REQUEST_SCOPED")
+  @Bean(name = WORKBENCH_CONFIG_REQUEST_SCOPED)
   @Primary
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   WorkbenchConfig getWorkbenchConfig(
@@ -89,7 +91,6 @@ public class CacheSpringConfiguration {
    * arguments. Not updated dynamically
    */
   @Bean(name = WORKBENCH_CONFIG_SINGLETON)
-  @Scope("SINGLETON")
   WorkbenchConfig getWorkbenchConfigSingleton(
       @Qualifier("configCache") LoadingCache<String, Object> configCache)
       throws ExecutionException {
