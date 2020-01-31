@@ -8,9 +8,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
-import org.pmiops.workbench.config.CacheSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,15 +22,12 @@ public class StackdriverStatsExporterService {
       Logger.getLogger(StackdriverStatsExporterService.class.getName());
   private static final String STACKDRIVER_CUSTOM_METRICS_PREFIX = "custom.googleapis.com/";
 
+  private MonitoredResource monitoredResource;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
-  private Provider<MonitoredResource> monitoredResourceProvider;
 
   public StackdriverStatsExporterService(
-      @Qualifier(CacheSpringConfiguration.WORKBENCH_CONFIG_SINGLETON)
-          Provider<WorkbenchConfig> workbenchConfigProvider,
-      Provider<MonitoredResource> monitoredResourceProvider) {
-    this.monitoredResourceProvider = monitoredResourceProvider;
-    logger.warning("Making StackdriverStatsExporterService");
+      MonitoredResource monitoredResource, Provider<WorkbenchConfig> workbenchConfigProvider) {
+    this.monitoredResource = monitoredResource;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
@@ -57,7 +52,7 @@ public class StackdriverStatsExporterService {
     return StackdriverStatsConfiguration.builder()
         .setMetricNamePrefix(STACKDRIVER_CUSTOM_METRICS_PREFIX)
         .setProjectId(workbenchConfigProvider.get().server.projectId)
-        .setMonitoredResource(monitoredResourceProvider.get())
+        .setMonitoredResource(monitoredResource)
         .build();
   }
 }
