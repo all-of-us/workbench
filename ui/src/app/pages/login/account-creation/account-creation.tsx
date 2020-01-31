@@ -27,7 +27,6 @@ import {FlexColumn, FlexRow, flexStyle} from 'app/components/flex';
 import {signedOutImages} from 'app/pages/login/signed-out-images';
 import {AoUTitle} from 'app/pages/profile/data-use-agreement-styles';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {environment} from 'environments/environment';
 import {
   DataAccessLevel,
   Degree,
@@ -490,6 +489,8 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         },
       },
     } = this.state;
+    const enableNewAccountCreation = serverConfigStore.getValue().enableNewAccountCreation;
+
     const usernameLabelText =
       <div>New Username
         <TooltipTrigger side='top' content={<div>Usernames can contain only letters
@@ -504,10 +505,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
 
     const errors = this.validateAccountCreation();
     return <div id='account-creation'
-                style={{paddingTop: environment.enableAccountPages ? '1.5rem' :
+                style={{paddingTop: enableNewAccountCreation ? '1.5rem' :
                       '3rem', paddingRight: '3rem', paddingLeft: '3rem'}}>
       <div style={{fontSize: 28, fontWeight: 400, color: colors.primary}}>Create your account</div>
-      {environment.enableAccountPages && <FlexRow>
+      {enableNewAccountCreation && <FlexRow>
         <FlexColumn style={{marginTop: '0.5rem'}}>
           <div style={{...styles.text, fontSize: 16, marginTop: '1rem'}}>
             Please complete Step 1 of 2
@@ -732,7 +733,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         </FlexColumn>
       </FlexRow>}
       {/*The following will be deleted once enableAccountPages is set to true in prod*/}
-      {!environment.enableAccountPages && <div>
+      {!enableNewAccountCreation && <div>
         <FormSection>
           <TextInput id='givenName' name='givenName' autoFocus
                      placeholder='First Name'
@@ -843,7 +844,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           </Button>
         </FormSection>
       </div>}
-      {!environment.enableAccountPages && this.state.showAllFieldsRequiredError &&
+      {!enableNewAccountCreation && this.state.showAllFieldsRequiredError &&
       <Error>
         All fields are required.
       </Error>}

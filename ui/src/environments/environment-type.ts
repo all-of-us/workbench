@@ -46,18 +46,17 @@ export interface Environment {
 
   inactivityTimeoutSeconds: number;
   inactivityWarningBeforeSeconds: number;
-  // Add transient client-side flags below here
-  // homepage restyling changes ; excludes DUA
-  // See RW-3275
-  // Exit criteria: once the epic is completed and fully reviewed
-  enableHomepageRestyle: boolean;
   // Whether users should be able to see the Published Workspaces
   // tab in the Workspace Library.
   enablePublishedWorkspaces: boolean;
-  // Enable create account pages as per CAPS requirement
-  enableAccountPages: boolean;
   // Profile changes for CAPS requirements in RW-3441.
   enableProfileCapsFeatures: boolean;
   // Enable Surveys and Physical Measurements tabs in concept search
   enableNewConceptTabs: boolean;
+  // WARNING: Please think *very* carefully before adding a new environment flag here! Instead
+  // of this file, prefer storing feature flags in the server-side WorkbenchConfig and passing them
+  // to the UI via ConfigController and serverConfigStore.
+  //
+  // The UI environment config should be restricted to truly UI-specific environment variables, such
+  // as server API endpoints and client IDs.
 }

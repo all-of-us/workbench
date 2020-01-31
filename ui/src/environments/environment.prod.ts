@@ -16,13 +16,7 @@ export const environment: Environment = {
   trainingUrl: 'https://aou.nnlm.gov',
   inactivityTimeoutSeconds: 30 * 60,
   inactivityWarningBeforeSeconds: 5 * 60,
-  // Use care when changing these flags in prod!
-  //
-  // See environment-type.ts for more details on transient flags, including
-  // exit criteria and Jira ticket links.
-  enableHomepageRestyle: true,
   enablePublishedWorkspaces: false,
-  enableAccountPages: false,
   enableProfileCapsFeatures: false,
   enableNewConceptTabs: false
 };
