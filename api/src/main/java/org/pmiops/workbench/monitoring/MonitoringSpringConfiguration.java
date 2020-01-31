@@ -9,7 +9,6 @@ import io.opencensus.stats.ViewManager;
 import io.opencensus.tags.Tagger;
 import io.opencensus.tags.Tags;
 import java.util.UUID;
-import java.util.logging.Level;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.CacheSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -53,9 +52,10 @@ public class MonitoringSpringConfiguration {
     }
   }
 
-  @Bean()
+  @Bean
   public MonitoredResource getMonitoredResource(
-      @Qualifier(CacheSpringConfiguration.WORKBENCH_CONFIG_SINGLETON) Provider<WorkbenchConfig> workbenchConfigProvider,
+      @Qualifier(CacheSpringConfiguration.WORKBENCH_CONFIG_SINGLETON)
+          Provider<WorkbenchConfig> workbenchConfigProvider,
       @Qualifier(APP_ENGINE_NODE_ID) Provider<String> appEngineNodeIdProvider) {
     return MonitoredResource.newBuilder()
         .setType(MONITORED_RESOURCE_TYPE)
@@ -76,5 +76,4 @@ public class MonitoringSpringConfiguration {
   private String makeRandomNodeId() {
     return UNKNOWN_INSTANCE_PREFIX + UUID.randomUUID().toString();
   }
-
 }

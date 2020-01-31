@@ -12,11 +12,9 @@ import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.web.context.annotation.RequestScope;
 
@@ -73,9 +71,8 @@ public class CacheSpringConfiguration {
   }
 
   /**
-   * Request-scoped WorkbenchConfig bean. This version should be used in all
-   * cases where updates during execution are desired. It may not be used in
-   * an Autowired Constructor or Bean function
+   * Request-scoped WorkbenchConfig bean. This version should be used in all cases where updates
+   * during execution are desired. It may not be used in an Autowired Constructor or Bean function
    */
   @Bean(name = WORKBENCH_CONFIG_REQUEST_SCOPED)
   @Primary
@@ -87,8 +84,8 @@ public class CacheSpringConfiguration {
   }
 
   /**
-   * Singleton version for use in Service constructors and Bean function
-   * arguments. Not updated dynamically
+   * Singleton version for use in Service constructors and Bean function arguments. Not updated
+   * dynamically
    */
   @Bean(name = WORKBENCH_CONFIG_SINGLETON)
   WorkbenchConfig getWorkbenchConfigSingleton(

@@ -41,13 +41,9 @@ public class MonitoringServiceImpl implements MonitoringService {
     this.statsRecorder = statsRecorder;
     this.stackdriverStatsExporterService = stackdriverStatsExporterService;
     this.tagger = tagger;
-  }
 
-  private void initStatsConfigurationIdempotent() {
-    if (!viewsAreRegistered) {
-      registerMetricViews();
-      viewsAreRegistered = true;
-    }
+    stackdriverStatsExporterService.createAndRegister();
+    registerMetricViews();
   }
 
   private void registerMetricViews() {
@@ -63,7 +59,6 @@ public class MonitoringServiceImpl implements MonitoringService {
 
   @Override
   public void recordValues(Map<Metric, Number> metricToValue, Map<TagKey, TagValue> tags) {
-    initStatsConfigurationIdempotent();
     if (metricToValue.isEmpty()) {
       logger.warning("recordValue() called with empty map.");
       return;
@@ -97,9 +92,5 @@ public class MonitoringServiceImpl implements MonitoringService {
           Level.WARNING,
           String.format("Unrecognized measure class %s", metric.getMeasureClass().getName()));
     }
-  }
-
-  private void logAndSwallow(RuntimeException e) {
-    logger.log(Level.WARNING, "Exception encountered during monitoring.", e);
   }
 }

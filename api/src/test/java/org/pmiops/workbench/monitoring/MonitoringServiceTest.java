@@ -77,7 +77,6 @@ public class MonitoringServiceTest {
   @Test
   public void testRecordIncrement() {
     monitoringService.recordEvent(EventMetric.NOTEBOOK_SAVE);
-    verify(mockInitService).createAndRegister();
 
     final int metricCount = GaugeMetric.values().length + EventMetric.values().length;
     verify(mockViewManager, times(metricCount)).registerView(any(View.class));
@@ -92,7 +91,6 @@ public class MonitoringServiceTest {
     long value = 16L;
     monitoringService.recordValue(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, value);
 
-    verify(mockInitService).createAndRegister();
     verify(mockStatsRecorder).newMeasureMap();
     verify(mockMeasureMap).put(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT.getMeasureLong(), value);
     verify(mockMeasureMap).record(any(TagContext.class));
@@ -112,7 +110,6 @@ public class MonitoringServiceTest {
   @Test
   public void testRecordValue_noOpOnEmptyMap() {
     monitoringService.recordValues(Collections.emptyMap());
-    verify(mockInitService).createAndRegister();
     verifyZeroInteractions(mockStatsRecorder);
     verifyZeroInteractions(mockMeasureMap);
   }
