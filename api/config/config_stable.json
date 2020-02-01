@@ -65,6 +65,9 @@
     "fromEmail": "donotreply@fake-research-aou.org",
     "sendRetries": 3
   },
+  "zendesk": {
+    "host": "https:\/\/aousupporthelp1579899699.zendesk.com"
+  },
   "elasticsearch": {
     "baseUrl": "https:\/\/7c7c7bf81223406abe60fec3dcb34e71.us-east-1.aws.found.io:9243",
     "enableBasicAuth": true,

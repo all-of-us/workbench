@@ -134,6 +134,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.zendesk.client.v2.Zendesk;
 
 // TODO(jaycarlton): many of the tests here are testing DataSetServiceImpl more than
 //   DataSetControllerImpl, so move those tests and setup stuff into DataSetServiceTest
@@ -236,6 +237,8 @@ public class DataSetControllerTest {
 
   @Autowired ManualWorkspaceMapper manualWorkspaceMapper;
 
+  @Autowired Provider<Zendesk> mockZendeskProvider;
+
   @TestConfiguration
   @Import({
     CohortFactoryImpl.class,
@@ -266,7 +269,8 @@ public class DataSetControllerTest {
     CohortQueryBuilder.class,
     UserRecentResourceService.class,
     WorkspaceAuditor.class,
-    UserServiceAuditor.class
+    UserServiceAuditor.class,
+    Zendesk.class
   })
   static class Configuration {
 
@@ -348,6 +352,7 @@ public class DataSetControllerTest {
             fireCloudService,
             cloudStorageService,
             cloudBillingProvider,
+            mockZendeskProvider,
             CLOCK,
             notebooksService,
             userService,
