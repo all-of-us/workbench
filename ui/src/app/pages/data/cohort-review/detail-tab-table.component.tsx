@@ -291,6 +291,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         this.setState({
           data: null,
           filteredData: null,
+          lazyLoad: false,
           loading: true,
           error: false,
           page: 0,
@@ -313,39 +314,42 @@ export const DetailTabTable = withCurrentWorkspace()(
     async getParticipantData(getCount: boolean) {
       try {
         const {columns, domain, participantId, workspace: {id, namespace}} = this.props;
-        const {page, sortField, sortOrder} = this.state;
+        const {page, range, sortField, sortOrder} = this.state;
         let {lazyLoad, start, totalCount} = this.state;
         const {cohortReviewId} = cohortReviewStore.getValue();
-        const pageFilterRequest = {
-          page: Math.floor(page / (lazyLoadSize / rowsPerPage)),
-          pageSize: lazyLoadSize,
-          sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
-          sortColumn: columns.find(col => col.name === sortField).filter,
-          domain,
-          filters: this.getFilters()
-        } as PageFilterRequest;
-        if (getCount) {
-          await cohortReviewApi().getParticipantCount(namespace, id, cohortReviewId, participantId, pageFilterRequest).then(response => {
-            totalCount = response.count;
-            if (start > totalCount) {
-              // If the data was filtered to a smaller count than the previous start, reset to the last page of the new data
-              start = Math.floor(totalCount / rowsPerPage) * rowsPerPage;
-              pageFilterRequest.page = Math.floor(totalCount / lazyLoadSize);
+        const filters = this.getFilters();
+        if (filters !== null) {
+          const pageFilterRequest = {
+            page: Math.floor(page / (lazyLoadSize / rowsPerPage)),
+            pageSize: lazyLoadSize,
+            sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+            sortColumn: columns.find(col => col.name === sortField).filter,
+            domain,
+            filters
+          } as PageFilterRequest;
+          if (getCount) {
+            await cohortReviewApi().getParticipantCount(namespace, id, cohortReviewId, participantId, pageFilterRequest).then(response => {
+              totalCount = response.count;
+              if (start > totalCount) {
+                // If the data was filtered to a smaller count than the previous start, reset to the last page of the new data
+                start = Math.floor(totalCount / rowsPerPage) * rowsPerPage;
+                pageFilterRequest.page = Math.floor(totalCount / lazyLoadSize);
+              }
+              // If lazyLoad is already true, leave it as true, otherwise check the count
+              lazyLoad = lazyLoad || totalCount > 1000;
+              pageFilterRequest.pageSize = lazyLoad ? lazyLoadSize : totalCount;
+            });
+          }
+          this.callApi(pageFilterRequest).then(data => {
+            if (lazyLoad) {
+              const end = Math.min(range[0] + lazyLoadSize, totalCount);
+              this.setState({data, filteredData: data, loading: false, lazyLoad, range: [range[0], end], start, totalCount});
+            } else {
+              this.setState({data, loading: false, lazyLoad, range: [0, totalCount - 1]});
+              this.filterData();
             }
-            // If lazyLoad is already true, leave it as true, otherwise check the count
-            lazyLoad = lazyLoad || totalCount > 1000;
-            pageFilterRequest.pageSize = lazyLoad ? lazyLoadSize : totalCount;
           });
         }
-        this.callApi(pageFilterRequest).then(data => {
-          if (lazyLoad) {
-            const end = Math.min(start + lazyLoadSize, totalCount);
-            this.setState({data, filteredData: data, loading: false, lazyLoad, range: [start, end], start, totalCount});
-          } else {
-            this.setState({data, loading: false, lazyLoad, range: [0, totalCount - 1]});
-            this.filterData();
-          }
-        });
       } catch (error) {
         console.error(error);
         this.setState({loading: false, error: true});
@@ -358,30 +362,33 @@ export const DetailTabTable = withCurrentWorkspace()(
       const {range, sortField, sortOrder} = this.state;
       let {filteredData} = this.state;
       const requestPage = previous ? range[0] / lazyLoadSize : (filteredData.length + range[0]) / lazyLoadSize;
-      const pageFilterRequest = {
-        page: requestPage,
-        pageSize: lazyLoadSize,
-        sortOrder: sortOrder === 1 ? SortOrder.Asc :  SortOrder.Desc,
-        sortColumn: columns.find(col => col.name === sortField).filter,
-        domain: domain,
-        filters: this.getFilters()
-      } as PageFilterRequest;
-      this.callApi(pageFilterRequest).then(data => {
-        if (previous) {
-          filteredData = [...data, ...filteredData];
-          if (filteredData.length > (lazyLoadSize * 3)) {
-            filteredData = filteredData.slice(0, filteredData.length - lazyLoadSize);
-            range[1] -= lazyLoadSize;
+      const filters = this.getFilters();
+      if (filters !== null) {
+        const pageFilterRequest = {
+          page: requestPage,
+          pageSize: lazyLoadSize,
+          sortOrder: sortOrder === 1 ? SortOrder.Asc : SortOrder.Desc,
+          sortColumn: columns.find(col => col.name === sortField).filter,
+          domain: domain,
+          filters
+        } as PageFilterRequest;
+        this.callApi(pageFilterRequest).then(data => {
+          if (previous) {
+            filteredData = [...data, ...filteredData];
+            if (filteredData.length > (lazyLoadSize * 3)) {
+              filteredData = filteredData.slice(0, filteredData.length - lazyLoadSize);
+              range[1] -= lazyLoadSize;
+            }
+          } else {
+            filteredData = [...filteredData, ...data];
+            if (filteredData.length > (lazyLoadSize * 3)) {
+              filteredData = filteredData.slice(lazyLoadSize);
+              range[0] += lazyLoadSize;
+            }
           }
-        } else {
-          filteredData = [...filteredData, ...data];
-          if (filteredData.length > (lazyLoadSize * 3)) {
-            filteredData = filteredData.slice(lazyLoadSize);
-            range[0] += lazyLoadSize;
-          }
-        }
-        this.setState({data, filteredData, range, loadingPrevious: false, updating: false});
-      });
+          this.setState({data, filteredData, range, loadingPrevious: false, updating: false});
+        });
+      }
     }
 
     async callApi(request: PageFilterRequest) {
@@ -413,9 +420,9 @@ export const DetailTabTable = withCurrentWorkspace()(
               if (Array.isArray(filter)) {
                 // checkbox filters
                 if (!filter.length) {
-                  // TODO show no data, don't call api
+                  // No filters checked so clear the data, don't call api
                   this.setState({data: [], filteredData: null, loading: false});
-                  return;
+                  return null;
                 } else if (!filter.includes('Select All')) {
                   filters.items.push({
                     property: columns.find(c => c.name === col).filter,
@@ -457,23 +464,23 @@ export const DetailTabTable = withCurrentWorkspace()(
       } else {
         this.setState({sortField, sortOrder: 1});
       }
-      const {lazyLoad, page} = this.state;
+      const {lazyLoad, start} = this.state;
       if (lazyLoad) {
-        const start = Math.floor(page / 5) * lazyLoadSize;
-        const range = [start, start + lazyLoadSize - 1];
+        const rangeStart = Math.floor(start / lazyLoadSize) * lazyLoadSize;
+        const range = [rangeStart, rangeStart + lazyLoadSize - 1];
         console.log(range);
         this.setState({loading: true, range}, () => this.getParticipantData(false));
       }
     }
 
     onPage = (event: any) => {
-      const {lazyLoad, page, range} = this.state;
+      const {lazyLoad, page, range, totalCount} = this.state;
       if (lazyLoad) {
         if (event.page < page && event.page > 1 && range[0] >= (event.first - rowsPerPage)) {
           range[0] -= lazyLoadSize;
           this.setState({page: event.page, range, start: event.first}, () => this.updatePageData(true));
-        } else if (event.page > page && range[1] <= (event.first + (rowsPerPage * 2))) {
-          range[1] += lazyLoadSize;
+        } else if (event.page > page && range[1] <= (event.first + (rowsPerPage * 2)) && range[1] < totalCount) {
+          range[1] = Math.min(totalCount, range[1] + lazyLoadSize);
           this.setState({page: event.page, range, start: event.first}, () => this.updatePageData(false));
         } else {
           this.setState({page: event.page, range, start: event.first});
@@ -665,20 +672,21 @@ export const DetailTabTable = withCurrentWorkspace()(
       const columnFilters = tabs[domain];
       const filterStyle = !columnFilters[column].includes('Select All') ? filterIcons.active : filterIcons.default;
       if (!data) {
-        return <i className='pi pi-filter' style={filterStyle} />;
+        // return <i className='pi pi-filter' style={filterStyle} />;
       }
-      const counts = {total: 0};
       let options: Array<any>;
-      data.forEach(item => {
-        counts[item[column]] = !!counts[item[column]] ? counts[item[column]] + 1 : 1;
-        counts.total++;
-      });
+      const counts = {total: 0};
+      // data.forEach(item => {
+      //   counts[item[column]] = !!counts[item[column]] ? counts[item[column]] + 1 : 1;
+      //   counts.total++;
+      // });
       switch (column) {
         case 'domain':
           options = domains.map(name => {
-            return {name, count: counts[name] || 0};
+            // return {name, count: counts[name] || 0};
+            return {name};
           });
-          options.sort((a, b) => b.count - a.count);
+          // options.sort((a, b) => b.count - a.count);
           break;
         case `${vocab}Code`:
           options = Object.keys(counts).reduce((acc, name) => {
@@ -699,7 +707,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         case `${vocab}Vocabulary`:
           const vocabs = vocabOptions.getValue()[vocab];
           options = vocabs[domain] ? vocabs[domain].map(name => {
-            return {name, count: counts[name] || 0};
+            // return {name, count: counts[name] || 0};
+            return {name};
           }) : [];
           // options.sort((a, b) => b.count - a.count);
           break;
@@ -834,12 +843,9 @@ export const DetailTabTable = withCurrentWorkspace()(
         value = lazyLoad
           ? (loadingPrevious && pageStart < 0 ? [] : filteredData.slice(pageStart, pageStart + rowsPerPage))
           : filteredData;
-        console.log(pageStart);
-        console.log(filteredData);
-        console.log(value);
       }
       let paginatorTemplate = 'CurrentPageReport';
-      if (filteredData && filteredData.length > rowsPerPage) {
+      if (max > rowsPerPage) {
         paginatorTemplate += ' PrevPageLink PageLinks NextPageLink';
       }
       const spinner = loading || (updating && value && value.length === 0);
@@ -896,8 +902,6 @@ export const DetailTabTable = withCurrentWorkspace()(
       });
       return <div style={styles.container}>
         <style>{datatableStyles}</style>
-        <div>{start}</div>
-        <div>{range[0]} {range[1]}</div>
         <DataTable
           expandedRows={expandedRows}
           onRowToggle={(e) => this.setState({expandedRows: e.data})}
