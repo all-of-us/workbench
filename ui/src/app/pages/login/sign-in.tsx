@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
 import {Router} from '@angular/router';
+import * as fp from 'lodash/fp';
 
 import {AccountCreation} from 'app/pages/login/account-creation/account-creation';
 import {AccountCreationSuccess} from 'app/pages/login/account-creation/account-creation-success';
@@ -9,12 +10,19 @@ import {InvitationKey} from 'app/pages/login/invitation-key';
 import {LoginReactComponent} from 'app/pages/login/login';
 import {SignInService} from 'app/services/sign-in.service';
 import colors from 'app/styles/colors';
-import {ReactWrapperBase, withWindowSize} from 'app/utils';
+import {
+  ReactWrapperBase, ServerConfigProps,
+  WindowSizeProps,
+  withServerConfig,
+  withWindowSize,
+} from 'app/utils';
 
 import {DataAccessLevel, Degree, Profile} from 'generated/fetch';
 
 import {FlexColumn} from 'app/components/flex';
 import * as React from 'react';
+import {ConfigResponse} from 'generated';
+import {serverConfigStore} from 'app/utils/navigation';
 
 const styles = {
   // A template function which returns the appropriate style config based on window size and
@@ -103,11 +111,10 @@ export const StepToImageConfig = {
 
 const HEADER_IMAGE = '/assets/images/logo-registration-non-signed-in.svg';
 
-export interface SignInProps {
+export interface SignInProps extends ServerConfigProps, WindowSizeProps {
   initialStep?: SignInStep;
   onInit: () => void;
   signIn: () => void;
-  windowSize: { width: number, height: number };
 }
 
 interface SignInState {
@@ -121,7 +128,7 @@ interface SignInState {
   termsOfServiceVersion?: number;
 }
 
-export const SignInReact = withWindowSize()(
+export const SignInReact = fp.flow(withServerConfig(), withWindowSize())(
   class extends React.Component<SignInProps, SignInState> {
 
     constructor(props: SignInProps) {
@@ -177,6 +184,8 @@ export const SignInReact = withWindowSize()(
     }
 
     renderSignInStep(currentStep: SignInStep) {
+      const {enableNewAccountCreation} = this.props.serverConfig;
+
       switch (currentStep) {
         case SignInStep.LANDING:
           return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() =>
@@ -186,7 +195,8 @@ export const SignInReact = withWindowSize()(
         case SignInStep.INVITATION_KEY:
           return <InvitationKey onInvitationKeyVerified={(key: string) => this.setState({
             invitationKey: key,
-            currentStep: SignInStep.TERMS_OF_SERVICE
+            // We skip over TERMS_OF_SERVICE if new-style account creation isn't enabled.
+            currentStep: enableNewAccountCreation ? SignInStep.TERMS_OF_SERVICE : SignInStep.ACCOUNT_CREATION
           })}/>;
         case SignInStep.TERMS_OF_SERVICE:
           return <AccountCreationTos
@@ -200,7 +210,9 @@ export const SignInReact = withWindowSize()(
                                   profile={this.state.profile}
                                   onComplete={(profile: Profile) => this.setState({
                                     profile: profile,
-                                    currentStep: SignInStep.DEMOGRAPHIC_SURVEY
+                                    // Skip over the demographic survey if new-style form isn't enabled.
+                                    currentStep: enableNewAccountCreation ? SignInStep.DEMOGRAPHIC_SURVEY :
+                                      SignInStep.SUCCESS_PAGE
                                   })}/>;
         case SignInStep.DEMOGRAPHIC_SURVEY:
           return <AccountCreationSurvey
@@ -248,6 +260,16 @@ export class SignInComponent extends ReactWrapperBase {
     super(SignInReact, ['onInit', 'signIn']);
     this.onInit = this.onInit.bind(this);
     this.signIn = this.signIn.bind(this);
+  }
+
+  ngOnInit(): void {
+    console.log('on init');
+    this.renderComponent();
+  }
+
+  ngOnChanges(): void {
+    console.log('on changes');
+    this.renderComponent();
   }
 
   onInit(): void {

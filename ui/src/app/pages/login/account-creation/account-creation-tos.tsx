@@ -5,9 +5,7 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import colors from 'app/styles/colors';
 import {reactStyles, withWindowSize} from 'app/utils';
 import * as React from 'react';
-import {Document, Page, pdfjs} from 'react-pdf';
-
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+import {Document, Page} from 'react-pdf';
 
 const baseCheckboxLabelStyle = {
   color: colors.primary,
@@ -23,6 +21,7 @@ const styles = reactStyles({
     marginRight: '.31667rem', zoom: '1.5',
   },
   checkboxLabel: baseCheckboxLabelStyle,
+  // We add opacity to make disabled controls even more obvious (classic CSS trick).
   disabledCheckboxLabel: {
     ...baseCheckboxLabelStyle,
     opacity: '0.5',
@@ -34,13 +33,11 @@ const styles = reactStyles({
   },
 });
 
-export function getPdfPath() {
-  return '/assets/documents/terms-of-service.pdf';
-}
-
 export interface AccountCreationTosProps {
-  onComplete: () => void;
   windowSize: { width: number, height: number };
+  // Callback which will be called by this component when the user clicks "Next".
+  onComplete: () => void;
+  // Path to the Terms of Service PDF file to be displayed.
   pdfPath: string;
 }
 
@@ -48,15 +45,19 @@ interface AccountCreationTosState {
   hasReadEntireTos: boolean;
   hasAckedPrivacyStatement: boolean;
   hasAckedTermsOfService: boolean;
+  // Whether the PDF document is currently being loaded. A spinner will show while true.
   loadingPdf: boolean;
+  // Once the PDF has been loaded, this value contains the number of pages in the PDF document.
   numPages: number;
 }
 
 export const AccountCreationTos = withWindowSize()(
   class extends React.Component<AccountCreationTosProps, AccountCreationTosState> {
 
-    pdfContainerRef: React.RefObject<HTMLDivElement>;
-    lastPageLoaded = false;
+    // Tracks whether this component has created an intersection observer to track the last page
+    // visibility yet.
+    hasCreatedIntersectionObserver = false;
+    // Once the last page has been loaded, this contains a reference to the page's DOM element.
     lastPage: HTMLElement;
 
     constructor(props: AccountCreationTosProps) {
@@ -68,14 +69,18 @@ export const AccountCreationTos = withWindowSize()(
         loadingPdf: true,
         numPages: 0,
       };
-      this.pdfContainerRef = React.createRef();
     }
 
-    handleLastPageLoad() {
-      if (this.lastPageLoaded) {
+    /**
+     * Handles the onRenderSuccess callback from the Page element at the end of the document.
+     * This sets up the intersection listener which will change state when the user scrolls to the
+     * end of the document.
+     */
+    handleLastPageRender() {
+      if (this.hasCreatedIntersectionObserver) {
         return;
       }
-      this.lastPageLoaded = true;
+      this.hasCreatedIntersectionObserver = true;
       const intersectionCallback: IntersectionObserverCallback = (
         entries: IntersectionObserverEntry[], unusedObserver: IntersectionObserver) => {
         for (const entry of entries) {
@@ -88,6 +93,9 @@ export const AccountCreationTos = withWindowSize()(
       observer.observe(this.lastPage);
     }
 
+    /**
+     * Attempts to scroll the last page of the PDF document into view.
+     */
     scrollToBottom() {
       if (this.lastPage) {
         this.lastPage.scrollIntoView({block: 'end'});
@@ -102,7 +110,7 @@ export const AccountCreationTos = withWindowSize()(
       return <FlexColumn data-test-id='account-creation-tos'
                          style={{flex: 1, padding: '1rem 3rem 0 3rem'}}>
         {/* TODO: all of this PDF rendering stuff should be broken out into a separate component. */}
-        <div ref={this.pdfContainerRef} style={{flex: '1 1 0', overflowY: 'auto'}}>
+        <div style={{flex: '1 1 0', overflowY: 'auto'}}>
           {loadingPdf && <SpinnerOverlay/>}
           <Document data-test-id='tos-pdf-document' file={this.props.pdfPath}
                     loading=''
@@ -124,7 +132,7 @@ export const AccountCreationTos = withWindowSize()(
                     inputRef={index === numPages - 1 ? (ref) => {
                       this.lastPage = ref;
                     } : undefined}
-                    onRenderSuccess={index === numPages - 1 ? () => this.handleLastPageLoad() :
+                    onRenderSuccess={index === numPages - 1 ? () => this.handleLastPageRender() :
                       undefined}
                   />
                 ),
@@ -178,7 +186,6 @@ export const AccountCreationTos = withWindowSize()(
                     onClick={() => this.props.onComplete()}>
               Next
             </Button>
-
           </FlexColumn>
         </FlexRow>
       </FlexColumn>;

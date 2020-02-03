@@ -46,6 +46,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkBrowserSupport();
+    console.log('loading config');
     this.loadConfig();
 
     this.cookiesEnabled = cookiesEnabled();
@@ -152,7 +153,9 @@ export class AppComponent implements OnInit {
   }
 
   private loadConfig() {
+    console.log('loading config...');
     this.serverConfigService.getConfig().subscribe((config) => {
+      console.log('config loaded!');
       serverConfigStore.next(config);
     });
   }
