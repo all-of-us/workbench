@@ -53,13 +53,10 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public boolean deleteInstitution(final String id) {
-    Optional<DbInstitution> dbInst = getDbInstitution(id);
-    if (dbInst.isPresent()) {
-      institutionDaoProvider.get().delete(dbInst.get());
+    return getDbInstitution(id).map(dbInst -> {
+      institutionDaoProvider.get().delete(dbInst);
       return true;
-    } else {
-      return false;
-    }
+    }).orElse(false);
   }
 
   @Override
