@@ -16,9 +16,9 @@
       "id": "featuredworkspaceworkingwithallofussurveydatav1",
       "category": "TUTORIAL_WORKSPACES"
     }, {
-      "name": "Working with All of Us Physical Measurements Data v1",
-      "namespace": "aou-rw-274bb61a",
-      "id": "featuredworkspaceworkingwithphysicalmeasurementdatav1",
+      "name": "Working with All of Us Physical Measurements Data v2",
+      "namespace": "aou-rw-53569ac7",
+      "id": "featuredworkspaceworkingwithallofusphysicalmeasurementsdatav2",
       "category": "TUTORIAL_WORKSPACES"
     }, {
       "name": "Versioning notebooks and intermediate results",
