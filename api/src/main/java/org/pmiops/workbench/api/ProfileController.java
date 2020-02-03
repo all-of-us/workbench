@@ -300,6 +300,8 @@ public class ProfileController implements ProfileApiDelegate {
     return getProfileResponse(dbUser);
   }
 
+//  TODO(dmohs): If the username is not present in the query string, this responds with 500 Server
+//  Error. It should respond with 400 Bad Request.
   @Override
   public ResponseEntity<UsernameTakenResponse> isUsernameTaken(String username) {
     return ResponseEntity.ok(

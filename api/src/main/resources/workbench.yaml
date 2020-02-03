@@ -1,33 +1,55 @@
-# This file is for endpoints we do NOT intend to generate client libraries for
-# and advertise to notebook developers. Endpoints we DO want notebook developers to use should
-# go in client_api.yaml.
-
-# This file references parameters, paths, and definitions specified in
-# client_api.yaml; the two files get merged together into a merged.yaml file at build time.
-
-# If validation fails, gradle:generateApi fails claiming this file does not exist.
-# For separate validation (with some false positives), do:
-#     ./project.rb validate-swagger
 swagger: '2.0'
+x-aou-note: |
+  This file is for endpoints we do NOT intend to generate client libraries for
+  and advertise to notebook developers. Endpoints we DO want notebook developers to use should
+  go in client_api.yaml.
+
+  This file references parameters, paths, and definitions specified in
+  client_api.yaml; the two files get merged together into a merged.yaml file at build time.
+
+  If validation fails, gradle:generateApi fails claiming this file does not exist.
+
+  For separate validation (with some false positives), do:
+  ./project.rb validate-swagger
+
 info:
   version: "0.1.0"
   title: "AllOfUs Workbench API"
-  description: "The API for the AllOfUs workbench."
+  description: |
+    The API for the AllOfUs workbench.
+
+    Throughout, we use integer/int64 in preference to string/date-time because Swagger's
+    date formatting is inconsistent between server and client. Time values are stored as
+    milliseconds since the UNIX epoch.
+
+    Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
+    true, which app engine itself only sets when invoking as a cronjob.
+    See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
+    and o.p.w.interceptors.CronInterceptor which implements the header check.
+
   termsOfService: "http://www.pmi-ops.org/terms_of_service.html"
   contact:
     name: "developer_help@pmi-ops.org"
   license:
     name: "BSD"
+  x-aou-note: |
+
 host: "api.pmi-ops.org"
 securityDefinitions:
-  # Establish the fact that *some endpoints* are OAuth protected
-  # by defining an `aou_oauth` security mode, which we'll assing
-  # to any protected endpoints below.
   aou_oauth:
-    # TODO: Vet/fix this token and/or authorization URL to work in practice.
-    # These are currently included simply to satisfy the Swagger specification,
-    # as this is not directly used to dictate oauth details (just used to
-    # annotate which methods require oauth).
+    x-aou-note: |
+      Establish the fact that *some endpoints* are OAuth protected
+      by defining an `aou_oauth` security mode, which we'll assigning
+      to any protected endpoints below.
+
+      TODO: Vet/fix this token and/or authorization URL to work in practice.
+      These are currently included simply to satisfy the Swagger specification,
+      as this is not directly used to dictate oauth details (just used to
+      annotate which methods require oauth).
+
+      The aou_auth entry under security (below) serves to establish the fact
+      that all endpoints are protected: this annotation ensures that client
+      libraries know to send bearer tokens when calling
     authorizationUrl: ""
     tokenUrl: ""
     type: oauth2
@@ -36,20 +58,9 @@ schemes:
   - "https"
 produces:
   - "application/json"
-# Establish the fact that all endpoints are protected: this annotation
-# ensures that client libraries know to send bearer tokens when calling
 security:
   - aou_oauth: []
 
-# Throughout, we use integer/int64 in preference to string/date-time because Swagger's
-# date formatting is inconsistent between server and client. Time values are stored as
-# milliseconds since the UNIX epoch.
-
-##########################################################################################
-## PATHS
-##########################################################################################
-
-## Common Path Parameters
 parameters:
   userId:
     in: path
@@ -142,9 +153,6 @@ paths:
             A status alert information object.
           schema:
             $ref: "#/definitions/StatusAlert"
-
-    # User methods ########################################################################
-
   /v1/profile:
     get:
       tags:
@@ -186,8 +194,6 @@ paths:
           description: Request Received.
 
 
-  # TODO(dmohs): If the username is not present in the query string, this responds with 500 Server
-  # Error. It should respond with 400 Bad Request.
   /v1/is-username-taken:
     get:
       tags:
@@ -440,7 +446,6 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  # TODO: add demographic survey response data
   /v1/account/submit-demographic-survey:
     post:
       tags:
@@ -547,8 +552,6 @@ paths:
           description: List of billing accounts
           schema:
             $ref: "#/definitions/WorkbenchListBillingAccountsResponse"
-
-  # Notebook clusters ####################################################################
 
   /v1/admin/security/clusters/{billingProjectId}/delete-clusters:
     post:
@@ -684,8 +687,6 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  # Billing projects #####################################################################
-
   /v1/billingProjects:
     get:
       tags:
@@ -703,8 +704,6 @@ paths:
           description: User Not Found
         500:
           description: Internal Server Error
-
-  # Workspaces ###########################################################################
 
   /v1/workspaces:
     get:
@@ -1123,14 +1122,13 @@ paths:
         204:
           description: The egress event was successfully handled.
 
-  # Cron ############################################################################
-
-  # Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
-  # true, which app engine itself only sets when invoking as a cronjob.
-  # See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
-  # and o.p.w.interceptors.CronInterceptor which implements the header check.
-
   /v1/cron/auditBigQuery:
+    x-aou-note: |
+      Note: all requests tagged as "cron" must have the header X-Appengine-Cron:
+      true, which app engine itself only sets when invoking as a cronjob.
+      See https://cloud.google.com/appengine/docs/standard/java/config/cron#securing_urls_for_cron
+      and o.p.w.interceptors.CronInterceptor which implements the header check.
+
     get:
       security: []
       tags:
@@ -1245,8 +1243,6 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
 
-  # Billing ##############################################################################
-
   /v1/cron/bufferBillingProjects:
     get:
       security: []
@@ -1358,8 +1354,6 @@ paths:
           description: Internal Error
           schema:
             $ref: '#/definitions/ErrorResponse'
-
-  # Notebooks ############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/notebooks/rename:
     parameters:
@@ -1500,9 +1494,6 @@ paths:
           description: The locking metadata fields for the notebook
           schema:
             $ref: '#/definitions/NotebookLockingMetadataResponse'
-
-  # Cohort Reviews #######################################################################
-
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohort-reviews:
     parameters:
       - $ref: '#/parameters/workspaceNamespace'
@@ -1558,8 +1549,6 @@ paths:
           description: ACCEPTED
           schema:
             $ref: '#/definitions/EmptyResponse'
-
-  # Cohorts ##############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts:
     parameters:
@@ -1689,7 +1678,6 @@ paths:
           schema:
             $ref: "#/definitions/MaterializeCohortResponse"
 
-  ######### USER RECENT RESOURCES ########################################
   /v1/workspaces/user-recent-resources:
     get:
       tags:
@@ -1719,10 +1707,11 @@ paths:
           description: request object for updating recent resource
           required: true
           schema:
-            # this is currently only ever used by Notebooks because other
-            # resources are stored in our db, and therefore cache ops are
-            # done for them in the backend
             $ref: "#/definitions/RecentResourceRequest"
+      x-aou-note: |
+        this response type is currently only ever used by Notebooks because other
+        resources are stored in our db, and therefore cache ops are
+        done for them in the backend
       responses:
         200:
           description: Successfully added/updated
@@ -1751,7 +1740,6 @@ paths:
           schema:
             $ref: "#/definitions/EmptyResponse"
 
-  ######### USER RECENT WORKSPACES ############################################################
   /v1/workspaces/user-recent-workspaces:
     get:
       tags:
@@ -1779,8 +1767,6 @@ paths:
           schema:
             $ref: "#/definitions/RecentWorkspaceResponse"
 
-
-  # Concept sets ##############################################################################
 
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/concept-sets:
     parameters:
@@ -1930,8 +1916,6 @@ paths:
           schema:
             $ref: "#/definitions/ConceptSet"
 
-  # Concepts ###############################################################################
-
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/domainInfo:
     get:
       tags:
@@ -1949,7 +1933,6 @@ paths:
           schema:
             $ref: "#/definitions/DomainInfoResponse"
 
-  ### Surveys #############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyInfo:
     get:
       tags:
@@ -1990,7 +1973,6 @@ paths:
             items:
               $ref: "#/definitions/SurveyQuestions"
 
-  ### Data set ############################################
   /v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}:
     post:
       tags:
@@ -2243,18 +2225,17 @@ paths:
             $ref: "#/definitions/DomainValuesResponse"
 
 
-##########################################################################################
-# Endpoints for task in cloud task queue
-# Note: all requests tagged as "cloudTask" must have the header X-AppEngine-QueueName:
-# to the queue name, which app engine itself only sets (and overrides internally) when invoking
-# cloud task. See
-# https://cloud.google.com/tasks/docs/creating-appengine-handlers#reading_app_engine_task_request_headers
-# and o.p.w.interceptors.CloudTaskInterceptor which implements the header check.
-#########################################################################################
-
-# Using body parameter ref ArrayOfLong instead of defining array of type long here because of
-# bug in swagger version 2.3.0 https://github.com/swagger-api/swagger-codegen/issues/6745.2.2.3
   /v1/cloudTask/exportResearcherData:
+    x-aou-note: |
+      Endpoints for task in cloud task queue
+      Note: all requests tagged as "cloudTask" must have the header X-AppEngine-QueueName:
+      to the queue name, which app engine itself only sets (and overrides internally) when invoking
+      cloud task. See
+      https://cloud.google.com/tasks/docs/creating-appengine-handlers#reading_app_engine_task_request_headers
+      and o.p.w.interceptors.CloudTaskInterceptor which implements the header check.
+
+      Using body parameter ref ArrayOfLong instead of defining array of type long here because of
+      bug in swagger version 2.3.0 https://github.com/swagger-api/swagger-codegen/issues/6745.2.2.3
     post:
       tags:
         - cloudTaskRdrExport
@@ -2298,10 +2279,6 @@ paths:
           description: >
             A SQL query for each domain in the Data Set
 
-
-##########################################################################################
-## DEFINITIONS
-##########################################################################################
 definitions:
   StatusResponse:
     type: object
@@ -2321,9 +2298,10 @@ definitions:
     required:
       - gsuiteDomain
     properties:
-      # This should be gSuiteDomain, but the Swagger-Codegen-generated server code causes the JSON
-      # response to have the keys "gsuiteDomain" and "gSuiteDomain". This weirdness is a workaround.
       gsuiteDomain:
+        x-aou-note: |
+          This should be gSuiteDomain, but the Swagger-Codegen-generated server code causes the JSON
+          response to have the keys "gsuiteDomain" and "gSuiteDomain". This weirdness is a workaround.
         type: string
         description: G-Suite domain containing user accounts.
       projectId:
@@ -2374,8 +2352,8 @@ definitions:
         items:
           $ref: "#/definitions/FeaturedWorkspace"
 
-  # Mirrors BillingProjectMembership from fireCloud.yaml
   BillingProjectMembership:
+    x-aou-note: Mirrors BillingProjectMembership from fireCloud.yaml
     description: ''
     required:
       - projectName
@@ -2444,23 +2422,26 @@ definitions:
       username:
         type: string
 
-  # Authorities are a tool used to add discrete permissions to users. We currently
-  # define the following authorities:
-  #   1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
-  #      the user has requested review to approve or reject.
-  #   2) DEVELOPER: *Grants all other authorities* as well as some internal-only
-  #      administrative endpoints, including group management and cluster
-  #      management. Intended to be granted for devops needs, e.g. for oncall.
-  #   3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
-  #      to perform actions on a user's enabled status and manual verification.
-  #   4) FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
   Authority:
+    x-aou-note: |
+      Authorities are a tool used to add discrete permissions to users. We currently
+      define the following authorities:
+       1) REVIEW_RESEARCH_PURPOSE: This authority allows the user to review workspaces where
+          the user has requested review to approve or reject.
+       2) DEVELOPER: *Grants all other authorities* as well as some internal-only
+          administrative endpoints, including group management and cluster
+          management. Intended to be granted for devops needs, e.g. for oncall.
+       3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
+          to perform actions on a user's enabled status and manual verification.
+       4) FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
+
+      Note on enum names: Swagger trims any common prefix from enum values' corresponding
+      Java fields by default; this has no side-effect currently as there is
+      no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
+
     type: string
     description: actions a user can have authority/permission to perform
     enum: [
-      # Note: Swagger trims any common prefix from enum values' corresponding
-      # Java fields by default; this has no side-effect currently as there is
-      # no common prefix. https://github.com/swagger-api/swagger-codegen/issues/4261
       REVIEW_RESEARCH_PURPOSE,
       DEVELOPER,
       ACCESS_CONTROL_ADMIN,
