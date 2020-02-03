@@ -364,6 +364,10 @@ public class ProfileController implements ProfileApiDelegate {
                 .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
                 .collect(Collectors.toList()));
 
+    if (request.getTermsOfServiceVersion() != null) {
+      userService.submitTermsOfService(user, request.getTermsOfServiceVersion());
+    }
+
     try {
       mailServiceProvider
           .get()

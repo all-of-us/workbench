@@ -31,6 +31,7 @@ import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -71,18 +72,20 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private final int MAX_RETRIES = 3;
   private static final int CURRENT_DATA_USE_AGREEMENT_VERSION = 2;
+  private static final int CURRENT_TERMS_OF_SERVICE_VERSION = 1;
 
   private final Provider<DbUser> userProvider;
   private final UserDao userDao;
   private final AdminActionHistoryDao adminActionHistoryDao;
   private final UserDataUseAgreementDao userDataUseAgreementDao;
+  private final UserTermsOfServiceDao userTermsOfServiceDao;
   private final Clock clock;
   private final Random random;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> configProvider;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
-  private final UserServiceAuditor userServiceAuditAdapter;
+  private final UserServiceAuditor userServiceAuditor;
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
   @Autowired
@@ -90,6 +93,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Provider<DbUser> userProvider,
       UserDao userDao,
       AdminActionHistoryDao adminActionHistoryDao,
+      UserTermsOfServiceDao userTermsOfServiceDao,
       UserDataUseAgreementDao userDataUseAgreementDao,
       Clock clock,
       Random random,
@@ -97,10 +101,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Provider<WorkbenchConfig> configProvider,
       ComplianceService complianceService,
       DirectoryService directoryService,
-      UserServiceAuditor userServiceAuditAdapter) {
+      UserServiceAuditor userServiceAuditor) {
     this.userProvider = userProvider;
     this.userDao = userDao;
     this.adminActionHistoryDao = adminActionHistoryDao;
+    this.userTermsOfServiceDao = userTermsOfServiceDao;
     this.userDataUseAgreementDao = userDataUseAgreementDao;
     this.clock = clock;
     this.random = random;
@@ -108,7 +113,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.configProvider = configProvider;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
-    this.userServiceAuditAdapter = userServiceAuditAdapter;
+    this.userServiceAuditor = userServiceAuditor;
   }
 
   /**
@@ -189,7 +194,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
     if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
       dbUser.setDataAccessLevelEnum(newDataAccessLevel);
-      userServiceAuditAdapter.fireUpdateDataAccessAction(
+      userServiceAuditor.fireUpdateDataAccessAction(
           dbUser, newDataAccessLevel, previousDataAccessLevel);
     }
   }
@@ -415,6 +420,21 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
+  @Transactional
+  public void submitTermsOfService(DbUser dbUser, Integer tosVersion) {
+    if (tosVersion != CURRENT_TERMS_OF_SERVICE_VERSION) {
+      throw new BadRequestException("Terms of Service version is not up to date");
+    }
+
+    DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
+    userTermsOfService.setTosVersion(tosVersion);
+    userTermsOfService.setUserId(dbUser.getUserId());
+    userTermsOfServiceDao.save(userTermsOfService);
+
+    userServiceAuditor.fireAcknowledgeTermsOfService(dbUser, tosVersion);
+  }
+
+  @Override
   public void setDataUseAgreementBypassTime(Long userId, Timestamp bypassTime) {
     setBypassTimeWithRetries(
         userId,
@@ -487,7 +507,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           return u;
         },
         dbUser);
-    userServiceAuditAdapter.fireAdministrativeBypassTime(
+    userServiceAuditor.fireAdministrativeBypassTime(
         dbUser.getUserId(),
         targetProperty,
         Optional.ofNullable(bypassTime).map(Timestamp::toInstant));

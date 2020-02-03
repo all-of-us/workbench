@@ -1,12 +1,18 @@
 package org.pmiops.workbench.auth;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.when;
 
+import java.sql.Timestamp;
+import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -18,12 +24,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 public class ProfileServiceTest {
 
+  @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
+
+  @Autowired ProfileService profileService;
+
   @TestConfiguration
   @MockBean({FreeTierBillingService.class})
   @Import(ProfileService.class)
   static class Configuration {}
-
-  @Autowired ProfileService profileService;
 
   @Test
   public void testGetProfile_empty() {
@@ -36,5 +44,20 @@ public class ProfileServiceTest {
     DbUser user = new DbUser();
     user.setDemographicSurvey(new DbDemographicSurvey());
     assertThat(profileService.getProfile(user)).isNotNull();
+  }
+
+  @Test
+  public void testReturnsLastAcknowledgedTermsOfService() {
+    DbUserTermsOfService userTermsOfService = new DbUserTermsOfService();
+    userTermsOfService.setTosVersion(1);
+    userTermsOfService.setAgreementTime(new Timestamp(1));
+    when(mockUserTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(1))
+        .thenReturn(Optional.of(userTermsOfService));
+
+    DbUser user = new DbUser();
+    user.setUserId(1);
+    Profile profile = profileService.getProfile(user);
+    assertThat(profile.getLatestTermsOfServiceVersion()).isEqualTo(1);
+    assertThat(profile.getLatestTermsOfServiceTime()).isEqualTo(1);
   }
 }

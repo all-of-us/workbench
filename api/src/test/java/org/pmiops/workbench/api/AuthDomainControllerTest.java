@@ -20,6 +20,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
+import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -58,6 +59,7 @@ public class AuthDomainControllerTest {
   @Mock private AuthDomainAuditor mockAuthDomainAuditAdapter;
   @Autowired private UserDao userDao;
   @Mock private UserDataUseAgreementDao userDataUseAgreementDao;
+  @Mock private UserTermsOfServiceDao userTermsOfServiceDao;
 
   private AuthDomainController authDomainController;
 
@@ -78,6 +80,7 @@ public class AuthDomainControllerTest {
             userProvider,
             userDao,
             adminActionHistoryDao,
+            userTermsOfServiceDao,
             userDataUseAgreementDao,
             clock,
             new FakeLongRandom(12345),
