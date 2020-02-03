@@ -1,7 +1,9 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 
+import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -19,35 +21,35 @@ public class InstitutionDaoTest {
   public void testDao() {
     final DbInstitution testInst = new DbInstitution("Broad", "The Broad Institute");
     institutionDao.save(testInst);
-    assertThat(institutionDao.findOneByApiId("Broad")).isEqualTo(testInst);
+    assertThat(institutionDao.findOneByShortName("Broad")).isEqualTo(Optional.of(testInst));
     assertThat(institutionDao.findAll()).hasSize(1);
 
     // update existing entity, don't change size
 
-    testInst.setApiId("Verily");
+    testInst.setShortName("Verily");
     institutionDao.save(testInst);
     assertThat(institutionDao.findAll()).hasSize(1);
-    assertThat(institutionDao.findOneByApiId("Verily")).isEqualTo(testInst);
+    assertThat(institutionDao.findOneByShortName("Verily")).isEqualTo(Optional.of(testInst));
 
-    testInst.setLongName("Yea, Verily");
+    testInst.setDisplayName("Yea, Verily");
     institutionDao.save(testInst);
     assertThat(institutionDao.findAll()).hasSize(1);
-    assertThat(institutionDao.findOneByApiId("Verily")).isEqualTo(testInst);
+    assertThat(institutionDao.findOneByShortName("Verily")).isEqualTo(Optional.of(testInst));
 
     final DbInstitution otherInst = new DbInstitution("VUMC", "Vanderbilt");
     institutionDao.save(otherInst);
     assertThat(institutionDao.findAll()).hasSize(2);
 
-    institutionDao.delete(institutionDao.findOneByApiId("Verily"));
+    institutionDao.delete(institutionDao.findOneByShortName("Verily").get());
     assertThat(institutionDao.findAll()).hasSize(1);
 
-    assertThat(institutionDao.findOneByApiId("404 Institute Not Found")).isNull();
+    assertThat(institutionDao.findOneByShortName("404 Institute Not Found")).isEmpty();
   }
 
   @Test(expected = DataIntegrityViolationException.class)
   public void test_idRequired() {
     final DbInstitution testInst = new DbInstitution();
-    testInst.setLongName("so long");
+    testInst.setDisplayName("so long");
     institutionDao.save(testInst);
   }
 
@@ -61,9 +63,9 @@ public class InstitutionDaoTest {
   }
 
   @Test(expected = DataIntegrityViolationException.class)
-  public void test_longNameRequired() {
+  public void test_displayNameRequired() {
     final DbInstitution testInst = new DbInstitution();
-    testInst.setApiId("VUMC");
+    testInst.setShortName("VUMC");
     institutionDao.save(testInst);
   }
 }

@@ -34,7 +34,8 @@ public class InstitutionEmailAddressDaoTest {
     assertThat(institutionEmailAddressDao.findAll()).hasSize(1);
     assertThat(institutionEmailAddressDao.findAllByInstitution(testInst)).isEmpty();
 
-    // we have no uniqueness constraint so these will be distinct entities
+    // we have no domain uniqueness constraint between institutions
+    // or even within an institution - so these will be distinct entities
     institutionEmailAddressDao.save(new DbInstitutionEmailAddress(testInst, "N/A"));
     institutionEmailAddressDao.save(new DbInstitutionEmailAddress(testInst, "N/A"));
 

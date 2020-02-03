@@ -1,6 +1,14 @@
 package org.pmiops.workbench.db.model;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "institution_email_address")
@@ -18,32 +26,46 @@ public class DbInstitutionEmailAddress {
   @Column(name = "email_address", nullable = false)
   private String emailAddress;
 
+  public DbInstitutionEmailAddress() {}
+
   public DbInstitutionEmailAddress(DbInstitution institution, String emailAddress) {
-    this.setInstitution(institution);
-    this.setEmailAddress(emailAddress);
-  }
-
-  public long getInstitutionEmailAddressId() {
-    return institutionEmailAddressId;
-  }
-
-  public void setInstitutionEmailAddressId(long institutionEmailAddressId) {
-    this.institutionEmailAddressId = institutionEmailAddressId;
+    this.institution = institution;
+    this.emailAddress = emailAddress;
   }
 
   public DbInstitution getInstitution() {
     return institution;
   }
 
-  public void setInstitution(DbInstitution institution) {
-    this.institution = institution;
-  }
-
   public String getEmailAddress() {
     return emailAddress;
   }
 
-  public void setEmailAddress(String emailAddress) {
-    this.emailAddress = emailAddress;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof DbInstitutionEmailAddress)) {
+      return false;
+    }
+
+    DbInstitutionEmailAddress that = (DbInstitutionEmailAddress) o;
+
+    if (institutionEmailAddressId != that.institutionEmailAddressId) {
+      return false;
+    }
+    if (!institution.equals(that.institution)) {
+      return false;
+    }
+    return emailAddress.equals(that.emailAddress);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = (int) (institutionEmailAddressId ^ (institutionEmailAddressId >>> 32));
+    result = 31 * result + institution.hashCode();
+    result = 31 * result + emailAddress.hashCode();
+    return result;
   }
 }
