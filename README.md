@@ -261,7 +261,7 @@ When the UI is deployed, you'll be able to access it at https://VERSION-dot-PROJ
 service (https://api-dot-PROJECT.appspot.com). (This can be overridden locally
 in the Chrome console).
 
-__NOTE:__ If you want to use a custom UI version pushed using the above command, you must whitelist the base URL with the OAuth 2.0 client ID for the test Workbech environment. A common pattern is to use your GitHub username as the App Engine version name, so this setup only needs to be done once. See [this doc](https://docs.google.com/document/d/15-ktzL3Hdt5rpdFAS3z-v5vSNfk_LtjtPHCvbshjeZo/edit) for instructions.
+__NOTE:__ In order to test out a custom UI version in the browser, you must whitelist the base URL with the OAuth 2.0 client ID for the test Workbech environment. A common pattern is to use your GitHub username as the App Engine version name, so this setup only needs to be done once. See [this doc](https://docs.google.com/document/d/15-ktzL3Hdt5rpdFAS3z-v5vSNfk_LtjtPHCvbshjeZo/edit) for instructions.
 
 ## git-lfs
 
