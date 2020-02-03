@@ -32,7 +32,6 @@ info:
     name: "developer_help@pmi-ops.org"
   license:
     name: "BSD"
-  x-aou-note: |
 
 host: "api.pmi-ops.org"
 securityDefinitions:

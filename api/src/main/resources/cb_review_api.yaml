@@ -1,13 +1,15 @@
-# Endpoints in this API are intended to be used by researchers in notebooks; make sure they
-# are extra-well documented and designed and that we do not break backwards compatibility!
-
-# For separate validation (with some false positives), do:
-#     ./project.rb validate-swagger
 swagger: '2.0'
 info:
   version: "0.1.0"
   title: "AllOfUs Client API"
-  description: "The API used by AllOfUs workbench clients (including both notebooks and our UI.)"
+  description: |
+     The API used by AllOfUs workbench clients (including both notebooks and our UI.)
+     Endpoints in this API are intended to be used by researchers in notebooks; make sure they
+     are extra-well documented and designed and that we do not break backwards compatibility!
+
+     For separate validation (with some false positives), do:
+         ./project.rb validate-swagger
+
   termsOfService: "http://www.pmi-ops.org/terms_of_service.html"
   contact:
     name: "developer_help@pmi-ops.org"
@@ -15,14 +17,13 @@ info:
     name: "BSD"
 host: "api.pmi-ops.org"
 securityDefinitions:
-  # Establish the fact that *some endpoints* are OAuth protected
-  # by defining an `aou_oauth` security mode, which we'll assing
-  # to any protected endpoints below.
+#  x-aou-note: |
+#    Establish the fact that *some endpoints* are OAuth protected
+#    by defining an `aou_oauth` security mode, which we'll assing
+#    to any protected endpoints below.
+#    Establish the fact that all endpoints are protected: this annotation
+#    ensures that client libraries know to send bearer tokens when calling
   aou_oauth:
-    # TODO: Vet/fix this token and/or authorization URL to work in practice.
-    # These are currently included simply to satisfy the Swagger specification,
-    # as this is not directly used to dictate oauth details (just used to
-    # annotate which methods require oauth).
     authorizationUrl: ""
     tokenUrl: ""
     type: oauth2
@@ -31,8 +32,6 @@ schemes:
   - "https"
 produces:
   - "application/json"
-# Establish the fact that all endpoints are protected: this annotation
-# ensures that client libraries know to send bearer tokens when calling
 security:
   - aou_oauth: []
 
