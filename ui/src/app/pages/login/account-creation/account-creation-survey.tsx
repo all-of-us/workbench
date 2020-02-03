@@ -8,21 +8,18 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {CheckBox, RadioButton} from 'app/components/inputs';
 import colors from 'app/styles/colors';
 import {
-  DataAccessLevel,
   Profile,
-  Race,
-  SexAtBirth,
 } from 'generated/fetch';
 import {Section, TextInputWithLabel} from './account-creation';
 
 import {TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {
   profileApi
 } from 'app/services/swagger-fetch-clients';
 import {toggleIncludes} from 'app/utils';
 import * as validate from 'validate.js';
 import {AccountCreationOptions} from './account-creation-options';
-import {SpinnerOverlay} from '../../../components/spinners';
 
 
 const styles = {
@@ -54,6 +51,7 @@ export const DropDownSection = (props) => {
 
 export interface AccountCreationSurveyProps {
   invitationKey: string;
+  termsOfServiceVersion?: number;
   profile: Profile;
   onComplete: (profile: Profile) => void;
   onPreviousClick: (profile: Profile) => void;
@@ -78,9 +76,13 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   // invitation key and tos version into this component (for the sole purpose of relaying this data
   // to the backend) is a telltale sign that this should be refactored.
   createAccount(): void {
-    const {invitationKey, onComplete} = this.props;
+    const {invitationKey, termsOfServiceVersion, onComplete} = this.props;
     this.setState({creatingAccount: true});
-    profileApi().createAccount({profile: this.state.profile, invitationKey: invitationKey})
+    profileApi().createAccount({
+      profile: this.state.profile,
+      invitationKey: invitationKey,
+      termsOfServiceVersion: termsOfServiceVersion
+    })
       .then((savedProfile) => {
         this.setState({profile: savedProfile, creatingAccount: false});
         onComplete(savedProfile);

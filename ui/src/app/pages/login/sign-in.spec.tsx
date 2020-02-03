@@ -3,8 +3,7 @@ import {Button} from 'app/components/buttons';
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import SignInReact, {SignInProps} from './sign-in';
-import {signedOutImages} from './signed-out-images';
+import {SignInProps, SignInReact, StepToImageConfig} from './sign-in';
 
 describe('SignInReact', () => {
   let props: SignInProps;
@@ -23,20 +22,20 @@ describe('SignInReact', () => {
 
   it('should display login background image and directive by default', () => {
     const wrapper = component();
-    const templateImage = wrapper.find('[data-test-id="template"]');
+    const templateImage = wrapper.find('[data-test-id="sign-in-page"]');
     const backgroundImage = templateImage.prop('style').backgroundImage;
-    expect(backgroundImage).toBe('url(\'' + signedOutImages.login.backgroundImgSrc + '\')');
+    expect(backgroundImage).toBe('url(\'' + '/assets/images/login-group.png' + '\')');
     expect(wrapper.exists('[data-test-id="login"]')).toBeTruthy();
   });
 
   it('should display small background image when window width is moderately sized', () => {
     props.windowSize.width = 999;
     const wrapper = component();
-    const templateImage = wrapper.find('[data-test-id="template"]');
+    const templateImage = wrapper.find('[data-test-id="sign-in-page"]');
     const backgroundImage = templateImage.prop('style').backgroundImage;
 
     expect(backgroundImage)
-      .toBe('url(\'' + signedOutImages.login.smallerBackgroundImgSrc + '\')');
+      .toBe('url(\'' + '/assets/images/login-standing.png' + '\')');
     expect(wrapper.exists('[data-test-id="login"]')).toBeTruthy();
   });
 
@@ -45,7 +44,7 @@ describe('SignInReact', () => {
     const createAccountButton = wrapper.find(Button).find({type: 'secondary'});
     createAccountButton.simulate('click');
     wrapper.update();
-    const templateImage = wrapper.find('[data-test-id="template"]');
+    const templateImage = wrapper.find('[data-test-id="sign-in-page"]');
     const backgroundImage = templateImage.prop('style').backgroundImage;
 
     expect(wrapper.exists('[data-test-id="invitationKey"]')).toBeTruthy();
@@ -57,6 +56,6 @@ describe('SignInReact', () => {
     const createAccountButton = wrapper.find(Button).find({type: 'secondary'});
     createAccountButton.simulate('click');
     wrapper.update();
-    const templateImage = wrapper.find('[data-test-id="template"]');
+    const templateImage = wrapper.find('[data-test-id="sign-in-page"]');
   });
 });

@@ -204,3 +204,11 @@ iframe#launcher {
 .create-account__degree-select .p-multiselect-header {
   display: none;
 }
+
+.terms-of-service__page {
+  margin-bottom: 1rem;
+}
+
+.terms-of-service__page > canvas {
+  margin: auto;
+}

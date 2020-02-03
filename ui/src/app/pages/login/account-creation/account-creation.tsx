@@ -27,8 +27,6 @@ import {FlexColumn, FlexRow, flexStyle} from 'app/components/flex';
 import {AoUTitle} from 'app/pages/profile/data-use-agreement-styles';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
-  DataAccessLevel,
-  Degree,
   EducationalRole,
   IndustryRole,
   InstitutionalAffiliation,
