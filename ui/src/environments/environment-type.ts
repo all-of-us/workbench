@@ -41,7 +41,7 @@ export interface Environment {
   // Example value: https://aoudev.nnlm.gov
   trainingUrl: string;
   // The base URL for the Zendesk help center / user forum.
-  // Example value: https://aousupporthelp.zendesk.com/hc/
+  // Example value: https://aousupporthelp1580753096.zendesk.com/hc/
   zendeskHelpCenterUrl: string;
   // Zendesk Widget API key from the Zendesk admin console.
   zendeskWidgetKey: string;
