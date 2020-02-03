@@ -61,6 +61,7 @@ public class ProfileService {
               result.setIdentifiesAsLgbtq(demographicSurvey.getIdentifiesAsLgbtq());
               result.setLgbtqIdentity(demographicSurvey.getLgbtqIdentity());
               result.setRace(demographicSurvey.getRaceEnum());
+              result.setGender(demographicSurvey.getGenderEnum());
               result.setSexAtBirth(demographicSurvey.getSexAtBirthEnum());
               result.setYearOfBirth(BigDecimal.valueOf(demographicSurvey.getYear_of_birth()));
 

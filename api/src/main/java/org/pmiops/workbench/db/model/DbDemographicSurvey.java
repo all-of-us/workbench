@@ -17,6 +17,7 @@ import javax.persistence.Transient;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.Ethnicity;
+import org.pmiops.workbench.model.Gender;
 import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.SexAtBirth;
 
@@ -31,6 +32,7 @@ public class DbDemographicSurvey {
   private String lgbtqIdentity;
   private DbUser user;
   private List<Short> race;
+  private List<Short> gender;
   private List<Short> sexAtBirth;
   private int year_of_birth;
 
@@ -172,6 +174,34 @@ public class DbDemographicSurvey {
   public void setRaceEnum(List<Race> raceList) {
     this.race =
         raceList.stream().map(DemographicSurveyEnum::raceToStorage).collect(Collectors.toList());
+  }
+
+  @ElementCollection(fetch = FetchType.LAZY)
+  @CollectionTable(
+      name = "demographic_survey_gender",
+      joinColumns = @JoinColumn(name = "demographic_survey_id"))
+  @Column(name = "gender")
+  public List<Short> getGender() {
+    return gender;
+  }
+
+  public void setGender(List<Short> gender) {
+    this.gender = gender;
+  }
+
+  @Transient
+  public List<Gender> getGenderEnum() {
+    if (gender == null) return null;
+    return this.gender.stream()
+        .map(DemographicSurveyEnum::genderFromStorage)
+        .collect(Collectors.toList());
+  }
+
+  public void setGenderEnum(List<Gender> genderlist) {
+    this.gender =
+        genderlist.stream()
+            .map(DemographicSurveyEnum::genderToStorage)
+            .collect(Collectors.toList());
   }
 
   @ElementCollection(fetch = FetchType.LAZY)

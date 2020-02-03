@@ -4,6 +4,7 @@ import {
   Education,
   EducationalRole,
   Ethnicity,
+  Gender,
   IndustryRole,
   NonAcademicAffiliation,
   Race,
@@ -74,6 +75,14 @@ export const AccountCreationOptions = {
     {label: `Hispanic or Latino`, value: Ethnicity.HISPANIC},
     {label: `Not Hispanic or Latino`, value: Ethnicity.NOTHISPANIC},
     {label: ` Prefer not to answer`, value: Ethnicity.PREFERNOANSWER}
+  ],
+  gender: [
+    {label: 'Man', value: Gender.MALE},
+    {label: 'Non-Binary', value: Gender.NONBINARY},
+    {label: 'Transgender', value: Gender.TRANSGENDER},
+    {label: 'Woman', value: Gender.FEMALE},
+    {label: 'None of these describe me', value: Gender.NONE},
+    {label: 'Prefer not to answer', value: SexAtBirth.PREFERNOANSWER}
   ],
   sexAtBirth: [
     {label: 'Female', value: SexAtBirth.FEMALE},

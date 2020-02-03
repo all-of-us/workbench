@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="nsaxena" id="changelog-123-add-demographic-gender-identity">
+    <createTable tableName="demographic_survey_gender">
+  	  <column name="demographic_survey_id" type="bigint">
+  	 		 <constraints nullable="false"/>
+  	  </column>
+  	  <column name="gender" type="tinyint">
+  	 	  <constraints nullable="false"/>
+  	  </column>
+    </createTable>
+      
+    <addForeignKeyConstraint baseColumnNames="demographic_survey_id"
+      baseTableName="demographic_survey_gender"
+      constraintName="fk_demographic_survey_gender_id"
+      onDelete="CASCADE"
+      referencedColumnNames="demographic_survey_id"
+      referencedTableName="demographic_survey"/>
+  </changeSet>
+</databaseChangeLog>
