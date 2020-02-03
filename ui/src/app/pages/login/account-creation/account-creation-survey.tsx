@@ -192,7 +192,7 @@ or another sexual and/or gender minority?'>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.gender.map((gender) => {
             return this.createOptionCheckbox(gender.label, 'gender',
-                gender.value, gender.value.toString());
+              gender.value, gender.value.toString());
           })}
         </FlexColumn>
       </Section>
