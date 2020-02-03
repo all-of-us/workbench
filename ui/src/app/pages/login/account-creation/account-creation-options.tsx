@@ -77,10 +77,10 @@ export const AccountCreationOptions = {
     {label: ` Prefer not to answer`, value: Ethnicity.PREFERNOANSWER}
   ],
   gender: [
-    {label: 'Man', value: Gender.MALE},
+    {label: 'Man', value: Gender.MAN},
     {label: 'Non-Binary', value: Gender.NONBINARY},
     {label: 'Transgender', value: Gender.TRANSGENDER},
-    {label: 'Woman', value: Gender.FEMALE},
+    {label: 'Woman', value: Gender.WOMAN},
     {label: 'None of these describe me', value: Gender.NONE},
     {label: 'Prefer not to answer', value: SexAtBirth.PREFERNOANSWER}
   ],
