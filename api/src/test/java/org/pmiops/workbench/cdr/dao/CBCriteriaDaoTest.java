@@ -31,7 +31,6 @@ public class CBCriteriaDaoTest {
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private JdbcTemplate jdbcTemplate;
   private DbCriteria surveyCriteria;
-  private DbCriteria questionCriteria;
   private DbCriteria sourceCriteria;
   private DbCriteria standardCriteria;
   private DbCriteria icd9Criteria;
@@ -53,18 +52,6 @@ public class CBCriteriaDaoTest {
                 .standard(false)
                 .selectable(true)
                 .name("The Basics"));
-    questionCriteria =
-        cbCriteriaDao.save(
-            new DbCriteria()
-                .domainId(DomainType.SURVEY.toString())
-                .type(CriteriaType.PPI.toString())
-                .subtype(CriteriaSubType.QUESTION.toString())
-                .group(false)
-                .standard(false)
-                .selectable(true)
-                .parentId(surveyCriteria.getId())
-                .synonyms("test")
-                .path(surveyCriteria.getId() + ".1"));
     sourceCriteria =
         cbCriteriaDao.save(
             new DbCriteria()
@@ -317,39 +304,5 @@ public class CBCriteriaDaoTest {
     assertThat(option6.getDomain()).isEqualTo(DomainType.SURVEY.toString());
     assertThat(option6.getType()).isEqualTo("PPI");
     assertThat(option6.getStandard()).isFalse();
-  }
-
-  @Test
-  public void countSurveyBySearchTerm() {
-    assertThat(cbCriteriaDao.countSurveyByKeyword("test")).isEqualTo(1);
-  }
-
-  @Test
-  public void findSurveysKeyword() {
-    PageRequest page = new PageRequest(0, 10);
-    assertThat(cbCriteriaDao.findSurveys("test", null, page)).containsExactly(questionCriteria);
-  }
-
-  @Test
-  public void countSurveyByName() {
-    assertThat(cbCriteriaDao.countSurveyByName("The Basics")).isEqualTo(1);
-  }
-
-  @Test
-  public void findSurveysByName() {
-    PageRequest page = new PageRequest(0, 10);
-    assertThat(cbCriteriaDao.findSurveys(null, "The Basics", page))
-        .containsExactly(questionCriteria);
-  }
-
-  @Test
-  public void findSurveysNoSurveyName() {
-    PageRequest page = new PageRequest(0, 10);
-    assertThat(cbCriteriaDao.findSurveys(null, null, page)).containsExactly(questionCriteria);
-  }
-
-  @Test
-  public void countSurveys() {
-    assertThat(cbCriteriaDao.countSurveys()).isEqualTo(1);
   }
 }
