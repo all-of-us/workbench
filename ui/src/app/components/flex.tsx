@@ -14,8 +14,12 @@ export const flexStyle = reactStyles({
 
 
 export const FlexRow = (props) => {
+  // The object destructuring below serves two purposes: (1) allows users of this component to pass
+  // on styles which will override default FlexRow styles, and (2) allows other props passed to
+  // FlexRow to be passed onto the inner <div>. We exclude data-test-id from being passed on, since
+  // passing it onto the <div> would cause both the FlexRow and the <div> component to have the same
+  // data-test-id, which complicates testing.
   const {style, 'data-test-id': dataTestId, ...other} = props;
-  console.log('data test id', dataTestId, other);
   return <div {...other} style={{...flexStyle.row, ...style}}>
     {props.children}
   </div>;
