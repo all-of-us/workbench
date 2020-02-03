@@ -43,6 +43,8 @@ export interface Environment {
   // The base URL for the Zendesk help center / user forum.
   // Example value: https://aousupporthelp.zendesk.com/hc/
   zendeskHelpCenterUrl: string;
+  // Zendesk Widget API key from the Zendesk admin console.
+  zendeskWidgetKey: string;
 
   inactivityTimeoutSeconds: number;
   inactivityWarningBeforeSeconds: number;
