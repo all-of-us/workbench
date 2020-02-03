@@ -3489,6 +3489,12 @@ definitions:
         $ref: '#/definitions/Profile'
       invitationKey:
         type: string
+      termsOfServiceVersion:
+        type: integer
+        format: int32
+        description: >
+          Optional version of the TOS that the user has acknowledged during the sign-up flow. If null, the system
+          assumes that the user has not acknowledged any TOS during sign-up.
 
   DuplicateCohortRequest:
     type: object
@@ -3705,6 +3711,18 @@ definitions:
       freeTierDollarQuota:
         type: number
         format: double
+      latestTermsOfServiceVersion:
+        type: integer
+        format: int32
+        description: >
+          Version of the terms of service that the user last acknowledged. May be null if the user has never
+          acknowledged the Terms of Service.
+      latestTermsOfServiceTime:
+        type: integer
+        format: int64
+        description: >
+          Timestamp when the user last acknowledged the terms of service. May be null if the user has never
+          acknowledged the Terms of Service.
 
   InstitutionalAffiliation:
     type: object

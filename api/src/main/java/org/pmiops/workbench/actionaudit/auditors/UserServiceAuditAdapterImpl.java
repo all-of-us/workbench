@@ -76,4 +76,21 @@ public class UserServiceAuditAdapterImpl implements UserServiceAuditor {
 
     actionAuditService.send(eventBuilder.build());
   }
+
+  @Override
+  public void fireAcknowledgeTermsOfService(DbUser targetUser, Integer termsOfServiceVersion) {
+    actionAuditService.send(
+        ActionAuditEvent.builder()
+            .timestamp(clock.millis())
+            .agentType(AgentType.USER)
+            .agentId(targetUser.getUserId())
+            .agentEmailMaybe(targetUser.getUsername())
+            .actionId(actionIdProvider.get())
+            .actionType(ActionType.EDIT)
+            .targetType(TargetType.ACCOUNT)
+            .targetPropertyMaybe(AccountTargetProperty.ACKNOWLEDGED_TOS_VERSION.getPropertyName())
+            .targetIdMaybe(targetUser.getUserId())
+            .newValueMaybe(String.valueOf(termsOfServiceVersion))
+            .build());
+  }
 }
