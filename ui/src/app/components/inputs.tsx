@@ -214,14 +214,15 @@ export const FormValidationErrorMessage = withStyle({
   fontSize: 12
 })('div');
 
-export const TextInput = React.forwardRef(({style = {}, onChange, onBlur, ...props}:
-      {style?: React.CSSProperties, onChange: Function, onBlur: Function, [key: string]: any},
+export const TextInput = React.forwardRef(({style = {}, onChange, onBlur, onKeyPress, ...props}:
+      {style?: React.CSSProperties, onChange: Function, onBlur: Function, Function, onKeyPress: Function, [key: string]: any},
                                            ref: React.Ref<HTMLInputElement>) => {
   return <input
     {...props}
     ref = {ref}
     onChange={onChange ? (e => onChange(e.target.value)) : undefined}
     onBlur={onBlur ? (e => onBlur(e.target.value)) : undefined}
+    onKeyPress={onKeyPress ? (e => onKeyPress(e)) : undefined}
     type='text'
     style={{
       width: '100%', height: '1.5rem',

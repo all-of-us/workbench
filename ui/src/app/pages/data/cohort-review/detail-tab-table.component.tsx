@@ -18,6 +18,7 @@ import {DataTable} from 'primereact/datatable';
 import {OverlayPanel} from 'primereact/overlaypanel';
 import {TabPanel, TabView} from 'primereact/tabview';
 import * as React from 'react';
+import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
   container: {
@@ -252,6 +253,7 @@ interface State {
   totalCount: number;
   requestPage: number;
   range: Array<number>;
+  tabFilterState: any;
 }
 
 export const DetailTabTable = withCurrentWorkspace()(
@@ -275,7 +277,8 @@ export const DetailTabTable = withCurrentWorkspace()(
         lazyLoad: false,
         totalCount: null,
         requestPage: 0,
-        range: [0, 124]
+        range: [0, 124],
+        tabFilterState: props.filterState.tabs[props.domain]
       };
       this.codeInputChange = fp.debounce(300, (e) => this.filterCodes(e));
     }
@@ -285,7 +288,7 @@ export const DetailTabTable = withCurrentWorkspace()(
     }
 
     componentDidUpdate(prevProps: any) {
-      const {participantId, updateState} = this.props;
+      const {domain, filterState, participantId, updateState} = this.props;
       const {lazyLoad} = this.state;
       if (prevProps.participantId !== participantId) {
         this.setState({
@@ -298,15 +301,17 @@ export const DetailTabTable = withCurrentWorkspace()(
           start: 0,
         }, () => this.getParticipantData(true));
       } else if (prevProps.updateState !== updateState) {
+        const tabFilterState = filterState.tabs[domain];
         if (lazyLoad) {
           this.setState({
             data: null,
             filteredData: null,
             loading: true,
             error: false,
+            tabFilterState
           }, () => this.getParticipantData(true));
         } else {
-          this.filterData();
+          this.setState({tabFilterState}, () => this.filterData());
         }
       }
     }
@@ -654,9 +659,10 @@ export const DetailTabTable = withCurrentWorkspace()(
       }
     }
 
-    filterText = (input: string, column: string) => {
+    filterText = () => {
       const {domain, filterState, getFilteredData} = this.props;
-      filterState.tabs[domain][column] = input;
+      const {tabFilterState} = this.state;
+      filterState.tabs[domain] = tabFilterState;
       getFilteredData(filterState);
     }
 
@@ -766,6 +772,7 @@ export const DetailTabTable = withCurrentWorkspace()(
 
     textFilter(column: string) {
       const {domain, filterState} = this.props;
+      const {tabFilterState} = this.state;
       const columnFilters = filterState.tabs[domain];
       const filtered = !!columnFilters[column];
       let fl: any, ip: any;
@@ -781,11 +788,19 @@ export const DetailTabTable = withCurrentWorkspace()(
                       ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
           <div style={styles.textSearch}>
             <i className='pi pi-search' style={{margin: '0 5px'}} />
-            <TextInput
+            <input
               ref={(i) => ip = i}
               style={styles.textInput}
-              value={columnFilters[column]}
-              onChange={(e) => this.filterText(e, column)}
+              value={tabFilterState[column]}
+              onChange={(e) => {
+                tabFilterState[column] = e.target.value;
+                this.setState({tabFilterState});
+              }}
+              onKeyPress={e => {
+                if (e.key === Key.Enter) {
+                  this.filterText();
+                }
+              }}
               placeholder={'Search'} />
           </div>
         </OverlayPanel>
