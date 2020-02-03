@@ -29,8 +29,8 @@ public class RdrExportEnums {
 
   private static final BiMap<Gender, org.pmiops.workbench.rdr.model.Gender> CLIENT_TO_RDR_GENDER =
       ImmutableBiMap.<Gender, org.pmiops.workbench.rdr.model.Gender>builder()
-          .put(Gender.MALE, org.pmiops.workbench.rdr.model.Gender.MALE)
-          .put(Gender.FEMALE, org.pmiops.workbench.rdr.model.Gender.FEMALE)
+          .put(Gender.MAN, org.pmiops.workbench.rdr.model.Gender.MALE)
+          .put(Gender.WOMAN, org.pmiops.workbench.rdr.model.Gender.FEMALE)
           .put(Gender.NON_BINARY, org.pmiops.workbench.rdr.model.Gender.NON_BINARY)
           .put(Gender.TRANSGENDER, org.pmiops.workbench.rdr.model.Gender.TRANSGENDER)
           .put(Gender.INTERSEX, org.pmiops.workbench.rdr.model.Gender.INTERSEX)

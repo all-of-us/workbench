@@ -54,8 +54,8 @@ public class DemographicSurveyEnum {
 
   private static final BiMap<Gender, Short> CLIENT_TO_STORAGE_GENDER =
       ImmutableBiMap.<Gender, Short>builder()
-          .put(Gender.MALE, (short) 1)
-          .put(Gender.FEMALE, (short) 2)
+          .put(Gender.MAN, (short) 1)
+          .put(Gender.WOMAN, (short) 2)
           .put(Gender.NON_BINARY, (short) 3)
           .put(Gender.TRANSGENDER, (short) 4)
           .put(Gender.INTERSEX, (short) 5)

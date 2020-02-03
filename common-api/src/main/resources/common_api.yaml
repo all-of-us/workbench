@@ -77,7 +77,7 @@ definitions:
 
   Gender:
     type: string
-    enum: &Gender [MALE, FEMALE, NON_BINARY, TRANSGENDER, INTERSEX, NONE, PREFER_NO_ANSWER]
+    enum: &Gender [MAN, WOMAN, NON_BINARY, TRANSGENDER, INTERSEX, NONE, PREFER_NO_ANSWER]
 
   SexAtBirth:
     type: string
