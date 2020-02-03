@@ -4,7 +4,7 @@ threadsafe: true
 default_expiration: "2m"
 
 handlers:
-- url: /(.*\.(css|eot|gz|html|ico|jpg|jpeg|js|map|mp4|png|svg|ttf|woff|woff2))
+- url: /(.*\.(css|eot|gz|html|ico|jpg|jpeg|js|map|mp4|pdf|png|svg|ttf|woff|woff2))
   static_files: dist/\1
   upload: dist/(.*)
   secure: always
