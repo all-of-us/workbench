@@ -200,6 +200,7 @@ class SideNavItem extends React.Component<SideNavItemProps, SideNavItemState> {
 export interface SideNavProps {
   profile: Profile;
   bannerAdminActive: boolean;
+  clusterAdminActive: boolean;
   homeActive: boolean;
   libraryActive: boolean;
   onToggleSideNav: Function;
@@ -328,7 +329,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       {
         profile.authorities.includes(Authority.ACCESSCONTROLADMIN) && this.state.showAdminOptions && <SideNavItem
           content={'User Admin'}
-          onToggleSideNav={() => this.props.onToggleSideNav}
+          onToggleSideNav={() => this.props.onToggleSideNav()}
           href={'/admin/user'}
           active={this.props.userAdminActive}
         />
@@ -336,9 +337,17 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       {
         profile.authorities.includes(Authority.COMMUNICATIONSADMIN) && this.state.showAdminOptions && <SideNavItem
             content={'Service Banners'}
-            onToggleSideNav={() => this.props.onToggleSideNav}
+            onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'/admin/banner'}
             active={this.props.bannerAdminActive}
+        />
+      }
+      {
+        profile.authorities.includes(Authority.CLUSTERADMIN) && this.state.showAdminOptions && <SideNavItem
+            content={'Manage Clusters'}
+            onToggleSideNav={() => this.props.onToggleSideNav()}
+            href={'admin/cluster'}
+            active={this.props.clusterAdminActive}
         />
       }
     </div>;

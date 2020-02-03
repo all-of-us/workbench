@@ -63,6 +63,7 @@ const styles = reactStyles({
 export interface Props {
   profile: Profile;
   bannerAdminActive: boolean;
+  clusterAdminActive: boolean;
   headerImg: string;
   displayTag: string;
   shouldShowDisplayTag: boolean;
@@ -234,6 +235,7 @@ export const NavBar = withUserProfile()(
           && <SideNav
             profile={this.props.profile}
             bannerAdminActive={this.props.bannerAdminActive}
+            clusterAdminActive={this.props.clusterAdminActive}
             homeActive={this.props.homeActive}
             libraryActive={this.props.libraryActive}
             // Passing the function itself deliberately, we want to be able to
@@ -259,6 +261,7 @@ export class NavBarComponent extends ReactWrapperBase {
   @Input('displayTag') displayTag: Props['displayTag'];
   @Input('shouldShowDisplayTag') shouldShowDisplayTag: Props['shouldShowDisplayTag'];
   @Input('bannerAdminActive') bannerAdminActive: Props['bannerAdminActive'];
+  @Input('clusterAdminActive') clusterAdminActive: Props['clusterAdminActive'];
   @Input('homeActive') homeActive: Props['homeActive'];
   @Input('workspacesActive') workspacesActive: Props['workspacesActive'];
   @Input('libraryActive') libraryActive: Props['libraryActive'];
@@ -271,6 +274,7 @@ export class NavBarComponent extends ReactWrapperBase {
       'displayTag',
       'shouldShowDisplayTag',
       'bannerAdminActive',
+      'clusterAdminActive',
       'homeActive',
       'workspacesActive',
       'libraryActive',

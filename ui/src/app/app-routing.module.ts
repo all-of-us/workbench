@@ -8,6 +8,7 @@ import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {DataUseAgreementComponent} from 'app/pages/profile/data-use-agreement';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
+import {AdminClusterComponent} from './pages/admin/admin-cluster';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {NotebookListComponent} from './pages/analysis/notebook-list';
@@ -280,6 +281,10 @@ const routes: Routes = [
         path: 'admin/banner',
         component: AdminBannerComponent,
         data: {title: 'Create Banner'}
+      }, {
+        path: 'admin/cluster',
+        component: AdminClusterComponent,
+        data: { title: 'Manage Clusters'}
       }, {
         path: 'profile',
         component: ProfilePageComponent,
