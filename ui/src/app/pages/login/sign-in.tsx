@@ -234,8 +234,6 @@ export const SignInReact = fp.flow(withServerConfig(), withWindowSize())(
 
     render() {
       const backgroundImages = StepToImageConfig[this.state.currentStep];
-      const maxWidth = backgroundImages === undefined ? '100%' : '41.66667%';
-
       return <FlexColumn style={styles.signInContainer} data-test-id='sign-in-container'>
         <FlexColumn data-test-id='sign-in-page'
              style={styles.template(this.props.windowSize, backgroundImages)}>

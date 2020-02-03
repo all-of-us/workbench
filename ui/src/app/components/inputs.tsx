@@ -194,9 +194,9 @@ export class CheckBox extends React.Component<CheckBoxProps, CheckBoxState> {
   render() {
     const {
       checked, disabled, label, labelStyle, onChange, manageOwnState, style, wrapperStyle,
-      'data-test-id': dataTestId,
       ...otherProps
     } = this.props;
+    delete otherProps['data-test-id'];
     const maybeDisabledOverrides = disabled ? styles.disabledStyle : {};
 
     const input = <input
