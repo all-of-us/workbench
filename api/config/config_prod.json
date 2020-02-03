@@ -65,6 +65,9 @@
     "fromEmail": "donotreply@researchallofus.org",
     "sendRetries": 3
   },
+  "zendesk": {
+    "host": "https:\/\/aousupporthelp.zendesk.com"
+  },
   "elasticsearch": {
     "baseUrl": "",
     "enableBasicAuth": true,

@@ -87,13 +87,16 @@ import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
 import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.WorkspaceMapper;
+import org.pmiops.workbench.zendesk.ZendeskRequests;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.zendesk.client.v2.Zendesk;
+import org.zendesk.client.v2.ZendeskException;
+import org.zendesk.client.v2.model.Request;
 
 @RestController
 public class WorkspacesController implements WorkspacesApiDelegate {
-
   private static final Logger log = Logger.getLogger(WorkspacesController.class.getName());
 
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
@@ -115,6 +118,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final Provider<DbUser> userProvider;
   private final FireCloudService fireCloudService;
   private final Provider<Cloudbilling> cloudbillingProvider;
+  private final Provider<Zendesk> zendeskProvider;
   private final CloudStorageService cloudStorageService;
   private final Clock clock;
   private final NotebooksService notebooksService;
@@ -134,6 +138,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       FireCloudService fireCloudService,
       CloudStorageService cloudStorageService,
       Provider<Cloudbilling> cloudBillingProvider,
+      Provider<Zendesk> zendeskProvider,
       Clock clock,
       NotebooksService notebooksService,
       UserService userService,
@@ -149,6 +154,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.fireCloudService = fireCloudService;
     this.cloudStorageService = cloudStorageService;
     this.cloudbillingProvider = cloudBillingProvider;
+    this.zendeskProvider = zendeskProvider;
     this.clock = clock;
     this.notebooksService = notebooksService;
     this.userService = userService;
@@ -209,6 +215,33 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private FirecloudWorkspace attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
     return fireCloudService.createWorkspace(
         workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
+  }
+
+  private void maybeFileZendeskReviewRequest(Workspace workspace) {
+    if (!workspace.getResearchPurpose().getReviewRequested()) {
+      return;
+    }
+
+    final Request zdReq;
+    try {
+      zdReq =
+          zendeskProvider
+              .get()
+              .createRequest(
+                  ZendeskRequests.workspaceToReviewRequest(userProvider.get(), workspace));
+    } catch (ZendeskException e) {
+      log.log(
+          Level.SEVERE,
+          String.format(
+              "Failed to file Zendesk review ticket for workspace %s/%s",
+              workspace.getNamespace(), workspace.getId()),
+          e);
+      return;
+    }
+    log.info(
+        String.format(
+            "filed Zendesk review request ticket with title %s, ID %s",
+            zdReq.getSubject(), zdReq.getId()));
   }
 
   @Override
@@ -280,6 +313,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     Workspace createdWorkspace = manualWorkspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
+    maybeFileZendeskReviewRequest(createdWorkspace);
     return ResponseEntity.ok(createdWorkspace);
   }
 
@@ -557,6 +591,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
+    maybeFileZendeskReviewRequest(savedWorkspace);
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
   }
 
