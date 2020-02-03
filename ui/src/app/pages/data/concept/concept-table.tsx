@@ -201,8 +201,7 @@ export class ConceptTable extends React.Component<Props, State> {
       selectedConcepts = fp.uniqBy( 'conceptId', this.state.selectedConcepts
           .concat(this.props.concepts.slice(startIndex, endIndex)));
       this.setState({showBanner: true});
-    } else if (selectedConcepts.length === 0 ) {
-      // if no concepts are selected remove the banner
+    } else if (selectedConcepts.length < this.props.concepts.length) {
       this.setState({showBanner: false});
     }
     this.setState({selectedConcepts: selectedConcepts});
@@ -263,15 +262,20 @@ export class ConceptTable extends React.Component<Props, State> {
   }
 
   selectAllHeader() {
-    if (this.state.showBanner) {
-      const {concepts} = this.props;
-      const bannerText = this.state.selectAll ? 'Clear Selection' : 'Select ' + concepts.length;
-      return <FlexRow  data-test-id='selection' style={{fontWeight: '200'}}>
-        All concepts on this page are selected.&nbsp;
+    const {concepts} = this.props;
+    const {selectAll, showBanner} = this.state;
+    if (showBanner && concepts.length > ROWS_TO_DISPLAY) {
+      const selectedConceptSize = selectAll ? concepts.length : ROWS_TO_DISPLAY;
+      const text = selectAll ? '.' : 'on this page.';
+      const clickableText = selectAll ? 'Clear Selection' :
+          'Select all ' + concepts.length + ' concepts';
+      return <div data-test-id='selection'><FlexRow style={{fontWeight: '200'}}>
+        You’ve selected all {selectedConceptSize} concepts {text} &nbsp;
         <Clickable data-test-id='banner-link' style={{color: 'blue'}} onClick={() => this.selectAll()}>
-          {bannerText}
+          {clickableText}
         </Clickable>
-      </FlexRow>;
+        {!selectAll && <div> &nbsp;in this domain </div>}
+      </FlexRow></div>;
     }
     return;
   }
