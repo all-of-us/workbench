@@ -201,8 +201,7 @@ export class ConceptTable extends React.Component<Props, State> {
       selectedConcepts = fp.uniqBy( 'conceptId', this.state.selectedConcepts
           .concat(this.props.concepts.slice(startIndex, endIndex)));
       this.setState({showBanner: true});
-    } else if (selectedConcepts.length === 0 ) {
-      // if no concepts are selected remove the banner
+    } else if (selectedConcepts.length < this.props.concepts.length) {
       this.setState({showBanner: false});
     }
     this.setState({selectedConcepts: selectedConcepts});
