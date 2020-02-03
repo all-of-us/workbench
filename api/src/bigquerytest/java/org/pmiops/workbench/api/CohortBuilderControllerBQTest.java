@@ -10,11 +10,13 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.inject.Provider;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -115,6 +117,23 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private JdbcTemplate jdbcTemplate;
 
+  private DbCriteria drugNode1;
+  private DbCriteria drugNode2;
+  private DbCriteria criteriaParent;
+  private DbCriteria criteriaChild;
+  private DbCriteria icd9;
+  private DbCriteria icd10;
+  private DbCriteria snomedSource;
+  private DbCriteria snomedStandard;
+  private DbCriteria cpt4;
+  private DbCriteria temporalParent1;
+  private DbCriteria temportalChild1;
+  private DbCriteria procedureParent1;
+  private DbCriteria procedureChild1;
+  private DbCriteria surveyNode;
+  private DbCriteria questionNode;
+  private DbCriteria answerNode;
+
   @Override
   public List<String> getTableNames() {
     return ImmutableList.of("person", "death", "cb_search_person", "cb_search_all_events");
@@ -154,6 +173,171 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     cdrVersion = cdrVersionDao.save(cdrVersion);
+
+    drugNode1 = drugCriteriaParent();
+    saveCriteriaWithPath("0", drugNode1);
+    drugNode2 = drugCriteriaChild(drugNode1.getId());
+    saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
+    jdbcTemplate.execute(
+        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
+    jdbcTemplate.execute(
+        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values ("
+            + 1520218
+            + ", "
+            + 1520218
+            + ")");
+
+    criteriaParent = icd9CriteriaParent();
+    saveCriteriaWithPath("0", criteriaParent);
+    criteriaChild = icd9CriteriaChild(criteriaParent.getId());
+    saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
+
+    icd9 =
+        cbCriteriaDao.save(
+            new DbCriteria()
+                .domainId(DomainType.CONDITION.toString())
+                .type(CriteriaType.ICD9CM.toString())
+                .standard(false));
+    icd10 =
+        cbCriteriaDao.save(
+            new DbCriteria()
+                .domainId(DomainType.CONDITION.toString())
+                .type(CriteriaType.ICD10CM.toString())
+                .standard(false));
+    snomedStandard =
+        cbCriteriaDao.save(
+            new DbCriteria()
+                .domainId(DomainType.CONDITION.toString())
+                .type(CriteriaType.SNOMED.toString())
+                .standard(true));
+    snomedSource =
+        cbCriteriaDao.save(
+            new DbCriteria()
+                .domainId(DomainType.CONDITION.toString())
+                .type(CriteriaType.SNOMED.toString())
+                .standard(false));
+    cpt4 =
+        cbCriteriaDao.save(
+            new DbCriteria()
+                .domainId(DomainType.PROCEDURE.toString())
+                .type(CriteriaType.CPT4.toString())
+                .standard(false));
+
+    temporalParent1 =
+        new DbCriteria()
+            .ancestorData(false)
+            .code("001")
+            .conceptId("0")
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD10CM.toString())
+            .group(true)
+            .selectable(true)
+            .standard(false)
+            .synonyms("+[CONDITION_rank1]");
+    saveCriteriaWithPath("0", temporalParent1);
+    temportalChild1 =
+        new DbCriteria()
+            .parentId(temporalParent1.getId())
+            .ancestorData(false)
+            .code("001.1")
+            .conceptId("1")
+            .domainId(DomainType.CONDITION.toString())
+            .type(CriteriaType.ICD10CM.toString())
+            .group(false)
+            .selectable(true)
+            .standard(false)
+            .synonyms("+[CONDITION_rank1]");
+    saveCriteriaWithPath(temporalParent1.getPath(), temportalChild1);
+
+    procedureParent1 =
+        new DbCriteria()
+            .parentId(99999)
+            .domainId(DomainType.PROCEDURE.toString())
+            .type(CriteriaType.SNOMED.toString())
+            .standard(true)
+            .code("386637004")
+            .name("Obstetric procedure")
+            .count("36673")
+            .group(true)
+            .selectable(true)
+            .ancestorData(false)
+            .conceptId("4302541")
+            .synonyms("+[PROCEDURE_rank1]");
+    saveCriteriaWithPath("0", procedureParent1);
+    procedureChild1 =
+        new DbCriteria()
+            .parentId(procedureParent1.getId())
+            .domainId(DomainType.PROCEDURE.toString())
+            .type(CriteriaType.SNOMED.toString())
+            .standard(true)
+            .code("386639001")
+            .name("Termination of pregnancy")
+            .count("50")
+            .group(false)
+            .selectable(true)
+            .ancestorData(false)
+            .conceptId("4")
+            .synonyms("+[PROCEDURE_rank1]");
+    saveCriteriaWithPath(procedureParent1.getPath(), procedureChild1);
+
+    surveyNode =
+        new DbCriteria()
+            .parentId(0)
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.SURVEY.toString())
+            .group(true)
+            .selectable(true)
+            .standard(false)
+            .conceptId("22");
+    saveCriteriaWithPath("0", surveyNode);
+    questionNode =
+        new DbCriteria()
+            .parentId(surveyNode.getId())
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.QUESTION.toString())
+            .group(true)
+            .selectable(true)
+            .standard(false)
+            .name("In what country were you born?")
+            .conceptId("1585899")
+            .synonyms("[SURVEY_rank1]");
+    saveCriteriaWithPath(surveyNode.getPath(), questionNode);
+    answerNode =
+        new DbCriteria()
+            .parentId(questionNode.getId())
+            .domainId(DomainType.SURVEY.toString())
+            .type(CriteriaType.PPI.toString())
+            .subtype(CriteriaSubType.ANSWER.toString())
+            .group(false)
+            .selectable(true)
+            .standard(false)
+            .name("USA")
+            .conceptId("5");
+    saveCriteriaWithPath(questionNode.getPath(), answerNode);
+  }
+
+  @After
+  public void tearDown() {
+    jdbcTemplate.execute("drop table cb_criteria_ancestor");
+    delete(
+        drugNode1,
+        drugNode2,
+        criteriaParent,
+        criteriaChild,
+        icd9,
+        icd10,
+        snomedSource,
+        snomedStandard,
+        cpt4,
+        temporalParent1,
+        temportalChild1,
+        procedureParent1,
+        procedureChild1,
+        surveyNode,
+        questionNode,
+        answerNode);
   }
 
   private static SearchParameter icd9() {
@@ -500,61 +684,61 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void findCriteriaMenuOptions() {
-    cbCriteriaDao.save(
-        new DbCriteria()
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD9CM.toString())
-            .standard(false));
-    cbCriteriaDao.save(
-        new DbCriteria()
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.ICD10CM.toString())
-            .standard(false));
-    cbCriteriaDao.save(
-        new DbCriteria()
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .standard(true));
-    cbCriteriaDao.save(
-        new DbCriteria()
-            .domainId(DomainType.CONDITION.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .standard(false));
-    cbCriteriaDao.save(
-        new DbCriteria()
-            .domainId(DomainType.PROCEDURE.toString())
-            .type(CriteriaType.CPT4.toString())
-            .standard(false));
+    ImmutableList<StandardFlag> standardFlag = ImmutableList.of(new StandardFlag().standard(true));
+    ImmutableList<StandardFlag> sourceFlag = ImmutableList.of(new StandardFlag().standard(false));
+    ImmutableList<StandardFlag> sourceAndStandardFlags =
+        ImmutableList.of(new StandardFlag().standard(false), new StandardFlag().standard(true));
     List<CriteriaMenuOption> options =
         controller.findCriteriaMenuOptions(cdrVersion.getCdrVersionId()).getBody().getItems();
-    assertEquals(2, options.size());
+    assertEquals(4, options.size());
     CriteriaMenuOption option1 =
         new CriteriaMenuOption()
             .domain(DomainType.CONDITION.toString())
             .addTypesItem(
                 new CriteriaMenuSubOption()
                     .type(CriteriaType.ICD10CM.toString())
-                    .standardFlags(ImmutableList.of(new StandardFlag().standard(false))))
+                    .standardFlags(sourceFlag))
             .addTypesItem(
                 new CriteriaMenuSubOption()
                     .type(CriteriaType.ICD9CM.toString())
-                    .standardFlags(ImmutableList.of(new StandardFlag().standard(false))))
+                    .standardFlags(sourceFlag))
             .addTypesItem(
                 new CriteriaMenuSubOption()
                     .type(CriteriaType.SNOMED.toString())
-                    .standardFlags(
-                        ImmutableList.of(
-                            new StandardFlag().standard(false),
-                            new StandardFlag().standard(true))));
+                    .standardFlags(sourceAndStandardFlags));
     CriteriaMenuOption option2 =
+        new CriteriaMenuOption()
+            .domain(DomainType.DRUG.toString())
+            .addTypesItem(
+                new CriteriaMenuSubOption()
+                    .type(CriteriaType.ATC.toString())
+                    .standardFlags(standardFlag))
+            .addTypesItem(
+                new CriteriaMenuSubOption()
+                    .type(CriteriaType.RXNORM.toString())
+                    .standardFlags(sourceFlag));
+    CriteriaMenuOption option3 =
         new CriteriaMenuOption()
             .domain(DomainType.PROCEDURE.toString())
             .addTypesItem(
                 new CriteriaMenuSubOption()
                     .type(CriteriaType.CPT4.toString())
-                    .standardFlags(ImmutableList.of(new StandardFlag().standard(false))));
+                    .standardFlags(sourceFlag))
+            .addTypesItem(
+                new CriteriaMenuSubOption()
+                    .type(CriteriaType.SNOMED.toString())
+                    .standardFlags(sourceAndStandardFlags));
+    CriteriaMenuOption option4 =
+        new CriteriaMenuOption()
+            .domain(DomainType.SURVEY.toString())
+            .addTypesItem(
+                new CriteriaMenuSubOption()
+                    .type(CriteriaType.PPI.toString())
+                    .standardFlags(sourceFlag));
     assertTrue(options.contains(option1));
     assertTrue(options.contains(option2));
+    assertTrue(options.contains(option3));
+    assertTrue(options.contains(option4));
   }
 
   @Test
@@ -744,11 +928,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void firstMentionOfDrug5DaysBeforeICD10WithModifiers() {
-    DbCriteria drugNode1 = drugCriteriaParent();
-    saveCriteriaWithPath("0", drugNode1);
-    DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
-    saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
-    insertCriteriaAncestor(1520218, 1520218);
     SearchGroupItem drugSGI =
         new SearchGroupItem()
             .type(DomainType.DRUG.toString())
@@ -773,37 +952,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    cbCriteriaDao.delete(drugNode1.getId());
-    cbCriteriaDao.delete(drugNode2.getId());
-    jdbcTemplate.execute("drop table cb_criteria_ancestor");
     assertParticipants(response, 1);
   }
 
   @Test
   public void anyMentionOfCPTParent5DaysAfterICD10Child() {
-    DbCriteria icd9Parent =
-        new DbCriteria()
-            .ancestorData(false)
-            .code("001")
-            .conceptId("0")
-            .domainId(DomainType.CONDITION.toString())
-            .group(true)
-            .selectable(true)
-            .standard(false)
-            .synonyms("+[CONDITION_rank1]");
-    saveCriteriaWithPath("0", icd9Parent);
-    DbCriteria icd9Child =
-        new DbCriteria()
-            .ancestorData(false)
-            .code("001.1")
-            .conceptId("1")
-            .domainId(DomainType.CONDITION.toString())
-            .group(false)
-            .selectable(true)
-            .standard(false)
-            .synonyms("+[CONDITION_rank1]");
-    saveCriteriaWithPath(icd9Parent.getPath(), icd9Child);
-
     SearchGroupItem icd9SGI =
         new SearchGroupItem()
             .type(DomainType.CONDITION.toString())
@@ -829,8 +982,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    cbCriteriaDao.delete(icd9Parent.getId());
-    cbCriteriaDao.delete(icd9Child.getId());
     assertParticipants(response, 1);
   }
 
@@ -863,9 +1014,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void firstMentionOfDrugDuringSameEncounterAsMeasurement() {
-    jdbcTemplate.execute(
-        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
-
     SearchGroupItem drugSGI =
         new SearchGroupItem()
             .type(DomainType.DRUG.toString())
@@ -888,15 +1036,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    jdbcTemplate.execute("drop table cb_criteria_ancestor");
     assertParticipants(response, 1);
   }
 
   @Test
   public void lastMentionOfDrugDuringSameEncounterAsMeasurement() {
-    jdbcTemplate.execute(
-        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
-
     SearchGroupItem drugSGI =
         new SearchGroupItem()
             .type(DomainType.DRUG.toString())
@@ -919,15 +1063,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    jdbcTemplate.execute("drop table cb_criteria_ancestor");
     assertParticipants(response, 1);
   }
 
   @Test
   public void lastMentionOfDrugDuringSameEncounterAsMeasurementOrVisit() {
-    jdbcTemplate.execute(
-        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
-
     SearchGroupItem drugSGI =
         new SearchGroupItem()
             .type(DomainType.DRUG.toString())
@@ -955,18 +1095,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    jdbcTemplate.execute("drop table cb_criteria_ancestor");
     assertParticipants(response, 1);
   }
 
   @Test
   public void lastMentionOfMeasurementOrVisit5DaysAfterDrug() {
-    DbCriteria drugCriteria1 = drugCriteriaParent();
-    saveCriteriaWithPath("0", drugCriteria1);
-    DbCriteria drugCriteria2 = drugCriteriaChild(drugCriteria1.getId());
-    saveCriteriaWithPath(drugCriteria1.getPath(), drugCriteria2);
-    insertCriteriaAncestor(1520218, 1520218);
-
     SearchGroupItem measurementSGI =
         new SearchGroupItem()
             .type(DomainType.MEASUREMENT.toString())
@@ -995,9 +1128,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest = new SearchRequest().includes(ImmutableList.of(temporalGroup));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    cbCriteriaDao.delete(drugCriteria1.getId());
-    cbCriteriaDao.delete(drugCriteria2.getId());
-    jdbcTemplate.execute("drop table cb_criteria_ancestor");
     assertParticipants(response, 1);
   }
 
@@ -1091,11 +1221,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ConditionParent() {
-    DbCriteria criteriaParent = icd9CriteriaParent();
-    saveCriteriaWithPath("0", criteriaParent);
-    DbCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
-    saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
-
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
@@ -1103,8 +1228,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    cbCriteriaDao.delete(criteriaParent.getId());
-    cbCriteriaDao.delete(criteriaChild.getId());
     assertParticipants(response, 1);
   }
 
@@ -1146,15 +1269,15 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDemoAge() {
-    Integer lo = getTestPeriod().getYears() - 1;
-    Integer hi = getTestPeriod().getYears() + 1;
+    int lo = getTestPeriod().getYears() - 1;
+    int hi = getTestPeriod().getYears() + 1;
     SearchParameter demo = age();
     demo.attributes(
         ImmutableList.of(
             new Attribute()
                 .name(AttrName.AGE)
                 .operator(Operator.BETWEEN)
-                .operands(ImmutableList.of(lo.toString(), hi.toString()))));
+                .operands(ImmutableList.of(String.valueOf(lo), String.valueOf(hi)))));
     SearchRequest searchRequests =
         createSearchRequests(
             DomainType.PERSON.toString(), ImmutableList.of(demo), new ArrayList<>());
@@ -1165,14 +1288,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsICD9AndDemo() {
     SearchParameter demoAgeSearchParam = age();
-    Integer lo = getTestPeriod().getYears() - 1;
-    Integer hi = getTestPeriod().getYears() + 1;
+    int lo = getTestPeriod().getYears() - 1;
+    int hi = getTestPeriod().getYears() + 1;
 
     demoAgeSearchParam.attributes(
         ImmutableList.of(
             new Attribute()
                 .operator(Operator.BETWEEN)
-                .operands(ImmutableList.of(lo.toString(), hi.toString()))));
+                .operands(ImmutableList.of(String.valueOf(lo), String.valueOf(hi)))));
 
     SearchRequest searchRequests =
         createSearchRequests(
@@ -1216,11 +1339,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsICD9ParentAndICD10ChildCondition() {
-    DbCriteria criteriaParent = icd9CriteriaParent();
-    saveCriteriaWithPath("0", criteriaParent);
-    DbCriteria criteriaChild = icd9CriteriaChild(criteriaParent.getId());
-    saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
-
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(),
@@ -1228,8 +1346,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    cbCriteriaDao.delete(criteriaParent.getId());
-    cbCriteriaDao.delete(criteriaChild.getId());
     assertParticipants(response, 2);
   }
 
@@ -1258,45 +1374,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   @Test
   public void countSubjectsSnomedParentProcedure() {
     SearchParameter snomed = snomed().group(true).standard(true).conceptId(4302541L);
-
-    DbCriteria criteriaParent =
-        new DbCriteria()
-            .parentId(99999)
-            .domainId(DomainType.PROCEDURE.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .standard(true)
-            .code("386637004")
-            .name("Obstetric procedure")
-            .count("36673")
-            .group(true)
-            .selectable(true)
-            .ancestorData(false)
-            .conceptId("4302541")
-            .synonyms("+[PROCEDURE_rank1]");
-    saveCriteriaWithPath("0", criteriaParent);
-    DbCriteria criteriaChild =
-        new DbCriteria()
-            .parentId(criteriaParent.getId())
-            .domainId(DomainType.PROCEDURE.toString())
-            .type(CriteriaType.SNOMED.toString())
-            .standard(true)
-            .code("386639001")
-            .name("Termination of pregnancy")
-            .count("50")
-            .group(false)
-            .selectable(true)
-            .ancestorData(false)
-            .conceptId("4")
-            .synonyms("+[PROCEDURE_rank1]");
-    saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
-
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.CONDITION.toString(), ImmutableList.of(snomed), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    cbCriteriaDao.delete(criteriaParent.getId());
-    cbCriteriaDao.delete(criteriaChild.getId());
     assertParticipants(response, 1);
   }
 
@@ -1324,25 +1406,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectsDrugChild() {
-    jdbcTemplate.execute(
-        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.DRUG.toString(), ImmutableList.of(drug()), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    jdbcTemplate.execute("drop table cb_criteria_ancestor");
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsDrugParent() {
-    DbCriteria drugNode1 = drugCriteriaParent();
-    saveCriteriaWithPath("0", drugNode1);
-    DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
-    saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
-
-    insertCriteriaAncestor(1520218, 1520218);
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.DRUG.toString(),
@@ -1350,20 +1423,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    jdbcTemplate.execute("drop table cb_criteria_ancestor");
-    cbCriteriaDao.delete(drugNode1.getId());
-    cbCriteriaDao.delete(drugNode2.getId());
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsDrugParentAndChild() {
-    DbCriteria drugNode1 = drugCriteriaParent();
-    saveCriteriaWithPath("0", drugNode1);
-    DbCriteria drugNode2 = drugCriteriaChild(drugNode1.getId());
-    saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
-
-    insertCriteriaAncestor(1520218, 1520218);
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.DRUG.toString(),
@@ -1371,16 +1435,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    jdbcTemplate.execute("drop table cb_criteria_ancestor");
-    cbCriteriaDao.delete(drugNode1.getId());
-    cbCriteriaDao.delete(drugNode2.getId());
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsDrugChildEncounter() {
-    jdbcTemplate.execute(
-        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.DRUG.toString(),
@@ -1388,20 +1447,16 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             ImmutableList.of(visitModifier()));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    jdbcTemplate.execute("drop table cb_criteria_ancestor");
     assertParticipants(response, 1);
   }
 
   @Test
   public void countSubjectsDrugChildAgeAtEvent() {
-    jdbcTemplate.execute(
-        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.DRUG.toString(), ImmutableList.of(drug()), ImmutableList.of(ageModifier()));
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    jdbcTemplate.execute("drop table cb_criteria_ancestor");
     assertParticipants(response, 1);
   }
 
@@ -1717,31 +1772,32 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsPPI() {
-    List<DbCriteria> surveys = insertSurveyCriteria();
-
+  public void countSubjectsSurvey() {
     // Survey
     SearchRequest searchRequest =
         createSearchRequests(
             DomainType.SURVEY.toString(), ImmutableList.of(survey()), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    deleteSurveyCriteria(surveys);
     assertParticipants(response, 1);
+  }
 
+  @Test
+  public void countSubjectsQuestion() {
     // Question
-    surveys = insertSurveyCriteria();
     SearchParameter ppiQuestion =
         survey().subtype(CriteriaSubType.QUESTION.toString()).conceptId(1585899L);
-    searchRequest =
+    SearchRequest searchRequest =
         createSearchRequests(
             ppiQuestion.getType(), ImmutableList.of(ppiQuestion), new ArrayList<>());
-    response = controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    deleteSurveyCriteria(surveys);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     assertParticipants(response, 1);
+  }
 
+  @Test
+  public void countSubjectsSurveyValueSourceConceptId() {
     // value source concept id
-    surveys = insertSurveyCriteria();
     List<Attribute> attributes =
         ImmutableList.of(
             new Attribute()
@@ -1750,18 +1806,20 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(ImmutableList.of("7")));
     SearchParameter ppiValueAsConceptId =
         survey().subtype(CriteriaSubType.ANSWER.toString()).conceptId(5L).attributes(attributes);
-    searchRequest =
+    SearchRequest searchRequest =
         createSearchRequests(
             ppiValueAsConceptId.getType(),
             ImmutableList.of(ppiValueAsConceptId),
             new ArrayList<>());
-    response = controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    deleteSurveyCriteria(surveys);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     assertParticipants(response, 1);
+  }
 
+  @Test
+  public void countSubjectsSurveyValueAsNumber() {
     // value as number
-    surveys = insertSurveyCriteria();
-    attributes =
+    List<Attribute> attributes =
         ImmutableList.of(
             new Attribute()
                 .name(AttrName.NUM)
@@ -1769,11 +1827,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operands(ImmutableList.of("7")));
     SearchParameter ppiValueAsNumer =
         survey().subtype(CriteriaSubType.ANSWER.toString()).conceptId(5L).attributes(attributes);
-    searchRequest =
+    SearchRequest searchRequest =
         createSearchRequests(
             ppiValueAsNumer.getType(), ImmutableList.of(ppiValueAsNumer), new ArrayList<>());
-    response = controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
-    deleteSurveyCriteria(surveys);
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     assertParticipants(response, 1);
   }
 
@@ -1810,19 +1868,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     return cdrVersion.getBigqueryProject() + "." + cdrVersion.getBigqueryDataset();
   }
 
-  private void insertCriteriaAncestor(int ancestorId, int descendentId) {
-    jdbcTemplate.execute(
-        "create table cb_criteria_ancestor(ancestor_id bigint, descendant_id bigint)");
-    jdbcTemplate.execute(
-        "insert into cb_criteria_ancestor(ancestor_id, descendant_id) values ("
-            + ancestorId
-            + ", "
-            + descendentId
-            + ")");
-  }
-
   private Period getTestPeriod() {
-    DateTime birthDate = new DateTime(1980, 8, 01, 0, 0, 0, 0);
+    DateTime birthDate = new DateTime(1980, 8, 1, 0, 0, 0, 0);
     DateTime now = new DateTime();
     return new Period(birthDate, now);
   }
@@ -1846,56 +1893,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertThat(participantCount).isEqualTo(expectedCount);
   }
 
-  private List<DbCriteria> insertSurveyCriteria() {
-    DbCriteria surveyNode =
-        new DbCriteria()
-            .parentId(0)
-            .domainId(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.SURVEY.toString())
-            .group(true)
-            .selectable(true)
-            .standard(false)
-            .conceptId("22");
-    saveCriteriaWithPath("0", surveyNode);
-    DbCriteria questionNode =
-        new DbCriteria()
-            .parentId(surveyNode.getId())
-            .domainId(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.QUESTION.toString())
-            .group(true)
-            .selectable(true)
-            .standard(false)
-            .name("In what country were you born?")
-            .conceptId("1585899")
-            .synonyms("[SURVEY_rank1]");
-    saveCriteriaWithPath(surveyNode.getPath(), questionNode);
-    DbCriteria answerNode =
-        new DbCriteria()
-            .parentId(questionNode.getId())
-            .domainId(DomainType.SURVEY.toString())
-            .type(CriteriaType.PPI.toString())
-            .subtype(CriteriaSubType.ANSWER.toString())
-            .group(false)
-            .selectable(true)
-            .standard(false)
-            .name("USA")
-            .conceptId("5");
-    saveCriteriaWithPath(questionNode.getPath(), answerNode);
-    return ImmutableList.of(surveyNode, questionNode, answerNode);
-  }
-
-  private void deleteSurveyCriteria(List<DbCriteria> surveys) {
-    for (DbCriteria survey : surveys) {
-      cbCriteriaDao.delete(survey.getId());
-    }
-  }
-
   private void saveCriteriaWithPath(String path, DbCriteria criteria) {
     criteria = cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
     criteria.path(path.isEmpty() ? pathEnd : path + "." + pathEnd);
-    cbCriteriaDao.save(criteria);
+    criteria = cbCriteriaDao.save(criteria);
+  }
+
+  private void delete(DbCriteria... criteriaList) {
+    Arrays.stream(criteriaList).forEach(c -> cbCriteriaDao.delete(c.getId()));
   }
 }
