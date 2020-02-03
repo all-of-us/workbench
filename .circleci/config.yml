@@ -68,7 +68,7 @@ jobs:
           - MYSQL_PASSWORD=ubuntu
     working_directory: ~/workbench
     environment:
-      JAVA_TOOL_OPTIONS: -Xmx2g
+      JAVA_TOOL_OPTIONS: -Xmx1536m
       TERM: dumb
       MYSQL_ROOT_PASSWORD: ubuntu
     steps:
