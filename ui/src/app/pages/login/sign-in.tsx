@@ -21,8 +21,6 @@ import {DataAccessLevel, Degree, Profile} from 'generated/fetch';
 
 import {FlexColumn} from 'app/components/flex';
 import * as React from 'react';
-import {ConfigResponse} from 'generated';
-import {serverConfigStore} from 'app/utils/navigation';
 
 const styles = {
   // A template function which returns the appropriate style config based on window size and
@@ -260,16 +258,6 @@ export class SignInComponent extends ReactWrapperBase {
     super(SignInReact, ['onInit', 'signIn']);
     this.onInit = this.onInit.bind(this);
     this.signIn = this.signIn.bind(this);
-  }
-
-  ngOnInit(): void {
-    console.log('on init');
-    this.renderComponent();
-  }
-
-  ngOnChanges(): void {
-    console.log('on changes');
-    this.renderComponent();
   }
 
   onInit(): void {

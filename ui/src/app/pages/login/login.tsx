@@ -48,7 +48,7 @@ export const styles = reactStyles({
 
 export const LoginReactComponent: React.FunctionComponent<{
   signIn: Function, onCreateAccount: Function }> = ({ signIn, onCreateAccount}) => {
-    return <div data-test-id='login' style={{marginTop: '6.5rem',  paddingLeft: '3rem'}}>
+    return <div data-test-id='login' style={{marginTop: '5.5rem',  paddingLeft: '3rem'}}>
       <div>
         <Header>
           Already have an account?
