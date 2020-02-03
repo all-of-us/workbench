@@ -435,6 +435,8 @@ dependencies {
   compile "io.opencensus:opencensus-exporter-trace-stackdriver:${OPENCENSUS_VERSION}"
   compile "io.opencensus:opencensus-impl:${OPENCENSUS_VERSION}"
 
+  // Force this dependency to a safe version, Zendesk client depends on this.
+  compile 'io.netty:netty-codec-http:4.1.44.Final'
   compile 'com.cloudbees.thirdparty:zendesk-java-client:0.12.0'
 
   compile 'javax.inject:javax.inject:1'

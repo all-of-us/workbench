@@ -56,7 +56,7 @@ public class ZendeskRequests {
             "",
             "[Review requester]",
             String.format(
-                "%s %s (%s, %s)",
+                "Workspace creator - %s %s (%s, %s)",
                 user.getGivenName(),
                 user.getFamilyName(),
                 user.getUsername(),

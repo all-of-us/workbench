@@ -174,6 +174,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.zendesk.client.v2.Zendesk;
+import org.zendesk.client.v2.model.Request;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -382,6 +383,8 @@ public class WorkspacesControllerTest {
     fcWorkspaceAcl = createWorkspaceACL();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
+
+    when(mockZendesk.createRequest(any())).thenReturn(new Request());
   }
 
   private DbUser createUser(String email) {
@@ -638,7 +641,7 @@ public class WorkspacesControllerTest {
             new ProjectBillingInfo().setBillingAccountName("billing-account"));
     assertThat(workspace2.getBillingAccountName()).isEqualTo("billing-account");
 
-    verify(mockZendesk.createRequest(any()), times(1));
+    verify(mockZendesk, times(1)).createRequest(any());
   }
 
   @Test
@@ -1079,7 +1082,7 @@ public class WorkspacesControllerTest {
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
     assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
 
-    verify(mockZendesk.createRequest(any()), times(1));
+    verify(mockZendesk, times(1)).createRequest(any());
   }
 
   @Test

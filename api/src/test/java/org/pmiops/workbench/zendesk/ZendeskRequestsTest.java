@@ -19,7 +19,7 @@ public class ZendeskRequestsTest {
     user = new DbUser();
     user.setGivenName("Falco");
     user.setFamilyName("Lombardi");
-    user.setUsername("flaco@fake-research-aou.org");
+    user.setUsername("falco@fake-research-aou.org");
     user.setContactEmail("user@gmail.com");
   }
 
