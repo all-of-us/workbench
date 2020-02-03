@@ -47,6 +47,10 @@ public class DbUserTermsOfService {
     this.tosVersion = tosVersion;
   }
 
+  // This column is non-nullable in our CloudSQL schema (see Liquibase changelog #123),
+  // but marking it as nullable=false in the column annotation causes unit tests to fail. This
+  // may be due to the way the in-memory H2 database interacts with a column that is auto-populated
+  // via the Hibernate CreationTimestamp annotation.
   @Column(name = "agreement_time")
   @CreationTimestamp
   public Timestamp getAgreementTime() {
