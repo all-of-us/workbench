@@ -1,10 +1,11 @@
 package org.pmiops.workbench.institution;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.inject.Provider;
-import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailDomainDao;
@@ -12,7 +13,6 @@ import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
 import org.pmiops.workbench.db.model.DbStorageEnums;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,8 +42,8 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public Institution getInstitution(final String id) {
-    return toModelClass(getDbInstitution(id));
+  public Optional<Institution> getInstitution(final String id) {
+    return getDbInstitution(id).map(this::toModelClass);
   }
 
   @Override
@@ -52,27 +52,30 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public void deleteInstitution(final String id) {
-    institutionDaoProvider.get().delete(getDbInstitution(id));
+  public boolean deleteInstitution(final String id) {
+    Optional<DbInstitution> dbInst = getDbInstitution(id);
+    if (dbInst.isPresent()) {
+      institutionDaoProvider.get().delete(dbInst.get());
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @Override
-  public Institution updateInstitution(final String id, final Institution institutionToUpdate) {
-    return toModelClass(saveInstitution(institutionToUpdate, getDbInstitution(id)));
+  public Optional<Institution> updateInstitution(
+      final String id, final Institution institutionToUpdate) {
+    return getDbInstitution(id)
+        .map(dbInst -> toModelClass(saveInstitution(institutionToUpdate, dbInst)));
   }
 
-  @NotNull
-  private DbInstitution getDbInstitution(String id) {
-    final DbInstitution institution = institutionDaoProvider.get().findOneByApiId(id);
-    if (institution == null) {
-      throw new NotFoundException(String.format("Could not find Institution with ID %s", id));
-    }
-    return institution;
+  private Optional<DbInstitution> getDbInstitution(String id) {
+    return institutionDaoProvider.get().findOneByShortName(id);
   }
 
   private DbInstitution saveInstitution(final Institution modelClass, final DbInstitution dbClass) {
-    dbClass.setApiId(modelClass.getId());
-    dbClass.setLongName(modelClass.getLongName());
+    dbClass.setShortName(modelClass.getShortName());
+    dbClass.setDisplayName(modelClass.getDisplayName());
     dbClass.setOrganizationTypeEnum(
         DbStorageEnums.organizationTypeToStorage(modelClass.getOrganizationTypeEnum()));
     dbClass.setOrganizationTypeOtherText(modelClass.getOrganizationTypeOtherText());
@@ -82,51 +85,61 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     final InstitutionEmailDomainDao domainDao = institutionEmailDomainDaoProvider.get();
     domainDao.deleteAllByInstitution(dbClass);
-    final List<String> domains = modelClass.getEmailDomains();
-    if (domains != null) {
-      domainDao.save(
-          modelClass.getEmailDomains().stream()
-              .map(domain -> new DbInstitutionEmailDomain(dbClass, domain))
-              .collect(Collectors.toList()));
-    }
+
+    Optional.ofNullable(modelClass.getEmailDomains())
+        .ifPresent(
+            domains -> {
+              Set<DbInstitutionEmailDomain> dbDomains =
+                  domains.stream()
+                      .map(domain -> new DbInstitutionEmailDomain(dbClass, domain))
+                      .collect(Collectors.toSet());
+              domainDao.save(dbDomains);
+              dbClass.setEmailDomains(dbDomains);
+            });
 
     final InstitutionEmailAddressDao addrDao = institutionEmailAddressDaoProvider.get();
     addrDao.deleteAllByInstitution(dbClass);
-    final List<String> addrs = modelClass.getEmailAddresses();
-    if (addrs != null) {
-      addrDao.save(
-          modelClass.getEmailAddresses().stream()
-              .map(address -> new DbInstitutionEmailAddress(dbClass, address))
-              .collect(Collectors.toList()));
-    }
 
-    return dbClass;
+    Optional.ofNullable(modelClass.getEmailAddresses())
+        .ifPresent(
+            addresses -> {
+              Set<DbInstitutionEmailAddress> dbAddrs =
+                  addresses.stream()
+                      .map(address -> new DbInstitutionEmailAddress(dbClass, address))
+                      .collect(Collectors.toSet());
+              addrDao.save(dbAddrs);
+              dbClass.setEmailAddresses(dbAddrs);
+            });
+
+    return institutionDaoProvider.get().save(dbClass);
   }
 
   private Institution toModelClass(final DbInstitution dbClass) {
     final Institution institution =
         new Institution()
-            .id(dbClass.getApiId())
-            .longName(dbClass.getLongName())
+            .shortName(dbClass.getShortName())
+            .displayName(dbClass.getDisplayName())
             .organizationTypeEnum(
                 DbStorageEnums.organizationTypeFromStorage(dbClass.getOrganizationTypeEnum()))
             .organizationTypeOtherText(dbClass.getOrganizationTypeOtherText());
 
-    final List<DbInstitutionEmailDomain> domains = dbClass.getEmailDomains();
-    if (domains != null) {
-      institution.emailDomains(
-          domains.stream()
-              .map(DbInstitutionEmailDomain::getEmailDomain)
-              .collect(Collectors.toList()));
-    }
+    Optional.ofNullable(dbClass.getEmailDomains())
+        .ifPresent(
+            domains -> {
+              institution.emailDomains(
+                  domains.stream()
+                      .map(DbInstitutionEmailDomain::getEmailDomain)
+                      .collect(Collectors.toList()));
+            });
 
-    final List<DbInstitutionEmailAddress> addresses = dbClass.getEmailAddresses();
-    if (addresses != null) {
-      institution.emailAddresses(
-          addresses.stream()
-              .map(DbInstitutionEmailAddress::getEmailAddress)
-              .collect(Collectors.toList()));
-    }
+    Optional.ofNullable(dbClass.getEmailAddresses())
+        .ifPresent(
+            addresses -> {
+              institution.emailAddresses(
+                  addresses.stream()
+                      .map(DbInstitutionEmailAddress::getEmailAddress)
+                      .collect(Collectors.toList()));
+            });
 
     return institution;
   }

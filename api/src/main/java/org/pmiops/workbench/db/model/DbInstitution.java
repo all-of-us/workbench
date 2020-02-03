@@ -1,7 +1,14 @@
 package org.pmiops.workbench.db.model;
 
-import java.util.List;
-import javax.persistence.*;
+import java.util.Set;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "institution")
@@ -10,13 +17,13 @@ public class DbInstitution {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "institution_id")
-  private long institutionId; // primary opaque key for DB use only
+  private long dbId; // primary opaque key for DB use only
 
-  @Column(name = "api_id", nullable = false, unique = true)
-  private String apiId; // unique key exposed to API
+  @Column(name = "short_name", nullable = false, unique = true)
+  private String shortName; // unique key exposed to API
 
-  @Column(name = "long_name", nullable = false)
-  private String longName;
+  @Column(name = "display_name", nullable = false)
+  private String displayName;
 
   @Column(name = "organization_type_enum")
   private Short organizationTypeEnum;
@@ -25,40 +32,32 @@ public class DbInstitution {
   private String organizationTypeOtherText;
 
   @OneToMany(mappedBy = "institution", fetch = FetchType.LAZY)
-  private List<DbInstitutionEmailDomain> emailDomains;
+  private Set<DbInstitutionEmailDomain> emailDomains;
 
   @OneToMany(mappedBy = "institution", fetch = FetchType.LAZY)
-  private List<DbInstitutionEmailAddress> emailAddresses;
+  private Set<DbInstitutionEmailAddress> emailAddresses;
 
   public DbInstitution() {}
 
-  public DbInstitution(final String apiId, final String longName) {
-    setApiId(apiId);
-    setLongName(longName);
+  public DbInstitution(final String shortName, final String displayName) {
+    setShortName(shortName);
+    setDisplayName(displayName);
   }
 
-  public long getInstitutionId() {
-    return institutionId;
+  public String getShortName() {
+    return shortName;
   }
 
-  public void setInstitutionId(long institutionId) {
-    this.institutionId = institutionId;
+  public void setShortName(String shortName) {
+    this.shortName = shortName;
   }
 
-  public String getApiId() {
-    return apiId;
+  public String getDisplayName() {
+    return displayName;
   }
 
-  public void setApiId(String apiId) {
-    this.apiId = apiId;
-  }
-
-  public String getLongName() {
-    return longName;
-  }
-
-  public void setLongName(String longName) {
-    this.longName = longName;
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   public Short getOrganizationTypeEnum() {
@@ -77,19 +76,19 @@ public class DbInstitution {
     this.organizationTypeOtherText = organizationTypeOtherText;
   }
 
-  public List<DbInstitutionEmailDomain> getEmailDomains() {
+  public Set<DbInstitutionEmailDomain> getEmailDomains() {
     return emailDomains;
   }
 
-  public void setEmailDomains(List<DbInstitutionEmailDomain> emailDomains) {
+  public void setEmailDomains(Set<DbInstitutionEmailDomain> emailDomains) {
     this.emailDomains = emailDomains;
   }
 
-  public List<DbInstitutionEmailAddress> getEmailAddresses() {
+  public Set<DbInstitutionEmailAddress> getEmailAddresses() {
     return emailAddresses;
   }
 
-  public void setEmailAddresses(List<DbInstitutionEmailAddress> emailAddresses) {
+  public void setEmailAddresses(Set<DbInstitutionEmailAddress> emailAddresses) {
     this.emailAddresses = emailAddresses;
   }
 }

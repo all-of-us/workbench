@@ -2335,36 +2335,36 @@ paths:
           schema:
             $ref: "#/definitions/Institution"
 
-  /v1/institutions/{id}:
+  /v1/institutions/{shortName}:
     parameters:
       - in: path
-        name: id
+        name: shortName
         required: true
         type: string
     get:
       tags:
         - institution
       description: >
-        Gets the Institution corresponding to the id.
+        Gets the Institution corresponding to the shortName ID.
         Requires INSTITUTION_ADMIN authority.
       operationId: "getInstitution"
       responses:
         200:
           description: >
-            The Institution corresponding to the id.
+            The Institution corresponding to the shortName ID.
           schema:
             $ref: "#/definitions/Institution"
     delete:
       tags:
         - institution
       description: >
-        Deletes the Institution corresponding to the id.
+        Deletes the Institution corresponding to the shortName ID.
         Requires INSTITUTION_ADMIN authority.
       operationId: "deleteInstitution"
       responses:
         204:
           description: >
-            Successful deletion of the Institution corresponding to the id.
+            Successful deletion of the Institution corresponding to the shortName ID.
     patch:
       tags:
         - institution
@@ -4287,18 +4287,24 @@ definitions:
     type: object
     description: Represents an institution which has been approved to validate researchers who wish to use the system
     required:
-      - name
+      - shortName
+      - displayName
+      - organizationTypeEnum
     properties:
-      id:
+      shortName:
         type: string
-      longName:
+      displayName:
         type: string
       organizationTypeEnum:
         $ref: '#/definitions/OrganizationType'
-        description: The Organization Type of this institution, if it is one of the enumerated OrganizationTypes
+        description: >
+          The Organization Type of this institution if it is one of the enumerated
+          OrganizationTypes, or OrganizationType.OTHER if it is not
       organizationTypeOtherText:
         type: string
-        description: The Organization Type of this institution, as text, if it is not one of the enumerated OrganizationTypes
+        description: >
+          The detailed Organization Type of this institution, as text,
+          if its enumerated type is OTHER
       emailAddresses:
         type: array
         description: A list of email addresses which can be validated as members of this Institution
