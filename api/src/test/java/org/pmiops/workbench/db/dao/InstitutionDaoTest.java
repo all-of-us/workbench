@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 
 import java.util.Optional;
 import org.junit.Test;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.junit4.SpringRunner;
+
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -42,7 +44,7 @@ public class InstitutionDaoTest {
     institutionDao.delete(institutionDao.findOneByShortName("Verily").get());
     assertThat(institutionDao.findAll()).hasSize(1);
 
-    assertThat(institutionDao.findOneByShortName("404 Institute Not Found").isPresent()).isFalse();
+    assertThat(institutionDao.findOneByShortName("404 Institute Not Found")).isEmpty();
   }
 
   @Test(expected = DataIntegrityViolationException.class)

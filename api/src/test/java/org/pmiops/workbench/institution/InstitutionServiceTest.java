@@ -1,6 +1,7 @@
 package org.pmiops.workbench.institution;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import java.util.HashSet;
@@ -86,8 +87,8 @@ public class InstitutionServiceTest {
 
   @Test
   public void test_InstitutionNotFound() {
-    assertThat(service.getInstitution("missing").isPresent()).isFalse();
-    assertThat(service.updateInstitution("missing", new Institution()).isPresent()).isFalse();
+    assertThat(service.getInstitution("missing")).isEmpty();
+    assertThat(service.updateInstitution("missing", new Institution())).isEmpty();
     assertThat(service.deleteInstitution("missing")).isFalse();
   }
 
