@@ -5,11 +5,10 @@ import static com.google.common.truth.Truth.assertThat;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.DbInstitution;
-import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest

@@ -69,6 +69,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
     return institution;
   }
+
   private DbInstitution saveInstitution(final Institution modelClass, final DbInstitution dbClass) {
     dbClass.setApiId(modelClass.getId());
     dbClass.setLongName(modelClass.getLongName());

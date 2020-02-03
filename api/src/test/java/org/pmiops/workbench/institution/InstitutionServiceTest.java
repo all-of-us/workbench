@@ -63,5 +63,4 @@ public class InstitutionServiceTest {
     service.createInstitution(new Institution().id("test").longName("We are all individuals"));
     service.createInstitution(new Institution().id("test").longName("I'm not"));
   }
-
 }
