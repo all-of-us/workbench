@@ -153,9 +153,7 @@ export class AppComponent implements OnInit {
   }
 
   private loadConfig() {
-    console.log('loading config...');
     this.serverConfigService.getConfig().subscribe((config) => {
-      console.log('config loaded!');
       serverConfigStore.next(config);
     });
   }

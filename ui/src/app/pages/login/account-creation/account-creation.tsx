@@ -702,7 +702,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <FlexColumn style={{...styles.asideContainer, marginTop: '21.8rem', height: '15rem'}}>
             <div style={styles.asideHeader}><i>All of Us</i> participants are most interested in knowing:</div>
             <ul style={styles.asideList}>
-              {researchPurposeList.map(value => <li key={value} style={styles.asideText}>{value}</li>)}
+              {researchPurposeList.map(value => <li key={value.key} style={styles.asideText}>{value}</li>)}
             </ul>
           </FlexColumn>
         </FlexColumn>
@@ -713,7 +713,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           <TextInput id='givenName' name='givenName' autoFocus
                      placeholder='First Name'
                      value={givenName}
-                     invalid={givenName.length > 80}
+                     invalid={String(givenName.length > 80)}
                      style={{width: '16rem'}}
                      onChange={v => this.updateProfileToBeDeleted('givenName', v)}/>
           {givenName.length > 80 &&
@@ -724,7 +724,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         <FormSection>
           <TextInput id='familyName' name='familyName' placeholder='Last Name'
                      value={familyName}
-                     invalid={familyName.length > 80}
+                     invalid={String(familyName.length > 80)}
                      style={{width: '16rem'}}
                      onChange={v => this.updateProfileToBeDeleted('familyName', v)}/>
           {familyName.length > 80 &&
