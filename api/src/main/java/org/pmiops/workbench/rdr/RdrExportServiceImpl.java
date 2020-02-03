@@ -7,6 +7,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -139,16 +140,17 @@ public class RdrExportServiceImpl implements RdrExportService {
    */
   @Override
   public void exportWorkspaces(List<Long> workspaceIds) {
-    List<RdrWorkspace> RdrWorkspacesList;
+    List<RdrWorkspace> rdrWorkspacesList;
     try {
-      RdrWorkspacesList =
+      rdrWorkspacesList =
           workspaceIds.stream()
               .map(
                   workspaceId ->
                       toRdrWorkspace(workspaceDao.findDbWorkspaceByWorkspaceId(workspaceId)))
+              .filter(Objects::nonNull)
               .collect(Collectors.toList());
       rdrApiProvider.get().getApiClient().setDebugging(true);
-      rdrApiProvider.get().exportWorkspaces(RdrWorkspacesList);
+      rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList);
       updateDBRdrExport(RdrEntity.WORKSPACE, workspaceIds);
     } catch (ApiException ex) {
       log.severe("Error while sending workspace data to RDR");
@@ -266,8 +268,11 @@ public class RdrExportServiceImpl implements RdrExportService {
             rdrWorkspace.addWorkspaceUsersItem(workspaceUserMap);
           });
     } catch (Exception ex) {
-      log.warning("Exception while retrieving workspace Collaborators");
-      rdrWorkspace.addWorkspaceUsersItem(new RdrWorkspaceUser());
+      log.warning(
+          String.format(
+              "Exception while retrieving workspace collaborators for workspace id %s, skipping this workspace for RDR Export",
+              rdrWorkspace.getWorkspaceId()));
+      return null;
     }
 
     return rdrWorkspace;
