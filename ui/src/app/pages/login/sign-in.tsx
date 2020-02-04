@@ -96,16 +96,16 @@ interface BackgroundImageConfig {
   smallerBackgroundImgSrc: string;
 }
 
-export const StepToImageConfig = {
-  [SignInStep.LANDING]: {
+export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map([
+  [SignInStep.LANDING, {
     backgroundImgSrc: '/assets/images/login-group.png',
     smallerBackgroundImgSrc: '/assets/images/login-standing.png'
-  },
-  [SignInStep.SUCCESS_PAGE]: {
+  }],
+  [SignInStep.SUCCESS_PAGE, {
     backgroundImgSrc: '/assets/images/congrats-female.png',
     smallerBackgroundImgSrc: 'assets/images/congrats-female-standing.png'
-  }
-};
+  }]]
+);
 
 const HEADER_IMAGE = '/assets/images/logo-registration-non-signed-in.svg';
 
