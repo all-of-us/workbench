@@ -27,16 +27,18 @@ public class RdrExportEnums {
                   org.pmiops.workbench.rdr.model.Ethnicity.PREFER_NOT_TO_ANSWER)
               .build();
 
-  private static final BiMap<Gender, org.pmiops.workbench.rdr.model.Gender> CLIENT_TO_RDR_GENDER =
-      ImmutableBiMap.<Gender, org.pmiops.workbench.rdr.model.Gender>builder()
-          .put(Gender.MALE, org.pmiops.workbench.rdr.model.Gender.MALE)
-          .put(Gender.FEMALE, org.pmiops.workbench.rdr.model.Gender.FEMALE)
-          .put(Gender.NON_BINARY, org.pmiops.workbench.rdr.model.Gender.NON_BINARY)
-          .put(Gender.TRANSGENDER, org.pmiops.workbench.rdr.model.Gender.TRANSGENDER)
-          .put(Gender.INTERSEX, org.pmiops.workbench.rdr.model.Gender.INTERSEX)
-          .put(Gender.NONE, org.pmiops.workbench.rdr.model.Gender.NONE)
-          .put(Gender.PREFER_NO_ANSWER, org.pmiops.workbench.rdr.model.Gender.PREFER_NOT_TO_ANSWER)
-          .build();
+  private static final BiMap<GenderIdentity, org.pmiops.workbench.rdr.model.Gender>
+      CLIENT_TO_RDR_GENDER =
+          ImmutableBiMap.<GenderIdentity, org.pmiops.workbench.rdr.model.Gender>builder()
+              .put(GenderIdentity.MAN, org.pmiops.workbench.rdr.model.Gender.MALE)
+              .put(GenderIdentity.WOMAN, org.pmiops.workbench.rdr.model.Gender.FEMALE)
+              .put(GenderIdentity.NON_BINARY, org.pmiops.workbench.rdr.model.Gender.NON_BINARY)
+              .put(GenderIdentity.TRANSGENDER, org.pmiops.workbench.rdr.model.Gender.TRANSGENDER)
+              .put(GenderIdentity.NONE_DESCRIBE_ME, org.pmiops.workbench.rdr.model.Gender.NONE)
+              .put(
+                  GenderIdentity.PREFER_NO_ANSWER,
+                  org.pmiops.workbench.rdr.model.Gender.PREFER_NOT_TO_ANSWER)
+              .build();
 
   private static final BiMap<Education, org.pmiops.workbench.rdr.model.Education>
       CLIENT_TO_RDR_EDUCATION =
@@ -105,9 +107,10 @@ public class RdrExportEnums {
     return CLIENT_TO_RDR_ETHNICITY.get(ethnicity);
   }
 
-  public static org.pmiops.workbench.rdr.model.Gender genderToRdrGender(Gender gender) {
-    if (gender == null) return null;
-    return CLIENT_TO_RDR_GENDER.get(gender);
+  public static org.pmiops.workbench.rdr.model.Gender genderToRdrGender(
+      GenderIdentity genderIdentity) {
+    if (genderIdentity == null) return null;
+    return CLIENT_TO_RDR_GENDER.get(genderIdentity);
   }
 
   public static org.pmiops.workbench.rdr.model.Education educationToRdrEducation(

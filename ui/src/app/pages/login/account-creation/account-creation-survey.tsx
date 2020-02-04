@@ -186,6 +186,17 @@ or another sexual and/or gender minority?'>
                             onChange={(value) => this.updateDemographicAttribute('lgbtqIdentity', value)}
                             disabled={!demographicSurvey.identifiesAsLgbtq}/>
       </Section>
+
+      {/*Gender Identity section*/}
+      <Section header='Gender Identity'>
+        <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
+          {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
+            return this.createOptionCheckbox(genderIdentity.label, 'genderIdentityList',
+              genderIdentity.value, genderIdentity.value.toString());
+          })}
+        </FlexColumn>
+      </Section>
+
       {/*Sex at birth section*/}
       <Section header='Sex at birth'>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>

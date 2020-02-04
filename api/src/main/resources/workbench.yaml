@@ -3750,6 +3750,10 @@ definitions:
         type: boolean
       lgbtqIdentity:
         type: string
+      genderIdentityList:
+        type: array
+        items:
+          $ref: '#/definitions/GenderIdentity'
       sexAtBirth:
         type: array
         items:
