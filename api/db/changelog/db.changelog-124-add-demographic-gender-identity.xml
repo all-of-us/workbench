@@ -5,18 +5,18 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="nsaxena" id="changelog-124-add-demographic-gender-identity">
-    <createTable tableName="demographic_survey_gender">
+    <createTable tableName="demographic_survey_gender_identity">
   	  <column name="demographic_survey_id" type="bigint">
   	 		 <constraints nullable="false"/>
   	  </column>
-  	  <column name="gender" type="tinyint">
+  	  <column name="gender_identity" type="tinyint">
   	 	  <constraints nullable="false"/>
   	  </column>
     </createTable>
       
     <addForeignKeyConstraint baseColumnNames="demographic_survey_id"
-      baseTableName="demographic_survey_gender"
-      constraintName="fk_demographic_survey_gender_id"
+      baseTableName="demographic_survey_gender_identity"
+      constraintName="fk_demographic_survey_gender_identity_id"
       onDelete="CASCADE"
       referencedColumnNames="demographic_survey_id"
       referencedTableName="demographic_survey"/>

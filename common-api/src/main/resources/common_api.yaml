@@ -75,9 +75,9 @@ definitions:
     type: string
     enum: &Ethnicity [HISPANIC, NOT_HISPANIC, PREFER_NO_ANSWER]
 
-  Gender:
+  GenderIdentity:
     type: string
-    enum: &Gender [MAN, WOMAN, NON_BINARY, TRANSGENDER, INTERSEX, NONE, PREFER_NO_ANSWER]
+    enum: &GenderIdentity [MAN, WOMAN, NON_BINARY, TRANSGENDER, NONE_DESCRIBE_ME, PREFER_NO_ANSWER]
 
   SexAtBirth:
     type: string

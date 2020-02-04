@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.CollectionTable;
@@ -17,7 +18,7 @@ import javax.persistence.Transient;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.Ethnicity;
-import org.pmiops.workbench.model.Gender;
+import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.SexAtBirth;
 
@@ -32,7 +33,7 @@ public class DbDemographicSurvey {
   private String lgbtqIdentity;
   private DbUser user;
   private List<Short> race;
-  private List<Short> gender;
+  private List<Short> genderIdentityList;
   private List<Short> sexAtBirth;
   private int year_of_birth;
 
@@ -53,6 +54,10 @@ public class DbDemographicSurvey {
             .map(DemographicSurveyEnum::sexAtBirthToStorage)
             .collect(Collectors.toList());
     this.year_of_birth = demographicSurvey.getYearOfBirth().intValue();
+    this.genderIdentityList =
+        demographicSurvey.getGenderIdentityList().stream()
+            .map(DemographicSurveyEnum::genderIdentityToStorage)
+            .collect(Collectors.toList());
   }
 
   @Column(name = "disability")
@@ -178,29 +183,29 @@ public class DbDemographicSurvey {
 
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(
-      name = "demographic_survey_gender",
+      name = "demographic_survey_gender_identity",
       joinColumns = @JoinColumn(name = "demographic_survey_id"))
-  @Column(name = "gender")
-  public List<Short> getGender() {
-    return gender;
+  @Column(name = "gender_identity")
+  public List<Short> getGenderIdentityList() {
+    return genderIdentityList;
   }
 
-  public void setGender(List<Short> gender) {
-    this.gender = gender;
+  public void setGenderIdentityList(List<Short> genderIdentityList) {
+    this.genderIdentityList = genderIdentityList;
   }
 
   @Transient
-  public List<Gender> getGenderEnum() {
-    if (gender == null) return null;
-    return this.gender.stream()
-        .map(DemographicSurveyEnum::genderFromStorage)
+  public List<GenderIdentity> getGenderIdentityEnumList() {
+    if (genderIdentityList == null) return new ArrayList<GenderIdentity>();
+    return this.genderIdentityList.stream()
+        .map(DemographicSurveyEnum::genderIdentityFromStorage)
         .collect(Collectors.toList());
   }
 
-  public void setGenderEnum(List<Gender> genderlist) {
-    this.gender =
-        genderlist.stream()
-            .map(DemographicSurveyEnum::genderToStorage)
+  public void setGenderIdentityEnumList(List<GenderIdentity> genderList) {
+    this.genderIdentityList =
+        genderList.stream()
+            .map(DemographicSurveyEnum::genderIdentityToStorage)
             .collect(Collectors.toList());
   }
 

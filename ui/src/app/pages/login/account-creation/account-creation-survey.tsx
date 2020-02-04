@@ -190,9 +190,9 @@ or another sexual and/or gender minority?'>
       {/*Gender Identity section*/}
       <Section header='Gender Identity'>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
-          {AccountCreationOptions.gender.map((gender) => {
-            return this.createOptionCheckbox(gender.label, 'gender',
-              gender.value, gender.value.toString());
+          {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
+            return this.createOptionCheckbox(genderIdentity.label, 'genderIdentityList',
+              genderIdentity.value, genderIdentity.value.toString());
           })}
         </FlexColumn>
       </Section>

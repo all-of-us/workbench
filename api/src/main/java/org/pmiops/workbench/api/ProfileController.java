@@ -155,8 +155,8 @@ public class ProfileController implements ProfileApiDelegate {
               if (demographicSurvey.getDisability() != null)
                 result.setDisabilityEnum(
                     demographicSurvey.getDisability() ? Disability.TRUE : Disability.FALSE);
-              if (demographicSurvey.getGender() != null) {
-                result.setGenderEnum(demographicSurvey.getGender());
+              if (demographicSurvey.getGenderIdentityList() != null) {
+                result.setGenderIdentityEnumList(demographicSurvey.getGenderIdentityList());
               }
               if (demographicSurvey.getSexAtBirth() != null)
                 result.setSexAtBirthEnum(demographicSurvey.getSexAtBirth());
