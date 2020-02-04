@@ -51,6 +51,14 @@ export function checkbox(label: string) {
 }
 
   /**
+   * a RADIO element with label.
+   * @param label
+   */
+export function radio(label: string) {
+  return `//*[contains(normalize-space(.),'${label}')]/ancestor::*/input[@type='radio']`;
+}
+
+  /**
    * Visible text element.
    * @param text
    */

@@ -1,7 +1,7 @@
+import Workspaces from '../../app/Workspaces';
 import GoogleLoginPage from '../../pages/google-login';
 import Home from '../../pages/home';
 import Profile from '../../pages/profile';
-import Workspaces from '../../pages/workspaces';
 import PuppeteerLaunch from '../../services/puppeteer-launch';
 
 jest.setTimeout(60 * 1000);

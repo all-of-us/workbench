@@ -6,10 +6,9 @@
   "private": true,
   "license": "BSD",
   "scripts": {
-    "test": "jest --runInBand /tests",
-    "test:debug": "yarn run test",
-    "test-dev": "WORKBENCH_ENV=dev jest /tests",
-    "test-dev:debug": "PUPPETEER_HEADLESS=true yarn run test-dev",
+    "test": "WORKBENCH_ENV=test jest --runInBand /tests",
+    "test:debug": "WORKBENCH_ENV=test PUPPETEER_HEADLESS=false jest --runInBand /tests",
+    "test-local": "WORKBENCH_ENV=local jest --runInBand /tests",
     "build": "tsc --build --clean",
     "lint": "tslint --project tsconfig.json",
     "lint:err": "yarn run lint --quiet",

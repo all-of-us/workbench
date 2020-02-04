@@ -78,7 +78,7 @@ export default class GoogleLoginPage {
    * Open All-of-Us Google login page.
    */
   public async goto(): Promise<void> {
-    await this.page.goto(configs.uiBaseUrl+ configs.loginUrlPath, {waitUntil: 'networkidle0'});
+    await this.page.goto(configs.uiBaseUrl + configs.loginUrlPath, {waitUntil: 'networkidle0'});
   }
 
   /**

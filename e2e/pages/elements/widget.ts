@@ -64,12 +64,21 @@ export default class Widget {
   }
 
    /**
-    * Find text INPUT element with a specified label.
+    * Find INPUT element with a specified label.
     * @param {string} label Input label text
     */
   public async findInput(label: string) {
-    const selectr1 = widgetxpath.textInput(label);
-    return await this.puppeteerPage.waitForXPath(selectr1, {visible: true})
+    const selectr = widgetxpath.textInput(label);
+    return await this.puppeteerPage.waitForXPath(selectr, {visible: true})
+  }
+
+  /**
+   * Find RADIO element with a specified label.
+   * @param {string} label text
+   */
+  public async findRadio(label: string) {
+    const selectr = widgetxpath.radio(label);
+    return await this.puppeteerPage.waitForXPath(selectr, {visible: true})
   }
 
 }

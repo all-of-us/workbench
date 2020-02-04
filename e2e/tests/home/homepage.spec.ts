@@ -1,6 +1,6 @@
+import Workspaces from '../../app/Workspaces';
 import GoogleLoginPage from '../../pages/google-login';
 import Home from '../../pages/home';
-import Workspaces from '../../pages/workspaces';
 import PuppeteerLaunch from '../../services/puppeteer-launch';
 
 jest.setTimeout(60 * 1000);
@@ -43,7 +43,7 @@ describe('Home page tests:', () => {
   test('Sign in with cookies', async () => {
     await page.setCookie(...cookies);
     const workspaces = new Workspaces(page);
-    await workspaces.goto();
+    await workspaces.goURL();
     await workspaces.waitForReady();
     expect(await page.title()).toMatch('Workspaces');
   });

@@ -1,7 +1,7 @@
 require('dotenv').config(); // loads variables from .env
 const _ = require('lodash');
 
-const env = process.env.WORKBENCH_ENV || 'test'; // default WORKBENCH_ENV value is test
+const env = process.env.WORKBENCH_ENV || 'test';
 
 const userCredential = {
     userEmail: process.env.USER_NAME,
@@ -18,14 +18,14 @@ const urlPath = {
   };
 
 const puppeteer = {
-  puppeteerHeadless: process.env.headless || true,
-  puppeteerSlowMotion: parseInt(process.env.PUPPETEER_SLOWMO) || 10, // milliseconds
-  puppeteerDevTools: process.env.PUPPETEER_DEVTOOLS || false,
+  isHeadless: process.env.PUPPETEER_HEADLESS || true,
+  slowMotion: parseInt(process.env.PUPPETEER_SLOWMO) || 10, // milliseconds
+  isDevTools: process.env.PUPPETEER_DEVTOOLS || false,
   puppeteerUserAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36'
   };
 
 // localhost development server
-const dev = {
+const local = {
     uiBaseUrl: process.env.DEV_LOGIN_URL || "https://localhost",
     apiBaseUrl: process.env.DEV_API_URL || "https://api-localhost/v1"
 };
@@ -46,16 +46,16 @@ const production = {
     apiBaseUrl: process.env.PRODUCTION_API_URL
 };
 
-const config = {
-  dev,
+const environment = {
+  local,
   test,
   staging,
   production
 };
 
-const configs = _.merge(config[env], userCredential, urlPath, puppeteer);
+const configs = _.merge(environment[env], userCredential, urlPath, puppeteer);
 
 // uncomment for configs inspection
-// console.log(`CONFIGS: ${JSON.stringify(configs, undefined, configs.json_indentation)}`);
+// console.log(`env: ${env} configs: ${JSON.stringify(configs, undefined, configs.json_indentation)}`);
 
 module.exports = configs;

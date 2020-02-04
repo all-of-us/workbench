@@ -55,7 +55,7 @@ export default class BasePage {
   public async waitUntilDocumentTitleMatch(text: string) {
     return await this.puppeteerPage.waitForFunction((includesText) => {
       const actualTitle = document.title;
-      return actualTitle.includes(includesText);
+      return actualTitle.match(includesText) !== undefined;
     }, {timeout: this.timeout}, text);
   }
 
