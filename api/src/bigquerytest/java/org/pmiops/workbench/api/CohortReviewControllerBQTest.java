@@ -570,14 +570,14 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         new ParticipantChartData()
             .ageAtEvent(28)
             .rank(1)
-            .standardName("SNOMED")
+            .standardName("Typhoid and paratyphoid fevers")
             .standardVocabulary("SNOMED")
             .startDate("2008-07-22");
     ParticipantChartData expectedData2 =
         new ParticipantChartData()
             .ageAtEvent(28)
             .rank(1)
-            .standardName("SNOMED")
+            .standardName("Typhoid and paratyphoid fevers")
             .standardVocabulary("SNOMED")
             .startDate("2008-08-01");
     assertThat(response.getItems().size()).isEqualTo(2);
