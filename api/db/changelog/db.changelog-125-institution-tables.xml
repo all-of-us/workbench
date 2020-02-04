@@ -16,7 +16,7 @@
       <column name="display_name" type="VARCHAR(80)">
         <constraints nullable="false"/>
       </column>
-      <column name="organization_type_enum" type="short">
+      <column name="organization_type_enum" type="tinyint">
         <constraints nullable="true"/>
       </column>
       <column name="organization_type_other_text" type="VARCHAR(80)">
