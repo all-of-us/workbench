@@ -1,7 +1,9 @@
 package org.pmiops.workbench.api;
 
+import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.GetInstitutionsResponse;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +21,13 @@ public class InstitutionController implements InstitutionApiDelegate {
   }
 
   @Override
+  @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<Institution> createInstitution(Institution institution) {
     return ResponseEntity.ok(institutionService.createInstitution(institution));
   }
 
   @Override
+  @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<Void> deleteInstitution(final String id) {
     if (institutionService.deleteInstitution(id)) {
       return ResponseEntity.noContent().build();
@@ -33,6 +37,7 @@ public class InstitutionController implements InstitutionApiDelegate {
   }
 
   @Override
+  @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<Institution> getInstitution(final String id) {
     final Institution institution =
         institutionService
@@ -46,6 +51,7 @@ public class InstitutionController implements InstitutionApiDelegate {
   }
 
   @Override
+  @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<GetInstitutionsResponse> getInstitutions() {
     final GetInstitutionsResponse response =
         new GetInstitutionsResponse().institutions(institutionService.getInstitutions());
@@ -53,6 +59,7 @@ public class InstitutionController implements InstitutionApiDelegate {
   }
 
   @Override
+  @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<Institution> updateInstitution(
       final String id, final Institution institutionToUpdate) {
     final Institution institution =

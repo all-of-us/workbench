@@ -2541,6 +2541,9 @@ definitions:
   #   3) ACCESS_CONTROL_ADMIN: This is actually basically a user admin authority, for people
   #      to perform actions on a user's enabled status and manual verification.
   #   4) FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
+  #   5) COMMUNICATIONS_ADMIN: TODO
+  #   6) SECURITY_ADMIN: TODO
+  #   7) INSTITUTION_ADMIN: Allows a user to CRUD Institute entities
   Authority:
     type: string
     description: actions a user can have authority/permission to perform
@@ -2553,7 +2556,8 @@ definitions:
       ACCESS_CONTROL_ADMIN,
       FEATURED_WORKSPACE_ADMIN,
       COMMUNICATIONS_ADMIN,
-      SECURITY_ADMIN
+      SECURITY_ADMIN,
+      INSTITUTION_ADMIN
     ]
 
   PageVisit:
