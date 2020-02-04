@@ -149,9 +149,11 @@ public class RdrExportServiceImpl implements RdrExportService {
                       toRdrWorkspace(workspaceDao.findDbWorkspaceByWorkspaceId(workspaceId)))
               .filter(Objects::nonNull)
               .collect(Collectors.toList());
-      rdrApiProvider.get().getApiClient().setDebugging(true);
-      rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList);
-      updateDBRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+      if (!rdrWorkspacesList.isEmpty()) {
+        rdrApiProvider.get().getApiClient().setDebugging(true);
+        rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList);
+        updateDBRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+      }
     } catch (ApiException ex) {
       log.severe("Error while sending workspace data to RDR");
     }
@@ -194,8 +196,9 @@ public class RdrExportServiceImpl implements RdrExportService {
       }
       if (dbDemographicSurvey.getSexAtBirthEnum() != null) {
         researcher.setSexAtBirth(
-            RdrExportEnums.sexAtBirthToRdrSexAtBirth(
-                dbDemographicSurvey.getSexAtBirthEnum().get(0)));
+            dbDemographicSurvey.getSexAtBirthEnum().stream()
+                .map(RdrExportEnums::sexAtBirthToRdrSexAtBirth)
+                .collect(Collectors.toList()));
       }
       researcher.setDisability(
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
@@ -204,11 +207,13 @@ public class RdrExportServiceImpl implements RdrExportService {
     if (null != dbDemographicSurvey && dbDemographicSurvey.getRaceEnum() != null) {
       researcher.setRace(
           dbDemographicSurvey.getRaceEnum().stream()
-              .map(dbUserRace -> RdrExportEnums.raceToRdrRace(dbUserRace))
+              .map(RdrExportEnums::raceToRdrRace)
               .collect(Collectors.toList()));
     } else {
       researcher.setRace(new ArrayList<>());
     }
+    researcher.setLgbtqIdentity(dbDemographicSurvey.getLgbtqIdentity());
+    researcher.setIdentifiesAsLgbtq(dbDemographicSurvey.getIdentifiesAsLgbtq());
     researcher.setAffiliations(
         dbUser.getInstitutionalAffiliations().stream()
             .map(
@@ -245,7 +250,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setDrugDevelopment(dbWorkspace.getDrugDevelopment());
     rdrWorkspace.setCommercialPurpose(dbWorkspace.getCommercialPurpose());
     rdrWorkspace.setEducational(dbWorkspace.getEducational());
-    rdrWorkspace.setReasonForInvestigation(dbWorkspace.getReasonForAllOfUs());
+    rdrWorkspace.setScientificApproaches(dbWorkspace.getReasonForAllOfUs());
     rdrWorkspace.setIntendToStudy(dbWorkspace.getIntendedStudy());
     rdrWorkspace.setFindingsFromStudy(dbWorkspace.getAnticipatedFindings());
 

@@ -67,28 +67,6 @@ public class RdrExportEnums {
                   org.pmiops.workbench.rdr.model.SexAtBirth.PREFER_NOT_TO_ANSWER)
               .build();
 
-  private static final BiMap<SexualOrientation, org.pmiops.workbench.rdr.model.SexualOrientation>
-      CLIENT_TO_RDR_SEXUAL_ORIENTATION =
-          ImmutableBiMap
-              .<SexualOrientation, org.pmiops.workbench.rdr.model.SexualOrientation>builder()
-              .put(
-                  SexualOrientation.BISEXUAL,
-                  org.pmiops.workbench.rdr.model.SexualOrientation.BISEXUAL)
-              .put(SexualOrientation.GAY, org.pmiops.workbench.rdr.model.SexualOrientation.GAY)
-              .put(
-                  SexualOrientation.LESBIAN,
-                  org.pmiops.workbench.rdr.model.SexualOrientation.LESBIAN)
-              .put(
-                  SexualOrientation.STRAIGHT,
-                  org.pmiops.workbench.rdr.model.SexualOrientation.STRAIGHT)
-              .put(
-                  SexualOrientation.NONE_OF_THESE_DESCRIBE_ME,
-                  org.pmiops.workbench.rdr.model.SexualOrientation.NONE_OF_THESE_DESCRIBE_ME)
-              .put(
-                  SexualOrientation.PREFER_NO_ANSWER,
-                  org.pmiops.workbench.rdr.model.SexualOrientation.PREFER_NOT_TO_ANSWER)
-              .build();
-
   private static final BiMap<Disability, org.pmiops.workbench.rdr.model.Disability>
       CLIENT_TO_RDR_DISABILITY =
           ImmutableBiMap.<Disability, org.pmiops.workbench.rdr.model.Disability>builder()
@@ -123,12 +101,6 @@ public class RdrExportEnums {
       SexAtBirth sexAtBirth) {
     if (sexAtBirth == null) return null;
     return CLIENT_TO_RDR_SEX_AT_BIRTH.get(sexAtBirth);
-  }
-
-  public static org.pmiops.workbench.rdr.model.SexualOrientation
-      sexualOrientationToRdrSexualOrientation(SexualOrientation sexualOrientation) {
-    if (sexualOrientation == null) return null;
-    return CLIENT_TO_RDR_SEXUAL_ORIENTATION.get(sexualOrientation);
   }
 
   public static org.pmiops.workbench.rdr.model.Disability disabilityToRdrDisability(
