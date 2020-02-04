@@ -17,13 +17,13 @@ info:
     name: "BSD"
 host: "api.pmi-ops.org"
 securityDefinitions:
-#  x-aou-note: |
-#    Establish the fact that *some endpoints* are OAuth protected
-#    by defining an `aou_oauth` security mode, which we'll assing
-#    to any protected endpoints below.
-#    Establish the fact that all endpoints are protected: this annotation
-#    ensures that client libraries know to send bearer tokens when calling
   aou_oauth:
+    x-aou-note: |
+      Establish the fact that *some endpoints* are OAuth protected
+      by defining an `aou_oauth` security mode, which we'll assing
+      to any protected endpoints below.
+      Establish the fact that all endpoints are protected: this annotation
+      ensures that client libraries know to send bearer tokens when calling
     authorizationUrl: ""
     tokenUrl: ""
     type: oauth2
@@ -423,9 +423,6 @@ paths:
           schema:
             $ref: '#/definitions/EmptyResponse'
 
-##########################################################################################
-## DEFINITIONS
-##########################################################################################
 definitions:
 
   CreateReviewRequest:
