@@ -46,7 +46,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkBrowserSupport();
-    console.log('loading config');
     this.loadConfig();
 
     this.cookiesEnabled = cookiesEnabled();
