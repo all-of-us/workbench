@@ -271,14 +271,14 @@ public class ReviewQueryBuilder {
         case GREATER_THAN_OR_EQUAL_TO:
         case LIKE:
           stringJoiner
-              .add(filter.getProperty().toString())
+              .add(addLowerColumnName(filter))
               .add(OperatorUtils.getSqlOperator(filter.getOperator()))
               .add(BQParameterUtil.buildParameter(params, buildQueryParameterValue(filter, 0)))
               .add(NEW_LINE);
           break;
         case IN:
           stringJoiner
-              .add(filter.getProperty().toString())
+              .add(addLowerColumnName(filter))
               .add(OperatorUtils.getSqlOperator(filter.getOperator()))
               .add(UNNEST)
               .add(OPEN_PAREN)
@@ -305,6 +305,14 @@ public class ReviewQueryBuilder {
     return filterSql.toString();
   }
 
+  private String addLowerColumnName(Filter filter) {
+    if (LONG_NUMBERS.contains(filter.getProperty())
+        || DOUBLE_NUMBERS.contains(filter.getProperty())) {
+      return filter.getProperty().toString();
+    }
+    return "lower(" + filter.getProperty().toString() + ")";
+  }
+
   private QueryParameterValue buildQueryParameterValue(Filter filter, int index) {
     if (LONG_NUMBERS.contains(filter.getProperty())) {
       return QueryParameterValue.int64(new Long(filter.getValues().get(index)));
@@ -312,8 +320,8 @@ public class ReviewQueryBuilder {
       return QueryParameterValue.float64(new Double(filter.getValues().get(index)));
     }
     return filter.getOperator().equals(Operator.LIKE)
-        ? QueryParameterValue.string(filter.getValues().get(index) + "%")
-        : QueryParameterValue.string(filter.getValues().get(index));
+        ? QueryParameterValue.string(filter.getValues().get(index).toLowerCase() + "%")
+        : QueryParameterValue.string(filter.getValues().get(index).toLowerCase());
   }
 
   private QueryParameterValue buildQueryParameterValue(Filter filter) {
@@ -322,7 +330,8 @@ public class ReviewQueryBuilder {
     } else if (DOUBLE_NUMBERS.contains(filter.getProperty())) {
       return QueryParameterValue.array(filter.getValues().toArray(new Double[0]), Double.class);
     }
-    return QueryParameterValue.array(filter.getValues().toArray(new String[0]), String.class);
+    return QueryParameterValue.array(
+        filter.getValues().stream().map(String::toLowerCase).toArray(String[]::new), String.class);
   }
 
   private Object[] addOrderByArgs(Object[] args, PageRequest pageRequest) {

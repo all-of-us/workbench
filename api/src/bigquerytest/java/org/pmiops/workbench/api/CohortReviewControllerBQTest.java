@@ -323,8 +323,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         .sourceCode("0020")
         .sourceVocabulary("ICD9CM")
         .sourceName("Typhoid and paratyphoid fevers")
+        .standardName("Typhoid and paratyphoid fevers")
         .itemDate("2008-07-22 05:00:00 UTC")
-        .standardName("SNOMED")
         .ageAtEvent(28)
         .standardConceptId(1L)
         .sourceConceptId(1L)
@@ -348,8 +348,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         .sourceCode("0021")
         .sourceVocabulary("ICD9CM")
         .sourceName("Typhoid and paratyphoid fevers")
+        .standardName("Typhoid and paratyphoid fevers")
         .itemDate("2008-08-01 05:00:00 UTC")
-        .standardName("SNOMED")
         .ageAtEvent(28)
         .standardConceptId(1L)
         .sourceConceptId(1L)
@@ -435,8 +435,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         ImmutableList.of(
             new Filter()
                 .operator(Operator.LIKE)
-                .property(FilterColumns.STANDARD_CODE)
-                .values(ImmutableList.of("002")),
+                .property(FilterColumns.STANDARD_NAME)
+                .values(ImmutableList.of("typhoid")),
             new Filter()
                 .operator(Operator.BETWEEN)
                 .property(FilterColumns.AGE_AT_EVENT)
