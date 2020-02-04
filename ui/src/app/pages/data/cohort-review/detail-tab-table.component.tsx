@@ -107,13 +107,13 @@ const styles = reactStyles({
     color: colors.accent,
   },
   textSearch: {
-    width: '85%',
+    width: '95%',
     borderRadius: '4px',
     backgroundColor: colors.light,
     marginLeft: '5px'
   },
   textInput: {
-    width: '85%',
+    width: '75%',
     padding: '0 0 0 5px',
     border: 0,
     backgroundColor: 'transparent',
@@ -278,7 +278,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         totalCount: null,
         requestPage: 0,
         range: [0, 124],
-        tabFilterState: props.filterState.tabs[props.domain]
+        tabFilterState: JSON.parse(JSON.stringify(props.filterState.tabs[props.domain]))
       };
       this.codeInputChange = fp.debounce(300, (e) => this.filterCodes(e));
     }
@@ -301,7 +301,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           start: 0,
         }, () => this.getParticipantData(true));
       } else if (prevProps.updateState !== updateState) {
-        const tabFilterState = filterState.tabs[domain];
+        const tabFilterState = JSON.parse(JSON.stringify(filterState.tabs[domain]));
         if (lazyLoad) {
           this.setState({
             data: null,
@@ -711,7 +711,7 @@ export const DetailTabTable = withCurrentWorkspace()(
           }
           break;
         case `${vocab}Vocabulary`:
-          const vocabs = vocabOptions.getValue()[vocab];
+          const vocabs = vocabOptions.getValue() ? vocabOptions.getValue()[vocab] : {};
           options = vocabs[domain] ? vocabs[domain].map(name => {
             // return {name, count: counts[name] || 0};
             return {name};
@@ -784,24 +784,31 @@ export const DetailTabTable = withCurrentWorkspace()(
             fl.toggle(e);
             ip.focus();
           }}/>
-        <OverlayPanel style={{left: '359.531px!important'}} className='filterOverlay'
-                      ref={(el) => fl = el} showCloseIcon={true} dismissable={true}>
+        <OverlayPanel style={{left: '359.531px!important'}}
+          className='filterOverlay'
+          ref={(el) => fl = el} dismissable={true}
+          onHide={() => {
+            if (columnFilters[column] !== tabFilterState[column]) {
+              tabFilterState[column] = columnFilters[column];
+              this.setState({tabFilterState});
+            }
+          }}>
           <div style={styles.textSearch}>
-            <i className='pi pi-search' style={{margin: '0 5px'}} />
-            <input
+            <i className='pi pi-search' style={{cursor: 'default', margin: '0 5px'}} />
+            <TextInput
               ref={(i) => ip = i}
               style={styles.textInput}
               value={tabFilterState[column]}
-              onChange={(e) => {
-                tabFilterState[column] = e.target.value;
+              onChange={(v) => {
+                tabFilterState[column] = v;
                 this.setState({tabFilterState});
               }}
-              onKeyPress={e => {
-                if (e.key === Key.Enter) {
-                  this.filterText();
-                }
-              }}
+              onKeyUp={e => e.key === Key.Enter && this.filterText()}
               placeholder={'Search'} />
+            <i className='pi pi-times-circle' style={{margin: '0 5px'}} onClick={() => {
+              tabFilterState[column] = '';
+              this.setState({tabFilterState}, () => this.filterText());
+            }} />
           </div>
         </OverlayPanel>
       </React.Fragment>;
