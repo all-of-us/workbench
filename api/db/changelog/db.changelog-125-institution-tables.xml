@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="thibault" id="changelog-125-institution-tables">
+
+    <createTable tableName="institution">
+      <column name="institution_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="short_name" type="VARCHAR(80)">
+        <constraints unique="true" nullable="false"/>
+      </column>
+      <column name="display_name" type="VARCHAR(80)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="organization_type_enum" type="short">
+        <constraints nullable="true"/>
+      </column>
+      <column name="organization_type_other_text" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+    <createIndex tableName="institution" indexName="institution_short_name_idx" unique="true">
+      <column name="short_name"/>
+    </createIndex>
+
+    <createTable tableName="institution_email_domain">
+      <column name="institution_email_domain_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="institution_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_institution_email_domain" references="institution(institution_id)"/>
+      </column>
+      <column name="email_domain" type="VARCHAR(80)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <createIndex tableName="institution_email_domain" indexName="fk_institution_email_domain_idx" unique="false">
+      <column name="institution_id"/>
+    </createIndex>
+
+    <createTable tableName="institution_email_address">
+      <column name="institution_email_address_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="institution_id" type="bigint">
+        <constraints nullable="false" foreignKeyName="fk_institution_email_address" references="institution(institution_id)"/>
+      </column>
+      <column name="email_address" type="VARCHAR(80)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+    <createIndex tableName="institution_email_address" indexName="fk_institution_email_address_idx" unique="false">
+      <column name="institution_id"/>
+    </createIndex>
+
+  </changeSet>
+</databaseChangeLog>
