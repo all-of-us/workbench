@@ -2243,17 +2243,17 @@ paths:
             $ref: "#/definitions/DomainValuesResponse"
 
 
-##########################################################################################
-# Endpoints for task in cloud task queue
-# Note: all requests tagged as "cloudTask" must have the header X-AppEngine-QueueName:
-# to the queue name, which app engine itself only sets (and overrides internally) when invoking
-# cloud task. See
-# https://cloud.google.com/tasks/docs/creating-appengine-handlers#reading_app_engine_task_request_headers
-# and o.p.w.interceptors.CloudTaskInterceptor which implements the header check.
-#########################################################################################
+  ##########################################################################################
+  # Endpoints for task in cloud task queue
+  # Note: all requests tagged as "cloudTask" must have the header X-AppEngine-QueueName:
+  # to the queue name, which app engine itself only sets (and overrides internally) when invoking
+  # cloud task. See
+  # https://cloud.google.com/tasks/docs/creating-appengine-handlers#reading_app_engine_task_request_headers
+  # and o.p.w.interceptors.CloudTaskInterceptor which implements the header check.
+  #########################################################################################
 
-# Using body parameter ref ArrayOfLong instead of defining array of type long here because of
-# bug in swagger version 2.3.0 https://github.com/swagger-api/swagger-codegen/issues/6745.2.2.3
+  # Using body parameter ref ArrayOfLong instead of defining array of type long here because of
+  # bug in swagger version 2.3.0 https://github.com/swagger-api/swagger-codegen/issues/6745.2.2.3
   /v1/cloudTask/exportResearcherData:
     post:
       tags:
@@ -2284,7 +2284,7 @@ paths:
         - cloudTask
       security: []
       description: >
-         Task handler which handle request from cloud task queue rdrQueueTest to send Workspace data
+        Task handler which handle request from cloud task queue rdrQueueTest to send Workspace data
       operationId: "exportWorkspaceData"
       parameters:
         - in: body
@@ -3555,21 +3555,10 @@ definitions:
       conceptId:
         type: integer
         format: int64
-
-  SurveyAnswerResponse:
-    type: object
-    properties:
-      answer:
-        type: string
-      conceptId:
+      countValue:
+        description: Count of participants matching this concept in the CDR
         type: integer
         format: int64
-      participationCount:
-        type: integer
-        format: int64
-      percentAnswered:
-        type: number
-        format: double
 
   CreateAccountRequest:
     type: object
@@ -4279,10 +4268,10 @@ definitions:
         type: string
 
   ArrayOfLong:
-      type: array
-      items:
-        type: integer
-        format: int64
+    type: array
+    items:
+      type: integer
+      format: int64
 
   OrganizationType:
     type: string
