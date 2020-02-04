@@ -173,6 +173,8 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.zendesk.client.v2.Zendesk;
+import org.zendesk.client.v2.model.Request;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -275,7 +277,8 @@ public class WorkspacesControllerTest {
     UserRecentResourceService.class,
     ConceptService.class,
     MonitoringService.class,
-    WorkspaceAuditor.class
+    WorkspaceAuditor.class,
+    Zendesk.class
   })
   static class Configuration {
 
@@ -334,6 +337,7 @@ public class WorkspacesControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired CohortReviewController cohortReviewController;
   @Autowired ConceptBigQueryService conceptBigQueryService;
+  @Autowired Zendesk mockZendesk;
 
   private DbCdrVersion cdrVersion;
   private String cdrVersionId;
@@ -379,6 +383,8 @@ public class WorkspacesControllerTest {
     fcWorkspaceAcl = createWorkspaceACL();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
+
+    when(mockZendesk.createRequest(any())).thenReturn(new Request());
   }
 
   private DbUser createUser(String email) {
@@ -519,39 +525,37 @@ public class WorkspacesControllerTest {
     return createWorkspace("namespace", "name");
   }
 
-  // TODO(calbach): Clean up this test file to make better use of chained builders.
   private Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
-    ResearchPurpose researchPurpose = new ResearchPurpose();
-    researchPurpose.setDiseaseFocusedResearch(true);
-    researchPurpose.setDiseaseOfFocus("cancer");
-    researchPurpose.setMethodsDevelopment(true);
-    researchPurpose.setControlSet(true);
-    researchPurpose.setAncestry(true);
-    researchPurpose.setCommercialPurpose(true);
-    researchPurpose.setSocialBehavioral(true);
-    researchPurpose.setPopulationHealth(true);
-    researchPurpose.setEducational(true);
-    researchPurpose.setDrugDevelopment(true);
-    researchPurpose.setPopulation(false);
-    researchPurpose.setPopulationDetails(Collections.emptyList());
-    researchPurpose.setAdditionalNotes("additional notes");
-    researchPurpose.setReasonForAllOfUs("reason for aou");
-    researchPurpose.setIntendedStudy("intended study");
-    researchPurpose.setAnticipatedFindings("anticipated findings");
-    researchPurpose.setTimeRequested(1000L);
-    researchPurpose.setTimeReviewed(1500L);
-    researchPurpose.setReviewRequested(true);
-    researchPurpose.setApproved(false);
-    Workspace workspace = new Workspace();
-    workspace.setId(workspaceName);
-    workspace.setName(workspaceName);
-    workspace.setNamespace(workspaceNameSpace);
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
-    workspace.setResearchPurpose(researchPurpose);
-    workspace.setCdrVersionId(cdrVersionId);
-    workspace.setGoogleBucketName(BUCKET_NAME);
-    workspace.setBillingAccountName("billing-account");
-    return workspace;
+    return new Workspace()
+        .id(workspaceName)
+        .name(workspaceName)
+        .namespace(workspaceNameSpace)
+        .dataAccessLevel(DataAccessLevel.PROTECTED)
+        .cdrVersionId(cdrVersionId)
+        .googleBucketName(BUCKET_NAME)
+        .billingAccountName("billing-account")
+        .researchPurpose(
+            new ResearchPurpose()
+                .diseaseFocusedResearch(true)
+                .diseaseOfFocus("cancer")
+                .methodsDevelopment(true)
+                .controlSet(true)
+                .ancestry(true)
+                .commercialPurpose(true)
+                .socialBehavioral(true)
+                .populationHealth(true)
+                .educational(true)
+                .drugDevelopment(true)
+                .population(false)
+                .populationDetails(Collections.emptyList())
+                .additionalNotes("additional notes")
+                .reasonForAllOfUs("reason for aou")
+                .intendedStudy("intended study")
+                .anticipatedFindings("anticipated findings")
+                .timeRequested(1000L)
+                .timeReviewed(1500L)
+                .reviewRequested(true)
+                .approved(false));
   }
 
   public Cohort createDefaultCohort(String name) {
@@ -636,6 +640,8 @@ public class WorkspacesControllerTest {
             "projects/" + workspace.getNamespace(),
             new ProjectBillingInfo().setBillingAccountName("billing-account"));
     assertThat(workspace2.getBillingAccountName()).isEqualTo("billing-account");
+
+    verify(mockZendesk, times(1)).createRequest(any());
   }
 
   @Test
@@ -1075,6 +1081,8 @@ public class WorkspacesControllerTest {
     assertThat(clonedWorkspace.getNamespace()).isEqualTo(modWorkspace.getNamespace());
     assertThat(clonedWorkspace.getResearchPurpose()).isEqualTo(modPurpose);
     assertThat(clonedWorkspace.getBillingAccountName()).isEqualTo(newBillingAccountName);
+
+    verify(mockZendesk, times(1)).createRequest(any());
   }
 
   @Test
