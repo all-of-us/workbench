@@ -131,7 +131,7 @@ definitions:
         type: boolean
       otherPurposeDetails:
         type: string
-      reasonForInvestigation:
+      scientificApproaches:
         type: string
       intendToStudy:
         type: string
@@ -197,9 +197,13 @@ definitions:
         items:
           $ref: '#/definitions/Race'
       sexAtBirth:
-        $ref: '#/definitions/SexAtBirth'
-      sexualOrientation:
-        $ref: '#/definitions/SexualOrientation'
+        type: array
+        items:
+          $ref: '#/definitions/SexAtBirth'
+      identifiesAsLgbtq:
+        type: boolean
+      lgbtqIdentity:
+        type: string
       education:
         $ref: '#/definitions/Education'
       disability:
