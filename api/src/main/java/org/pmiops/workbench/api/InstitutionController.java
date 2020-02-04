@@ -1,7 +1,7 @@
-package org.pmiops.workbench.institution;
+package org.pmiops.workbench.api;
 
-import org.pmiops.workbench.api.InstitutionApiDelegate;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.GetInstitutionsResponse;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
