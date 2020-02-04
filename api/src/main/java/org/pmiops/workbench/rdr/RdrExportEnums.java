@@ -64,7 +64,7 @@ public class RdrExportEnums {
                   SexAtBirth.PREFER_NO_ANSWER,
                   org.pmiops.workbench.rdr.model.SexAtBirth.PREFER_NOT_TO_ANSWER)
               .build();
-  
+
   private static final BiMap<Disability, org.pmiops.workbench.rdr.model.Disability>
       CLIENT_TO_RDR_DISABILITY =
           ImmutableBiMap.<Disability, org.pmiops.workbench.rdr.model.Disability>builder()
