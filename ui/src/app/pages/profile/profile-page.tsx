@@ -18,6 +18,7 @@ import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
+import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 
 const styles = reactStyles({
   h1: {
@@ -96,7 +97,8 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     this.setState({updating: true});
 
     try {
-      await profileApi().updateProfile(this.state.profileEdits);
+      await fetchWithGlobalErrorHandler(() => profileApi().updateProfile(this.state.profileEdits),
+        /* maxRetries */ 1);
       await reload();
     } catch (e) {
       console.error(e);
@@ -138,7 +140,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
       const inputProps = {
         value: fp.get(valueKey, profileEdits) || '',
         onChange: v => this.setState(fp.set(['profileEdits', ...valueKey], v)),
-        invalid: !!errorText,
+        invalid: String(!!errorText),
         ...props
       };
 

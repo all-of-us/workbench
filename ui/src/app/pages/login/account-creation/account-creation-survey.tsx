@@ -23,6 +23,7 @@ import {
 import {toggleIncludes} from 'app/utils';
 import * as validate from 'validate.js';
 import {AccountCreationOptions} from './account-creation-options';
+import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 
 
 const styles = {
@@ -97,17 +98,22 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     };
   }
 
-  createAccount(): void {
+  async createAccount() {
     const {invitationKey, setProfile} = this.props;
     this.setState({creatingAccount: true});
-    profileApi().createAccount({profile: this.profileObj, invitationKey: invitationKey})
-      .then((savedProfile) => {
-        this.setState({profile: savedProfile, creatingAccount: false});
-        setProfile(savedProfile, {stepName: 'accountCreationSuccess', backgroundImages: signedOutImages.login});
-      }).catch(error => {
-        console.log(error);
-        this.setState({creatingAccount: false});
-      });
+    try {
+      console.log('Attempting account creation');
+      await fetchWithGlobalErrorHandler(() => profileApi().createAccount({profile: this.profileObj, invitationKey: invitationKey})
+        .then((savedProfile) => {
+          this.setState({profile: savedProfile, creatingAccount: false});
+          setProfile(savedProfile, {stepName: 'accountCreationSuccess', backgroundImages: signedOutImages.login});
+        }), 1);
+    } catch (e) {
+      console.log('Exception', e);
+    } finally {
+      console.log('Finished');
+      this.setState({creatingAccount: false});
+    }
   }
 
   updateList(attribute, value) {
