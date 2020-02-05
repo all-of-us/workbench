@@ -162,6 +162,8 @@ interface State { // Browse survey
   conceptsSavedText: string;
   // Array of surveys
   conceptSurveysList: Array<SurveyModule>;
+  // True if the domainCounts call fails
+  countsError: boolean;
   // Current string in search box
   currentInputString: string;
   // Last string that was searched
@@ -208,6 +210,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         conceptsCache: [],
         conceptsSavedText: '',
         conceptSurveysList: [],
+        countsError: false,
         currentInputString: '',
         currentSearchString: '',
         domainErrors: [],
@@ -249,6 +252,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
           name: domain.name,
           conceptCount: 0
         }));
+        // Add DomainCount for Surveys tab
+        conceptDomainCounts.push({domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0});
         if (!environment.enableNewConceptTabs) {
           // Don't show Physical Measurements tile or tab if feature flag disabled
           conceptsCache = conceptsCache.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
@@ -318,7 +323,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
       const {standardConceptsOnly, currentSearchString, conceptsCache, selectedDomain, selectedConceptDomainMap, selectedSurvey}
         = this.state;
       const {namespace, id} = this.props.workspace;
-      this.setState({concepts: [], searchLoading: true, searching: true, completedDomainSearches: [], domainErrors: []});
+      this.setState({completedDomainSearches: [], concepts: [], countsError: false,
+        domainErrors: [], searchLoading: true, searching: true});
       const standardConceptFilter = standardConceptsOnly ? StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
       const completedDomainSearches = [];
       const request = {query: currentSearchString, standardConceptFilter: standardConceptFilter, maxResults: this.MAX_CONCEPT_FETCH};
@@ -331,6 +337,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
           ? counts.domainCounts.filter(dc => dc.domain !== Domain.PHYSICALMEASUREMENT)
           : counts.domainCounts;
         this.setState({conceptDomainCounts: conceptDomainCounts});
+      }).catch(error => {
+        console.error(error);
+        this.setState({countsError: true});
       });
       conceptsCache.forEach(async(cacheItem) => {
         selectedConceptDomainMap[cacheItem.domain] = [];
@@ -435,8 +444,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     renderConcepts() {
-      const {concepts, domainErrors, searchLoading, conceptDomainCounts, selectedDomain, selectedConceptDomainMap} = this.state;
-
+      const {conceptDomainCounts, concepts, countsError, domainErrors, searchLoading,
+        selectedDomain, selectedConceptDomainMap} = this.state;
+      const domainError = domainErrors.includes(selectedDomain.domain);
       return <React.Fragment>
         <button style={styles.backBtn} type='button' onClick={() => this.setState({searching: false, selectedSurvey: ''})}>
           &lt; Back to Concept Set Homepage
@@ -444,16 +454,20 @@ export const ConceptHomepage = withCurrentWorkspace()(
         <FadeBox>
           <FlexRow style={{justifyContent: 'flex-start'}}>
             {conceptDomainCounts.map((domain) => {
+              const tabError = countsError || domainErrors.includes(domain.domain);
               return <FlexColumn key={domain.name}>
                 <Clickable style={styles.domainHeaderLink}
                            onClick={() => this.selectDomain(domain)}
                            disabled={this.domainLoading(domain)}
                            data-test-id={'domain-header-' + domain.name}>
-                  <div style={{fontSize: '16px'}}>{domain.name}</div>
+                  <div style={{fontSize: '16px'}}>
+                    {domain.name}
+                    {tabError && <ClrIcon style={{color: colors.warning}} className='is-solid' shape='exclamation-triangle' size='22'/>}
+                  </div>
                   {this.domainLoading(domain) ?
                       <Spinner style={{height: '15px', width: '15px'}}/> :
                       <FlexRow style={{justifyContent: 'space-between'}}>
-                        <div>{domain.conceptCount.toLocaleString()}</div>
+                        {!tabError && <div>{domain.conceptCount.toLocaleString()}</div>}
                         {(selectedConceptDomainMap && selectedConceptDomainMap[domain.domain].length > 0) &&
                         <div style={styles.selectedConceptsCount} data-test-id='selectedConcepts'>
                           {selectedConceptDomainMap[domain.domain].length}
@@ -467,7 +481,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
               </FlexColumn>;
             })}
           </FlexRow>
-          {!searchLoading && selectedDomain.conceptCount > 1000 && !domainErrors.includes(selectedDomain.domain) &&
+          {!searchLoading && selectedDomain.conceptCount > 1000 && !domainError &&
             <div style={styles.conceptCounts}>Showing top {concepts.length} {selectedDomain.name}</div>
           }
           <ConceptTable concepts={concepts}
@@ -478,7 +492,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
                         searchTerm={this.state.currentSearchString}
                         selectedConcepts={selectedConceptDomainMap[selectedDomain.domain]}
                         reactKey={selectedDomain.name}
-                        error={domainErrors.includes(selectedDomain.domain)}/>
+                        error={domainError}/>
           <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
                            iconShape='plus'
                            tooltip={!this.state.workspacePermissions.canWrite}

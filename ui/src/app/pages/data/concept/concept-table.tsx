@@ -197,7 +197,6 @@ export class ConceptTable extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps) {
-    console.log(this.props.concepts);
     if (this.state.selectedConcepts !== this.props.selectedConcepts) {
       // when parent has updated a set with selected concepts, unselect them from table
       this.setState({selectedConcepts: this.props.selectedConcepts});
