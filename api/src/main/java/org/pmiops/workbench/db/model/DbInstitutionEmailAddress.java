@@ -58,7 +58,9 @@ public class DbInstitutionEmailAddress {
     if (!institution.equals(that.institution)) {
       return false;
     }
-    return emailAddress.equals(that.emailAddress);
+    return institutionEmailAddressId == that.institutionEmailAddressId 
+           && institution.equals(that.institution)
+           && emailAddress.equals(that.emailAddress);
   }
 
   @Override
