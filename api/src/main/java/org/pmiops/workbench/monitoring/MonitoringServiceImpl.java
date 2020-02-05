@@ -16,7 +16,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import org.jetbrains.annotations.NotNull;
-import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.monitoring.views.Metric;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,17 +51,13 @@ public class MonitoringServiceImpl implements MonitoringService {
   }
 
   /**
-   * We don't want to register LogsBasedMetric enum values with OpenCensus.
-   * It makes it confusing ot see custom.googleapis.com/metric_name in addition to
-   * logging/user/metric_name.
+   * We don't want to register LogsBasedMetric enum values with OpenCensus. It makes it confusing ot
+   * see custom.googleapis.com/metric_name in addition to logging/user/metric_name.
    * TODO(jaycarlton): restore event metrics here once OpenCensus is working
    */
   private void registerMetricViews() {
     StreamSupport.stream(
-            Iterables.concat(
-                    Arrays.<Metric>asList(GaugeMetric.values()))
-                .spliterator(),
-            false)
+            Iterables.concat(Arrays.<Metric>asList(GaugeMetric.values())).spliterator(), false)
         .map(Metric::toView)
         .forEach(viewManager::registerView);
   }

@@ -23,7 +23,6 @@ import org.pmiops.workbench.google.GoogleCloudLocators;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
-import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;

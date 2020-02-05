@@ -117,13 +117,16 @@ public class LogsBasedMetricsServiceTest {
     assertThat(logEntry.getResource()).isEqualTo(MONITORED_RESOURCE);
     assertThat(logEntry.getSeverity()).isEqualTo(Severity.INFO);
 
-    final ImmutableSet<String> metricNames = sentEntries.stream()
-        .map(e -> (JsonPayload) e.getPayload())
-        .map(JsonPayload::getDataAsMap)
-        .map(m -> (String) m.get(LogsBasedMetricService.METRIC_NAME_KEY))
-        .filter(Objects::nonNull)
-        .collect(ImmutableSet.toImmutableSet());
-    assertThat(metricNames).containsAllIn(ImmutableSet.of(EventMetric.NOTEBOOK_CLONE.getName(),
-        EventMetric.NOTEBOOK_DELETE.getName()));
+    final ImmutableSet<String> metricNames =
+        sentEntries.stream()
+            .map(e -> (JsonPayload) e.getPayload())
+            .map(JsonPayload::getDataAsMap)
+            .map(m -> (String) m.get(LogsBasedMetricService.METRIC_NAME_KEY))
+            .filter(Objects::nonNull)
+            .collect(ImmutableSet.toImmutableSet());
+    assertThat(metricNames)
+        .containsAllIn(
+            ImmutableSet.of(
+                EventMetric.NOTEBOOK_CLONE.getName(), EventMetric.NOTEBOOK_DELETE.getName()));
   }
 }

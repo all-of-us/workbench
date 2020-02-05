@@ -7,9 +7,7 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.utils.Booleans;
 import org.pmiops.workbench.utils.Enums;
 
-/**
- * Specifies label names and allowed discrete values (if given)
- */
+/** Specifies label names and allowed discrete values (if given) */
 public enum MetricLabel implements MetricLabelBase {
   BUFFER_ENTRY_STATUS("BufferEntryStatus", Enums.getValueStrings(BufferEntryStatus.class)),
   CRON_JOB_NAME("cron_job_name"),

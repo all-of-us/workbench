@@ -6,11 +6,12 @@ import io.opencensus.stats.Measure.MeasureLong;
 import java.util.Collections;
 import java.util.List;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
-import org.pmiops.workbench.utils.Enums;
 
 /** Metric enum values for events to be counted. */
 public enum EventMetric implements Metric {
-  CRON_JOB_END("cron_job_complete", "Cron job finishes",
+  CRON_JOB_END(
+      "cron_job_complete",
+      "Cron job finishes",
       ImmutableList.of(MetricLabel.CRON_JOB_SUCCEEDED, MetricLabel.CRON_JOB_NAME)),
   NOTEBOOK_CLONE("notebook_clone_2", "Clone (duplicate) a notebook"),
   NOTEBOOK_DELETE("notebook_delete_2", "Delete a notebook"),

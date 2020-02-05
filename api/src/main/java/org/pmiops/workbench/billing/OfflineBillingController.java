@@ -41,11 +41,12 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
     // TODO(jaycarlton) we're going to need a richer framework for cron reporting,
     // possibly from the client side. This is just an example to make sure labels work.
     // It would be massively awkward to put a try/catch around every job just for error reporting.
-    logsBasedMetricService.record(MeasurementBundle.builder()
-      .addEvent(EventMetric.CRON_JOB_END)
-      .addTag(MetricLabel.CRON_JOB_NAME, "bufferBillingProjects")
-      .addTag(MetricLabel.CRON_JOB_SUCCEEDED, Boolean.valueOf(true).toString())
-      .build());
+    logsBasedMetricService.record(
+        MeasurementBundle.builder()
+            .addEvent(EventMetric.CRON_JOB_END)
+            .addTag(MetricLabel.CRON_JOB_NAME, "bufferBillingProjects")
+            .addTag(MetricLabel.CRON_JOB_SUCCEEDED, Boolean.valueOf(true).toString())
+            .build());
     // TODO(jaycarlton): record completion time as a distribution metric
     return ResponseEntity.noContent().build();
   }

@@ -22,10 +22,10 @@ public interface LogsBasedMetricService {
 
   /**
    * Record a simple event (count) metric with a value of 1 and no labels
+   *
    * @param eventMetric
    */
   default void recordEvent(EventMetric eventMetric) {
-    record(MeasurementBundle.builder()
-    .addEvent(eventMetric).build());
+    record(MeasurementBundle.builder().addEvent(eventMetric).build());
   }
 }
