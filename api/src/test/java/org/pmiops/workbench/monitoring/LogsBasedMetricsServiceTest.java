@@ -11,8 +11,10 @@ import com.google.cloud.logging.Payload.JsonPayload;
 import com.google.cloud.logging.Payload.Type;
 import com.google.cloud.logging.Severity;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.junit.Before;
@@ -22,7 +24,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
-import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
+import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -63,7 +66,7 @@ public class LogsBasedMetricsServiceTest {
             .addTag(MetricLabel.DATA_ACCESS_LEVEL, DataAccessLevel.PROTECTED.toString())
             .addTag(MetricLabel.WORKSPACE_ACTIVE_STATUS, WorkspaceActiveStatus.ACTIVE.toString())
             .build();
-    logsBasedMetricService.recordMeasurementBundle(gaugeMeasurement);
+    logsBasedMetricService.record(gaugeMeasurement);
     verify(mockLogging).write(logEntriesCaptor.capture());
     List<LogEntry> sentEntries =
         StreamSupport.stream(logEntriesCaptor.getValue().spliterator(), false)
@@ -93,5 +96,34 @@ public class LogsBasedMetricsServiceTest {
     assertThat(labelToValue).hasSize(2);
     assertThat(labelToValue.get(MetricLabel.DATA_ACCESS_LEVEL.getName()))
         .isEqualTo(DataAccessLevel.PROTECTED.toString());
+  }
+
+  @Test
+  public void testRecord_handlesMultipleMeasurements() {
+    final MeasurementBundle measurements =
+        MeasurementBundle.builder()
+            .addEvent(EventMetric.NOTEBOOK_CLONE)
+            .addEvent(EventMetric.NOTEBOOK_DELETE)
+            .build();
+    logsBasedMetricService.record(measurements);
+    verify(mockLogging).write(logEntriesCaptor.capture());
+    List<LogEntry> sentEntries =
+        StreamSupport.stream(logEntriesCaptor.getValue().spliterator(), false)
+            .collect(Collectors.toList());
+    assertThat(sentEntries).hasSize(2);
+
+    final LogEntry logEntry = sentEntries.get(0);
+    assertThat(logEntry.getPayload().getType()).isEqualTo(Type.JSON);
+    assertThat(logEntry.getResource()).isEqualTo(MONITORED_RESOURCE);
+    assertThat(logEntry.getSeverity()).isEqualTo(Severity.INFO);
+
+    final ImmutableSet<String> metricNames = sentEntries.stream()
+        .map(e -> (JsonPayload) e.getPayload())
+        .map(JsonPayload::getDataAsMap)
+        .map(m -> (String) m.get(LogsBasedMetricService.METRIC_NAME_KEY))
+        .filter(Objects::nonNull)
+        .collect(ImmutableSet.toImmutableSet());
+    assertThat(metricNames).containsAllIn(ImmutableSet.of(EventMetric.NOTEBOOK_CLONE.getName(),
+        EventMetric.NOTEBOOK_DELETE.getName()));
   }
 }

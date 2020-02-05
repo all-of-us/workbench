@@ -51,11 +51,16 @@ public class MonitoringServiceImpl implements MonitoringService {
     stackdriverStatsExporterService.createAndRegister();
   }
 
+  /**
+   * We don't want to register LogsBasedMetric enum values with OpenCensus.
+   * It makes it confusing ot see custom.googleapis.com/metric_name in addition to
+   * logging/user/metric_name.
+   * TODO(jaycarlton): restore event metrics here once OpenCensus is working
+   */
   private void registerMetricViews() {
     StreamSupport.stream(
             Iterables.concat(
-                    Arrays.<Metric>asList(GaugeMetric.values()),
-                    Arrays.<Metric>asList(EventMetric.values()))
+                    Arrays.<Metric>asList(GaugeMetric.values()))
                 .spliterator(),
             false)
         .map(Metric::toView)

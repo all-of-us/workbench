@@ -22,6 +22,7 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.GoogleCloudLocators;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -72,7 +73,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   private final Provider<DbUser> userProvider;
   private final UserRecentResourceService userRecentResourceService;
   private final WorkspaceService workspaceService;
-  private MonitoringService monitoringService;
+  private final LogsBasedMetricService logsBasedMetricService;
 
   @Autowired
   public NotebooksServiceImpl(
@@ -82,14 +83,14 @@ public class NotebooksServiceImpl implements NotebooksService {
       Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceService workspaceService,
-      MonitoringService monitoringService) {
+      LogsBasedMetricService logsBasedMetricService) {
     this.clock = clock;
     this.cloudStorageService = cloudStorageService;
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.workspaceService = workspaceService;
-    this.monitoringService = monitoringService;
+    this.logsBasedMetricService = logsBasedMetricService;
   }
 
   @Override
@@ -168,7 +169,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             workspaceNamespace,
             workspaceName,
             newName);
-    monitoringService.recordEvent(EventMetric.NOTEBOOK_CLONE);
+    logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_CLONE);
     return copiedNotebookFileDetail;
   }
 
@@ -181,7 +182,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         workspaceService.getRequired(workspaceNamespace, workspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
         notebookLocators.fullPath);
-    monitoringService.recordEvent(EventMetric.NOTEBOOK_DELETE);
+    logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_DELETE);
   }
 
   @Override
@@ -224,7 +225,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         bucketName,
         "notebooks/" + NotebooksService.withNotebookExtension(notebookName),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));
-    monitoringService.recordEvent(EventMetric.NOTEBOOK_SAVE);
+    logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
 
   @Override

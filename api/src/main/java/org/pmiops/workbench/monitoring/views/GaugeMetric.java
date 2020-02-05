@@ -6,7 +6,7 @@ import io.opencensus.stats.Aggregation.LastValue;
 import io.opencensus.stats.Measure.MeasureLong;
 import java.util.Collections;
 import java.util.List;
-import org.pmiops.workbench.monitoring.attachments.MetricLabel;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
 
 public enum GaugeMetric implements Metric {
   BILLING_BUFFER_PROJECT_COUNT(

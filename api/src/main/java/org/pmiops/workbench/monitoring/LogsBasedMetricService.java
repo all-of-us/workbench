@@ -1,5 +1,7 @@
 package org.pmiops.workbench.monitoring;
 
+import org.pmiops.workbench.monitoring.views.EventMetric;
+
 public interface LogsBasedMetricService {
 
   String METRIC_VALUE_KEY = "data_point_value";
@@ -16,5 +18,14 @@ public interface LogsBasedMetricService {
    * @param measurementBundle - Bundle of one or more measurements corresonding to the same labels
    *     map
    */
-  void recordMeasurementBundle(MeasurementBundle measurementBundle);
+  void record(MeasurementBundle measurementBundle);
+
+  /**
+   * Record a simple event (count) metric with a value of 1 and no labels
+   * @param eventMetric
+   */
+  default void recordEvent(EventMetric eventMetric) {
+    record(MeasurementBundle.builder()
+    .addEvent(eventMetric).build());
+  }
 }

@@ -29,12 +29,12 @@ public class LogsBasedMetricServiceImpl implements LogsBasedMetricService {
   }
 
   @Override
-  public void recordMeasurementBundle(MeasurementBundle measurementBundle) {
+  public void record(MeasurementBundle measurementBundle) {
     final ImmutableSet<LogEntry> logEntries =
         measurementBundleToJsonPayloads(measurementBundle).stream()
             .map(this::payloadToLogEntry)
             .collect(ImmutableSet.toImmutableSet());
-    // This list will never be empty because of the validation in the MeasurementBUndle builder
+    // This list will never be empty because of the validation in the MeasurementBundle builder
     logging.write(logEntries);
   }
 

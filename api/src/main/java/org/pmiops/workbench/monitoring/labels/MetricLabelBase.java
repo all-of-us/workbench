@@ -1,4 +1,4 @@
-package org.pmiops.workbench.monitoring.attachments;
+package org.pmiops.workbench.monitoring.labels;
 
 import io.opencensus.tags.TagKey;
 import java.util.Set;

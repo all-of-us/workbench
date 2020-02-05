@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.pmiops.workbench.monitoring.attachments.MetricLabel;
-import org.pmiops.workbench.monitoring.attachments.MetricLabelBase;
+import org.pmiops.workbench.monitoring.labels.MetricLabel;
+import org.pmiops.workbench.monitoring.labels.MetricLabelBase;
 
 /**
  * This is essentially a carbon copy of io.opencensus.stats.View, but written as an interface
