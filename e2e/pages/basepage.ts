@@ -1,4 +1,4 @@
-import {JSHandle, Page} from 'puppeteer-core';
+import {JSHandle, Page} from 'puppeteer';
 
 export default class BasePage {
 

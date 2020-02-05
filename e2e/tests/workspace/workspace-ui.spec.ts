@@ -61,7 +61,6 @@ describe('Workspace-editing page', () => {
     await page.evaluate(elem => elem.click(), diseaseNameCheckbox);
     // TODO wait async for checked and disabled checking or test will fail
     await page.waitFor(1000);
-    await workspaces.takeScreenshot('CreateNewWorkspacePagechecking');
     expect(await getProperty(page, await elementDiseaseName.checkbox(), 'checked')).toBeTruthy();
     expect(await getProperty(page, await elementDiseaseName.checkbox(), 'disabled')).toBeFalsy();
 
@@ -98,8 +97,6 @@ describe('Workspace-editing page', () => {
         .then(elem => elem.getProperty('checked'))
         .then(elemhandle => elemhandle.jsonValue())
     ).toBeTruthy();
-
-    await workspaces.takeScreenshot('CreateNewWorkspacePage');
 
   }, 60 * 1000);
 

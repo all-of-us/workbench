@@ -1,4 +1,4 @@
-import {ElementHandle, JSHandle} from 'puppeteer-core';import {Page} from 'puppeteer-core';
+import {ElementHandle, JSHandle} from 'puppeteer';import {Page} from 'puppeteer';
 import Widget from './widget';
 
 export default class Component extends Widget {

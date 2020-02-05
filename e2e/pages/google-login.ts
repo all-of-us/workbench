@@ -1,4 +1,4 @@
-import {ElementHandle, Page} from 'puppeteer-core';
+import {ElementHandle, Page} from 'puppeteer';
 import {waitForNavigation} from '../services/page-wait';
 
 const configs = require('../config/config');

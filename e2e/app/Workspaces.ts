@@ -1,4 +1,4 @@
-import {ElementHandle, JSHandle} from 'puppeteer-core';
+import {ElementHandle, JSHandle} from 'puppeteer';
 import authenticatedpage from '../pages/authenticatedpage';
 import Button from '../pages/elements/button';
 import Checkbox from '../pages/elements/checkbox';

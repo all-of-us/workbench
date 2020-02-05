@@ -1,4 +1,4 @@
-import {Page} from 'puppeteer-core';
+import {Page} from 'puppeteer';
 
 /**
  * Click on element found by specified xpath selector.

@@ -1,4 +1,4 @@
-import {Page} from 'puppeteer-core';
+import {Page} from 'puppeteer';
 import BasePage from './basepage';
 import NavigationMenu from './mixin/navigationmenu';
 

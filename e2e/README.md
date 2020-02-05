@@ -1,21 +1,18 @@
-# All-of-Us Test Automation with Puppeteer
-Test using Jest as test runner and Puppeteer to perform automation tests in local installed Chrome browser.
+# All-of-Us Test Automation with Puppeteer in Chrome
 
-### Try running tests in localhost
-#### clone github project
+#### Clone github project
 - `git clone git@github.com:all-of-us/workbench.git`
 
-#### set up login credential
+#### Set up login credential
 - copy `.env.sample` file. Save new file as `.env` (do not commit `.env` file to version control)
 - edit `.env` to provide workbench login credential
-- 
 
-#### install libraries
-- change dir: `cd puppeteer-test`
-- run cmd `yarn`
+#### install node libraries
+- change dir: `cd e2e`
+- run cmd `yarn` or `yarn install`
 
-### Run UI tests in `tests` folder
-- in `puppeteer-test` dir, run cmd `yarn test`
+### Try run all tests in `tests` folder on localhost
+- in `e2e` dir, run cmd `yarn test`
 
 #### List all available `yarn` tasks from `package.json`
 - `yarn run`
@@ -26,5 +23,3 @@ Test using Jest as test runner and Puppeteer to perform automation tests in loca
     * Set default jest test timeout: `jest.setTimeout(300000);`
     * Add `await page.evaluate(() => {debugger;});` to where you want to pause the playback
 * Starting test
-
-

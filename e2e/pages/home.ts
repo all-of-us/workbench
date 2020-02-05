@@ -1,4 +1,4 @@
-import {ElementHandle} from 'puppeteer-core';
+import {ElementHandle} from 'puppeteer';
 import * as xpathHandler from '../services/xpath-handler';
 import AuthenticatedPage from './authenticatedpage';
 

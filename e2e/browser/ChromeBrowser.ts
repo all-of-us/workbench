@@ -1,5 +1,4 @@
-import * as chromePaths from 'chrome-paths';
-import * as Puppeteer from 'puppeteer-core';
+import * as Puppeteer from 'puppeteer';
 import GoogleLoginPage from '../pages/google-login';
 
 const configs = require('../config/config');
@@ -17,12 +16,12 @@ export default class ChromeBrowser {
   ];
 
   public launchOpts = {
-    headless: configs.isHeadless,
+    headless: configs.isHeadless === true,
     devtools: false,
-    slowMo: 50,
-    executablePath: chromePaths.chrome,
+    slowMo: 10,
     defaultViewport: null,
-    args: this.chromeSwitches
+    args: this.chromeSwitches,
+    ignoreDefaultArgs: ['--disable-extensions']
   };
 
   public userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36';
@@ -41,7 +40,6 @@ export default class ChromeBrowser {
   }
 
   public async newPage(browser?: Puppeteer.Browser): Promise<Puppeteer.Page> {
-    console.log("isHeadless: " + configs.isHeadless);
     const br = browser || await this.newBrowser();
     if (this.incognito) {
       const incognitoContext = await br.createIncognitoBrowserContext();

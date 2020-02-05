@@ -1,4 +1,4 @@
-import {Page} from 'puppeteer-core';
+import {Page} from 'puppeteer';
 import {getAttribute, getProperty} from '../../services/element-handler';
 import * as elementHandler from '../../services/element-handler';
 import Widget from './widget';

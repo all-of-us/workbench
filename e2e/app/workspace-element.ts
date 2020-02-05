@@ -1,4 +1,4 @@
-import {ElementHandle, Page} from 'puppeteer-core';
+import {ElementHandle, Page} from 'puppeteer';
 import Widget from '../pages/elements/widget';
 
 // If element CSS/XPath selectors are used frequently, put it there.

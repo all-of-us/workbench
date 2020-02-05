@@ -1,6 +1,6 @@
 import * as chromePaths from 'chrome-paths';
-import * as Puppeteer from 'puppeteer-core';
-import {Browser} from 'puppeteer-core';
+import * as Puppeteer from 'puppeteer';
+import {Browser} from 'puppeteer';
 
 const defaultLaunchOpts = {
   headless: true,
