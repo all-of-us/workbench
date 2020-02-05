@@ -86,7 +86,7 @@ const domainColumns = [
     bodyStyle: styles.colStyle,
     className: 'divider',
     field: 'countValue',
-    header: 'Count',
+    header: 'Participant Count',
     headerStyle: styles.headerStyle,
     selectionMode: null,
     testId: null
@@ -300,7 +300,7 @@ export class ConceptTable extends React.Component<Props, State> {
         bodyStyle: {...styles.colStyle},
         className: 'divider',
         field: 'countValue',
-        header: 'Count',
+        header: 'Participant Count',
         headerStyle: {...styles.headerStyle, width: '20%'},
         selectionMode: null,
         testId: null
