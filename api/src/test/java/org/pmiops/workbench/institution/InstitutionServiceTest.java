@@ -29,7 +29,7 @@ public class InstitutionServiceTest {
 
     final Institution inst = new Institution().shortName("test").displayName("this is a test");
     assertThat(service.createInstitution(inst)).isEqualTo(inst);
-    assertThat(service.getInstitution(inst.getShortName())).isEqualTo(Optional.of(inst));
+    assertThat(service.getInstitution(inst.getShortName())).hasValue(inst);
 
     final List<Institution> institutions = service.getInstitutions();
     assertThat(institutions).hasSize(1);
@@ -37,9 +37,8 @@ public class InstitutionServiceTest {
 
     final Institution modifiedInst =
         new Institution().shortName(inst.getShortName()).displayName("I have altered the test");
-    assertThat(service.updateInstitution(inst.getShortName(), modifiedInst))
-        .isEqualTo(Optional.of(modifiedInst));
-    assertThat(service.getInstitution(inst.getShortName())).isEqualTo(Optional.of(modifiedInst));
+    assertThat(service.updateInstitution(inst.getShortName(), modifiedInst)).hasValue(modifiedInst);
+    assertThat(service.getInstitution(inst.getShortName())).hasValue(modifiedInst);
 
     service.deleteInstitution(inst.getShortName());
     assertThat(service.getInstitutions()).isEmpty();

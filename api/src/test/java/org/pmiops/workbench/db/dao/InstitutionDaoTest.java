@@ -23,7 +23,7 @@ public class InstitutionDaoTest {
   public void testDao() {
     DbInstitution testInst = new DbInstitution("Broad", "The Broad Institute");
     testInst = institutionDao.save(testInst);
-    assertThat(institutionDao.findOneByShortName("Broad")).isEqualTo(Optional.of(testInst));
+    assertThat(institutionDao.findOneByShortName("Broad")).hasValue(testInst);
     assertThat(institutionDao.findAll()).hasSize(1);
 
     // update existing entity, don't change size
@@ -31,12 +31,12 @@ public class InstitutionDaoTest {
     testInst.setShortName("Verily");
     testInst = institutionDao.save(testInst);
     assertThat(institutionDao.findAll()).hasSize(1);
-    assertThat(institutionDao.findOneByShortName("Verily")).isEqualTo(Optional.of(testInst));
+    assertThat(institutionDao.findOneByShortName("Verily")).hasValue(testInst);
 
     testInst.setDisplayName("Yea, Verily");
     testInst = institutionDao.save(testInst);
     assertThat(institutionDao.findAll()).hasSize(1);
-    assertThat(institutionDao.findOneByShortName("Verily")).isEqualTo(Optional.of(testInst));
+    assertThat(institutionDao.findOneByShortName("Verily")).hasValue(testInst);
 
     institutionDao.save(new DbInstitution("VUMC", "Vanderbilt"));
     assertThat(institutionDao.findAll()).hasSize(2);
