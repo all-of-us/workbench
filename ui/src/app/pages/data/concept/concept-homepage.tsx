@@ -170,6 +170,8 @@ interface State { // Browse survey
   currentSearchString: string;
   // List of domains where the search api call failed
   domainErrors: Domain[];
+  // True if the getDomainInfo call fails
+  domainInfoError: boolean;
   // If concept metadata is still being gathered for any domain
   loadingDomains: boolean;
   // If we are still searching concepts and should show a spinner on the table
@@ -190,6 +192,8 @@ interface State { // Browse survey
   standardConceptsOnly: boolean;
   // Open modal to add survey questions to concept set
   surveyAddModalOpen: boolean;
+  // True if the getSurveyInfo call fails
+  surveyInfoError: boolean;
   workspacePermissions: WorkspacePermissions;
 }
 
@@ -203,7 +207,6 @@ export const ConceptHomepage = withCurrentWorkspace()(
         browsingSurvey: false,
         completedDomainSearches: [],
         conceptAddModalOpen: false,
-        surveyAddModalOpen: false,
         conceptDomainCounts: [],
         conceptDomainList: [],
         concepts: [],
@@ -214,20 +217,19 @@ export const ConceptHomepage = withCurrentWorkspace()(
         currentInputString: '',
         currentSearchString: '',
         domainErrors: [],
+        domainInfoError: false,
         loadingDomains: true,
         searchLoading: false,
         searching: false,
         selectedConceptDomainMap: new Map<string, Concept[]>(),
-        selectedDomain: {
-          name: '',
-          domain: undefined,
-          conceptCount: 0
-        },
+        selectedDomain: {name: '', domain: undefined, conceptCount: 0},
+        selectedSurvey: '',
+        selectedSurveyQuestions: [],
         showSearchError: false,
         standardConceptsOnly: true,
+        surveyAddModalOpen: false,
+        surveyInfoError: false,
         workspacePermissions: new WorkspacePermissions(props.workspace),
-        selectedSurvey: '',
-        selectedSurveyQuestions: []
       };
     }
 
