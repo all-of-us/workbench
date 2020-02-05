@@ -166,6 +166,8 @@ interface State { // Browse survey
   currentInputString: string;
   // Last string that was searched
   currentSearchString: string;
+  // List of domains where the search api call failed
+  domainErrors: Domain[];
   // If concept metadata is still being gathered for any domain
   loadingDomains: boolean;
   // If we are still searching concepts and should show a spinner on the table
@@ -208,6 +210,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
         conceptSurveysList: [],
         currentInputString: '',
         currentSearchString: '',
+        domainErrors: [],
         loadingDomains: true,
         searchLoading: false,
         searching: false,
@@ -315,7 +318,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
       const {standardConceptsOnly, currentSearchString, conceptsCache, selectedDomain, selectedConceptDomainMap, selectedSurvey}
         = this.state;
       const {namespace, id} = this.props.workspace;
-      this.setState({concepts: [], searchLoading: true, searching: true, completedDomainSearches: []});
+      this.setState({concepts: [], searchLoading: true, searching: true, completedDomainSearches: [], domainErrors: []});
       const standardConceptFilter = standardConceptsOnly ? StandardConceptFilter.STANDARDCONCEPTS : StandardConceptFilter.ALLCONCEPTS;
       const completedDomainSearches = [];
       const request = {query: currentSearchString, standardConceptFilter: standardConceptFilter, maxResults: this.MAX_CONCEPT_FETCH};
@@ -333,10 +336,21 @@ export const ConceptHomepage = withCurrentWorkspace()(
         selectedConceptDomainMap[cacheItem.domain] = [];
         const activeTabSearch = cacheItem.domain === selectedDomain.domain;
         if (cacheItem.domain === Domain.SURVEY) {
-          await conceptsApi().searchSurveys(namespace, id, request).then(resp => cacheItem.items = resp);
+          await conceptsApi().searchSurveys(namespace, id, request)
+            .then(resp => cacheItem.items = resp)
+            .catch(error => {
+              console.error(error);
+              const {domainErrors} = this.state;
+              this.setState({domainErrors: [...domainErrors, Domain.SURVEY]});
+            });
         } else {
           await conceptsApi().searchConcepts(namespace, id, {...request, domain: cacheItem.domain})
-            .then(resp => cacheItem.items = resp.items);
+            .then(resp => cacheItem.items = resp.items)
+            .catch(error => {
+              console.error(error);
+              const {domainErrors} = this.state;
+              this.setState({domainErrors: [...domainErrors, cacheItem.domain]});
+            });
         }
         completedDomainSearches.push(cacheItem.domain);
         this.setState({completedDomainSearches: completedDomainSearches});
@@ -421,7 +435,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     renderConcepts() {
-      const {concepts, searchLoading, conceptDomainCounts, selectedDomain, selectedConceptDomainMap} = this.state;
+      const {concepts, domainErrors, searchLoading, conceptDomainCounts, selectedDomain, selectedConceptDomainMap} = this.state;
 
       return <React.Fragment>
         <button style={styles.backBtn} type='button' onClick={() => this.setState({searching: false, selectedSurvey: ''})}>
@@ -453,9 +467,9 @@ export const ConceptHomepage = withCurrentWorkspace()(
               </FlexColumn>;
             })}
           </FlexRow>
-          {!searchLoading && selectedDomain.conceptCount > 1000 && <div style={styles.conceptCounts}>
-            Showing top {concepts.length} {selectedDomain.name}
-          </div>}
+          {!searchLoading && selectedDomain.conceptCount > 1000 && !domainErrors.includes(selectedDomain.domain) &&
+            <div style={styles.conceptCounts}>Showing top {concepts.length} {selectedDomain.name}</div>
+          }
           <ConceptTable concepts={concepts}
                         domain={selectedDomain.domain}
                         loading={searchLoading}
@@ -463,7 +477,8 @@ export const ConceptHomepage = withCurrentWorkspace()(
                         placeholderValue={this.noConceptsConstant}
                         searchTerm={this.state.currentSearchString}
                         selectedConcepts={selectedConceptDomainMap[selectedDomain.domain]}
-                        reactKey={selectedDomain.name}/>
+                        reactKey={selectedDomain.name}
+                        error={domainErrors.includes(selectedDomain.domain)}/>
           <SlidingFabReact submitFunction={() => this.setState({conceptAddModalOpen: true})}
                            iconShape='plus'
                            tooltip={!this.state.workspacePermissions.canWrite}
