@@ -2306,7 +2306,6 @@ paths:
         - institution
       description: >
         Gets a list of all Institutions.
-        Requires INSTITUTION_ADMIN authority.
       operationId: "getInstitutions"
       responses:
         200:
@@ -2346,7 +2345,6 @@ paths:
         - institution
       description: >
         Gets the Institution corresponding to the shortName ID.
-        Requires INSTITUTION_ADMIN authority.
       operationId: "getInstitution"
       responses:
         200:
@@ -2543,7 +2541,7 @@ definitions:
   #   4) FEATURED_WORKSPACE_ADMIN: Allows a user to publish workspaces
   #   5) COMMUNICATIONS_ADMIN: Allows a user to post a Status Alert banner
   #   6) SECURITY_ADMIN: Allows a user to respond to egress alerts by deleting all clusters in a project
-  #   7) INSTITUTION_ADMIN: Allows a user to CRUD Institute entities
+  #   7) INSTITUTION_ADMIN: Allows a user to create, delete, and update Institute entities
   Authority:
     type: string
     description: actions a user can have authority/permission to perform

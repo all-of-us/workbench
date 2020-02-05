@@ -37,7 +37,6 @@ public class InstitutionController implements InstitutionApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<Institution> getInstitution(final String id) {
     final Institution institution =
         institutionService
@@ -51,7 +50,6 @@ public class InstitutionController implements InstitutionApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.INSTITUTION_ADMIN})
   public ResponseEntity<GetInstitutionsResponse> getInstitutions() {
     final GetInstitutionsResponse response =
         new GetInstitutionsResponse().institutions(institutionService.getInstitutions());
