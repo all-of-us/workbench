@@ -39,6 +39,7 @@ import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
 import {Location} from "@angular/common";
+import {AouP} from "app/components/aou-p";
 
 export const ResearchPurposeDescription =
   <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
@@ -1119,8 +1120,11 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             <ModalTitle>Create a billing account</ModalTitle>
             <ModalBody>
               <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
-                <div>Google accounts are managed by via Google Cloud Platform.</div>
-                <div>Learn more on how to set up a billing account.</div>
+                <img style={{width: '12rem', marginLeft: '-1.2rem'}} src="/assets/images/logo_lockup_cloud_rgb.png"/>
+                <AouP>
+                  <div>Billing accounts are managed by via Google Cloud Platform.</div>
+                  <div>Learn more on how to set up a billing account.</div>
+                </AouP>
                 <Button type='primary'
                         style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
                         onClick={() => this.setState({showCreateBillingAccountModal: false})}>
@@ -1132,13 +1136,17 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               marginTop: '1rem',
               marginBottom: '0.5rem'}}/>
             <ModalFooter style={{marginTop: 0, justifyContent: 'flex-start'}}>
-              <div style={{display: 'flex', flexDirection: 'column'}}>
-                <p style={{marginTop: 0}}>If you do not have a Google Cloud billing account.</p>
-                <a>Create billing account</a>
+              <FlexColumn>
+                <AouP>
+                  <p style={{marginTop: 0}}>If you do not have a Google Cloud billing account.</p>
+                  <a href="https://cloud.google.com" target="_blank">Create billing account</a>
+                </AouP>
 
-                <p>Add your <i>All of Us</i> user account to your existing Google Cloud account.</p>
-                <a>Add your account</a>
-              </div>
+                <AouP>
+                  <div>Add your <i>All of Us</i> user account to your existing Google Cloud account.</div>
+                  <a href="https://console.cloud.google.com/billing" target="_blank">Add your account</a>
+                </AouP>
+              </FlexColumn>
             </ModalFooter>
           </Modal>
         }
