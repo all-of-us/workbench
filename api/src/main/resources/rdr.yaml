@@ -234,12 +234,11 @@ definitions:
   Gender:
     type: string
     enum:
-      - MALE
-      - FEMALE
+      - MAN
+      - WOMAN
       - NON_BINARY
       - TRANSGENDER
-      - INTERSEX
-      - NONE
+      - NONE_DESCRIBE_ME
       - PREFER_NOT_TO_ANSWER
 
   Race:
