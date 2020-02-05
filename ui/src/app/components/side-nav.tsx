@@ -343,7 +343,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         />
       }
       {
-        profile.authorities.includes(Authority.CLUSTERADMIN) && this.state.showAdminOptions && <SideNavItem
+        profile.authorities.includes(Authority.WORKSPACESVIEW) && this.state.showAdminOptions && <SideNavItem
             content={'Manage Clusters'}
             onToggleSideNav={() => this.props.onToggleSideNav()}
             href={'admin/cluster'}

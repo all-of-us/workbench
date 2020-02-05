@@ -40,6 +40,7 @@ import {
   StatusApi,
   UserApi,
   UserMetricsApi,
+  WorkspaceAdminApi,
   WorkspacesApi,
 } from 'generated/fetch';
 
@@ -95,6 +96,7 @@ export const statusApi = bindCtor(StatusApi);
 export const statusAlertApi = bindCtor(StatusAlertApi);
 export const userApi = bindCtor(UserApi);
 export const userMetricsApi = bindCtor(UserMetricsApi);
+export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
 
 /**
