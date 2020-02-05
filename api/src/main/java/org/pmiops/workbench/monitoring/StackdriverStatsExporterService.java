@@ -4,9 +4,11 @@ import com.google.api.MonitoredResource;
 import com.google.appengine.api.modules.ModulesException;
 import com.google.appengine.api.modules.ModulesService;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsConfiguration;
 import io.opencensus.exporter.stats.stackdriver.StackdriverStatsExporter;
 import java.io.IOException;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,12 +28,13 @@ public class StackdriverStatsExporterService {
       Logger.getLogger(StackdriverStatsExporterService.class.getName());
   private static final String STACKDRIVER_CUSTOM_METRICS_PREFIX = "custom.googleapis.com/";
   private static final String MONITORED_RESOURCE_TYPE = "generic_node";
-  private static final String PROJECT_ID_LABEL = "project_id";
-  private static final String LOCATION_LABEL = "location";
-  private static final String NAMESPACE_LABEL = "namespace";
-  private static final String NODE_ID_LABEL = "node_id";
+  public static final String PROJECT_ID_LABEL = "project_id";
+  public static final String LOCATION_LABEL = "location";
+  public static final String NAMESPACE_LABEL = "namespace";
+  public static final String NODE_ID_LABEL = "node_id";
   public static final String UNKNOWN_INSTANCE_PREFIX = "unknown-";
-
+  public static final Set<String> MONITORED_RESOURCE_LABELS =
+      ImmutableSet.of(PROJECT_ID_LABEL, LOCATION_LABEL, NAMESPACE_LABEL, NODE_ID_LABEL);
   private boolean initialized;
   private Provider<WorkbenchConfig> workbenchConfigProvider;
   private ModulesService modulesService;
@@ -68,11 +71,11 @@ public class StackdriverStatsExporterService {
     return StackdriverStatsConfiguration.builder()
         .setMetricNamePrefix(STACKDRIVER_CUSTOM_METRICS_PREFIX)
         .setProjectId(getProjectId())
-        .setMonitoredResource(makeMonitoredResource())
+        .setMonitoredResource(getMonitoringMonitoredResource())
         .build();
   }
 
-  private MonitoredResource makeMonitoredResource() {
+  private MonitoredResource getMonitoringMonitoredResource() {
     return MonitoredResource.newBuilder()
         .setType(MONITORED_RESOURCE_TYPE)
         .putLabels(PROJECT_ID_LABEL, getProjectId())
@@ -80,6 +83,30 @@ public class StackdriverStatsExporterService {
         .putLabels(NAMESPACE_LABEL, getEnvironmentShortName())
         .putLabels(NODE_ID_LABEL, getNodeId())
         .build();
+  }
+
+  /**
+   * Make a MonitoredResource to idenfity the log. Note that this is nearly identical, but a
+   * different, unrelated class, from com.google.api.MonitoredResource used in Stackdriver
+   * Monitoring. They both have the same type and label inputs though, which is helpful.
+   *
+   * <p>The MonitoredResource should be constant for all execution time for the application.
+   */
+  public com.google.cloud.MonitoredResource getLoggingMonitoredResource() {
+    final MonitoredResource monitoringMonitoredResource = getMonitoringMonitoredResource();
+    com.google.cloud.MonitoredResource.Builder builder =
+        com.google.cloud.MonitoredResource.newBuilder(monitoringMonitoredResource.getType());
+
+    MONITORED_RESOURCE_LABELS.forEach(
+        label -> addLabelAndValue(builder, monitoringMonitoredResource, label));
+    return builder.build();
+  }
+
+  private com.google.cloud.MonitoredResource.Builder addLabelAndValue(
+      com.google.cloud.MonitoredResource.Builder builder,
+      com.google.api.MonitoredResource otherResource,
+      String label) {
+    return builder.addLabel(label, otherResource.getLabelsOrThrow(label));
   }
 
   private String getProjectId() {
