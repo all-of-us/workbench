@@ -37,7 +37,6 @@ export async function fetchWithGlobalErrorHandler<T>(fetchFn: () => Promise<T>, 
     try {
       return await fetchFn();
     } catch (e) {
-      console.log('Caught global error', e);
       retries++;
       const errorResponse = await convertAPIError(e);
       if (retries === maxRetries) {

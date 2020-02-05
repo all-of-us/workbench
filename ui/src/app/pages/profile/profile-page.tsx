@@ -15,10 +15,11 @@ import { ProfileRegistrationStepStatus } from 'app/pages/profile/profile-registr
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
-import {serverConfigStore} from 'app/utils/navigation';
+import {globalErrorStore, serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
+import {convertAPIError} from 'app/utils/errors';
 
 const styles = reactStyles({
   h1: {
@@ -97,11 +98,13 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     this.setState({updating: true});
 
     try {
-      await fetchWithGlobalErrorHandler(() => profileApi().updateProfile(this.state.profileEdits),
-        /* maxRetries */ 1);
-      await reload();
+      await profileApi().updateProfile(this.state.profileEdits);
     } catch (e) {
-      console.error(e);
+      if (e instanceof Response) {
+        await globalErrorStore.next(await convertAPIError(e));
+      } else {
+        throw e;
+      }
     } finally {
       this.setState({updating: false});
     }

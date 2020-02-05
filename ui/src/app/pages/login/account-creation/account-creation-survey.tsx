@@ -24,6 +24,8 @@ import {toggleIncludes} from 'app/utils';
 import * as validate from 'validate.js';
 import {AccountCreationOptions} from './account-creation-options';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
+import {globalErrorStore} from 'app/utils/navigation';
+import {convertAPIError} from 'app/utils/errors';
 
 
 const styles = {
@@ -103,15 +105,19 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
     this.setState({creatingAccount: true});
     try {
       console.log('Attempting account creation');
-      await fetchWithGlobalErrorHandler(() => profileApi().createAccount({profile: this.profileObj, invitationKey: invitationKey})
+      await profileApi().createAccount({profile: this.profileObj, invitationKey: 'asdf'})
         .then((savedProfile) => {
           this.setState({profile: savedProfile, creatingAccount: false});
           setProfile(savedProfile, {stepName: 'accountCreationSuccess', backgroundImages: signedOutImages.login});
-        }), 1);
+        });
     } catch (e) {
-      console.log('Exception', e);
+      if (e instanceof Response) {
+        await globalErrorStore.next(await convertAPIError(e));
+      } else {
+        // Re-throw if it's not an API exception.
+        throw e;
+      }
     } finally {
-      console.log('Finished');
       this.setState({creatingAccount: false});
     }
   }
