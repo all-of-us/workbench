@@ -66,6 +66,9 @@ public class DbInstitutionEmailDomain {
     int result = (int) (institutionEmailDomainId ^ (institutionEmailDomainId >>> 32));
     result = 31 * result + institution.hashCode();
     result = 31 * result + emailDomain.hashCode();
-    return result;
+    return Objects.hash(
+           institutionEmailDomainId,
+           institution,
+           emailDomain);
   }
 }
