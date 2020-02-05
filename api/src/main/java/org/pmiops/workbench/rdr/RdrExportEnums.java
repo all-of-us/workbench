@@ -30,11 +30,13 @@ public class RdrExportEnums {
   private static final BiMap<GenderIdentity, org.pmiops.workbench.rdr.model.Gender>
       CLIENT_TO_RDR_GENDER =
           ImmutableBiMap.<GenderIdentity, org.pmiops.workbench.rdr.model.Gender>builder()
-              .put(GenderIdentity.MAN, org.pmiops.workbench.rdr.model.Gender.MALE)
-              .put(GenderIdentity.WOMAN, org.pmiops.workbench.rdr.model.Gender.FEMALE)
+              .put(GenderIdentity.MAN, org.pmiops.workbench.rdr.model.Gender.MAN)
+              .put(GenderIdentity.WOMAN, org.pmiops.workbench.rdr.model.Gender.WOMAN)
               .put(GenderIdentity.NON_BINARY, org.pmiops.workbench.rdr.model.Gender.NON_BINARY)
               .put(GenderIdentity.TRANSGENDER, org.pmiops.workbench.rdr.model.Gender.TRANSGENDER)
-              .put(GenderIdentity.NONE_DESCRIBE_ME, org.pmiops.workbench.rdr.model.Gender.NONE)
+              .put(
+                  GenderIdentity.NONE_DESCRIBE_ME,
+                  org.pmiops.workbench.rdr.model.Gender.NONE_DESCRIBE_ME)
               .put(
                   GenderIdentity.PREFER_NO_ANSWER,
                   org.pmiops.workbench.rdr.model.Gender.PREFER_NOT_TO_ANSWER)
@@ -70,8 +72,8 @@ public class RdrExportEnums {
   private static final BiMap<Disability, org.pmiops.workbench.rdr.model.Disability>
       CLIENT_TO_RDR_DISABILITY =
           ImmutableBiMap.<Disability, org.pmiops.workbench.rdr.model.Disability>builder()
-              .put(Disability.TRUE, org.pmiops.workbench.rdr.model.Disability.TRUE)
-              .put(Disability.FALSE, org.pmiops.workbench.rdr.model.Disability.FALSE)
+              .put(Disability.TRUE, org.pmiops.workbench.rdr.model.Disability.YES)
+              .put(Disability.FALSE, org.pmiops.workbench.rdr.model.Disability.NO)
               .build();
 
   public static org.pmiops.workbench.rdr.model.Race raceToRdrRace(Race race) {

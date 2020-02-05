@@ -220,7 +220,6 @@ definitions:
         type: string
       role:
         type: string
-#        Need to talk to Yu about this to be an ENUM
       nonAcademicAffiliation:
         type: boolean
 
@@ -234,12 +233,11 @@ definitions:
   Gender:
     type: string
     enum:
-      - MALE
-      - FEMALE
+      - MAN
+      - WOMAN
       - NON_BINARY
       - TRANSGENDER
-      - INTERSEX
-      - NONE
+      - NONE_DESCRIBE_ME
       - PREFER_NOT_TO_ANSWER
 
   Race:
@@ -281,10 +279,10 @@ definitions:
       - UNDERGRADUATE
       - MASTER
       - DOCTORATE
-      -
+
   Disability:
     type: string
     enum:
-      - YES
-      - NO
+      - "YES"
+      - "NO"
       - PREFER_NOT_TO_ANSWER
