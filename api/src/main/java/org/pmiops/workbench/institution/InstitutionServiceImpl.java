@@ -41,8 +41,8 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public Optional<Institution> getInstitution(final String id) {
-    return getDbInstitution(id).map(this::toModelClass);
+  public Optional<Institution> getInstitution(final String shortName) {
+    return getDbInstitution(shortName).map(this::toModelClass);
   }
 
   @Override
@@ -51,8 +51,8 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public boolean deleteInstitution(final String id) {
-    return getDbInstitution(id)
+  public boolean deleteInstitution(final String shortName) {
+    return getDbInstitution(shortName)
         .map(
             dbInst -> {
               institutionDao.delete(dbInst);
@@ -63,13 +63,13 @@ public class InstitutionServiceImpl implements InstitutionService {
 
   @Override
   public Optional<Institution> updateInstitution(
-      final String id, final Institution institutionToUpdate) {
-    return getDbInstitution(id)
+      final String shortName, final Institution institutionToUpdate) {
+    return getDbInstitution(shortName)
         .map(dbInst -> toModelClass(saveInstitution(institutionToUpdate, dbInst)));
   }
 
-  private Optional<DbInstitution> getDbInstitution(String id) {
-    return institutionDao.findOneByShortName(id);
+  private Optional<DbInstitution> getDbInstitution(String shortName) {
+    return institutionDao.findOneByShortName(shortName);
   }
 
   private DbInstitution saveInstitution(final Institution modelClass, final DbInstitution dbClass) {

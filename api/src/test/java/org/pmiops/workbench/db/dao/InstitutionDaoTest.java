@@ -3,7 +3,8 @@ package org.pmiops.workbench.db.dao;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
-import java.util.Optional;
+import com.google.common.collect.ImmutableList;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -19,32 +20,48 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class InstitutionDaoTest {
   @Autowired InstitutionDao institutionDao;
 
+  private DbInstitution testInst = new DbInstitution("Broad", "The Broad Institute");
+
+  @Before
+  public void setUp() {
+    testInst = institutionDao.save(testInst);
+  }
+
   @Test
-  public void testDao() {
-    DbInstitution testInst = new DbInstitution("Broad", "The Broad Institute");
-    testInst = institutionDao.save(testInst);
-    assertThat(institutionDao.findOneByShortName("Broad")).hasValue(testInst);
+  public void test_save() {
     assertThat(institutionDao.findAll()).hasSize(1);
-
-    // update existing entity, don't change size
-
-    testInst.setShortName("Verily");
-    testInst = institutionDao.save(testInst);
-    assertThat(institutionDao.findAll()).hasSize(1);
-    assertThat(institutionDao.findOneByShortName("Verily")).hasValue(testInst);
-
-    testInst.setDisplayName("Yea, Verily");
-    testInst = institutionDao.save(testInst);
-    assertThat(institutionDao.findAll()).hasSize(1);
-    assertThat(institutionDao.findOneByShortName("Verily")).hasValue(testInst);
-
     institutionDao.save(new DbInstitution("VUMC", "Vanderbilt"));
     assertThat(institutionDao.findAll()).hasSize(2);
+  }
 
-    institutionDao.delete(institutionDao.findOneByShortName("Verily").get());
+  @Test
+  public void test_delete() {
     assertThat(institutionDao.findAll()).hasSize(1);
+    institutionDao.delete(institutionDao.findOneByShortName("Broad").get());
+    assertThat(institutionDao.findAll()).hasSize(0);
+  }
 
-    assertThat(institutionDao.findOneByShortName("404 Institute Not Found")).isEmpty();
+  @Test
+  public void test_findAll() {
+    assertThat(institutionDao.findAll()).containsExactlyElementsIn(ImmutableList.of(testInst));
+
+    DbInstitution otherInst = new DbInstitution("VUMC", "Vanderbilt");
+    otherInst = institutionDao.save(otherInst);
+    assertThat(institutionDao.findAll())
+        .containsExactlyElementsIn(ImmutableList.of(testInst, otherInst));
+
+    institutionDao.delete(institutionDao.findOneByShortName("Broad").get());
+    assertThat(institutionDao.findAll()).containsExactlyElementsIn(ImmutableList.of(otherInst));
+  }
+
+  @Test
+  public void test_findOneByShortName() {
+    assertThat(institutionDao.findOneByShortName("Broad")).hasValue(testInst);
+    assertThat(institutionDao.findOneByShortName("Verily")).isEmpty();
+
+    DbInstitution otherInst = new DbInstitution("Verily", "An Alphabet Company");
+    otherInst = institutionDao.save(otherInst);
+    assertThat(institutionDao.findOneByShortName("Verily")).hasValue(otherInst);
   }
 
   @Test(expected = DataIntegrityViolationException.class)

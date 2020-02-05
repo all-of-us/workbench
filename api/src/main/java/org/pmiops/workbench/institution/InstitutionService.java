@@ -7,11 +7,12 @@ import org.pmiops.workbench.model.Institution;
 public interface InstitutionService {
   List<Institution> getInstitutions();
 
-  Optional<Institution> getInstitution(final String id);
+  Optional<Institution> getInstitution(final String shortName);
 
   Institution createInstitution(final Institution institutionToCreate);
 
-  boolean deleteInstitution(final String id);
+  boolean deleteInstitution(final String shortName);
 
-  Optional<Institution> updateInstitution(final String id, final Institution institutionToUpdate);
+  Optional<Institution> updateInstitution(
+      final String shortName, final Institution institutionToUpdate);
 }

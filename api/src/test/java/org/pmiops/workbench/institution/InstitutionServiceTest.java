@@ -5,9 +5,8 @@ import static com.google.common.truth.Truth8.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.Institution;
@@ -23,29 +22,60 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class InstitutionServiceTest {
   @Autowired private InstitutionService service;
 
+  private final Institution testInst =
+      new Institution().shortName("test").displayName("this is a test");
+
+  @Before
+  public void setUp() {
+    service.createInstitution(testInst);
+  }
+
   @Test
-  public void test_InstitutionCRUD() {
-    assertThat(service.getInstitutions()).isEmpty();
+  public void test_createInstitution() {
+    assertThat(service.getInstitutions()).hasSize(1);
 
-    final Institution inst = new Institution().shortName("test").displayName("this is a test");
-    assertThat(service.createInstitution(inst)).isEqualTo(inst);
-    assertThat(service.getInstitution(inst.getShortName())).hasValue(inst);
+    service.createInstitution(
+        new Institution().shortName("otherInst").displayName("The Institution of testing"));
+    assertThat(service.getInstitutions()).hasSize(2);
+  }
 
-    final List<Institution> institutions = service.getInstitutions();
-    assertThat(institutions).hasSize(1);
-    assertThat(institutions.get(0)).isEqualTo(inst);
+  @Test
+  public void test_deleteInstitution() {
+    assertThat(service.getInstitutions()).hasSize(1);
 
-    final Institution modifiedInst =
-        new Institution().shortName(inst.getShortName()).displayName("I have altered the test");
-    assertThat(service.updateInstitution(inst.getShortName(), modifiedInst)).hasValue(modifiedInst);
-    assertThat(service.getInstitution(inst.getShortName())).hasValue(modifiedInst);
+    service.deleteInstitution(testInst.getShortName());
+    assertThat(service.getInstitutions()).hasSize(0);
+  }
 
-    service.deleteInstitution(inst.getShortName());
-    assertThat(service.getInstitutions()).isEmpty();
+  @Test
+  public void test_getInstitutions() {
+    assertThat(service.getInstitutions()).containsExactlyElementsIn(ImmutableList.of(testInst));
 
-    // we uniquify Email Addresses and Domains in the DB
+    final Institution otherInst =
+        new Institution().shortName("otherInst").displayName("The Institution of testing");
+    service.createInstitution(otherInst);
+    assertThat(service.getInstitutions())
+        .containsExactlyElementsIn(ImmutableList.of(testInst, otherInst));
 
-    final Institution newInst =
+    service.deleteInstitution(testInst.getShortName());
+    assertThat(service.getInstitutions()).containsExactlyElementsIn(ImmutableList.of(otherInst));
+  }
+
+  @Test
+  public void test_getInstitution() {
+    assertThat(service.getInstitution(testInst.getShortName())).hasValue(testInst);
+    assertThat(service.getInstitution("otherInst")).isEmpty();
+
+    final Institution otherInst =
+        new Institution().shortName("otherInst").displayName("The Institution of testing");
+    service.createInstitution(otherInst);
+    assertThat(service.getInstitution("otherInst")).hasValue(otherInst);
+  }
+
+  // we uniquify Email Addresses and Domains in the DB per-institution
+  @Test
+  public void test_uniqueEmailPatterns() {
+    final Institution instWithDupes =
         new Institution()
             .shortName("test2")
             .displayName("another test")
@@ -53,31 +83,44 @@ public class InstitutionServiceTest {
             .emailAddresses(
                 ImmutableList.of("joel@broad.org", "joel@broad.org", "joel@google.com"));
 
-    final Set<String> uniquifiedEmailDomains = new HashSet<>(newInst.getEmailDomains());
-    final Set<String> uniquifiedEmailAddresses = new HashSet<>(newInst.getEmailAddresses());
+    final Set<String> uniquifiedEmailDomains = new HashSet<>(instWithDupes.getEmailDomains());
+    final Set<String> uniquifiedEmailAddresses = new HashSet<>(instWithDupes.getEmailAddresses());
 
-    final Institution dbInst = service.createInstitution(newInst);
+    final Institution uniquifiedInst = service.createInstitution(instWithDupes);
 
-    assertThat(dbInst).isNotEqualTo(newInst);
-    assertThat(dbInst.getEmailDomains()).containsExactlyElementsIn(uniquifiedEmailDomains);
-    assertThat(dbInst.getEmailAddresses()).containsExactlyElementsIn(uniquifiedEmailAddresses);
+    assertThat(uniquifiedInst).isNotEqualTo(instWithDupes);
+    assertThat(uniquifiedInst.getEmailDomains()).containsExactlyElementsIn(uniquifiedEmailDomains);
+    assertThat(uniquifiedInst.getEmailAddresses())
+        .containsExactlyElementsIn(uniquifiedEmailAddresses);
+  }
 
-    // displayName and email patterns can match other institutions
+  // we do not uniquify Email Addresses and Domains in the DB across institutions
+  @Test
+  public void test_nonUniqueEmailPatterns() {
+    final Institution instWithEmails =
+        new Institution()
+            .shortName("hasEmails")
+            .displayName("another test")
+            .emailDomains(ImmutableList.of("broad.org", "google.com"))
+            .emailAddresses(ImmutableList.of("joel@broad.org", "joel@google.com"));
 
-    final Institution otherInst =
+    final Institution similarInst =
         new Institution()
             .shortName("otherInst")
-            .displayName(newInst.getDisplayName())
-            .emailDomains(newInst.getEmailDomains())
-            .emailAddresses(newInst.getEmailAddresses());
+            .displayName("The University of Elsewhere")
+            .emailDomains(instWithEmails.getEmailDomains())
+            .emailAddresses(instWithEmails.getEmailAddresses());
 
-    final Institution otherDbInst = service.createInstitution(otherInst);
+    final Institution instWithEmailsViaDb = service.createInstitution(instWithEmails);
+    final Institution similarInstViaDb = service.createInstitution(similarInst);
 
-    assertThat(otherDbInst.getShortName()).isNotEqualTo(dbInst.getShortName());
-    assertThat(otherDbInst.getDisplayName()).isEqualTo(dbInst.getDisplayName());
-    assertThat(otherDbInst.getEmailDomains()).containsExactlyElementsIn(dbInst.getEmailDomains());
-    assertThat(otherDbInst.getEmailAddresses())
-        .containsExactlyElementsIn(dbInst.getEmailAddresses());
+    assertThat(instWithEmailsViaDb.getShortName()).isNotEqualTo(similarInstViaDb.getShortName());
+    assertThat(instWithEmailsViaDb.getDisplayName())
+        .isNotEqualTo(similarInstViaDb.getDisplayName());
+    assertThat(instWithEmailsViaDb.getEmailDomains())
+        .containsExactlyElementsIn(similarInstViaDb.getEmailDomains());
+    assertThat(instWithEmailsViaDb.getEmailAddresses())
+        .containsExactlyElementsIn(similarInstViaDb.getEmailAddresses());
   }
 
   @Test
