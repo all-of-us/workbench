@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -58,19 +59,13 @@ public class DbInstitutionEmailAddress {
     if (!institution.equals(that.institution)) {
       return false;
     }
-    return institutionEmailAddressId == that.institutionEmailAddressId 
-           && institution.equals(that.institution)
-           && emailAddress.equals(that.emailAddress);
+    return institutionEmailAddressId == that.institutionEmailAddressId
+        && institution.equals(that.institution)
+        && emailAddress.equals(that.emailAddress);
   }
 
   @Override
   public int hashCode() {
-    int result = (int) (institutionEmailAddressId ^ (institutionEmailAddressId >>> 32));
-    result = 31 * result + institution.hashCode();
-    result = 31 * result + emailAddress.hashCode();
-    return Objects.hash(
-           institutionEmailAddressId,
-           institution,
-           emailAddress);
+    return Objects.hash(institutionEmailAddressId, institution, emailAddress);
   }
 }

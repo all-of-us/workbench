@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailDomainDao;
@@ -73,7 +72,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     return institutionDao.findOneByShortName(id);
   }
 
-  private DbInstitution saveInstitution(final Institution modelClass, final DbInstitution dbClass) {
+  private DbInstitution saveInstitution(final Institution modelClass, DbInstitution dbClass) {
     dbClass.setShortName(modelClass.getShortName());
     dbClass.setDisplayName(modelClass.getDisplayName());
     dbClass.setOrganizationTypeEnum(
@@ -81,7 +80,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     dbClass.setOrganizationTypeOtherText(modelClass.getOrganizationTypeOtherText());
 
     // save so the domain and address DAOs have something to reference
-    institutionDao.save(dbClass);
+    final DbInstitution finalDbClass = institutionDao.save(dbClass);
 
     institutionEmailDomainDao.deleteAllByInstitution(dbClass);
     Optional.ofNullable(modelClass.getEmailDomains())
@@ -89,10 +88,9 @@ public class InstitutionServiceImpl implements InstitutionService {
             domains -> {
               Set<DbInstitutionEmailDomain> dbDomains =
                   domains.stream()
-                      .map(domain -> new DbInstitutionEmailDomain(dbClass, domain))
+                      .map(domain -> new DbInstitutionEmailDomain(finalDbClass, domain))
                       .collect(Collectors.toSet());
-              institutionEmailDomainDao.save(dbDomains);
-              dbClass.setEmailDomains(dbDomains);
+              finalDbClass.setEmailDomains(institutionEmailDomainDao.save(dbDomains));
             });
 
     institutionEmailAddressDao.deleteAllByInstitution(dbClass);
@@ -101,10 +99,10 @@ public class InstitutionServiceImpl implements InstitutionService {
             addresses -> {
               Set<DbInstitutionEmailAddress> dbAddrs =
                   addresses.stream()
-                      .map(address -> new DbInstitutionEmailAddress(dbClass, address))
+                      .map(address -> new DbInstitutionEmailAddress(finalDbClass, address))
                       .collect(Collectors.toSet());
-              institutionEmailAddressDao.save(dbAddrs);
-              dbClass.setEmailAddresses(dbAddrs);
+
+              finalDbClass.setEmailAddresses(institutionEmailAddressDao.save(dbAddrs));
             });
 
     return institutionDao.save(dbClass);
