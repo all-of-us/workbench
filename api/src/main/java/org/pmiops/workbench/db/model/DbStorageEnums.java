@@ -4,7 +4,18 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.AnnotationType;
+import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.BillingAccountType;
+import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.CohortStatus;
+import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.OrganizationType;
+import org.pmiops.workbench.model.ReviewStatus;
+import org.pmiops.workbench.model.SpecificPopulationEnum;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 /**
  * Static utility for converting between API enums and stored short values. All stored enums should
