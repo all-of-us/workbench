@@ -201,8 +201,10 @@ public class RdrExportServiceImpl implements RdrExportService {
                 .collect(Collectors.toList()));
       }
       if (null != dbDemographicSurvey.getGenderIdentityEnumList()) {
-        researcher.setGender(dbDemographicSurvey.getGenderIdentityEnumList().stream()
-            .map(RdrExportEnums::genderToRdrGender).collect(Collectors.toList()));
+        researcher.setGender(
+            dbDemographicSurvey.getGenderIdentityEnumList().stream()
+                .map(RdrExportEnums::genderToRdrGender)
+                .collect(Collectors.toList()));
       }
       researcher.setDisability(
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));

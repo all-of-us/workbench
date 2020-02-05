@@ -34,7 +34,9 @@ public class RdrExportEnums {
               .put(GenderIdentity.WOMAN, org.pmiops.workbench.rdr.model.Gender.WOMAN)
               .put(GenderIdentity.NON_BINARY, org.pmiops.workbench.rdr.model.Gender.NON_BINARY)
               .put(GenderIdentity.TRANSGENDER, org.pmiops.workbench.rdr.model.Gender.TRANSGENDER)
-              .put(GenderIdentity.NONE_DESCRIBE_ME, org.pmiops.workbench.rdr.model.Gender.NONE_DESCRIBE_ME)
+              .put(
+                  GenderIdentity.NONE_DESCRIBE_ME,
+                  org.pmiops.workbench.rdr.model.Gender.NONE_DESCRIBE_ME)
               .put(
                   GenderIdentity.PREFER_NO_ANSWER,
                   org.pmiops.workbench.rdr.model.Gender.PREFER_NOT_TO_ANSWER)
