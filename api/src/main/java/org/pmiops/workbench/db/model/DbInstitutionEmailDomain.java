@@ -53,12 +53,6 @@ public class DbInstitutionEmailDomain {
 
     DbInstitutionEmailDomain that = (DbInstitutionEmailDomain) o;
 
-    if (institutionEmailDomainId != that.institutionEmailDomainId) {
-      return false;
-    }
-    if (!institution.equals(that.institution)) {
-      return false;
-    }
     return institutionEmailDomainId == that.institutionEmailDomainId
         && institution.equals(that.institution)
         && emailDomain.equals(that.emailDomain);
