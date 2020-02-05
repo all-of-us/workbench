@@ -58,7 +58,9 @@ public class DbInstitutionEmailDomain {
     if (!institution.equals(that.institution)) {
       return false;
     }
-    return emailDomain.equals(that.emailDomain);
+    return institutionEmailDomainId == that.institutionEmailDomainId
+           && institution.equals(that.institution)
+           && emailDomain.equals(that.emailDomain);
   }
 
   @Override
