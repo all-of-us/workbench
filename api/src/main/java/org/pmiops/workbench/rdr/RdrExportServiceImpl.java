@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -149,9 +150,11 @@ public class RdrExportServiceImpl implements RdrExportService {
                       toRdrWorkspace(workspaceDao.findDbWorkspaceByWorkspaceId(workspaceId)))
               .filter(Objects::nonNull)
               .collect(Collectors.toList());
-      rdrApiProvider.get().getApiClient().setDebugging(true);
-      rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList);
-      updateDBRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+      if (!rdrWorkspacesList.isEmpty()) {
+        rdrApiProvider.get().getApiClient().setDebugging(true);
+        rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList);
+        updateDBRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+      }
     } catch (ApiException ex) {
       log.severe("Error while sending workspace data to RDR");
     }
@@ -192,22 +195,30 @@ public class RdrExportServiceImpl implements RdrExportService {
                     RdrExportEnums.ethnicityToRdrEthnicity(
                         dbDemographicSurvey.getEthnicityEnum()))));
       }
-      if (dbDemographicSurvey.getSexAtBirthEnum() != null) {
-        researcher.setSexAtBirth(
-            RdrExportEnums.sexAtBirthToRdrSexAtBirth(
-                dbDemographicSurvey.getSexAtBirthEnum().get(0)));
-      }
+      researcher.setSexAtBirth(
+          Optional.ofNullable(
+                  dbDemographicSurvey.getSexAtBirthEnum().stream()
+                      .map(RdrExportEnums::sexAtBirthToRdrSexAtBirth)
+                      .collect(Collectors.toList()))
+              .orElse(new ArrayList<SexAtBirth>()));
+      researcher.setGender(
+          Optional.ofNullable(
+                  dbDemographicSurvey.getGenderIdentityEnumList().stream()
+                      .map(RdrExportEnums::genderToRdrGender)
+                      .collect(Collectors.toList()))
+              .orElse(new ArrayList<Gender>()));
       researcher.setDisability(
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
-    }
 
-    if (null != dbDemographicSurvey && dbDemographicSurvey.getRaceEnum() != null) {
       researcher.setRace(
-          dbDemographicSurvey.getRaceEnum().stream()
-              .map(dbUserRace -> RdrExportEnums.raceToRdrRace(dbUserRace))
-              .collect(Collectors.toList()));
-    } else {
-      researcher.setRace(new ArrayList<>());
+          Optional.ofNullable(
+                  dbDemographicSurvey.getRaceEnum().stream()
+                      .map(RdrExportEnums::raceToRdrRace)
+                      .collect(Collectors.toList()))
+              .orElse(new ArrayList<Race>()));
+
+      researcher.setLgbtqIdentity(dbDemographicSurvey.getLgbtqIdentity());
+      researcher.setIdentifiesAsLgbtq(dbDemographicSurvey.getIdentifiesAsLgbtq());
     }
     researcher.setAffiliations(
         dbUser.getInstitutionalAffiliations().stream()
@@ -245,7 +256,7 @@ public class RdrExportServiceImpl implements RdrExportService {
     rdrWorkspace.setDrugDevelopment(dbWorkspace.getDrugDevelopment());
     rdrWorkspace.setCommercialPurpose(dbWorkspace.getCommercialPurpose());
     rdrWorkspace.setEducational(dbWorkspace.getEducational());
-    rdrWorkspace.setReasonForInvestigation(dbWorkspace.getReasonForAllOfUs());
+    rdrWorkspace.setScientificApproaches(dbWorkspace.getReasonForAllOfUs());
     rdrWorkspace.setIntendToStudy(dbWorkspace.getIntendedStudy());
     rdrWorkspace.setFindingsFromStudy(dbWorkspace.getAnticipatedFindings());
 
