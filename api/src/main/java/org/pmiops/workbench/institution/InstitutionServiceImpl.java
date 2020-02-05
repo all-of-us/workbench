@@ -20,23 +20,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class InstitutionServiceImpl implements InstitutionService {
 
-  private final Provider<InstitutionDao> institutionDaoProvider;
-  private final Provider<InstitutionEmailDomainDao> institutionEmailDomainDaoProvider;
-  private final Provider<InstitutionEmailAddressDao> institutionEmailAddressDaoProvider;
+  private final InstitutionDao institutionDao;
+  private final InstitutionEmailDomainDao institutionEmailDomainDao;
+  private final InstitutionEmailAddressDao institutionEmailAddressDao;
 
   @Autowired
   InstitutionServiceImpl(
-      Provider<InstitutionDao> institutionDaoProvider,
-      Provider<InstitutionEmailDomainDao> institutionEmailDomainDaoProvider,
-      Provider<InstitutionEmailAddressDao> institutionEmailAddressDaoProvider) {
-    this.institutionDaoProvider = institutionDaoProvider;
-    this.institutionEmailDomainDaoProvider = institutionEmailDomainDaoProvider;
-    this.institutionEmailAddressDaoProvider = institutionEmailAddressDaoProvider;
+      InstitutionDao institutionDao,
+      InstitutionEmailDomainDao institutionEmailDomainDao,
+      InstitutionEmailAddressDao institutionEmailAddressDao) {
+    this.institutionDao = institutionDao;
+    this.institutionEmailDomainDao = institutionEmailDomainDao;
+    this.institutionEmailAddressDao = institutionEmailAddressDao;
   }
 
   @Override
   public List<Institution> getInstitutions() {
-    return StreamSupport.stream(institutionDaoProvider.get().findAll().spliterator(), false)
+    return StreamSupport.stream(institutionDao.findAll().spliterator(), false)
         .map(this::toModelClass)
         .collect(Collectors.toList());
   }
@@ -56,7 +56,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     return getDbInstitution(id)
         .map(
             dbInst -> {
-              institutionDaoProvider.get().delete(dbInst);
+              institutionDao.delete(dbInst);
               return true;
             })
         .orElse(false);
@@ -70,7 +70,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   private Optional<DbInstitution> getDbInstitution(String id) {
-    return institutionDaoProvider.get().findOneByShortName(id);
+    return institutionDao.findOneByShortName(id);
   }
 
   private DbInstitution saveInstitution(final Institution modelClass, final DbInstitution dbClass) {
@@ -81,11 +81,9 @@ public class InstitutionServiceImpl implements InstitutionService {
     dbClass.setOrganizationTypeOtherText(modelClass.getOrganizationTypeOtherText());
 
     // save so the domain and address DAOs have something to reference
-    institutionDaoProvider.get().save(dbClass);
+    institutionDao.save(dbClass);
 
-    final InstitutionEmailDomainDao domainDao = institutionEmailDomainDaoProvider.get();
-    domainDao.deleteAllByInstitution(dbClass);
-
+    institutionEmailDomainDao.deleteAllByInstitution(dbClass);
     Optional.ofNullable(modelClass.getEmailDomains())
         .ifPresent(
             domains -> {
@@ -93,13 +91,11 @@ public class InstitutionServiceImpl implements InstitutionService {
                   domains.stream()
                       .map(domain -> new DbInstitutionEmailDomain(dbClass, domain))
                       .collect(Collectors.toSet());
-              domainDao.save(dbDomains);
+              institutionEmailDomainDao.save(dbDomains);
               dbClass.setEmailDomains(dbDomains);
             });
 
-    final InstitutionEmailAddressDao addrDao = institutionEmailAddressDaoProvider.get();
-    addrDao.deleteAllByInstitution(dbClass);
-
+    institutionEmailAddressDao.deleteAllByInstitution(dbClass);
     Optional.ofNullable(modelClass.getEmailAddresses())
         .ifPresent(
             addresses -> {
@@ -107,11 +103,11 @@ public class InstitutionServiceImpl implements InstitutionService {
                   addresses.stream()
                       .map(address -> new DbInstitutionEmailAddress(dbClass, address))
                       .collect(Collectors.toSet());
-              addrDao.save(dbAddrs);
+              institutionEmailAddressDao.save(dbAddrs);
               dbClass.setEmailAddresses(dbAddrs);
             });
 
-    return institutionDaoProvider.get().save(dbClass);
+    return institutionDao.save(dbClass);
   }
 
   private Institution toModelClass(final DbInstitution dbClass) {
