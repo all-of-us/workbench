@@ -14,5 +14,5 @@ public interface InstitutionEmailAddressDao
     delete(findAllByInstitution(institution));
   }
 
-  Set<DbInstitutionEmailAddress> save(Set<DbInstitutionEmailAddress> entries);
+  Set<DbInstitutionEmailAddress> save(Set<DbInstitutionEmailAddress> addresses);
 }

@@ -19,25 +19,24 @@ public class InstitutionDaoTest {
 
   @Test
   public void testDao() {
-    final DbInstitution testInst = new DbInstitution("Broad", "The Broad Institute");
-    institutionDao.save(testInst);
+    DbInstitution testInst = new DbInstitution("Broad", "The Broad Institute");
+    testInst = institutionDao.save(testInst);
     assertThat(institutionDao.findOneByShortName("Broad")).isEqualTo(Optional.of(testInst));
     assertThat(institutionDao.findAll()).hasSize(1);
 
     // update existing entity, don't change size
 
     testInst.setShortName("Verily");
-    institutionDao.save(testInst);
+    testInst = institutionDao.save(testInst);
     assertThat(institutionDao.findAll()).hasSize(1);
     assertThat(institutionDao.findOneByShortName("Verily")).isEqualTo(Optional.of(testInst));
 
     testInst.setDisplayName("Yea, Verily");
-    institutionDao.save(testInst);
+    testInst = institutionDao.save(testInst);
     assertThat(institutionDao.findAll()).hasSize(1);
     assertThat(institutionDao.findOneByShortName("Verily")).isEqualTo(Optional.of(testInst));
 
-    final DbInstitution otherInst = new DbInstitution("VUMC", "Vanderbilt");
-    institutionDao.save(otherInst);
+    institutionDao.save(new DbInstitution("VUMC", "Vanderbilt"));
     assertThat(institutionDao.findAll()).hasSize(2);
 
     institutionDao.delete(institutionDao.findOneByShortName("Verily").get());

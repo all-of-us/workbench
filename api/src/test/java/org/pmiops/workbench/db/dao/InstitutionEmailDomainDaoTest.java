@@ -18,12 +18,10 @@ public class InstitutionEmailDomainDaoTest {
 
   @Test
   public void testDao() {
-    final DbInstitution testInst = new DbInstitution("Broad", "The Broad Institute");
-    institutionDao.save(testInst);
+    final DbInstitution testInst = institutionDao.save(new DbInstitution("Broad", "The Broad Institute"));
     assertThat(institutionDao.findAll()).hasSize(1);
 
-    final DbInstitution otherInst = new DbInstitution("NIH", "The National Institute of Health");
-    institutionDao.save(otherInst);
+    final DbInstitution otherInst = institutionDao.save(new DbInstitution("NIH", "The National Institutes of Health"));
     assertThat(institutionDao.findAll()).hasSize(2);
 
     assertThat(institutionEmailDomainDao.findAll()).isEmpty();
