@@ -21,7 +21,7 @@ export default class ChromeBrowser {
     slowMo: 10,
     defaultViewport: null,
     args: this.chromeSwitches,
-    ignoreDefaultArgs: ['--disable-extensions']
+    ignoreDefaultArgs: ['--disable-extensions'],
   };
 
   public userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.87 Safari/537.36';
