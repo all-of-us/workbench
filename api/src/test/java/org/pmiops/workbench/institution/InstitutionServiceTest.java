@@ -13,19 +13,15 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
+@Import({InstitutionServiceImpl.class})
 public class InstitutionServiceTest {
   @Autowired private InstitutionService service;
-
-  @TestConfiguration
-  @Import({InstitutionServiceImpl.class})
-  static class Configuration {}
 
   @Test
   public void test_InstitutionCRUD() {

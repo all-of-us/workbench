@@ -1,6 +1,8 @@
 package org.pmiops.workbench.db.model;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -80,15 +82,17 @@ public class DbInstitution {
     return emailDomains;
   }
 
-  public void setEmailDomains(Set<DbInstitutionEmailDomain> emailDomains) {
-    this.emailDomains = emailDomains;
+  public void setEmailDomains(Iterable<DbInstitutionEmailDomain> emailDomains) {
+    this.emailDomains =
+        StreamSupport.stream(emailDomains.spliterator(), false).collect(Collectors.toSet());
   }
 
   public Set<DbInstitutionEmailAddress> getEmailAddresses() {
     return emailAddresses;
   }
 
-  public void setEmailAddresses(Set<DbInstitutionEmailAddress> emailAddresses) {
-    this.emailAddresses = emailAddresses;
+  public void setEmailAddresses(Iterable<DbInstitutionEmailAddress> emailAddresses) {
+    this.emailAddresses =
+        StreamSupport.stream(emailAddresses.spliterator(), false).collect(Collectors.toSet());
   }
 }

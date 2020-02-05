@@ -12,6 +12,4 @@ public interface InstitutionEmailDomainDao extends CrudRepository<DbInstitutionE
   default void deleteAllByInstitution(DbInstitution institution) {
     delete(findAllByInstitution(institution));
   }
-
-  Set<DbInstitutionEmailDomain> save(Set<DbInstitutionEmailDomain> domains);
 }
