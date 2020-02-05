@@ -2,7 +2,6 @@ package org.pmiops.workbench.institution;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.pmiops.workbench.db.dao.InstitutionDao;
@@ -88,25 +87,22 @@ public class InstitutionServiceImpl implements InstitutionService {
     institutionEmailDomainDao.deleteAllByInstitution(dbClass);
     Optional.ofNullable(modelClass.getEmailDomains())
         .ifPresent(
-            domains -> {
-              Set<DbInstitutionEmailDomain> dbDomains =
-                  domains.stream()
-                      .map(domain -> new DbInstitutionEmailDomain(dbClass, domain))
-                      .collect(Collectors.toSet());
-              dbClass.setEmailDomains(institutionEmailDomainDao.save(dbDomains));
-            });
+            domains ->
+                dbClass.setEmailDomains(
+                    institutionEmailDomainDao.save(
+                        domains.stream()
+                            .map(domain -> new DbInstitutionEmailDomain(dbClass, domain))
+                            .collect(Collectors.toSet()))));
 
     institutionEmailAddressDao.deleteAllByInstitution(dbClass);
     Optional.ofNullable(modelClass.getEmailAddresses())
         .ifPresent(
-            addresses -> {
-              Set<DbInstitutionEmailAddress> dbAddrs =
-                  addresses.stream()
-                      .map(address -> new DbInstitutionEmailAddress(dbClass, address))
-                      .collect(Collectors.toSet());
-
-              dbClass.setEmailAddresses(institutionEmailAddressDao.save(dbAddrs));
-            });
+            addresses ->
+                dbClass.setEmailAddresses(
+                    institutionEmailAddressDao.save(
+                        addresses.stream()
+                            .map(address -> new DbInstitutionEmailAddress(dbClass, address))
+                            .collect(Collectors.toSet()))));
 
     return institutionDao.save(dbClass);
   }
@@ -122,21 +118,19 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     Optional.ofNullable(dbClass.getEmailDomains())
         .ifPresent(
-            domains -> {
-              institution.emailDomains(
-                  domains.stream()
-                      .map(DbInstitutionEmailDomain::getEmailDomain)
-                      .collect(Collectors.toList()));
-            });
+            domains ->
+                institution.emailDomains(
+                    domains.stream()
+                        .map(DbInstitutionEmailDomain::getEmailDomain)
+                        .collect(Collectors.toList())));
 
     Optional.ofNullable(dbClass.getEmailAddresses())
         .ifPresent(
-            addresses -> {
-              institution.emailAddresses(
-                  addresses.stream()
-                      .map(DbInstitutionEmailAddress::getEmailAddress)
-                      .collect(Collectors.toList()));
-            });
+            addresses ->
+                institution.emailAddresses(
+                    addresses.stream()
+                        .map(DbInstitutionEmailAddress::getEmailAddress)
+                        .collect(Collectors.toList())));
 
     return institution;
   }
