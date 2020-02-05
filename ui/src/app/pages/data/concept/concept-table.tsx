@@ -286,7 +286,7 @@ export class ConceptTable extends React.Component<Props, State> {
 
   renderColumns() {
     const {concepts, domain} = this.props;
-    const surveyColumn = [
+    const surveyColumns = [
       {
         bodyStyle: styles.colStyle,
         className: null,
@@ -295,6 +295,15 @@ export class ConceptTable extends React.Component<Props, State> {
         headerStyle: styles.headerStyle,
         selectionMode: null,
         testId: 'question'
+      },
+      {
+        bodyStyle: {...styles.colStyle},
+        className: 'divider',
+        field: 'countValue',
+        header: 'Count',
+        headerStyle: {...styles.headerStyle, width: '20%'},
+        selectionMode: null,
+        testId: null
       }
     ];
     const columns = [
@@ -307,7 +316,7 @@ export class ConceptTable extends React.Component<Props, State> {
         selectionMode: 'multiple',
         testId: 'conceptCheckBox'
       },
-      ...(domain === Domain.SURVEY ? surveyColumn : domainColumns)
+      ...(domain === Domain.SURVEY ? surveyColumns : domainColumns)
     ];
     return columns.map((col, c) => <Column
       bodyStyle={col.bodyStyle}
