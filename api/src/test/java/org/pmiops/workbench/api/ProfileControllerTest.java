@@ -56,8 +56,8 @@ import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.DeprecatedInstitutionalAffiliation;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.Profile;
@@ -313,22 +313,23 @@ public class ProfileControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
-    InstitutionalAffiliation first = new InstitutionalAffiliation();
+    ArrayList<DeprecatedInstitutionalAffiliation> affiliations =
+        new ArrayList<DeprecatedInstitutionalAffiliation>();
+    DeprecatedInstitutionalAffiliation first = new DeprecatedInstitutionalAffiliation();
     first.setRole("test");
     first.setInstitution("Institution");
-    InstitutionalAffiliation second = new InstitutionalAffiliation();
+    DeprecatedInstitutionalAffiliation second = new DeprecatedInstitutionalAffiliation();
     second.setRole("zeta");
     second.setInstitution("Zeta");
     affiliations.add(first);
     affiliations.add(second);
-    profile.setInstitutionalAffiliations(affiliations);
+    profile.setDeprecatedInstitutionalAffiliations(affiliations);
     profileController.updateProfile(profile);
 
     Profile result = profileController.getMe().getBody();
-    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(2);
-    assertThat(result.getInstitutionalAffiliations().get(0)).isEqualTo(first);
-    assertThat(result.getInstitutionalAffiliations().get(1)).isEqualTo(second);
+    assertThat(result.getDeprecatedInstitutionalAffiliations().size()).isEqualTo(2);
+    assertThat(result.getDeprecatedInstitutionalAffiliations().get(0)).isEqualTo(first);
+    assertThat(result.getDeprecatedInstitutionalAffiliations().get(1)).isEqualTo(second);
   }
 
   @Test
@@ -336,22 +337,23 @@ public class ProfileControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
-    InstitutionalAffiliation first = new InstitutionalAffiliation();
+    ArrayList<DeprecatedInstitutionalAffiliation> affiliations =
+        new ArrayList<DeprecatedInstitutionalAffiliation>();
+    DeprecatedInstitutionalAffiliation first = new DeprecatedInstitutionalAffiliation();
     first.setRole("zeta");
     first.setInstitution("Zeta");
-    InstitutionalAffiliation second = new InstitutionalAffiliation();
+    DeprecatedInstitutionalAffiliation second = new DeprecatedInstitutionalAffiliation();
     second.setRole("test");
     second.setInstitution("Institution");
     affiliations.add(first);
     affiliations.add(second);
-    profile.setInstitutionalAffiliations(affiliations);
+    profile.setDeprecatedInstitutionalAffiliations(affiliations);
     profileController.updateProfile(profile);
 
     Profile result = profileController.getMe().getBody();
-    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(2);
-    assertThat(result.getInstitutionalAffiliations().get(0)).isEqualTo(first);
-    assertThat(result.getInstitutionalAffiliations().get(1)).isEqualTo(second);
+    assertThat(result.getDeprecatedInstitutionalAffiliations().size()).isEqualTo(2);
+    assertThat(result.getDeprecatedInstitutionalAffiliations().get(0)).isEqualTo(first);
+    assertThat(result.getDeprecatedInstitutionalAffiliations().get(1)).isEqualTo(second);
   }
 
   @Test
@@ -359,24 +361,25 @@ public class ProfileControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
-    InstitutionalAffiliation first = new InstitutionalAffiliation();
+    ArrayList<DeprecatedInstitutionalAffiliation> affiliations =
+        new ArrayList<DeprecatedInstitutionalAffiliation>();
+    DeprecatedInstitutionalAffiliation first = new DeprecatedInstitutionalAffiliation();
     first.setRole("test");
     first.setInstitution("Institution");
-    InstitutionalAffiliation second = new InstitutionalAffiliation();
+    DeprecatedInstitutionalAffiliation second = new DeprecatedInstitutionalAffiliation();
     second.setRole("zeta");
     second.setInstitution("Zeta");
     affiliations.add(first);
     affiliations.add(second);
-    profile.setInstitutionalAffiliations(affiliations);
+    profile.setDeprecatedInstitutionalAffiliations(affiliations);
     profileController.updateProfile(profile);
-    affiliations = new ArrayList<InstitutionalAffiliation>();
+    affiliations = new ArrayList<DeprecatedInstitutionalAffiliation>();
     affiliations.add(first);
-    profile.setInstitutionalAffiliations(affiliations);
+    profile.setDeprecatedInstitutionalAffiliations(affiliations);
     profileController.updateProfile(profile);
     Profile result = profileController.getMe().getBody();
-    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(1);
-    assertThat(result.getInstitutionalAffiliations().get(0)).isEqualTo(first);
+    assertThat(result.getDeprecatedInstitutionalAffiliations().size()).isEqualTo(1);
+    assertThat(result.getDeprecatedInstitutionalAffiliations().get(0)).isEqualTo(first);
   }
 
   @Test
@@ -384,22 +387,23 @@ public class ProfileControllerTest {
     createUser();
 
     Profile profile = profileController.getMe().getBody();
-    ArrayList<InstitutionalAffiliation> affiliations = new ArrayList<InstitutionalAffiliation>();
-    InstitutionalAffiliation first = new InstitutionalAffiliation();
+    ArrayList<DeprecatedInstitutionalAffiliation> affiliations =
+        new ArrayList<DeprecatedInstitutionalAffiliation>();
+    DeprecatedInstitutionalAffiliation first = new DeprecatedInstitutionalAffiliation();
     first.setRole("test");
     first.setInstitution("Institution");
-    InstitutionalAffiliation second = new InstitutionalAffiliation();
+    DeprecatedInstitutionalAffiliation second = new DeprecatedInstitutionalAffiliation();
     second.setRole("zeta");
     second.setInstitution("Zeta");
     affiliations.add(first);
     affiliations.add(second);
-    profile.setInstitutionalAffiliations(affiliations);
+    profile.setDeprecatedInstitutionalAffiliations(affiliations);
     profileController.updateProfile(profile);
     affiliations.clear();
-    profile.setInstitutionalAffiliations(affiliations);
+    profile.setDeprecatedInstitutionalAffiliations(affiliations);
     profileController.updateProfile(profile);
     Profile result = profileController.getMe().getBody();
-    assertThat(result.getInstitutionalAffiliations().size()).isEqualTo(0);
+    assertThat(result.getDeprecatedInstitutionalAffiliations().size()).isEqualTo(0);
   }
 
   @Test

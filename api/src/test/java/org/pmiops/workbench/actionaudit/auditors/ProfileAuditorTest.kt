@@ -22,8 +22,8 @@ import org.pmiops.workbench.model.DataAccessLevel
 import org.pmiops.workbench.model.DemographicSurvey
 import org.pmiops.workbench.model.Education
 import org.pmiops.workbench.model.Ethnicity
-import org.pmiops.workbench.model.InstitutionalAffiliation
-import org.pmiops.workbench.model.NonAcademicAffiliation
+import org.pmiops.workbench.model.DeprecatedInstitutionalAffiliation
+import org.pmiops.workbench.model.DeprecatedNonAcademicAffiliation
 import org.pmiops.workbench.model.Profile
 import org.pmiops.workbench.model.Race
 import org.springframework.test.context.junit4.SpringRunner
@@ -70,16 +70,16 @@ class ProfileAuditorTest {
     }
 
     private fun buildProfile(): Profile {
-        val caltechAffiliation = InstitutionalAffiliation()
+        val caltechAffiliation = DeprecatedInstitutionalAffiliation()
             .apply { institution = "Caltech" }
             .apply { role = "T.A." }
-            .apply { nonAcademicAffiliation = NonAcademicAffiliation.COMMUNITY_SCIENTIST }
+            .apply { nonAcademicAffiliation = DeprecatedNonAcademicAffiliation.COMMUNITY_SCIENTIST }
             .apply { other = "They are all fine houses." }
 
-        val mitAffiliation = InstitutionalAffiliation()
+        val mitAffiliation = DeprecatedInstitutionalAffiliation()
             .apply { institution = "MIT" }
             .apply { role = "Professor" }
-            .apply { nonAcademicAffiliation = NonAcademicAffiliation.EDUCATIONAL_INSTITUTION }
+            .apply { nonAcademicAffiliation = DeprecatedNonAcademicAffiliation.EDUCATIONAL_INSTITUTION }
 
         val demographicSurvey1 = DemographicSurvey()
             .apply { disability = false }
@@ -104,7 +104,7 @@ class ProfileAuditorTest {
             .apply { aboutYou = "Nobody in particular" }
             .apply { areaOfResearch = "Aliens" }
             .apply { professionalUrl = "linkedin.com" }
-            .apply { institutionalAffiliations = listOf(caltechAffiliation, mitAffiliation) }
+            .apply { deprecatedInstitutionalAffiliations = listOf(caltechAffiliation, mitAffiliation) }
             .apply { demographicSurvey = demographicSurvey1 }
     }
 

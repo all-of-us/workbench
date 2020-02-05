@@ -28,7 +28,7 @@ import org.pmiops.workbench.db.model.CommonStorageEnums;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
-import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
+import org.pmiops.workbench.db.model.DbDeprecatedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
@@ -326,7 +326,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       List<Degree> degrees,
       DbAddress address,
       DbDemographicSurvey demographicSurvey,
-      List<DbInstitutionalAffiliation> institutionalAffiliations) {
+      List<DbDeprecatedInstitutionalAffiliation> deprecatedInstitutionalAffiliations) {
     DbUser dbUser = new DbUser();
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
     dbUser.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
@@ -356,11 +356,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       address.setUser(dbUser);
     }
     if (demographicSurvey != null) demographicSurvey.setUser(dbUser);
-    if (institutionalAffiliations != null) {
+    if (deprecatedInstitutionalAffiliations != null) {
       // We need an "effectively final" variable to be captured in the lambda
       // to pass to forEach.
       final DbUser finalDbUserReference = dbUser;
-      institutionalAffiliations.forEach(
+      deprecatedInstitutionalAffiliations.forEach(
           affiliation -> {
             affiliation.setUser(finalDbUserReference);
             finalDbUserReference.addInstitutionalAffiliation(affiliation);

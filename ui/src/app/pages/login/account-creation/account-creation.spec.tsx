@@ -41,9 +41,9 @@ beforeEach(() => {
         country: '',
         zipCode: '',
       },
-      institutionalAffiliations: [
+      deprecatedInstitutionalAffiliations: [
         {
-          institution: "institution",
+          institution: 'institution',
           nonAcademicAffiliation: undefined,
           role: undefined
         }

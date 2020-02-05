@@ -30,10 +30,10 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   DataAccessLevel,
   Degree,
+  DeprecatedInstitutionalAffiliation,
+  DeprecatedNonAcademicAffiliation,
   EducationalRole,
   IndustryRole,
-  InstitutionalAffiliation,
-  NonAcademicAffiliation,
   Profile,
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -201,7 +201,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
           country: '',
           zipCode: '',
         },
-        institutionalAffiliations: [
+        deprecatedInstitutionalAffiliations: [
           {
             institution: undefined,
             nonAcademicAffiliation: undefined,
@@ -229,13 +229,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
 
   componentDidMount() {
     if (this.props.profile.address) {
-      const {institutionalAffiliations} = this.props.profile;
-      if (institutionalAffiliations[0].institution) {
+      const {deprecatedInstitutionalAffiliations} = this.props.profile;
+      if (deprecatedInstitutionalAffiliations[0].institution) {
         this.setState({showInstitution: true});
       } else {
         this.setState({showInstitution: false});
-        this.updateNonAcademicAffiliationRoles(institutionalAffiliations[0].nonAcademicAffiliation);
-        this.selectNonAcademicAffiliationRoles(institutionalAffiliations[0].role);
+        this.updateNonAcademicAffiliationRoles(deprecatedInstitutionalAffiliations[0].nonAcademicAffiliation);
+        this.selectNonAcademicAffiliationRoles(deprecatedInstitutionalAffiliations[0].role);
       }
       this.setState({profile: this.props.profile});
 
@@ -247,7 +247,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   createAccount(): void {
     const {invitationKey, setProfile} = this.props;
     const profile = this.state.profile;
-    profile.institutionalAffiliations = [];
+    profile.deprecatedInstitutionalAffiliations = [];
     const emailValidRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/);
     this.setState({showAllFieldsRequiredError: false});
     this.setState({invalidEmail: false});
@@ -346,18 +346,18 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   // As of now we can add just one industry name role, this will change later
   updateInstitutionAffiliation(attribute: string, value) {
     const profile = this.state.profile;
-    if (profile.institutionalAffiliations && profile.institutionalAffiliations.length > 0) {
-      profile.institutionalAffiliations[0][attribute] = value;
+    if (profile.deprecatedInstitutionalAffiliations && profile.deprecatedInstitutionalAffiliations.length > 0) {
+      profile.deprecatedInstitutionalAffiliations[0][attribute] = value;
     } else {
-      const institutionalAffiliation = {} as InstitutionalAffiliation;
+      const institutionalAffiliation = {} as DeprecatedInstitutionalAffiliation;
       institutionalAffiliation[attribute] = value;
-      profile.institutionalAffiliations = [institutionalAffiliation];
+      profile.deprecatedInstitutionalAffiliations = [institutionalAffiliation];
     }
     this.setState({profile: profile});
   }
 
   showFreeTextField(option) {
-    return option === NonAcademicAffiliation.FREETEXT || option === IndustryRole.FREETEXT ||
+    return option === DeprecatedNonAcademicAffiliation.FREETEXT || option === IndustryRole.FREETEXT ||
         option === EducationalRole.FREETEXT;
   }
 
@@ -371,10 +371,10 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   updateNonAcademicAffiliationRoles(nonAcademicAffiliation) {
     this.updateInstitutionAffiliation('nonAcademicAffiliation', nonAcademicAffiliation);
     this.setState({showNonAcademicAffiliationRole: false, showNonAcademicAffiliationOther: false});
-    if (nonAcademicAffiliation === NonAcademicAffiliation.INDUSTRY) {
+    if (nonAcademicAffiliation === DeprecatedNonAcademicAffiliation.INDUSTRY) {
       this.setState({rolesOptions: AccountCreationOptions.industryRole,
         showNonAcademicAffiliationRole: true});
-    } else if (nonAcademicAffiliation === NonAcademicAffiliation.EDUCATIONALINSTITUTION) {
+    } else if (nonAcademicAffiliation === DeprecatedNonAcademicAffiliation.EDUCATIONALINSTITUTION) {
       this.setState({rolesOptions: AccountCreationOptions.educationRole, showNonAcademicAffiliationRole: true});
     } else if (this.showFreeTextField(nonAcademicAffiliation)) {
       this.setState({showNonAcademicAffiliationOther: true});
@@ -409,13 +409,13 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     const {
       showInstitution,
       profile: { givenName, familyName, contactEmail, areaOfResearch, degrees, username,
-        address: {streetAddress1, city, country, state, zipCode}, institutionalAffiliations
+        address: {streetAddress1, city, country, state, zipCode}, deprecatedInstitutionalAffiliations
       }
     } = this.state;
 
     let institution, nonAcademicAffiliation, role;
-    if (institutionalAffiliations.length) {
-      ({institution, nonAcademicAffiliation, role} = institutionalAffiliations[0]);
+    if (deprecatedInstitutionalAffiliations.length) {
+      ({institution, nonAcademicAffiliation, role} = deprecatedInstitutionalAffiliations[0]);
     }
 
     const presenceCheck = {
@@ -462,7 +462,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     showInstitution ? validationCheck['institution'] = presenceCheck :
       validationCheck['nonAcademicAffiliation'] = presenceCheck;
 
-    if (showInstitution || nonAcademicAffiliation !== NonAcademicAffiliation.COMMUNITYSCIENTIST) {
+    if (showInstitution || nonAcademicAffiliation !== DeprecatedNonAcademicAffiliation.COMMUNITYSCIENTIST) {
       validationCheck['role'] = presenceCheck;
     }
 
@@ -473,9 +473,9 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   getInstitutionalAffiliationPropertyOrEmptyString(property: string) {
-    const {institutionalAffiliations} = this.state.profile;
-    return institutionalAffiliations &&
-      institutionalAffiliations.length > 0 ? institutionalAffiliations[0][property] : '';
+    const {deprecatedInstitutionalAffiliations} = this.state.profile;
+    return deprecatedInstitutionalAffiliations &&
+    deprecatedInstitutionalAffiliations.length > 0 ? deprecatedInstitutionalAffiliations[0][property] : '';
   }
 
 

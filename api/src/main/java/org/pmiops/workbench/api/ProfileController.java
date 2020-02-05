@@ -26,7 +26,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
-import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
+import org.pmiops.workbench.db.model.DbDeprecatedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -51,10 +51,10 @@ import org.pmiops.workbench.model.BillingProjectMembership;
 import org.pmiops.workbench.model.BillingProjectStatus;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DemographicSurvey;
+import org.pmiops.workbench.model.DeprecatedInstitutionalAffiliation;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
@@ -98,13 +98,15 @@ public class ProfileController implements ProfileApiDelegate {
               return result;
             }
           };
-  private static final Function<InstitutionalAffiliation, DbInstitutionalAffiliation>
+  private static final Function<
+          DeprecatedInstitutionalAffiliation, DbDeprecatedInstitutionalAffiliation>
       FROM_CLIENT_INSTITUTIONAL_AFFILIATION =
-          new Function<InstitutionalAffiliation, DbInstitutionalAffiliation>() {
+          new Function<DeprecatedInstitutionalAffiliation, DbDeprecatedInstitutionalAffiliation>() {
             @Override
-            public DbInstitutionalAffiliation apply(
-                InstitutionalAffiliation institutionalAffiliation) {
-              DbInstitutionalAffiliation result = new DbInstitutionalAffiliation();
+            public DbDeprecatedInstitutionalAffiliation apply(
+                DeprecatedInstitutionalAffiliation institutionalAffiliation) {
+              DbDeprecatedInstitutionalAffiliation result =
+                  new DbDeprecatedInstitutionalAffiliation();
               if (institutionalAffiliation.getInstitution() != null) {
                 result.setInstitution(institutionalAffiliation.getInstitution());
               }
@@ -325,8 +327,8 @@ public class ProfileController implements ProfileApiDelegate {
     if (request.getProfile().getDemographicSurvey() == null) {
       request.getProfile().setDemographicSurvey(new DemographicSurvey());
     }
-    if (request.getProfile().getInstitutionalAffiliations() == null) {
-      request.getProfile().setInstitutionalAffiliations(new ArrayList<InstitutionalAffiliation>());
+    if (request.getProfile().getDeprecatedInstitutionalAffiliations() == null) {
+      request.getProfile().setDeprecatedInstitutionalAffiliations(new ArrayList<>());
     }
     com.google.api.services.directory.model.User googleUser =
         directoryService.createUser(
@@ -360,7 +362,7 @@ public class ProfileController implements ProfileApiDelegate {
             request.getProfile().getDegrees(),
             FROM_CLIENT_ADDRESS.apply(request.getProfile().getAddress()),
             FROM_CLIENT_DEMOGRAPHIC_SURVEY.apply(request.getProfile().getDemographicSurvey()),
-            request.getProfile().getInstitutionalAffiliations().stream()
+            request.getProfile().getDeprecatedInstitutionalAffiliations().stream()
                 .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
                 .collect(Collectors.toList()));
 
@@ -577,22 +579,22 @@ public class ProfileController implements ProfileApiDelegate {
       // See RW-1488.
       throw new BadRequestException("Changing email is not currently supported");
     }
-    List<DbInstitutionalAffiliation> newAffiliations =
-        updatedProfile.getInstitutionalAffiliations().stream()
+    List<DbDeprecatedInstitutionalAffiliation> newAffiliations =
+        updatedProfile.getDeprecatedInstitutionalAffiliations().stream()
             .map(FROM_CLIENT_INSTITUTIONAL_AFFILIATION)
             .collect(Collectors.toList());
     int i = 0;
-    ListIterator<DbInstitutionalAffiliation> oldAffilations =
+    ListIterator<DbDeprecatedInstitutionalAffiliation> oldAffilations =
         user.getInstitutionalAffiliations().listIterator();
     boolean shouldAdd = false;
     if (newAffiliations.size() == 0) {
       shouldAdd = true;
     }
-    for (DbInstitutionalAffiliation affiliation : newAffiliations) {
+    for (DbDeprecatedInstitutionalAffiliation affiliation : newAffiliations) {
       affiliation.setOrderIndex(i);
       affiliation.setUser(user);
       if (oldAffilations.hasNext()) {
-        DbInstitutionalAffiliation oldAffilation = oldAffilations.next();
+        DbDeprecatedInstitutionalAffiliation oldAffilation = oldAffilations.next();
         if (!oldAffilation.getRole().equals(affiliation.getRole())
             || !oldAffilation.getInstitution().equals(affiliation.getInstitution())) {
           shouldAdd = true;
@@ -607,7 +609,7 @@ public class ProfileController implements ProfileApiDelegate {
     }
     if (shouldAdd) {
       user.clearInstitutionalAffiliations();
-      for (DbInstitutionalAffiliation affiliation : newAffiliations) {
+      for (DbDeprecatedInstitutionalAffiliation affiliation : newAffiliations) {
         user.addInstitutionalAffiliation(affiliation);
       }
     }

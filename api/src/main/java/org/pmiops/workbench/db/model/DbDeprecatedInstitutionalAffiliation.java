@@ -9,11 +9,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import org.pmiops.workbench.model.NonAcademicAffiliation;
+import org.pmiops.workbench.model.DeprecatedNonAcademicAffiliation;
 
 @Entity
 @Table(name = "institutional_affiliation")
-public class DbInstitutionalAffiliation {
+public class DbDeprecatedInstitutionalAffiliation {
 
   private long institutionalAffiliationId;
   private DbUser user;
@@ -81,11 +81,11 @@ public class DbInstitutionalAffiliation {
   }
 
   @Transient
-  public NonAcademicAffiliation getNonAcademicAffiliationEnum() {
+  public DeprecatedNonAcademicAffiliation getNonAcademicAffiliationEnum() {
     return DemographicSurveyEnum.nonAcademicAffiliationFromStorage(this.nonAcademicAffiliation);
   }
 
-  public void setNonAcademicAffiliationnEnum(NonAcademicAffiliation affiliation) {
+  public void setNonAcademicAffiliationnEnum(DeprecatedNonAcademicAffiliation affiliation) {
     this.nonAcademicAffiliation =
         DemographicSurveyEnum.nonAcademicAffiliationToStorage(affiliation);
   }

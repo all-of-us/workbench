@@ -3629,10 +3629,11 @@ definitions:
         type: string
       areaOfResearch:
         type: string
-      institutionalAffiliations:
+      deprecatedInstitutionalAffiliations:
         type: "array"
         items:
-          $ref: "#/definitions/InstitutionalAffiliation"
+          $ref: "#/definitions/DeprecatedInstitutionalAffiliation"
+        description: DEPRECATED for replacement by verifiedUserInstitution.
       demographicSurvey:
         $ref: "#/definitions/DemographicSurvey"
       idVerificationCompletionTime:
@@ -3724,7 +3725,8 @@ definitions:
           Timestamp when the user last acknowledged the terms of service. May be null if the user has never
           acknowledged the Terms of Service.
 
-  InstitutionalAffiliation:
+  DeprecatedInstitutionalAffiliation:
+    description: DEPRECATED for replacement by VerifiedUserInstitution.
     type: object
     properties:
       institution:
@@ -3732,7 +3734,7 @@ definitions:
       role:
         type: string
       nonAcademicAffiliation:
-        $ref: '#/definitions/NonAcademicAffiliation'
+        $ref: '#/definitions/DeprecatedNonAcademicAffiliation'
         type: string
       other:
         type: string

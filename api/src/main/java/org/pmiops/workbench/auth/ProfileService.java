@@ -10,14 +10,14 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
-import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
+import org.pmiops.workbench.db.model.DbDeprecatedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbPageVisit;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.DemographicSurvey;
+import org.pmiops.workbench.model.DeprecatedInstitutionalAffiliation;
 import org.pmiops.workbench.model.Disability;
-import org.pmiops.workbench.model.InstitutionalAffiliation;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +25,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ProfileService {
-  private static final Function<DbInstitutionalAffiliation, InstitutionalAffiliation>
+  private static final Function<
+          DbDeprecatedInstitutionalAffiliation, DeprecatedInstitutionalAffiliation>
       TO_CLIENT_INSTITUTIONAL_AFFILIATION =
-          new Function<DbInstitutionalAffiliation, InstitutionalAffiliation>() {
+          new Function<DbDeprecatedInstitutionalAffiliation, DeprecatedInstitutionalAffiliation>() {
             @Override
-            public InstitutionalAffiliation apply(
-                DbInstitutionalAffiliation institutionalAffiliation) {
-              InstitutionalAffiliation result = new InstitutionalAffiliation();
+            public DeprecatedInstitutionalAffiliation apply(
+                DbDeprecatedInstitutionalAffiliation institutionalAffiliation) {
+              DeprecatedInstitutionalAffiliation result = new DeprecatedInstitutionalAffiliation();
               result.setRole(institutionalAffiliation.getRole());
               result.setInstitution(institutionalAffiliation.getInstitution());
 
@@ -207,7 +208,7 @@ public class ProfileService {
     if (user.getDegreesEnum() != null) {
       profile.setDegrees(user.getDegreesEnum());
     }
-    profile.setInstitutionalAffiliations(
+    profile.setDeprecatedInstitutionalAffiliations(
         user.getInstitutionalAffiliations().stream()
             .map(TO_CLIENT_INSTITUTIONAL_AFFILIATION)
             .collect(Collectors.toList()));

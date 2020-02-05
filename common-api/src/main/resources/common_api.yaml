@@ -95,7 +95,8 @@ definitions:
     type: string
     enum: &Disability [YES, NO]
 
-  NonAcademicAffiliation:
+  DeprecatedNonAcademicAffiliation:
+    description: DEPRECATED for replacement by OrganizationType.
     type: string
     enum: &Affiliation_Role [INDUSTRY, EDUCATIONAL_INSTITUTION, COMMUNITY_SCIENTIST, FREE_TEXT]
 

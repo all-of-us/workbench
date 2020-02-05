@@ -1,12 +1,12 @@
 import {
   AcademicRole,
   Degree,
+  DeprecatedNonAcademicAffiliation,
   Education,
   EducationalRole,
   Ethnicity,
   GenderIdentity,
   IndustryRole,
-  NonAcademicAffiliation,
   Race,
   SexAtBirth
 } from 'generated/fetch';
@@ -43,12 +43,12 @@ export const AccountCreationOptions = {
         Coordinator or other roles)`, value: AcademicRole.PROJECTPERSONNEL}
   ],
   nonAcademicAffiliations: [
-    {label: 'Industry', value: NonAcademicAffiliation.INDUSTRY },
+    {label: 'Industry', value: DeprecatedNonAcademicAffiliation.INDUSTRY },
     {label: `Educational institution (High school, Community college, 4-year college, trade
-        school)`, value: NonAcademicAffiliation.EDUCATIONALINSTITUTION},
+        school)`, value: DeprecatedNonAcademicAffiliation.EDUCATIONALINSTITUTION},
     {label: `Community Scientist (i.e. I am accessing All of Us for independent research, unrelated to my
-        professional affiliation)`, value: NonAcademicAffiliation.COMMUNITYSCIENTIST},
-    {label: `Other (free text)`, value: NonAcademicAffiliation.FREETEXT}
+        professional affiliation)`, value: DeprecatedNonAcademicAffiliation.COMMUNITYSCIENTIST},
+    {label: `Other (free text)`, value: DeprecatedNonAcademicAffiliation.FREETEXT}
   ],
   industryRole: [
     {label: 'Research Assistant (pre-doctoral)', value: IndustryRole.PREDOCTORAL},

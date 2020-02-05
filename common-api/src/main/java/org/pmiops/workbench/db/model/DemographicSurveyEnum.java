@@ -3,13 +3,13 @@ package org.pmiops.workbench.db.model;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import org.pmiops.workbench.model.AcademicRole;
+import org.pmiops.workbench.model.DeprecatedNonAcademicAffiliation;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EducationalRole;
 import org.pmiops.workbench.model.Ethnicity;
 import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.IndustryRole;
-import org.pmiops.workbench.model.NonAcademicAffiliation;
 import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SexualOrientation;
@@ -87,13 +87,13 @@ public class DemographicSurveyEnum {
           .put(IndustryRole.PRE_DOCTORAL, (short) 5)
           .build();
 
-  private static final BiMap<NonAcademicAffiliation, Short>
+  private static final BiMap<DeprecatedNonAcademicAffiliation, Short>
       CLIENT_TO_STORAGE_NON_ACADEMIC_AFFILIATION =
-          ImmutableBiMap.<NonAcademicAffiliation, Short>builder()
-              .put(NonAcademicAffiliation.COMMUNITY_SCIENTIST, (short) 1)
-              .put(NonAcademicAffiliation.EDUCATIONAL_INSTITUTION, (short) 2)
-              .put(NonAcademicAffiliation.INDUSTRY, (short) 3)
-              .put(NonAcademicAffiliation.FREE_TEXT, (short) 4)
+          ImmutableBiMap.<DeprecatedNonAcademicAffiliation, Short>builder()
+              .put(DeprecatedNonAcademicAffiliation.COMMUNITY_SCIENTIST, (short) 1)
+              .put(DeprecatedNonAcademicAffiliation.EDUCATIONAL_INSTITUTION, (short) 2)
+              .put(DeprecatedNonAcademicAffiliation.INDUSTRY, (short) 3)
+              .put(DeprecatedNonAcademicAffiliation.FREE_TEXT, (short) 4)
               .build();
 
   private static final BiMap<EducationalRole, Short> CLIENT_TO_STORAGE_EDUCATIONAL_ROLE =
@@ -192,11 +192,11 @@ public class DemographicSurveyEnum {
     return CLIENT_TO_STORAGE_INDUSTRY_ROLE.inverse().get(role);
   }
 
-  public static Short nonAcademicAffiliationToStorage(NonAcademicAffiliation role) {
+  public static Short nonAcademicAffiliationToStorage(DeprecatedNonAcademicAffiliation role) {
     return CLIENT_TO_STORAGE_NON_ACADEMIC_AFFILIATION.get(role);
   }
 
-  public static NonAcademicAffiliation nonAcademicAffiliationFromStorage(Short role) {
+  public static DeprecatedNonAcademicAffiliation nonAcademicAffiliationFromStorage(Short role) {
     return CLIENT_TO_STORAGE_NON_ACADEMIC_AFFILIATION.inverse().get(role);
   }
 

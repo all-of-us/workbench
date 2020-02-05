@@ -78,7 +78,8 @@ public class DbUser {
   private Set<DbPageVisit> pageVisits = new HashSet<>();
   private String clusterConfigDefault;
 
-  private List<DbInstitutionalAffiliation> institutionalAffiliations = new ArrayList<>();
+  private List<DbDeprecatedInstitutionalAffiliation> deprecatedInstitutionalAffiliations =
+      new ArrayList<>();
   private String aboutYou;
   private String areaOfResearch;
   private Integer clusterCreateRetries;
@@ -435,21 +436,22 @@ public class DbUser {
       mappedBy = "user",
       cascade = CascadeType.ALL)
   @OrderColumn(name = "order_index")
-  public List<DbInstitutionalAffiliation> getInstitutionalAffiliations() {
-    return institutionalAffiliations;
+  public List<DbDeprecatedInstitutionalAffiliation> getInstitutionalAffiliations() {
+    return deprecatedInstitutionalAffiliations;
   }
 
   public void setInstitutionalAffiliations(
-      List<DbInstitutionalAffiliation> newInstitutionalAffiliations) {
-    this.institutionalAffiliations = newInstitutionalAffiliations;
+      List<DbDeprecatedInstitutionalAffiliation> newInstitutionalAffiliations) {
+    this.deprecatedInstitutionalAffiliations = newInstitutionalAffiliations;
   }
 
   public void clearInstitutionalAffiliations() {
-    this.institutionalAffiliations.clear();
+    this.deprecatedInstitutionalAffiliations.clear();
   }
 
-  public void addInstitutionalAffiliation(DbInstitutionalAffiliation newInstitutionalAffiliation) {
-    this.institutionalAffiliations.add(newInstitutionalAffiliation);
+  public void addInstitutionalAffiliation(
+      DbDeprecatedInstitutionalAffiliation newInstitutionalAffiliation) {
+    this.deprecatedInstitutionalAffiliations.add(newInstitutionalAffiliation);
   }
 
   @Column(name = "about_you")

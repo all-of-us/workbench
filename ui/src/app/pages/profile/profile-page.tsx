@@ -110,7 +110,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     const {profileEdits, updating} = this.state;
     const {
       givenName, familyName, currentPosition, organization, areaOfResearch,
-      institutionalAffiliations = []
+      deprecatedInstitutionalAffiliations = []
     } = profileEdits;
     const errors = validate({
       givenName, familyName, currentPosition, organization, areaOfResearch
@@ -218,7 +218,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
             isLong: true
           })}
           <div style={{...styles.h1, marginBottom: 24}}>Institution Affiliations</div>
-          {institutionalAffiliations.map((v, i) =>
+          {deprecatedInstitutionalAffiliations.map((v, i) =>
             <div style={{display: 'flex'}} key={`institution${i}`}>
               {makeProfileInput({
                 title: 'Institution',

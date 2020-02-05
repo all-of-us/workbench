@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.Function;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
-import org.pmiops.workbench.db.model.DbInstitutionalAffiliation;
+import org.pmiops.workbench.db.model.DbDeprecatedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.Degree;
@@ -38,7 +38,7 @@ public interface UserService {
       List<Degree> degrees,
       DbAddress address,
       DbDemographicSurvey demographicSurvey,
-      List<DbInstitutionalAffiliation> institutionalAffiliations);
+      List<DbDeprecatedInstitutionalAffiliation> deprecatedInstitutionalAffiliations);
 
   DbUser submitDataUseAgreement(
       DbUser user, Integer dataUseAgreementSignedVersion, String initials);
