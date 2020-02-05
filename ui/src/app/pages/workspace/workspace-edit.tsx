@@ -1,3 +1,4 @@
+import {Location} from '@angular/common';
 import {Component} from '@angular/core';
 import {Button, Link} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
@@ -9,6 +10,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {TwoColPaddedTable} from 'app/components/tables';
+import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -38,8 +40,6 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 import * as validate from 'validate.js';
-import {Location} from "@angular/common";
-import {AouP} from "app/components/aou-p";
 
 export const ResearchPurposeDescription =
   <div style={{display: 'inline'}}>The <i>All of Us</i> Research Program requires each user
@@ -803,7 +803,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     buildBillingAccountOptions() {
-      let options = this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}));
+      const options = this.state.billingAccounts.map(a => ({label: a.displayName, value: a.name}));
       options.push({label: 'Create a new billing account', value: CREATE_BILLING_ACCOUNT_OPTION_VALUE});
       return options;
     }
@@ -1116,40 +1116,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         </Modal>
         }
         {this.state.showCreateBillingAccountModal &&
-          <Modal width={600} onRequestClose={() => this.setState({showCreateBillingAccountModal: false})}>
-            <ModalTitle>Create a billing account</ModalTitle>
-            <ModalBody>
-              <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
-                <img style={{width: '12rem', marginLeft: '-1.2rem'}} src="/assets/images/logo_lockup_cloud_rgb.png"/>
-                <AouP>
-                  <div>Billing accounts are managed by via Google Cloud Platform.</div>
-                  <div>Learn more on how to set up a billing account.</div>
-                </AouP>
-                <Button type='primary'
-                        style={{fontWeight: 400, padding: '0 18px', height: '40px'}}
-                        onClick={() => this.setState({showCreateBillingAccountModal: false})}>
-                  Read Instructions
-                </Button>
-              </div>
-            </ModalBody>
-            <hr style={{width: '100%', backgroundColor: colors.primary, borderWidth: '0px', height: '1px',
-              marginTop: '1rem',
-              marginBottom: '0.5rem'}}/>
-            <ModalFooter style={{marginTop: 0, justifyContent: 'flex-start'}}>
-              <FlexColumn>
-                <AouP>
-                  <p style={{marginTop: 0}}>If you do not have a Google Cloud billing account.</p>
-                  <a href="https://cloud.google.com" target="_blank">Create billing account</a>
-                </AouP>
-
-                <AouP>
-                  <div>Add your <i>All of Us</i> user account to your existing Google Cloud account.</div>
-                  <a href="https://console.cloud.google.com/billing" target="_blank">Add your account</a>
-                </AouP>
-              </FlexColumn>
-            </ModalFooter>
-          </Modal>
-        }
+          <CreateBillingAccountModal onClose={() => this.setState({showCreateBillingAccountModal: false})} />}
         {this.state.workspaceCreationConflictError &&
         <Modal>
           <ModalTitle>{this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
