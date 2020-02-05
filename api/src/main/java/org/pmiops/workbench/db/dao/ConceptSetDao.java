@@ -33,4 +33,6 @@ public interface ConceptSetDao extends CrudRepository<DbConceptSet, Long> {
   DbConceptSet findConceptSetByNameAndWorkspaceId(String name, long workspaceId);
 
   List<DbConceptSet> findAllByConceptSetIdIn(Collection<Long> conceptSetIds);
+
+  int countByWorkspaceId(long workspaceId);
 }

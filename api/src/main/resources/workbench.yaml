@@ -4289,7 +4289,6 @@ definitions:
         type: string
 
   ArrayOfLong:
-<<<<<<< HEAD
     type: array
     items:
       type: integer
@@ -4342,7 +4341,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/Institution"
-=======
       type: array
       items:
         type: integer
@@ -4354,13 +4352,42 @@ definitions:
     properties:
       workspace:
         $ref: "#/definitions/Workspace"
-#      collaborators:
-#        type: array
-#        items:
-#          $ref: "#/definitions/UserRole"
-#      resources:
-#        $ref: "#/definitions/WorkspaceResources"
+      collaborators:
+        type: array
+        items:
+          $ref: "#/definitions/UserRole"
+      resources:
+        $ref: "#/definitions/AdminWorkspaceResources"
 #      activityLogs:
 #        description: Logs for all action audit events collected for the given workspace.
 #        $ref: "#/definitions/ActionAuditEvents"
->>>>>>> stashing.
+
+  AdminWorkspaceResources:
+    description: >
+      A summary of application-level resources associated with a workspace. Includes data about
+      Cohort Builder objects, analysis clusters, and cloud-storage contents.
+    type: object
+    properties:
+      workspaceObjects:
+        type: object
+        properties:
+          cohortCount:
+            type: integer
+          conceptSetCount:
+            type: integer
+          datasetCount:
+            type: integer
+#      cloudStorage:
+#        properties:
+#          notebookFileCount:
+#            type: integer
+#          nonNotebookFileCount:
+#            type: integer
+#          storageBytesUsed:
+#            type: integer
+#      analysis:
+#        properties:
+#          clusters:
+#            type: array
+#            items:
+#            $ref: "#/definitions/Cluster"
