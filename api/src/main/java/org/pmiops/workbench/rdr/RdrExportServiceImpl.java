@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
@@ -194,32 +195,31 @@ public class RdrExportServiceImpl implements RdrExportService {
                     RdrExportEnums.ethnicityToRdrEthnicity(
                         dbDemographicSurvey.getEthnicityEnum()))));
       }
-      if (dbDemographicSurvey.getSexAtBirthEnum() != null) {
-        researcher.setSexAtBirth(
-            dbDemographicSurvey.getSexAtBirthEnum().stream()
-                .map(RdrExportEnums::sexAtBirthToRdrSexAtBirth)
-                .collect(Collectors.toList()));
-      }
-      if (null != dbDemographicSurvey.getGenderIdentityEnumList()) {
-        researcher.setGender(
-            dbDemographicSurvey.getGenderIdentityEnumList().stream()
-                .map(RdrExportEnums::genderToRdrGender)
-                .collect(Collectors.toList()));
-      }
+      researcher.setSexAtBirth(
+          Optional.ofNullable(
+                  dbDemographicSurvey.getSexAtBirthEnum().stream()
+                      .map(RdrExportEnums::sexAtBirthToRdrSexAtBirth)
+                      .collect(Collectors.toList()))
+              .orElse(new ArrayList<SexAtBirth>()));
+      researcher.setGender(
+          Optional.ofNullable(
+                  dbDemographicSurvey.getGenderIdentityEnumList().stream()
+                      .map(RdrExportEnums::genderToRdrGender)
+                      .collect(Collectors.toList()))
+              .orElse(new ArrayList<Gender>()));
       researcher.setDisability(
           RdrExportEnums.disabilityToRdrDisability(dbDemographicSurvey.getDisabilityEnum()));
-    }
 
-    if (null != dbDemographicSurvey && dbDemographicSurvey.getRaceEnum() != null) {
       researcher.setRace(
-          dbDemographicSurvey.getRaceEnum().stream()
-              .map(RdrExportEnums::raceToRdrRace)
-              .collect(Collectors.toList()));
-    } else {
-      researcher.setRace(new ArrayList<>());
+          Optional.ofNullable(
+                  dbDemographicSurvey.getRaceEnum().stream()
+                      .map(RdrExportEnums::raceToRdrRace)
+                      .collect(Collectors.toList()))
+              .orElse(new ArrayList<Race>()));
+
+      researcher.setLgbtqIdentity(dbDemographicSurvey.getLgbtqIdentity());
+      researcher.setIdentifiesAsLgbtq(dbDemographicSurvey.getIdentifiesAsLgbtq());
     }
-    researcher.setLgbtqIdentity(dbDemographicSurvey.getLgbtqIdentity());
-    researcher.setIdentifiesAsLgbtq(dbDemographicSurvey.getIdentifiesAsLgbtq());
     researcher.setAffiliations(
         dbUser.getInstitutionalAffiliations().stream()
             .map(

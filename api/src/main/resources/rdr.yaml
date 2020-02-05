@@ -220,7 +220,6 @@ definitions:
         type: string
       role:
         type: string
-#        Need to talk to Yu about this to be an ENUM
       nonAcademicAffiliation:
         type: boolean
 
@@ -280,10 +279,10 @@ definitions:
       - UNDERGRADUATE
       - MASTER
       - DOCTORATE
-      -
+
   Disability:
     type: string
     enum:
-      - YES
-      - NO
+      - "YES"
+      - "NO"
       - PREFER_NOT_TO_ANSWER

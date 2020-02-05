@@ -72,8 +72,8 @@ public class RdrExportEnums {
   private static final BiMap<Disability, org.pmiops.workbench.rdr.model.Disability>
       CLIENT_TO_RDR_DISABILITY =
           ImmutableBiMap.<Disability, org.pmiops.workbench.rdr.model.Disability>builder()
-              .put(Disability.TRUE, org.pmiops.workbench.rdr.model.Disability.TRUE)
-              .put(Disability.FALSE, org.pmiops.workbench.rdr.model.Disability.FALSE)
+              .put(Disability.TRUE, org.pmiops.workbench.rdr.model.Disability.YES)
+              .put(Disability.FALSE, org.pmiops.workbench.rdr.model.Disability.NO)
               .build();
 
   public static org.pmiops.workbench.rdr.model.Race raceToRdrRace(Race race) {
