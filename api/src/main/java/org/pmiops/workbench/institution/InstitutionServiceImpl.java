@@ -72,15 +72,18 @@ public class InstitutionServiceImpl implements InstitutionService {
     return institutionDao.findOneByShortName(id);
   }
 
-  private DbInstitution saveInstitution(final Institution modelClass, DbInstitution dbClass) {
+  private DbInstitution saveInstitution(final Institution modelClass, final DbInstitution dbClass) {
     dbClass.setShortName(modelClass.getShortName());
     dbClass.setDisplayName(modelClass.getDisplayName());
     dbClass.setOrganizationTypeEnum(
         DbStorageEnums.organizationTypeToStorage(modelClass.getOrganizationTypeEnum()));
     dbClass.setOrganizationTypeOtherText(modelClass.getOrganizationTypeOtherText());
 
-    // save so the domain and address DAOs have something to reference
-    final DbInstitution finalDbClass = institutionDao.save(dbClass);
+    return saveInstitutionEmailPatterns(modelClass, institutionDao.save(dbClass));
+  }
+
+  private DbInstitution saveInstitutionEmailPatterns(
+      final Institution modelClass, final DbInstitution dbClass) {
 
     institutionEmailDomainDao.deleteAllByInstitution(dbClass);
     Optional.ofNullable(modelClass.getEmailDomains())
@@ -88,9 +91,9 @@ public class InstitutionServiceImpl implements InstitutionService {
             domains -> {
               Set<DbInstitutionEmailDomain> dbDomains =
                   domains.stream()
-                      .map(domain -> new DbInstitutionEmailDomain(finalDbClass, domain))
+                      .map(domain -> new DbInstitutionEmailDomain(dbClass, domain))
                       .collect(Collectors.toSet());
-              finalDbClass.setEmailDomains(institutionEmailDomainDao.save(dbDomains));
+              dbClass.setEmailDomains(institutionEmailDomainDao.save(dbDomains));
             });
 
     institutionEmailAddressDao.deleteAllByInstitution(dbClass);
@@ -99,10 +102,10 @@ public class InstitutionServiceImpl implements InstitutionService {
             addresses -> {
               Set<DbInstitutionEmailAddress> dbAddrs =
                   addresses.stream()
-                      .map(address -> new DbInstitutionEmailAddress(finalDbClass, address))
+                      .map(address -> new DbInstitutionEmailAddress(dbClass, address))
                       .collect(Collectors.toSet());
 
-              finalDbClass.setEmailAddresses(institutionEmailAddressDao.save(dbAddrs));
+              dbClass.setEmailAddresses(institutionEmailAddressDao.save(dbAddrs));
             });
 
     return institutionDao.save(dbClass);
