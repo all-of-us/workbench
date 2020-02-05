@@ -297,7 +297,7 @@ export class ConceptTable extends React.Component<Props, State> {
         testId: 'question'
       },
       {
-        bodyStyle: {...styles.colStyle},
+        bodyStyle: styles.colStyle,
         className: 'divider',
         field: 'countValue',
         header: 'Participant Count',
