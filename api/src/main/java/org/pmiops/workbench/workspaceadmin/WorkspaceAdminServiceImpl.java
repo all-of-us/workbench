@@ -1,6 +1,5 @@
 package org.pmiops.workbench.workspaceadmin;
 
-import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -24,6 +23,6 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
    * Returns the first workspace found for any given namespace.
    */
   public Optional<DbWorkspace> getFirstWorkspaceByNamespace(String workspaceNamespace) {
-    return workspaceDao.findFirstByWorkspaceNamespaceOrderByWorkspaceId(workspaceNamespace);
+    return workspaceDao.findFirstByWorkspaceNamespaceOrderByFirecloudNameAsc(workspaceNamespace);
   }
 }
