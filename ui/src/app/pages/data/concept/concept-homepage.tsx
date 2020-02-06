@@ -82,6 +82,17 @@ const styles = reactStyles({
     background: 'transparent',
     cursor: 'pointer'
   },
+  error: {
+    background: colors.warning,
+    color: colors.white,
+    fontSize: '12px',
+    fontWeight: 500,
+    textAlign: 'left',
+    border: '1px solid #ebafa6',
+    borderRadius: '5px',
+    marginTop: '0.25rem',
+    padding: '8px',
+  },
 });
 
 interface ConceptCacheItem {
@@ -239,41 +250,46 @@ export const ConceptHomepage = withCurrentWorkspace()(
 
     async loadDomainsAndSurveys() {
       const {namespace, id} = this.props.workspace;
-      try {
-        const [conceptDomainInfo, surveysInfo] = await Promise.all([
-          conceptsApi().getDomainInfo(namespace, id),
-          conceptsApi().getSurveyInfo(namespace, id)]);
-        let conceptsCache: ConceptCacheItem[] = conceptDomainInfo.items.map((domain) => ({
-          domain: domain.domain,
-          items: []
-        }));
-        // Add ConceptCacheItem for Surveys tab
-        conceptsCache.push({domain: Domain.SURVEY, items: []});
-        let conceptDomainCounts: DomainCount[] = conceptDomainInfo.items.map((domain) => ({
-          domain: domain.domain,
-          name: domain.name,
-          conceptCount: 0
-        }));
-        // Add DomainCount for Surveys tab
-        conceptDomainCounts.push({domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0});
-        if (!environment.enableNewConceptTabs) {
-          // Don't show Physical Measurements tile or tab if feature flag disabled
-          conceptsCache = conceptsCache.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
-          conceptDomainCounts = conceptDomainCounts.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
-        }
-        this.setState({
-          conceptsCache: conceptsCache,
-          conceptDomainList: conceptDomainInfo.items,
-          conceptDomainCounts: conceptDomainCounts,
-          conceptSurveysList: surveysInfo.items,
-          selectedDomain: conceptDomainCounts[0],
+      const getDomainInfo = conceptsApi().getDomainInfo(namespace, id)
+        .then(conceptDomainInfo => {
+          let conceptsCache: ConceptCacheItem[] = conceptDomainInfo.items.map((domain) => ({
+            domain: domain.domain,
+            items: []
+          }));
+          // Add ConceptCacheItem for Surveys tab
+          conceptsCache.push({domain: Domain.SURVEY, items: []});
+          let conceptDomainCounts: DomainCount[] = conceptDomainInfo.items.map((domain) => ({
+            domain: domain.domain,
+            name: domain.name,
+            conceptCount: 0
+          }));
+          // Add DomainCount for Surveys tab
+          conceptDomainCounts.push({domain: Domain.SURVEY, name: 'Surveys', conceptCount: 0});
+          if (!environment.enableNewConceptTabs) {
+            // Don't show Physical Measurements tile or tab if feature flag disabled
+            conceptsCache = conceptsCache.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
+            conceptDomainCounts = conceptDomainCounts.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT);
+          }
+          this.setState({
+            conceptsCache: conceptsCache,
+            conceptDomainList: conceptDomainInfo.items,
+            conceptDomainCounts: conceptDomainCounts,
+            selectedDomain: conceptDomainCounts[0],
+          });
+        })
+        .catch((e) => {
+          this.setState({domainInfoError: true});
+          console.error(e);
         });
-      } catch (e) {
-        console.error(e);
-      } finally {
-        this.browseDomainFromQueryParams();
-        this.setState({loadingDomains: false});
-      }
+      const getSurveyInfo = conceptsApi().getSurveyInfo(namespace, id)
+        .then(surveysInfo => this.setState({conceptSurveysList: surveysInfo.items}))
+        .catch((e) => {
+          this.setState({surveyInfoError: true});
+          console.error(e);
+        });
+      await Promise.all([getDomainInfo, getSurveyInfo]);
+      this.browseDomainFromQueryParams();
+      this.setState({loadingDomains: false});
     }
 
     browseDomainFromQueryParams() {
@@ -445,6 +461,13 @@ export const ConceptHomepage = withCurrentWorkspace()(
         'concepts', 'sets', conceptSet.id, 'actions']);
     }
 
+    errorMessage() {
+      return <div style={styles.error}>
+        <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
+        Sorry, the request cannot be completed. Please try refreshing the page or contact Support in the left hand navigation.
+      </div>;
+    }
+
     renderConcepts() {
       const {conceptDomainCounts, concepts, countsError, domainErrors, searchLoading,
         selectedDomain, selectedConceptDomainMap} = this.state;
@@ -507,7 +530,7 @@ export const ConceptHomepage = withCurrentWorkspace()(
     }
 
     render() {
-      const {loadingDomains, browsingSurvey, conceptDomainList, conceptSurveysList,
+      const {loadingDomains, browsingSurvey, conceptDomainList, conceptSurveysList, domainInfoError, surveyInfoError,
         standardConceptsOnly, showSearchError, searching, selectedDomain, conceptAddModalOpen, currentInputString, currentSearchString,
         conceptsSavedText, selectedSurvey, selectedConceptDomainMap, selectedSurveyQuestions, surveyAddModalOpen} = this.state;
       return <React.Fragment>
@@ -560,30 +583,39 @@ export const ConceptHomepage = withCurrentWorkspace()(
                 Domains
               </div>
               <div style={styles.cardList}>
-              {conceptDomainList.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT).map((domain, i) => {
-                return <DomainCard conceptDomainInfo={domain}
-                                     standardConceptsOnly={standardConceptsOnly}
-                                     browseInDomain={() => this.browseDomain(domain)}
-                                     key={i} data-test-id='domain-box'/>;
-              })}
+                {domainInfoError
+                  ? this.errorMessage()
+                  : conceptDomainList.filter(item => item.domain !== Domain.PHYSICALMEASUREMENT).map((domain, i) => {
+                    return <DomainCard conceptDomainInfo={domain}
+                                         standardConceptsOnly={standardConceptsOnly}
+                                         browseInDomain={() => this.browseDomain(domain)}
+                                         key={i} data-test-id='domain-box'/>;
+                  })
+                }
               </div>
               <div style={styles.sectionHeader}>
                 Survey Questions
               </div>
               <div style={styles.cardList}>
-                {conceptSurveysList.map((surveys) => {
-                  return <SurveyCard survey={surveys} key={surveys.orderNumber} browseSurvey={() => this.browseSurvey(surveys.name)} />;
-                })}
+                {surveyInfoError
+                  ? this.errorMessage()
+                  : conceptSurveysList.map((surveys) => {
+                    return <SurveyCard survey={surveys} key={surveys.orderNumber} browseSurvey={() => this.browseSurvey(surveys.name)} />;
+                  })
+                }
                </div>
               {environment.enableNewConceptTabs && <React.Fragment>
                 <div style={styles.sectionHeader}>
                   Program Physical Measurements
                 </div>
                 <div style={styles.cardList}>
-                  {conceptDomainList.filter(item => item.domain === Domain.PHYSICALMEASUREMENT).map((physicalMeasurement, p) => {
-                    return <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement} key={p}
-                                       browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurement)}/>;
-                  })}
+                  {domainInfoError
+                    ? this.errorMessage()
+                    : conceptDomainList.filter(item => item.domain === Domain.PHYSICALMEASUREMENT).map((physicalMeasurement, p) => {
+                      return <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurement} key={p}
+                                         browsePhysicalMeasurements={() => this.browseDomain(physicalMeasurement)}/>;
+                    })
+                  }
                 </div>
               </React.Fragment>}
             </div>
