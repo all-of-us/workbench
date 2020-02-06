@@ -1,4 +1,4 @@
-package org.pmiops.workbench.monitoring.attachments;
+package org.pmiops.workbench.monitoring.labels;
 
 import java.util.Collections;
 import java.util.Set;
@@ -7,8 +7,11 @@ import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.utils.Booleans;
 import org.pmiops.workbench.utils.Enums;
 
+/** Specifies label names and allowed discrete values (if given) */
 public enum MetricLabel implements MetricLabelBase {
   BUFFER_ENTRY_STATUS("BufferEntryStatus", Enums.getValueStrings(BufferEntryStatus.class)),
+  CRON_JOB_NAME("cron_job_name"),
+  CRON_JOB_SUCCEEDED("cron_job_completion_status", Booleans.VALUE_STRINGS),
   DATASET_INVALID("Invalid", Booleans.VALUE_STRINGS),
   DATA_ACCESS_LEVEL("DataAccessLevel", Enums.getValueStrings(DataAccessLevel.class)),
   GSUITE_DOMAIN("gsuite_domain"),
