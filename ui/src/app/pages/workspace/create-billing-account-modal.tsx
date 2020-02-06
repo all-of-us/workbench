@@ -1,3 +1,5 @@
+import {faTimes} from '@fortawesome/free-solid-svg-icons';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {Button} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -5,6 +7,7 @@ import {TextColumn} from 'app/components/text-column';
 import colors from 'app/styles/colors';
 import * as React from 'react';
 import {FileDetail, Profile} from '../../../generated/fetch';
+import {ClrIcon} from '../../components/icons';
 import {withUserProfile} from '../../utils';
 import {WorkspaceData} from '../../utils/workspace-data';
 
@@ -19,14 +22,14 @@ export const CreateBillingAccountModal = withUserProfile() (
 
     render() {
       return <Modal width={600} onRequestClose={() => this.props.onClose()}>
-        <ModalTitle>Create a billing account</ModalTitle>
+        <ModalTitle style={{marginBottom: '0.7rem'}}>Create a billing account</ModalTitle>
 
         <ModalBody>
           <FlexColumn style={{alignItems: 'flex-start'}}>
-            <img style={{width: '12rem', marginLeft: '-1.2rem'}} src='/assets/images/logo_lockup_cloud_rgb.png'/>
+            <img style={{width: '12rem', marginLeft: '-0.7rem'}} src='/assets/images/gcp_logo.png'/>
 
             <TextColumn>
-              <div>Billing accounts are managed by via Google Cloud Platform™ service.</div>
+              <div>Billing accounts are managed via Google Cloud Platform™ service.</div>
               <div>Learn more on how to set up a billing account.</div>
             </TextColumn>
 
@@ -55,6 +58,19 @@ export const CreateBillingAccountModal = withUserProfile() (
             </TextColumn>
           </FlexColumn>
         </ModalFooter>
+
+        <FontAwesomeIcon
+          icon={faTimes}
+          size='lg'
+          style={{
+            color: colors.accent,
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            cursor: 'pointer'
+          }}
+          onClick={() => this.props.onClose()}
+        />
       </Modal>;
     }
   }
