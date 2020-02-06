@@ -151,6 +151,7 @@ import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.model.WorkspaceUserRolesResponse;
+import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
@@ -278,7 +279,8 @@ public class WorkspacesControllerTest {
     ConceptService.class,
     MonitoringService.class,
     WorkspaceAuditor.class,
-    Zendesk.class
+    Zendesk.class,
+    LogsBasedMetricService.class
   })
   static class Configuration {
 
