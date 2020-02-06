@@ -79,7 +79,8 @@ public class MonitoringServiceTest {
     monitoringService.recordEvent(EventMetric.NOTEBOOK_SAVE);
     verify(mockInitService).createAndRegister();
 
-    final int metricCount = GaugeMetric.values().length + EventMetric.values().length;
+    // TODO(jaycarlton): include other metric types as they are re-added
+    final int metricCount = GaugeMetric.values().length;
     verify(mockViewManager, times(metricCount)).registerView(any(View.class));
 
     verify(mockStatsRecorder).newMeasureMap();

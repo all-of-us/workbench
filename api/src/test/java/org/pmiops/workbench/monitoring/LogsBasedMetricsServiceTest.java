@@ -52,7 +52,7 @@ public class LogsBasedMetricsServiceTest {
   static class Configuration {}
 
   @Before
-  public void settup() {
+  public void setup() {
     doReturn(MONITORED_RESOURCE)
         .when(mockStackdriverStatsExporterService)
         .getLoggingMonitoredResource();

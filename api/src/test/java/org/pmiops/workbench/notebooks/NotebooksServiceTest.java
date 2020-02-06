@@ -26,6 +26,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
@@ -55,22 +56,18 @@ public class NotebooksServiceTest {
 
   private static DbUser DB_USER;
 
-  @Captor private ArgumentCaptor<MeasurementBundle> measurementBundleCaptor;
-  @Autowired private MonitoringService mockMonitoringService;
-  @Autowired private FireCloudService mockFirecloudService;
-  @Autowired private CloudStorageService mockCloudStorageService;
-  @Autowired private WorkspaceService mockWorkspaceService;
+  @MockBean private LogsBasedMetricService mockLogsBasedMetricsService;
+
+  @MockBean private FireCloudService mockFirecloudService;
+  @MockBean private CloudStorageService mockCloudStorageService;
+  @MockBean private WorkspaceService mockWorkspaceService;
 
   @Autowired private NotebooksService notebooksService;
 
   @TestConfiguration
   @Import({NotebooksServiceImpl.class})
   @MockBean({
-    CloudStorageService.class,
-    FireCloudService.class,
-    WorkspaceService.class,
-    UserRecentResourceService.class,
-    MonitoringService.class
+    UserRecentResourceService.class
   })
   static class Configuration {
 
@@ -172,7 +169,7 @@ public class NotebooksServiceTest {
   @Test
   public void testSaveNotebook_firesMetric() {
     notebooksService.saveNotebook(BUCKET_NAME, NOTEBOOK_NAME, NOTEBOOK_CONTENTS);
-    verify(mockMonitoringService).recordEvent(EventMetric.NOTEBOOK_SAVE);
+    verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_SAVE);
   }
 
   @Test
@@ -181,7 +178,7 @@ public class NotebooksServiceTest {
     doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
 
     notebooksService.deleteNotebook(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
-    verify(mockMonitoringService).recordEvent(EventMetric.NOTEBOOK_DELETE);
+    verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_DELETE);
   }
 
   @Test
@@ -190,7 +187,7 @@ public class NotebooksServiceTest {
     doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
 
     notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
-    verify(mockMonitoringService).recordEvent(EventMetric.NOTEBOOK_CLONE);
+    verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_CLONE);
   }
 
   private void stubNotebookToJson() {
