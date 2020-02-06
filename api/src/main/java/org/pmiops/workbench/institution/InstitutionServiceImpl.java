@@ -10,7 +10,6 @@ import org.pmiops.workbench.db.dao.InstitutionEmailDomainDao;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.db.model.DbInstitutionEmailDomain;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.Institution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,8 +73,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   private DbInstitution saveInstitution(final Institution modelClass, final DbInstitution dbClass) {
     dbClass.setShortName(modelClass.getShortName());
     dbClass.setDisplayName(modelClass.getDisplayName());
-    dbClass.setOrganizationTypeEnum(
-        DbStorageEnums.organizationTypeToStorage(modelClass.getOrganizationTypeEnum()));
+    dbClass.setOrganizationTypeEnum(modelClass.getOrganizationTypeEnum());
     dbClass.setOrganizationTypeOtherText(modelClass.getOrganizationTypeOtherText());
 
     return saveInstitutionEmailPatterns(modelClass, institutionDao.save(dbClass));
@@ -112,8 +110,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         new Institution()
             .shortName(dbClass.getShortName())
             .displayName(dbClass.getDisplayName())
-            .organizationTypeEnum(
-                DbStorageEnums.organizationTypeFromStorage(dbClass.getOrganizationTypeEnum()))
+            .organizationTypeEnum(dbClass.getOrganizationTypeEnum())
             .organizationTypeOtherText(dbClass.getOrganizationTypeOtherText());
 
     Optional.ofNullable(dbClass.getEmailDomains())

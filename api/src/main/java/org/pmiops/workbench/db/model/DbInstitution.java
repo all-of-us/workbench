@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import org.pmiops.workbench.model.OrganizationType;
 
 @Entity
 @Table(name = "institution")
@@ -62,12 +63,12 @@ public class DbInstitution {
     this.displayName = displayName;
   }
 
-  public Short getOrganizationTypeEnum() {
-    return organizationTypeEnum;
+  public OrganizationType getOrganizationTypeEnum() {
+    return DbStorageEnums.organizationTypeFromStorage(organizationTypeEnum);
   }
 
-  public void setOrganizationTypeEnum(Short organizationTypeEnum) {
-    this.organizationTypeEnum = organizationTypeEnum;
+  public void setOrganizationTypeEnum(OrganizationType type) {
+    this.organizationTypeEnum = DbStorageEnums.organizationTypeToStorage(type);
   }
 
   public String getOrganizationTypeOtherText() {
