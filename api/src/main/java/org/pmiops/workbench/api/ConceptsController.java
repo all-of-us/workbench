@@ -134,23 +134,26 @@ public class ConceptsController implements ConceptsApiDelegate {
   }
 
   public static Concept toClientConcept(DbConcept dbConcept) {
+    boolean standard = STANDARD_CONCEPT_CODES.contains(dbConcept.getStandardConcept());
     return new Concept()
         .conceptClassId(dbConcept.getConceptClassId())
         .conceptCode(dbConcept.getConceptCode())
         .conceptName(dbConcept.getConceptName())
         .conceptId(dbConcept.getConceptId())
-        .countValue(dbConcept.getCountValue())
+        .countValue(standard ? dbConcept.getCountValue() : dbConcept.getSourceCountValue())
         .domainId(dbConcept.getDomainId())
         .prevalence(dbConcept.getPrevalence())
-        .standardConcept(STANDARD_CONCEPT_CODES.contains(dbConcept.getStandardConcept()))
+        .standardConcept(standard)
         .vocabularyId(dbConcept.getVocabularyId())
         .conceptSynonyms(dbConcept.getSynonyms());
   }
 
   private SurveyQuestions toClientSurveyQuestions(DbConcept dbConcept) {
+    boolean standard = STANDARD_CONCEPT_CODES.contains(dbConcept.getStandardConcept());
     return new SurveyQuestions()
         .conceptId(dbConcept.getConceptId())
-        .question(dbConcept.getConceptName());
+        .question(dbConcept.getConceptName())
+        .countValue(standard ? dbConcept.getCountValue() : dbConcept.getSourceCountValue());
   }
 
   private DomainInfo toClientDomainInfo(DbDomainInfo dbDomainInfo) {

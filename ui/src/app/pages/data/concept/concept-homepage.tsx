@@ -103,7 +103,7 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo,
           <div><b>{conceptDomainInfo.participantCount.toLocaleString()}</b> participants in domain.</div>
         </div>
         <Clickable style={styles.domainBoxLink}
-                   onClick={browseInDomain}>Browse Domain</Clickable>
+                   onClick={browseInDomain}>Select Concepts</Clickable>
       </DomainCardBase>;
     };
 
@@ -120,7 +120,7 @@ const SurveyCard: React.FunctionComponent<{survey: SurveyModule, browseSurvey: F
         <div style={{...styles.conceptText, height: '3.5rem'}}>
           {survey.description}
         </div>
-        <Clickable style={{...styles.domainBoxLink}} onClick={browseSurvey}>Browse Survey</Clickable>
+        <Clickable style={{...styles.domainBoxLink}} onClick={browseSurvey}>Select Concepts</Clickable>
       </DomainCardBase>;
     };
 
@@ -131,15 +131,13 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
           onClick={browsePhysicalMeasurements}
           data-test-id='pm-box-name'>{physicalMeasurement.name}</Clickable>
         <div style={styles.conceptText}>
-          <span style={{fontSize: 30}}>{physicalMeasurement.allConceptCount}</span> physical measurements.
-          <div><b>{physicalMeasurement.participantCount}</b> participants in this domain</div>
+          <span style={{fontSize: 30}}>{physicalMeasurement.allConceptCount.toLocaleString()}</span> physical measurements.
+          <div><b>{physicalMeasurement.participantCount.toLocaleString()}</b> participants in this domain</div>
         </div>
         <div style={{...styles.conceptText, height: 'auto'}}>
           {physicalMeasurement.description}
         </div>
-        <Clickable style={styles.domainBoxLink} onClick={browsePhysicalMeasurements}>
-          Browse Physical Measurements
-        </Clickable>
+        <Clickable style={styles.domainBoxLink} onClick={browsePhysicalMeasurements}>Select Concepts</Clickable>
       </DomainCardBase>;
     };
 
